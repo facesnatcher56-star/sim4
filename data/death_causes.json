@@ -1,0 +1,90 @@
+{
+ "_doc": "Death causes (scripts/systems/death_causes.gd). More causes: add data/death_causes/NN_<task>.json (same shape, merged by id). Tokens: {name} {cause} {summary}. grief.strength picks the buff (<=1 grieving, <=1.6 grieving_heavy, else grieving_shattered); days = how long family grieves (friends 60 percent, townies you knew 50 percent). child_text is the thought for kids and teens. severity 1-5 feeds the chronicle.",
+ "default": {
+  "label": "Unknown",
+  "text": "{name} has passed away. {summary}",
+  "legacy_text": "",
+  "grief": {
+   "strength": 1.2,
+   "days": 3
+  },
+  "child_text": "I miss them so much. Why did they have to go?",
+  "memory": {
+   "value": -0.5,
+   "text": "the day {name} died"
+  },
+  "grave_style": "stone",
+  "unexpected": true,
+  "severity": 3
+ },
+ "causes": {
+  "old_age": {
+   "label": "Old age",
+   "text": "{name} has passed away peacefully. {summary}",
+   "legacy_text": "Their long life came to a quiet end.",
+   "grief": {
+    "strength": 1.0,
+    "days": 3
+   },
+   "child_text": "They were very old. I'll miss them, though.",
+   "memory": {
+    "value": -0.3,
+    "text": "saying goodbye to {name}"
+   },
+   "grave_style": "stone",
+   "unexpected": false,
+   "severity": 2
+  },
+  "heart_attack": {
+   "label": "Heart attack",
+   "text": "{name} collapsed suddenly and could not be revived.",
+   "legacy_text": "Their life ended suddenly with a heart attack.",
+   "grief": {
+    "strength": 1.5,
+    "days": 5
+   },
+   "child_text": "They were fine yesterday. I don't understand.",
+   "memory": {
+    "value": -0.8,
+    "text": "the day {name} collapsed"
+   },
+   "grave_style": "stone",
+   "unexpected": true,
+   "severity": 4
+  },
+  "test_urn": {
+   "label": "Test cause",
+   "text": "{name} is gone.",
+   "legacy_text": "A test cause.",
+   "grief": {
+    "strength": 2.0,
+    "days": 7
+   },
+   "child_text": "I'm scared and sad.",
+   "memory": {
+    "value": -1.0,
+    "text": "a very sad day"
+   },
+   "grave_style": "urn",
+   "unexpected": true,
+   "severity": 4
+  },
+  "illness": {
+   "label": "Illness",
+   "text": "{name} lost the fight against a long illness.",
+   "legacy_text": "Their life ended after a serious illness.",
+   "grief": {
+    "strength": 1.3,
+    "days": 4
+   },
+   "child_text": "They were so sick. I wish they were still here.",
+   "memory": {
+    "value": -0.7,
+    "text": "the day {name} passed away"
+   },
+   "grave_style": "stone",
+   "unexpected": true,
+   "severity": 3
+  }
+ }
+}

@@ -21,12 +21,12 @@ static func new_game(start_id: String = "classic", seed_value: int = 777) -> Arr
 	SimEnv.release_standalone()
 	WorldIface.stub = null
 	WorldIface.coins.clear()
+	if mgr != null:
+		teardown()            # first: frees the previous game's systems / NPCs / map state (see teardown)
 	var W: Node = world()
 	for f in W.all_folk().duplicate():
 		W.remove_folk(f.id)
 	W.reset()
-	if mgr != null:
-		teardown()
 	SysUtil.seed_rng(seed_value)
 	SystemsManager.reset_all()
 	notes.clear()

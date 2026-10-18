@@ -13,6 +13,7 @@ var mood_icon: FaceIcon
 var name_label: Label
 var mood_label: Label
 var trait_box: HFlowContainer
+var status_box: HFlowContainer          # injured / unwell / in hospital chips (Hospital.status_chips)
 var needs_box: VBoxContainer
 var skills_box: VBoxContainer
 var rel_box: VBoxContainer
@@ -55,6 +56,9 @@ func _ready() -> void:
 	mood_area.mouse_filter = Control.MOUSE_FILTER_STOP
 	trait_box = HFlowContainer.new()
 	root.add_child(trait_box)
+	status_box = HFlowContainer.new()
+	status_box.name = "StatusChips"
+	root.add_child(status_box)
 	var goal_row := HBoxContainer.new()
 	root.add_child(goal_row)
 	goal_label = UIU.make_label("", 13, UITheme.MUTED)
@@ -130,6 +134,7 @@ func show_folk(f) -> void:
 	portrait.color = portrait_color(f)
 	_build_needs()
 	_build_traits()
+	_build_status()
 	_build_skills()
 	_build_relationships()
 	_build_family()
@@ -326,6 +331,7 @@ func _on_mood_changed(fid: int, mood: String, intensity: int) -> void:
 func _on_buff_event(fid: int, _buff: String) -> void:
 	if fid != folk_id:
 		return
+	_build_status()
 	_refresh_mood()
 	for nid in need_bars:
 		_update_need(nid, UIU.prop(folk, "needs", {}).get(nid))
@@ -342,6 +348,15 @@ func _build_traits() -> void:
 		chip.add_child(l)
 		chip.tooltip_text = str(defs.get(t, {}).get("description", ""))
 		trait_box.add_child(chip)
+
+## Status chips: Injured / Unwell / In hospital (hidden `in_hospital` buff, so this is where the player sees it).
+func _build_status() -> void:
+	for c in status_box.get_children():
+		c.queue_free()
+	if folk == null or not (folk is Folk):
+		return
+	for chip in Hospital.status_chips(folk):
+		status_box.add_child(_chip(str(chip["text"]), chip["color"], str(chip["tip"])))
 
 func _refresh_goal() -> void:
 	var info: Dictionary = Goals.active_for(folk_id) if folk_id >= 0 else {}

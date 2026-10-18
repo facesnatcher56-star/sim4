@@ -24,6 +24,7 @@ static func install_all() -> void:
 	install()
 	FamilyContent.install()
 	WeatherContent.install()
+	IncidentContent.install()
 
 ## Buffs derived from other tables: the hidden stage_<id> markers (data/aging.json) and the goals' perk buffs.
 static func _add_marker_buffs(buffs: Dictionary) -> void:

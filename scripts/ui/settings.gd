@@ -46,6 +46,8 @@ const DEFS := [
 		"tip": "Pays a bill the moment it arrives when the household has the Coins. Otherwise open the Coins button and pay it yourself."},
 	{"k": "pause_on_dialog", "tab": "gameplay", "t": "bool", "label": "Pause when a window is open", "def": true,
 		"tip": "Time stops while a window (Goals, Career, Household, Help, menus) is open and goes back to your speed when it closes."},
+	{"k": "surprises", "tab": "gameplay", "t": "enum", "label": "Surprises", "def": "rare", "opts": [["off", "Off"], ["rare", "Rare"], ["normal", "Normal"], ["chaotic", "Chaotic"]],
+		"tip": "How often unexpected things happen: accidents, illness, crime, disasters and lucky finds. Off = never, Rare = a few in a lifetime, Normal = 3x, Chaotic = 10x. Old age is not affected. Saved with each game; new games start from this value."},
 	{"k": "confirm_quit", "tab": "gameplay", "t": "bool", "label": "Confirm before quitting to title", "def": true,
 		"tip": "Asks 'are you sure?' before leaving the game, because unsaved progress is lost."},
 	{"k": "thought_bubbles", "tab": "gameplay", "t": "bool", "label": "Show thought bubbles", "def": true, "tip": "The little speech balloons above Folk heads."},

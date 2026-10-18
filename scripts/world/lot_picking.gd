@@ -226,6 +226,6 @@ func _update_hover_label() -> void:
 		var o = World.get_object(hover_id)
 		if o != null:
 			var bb := _object_aabb(o)
-			_hover_label.text = str(o.def.get("label", o.def_id))
+			_hover_label.text = Graves.hover_text(o) if o.has_tag("grave") and Graves.hover_text(o) != "" else str(o.def.get("label", o.def_id))
 			_hover_label.position = bb.get_center() + Vector3(0, bb.size.y * 0.5 + 0.3, 0)
 			_hover_label.visible = true

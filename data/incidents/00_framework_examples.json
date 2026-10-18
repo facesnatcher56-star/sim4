@@ -1,0 +1,73 @@
+{
+ "_doc": "Worked examples for the incident framework. Copy the patterns; later tasks add their own data/incidents/NN_<task>.json instead of editing this file.",
+ "incidents": {
+  "heart_attack": {
+   "label": "Heart attack", "scope": "folk", "check": "day", "base_rate_per_year": 0.02,
+   "notify_policy": "known",
+   "conditions": [{"age_stage_is": "elder"}],
+   "risk_mults": [
+    {"label": "Low fitness", "when": [{"skill_below": ["fitness", 2]}], "mult": 1.6},
+    {"label": "Strong fitness", "when": [{"skill_at_least": ["fitness", 5]}], "mult": 0.5},
+    {"label": "Rich diet", "when": [{"has_trait": "glutton"}], "mult": 1.4},
+    {"label": "Stressed", "when": [{"any": [{"has_buff": "anxious_jitters"}, {"has_buff": "fuming"}, {"has_buff": "jittery"}]}], "mult": 1.5},
+    {"label": "Exhausted", "when": [{"has_buff": "exhausted"}], "mult": 1.4}
+   ],
+   "prevent": [
+    {"label": "Recent check-up", "when": [{"has_buff": "checked_up"}], "mult": 0.4}
+   ],
+   "warning": {"lead_min": 90, "thought": "My chest feels so tight...", "text": "{name} looks pale and keeps holding their chest. A doctor might help.", "kind": "warn", "doctor_can_defuse": true,
+    "averted": "The doctor arrived in time and {name} is resting safely."},
+   "outcomes": [
+    {"weight": 5, "when": [{"lacks_buff": "checked_up"}], "effects": [{"kill": "heart_attack"}]},
+    {"weight": 5, "effects": [{"hospital": {"severity": 3, "reason": "a heart attack"}}], "text": "{name} was rushed to hospital with a heart attack.", "kind": "bad"},
+    {"weight": 4, "when": [{"has_buff": "checked_up"}], "effects": [{"hospital": {"severity": 3, "reason": "a heart attack"}}], "text": "A recent check-up saved {name}: they were rushed to hospital in time.", "kind": "bad"}
+   ],
+   "statistical": {"outcomes": [
+    {"weight": 1, "effects": [{"kill": "heart_attack"}], "summary": "{name} died suddenly of a heart attack."},
+    {"weight": 1, "effects": [{"hospital": {"severity": 3}}], "summary": "{name} was taken to hospital with a heart attack."}
+   ]}
+  },
+  "minor_fall": {
+   "label": "Fall", "scope": "folk", "check": "hour", "base_rate_per_year": 0.5,
+   "notify_policy": "household",
+   "conditions": [{"lacks_buff": "away"}, {"lacks_buff": "in_hospital"}, {"lacks_buff": "stage_baby"}],
+   "risk_mults": [
+    {"label": "Elder", "when": [{"age_stage_is": "elder"}], "mult": 3.0},
+    {"label": "Toddler", "when": [{"age_stage_is": "toddler"}], "mult": 2.0},
+    {"label": "Clumsy", "when": [{"has_trait": "clumsy"}], "mult": 2.5},
+    {"label": "Wet weather", "when": [{"weather_is": ["rain", "thunderstorm", "snow"]}], "mult": 1.8},
+    {"label": "Exhausted", "when": [{"has_buff": "exhausted"}], "mult": 1.5}
+   ],
+   "prevent": [
+    {"label": "Strong and steady", "when": [{"skill_at_least": ["fitness", 4]}], "mult": 0.6}
+   ],
+   "warning": {"lead_min": 0, "thought": "Whoa!"},
+   "outcomes": [
+    {"weight": 8, "effects": [{"injure": {"severity": 1, "reason": "a fall"}}], "text": "{name} slipped and bruised themselves.", "kind": "warn"},
+    {"weight": 2, "effects": [{"injure": {"severity": 2, "reason": "a bad fall"}}], "text": "{name} had a bad fall and was taken to the clinic.", "kind": "bad"}
+   ],
+   "statistical": {"outcomes": [
+    {"weight": 9, "effects": [], "summary": "{name} took a tumble but was fine."},
+    {"weight": 1, "effects": [{"hospital": {"severity": 2}}], "summary": "{name} had a bad fall and spent a night in hospital."}
+   ]}
+  },
+  "found_money": {
+   "label": "Found money", "scope": "lot", "check": "day", "base_rate_per_year": 1.0,
+   "notify_policy": "household",
+   "outcomes": [
+    {"weight": 1, "effects": [{"coins_range": [15, 60]}, {"add_buff": "lucky_day"}], "text": "{name} found {amount} coins tucked inside an old coat.", "kind": "good"}
+   ],
+   "statistical": {"outcomes": [
+    {"weight": 1, "effects": [{"coins_range": [15, 60]}], "summary": "{house} found some forgotten coins."}
+   ]}
+  },
+  "townie_mishap": {
+   "label": "Townie mishap", "scope": "townie", "check": "day", "base_rate_per_year": 0.15,
+   "notify_policy": "known",
+   "outcomes": [
+    {"weight": 3, "effects": [{"hospital": {"severity": 1, "reason": "a mishap"}}], "text": "{name} was taken to hospital after a mishap.", "kind": "info"},
+    {"weight": 1, "effects": [{"hospital": {"severity": 3, "reason": "a serious accident"}}], "text": "{name} was seriously hurt and taken to hospital.", "kind": "bad"}
+   ]
+  }
+ }
+}

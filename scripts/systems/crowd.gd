@@ -10,6 +10,7 @@ extends RefCounted
 const STAFF_ID_BASE := 5000
 const ACTIVE_RADIUS := 40
 const DROP_RADIUS := 64
+const NEED_FLOOR := -50.0        # an NPC with a need below this goes home (needs are -100..100; they are re-rolled on the next visit by spawn_npc)
 
 static var _last_check: Dictionary = {}     # lot_id -> game minute of the last full crowd update
 static var _staff_seq: int = 0
@@ -65,6 +66,12 @@ static func clear_npcs(lot_id: String = "") -> void:
 	else:
 		_last_check.erase(lot_id)
 
+static func lowest_need(f) -> float:
+	var low := 100.0
+	for n in f.needs:
+		low = minf(low, (f.needs[n] as Stat).value)
+	return low
+
 ## Take one NPC out of the world right now (a townie who is needed elsewhere).
 static func dismiss(f) -> void:
 	_remove(f)
@@ -104,7 +111,7 @@ static func _update_lot(lot_id: String, now: int, force: bool) -> void:
 			here.append(f)
 	for f2 in here.duplicate():      # time is up for some
 		if now >= int(f2.get_meta("leave_min", 0)):
-			_start_leaving(f2)
+			start_leaving(f2)
 			here.erase(f2)
 	while here.size() > target:      # too many (venue closing / quiet hours): oldest leave
 		var oldest = null
@@ -115,7 +122,7 @@ static func _update_lot(lot_id: String, now: int, force: bool) -> void:
 				oldest = f3
 		if oldest == null:
 			break
-		_start_leaving(oldest)
+		start_leaving(oldest)
 		here.erase(oldest)
 	# too few: welcome new arrivals (at most 2 per check so the room fills gradually, all at once when the lot wakes up)
 	var room: int = mini(target - here.size(), Venues.crowd_cap() - count(lot_id))
@@ -195,7 +202,7 @@ static func spawn_npc(t: Dictionary, lot_id: String, vtype: String, stay_overrid
 	return f
 
 ## An NPC whose time is up walks to the lot's door (one route, computed once by the go_here interaction) and is removed there.
-static func _start_leaving(f) -> void:
+static func start_leaving(f) -> void:
 	if f.has_meta("leaving"):
 		return
 	f.set_meta("leaving", SimEnv.now_min() + int(cfg().get("leave_walk_min", 12)))
@@ -209,6 +216,8 @@ static func _start_leaving(f) -> void:
 static func _step_leavers(now: int) -> void:
 	for f in crowd_folk():
 		if not f.has_meta("leaving"):
+			if now >= int(f.get_meta("leave_min", 0)) or lowest_need(f) < NEED_FLOOR:      # time is up (also far from the player) or a need is low: go home
+				start_leaving(f)
 			continue
 		if f.tile == NeighborhoodLots.entry_tile(str(f.get_meta("crowd"))) or now >= int(f.get_meta("leaving")) or (f.current == null and f.queue.is_empty()):
 			_remove(f)

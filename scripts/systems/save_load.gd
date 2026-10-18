@@ -41,7 +41,7 @@ static func snapshot(label: String = "") -> Dictionary:
 			"economy": Economy.to_dict(), "careers": Careers.to_dict(), "relationships": RelationshipService.to_dict(),
 			"goals": Goals.to_dict(), "aging": Aging.to_dict(), "story": Story.to_dict(), "away": Away.to_dict(),
 			"family": Family.to_dict(), "babycare": BabyCare.to_dict(), "weather": Weather.to_dict(),
-			"neighborhood": Neighborhood.to_dict(), "scenario": Scenario.to_dict(),
+			"neighborhood": Neighborhood.to_dict(), "scenario": Scenario.to_dict(), "incidents": Incidents.to_dict(),
 		},
 	}
 
@@ -151,6 +151,7 @@ static func restore(d: Dictionary) -> bool:
 	NeighborhoodService.install()
 	Neighborhood.from_dict(sy.get("neighborhood", {}))
 	Scenario.from_dict(sy.get("scenario", {}))
+	Incidents.from_dict(sy.get("incidents", {}))
 	return true
 
 ## Autosave (slot 0) — SystemsManager calls this each game day.

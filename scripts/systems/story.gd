@@ -174,13 +174,7 @@ static func on_day(day: int) -> void:
 	StoryVisits._visits_and_invites(day)
 
 static func _townie_dies(t: Dictionary) -> void:
-	t["alive"] = false
-	t["died_day"] = SysUtil.day()
-	_log("%s passed away." % t["name"])
-	for rid in SysUtil.residents():
-		if RelationshipService.knows(int(rid.id), int(t["id"])) and RelationshipService.value(int(rid.id), int(t["id"]), "friendship") >= 20.0:
-			SysUtil.notify("%s, a friend of %s, has passed away." % [t["name"], rid.name], "death")
-			rid.add_buff("grieving")
+	Aging.kill(int(t["id"]), "old age")      # grief, grave, chronicle and the news line live in DeathCauses.kill_townie
 
 static func _pair_events(dc: Dictionary) -> void:
 	var adults: Array = []
@@ -221,6 +215,7 @@ static func _life_events(dc: Dictionary) -> void:
 			if RelationshipService.value(a, b, "romance") >= 80.0 and SysUtil.chance(float(dc.get("marry_chance", 0.12))):
 				RelationshipBits.set_flag(a, b, "spouse", true, false)
 				_log("%s and %s got married!" % [name_of(a), name_of(b)])
+				ChronicleHook.note("wedding", "%s and %s got married." % [name_of(a), name_of(b)], [a, b], "town:%d" % int(townies[a].get("lot", 0)), 2, true)
 				_tell_residents_about(a, b, "%s and %s got married!" % [name_of(a), name_of(b)])
 		elif fl.get("spouse", false) or fl.get("partner", false):
 			if alive_townies().size() < int(c.get("max_population", 20)) and SysUtil.chance(float(dc.get("baby_chance", 0.05))):
@@ -231,6 +226,7 @@ static func _life_events(dc: Dictionary) -> void:
 				baby["appearance"] = Genetics.inherit(Family.person_info(a), Family.person_info(b))["appearance"]
 				Family.note_townie_birth(int(baby["id"]), a, b)
 				_log("%s and %s had a baby, %s." % [name_of(a), name_of(b), baby["name"]])
+				ChronicleHook.note("birth", "%s was born to %s and %s." % [baby["name"], name_of(a), name_of(b)], [int(baby["id"]), a, b], "town:%d" % int(townies[a].get("lot", 0)), 2, true)
 	# moving away / arriving
 	for t in alive_townies():
 		if SysUtil.chance(float(dc.get("move_away_chance", 0.01))) and stage_of(t) == "adult":

@@ -259,39 +259,53 @@ static func _check_deaths() -> void:
 		if days >= float(dc.get("max_day", 230)) or SysUtil.chance(p):
 			kill(int(fid), "old age")
 
-## Remove a folk from the world, with grief, inheritance and a legacy record. Returns the legacy summary.
+## Remove a folk from the world, with grief, inheritance, a grave and a legacy record. Returns the legacy summary.
+## `cause` is a death-cause id of data/death_causes.json (or "old age"); every path that kills someone goes through here.
+## Works for Story townies too (no Folk on the map): the grief / grave / chronicle logic lives in DeathCauses.kill_townie.
 static func kill(folk_id: int, cause: String = "old age") -> Dictionary:
 	var f = SysUtil.folk(folk_id)
 	if f == null:
-		return {}
+		return DeathCauses.kill_townie(folk_id, cause) if Story.is_townie(folk_id) else {}
+	var cdef: Dictionary = DeathCauses.def(cause)
 	var legacy: Dictionary = legacy_summary(folk_id)
-	legacy["cause"] = cause
+	var rec0: Dictionary = records.get(folk_id, {})
+	legacy["cause"] = str(cdef["label"])
+	legacy["cause_id"] = str(cdef["id"])
 	legacy["day"] = SysUtil.day()
-	# relatives that grieve (from the survivors' point of view)
+	legacy["born_day"] = int(rec0.get("born_day", 0))
+	if str(cdef.get("legacy_text", "")) != "":
+		legacy["summary"] = "%s %s" % [legacy["summary"], cdef["legacy_text"]]
+	SysUtil.game_event("folk_collapsing", {"folk_id": folk_id, "cause": str(cdef["id"]), "tile": [f.tile.x, f.tile.y]})
+	# relatives and friends grieve (strength / length depend on the cause), kids included
 	var mourners: Array = []
-	var gmin: float = float(cfg().get("grief", {}).get("min_friendship", 50))
 	for o in SysUtil.residents():
 		if int(o.id) == folk_id:
 			continue
-		var bit: String = RelationshipBits.bit_for(int(o.id), folk_id)
-		if bit in ["family", "spouse", "partner", "sweetheart", "best_friend"] or RelationshipService.value(int(o.id), folk_id, "friendship") >= gmin:
+		var close: float = DeathCauses.closeness(int(o.id), folk_id)
+		if close > 0.0:
 			mourners.append(int(o.id))
-			o.add_buff(str(cfg().get("grief", {}).get("buff", "grieving")))
-			o.add_to_stat("fun", -15.0)
+			DeathCauses.grieve(o, folk_id, str(f.name), cdef, close)
 	legacy["mourners"] = mourners
 	FamilyHousehold.on_death(folk_id, mourners)
-	# inheritance
 	legacy["inheritance"] = _inherit(f, mourners)
 	RelationshipService.sync_folk(f)
 	f.cancel_current("died")
 	f.clear_queue()
+	Hospital.patients.erase(folk_id)
+	f.remove_buff("in_hospital")
 	SysUtil.world_remove_folk(folk_id)
+	Graves.place_for(legacy, f, cdef)
 	records.erase(folk_id)
 	pregnancies.erase(folk_id)
 	Careers.forget(folk_id)
 	dead.append(legacy)
-	SysUtil.notify("%s has passed away (%s). %s" % [f.name, cause, str(legacy["summary"])], "death")
-	SysUtil.game_event("died", {"folk_id": folk_id, "cause": cause})
+	if Story.townies.has(folk_id):
+		Story.townies[folk_id]["alive"] = false
+		Story.townies[folk_id]["died_day"] = SysUtil.day()
+	var text: String = DeathCauses.fill(str(cdef.get("text", "")), str(f.name), cdef, str(legacy["summary"]))
+	SysUtil.notify(text, "death")
+	ChronicleHook.note("death", "%s died (%s)." % [f.name, str(cdef["label"]).to_lower()], [folk_id], "home:%d" % int(f.household_id), int(cdef.get("severity", 3)), true)
+	SysUtil.game_event("died", {"folk_id": folk_id, "cause": str(cdef["id"])})
 	return legacy
 
 static func _inherit(f, mourners: Array) -> Dictionary:

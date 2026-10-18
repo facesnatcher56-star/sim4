@@ -32,6 +32,8 @@ static func drive(now: int) -> void:
 			continue
 		var pick: Dictionary = _pick_activity(f, w)
 		if pick.is_empty():
+			if Crowd.lowest_need(f) < -30.0:       # nothing to do here and getting needy: head home
+				Crowd.start_leaving(f)
 			continue
 		var ir := Interaction.create(str(pick["iid"]), f, int(pick["oid"]), false)
 		if ir != null and ir.can_run(f, null, false):

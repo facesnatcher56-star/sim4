@@ -37,6 +37,7 @@ func _connect_signals() -> void:
 		ev.object_state_changed.connect(_on_object_state)
 		ev.folk_added.connect(_on_folk_added)
 		ev.folk_removed.connect(_on_folk_removed)
+		ev.game_event.connect(_on_collapse_event)
 		ev.selection_changed.connect(_on_selection_changed)
 	var clk := get_node_or_null("/root/Clock")
 	if clk:
@@ -304,10 +305,23 @@ func _on_folk_added(id: int) -> void:
 	_folk_views[id] = fv
 
 
+var _collapsing: Dictionary = {}       # folk ids about to die (Aging.kill emits folk_collapsing first)
+
+func _on_collapse_event(ev_name: String, payload: Dictionary) -> void:
+	if ev_name == "folk_collapsing":
+		_collapsing[int(payload.get("folk_id", -1))] = true
+
 func _on_folk_removed(id: int) -> void:
 	if _folk_views.has(id):
-		_folk_views[id].queue_free()
+		var fv = _folk_views[id]
 		_folk_views.erase(id)
+		if _collapsing.has(id) and not GameSettings.reduce_motion():
+			var tw: Tween = fv.create_tween()       # a short, quiet collapse: sink and shrink, no gore
+			tw.tween_property(fv, "scale", Vector3(1.0, 0.05, 1.0), 0.9)
+			tw.tween_callback(fv.queue_free)
+		else:
+			fv.queue_free()
+	_collapsing.erase(id)
 	if selected_id == id and selected_kind == "folk":
 		_set_selected("none", -1)
 

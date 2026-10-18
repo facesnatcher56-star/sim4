@@ -1,0 +1,42 @@
+{
+ "_doc": "Incident framework base file (scripts/systems/incidents.gd). Every data/incidents/*.json is merged on top (by id, later file name wins). Sections: config, handlers {name: {script, method}}, content (ContentMerge format: buffs/interactions/objects/object_interactions), incidents {id: def}. See docs/INCIDENTS.md.",
+ "config": {
+  "year_days": 28,
+  "max_chance": 0.9,
+  "history_cap": 200,
+  "levels": {"off": 0, "rare": 1, "normal": 3, "chaotic": 10},
+  "default_level": "rare",
+  "doctor_cost": 120,
+  "hospital": {
+   "stay_hours": {"1": 4, "2": 16, "3": 48},
+   "bill": {"1": 60, "2": 220, "3": 700},
+   "injured_hours": {"1": 24, "2": 72, "3": 120},
+   "sick_hours": {"1": 24, "2": 60, "3": 96},
+   "townie_death_chance": {"1": 0.0, "2": 0.03, "3": 0.25},
+   "min_admit_severity": 2
+  }
+ },
+ "handlers": {},
+ "content": {
+  "buffs": {
+   "injured": {"label": "Injured", "mood": {"uncomfortable": 2, "sad": 1}, "duration_min": 2880, "need_decay_mult": {"fun": 1.1}, "thought": "Ouch... that really hurts."},
+   "sick": {"label": "Unwell", "mood": {"uncomfortable": 2, "sad": 1}, "duration_min": 2880, "need_decay_mult": {"energy": 1.25}, "thought": "I don't feel well at all."},
+   "in_hospital": {"label": "In hospital", "mood": {}, "duration_min": 0, "hidden": true},
+   "checked_up": {"label": "Recent Check-up", "mood": {"happy": 1}, "duration_min": 40320},
+   "lucky_day": {"label": "Lucky Day", "mood": {"happy": 2}, "duration_min": 360, "thought": "What a lucky find!"},
+   "grieving_heavy": {"label": "Heavy Grief", "mood": {"sad": 4}, "duration_min": 7200, "need_decay_mult": {"fun": 1.3}, "thought": "I can't believe they're gone."},
+   "grieving_shattered": {"label": "Shattered", "mood": {"sad": 6, "tense": 2}, "duration_min": 10080, "need_decay_mult": {"fun": 1.4, "energy": 1.1}, "thought": "It doesn't feel real. I miss them so much."},
+   "remembered_fondly": {"label": "Fond Memories", "mood": {"happy": 2}, "duration_min": 480, "thought": "I'm glad I knew them."},
+   "at_peace": {"label": "At Peace", "mood": {"happy": 2}, "duration_min": 720, "thought": "It hurts a little less now."}
+  },
+  "objects": {
+   "grave": {"def": {"label": "Grave", "size": [1, 1], "price": 0, "tags": ["grave", "memorial", "outdoor"], "model": "res://assets/models/grave.glb", "color": "#8d8f94", "height": 0.9, "blocks": false, "slots": [{"offset": [0, 1], "pose": "stand"}], "state": {}, "advertises": {}, "decor": 0.0, "interactions": ["remember_grave", "mourn_grave"]}},
+   "urn": {"def": {"label": "Memorial Urn", "size": [1, 1], "price": 0, "tags": ["grave", "memorial"], "model": "res://assets/models/urn.glb", "color": "#a07a52", "height": 0.7, "blocks": false, "slots": [{"offset": [0, 1], "pose": "stand"}], "state": {}, "advertises": {}, "decor": 0.0, "interactions": ["remember_grave", "mourn_grave"]}}
+  },
+  "interactions": {
+   "remember_grave": {"label": "Remember", "kind": "super", "target": "object", "objects": ["grave", "urn"], "tags": ["grave", "memory"], "duration_min": 15, "posture": "stand", "tests": [], "per_min": {"fun": 0.15}, "on_finish": [{"add_buff": "remembered_fondly"}, {"fire_event": "grave_remembered"}], "autonomous": false, "priority": "normal", "thought": "Let me take a moment to remember them."},
+   "mourn_grave": {"label": "Mourn", "kind": "super", "target": "object", "objects": ["grave", "urn"], "tags": ["grave", "memory"], "duration_min": 25, "posture": "stand", "tests": [], "per_min": {"fun": -0.05}, "on_finish": [{"fire_event": "grave_mourned"}], "autonomous": false, "priority": "normal", "thought": "I came to say goodbye."}
+  }
+ },
+ "incidents": {}
+}

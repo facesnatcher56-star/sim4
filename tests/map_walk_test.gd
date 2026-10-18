@@ -248,7 +248,7 @@ func _leavers_walk_out() -> void:
 	var npc: Folk = crowd[0]
 	var door: Vector2i = Neighborhood.entry_tile("cafe")
 	var start: Vector2i = npc.tile
-	Crowd._start_leaving(npc)
+	Crowd.start_leaving(npc)
 	_check(npc.has_meta("leaving"), "marked as leaving")
 	Kit.run(1)
 	var moved := npc.tile != start or start == door
