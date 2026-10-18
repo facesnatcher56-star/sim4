@@ -2,6 +2,8 @@ extends SceneTree
 ## Not a unit test: boots the real game, simulates N game days with the real World, prints a report, saves screenshots.
 ## godot --path . --resolution 1600x900 --script res://tests/play_smoke.gd -- out_prefix days [job|nojob]
 ## `job` (default): the first folk is hired as a coder, so the run exercises the real commute (walk to the office, shift, walk home).
+const Watchdog := preload("res://tests/watchdog.gd")
+var _wd = null
 var _main: Node = null
 var _frames := 0
 var _days := 2
@@ -13,8 +15,9 @@ var _commuting_min := 0
 var _coins0 := 0
 
 func _process(_d: float) -> bool:
-	var args := OS.get_cmdline_user_args()
+	var args := Watchdog.user_args()
 	if _main == null:
+		_wd = Watchdog.start(Watchdog.budget_from(OS.get_cmdline_user_args(), 300.0), "play_smoke")
 		if args.size() > 0: _prefix = args[0]
 		if args.size() > 1: _days = int(args[1])
 		if args.size() > 2: _job = args[2] != "nojob"
@@ -49,6 +52,7 @@ func _process(_d: float) -> bool:
 		var tex := root.get_texture()
 		if tex != null and DisplayServer.get_name() != "headless":
 			tex.get_image().save_png(_prefix + "_end.png")
+		_wd.stop()
 		quit(0)
 	return false
 

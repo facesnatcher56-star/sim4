@@ -3,6 +3,8 @@ extends SceneTree
 ## times every Clock listener (minute / hour / day) separately, plus SimDirector's inner phases.
 ##   godot --headless --path . --script res://tests/perf_probe.gd -- [days=2]
 ## Prints a table sorted by total time. Run through tools/godot_guard.ps1 (see docs/PERFORMANCE.md).
+const Watchdog := preload("res://tests/watchdog.gd")
+var _wd = null
 var _main: Node = null
 var _frames := 0
 var _days := 2
@@ -27,8 +29,9 @@ func _wrap(sig: Signal, tag: String) -> void:
 			_acc[label] = rec)
 
 func _process(_d: float) -> bool:
-	var args := OS.get_cmdline_user_args()
+	var args := Watchdog.user_args()
 	if _main == null:
+		_wd = Watchdog.start(Watchdog.budget_from(OS.get_cmdline_user_args(), 600.0), "perf_probe")
 		if args.size() > 0:
 			_days = int(args[0])
 		_main = load("res://scenes/main.tscn").instantiate()
@@ -68,5 +71,6 @@ func _process(_d: float) -> bool:
 		for r in rows:
 			if r[1] >= 20.0:
 				print("%-48s %9.0f ms  %7d calls  %8.3f ms/call" % [r[0], r[1], r[2], r[1] / maxi(r[2], 1)])
+		_wd.stop()
 		quit(0)
 	return false

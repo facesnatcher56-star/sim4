@@ -9,7 +9,7 @@ extends SceneTree
 ##   Godot --headless --path . --script res://tests/run_all.gd -- --list           print the file list and exit
 ##   Godot --headless --path . --script res://tests/run_one.gd -- <test file base name>      a single test file
 ##
-## (`--all` is an alias of `--slow`; flags can be combined.)
+## (`--all` is an alias of `--slow`; flags can be combined; `--budget=<s>` = wall-clock limit, default 900 fast / 2400 slow, per file 300 / 1200 for SLOW; see tests/watchdog.gd.)
 ## Discovers tests/*_test.gd, tests/sim_*.gd and tests/world_*.gd. A file is a test when its script has a `run()` method that
 ## returns an Array of failure strings (empty = pass); other files (kits, shots, helpers) are skipped. Exit code 1 on any failure.
 ## Every file starts from the same state: TestFixture.reset() runs before and after it. Long tests read `TestFixture.fast`
@@ -20,6 +20,10 @@ const SLOW := [
 	"systems_family_integration_test.gd", "systems_integration_test.gd", "hood_sim_test.gd", "weather_longrun_test.gd",
 	"social_autonomy_test.gd", "sim_longrun.gd", "incidents_longrun_test.gd", "crime_longrun_test.gd", "accident_longrun_test.gd", "health_longrun_test.gd", "disaster_longrun_test.gd", "fire_longrun_test.gd", "commute_longrun_test.gd",
 ]
+
+const Watchdog := preload("res://tests/watchdog.gd")
+const FILE_BUDGET_S := 300.0       # per test file (fast tier)
+const SLOW_FILE_BUDGET_S := 1200.0 # per test file in the SLOW list
 
 var _done := false
 
@@ -67,6 +71,9 @@ func _run(args: PackedStringArray) -> int:
 	var only_arg := _arg_value(args, "--only")
 	var only: Array = [] if only_arg == "\u0000" or only_arg == "" else Array(only_arg.split(","))
 	var files := _discover(slow, only)
+	var fixture := _arg_value(args, "--fixture")   # run only tests/fixtures/<name>.gd (watchdog tests); never discovered otherwise
+	if fixture != "\u0000" and fixture != "":
+		files = ["fixtures/" + fixture + ".gd"]
 	var shuffle_arg := _arg_value(args, "--shuffle")
 	if shuffle_arg != "\u0000":
 		var rng := RandomNumberGenerator.new()
@@ -86,7 +93,10 @@ func _run(args: PackedStringArray) -> int:
 	var total_fail := 0
 	var ran := 0
 	var t_all := Time.get_ticks_msec()
+	var wd = Watchdog.start(Watchdog.budget_from(args, 2400.0 if slow else 900.0), "run_all")
 	for f in files:
+		var file_budget := SLOW_FILE_BUDGET_S if SLOW.has(f) else FILE_BUDGET_S
+		wd.set_label(f, file_budget)
 		var script: Variant = load("res://tests/" + f)
 		if script == null or not (script is GDScript):
 			print("FAIL  %s  (could not load script)" % f)
@@ -103,6 +113,8 @@ func _run(args: PackedStringArray) -> int:
 		if inst is Node:
 			(inst as Node).free()
 		TestFixture.reset()
+		if ms > file_budget * 1000.0:
+			failures = ["TIMEOUT in %s: took %d s, per-file budget %d s" % [f, ms / 1000, int(file_budget)]]
 		if failures is Array and (failures as Array).is_empty():
 			print("PASS  %s  (%d ms)" % [f, ms])
 		else:
@@ -111,6 +123,7 @@ func _run(args: PackedStringArray) -> int:
 			if failures is Array:
 				for m in failures:
 					print("      - " + str(m))
+	wd.stop()
 	print("---- %d test files, %d failed, %.1f s ----" % [ran, total_fail, float(Time.get_ticks_msec() - t_all) / 1000.0])
 	print("RESULT: " + ("PASS" if total_fail == 0 and ran > 0 else "FAIL"))
 	return 0 if (total_fail == 0 and ran > 0) else 1
