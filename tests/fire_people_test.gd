@@ -98,7 +98,7 @@ func _alarm_wakes_sleeper(f: Array) -> void:
 	for i in trials:
 		var w := FK.setup()
 		Fire.rng.seed = 300 + i
-		_cfg("wake_chance", 0.0)
+		_cfg("wake_scale", 0.0)
 		var sl := K.make_folk(w, "Sleepy", [], 1, Vector2i(12, 19))
 		var o := FK.house(w, [["smoke_alarm", Vector2i(14, 14)]])
 		_sleep(w, sl, o["bed"])
@@ -116,7 +116,7 @@ func _alarm_wakes_sleeper(f: Array) -> void:
 func _sleeper_dies_without_alarm(f: Array) -> void:
 	var w := FK.setup()
 	Fire.rng.seed = 21
-	_cfg("wake_chance", 0.0)
+	_cfg("wake_scale", 0.0)
 	_cfg("brigade_delay", [60, 70])
 	_cfg("neighbor_call_min", 90)
 	var sl := K.make_folk(w, "Sleepy", [], 1, Vector2i(12, 19))
@@ -134,7 +134,7 @@ func _sleeper_dies_without_alarm(f: Array) -> void:
 	# the same fire with the fire department on its way: rescued and hurt, not dead
 	var w2 := FK.setup()
 	Fire.rng.seed = 21
-	_cfg("wake_chance", 0.0)
+	_cfg("wake_scale", 0.0)
 	var sl2 := K.make_folk(w2, "Sleepy", [], 1, Vector2i(12, 19))
 	var o2 := FK.house(w2)
 	_sleep(w2, sl2, o2["bed"])

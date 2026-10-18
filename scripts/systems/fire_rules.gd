@@ -202,6 +202,28 @@ static func folk_in_lot(lot: String) -> Array:
 	out.sort_custom(func(a, b): return a.id < b.id)
 	return out
 
+## Smoke dose thresholds scale with this (frail: elders, toddlers, kids, the sick and injured; fit adults slightly above 1).
+static func dose_mult(f) -> float:
+	var m: float = float((cfg().get("dose_stage", {}) as Dictionary).get(str(f.age_stage), 1.0))
+	if f.has_buff("injured"):
+		m *= num("dose_injured", 0.8)
+	if f.has_buff("sick"):
+		m *= num("dose_sick", 0.8)
+	return m * (1.0 + num("dose_fitness", 0.02) * float(mini(f.skill_level("fitness"), 8)))
+
+## How easily a sleeper wakes (1 = average). 0 = cannot wake (passed out, drunk).
+static func wake_mult(f) -> float:
+	if helpless(f) or f.has_buff("drunk"):
+		return 0.0
+	var m: float = 1.0
+	var tr: Dictionary = cfg().get("wake_traits", {})
+	for t in tr:
+		if f.has_trait(str(t)):
+			m *= float(tr[t])
+	if f.has_buff("exhausted") or f.get_stat_value("energy") < -60.0:
+		m *= num("wake_exhausted", 0.5)
+	return m
+
 static func trait_score(f) -> float:
 	var s: float = 0.0
 	for t in cfg().get("brave_traits", []):

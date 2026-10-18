@@ -36,6 +36,7 @@ static func reset() -> void:
 	FireRules.reset()
 	FireFolk.reset()
 	FireTown.reset()
+	FireSmoke.reset()
 
 static func key(t: Vector2i) -> String:
 	return "%d,%d" % [t.x, t.y]
@@ -131,7 +132,7 @@ static func ignite(target, source: String = "unknown", opts: Dictionary = {}) ->
 
 static func _new_blaze(lot: String, source: String, culprit: int) -> Dictionary:
 	return {"lot": lot, "source": source, "culprit": culprit, "start": SysUtil.now(), "called": false, "call_min": -1, "due": -1, "alarm": false, "here": false,
-		"here_min": -1, "spread": false, "peak": 1, "lost": [], "loss": 0, "smoke": 0.0, "hid": FireRules.hid_of_lot(lot), "folk": {}, "hurt": [], "dead": [],
+		"here_min": -1, "spread": false, "peak": 1, "lost": [], "loss": 0, "smoke": 0.0, "rs": {}, "hid": FireRules.hid_of_lot(lot), "folk": {}, "hurt": [], "dead": [],
 		"rescued": [], "neighbor_min": SysUtil.now() + int(FireRules.num("neighbor_call_min", 18.0)), "out_min": -1}
 
 static func _announce(b: Dictionary, f: Dictionary, quiet: bool) -> void:
@@ -268,6 +269,7 @@ static func from_dict(d: Dictionary) -> void:
 		var b: Dictionary = (bs[lot] as Dictionary).duplicate(true)
 		SysUtil.ints_in(b, ["culprit", "start", "call_min", "due", "here_min", "peak", "loss", "hid", "neighbor_min", "out_min"])
 		b["smoke"] = float(b.get("smoke", 0.0))
+		b["rs"] = SysUtil.int_keys(b.get("rs", {}))
 		b["folk"] = SysUtil.int_keys(b.get("folk", {}))
 		b["hurt"] = SysUtil.to_ints(b.get("hurt", []))
 		b["dead"] = SysUtil.to_ints(b.get("dead", []))

@@ -16,7 +16,7 @@ static func reset() -> void:
 static func rec(b: Dictionary, f) -> Dictionary:
 	var m: Dictionary = b["folk"]
 	if not m.has(int(f.id)):
-		m[int(f.id)] = {"aware": false, "t": 0, "expo": 0.0, "state": "none", "hurt": 0, "trap": 0, "aware_min": -1}
+		m[int(f.id)] = {"aware": false, "t": 0, "expo": 0.0, "state": "none", "hurt": 0, "trap": 0, "aware_min": -1, "shouted": false}
 	return m[int(f.id)]
 
 ## Health API of task 02 when it exists, else the hospital of task 01.
@@ -50,7 +50,11 @@ static func step(now: int) -> void:
 static func _alarm(b: Dictionary) -> void:
 	if bool(b["alarm"]) or float(b["smoke"]) < FireRules.num("alarm_smoke", 0.12):
 		return
-	if not FireRules.working_alarm(str(b["lot"])):
+	var heard: bool = false
+	for o in FireRules.objects_in_lot(str(b["lot"]), ["smoke_alarm"]):
+		if float(WorldIface.state_get(o, "battery", 0.0)) > 0.0 and not bool(WorldIface.state_get(o, "broken", false)) 				and FireSmoke.at(b, o.tile) >= FireRules.num("alarm_smoke", 0.12):
+			heard = true
+	if not heard:
 		return
 	b["alarm"] = true
 	SysUtil.game_event("fire_alarm", {"lot": str(b["lot"]), "folk_id": -1})
@@ -80,8 +84,9 @@ static func _tick(b: Dictionary, f, fires: Array, now: int) -> void:
 		near = mini(near, FireRules.dist(f.tile, fi["tile"]))
 		if FireRules.same_room(f.tile, fi["tile"]):
 			room_stage = maxi(room_stage, int(fi["stage"]))
+	var here: float = FireSmoke.at(b, f.tile)
 	f.add_buff("fire_nearby")
-	if float(b["smoke"]) >= FireRules.num("smoky_at", 0.25) and (room_stage > 0 or near <= 5 or float(b["smoke"]) >= 0.6):
+	if here >= FireRules.num("smoky_at", 0.25):
 		f.add_buff("fire_smoke")
 	if r["state"] == "safe":
 		if near >= 5 and room_stage == 0:
@@ -92,13 +97,13 @@ static func _tick(b: Dictionary, f, fires: Array, now: int) -> void:
 	if asleep:
 		if bool(b["alarm"]):
 			_wake(f, r, now)
-		elif float(b["smoke"]) >= 0.3 and (room_stage > 0 or near <= 6) and Fire.rng.randf() < FireRules.num("wake_chance", 0.04):
+		elif Fire.rng.randf() < _wake_chance(f, here, room_stage, near):
 			_wake(f, r, now)
 		asleep = FireRules.asleep(f)
 	if not bool(r["aware"]) and not asleep and not helpless:
 		r["t"] = int(r["t"]) + 1
 		var notice: bool = bool(b["alarm"]) or near <= 2 or (room_stage > 0 and int(r["t"]) >= int(FireRules.num("notice_room_min", 1.0))) \
-			or (int(r["t"]) >= int(FireRules.num("notice_lot_min", 3.0)) and float(b["smoke"]) >= 0.1)
+			or (int(r["t"]) >= int(FireRules.num("notice_lot_min", 3.0)) and here >= 0.1)
 		if notice:
 			r["aware"] = true
 			r["aware_min"] = now
@@ -106,6 +111,47 @@ static func _tick(b: Dictionary, f, fires: Array, now: int) -> void:
 	if bool(r["aware"]) and not asleep and not helpless:
 		_act(b, f, r, fires, now)
 	_exposure(b, f, r, room_stage, asleep, helpless)
+
+## Chance per minute that a sleeper wakes by himself: thin haze almost never, thick smoke or flames in the room often; anywhere in the lot.
+static func _wake_chance(f, smoke_here: float, room_stage: int, near: int) -> float:
+	var wm: float = FireRules.wake_mult(f)
+	if wm <= 0.0:
+		return 0.0
+	var p: float = FireRules.num("wake_base", 0.004) + FireRules.num("wake_smoke", 0.3) * pow(smoke_here, 1.5)
+	var stage: int = room_stage if room_stage > 0 else (1 if near <= 3 else 0)
+	if stage > 0:
+		p += FireRules.at("wake_flames", stage - 1, 0.1) * (1.0 if room_stage > 0 else 0.5)
+	return clampf(p * wm * FireRules.num("wake_scale", 1.0), 0.0, 0.9)
+
+## "Fire!": every sleeper within earshot may wake (same room almost surely, a few rooms away through open or closed doors, walls muffle).
+static func _shout(b: Dictionary, f, now: int) -> void:
+	SimEnv.emit("thought", int(f.id), "Fire! Everybody out!")
+	for s in FireRules.folk_in_lot(str(b["lot"])):
+		if int(s.id) == int(f.id) or not FireRules.asleep(s):
+			continue
+		var wm: float = FireRules.wake_mult(s)
+		if wm <= 0.0:
+			continue
+		var h: int = FireSmoke.hops(f.tile, s.tile)
+		var p: float = 0.0
+		var tab: Array = FireRules.cfg().get("shout_hops", [0.95, 0.8, 0.5, 0.15])
+		if h < tab.size():
+			p = float(tab[h])
+		elif FireRules.dist(f.tile, s.tile) <= int(FireRules.num("shout_wall_range", 3.0)):
+			p = FireRules.num("shout_wall", 0.3)
+		if p > 0.0 and Fire.rng.randf() < minf(p * clampf(wm, 0.3, 1.3), 1.0):
+			_wake(s, rec(b, s), now)
+
+## Go and wake a family member sleeping in another room (before leaving). True while somebody is still being woken.
+static func _wake_others(b: Dictionary, f, now: int) -> bool:
+	for s in FireRules.folk_in_lot(str(b["lot"])):
+		if int(s.id) == int(f.id) or not FireRules.asleep(s) or FireRules.wake_mult(s) <= 0.0:
+			continue
+		if Fire.rng.randf() < FireRules.num("wake_others_chance", 0.7):
+			_wake(s, rec(b, s), now)
+			SimEnv.emit("thought", int(f.id), "Wake up, wake up!")
+		return true
+	return false
 
 static func _wake(f, r: Dictionary, now: int) -> void:
 	f.cancel_current("alarm")
@@ -132,6 +178,12 @@ static func _act(b: Dictionary, f, r: Dictionary, fires: Array, now: int) -> voi
 	var lot: String = str(b["lot"])
 	var adult: bool = ADULT.has(str(f.age_stage))
 	if adult and _rescue_dependants(b, f, now):
+		return
+	var tiny: bool = fires.size() == 1 and int(fires[0]["stage"]) <= 1
+	if not bool(r["shouted"]) and (adult or Fire.rng.randf() < FireRules.num("shout_child", 0.6)):
+		r["shouted"] = true
+		_shout(b, f, now)
+	if adult and not tiny and _wake_others(b, f, now):
 		return
 	if not bool(b["called"]) and now - int(r["aware_min"]) >= int(FireRules.num("call_after_aware_min", 1.0)) and Fire.rng.randf() < FireRules.num("call_chance", 0.6):
 		Fire.call_brigade(lot, int(f.id))
@@ -236,7 +288,7 @@ static func carry_out(b: Dictionary, d, dr: Dictionary) -> void:
 	if not (b["rescued"] as Array).has(int(d.id)):
 		(b["rescued"] as Array).append(int(d.id))
 		Fire._stat("rescued")
-	var ex: float = float(dr["expo"])
+	var ex: float = float(dr["expo"]) / FireRules.dose_mult(d)
 	if ex >= FireRules.num("severe_min", 17.0):
 		injure(d, 2, "smoke")
 		_hurt(b, d, dr, 2)
@@ -259,15 +311,18 @@ static func _exposure(b: Dictionary, f, r: Dictionary, room_stage: int, asleep: 
 		d = 1.5
 	elif room_stage == 2:
 		d = 1.0
-	elif float(b["smoke"]) >= 0.5:
-		d = 0.4
+	else:
+		var lvl: float = FireSmoke.at(b, f.tile)
+		d = 0.8 if lvl >= 0.6 else (0.4 if lvl >= 0.35 else (0.15 if lvl >= 0.2 else 0.0))
+	if d > 0.0 and FireSmoke.near_vent(f):
+		d *= FireRules.num("near_vent_dose", 0.6)
 	if str(r["state"]) == "fleeing":
 		d *= 0.5
 	if d <= 0.0:
 		r["expo"] = maxf(float(r["expo"]) - 0.5, 0.0)
 		return
 	r["expo"] = float(r["expo"]) + d
-	var ex: float = float(r["expo"])
+	var ex: float = float(r["expo"]) / FireRules.dose_mult(f)          # frail folk reach every threshold sooner
 	if ex >= FireRules.num("hurt_min", 9.0) and int(r["hurt"]) < 1:
 		injure(f, 1, "smoke")
 		_hurt(b, f, r, 1)

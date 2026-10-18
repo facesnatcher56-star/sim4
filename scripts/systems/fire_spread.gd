@@ -130,9 +130,4 @@ static func damage_survivor(f: Dictionary) -> void:
 # ------------------------------------------------------------------ smoke
 static func _smoke() -> void:
 	for lot in Fire.blazes:
-		var b: Dictionary = Fire.blazes[lot]
-		var sum: float = 0.0
-		for f in Fire.fires_in(str(lot)):
-			sum += FireRules.at("smoke_weight", int(f["stage"]) - 1, 1.0)
-		var target: float = minf(sum / FireRules.num("smoke_full_at", 3.0), 1.0)
-		b["smoke"] = clampf(float(b["smoke"]) + clampf(target - float(b["smoke"]), -0.05, 0.15), 0.0, 1.0)
+		FireSmoke.step(Fire.blazes[lot], Fire.fires_in(str(lot)))
