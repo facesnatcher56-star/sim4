@@ -32,6 +32,7 @@ var incident_debug: IncidentDebug
 var case_board: CaseBoard
 var case_prompt: CasePrompt
 var pause_menu: PauseMenu
+var share_hub: ShareHub
 var settings_dialog: SettingsDialog
 var confirm_dialog: ConfirmDialog
 var menu_button: Button
@@ -206,6 +207,7 @@ func _build_dialogs() -> void:
 	household_dialog = HouseholdDialog.new()
 	help_dialog = HelpDialog.new()
 	help_dialog.tips_requested.connect(func(): tips.start(true))
+	share_hub = ShareHub.new()
 	pause_menu = PauseMenu.new()
 	pause_menu.chosen.connect(_on_pause_choice)
 	settings_dialog = SettingsDialog.new()
@@ -220,12 +222,12 @@ func _build_dialogs() -> void:
 	case_board = CaseBoard.new()
 	case_prompt = CasePrompt.new()
 	JusticePlayer.ask_fn = case_prompt.ask
-	for d in [goals_dialog, career_dialog, household_dialog, help_dialog, pause_menu, settings_dialog, confirm_dialog, incident_debug, case_board, case_prompt]:
+	for d in [goals_dialog, career_dialog, household_dialog, help_dialog, pause_menu, settings_dialog, confirm_dialog, incident_debug, case_board, case_prompt, share_hub]:
 		add_child(d)
 	save_menu.visibility_changed.connect(func(): UIDialog.track_open(save_menu.get_instance_id(), save_menu.visible))
 
 func dialogs() -> Array:
-	return [confirm_dialog, settings_dialog, pause_menu, goals_dialog, career_dialog, household_dialog, help_dialog, incident_debug, case_board, case_prompt]
+	return [confirm_dialog, settings_dialog, share_hub, pause_menu, goals_dialog, career_dialog, household_dialog, help_dialog, incident_debug, case_board, case_prompt]
 
 func _on_pause_choice(id: String) -> void:
 	pause_menu.hide_dialog()
@@ -236,6 +238,8 @@ func _on_pause_choice(id: String) -> void:
 		"save", "load":
 			_refresh_save_menu()
 			save_menu.visible = true
+		"share":
+			share_hub.show_for(-1)
 		"help":
 			help_dialog.show_for(selected_folk_id)
 		"quit":

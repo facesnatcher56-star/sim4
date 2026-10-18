@@ -3,7 +3,7 @@ extends UIDialog
 ## Esc / the Menu button: Resume, Settings, Save, Load, Help, Quit to Title. Each button emits `chosen(id)`; Hud wires them up.
 signal chosen(id: String)
 const ITEMS := [["resume", "Resume", "Back to the game"], ["settings", "Settings", "Display, gameplay, accessibility, audio and controls"],
-	["save", "Save", "Save to one of your slots"], ["load", "Load", "Load a saved game"], ["help", "Help", "Controls and tips"],
+	["save", "Save", "Save to one of your slots"], ["load", "Load", "Load a saved game"], ["share", "Share", "Export or import households and towns, gifts, family cards"], ["help", "Help", "Controls and tips"],
 	["quit", "Quit to Title", "Leave this game. Unsaved progress is lost."]]
 
 func _ready() -> void:

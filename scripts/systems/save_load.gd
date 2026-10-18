@@ -41,7 +41,7 @@ static func snapshot(label: String = "") -> Dictionary:
 			"economy": Economy.to_dict(), "careers": Careers.to_dict(), "relationships": RelationshipService.to_dict(),
 			"goals": Goals.to_dict(), "aging": Aging.to_dict(), "story": Story.to_dict(), "away": Away.to_dict(), "commute": Commute.to_dict(),
 			"family": Family.to_dict(), "babycare": BabyCare.to_dict(), "weather": Weather.to_dict(),
-			"neighborhood": Neighborhood.to_dict(), "scenario": Scenario.to_dict(), "incidents": Incidents.to_dict(), "justice": JusticeState.to_dict(), "fire": Fire.to_dict(),
+			"neighborhood": Neighborhood.to_dict(), "scenario": Scenario.to_dict(), "incidents": Incidents.to_dict(), "justice": JusticeState.to_dict(), "fire": Fire.to_dict(), "share": ShareState.to_dict(),
 		},
 	}
 
@@ -155,6 +155,8 @@ static func restore(d: Dictionary) -> bool:
 	Incidents.from_dict(sy.get("incidents", {}))
 	JusticeState.from_dict(sy.get("justice", {}))
 	Fire.from_dict(sy.get("fire", {}))
+	ShareState.from_dict(sy.get("share", {}))
+	ShareState.deliver_pending()      # gifts and letters left in a shared town arrive once
 	return true
 
 ## Autosave (slot 0) — SystemsManager calls this each game day.

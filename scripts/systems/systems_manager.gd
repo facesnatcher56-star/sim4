@@ -92,6 +92,7 @@ static func reset_all() -> void:
 	Incidents.reset()
 	CrimeFlow.reset()
 	Fire.reset()
+	ShareState.reset()
 
 ## Start a fresh game: reset systems, give every household starting funds, register all current folk, make townies.
 func new_game(household_ids: Array = [], lifespan: String = "") -> void:
