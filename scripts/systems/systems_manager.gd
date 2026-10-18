@@ -83,6 +83,7 @@ static func reset_all() -> void:
 	Aging.reset()
 	Story.reset()
 	Away.reset()
+	Commute.reset()
 	Family.reset()
 	BabyCare.reset()
 	Weather.reset()
@@ -115,21 +116,28 @@ func ensure_registered() -> void:
 	Careers.enroll_school()
 
 # ------------------------------------------------------------------ clock
+## Per-minute steps, in order (a list so tests/perf_probe.gd can time each one: `prof_on` + `prof`).
+var _minute_steps: Array = []
+var prof_on: bool = false
+var prof: Dictionary = {}          # label -> [usec, calls]
+
 func _on_minute(_total: int) -> void:
 	if not enabled:
 		return
-	NeighborhoodService.before_minute()
-	CareerShifts.on_minute()
-	Away.on_minute()
-	StoryVisits.on_minute()
-	BabyCare.on_minute()
-	AccidentMarks.on_minute()
-	Incidents.on_minute()
-	CrimeFlow.on_minute()
-	Fire.on_minute()
-	DisasterClock.on_minute()
-	NeighborhoodService.after_minute()
-	WeatherFolk.on_minute()
+	if _minute_steps.is_empty():
+		_minute_steps = [["NeighborhoodService.before", NeighborhoodService.before_minute], ["CareerShifts", CareerShifts.on_minute],
+			["Away", Away.on_minute], ["StoryVisits", StoryVisits.on_minute], ["BabyCare", BabyCare.on_minute],
+			["AccidentMarks", AccidentMarks.on_minute], ["Incidents", Incidents.on_minute], ["CrimeFlow", CrimeFlow.on_minute],
+			["Fire", Fire.on_minute], ["DisasterClock", DisasterClock.on_minute],
+			["NeighborhoodService.after", NeighborhoodService.after_minute], ["WeatherFolk", WeatherFolk.on_minute]]
+	for s in _minute_steps:
+		var t0 := Time.get_ticks_usec() if prof_on else 0
+		(s[1] as Callable).call()
+		if prof_on:
+			var rec: Array = prof.get(s[0], [0, 0])
+			rec[0] += Time.get_ticks_usec() - t0
+			rec[1] += 1
+			prof[s[0]] = rec
 
 func _on_hour(hour: int) -> void:
 	if not enabled:

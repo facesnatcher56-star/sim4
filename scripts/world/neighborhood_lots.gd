@@ -215,6 +215,8 @@ static func _on_leave(f, lot_id: String) -> void:
 static func _on_enter(f, lot_id: String) -> void:
 	var fid: int = int(f.id)
 	Neighborhood.visits[lot_id] = int(Neighborhood.visits.get(lot_id, 0)) + 1
+	if Commute.exempt(f, lot_id):
+		return                  # staff / students: no fee, no opening hours, no "arrived" toast (Commute announces it)
 	if str(f.get_meta("walk_to", "")) == lot_id:
 		f.remove_meta("walk_to")
 		Neighborhood.loc.erase(fid)

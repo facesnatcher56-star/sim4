@@ -104,10 +104,11 @@ static func _update_lot(lot_id: String, now: int, force: bool) -> void:
 	WorldIface.coins[-1] = 99999            # NPCs can pay for coffee (household -1); never saved (Economy.to_dict)
 	var vtype: String = Venues.type_of_lot(lot_id)
 	update_staff(lot_id)
+	CommuteTownies.update(lot_id, now, force or first)       # townies whose job is here (they are not part of the customer count)
 	var target: int = Venues.crowd_target(vtype, SimEnv.hour_f())
 	var here: Array = []
 	for f in crowd_folk(lot_id):
-		if not f.has_meta("leaving"):
+		if not f.has_meta("leaving") and not f.has_meta("coworker"):
 			here.append(f)
 	for f2 in here.duplicate():      # time is up for some
 		if now >= int(f2.get_meta("leave_min", 0)):
@@ -125,7 +126,7 @@ static func _update_lot(lot_id: String, now: int, force: bool) -> void:
 		start_leaving(oldest)
 		here.erase(oldest)
 	# too few: welcome new arrivals (at most 2 per check so the room fills gradually, all at once when the lot wakes up)
-	var room: int = mini(target - here.size(), Venues.crowd_cap() - count(lot_id))
+	var room: int = mini(target - here.size(), Venues.crowd_cap() - count(lot_id) + CommuteTownies.present(lot_id).size())
 	var spawn_max: int = room if (force or first) else mini(room, 2)
 	for _i in spawn_max:
 		var t: Dictionary = _pick_townie(lot_id, vtype)
@@ -144,7 +145,7 @@ static func _pick_townie(lot_id: String, vtype: String) -> Dictionary:
 	var res: Array = SysUtil.residents()
 	for t in pool:
 		var tid: int = int(t["id"])
-		if present.has(tid) or SysUtil.folk(tid) != null:
+		if present.has(tid) or SysUtil.folk(tid) != null or CommuteTownies.busy_elsewhere(t, lot_id, SimEnv.now_min()):
 			continue
 		if Story.stage_of(t) in ["baby", "toddler"]:
 			continue

@@ -103,7 +103,9 @@ static func on_minute() -> void:
 			"out":
 				_step_out(f, t, now)
 			"in":
-				if not Away.active.has(int(fid)) and not Away.pending.has(int(fid)):
+				if Away.is_visible(int(fid)):
+					VisibleWork.step(f, t, now)
+				elif not Away.active.has(int(fid)) and not Away.pending.has(int(fid)):
 					_start_home(f, t)                 # the record is gone (recalled / lost on load): just go home
 			"home":
 				_step_home(f, t, now)
@@ -120,8 +122,8 @@ static func _step_out(f, t: Dictionary, now: int) -> void:
 	if now > int(t["due_min"]) + int(Workplace.num("miss_after_min", 90.0)) or now >= int(t["end_min"]) - 20:
 		miss(f, t, "never made it to %s" % ("work" if str(t["kind"]) == "work" else "school"))
 		return
-	if not walking(f) and f.current == null:
-		_walk(f, dest)                                # something interrupted the walk: carry on when free
+	if not walking(f):
+		_walk(f, dest)                                # the walk was lost (interrupted, loaded): high priority, so it preempts the errand
 
 static func _arrive(f, t: Dictionary, now: int) -> void:
 	_stop_walk(f)
@@ -136,6 +138,8 @@ static func _arrive(f, t: Dictionary, now: int) -> void:
 	var inside: bool = work and Workplace.visible_job(str(t["career"])) != ""
 	var spot: Vector2i = VisibleWork.post_tile(f, lot, str(t["career"])) if inside else Workplace.desk_tile(lot, f)
 	f.tile = spot
+	if "level" in f:
+		f.level = 0                       # multi-floor hook: Workplace.entry_tile(career).level will put office jobs on their floor
 	NeighborhoodLots.mark_inside(f, lot)
 	Neighborhood.refresh_view(fid)
 	t["state"] = "in"
@@ -148,6 +152,7 @@ static func _arrive(f, t: Dictionary, now: int) -> void:
 	var start_min: int = maxi(now, int(t["due_min"]))
 	var ok: bool = false
 	if inside:
+		f.idle_until_min = now + 5          # no autonomy errands between arriving and the first job
 		ok = Away.begin_visible(f, float(left_min), "work", data, start_min)
 	else:
 		ok = Away.send(f, float(left_min), str(t["kind"]), data)
@@ -231,7 +236,7 @@ static func _step_home(f, t: Dictionary, now: int) -> void:
 		_home(f, t)
 	elif now - int(t["left_min"]) > int(Workplace.num("home_timeout_min", 240.0)):
 		trips.erase(int(f.id))                         # gave up (autonomy / stranded_home takes over)
-	elif not walking(f) and f.current == null and f.queue.is_empty():
+	elif not walking(f) and (f.current == null or f.current.effective_priority() < 2) and f.queue.is_empty():
 		_walk(f, home)
 
 static func _home(f, t: Dictionary) -> void:

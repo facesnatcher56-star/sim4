@@ -1,4 +1,4 @@
-class_name Interaction
+﻿class_name Interaction
 extends RefCounted
 ## Runtime instance of an interaction definition from data/interactions.json.
 ## Lifecycle: queued -> walking -> running -> finished | cancelled.
@@ -151,7 +151,7 @@ func start() -> bool:
 	if n < 0:
 		_release()
 		return false
-	travel_total = n * WALK_MIN_PER_TILE / Health.speed_mult(actor)      # injured / unwell folk walk slower
+	travel_total = n * WALK_MIN_PER_TILE / (Health.speed_mult(actor) * Weather.walk_speed_mult()) + float(params.get("delay_min", 0.0))      # injured folk and snow / rain walk slower; delay_min = traffic wait (commutes)
 	travel_left = travel_total
 	actor.current = self
 	SimEnv.emit("interaction_started", actor.id, def_id, target_id)

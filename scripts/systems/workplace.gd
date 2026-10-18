@@ -81,7 +81,7 @@ static func desk_tile(lot_id: String, f) -> Vector2i:
 # ------------------------------------------------------------------ time
 ## Speed factor the folk walks at right now (injury x weather).
 static func speed_factor(f) -> float:
-	return maxf(Health.speed_mult(f) * Weather.walk_speed_mult_at(f.tile), 0.2)
+	return maxf(Health.speed_mult(f) * Weather.walk_speed_mult(), 0.2)
 
 ## Planned minutes to walk from the folk's tile to `to`: -1 when there is no route.
 static func commute_minutes(f, to: Vector2i) -> float:

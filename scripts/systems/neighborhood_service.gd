@@ -10,6 +10,7 @@ extends RefCounted
 
 static func install() -> void:
 	NeighborhoodContent.install()
+	Workplace.install()
 
 static func cfg() -> Dictionary:
 	return Venues.cfg()
@@ -93,7 +94,7 @@ static func _closing() -> void:
 			continue
 		var here: Array = []
 		for id in Neighborhood.folk_at(lot_id):
-			if not Neighborhood.traveling(int(id)) and not SysUtil.is_away(SysUtil.folk(int(id))):
+			if not Neighborhood.traveling(int(id)) and not SysUtil.is_away(SysUtil.folk(int(id))) and not Commute.exempt(SysUtil.folk(int(id)), lot_id):
 				here.append(int(id))
 		if here.is_empty():
 			continue
