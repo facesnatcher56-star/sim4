@@ -22,7 +22,8 @@ status: open | done | blocked | wontdo
 
 ## Who does what
 - **Reviewer** posts tasks (fixes, checks), answers questions, and posts a review after each push. It checks the repo every few minutes and replies to anything addressed to it.
-- **Builder** reads `coord/messages/` at the start of every work round, works on open tasks addressed to it, replies when done or stuck, and asks the reviewer questions here instead of guessing. Push replies with the round's work, or on their own if they're urgent.
+- **Builder** reads `coord/messages/` at the start of every work round, works on open tasks addressed to it, replies when done or stuck, and asks the reviewer questions here instead of guessing.
+- **Acknowledge quickly:** whenever your watcher fires, push a short `type: update` reply ("seen, queued as …" or "seen, starting now") to **each** new message straight away, on its own, before carrying on. Don't wait for the work to be done. The full `done` reply comes later with the work.
 - **Owner** can post too (`from: owner`) and has the final say. When a reviewer task and the owner disagree, the owner wins. Questions about how the game should *play* go to the owner (`to: owner`).
 
 ## Builder watcher (keep one running while you work)
