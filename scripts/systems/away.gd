@@ -1,0 +1,124 @@
+class_name Away
+extends RefCounted
+## "Rabbit-hole" service: a folk leaves the lot for a while (work, school, party...). Implemented as a long,
+## non-autonomous `sys_away` interaction so SimDirector keeps ticking needs while they are gone. While away the
+## folk carries the `away` buff and meta flag "away" (UI should hide the model: `folk.has_meta("away")`).
+## Returning (or being pulled away early) is reported to the caller through `on_finished`.
+
+const IID := "sys_away"
+const PENDING_TIMEOUT_MIN := 120
+
+static var pending: Dictionary = {}   # folk_id -> {reason, minutes, data, queued_min}
+static var active: Dictionary = {}    # folk_id -> {reason, minutes, data, start_min, until_min}
+
+static func reset() -> void:
+	pending.clear()
+	active.clear()
+
+static func is_away(folk_id: int) -> bool:
+	return active.has(folk_id)
+
+static func info(folk_id: int) -> Dictionary:
+	return active.get(folk_id, {})
+
+## Queue the away interaction. Returns false if the folk is invalid/already away/pending.
+static func send(f, minutes: float, reason: String, data: Dictionary = {}) -> bool:
+	if f == null or active.has(f.id) or pending.has(f.id) or minutes <= 1.0:
+		return false
+	var ir := Interaction.create(IID, f, -1, false)
+	if ir == null:
+		return false
+	ir.def = ir.def.duplicate(true)
+	ir.def["duration_min"] = minutes
+	ir.def["label"] = str(data.get("label", "Away (%s)" % reason))
+	pending[f.id] = {"reason": reason, "minutes": minutes, "data": data, "queued_min": SysUtil.now()}
+	f.enqueue(ir)
+	return true
+
+## interaction_started hook. Returns the info dict when this was a systems away interaction.
+static func on_started(folk_id: int, iid: String) -> Dictionary:
+	if iid != IID:
+		return {}
+	var f = SysUtil.folk(folk_id)
+	var p: Dictionary = pending.get(folk_id, {"reason": "away", "minutes": 60.0, "data": {}, "queued_min": SysUtil.now()})
+	pending.erase(folk_id)
+	var rec: Dictionary = {"reason": p["reason"], "minutes": float(p["minutes"]), "data": p["data"],
+		"start_min": int(p.get("restored_start", SysUtil.now())), "until_min": SysUtil.now() + int(float(p["minutes"]))}
+	active[folk_id] = rec
+	if f != null:
+		f.set_meta("away", str(rec["reason"]))
+		f.add_buff("away")
+	SysUtil.game_event("left_lot", {"folk_id": folk_id, "reason": rec["reason"]})
+	return rec
+
+## interaction_finished hook. Returns {} for unrelated interactions, else the info dict plus "completed".
+static func on_finished(folk_id: int, iid: String, success: bool) -> Dictionary:
+	if iid != IID:
+		return {}
+	var rec: Dictionary = active.get(folk_id, {})
+	active.erase(folk_id)
+	pending.erase(folk_id)
+	var f = SysUtil.folk(folk_id)
+	if f != null:
+		if f.has_meta("away"):
+			f.remove_meta("away")
+		f.remove_buff("away")
+	if rec.is_empty():
+		return {}
+	rec["completed"] = success
+	rec["worked_min"] = SysUtil.now() - int(rec["start_min"])
+	SysUtil.game_event("returned_to_lot", {"folk_id": folk_id, "reason": rec["reason"], "completed": success})
+	return rec
+
+## Drop stale queued requests (the folk never got to start them).
+static func on_minute() -> void:
+	var stale: Array = []
+	for fid in pending:
+		if SysUtil.now() - int(pending[fid]["queued_min"]) > PENDING_TIMEOUT_MIN:
+			stale.append(fid)
+	for fid in stale:
+		var f = SysUtil.folk(int(fid))
+		if f != null:
+			for q in f.queue.duplicate():
+				if (q as Interaction).def_id == IID:
+					f.queue.erase(q)
+		pending.erase(fid)
+
+## Pull a folk back early (counts as an unfinished, cancelled interaction).
+static func recall(folk_id: int, reason: String = "recalled") -> bool:
+	var f = SysUtil.folk(folk_id)
+	if f == null or not active.has(folk_id):
+		return false
+	if f.current != null and f.current.def_id == IID:
+		f.current.cancel(reason)
+		return true
+	return false
+
+static func to_dict() -> Dictionary:
+	var a: Dictionary = {}
+	for k in active:
+		a[str(k)] = (active[k] as Dictionary).duplicate(true)
+	return {"active": a}
+
+## Restore after a load: folk that were away are re-sent for the remaining time.
+static func from_dict(d: Dictionary) -> void:
+	reset()
+	var a: Dictionary = d.get("active", {})
+	for k in a:
+		var rec: Dictionary = a[k]
+		var f = SysUtil.folk(int(str(k)))
+		if f == null:
+			continue
+		var left: float = float(int(rec.get("until_min", 0)) - SysUtil.now())
+		if left < 2.0:
+			left = 2.0
+		f.remove_buff("away")
+		if send(f, left, str(rec.get("reason", "away")), (rec.get("data", {}) as Dictionary)):
+			pending[f.id]["restored_start"] = int(rec.get("start_min", SysUtil.now()))
+			# look away right now; the interaction itself resumes on the next director tick
+			var restored: Dictionary = (rec as Dictionary).duplicate(true)
+			for key in ["minutes", "start_min", "until_min"]:
+				restored[key] = float(restored.get(key, 0.0)) if key == "minutes" else int(restored.get(key, 0))
+			active[f.id] = restored
+			f.set_meta("away", str(rec.get("reason", "away")))
+			f.add_buff("away")

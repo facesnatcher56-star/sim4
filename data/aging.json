@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "days_per_year": 4,
+  "lifespan": {
+    "setting": "normal",
+    "age_rate": {"short": 1.6, "normal": 1.0, "long": 0.6, "epic": 0.3}
+  },
+  "stages": [
+    {"id": "baby",    "label": "Baby",    "from_day": 0,   "trait_slots": 0, "allow_tags": ["sleep", "rest", "emergency", "snack", "social"]},
+    {"id": "toddler", "label": "Toddler", "from_day": 4,   "trait_slots": 1, "forbid_tags": ["work", "exercise", "flirt", "cook", "game", "conflict", "chore"]},
+    {"id": "child",   "label": "Child",   "from_day": 12,  "trait_slots": 2, "forbid_tags": ["work", "flirt", "cook"]},
+    {"id": "teen",    "label": "Teen",    "from_day": 28,  "trait_slots": 3, "forbid_tags": ["work"]},
+    {"id": "adult",   "label": "Adult",   "from_day": 44,  "trait_slots": 4, "forbid_tags": []},
+    {"id": "elder",   "label": "Elder",   "from_day": 140, "trait_slots": 4, "forbid_tags": ["exercise"]}
+  ],
+  "death": {
+    "start_day": 170,
+    "chance_per_day": 0.03,
+    "ramp_per_day": 0.004,
+    "max_day": 230
+  },
+  "pregnancy": {
+    "days": 3,
+    "success_chance": 0.45,
+    "min_romance": 45,
+    "inherit_chance": 0.45,
+    "max_inherited": 2,
+    "cooldown_days": 4,
+    "min_stage": "adult"
+  },
+  "grief": {
+    "buff": "grieving",
+    "min_friendship": 50
+  },
+  "growth_trait_stages": ["child", "teen"],
+  "name_pool": ["Pip", "Juno", "Rowan", "Sage", "Bram", "Luma", "Ember", "Kit", "Nia", "Odin", "Tess", "Vale", "Wilder", "Zadie", "Arlo", "Mabel"]
+}

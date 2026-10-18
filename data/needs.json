@@ -1,0 +1,16 @@
+{
+  "hunger":  {"label": "Hunger",  "min": -100, "max": 100, "start": 55, "decay_per_min": 0.07,
+              "thresholds": [{"below": -60, "buff": "starving"}, {"below": -20, "buff": "hungry"}], "icon_color": "#e8a33d"},
+  "energy":  {"label": "Energy",  "min": -100, "max": 100, "start": 60, "decay_per_min": 0.055,
+              "thresholds": [{"below": -70, "buff": "exhausted"}, {"below": -25, "buff": "tired"}], "icon_color": "#6aa5e8"},
+  "bladder": {"label": "Bladder", "min": -100, "max": 100, "start": 70, "decay_per_min": 0.10,
+              "thresholds": [{"below": -75, "buff": "bursting"}, {"below": -35, "buff": "full_bladder"}], "icon_color": "#e8d94a"},
+  "hygiene": {"label": "Hygiene", "min": -100, "max": 100, "start": 60, "decay_per_min": 0.04,
+              "thresholds": [{"below": -65, "buff": "filthy"}, {"below": -25, "buff": "grimy"}], "icon_color": "#5ed1c4"},
+  "social":  {"label": "Social",  "min": -100, "max": 100, "start": 50, "decay_per_min": 0.045,
+              "thresholds": [{"below": -75, "buff": "isolated"}, {"below": -35, "buff": "lonely"}], "icon_color": "#e86aa5"},
+  "fun":     {"label": "Fun",     "min": -100, "max": 100, "start": 50, "decay_per_min": 0.06,
+              "thresholds": [{"below": -65, "buff": "bored_stiff"}, {"below": -25, "buff": "restless"}], "icon_color": "#a56ae8"},
+  "comfort": {"label": "Comfort", "min": -100, "max": 100, "start": 50, "decay_per_min": 0.03,
+              "thresholds": [{"below": -40, "buff": "achy"}], "icon_color": "#8bc34a"}
+}

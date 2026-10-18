@@ -1,0 +1,514 @@
+{
+  "fridge": {
+    "file": "res://assets/models/fridge.glb",
+    "footprint": [
+      1,
+      1,
+      1.8
+    ],
+    "notes": "front (door) faces -Z",
+    "bounds_min": [
+      -0.4,
+      0.0,
+      -0.4
+    ],
+    "bounds_max": [
+      0.4,
+      1.8,
+      0.45
+    ]
+  },
+  "stove": {
+    "file": "res://assets/models/stove.glb",
+    "footprint": [
+      1,
+      1,
+      1.08
+    ],
+    "notes": "front faces -Z; hob on top",
+    "bounds_min": [
+      -0.45,
+      0.0,
+      -0.39
+    ],
+    "bounds_max": [
+      0.45,
+      1.08,
+      0.45
+    ]
+  },
+  "table": {
+    "file": "res://assets/models/table.glb",
+    "footprint": [
+      2,
+      1,
+      0.75
+    ],
+    "notes": "2x1: long axis X; origin at footprint centre",
+    "bounds_min": [
+      -0.95,
+      0.0,
+      -0.45
+    ],
+    "bounds_max": [
+      0.95,
+      0.75,
+      0.45
+    ]
+  },
+  "chair": {
+    "file": "res://assets/models/chair.glb",
+    "footprint": [
+      1,
+      1,
+      0.97
+    ],
+    "notes": "seat top y=0.47, backrest at +Z; sitter faces -Z",
+    "bounds_min": [
+      -0.21,
+      0.0,
+      -0.21
+    ],
+    "bounds_max": [
+      0.21,
+      0.97,
+      0.21
+    ]
+  },
+  "bed": {
+    "file": "res://assets/models/bed.glb",
+    "footprint": [
+      2,
+      2,
+      0.9
+    ],
+    "notes": "2x2; headboard/pillows at +Z; mattress top y~0.55 (sleep surface); foot end -Z",
+    "bounds_min": [
+      -0.95,
+      0.1,
+      -1.0
+    ],
+    "bounds_max": [
+      0.95,
+      0.9,
+      0.99
+    ]
+  },
+  "toilet": {
+    "file": "res://assets/models/toilet.glb",
+    "footprint": [
+      1,
+      1,
+      0.85
+    ],
+    "notes": "tank at +Z; sitter faces -Z",
+    "bounds_min": [
+      -0.21,
+      0.0,
+      -0.29
+    ],
+    "bounds_max": [
+      0.21,
+      0.845,
+      0.38
+    ]
+  },
+  "shower": {
+    "file": "res://assets/models/shower.glb",
+    "footprint": [
+      1,
+      1,
+      2.2
+    ],
+    "notes": "open side faces -Z; user stands inside",
+    "bounds_min": [
+      -0.475,
+      0.0,
+      -0.475
+    ],
+    "bounds_max": [
+      0.475,
+      2.2,
+      0.48
+    ]
+  },
+  "bathtub": {
+    "file": "res://assets/models/bathtub.glb",
+    "footprint": [
+      2,
+      1,
+      0.82
+    ],
+    "notes": "2x1 long axis X; faucet at +X end",
+    "bounds_min": [
+      -0.95,
+      0.0,
+      -0.45
+    ],
+    "bounds_max": [
+      0.95,
+      0.825,
+      0.45
+    ]
+  },
+  "sink": {
+    "file": "res://assets/models/sink.glb",
+    "footprint": [
+      1,
+      1,
+      1.17
+    ],
+    "notes": "front faces -Z",
+    "bounds_min": [
+      -0.44,
+      0.0,
+      -0.34
+    ],
+    "bounds_max": [
+      0.44,
+      1.175,
+      0.455
+    ]
+  },
+  "sofa": {
+    "file": "res://assets/models/sofa.glb",
+    "footprint": [
+      2,
+      1,
+      0.95
+    ],
+    "notes": "2x1; backrest at +Z; seat top y~0.6",
+    "bounds_min": [
+      -0.98,
+      0.0,
+      -0.45
+    ],
+    "bounds_max": [
+      0.98,
+      0.955,
+      0.45
+    ]
+  },
+  "tv": {
+    "file": "res://assets/models/tv.glb",
+    "footprint": [
+      1,
+      1,
+      1.06
+    ],
+    "notes": "screen faces -Z",
+    "bounds_min": [
+      -0.45,
+      0.0,
+      -0.2
+    ],
+    "bounds_max": [
+      0.45,
+      1.06,
+      0.2
+    ]
+  },
+  "bookshelf": {
+    "file": "res://assets/models/bookshelf.glb",
+    "footprint": [
+      1,
+      1,
+      1.9
+    ],
+    "notes": "open front faces -Z",
+    "bounds_min": [
+      -0.475,
+      0.0,
+      -0.09
+    ],
+    "bounds_max": [
+      0.475,
+      1.905,
+      0.255
+    ]
+  },
+  "easel": {
+    "file": "res://assets/models/easel.glb",
+    "footprint": [
+      1,
+      1,
+      1.6
+    ],
+    "notes": "canvas faces -Z",
+    "bounds_min": [
+      -0.32,
+      0.0,
+      -0.22
+    ],
+    "bounds_max": [
+      0.32,
+      1.6,
+      0.32
+    ]
+  },
+  "treadmill": {
+    "file": "res://assets/models/treadmill.glb",
+    "footprint": [
+      1,
+      1,
+      1.32
+    ],
+    "notes": "user stands on belt facing -Z towards console",
+    "bounds_min": [
+      -0.32,
+      0.05,
+      -0.457
+    ],
+    "bounds_max": [
+      0.32,
+      1.32,
+      0.5
+    ]
+  },
+  "computer": {
+    "file": "res://assets/models/computer.glb",
+    "footprint": [
+      1,
+      1,
+      1.21
+    ],
+    "notes": "desk+pc; monitor faces -Z, user sits at -Z side",
+    "bounds_min": [
+      -0.475,
+      0.0,
+      -0.3
+    ],
+    "bounds_max": [
+      0.475,
+      1.21,
+      0.4
+    ]
+  },
+  "counter": {
+    "file": "res://assets/models/counter.glb",
+    "footprint": [
+      1,
+      1,
+      0.88
+    ],
+    "notes": "front faces -Z; top y=0.88",
+    "bounds_min": [
+      -0.5,
+      0.0,
+      -0.49
+    ],
+    "bounds_max": [
+      0.5,
+      0.88,
+      0.49
+    ]
+  },
+  "plant": {
+    "file": "res://assets/models/plant.glb",
+    "footprint": [
+      1,
+      1,
+      1.2
+    ],
+    "notes": "",
+    "bounds_min": [
+      -0.36,
+      0.0,
+      -0.29
+    ],
+    "bounds_max": [
+      0.38,
+      1.2,
+      0.285
+    ]
+  },
+  "lamp": {
+    "file": "res://assets/models/lamp.glb",
+    "footprint": [
+      1,
+      1,
+      1.6
+    ],
+    "notes": "floor lamp",
+    "bounds_min": [
+      -0.2,
+      0.0,
+      -0.2
+    ],
+    "bounds_max": [
+      0.2,
+      1.6,
+      0.2
+    ]
+  },
+  "trash_bin": {
+    "file": "res://assets/models/trash_bin.glb",
+    "footprint": [
+      1,
+      1,
+      0.54
+    ],
+    "notes": "",
+    "bounds_min": [
+      -0.19,
+      0.0,
+      -0.19
+    ],
+    "bounds_max": [
+      0.19,
+      0.54,
+      0.19
+    ]
+  },
+  "rug": {
+    "file": "res://assets/models/rug.glb",
+    "footprint": [
+      1,
+      1,
+      0.03
+    ],
+    "notes": "1x1 flat, top y~0.03; tile or scale in Godot",
+    "bounds_min": [
+      -0.48,
+      0.0,
+      -0.48
+    ],
+    "bounds_max": [
+      0.48,
+      0.028,
+      0.48
+    ]
+  },
+  "wall": {
+    "file": "res://assets/models/wall.glb",
+    "footprint": [
+      1,
+      1,
+      2.6
+    ],
+    "notes": "1.0 x 2.6 x 0.15 along X, centred on tile edge line; rotate 90deg for Z-edges",
+    "bounds_min": [
+      -0.5,
+      0.0,
+      -0.085
+    ],
+    "bounds_max": [
+      0.5,
+      2.6,
+      0.085
+    ]
+  },
+  "door": {
+    "file": "res://assets/models/door.glb",
+    "footprint": [
+      1,
+      1,
+      2.6
+    ],
+    "notes": "root with nodes 'frame' and 'leaf'; leaf origin is the hinge (x=-0.42), rotate leaf about Y to open; same 1.0x2.6x0.15 slot as wall",
+    "bounds_min": [
+      -0.5,
+      0.0,
+      -0.09
+    ],
+    "bounds_max": [
+      0.5,
+      2.6,
+      0.09
+    ]
+  },
+  "window": {
+    "file": "res://assets/models/window.glb",
+    "footprint": [
+      1,
+      1,
+      2.6
+    ],
+    "notes": "wall piece with glass opening, same slot as wall",
+    "bounds_min": [
+      -0.5,
+      0.0,
+      -0.11
+    ],
+    "bounds_max": [
+      0.5,
+      2.6,
+      0.11
+    ]
+  },
+  "floor_wood": {
+    "file": "res://assets/models/floor_wood.glb",
+    "footprint": [
+      1,
+      1,
+      0.0
+    ],
+    "notes": "top surface at y=0",
+    "bounds_min": [
+      -0.498,
+      -0.05,
+      -0.5
+    ],
+    "bounds_max": [
+      0.498,
+      0.0,
+      0.5
+    ]
+  },
+  "floor_tile": {
+    "file": "res://assets/models/floor_tile.glb",
+    "footprint": [
+      1,
+      1,
+      0.0
+    ],
+    "notes": "top surface at y=0",
+    "bounds_min": [
+      -0.5,
+      -0.05,
+      -0.5
+    ],
+    "bounds_max": [
+      0.5,
+      0.0,
+      0.5
+    ]
+  },
+  "floor_carpet": {
+    "file": "res://assets/models/floor_carpet.glb",
+    "footprint": [
+      1,
+      1,
+      0.0
+    ],
+    "notes": "top surface at y=0",
+    "bounds_min": [
+      -0.5,
+      -0.05,
+      -0.5
+    ],
+    "bounds_max": [
+      0.5,
+      0.0,
+      0.5
+    ]
+  },
+  "folk": {
+    "file": "res://assets/models/folk.glb",
+    "footprint": [
+      1,
+      1,
+      1.72
+    ],
+    "notes": "skinned armature; bones hips,torso,head,arm_l,arm_r,leg_l,leg_r; clips Idle,Walk,Sit,Sleep,Use,Eat; faces -Z"
+  },
+  "folk_child": {
+    "file": "res://assets/models/folk_child.glb",
+    "footprint": [
+      1,
+      1,
+      1.17
+    ],
+    "notes": "skinned armature; bones hips,torso,head,arm_l,arm_r,leg_l,leg_r; clips Idle,Walk,Sit,Sleep,Use,Eat; faces -Z"
+  }
+}

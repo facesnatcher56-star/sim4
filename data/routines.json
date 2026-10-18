@@ -1,0 +1,48 @@
+{
+  "get_ready_for_work": {
+    "label": "getting ready for work",
+    "requires": ["has_job"],
+    "before_work_hours": [2.5, 0.25],
+    "tag_mult": {"prepare": 2.0, "food": 1.3},
+    "tag_bonus": {"prepare": 4.0},
+    "once": true
+  },
+  "morning_basics": {
+    "label": "morning routine",
+    "requires": ["no_job"],
+    "time_between": [7, 9],
+    "tag_mult": {"prepare": 1.5},
+    "tag_bonus": {"prepare": 1.5},
+    "once": true
+  },
+  "breakfast": {
+    "label": "breakfast time",
+    "time_between": [7, 9.5],
+    "tag_mult": {"meal": 1.5, "snack": 1.2},
+    "once": false
+  },
+  "lunch": {
+    "label": "lunch time",
+    "time_between": [12, 14],
+    "tag_mult": {"meal": 1.5},
+    "once": false
+  },
+  "dinner": {
+    "label": "dinner time",
+    "time_between": [18, 20],
+    "tag_mult": {"meal": 1.5},
+    "once": false
+  },
+  "wind_down": {
+    "label": "winding down for the night",
+    "time_between": [22, 24],
+    "tag_mult": {"sleep": 1.8, "work": 0.4, "exercise": 0.3},
+    "once": false
+  },
+  "small_hours": {
+    "label": "it's the middle of the night",
+    "time_between": [0, 5],
+    "tag_mult": {"sleep": 2.2, "work": 0.2, "exercise": 0.1, "social": 0.3},
+    "once": false
+  }
+}

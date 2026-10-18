@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "starting_funds": 6000,
+  "bills": {
+    "every_days": 7,
+    "first_day": 7,
+    "due_after_days": 3,
+    "base": 50,
+    "lot_value_rate": 0.015,
+    "utility_rate": 0.8,
+    "utility_weights": {"take_shower": 3, "take_bath": 6, "use_toilet": 1, "wash_hands": 0.5, "wash_dishes": 3, "watch_tv": 0.05, "play_computer": 0.03, "work_computer": 0.03, "cook_meal": 2, "exercise": 0.05},
+    "late_fee_rate": 0.1,
+    "late_fee_min": 10,
+    "auto_pay": true,
+    "repossess_after_cycles": 3,
+    "protected_tags": ["structure", "door", "window", "floor"]
+  },
+  "market": {
+    "sell_ratio_new": 0.8,
+    "sell_ratio_old": 0.5,
+    "old_after_days": 30
+  },
+  "groceries": {
+    "cost_per_unit": 6,
+    "max_units": 10
+  },
+  "ledger_size": 60
+}

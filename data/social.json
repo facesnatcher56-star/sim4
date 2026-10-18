@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "tracks": ["friendship", "romance"],
+  "bits": [
+    {"id": "spouse",      "label": "Spouse",      "flag": "spouse",     "color": "#e0517a"},
+    {"id": "partner",     "label": "Partner",     "flag": "partner",    "color": "#e8688f"},
+    {"id": "sweetheart",  "label": "Sweetheart",  "flag": "sweetheart", "color": "#ee86a6"},
+    {"id": "family",      "label": "Family",      "flag": "family",     "color": "#9b7fd4"},
+    {"id": "best_friend", "label": "Best Friend", "friendship_min": 70, "color": "#3fb27f"},
+    {"id": "enemy",       "label": "Enemy",       "friendship_max": -40, "color": "#c0392b"},
+    {"id": "crush",       "label": "Crush",       "romance_min": 25,     "color": "#f08fb4"},
+    {"id": "friend",      "label": "Friend",      "friendship_min": 30,  "color": "#5aa469"},
+    {"id": "acquaintance","label": "Acquaintance","known": true,         "color": "#9aa5b1"}
+  ],
+  "sweetheart": {"romance_min": 45, "friendship_min": 25},
+  "partner": {"romance_min": 70, "friendship_min": 50, "days_as_sweethearts": 4},
+  "decay": {
+    "friendship": {"idle_days": 2, "per_day": 1.0, "negative_per_day": 0.4},
+    "romance":    {"idle_days": 1, "per_day": 1.5, "negative_per_day": 0.5},
+    "bonded_factor": 0.25
+  },
+  "compat": {
+    "gain_scale": 0.5,
+    "pairs": {
+      "social:social": 0.4, "social:loner": -0.5, "loner:loner": 0.2, "neat:neat": 0.3, "neat:lazy": -0.5,
+      "lazy:lazy": 0.2, "hot_headed:hot_headed": -0.6, "hot_headed:neat": -0.2, "hot_headed:loner": -0.3,
+      "romantic:romantic": 0.5, "social:romantic": 0.2, "active:active": 0.4, "active:lazy": -0.4,
+      "creative:creative": 0.4, "creative:bookworm": 0.2, "bookworm:bookworm": 0.4, "gamer:gamer": 0.4,
+      "glutton:glutton": 0.2, "workaholic:lazy": -0.5, "workaholic:workaholic": 0.1, "gamer:active": -0.2,
+      "social:hot_headed": -0.1, "bookworm:gamer": -0.1
+    }
+  },
+  "history": {
+    "max_events": 30,
+    "half_life_days": 14,
+    "grudge_threshold": 0.4,
+    "warmth_threshold": 0.4,
+    "grudge_dampen": 0.6,
+    "grudge_amplify": 0.5,
+    "warmth_boost": 0.3,
+    "memory_scale": 0.35,
+    "kinds": {
+      "insult": -0.9, "chat": 0.3, "tell_joke": 0.4, "compliment": 0.5, "flirt": 0.4,
+      "apologize": 0.6, "try_for_baby": 0.6, "help": 0.8, "jealous": -0.7, "party": 0.6, "visit": 0.3
+    }
+  },
+  "jealousy": {
+    "enabled": true,
+    "triggers": ["flirt"],
+    "range": 14,
+    "romance_loss": 8,
+    "friendship_loss": 4,
+    "buff": "annoyed",
+    "buff_hot": "furious"
+  },
+  "apologize": {"friendship": 5, "grudge_relief": 0.5}
+}

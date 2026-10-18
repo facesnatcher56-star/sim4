@@ -1,0 +1,888 @@
+{
+ "fridge": {
+  "label": "Fridge",
+  "size": [
+   1,
+   1
+  ],
+  "price": 600,
+  "tags": [
+   "kitchen",
+   "food",
+   "appliance"
+  ],
+  "model": "res://assets/models/fridge.glb",
+  "color": "#d8e2e8",
+  "height": 1.8,
+  "slots": [
+   {
+    "offset": [
+     0,
+     1
+    ],
+    "pose": "stand"
+   }
+  ],
+  "state": {
+   "stock": {
+    "min": 0,
+    "max": 10,
+    "start": 10
+   },
+   "broken": {
+    "start": false
+   }
+  },
+  "advertises": {
+   "hunger": 3.0
+  },
+  "decor": 0.5,
+  "interactions": [
+   "grab_snack",
+   "cook_meal"
+  ]
+ },
+ "stove": {
+  "label": "Stove",
+  "size": [
+   1,
+   1
+  ],
+  "price": 450,
+  "tags": [
+   "kitchen",
+   "food",
+   "appliance"
+  ],
+  "model": "res://assets/models/stove.glb",
+  "color": "#555a60",
+  "height": 0.95,
+  "slots": [
+   {
+    "offset": [
+     0,
+     1
+    ],
+    "pose": "stand"
+   }
+  ],
+  "state": {
+   "dirtiness": {
+    "min": 0,
+    "max": 10,
+    "start": 0
+   },
+   "broken": {
+    "start": false
+   }
+  },
+  "advertises": {
+   "hunger": 3.5
+  },
+  "decor": 0.3,
+  "interactions": [
+   "cook_meal",
+   "clean_object"
+  ]
+ },
+ "counter": {
+  "label": "Counter",
+  "size": [
+   1,
+   1
+  ],
+  "price": 150,
+  "tags": [
+   "kitchen",
+   "furniture"
+  ],
+  "model": "res://assets/models/counter.glb",
+  "color": "#b9a58a",
+  "height": 0.95,
+  "slots": [
+   {
+    "offset": [
+     0,
+     1
+    ],
+    "pose": "stand"
+   }
+  ],
+  "state": {
+   "dirtiness": {
+    "min": 0,
+    "max": 10,
+    "start": 0
+   }
+  },
+  "advertises": {
+   "hunger": 1.0
+  },
+  "decor": 0.4,
+  "interactions": [
+   "prep_food",
+   "clean_object"
+  ]
+ },
+ "table": {
+  "label": "Dining Table",
+  "size": [
+   2,
+   1
+  ],
+  "price": 300,
+  "tags": [
+   "dining",
+   "furniture"
+  ],
+  "model": "res://assets/models/table.glb",
+  "color": "#9a6b43",
+  "height": 0.78,
+  "slots": [
+   {
+    "offset": [
+     0,
+     1
+    ],
+    "pose": "stand"
+   },
+   {
+    "offset": [
+     1,
+     1
+    ],
+    "pose": "stand"
+   }
+  ],
+  "state": {
+   "dirtiness": {
+    "min": 0,
+    "max": 10,
+    "start": 0
+   }
+  },
+  "advertises": {
+   "hunger": 0.8
+  },
+  "decor": 1.0,
+  "interactions": [
+   "eat_meal",
+   "clean_object"
+  ]
+ },
+ "chair": {
+  "label": "Chair",
+  "size": [
+   1,
+   1
+  ],
+  "price": 80,
+  "tags": [
+   "seat",
+   "furniture"
+  ],
+  "model": "res://assets/models/chair.glb",
+  "color": "#b07a4a",
+  "height": 0.9,
+  "slots": [
+   {
+    "offset": [
+     0,
+     0
+    ],
+    "use": [
+     0.5,
+     0.5
+    ],
+    "pose": "sit",
+    "inside": true
+   }
+  ],
+  "state": {},
+  "advertises": {
+   "energy": 0.5
+  },
+  "decor": 0.3,
+  "interactions": [
+   "sit_chair"
+  ]
+ },
+ "bed": {
+  "label": "Double Bed",
+  "size": [
+   2,
+   2
+  ],
+  "price": 700,
+  "tags": [
+   "bedroom",
+   "bed",
+   "furniture"
+  ],
+  "model": "res://assets/models/bed.glb",
+  "color": "#6f8fb5",
+  "height": 0.9,
+  "slots": [
+   {
+    "offset": [
+     2,
+     0
+    ],
+    "use": [
+     0.5,
+     1.0
+    ],
+    "pose": "lie",
+    "y": 0.55
+   },
+   {
+    "offset": [
+     2,
+     1
+    ],
+    "use": [
+     1.5,
+     1.0
+    ],
+    "pose": "lie",
+    "y": 0.55
+   }
+  ],
+  "state": {
+   "made": {
+    "start": true
+   }
+  },
+  "advertises": {
+   "energy": 5.0
+  },
+  "decor": 1.0,
+  "interactions": [
+   "sleep_bed",
+   "nap_bed",
+   "make_bed"
+  ]
+ },
+ "toilet": {
+  "label": "Toilet",
+  "size": [
+   1,
+   1
+  ],
+  "price": 250,
+  "tags": [
+   "bathroom",
+   "plumbing"
+  ],
+  "model": "res://assets/models/toilet.glb",
+  "color": "#f2f2f2",
+  "height": 0.5,
+  "slots": [
+   {
+    "offset": [
+     0,
+     1
+    ],
+    "use": [
+     0.5,
+     0.55
+    ],
+    "pose": "sit"
+   }
+  ],
+  "state": {
+   "dirtiness": {
+    "min": 0,
+    "max": 10,
+    "start": 0
+   },
+   "broken": {
+    "start": false
+   }
+  },
+  "advertises": {
+   "bladder": 6.0
+  },
+  "decor": -0.4,
+  "interactions": [
+   "use_toilet",
+   "clean_toilet"
+  ]
+ },
+ "shower": {
+  "label": "Shower",
+  "size": [
+   1,
+   1
+  ],
+  "price": 400,
+  "tags": [
+   "bathroom",
+   "plumbing"
+  ],
+  "model": "res://assets/models/shower.glb",
+  "color": "#9fd0e0",
+  "height": 2.0,
+  "slots": [
+   {
+    "offset": [
+     0,
+     0
+    ],
+    "pose": "stand",
+    "inside": true
+   }
+  ],
+  "state": {
+   "dirtiness": {
+    "min": 0,
+    "max": 10,
+    "start": 0
+   },
+   "broken": {
+    "start": false
+   }
+  },
+  "advertises": {
+   "hygiene": 4.0
+  },
+  "decor": 0.3,
+  "interactions": [
+   "take_shower",
+   "clean_object"
+  ]
+ },
+ "bathtub": {
+  "label": "Bathtub",
+  "size": [
+   2,
+   1
+  ],
+  "price": 700,
+  "tags": [
+   "bathroom",
+   "plumbing"
+  ],
+  "model": "res://assets/models/bathtub.glb",
+  "color": "#eaf1f4",
+  "height": 0.82,
+  "slots": [
+   {
+    "offset": [
+     0,
+     1
+    ],
+    "use": [
+     1.0,
+     0.5
+    ],
+    "pose": "sit",
+    "y": 0.12
+   }
+  ],
+  "state": {
+   "dirtiness": {
+    "min": 0,
+    "max": 10,
+    "start": 0
+   },
+   "broken": {
+    "start": false
+   }
+  },
+  "advertises": {
+   "hygiene": 4.5,
+   "fun": 0.5
+  },
+  "decor": 0.8,
+  "interactions": [
+   "take_bath",
+   "clean_object"
+  ]
+ },
+ "sink": {
+  "label": "Sink",
+  "size": [
+   1,
+   1
+  ],
+  "price": 200,
+  "tags": [
+   "bathroom",
+   "kitchen",
+   "plumbing"
+  ],
+  "model": "res://assets/models/sink.glb",
+  "color": "#dfe6ea",
+  "height": 0.9,
+  "slots": [
+   {
+    "offset": [
+     0,
+     1
+    ],
+    "pose": "stand"
+   }
+  ],
+  "state": {
+   "dirtiness": {
+    "min": 0,
+    "max": 10,
+    "start": 0
+   },
+   "broken": {
+    "start": false
+   }
+  },
+  "advertises": {
+   "hygiene": 1.5
+  },
+  "decor": 0.2,
+  "interactions": [
+   "wash_hands",
+   "brush_teeth",
+   "wash_dishes"
+  ]
+ },
+ "sofa": {
+  "label": "Sofa",
+  "size": [
+   2,
+   1
+  ],
+  "price": 650,
+  "tags": [
+   "living",
+   "seat",
+   "furniture",
+   "comfy"
+  ],
+  "model": "res://assets/models/sofa.glb",
+  "color": "#8a5a7a",
+  "height": 0.85,
+  "slots": [
+   {
+    "offset": [
+     0,
+     0
+    ],
+    "use": [
+     0.5,
+     0.5
+    ],
+    "pose": "sit",
+    "inside": true,
+    "y": 0.13
+   },
+   {
+    "offset": [
+     1,
+     0
+    ],
+    "use": [
+     1.5,
+     0.5
+    ],
+    "pose": "sit",
+    "inside": true,
+    "y": 0.13
+   }
+  ],
+  "state": {},
+  "advertises": {
+   "fun": 1.0,
+   "energy": 1.5
+  },
+  "decor": 2.0,
+  "interactions": [
+   "sit_sofa",
+   "nap_sofa",
+   "watch_tv"
+  ]
+ },
+ "tv": {
+  "label": "Television",
+  "size": [
+   1,
+   1
+  ],
+  "price": 500,
+  "tags": [
+   "living",
+   "electronics",
+   "fun"
+  ],
+  "model": "res://assets/models/tv.glb",
+  "color": "#202428",
+  "height": 0.9,
+  "slots": [
+   {
+    "offset": [
+     0,
+     2
+    ],
+    "pose": "stand"
+   },
+   {
+    "offset": [
+     0,
+     1
+    ],
+    "pose": "stand"
+   }
+  ],
+  "state": {
+   "on": {
+    "start": false
+   },
+   "broken": {
+    "start": false
+   }
+  },
+  "advertises": {
+   "fun": 3.0
+  },
+  "decor": 1.0,
+  "interactions": [
+   "watch_tv"
+  ]
+ },
+ "bookshelf": {
+  "label": "Bookshelf",
+  "size": [
+   1,
+   1
+  ],
+  "price": 350,
+  "tags": [
+   "living",
+   "furniture",
+   "skill"
+  ],
+  "model": "res://assets/models/bookshelf.glb",
+  "color": "#7a5230",
+  "height": 1.8,
+  "slots": [
+   {
+    "offset": [
+     0,
+     1
+    ],
+    "pose": "stand"
+   }
+  ],
+  "state": {},
+  "advertises": {
+   "fun": 1.8
+  },
+  "decor": 2.0,
+  "interactions": [
+   "read_book"
+  ]
+ },
+ "easel": {
+  "label": "Easel",
+  "size": [
+   1,
+   1
+  ],
+  "price": 300,
+  "tags": [
+   "hobby",
+   "skill",
+   "art"
+  ],
+  "model": "res://assets/models/easel.glb",
+  "color": "#c9a46b",
+  "height": 1.5,
+  "slots": [
+   {
+    "offset": [
+     0,
+     1
+    ],
+    "pose": "stand"
+   }
+  ],
+  "state": {
+   "progress": {
+    "min": 0,
+    "max": 100,
+    "start": 0
+   }
+  },
+  "advertises": {
+   "fun": 2.2
+  },
+  "decor": 1.5,
+  "interactions": [
+   "paint_canvas"
+  ]
+ },
+ "treadmill": {
+  "label": "Treadmill",
+  "size": [
+   1,
+   1
+  ],
+  "price": 800,
+  "tags": [
+   "fitness",
+   "electronics"
+  ],
+  "model": "res://assets/models/treadmill.glb",
+  "color": "#3b4048",
+  "height": 1.1,
+  "slots": [
+   {
+    "offset": [
+     0,
+     0
+    ],
+    "pose": "stand",
+    "inside": true
+   }
+  ],
+  "state": {
+   "broken": {
+    "start": false
+   }
+  },
+  "advertises": {
+   "fun": 1.0,
+   "fitness": 3.0
+  },
+  "decor": 0.0,
+  "interactions": [
+   "exercise"
+  ]
+ },
+ "computer": {
+  "label": "Computer",
+  "size": [
+   1,
+   1
+  ],
+  "price": 900,
+  "tags": [
+   "electronics",
+   "office",
+   "fun",
+   "skill"
+  ],
+  "model": "res://assets/models/computer.glb",
+  "color": "#4a5a6a",
+  "height": 1.1,
+  "slots": [
+   {
+    "offset": [
+     0,
+     1
+    ],
+    "pose": "stand"
+   }
+  ],
+  "state": {
+   "on": {
+    "start": false
+   },
+   "broken": {
+    "start": false
+   }
+  },
+  "advertises": {
+   "fun": 2.5
+  },
+  "decor": 0.6,
+  "interactions": [
+   "play_computer",
+   "work_computer"
+  ]
+ },
+ "plant": {
+  "label": "Potted Plant",
+  "size": [
+   1,
+   1
+  ],
+  "price": 60,
+  "tags": [
+   "decor",
+   "plant",
+   "clean"
+  ],
+  "model": "res://assets/models/plant.glb",
+  "color": "#4f9a4a",
+  "height": 0.9,
+  "slots": [
+   {
+    "offset": [
+     0,
+     1
+    ],
+    "pose": "stand"
+   }
+  ],
+  "state": {
+   "water": {
+    "min": 0,
+    "max": 10,
+    "start": 7
+   }
+  },
+  "advertises": {},
+  "decor": 2.0,
+  "decor_scale_state": "water",
+  "interactions": [
+   "water_plant"
+  ]
+ },
+ "lamp": {
+  "label": "Floor Lamp",
+  "size": [
+   1,
+   1
+  ],
+  "price": 70,
+  "tags": [
+   "decor",
+   "light"
+  ],
+  "model": "res://assets/models/lamp.glb",
+  "color": "#e8d28a",
+  "height": 1.6,
+  "slots": [
+   {
+    "offset": [
+     0,
+     1
+    ],
+    "pose": "stand"
+   }
+  ],
+  "state": {
+   "on": {
+    "start": true
+   }
+  },
+  "advertises": {},
+  "decor": 1.0,
+  "interactions": [
+   "toggle_lamp"
+  ]
+ },
+ "trash_bin": {
+  "label": "Trash Bin",
+  "size": [
+   1,
+   1
+  ],
+  "price": 40,
+  "tags": [
+   "clean",
+   "utility"
+  ],
+  "model": "res://assets/models/trash_bin.glb",
+  "color": "#6b7378",
+  "height": 0.6,
+  "slots": [
+   {
+    "offset": [
+     0,
+     1
+    ],
+    "pose": "stand"
+   }
+  ],
+  "state": {
+   "fullness": {
+    "min": 0,
+    "max": 10,
+    "start": 0
+   }
+  },
+  "advertises": {},
+  "decor": -0.3,
+  "interactions": [
+   "empty_trash"
+  ]
+ },
+ "rug": {
+  "label": "Rug",
+  "size": [
+   2,
+   2
+  ],
+  "price": 120,
+  "tags": [
+   "decor",
+   "floor"
+  ],
+  "model": "res://assets/models/rug.glb",
+  "color": "#b5483f",
+  "height": 0.03,
+  "blocks": false,
+  "layer": "floor",
+  "slots": [],
+  "state": {
+   "dirtiness": {
+    "min": 0,
+    "max": 10,
+    "start": 0
+   }
+  },
+  "advertises": {},
+  "decor": 2.0,
+  "interactions": []
+ },
+ "door": {
+  "label": "Door",
+  "size": [
+   1,
+   1
+  ],
+  "price": 150,
+  "tags": [
+   "door",
+   "structure"
+  ],
+  "model": "res://assets/models/door.glb",
+  "color": "#8a6a45",
+  "height": 2.0,
+  "mount": "wall",
+  "wall_type": "door",
+  "blocks": false,
+  "slots": [],
+  "state": {
+   "locked": {
+    "start": false
+   }
+  },
+  "advertises": {},
+  "decor": 0.2,
+  "interactions": []
+ },
+ "window": {
+  "label": "Window",
+  "size": [
+   1,
+   1
+  ],
+  "price": 120,
+  "tags": [
+   "window",
+   "structure"
+  ],
+  "model": "res://assets/models/window.glb",
+  "color": "#a8d4ee",
+  "height": 1.0,
+  "mount": "wall",
+  "wall_type": "window",
+  "blocks": false,
+  "slots": [],
+  "state": {},
+  "advertises": {},
+  "decor": 1.5,
+  "interactions": []
+ }
+}

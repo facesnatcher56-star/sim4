@@ -1,0 +1,99 @@
+{
+  "version": 1,
+  "settings": {
+    "start_performance": 50,
+    "promote_at": 100,
+    "demote_at": 0,
+    "after_promotion_performance": 40,
+    "after_demotion_performance": 35,
+    "skip_penalty": 15,
+    "sick_penalty": 8,
+    "critical_need": -65,
+    "offer_chance_per_day": 0.3,
+    "offer_expire_days": 3,
+    "offer_min_stage": "adult",
+    "mood_gain": {"happy": 3, "energized": 3, "focused": 4, "flirty": 1, "neutral": 0, "bored": -2, "sad": -3, "tense": -2, "uncomfortable": -3, "angry": -4},
+    "buff_gain": {"focused_flow": 2, "proud": 1, "inspired": 1, "hungry": -1, "starving": -3, "tired": -1, "exhausted": -3, "filthy": -2, "grimy": -1, "embarrassed": -1},
+    "base_gain": 3,
+    "skill_gain_cap": 3,
+    "pay_perf_floor": 0.8,
+    "pay_perf_span": 0.4,
+    "days_per_week": 7,
+    "weekend": [5, 6]
+  },
+  "school": {
+    "stages": ["child", "teen"],
+    "start": 9.0,
+    "end": 15.0,
+    "days": [0, 1, 2, 3, 4],
+    "grade_start": 70,
+    "base_gain": 1,
+    "mood_scale": 0.8,
+    "skip_penalty": 12,
+    "hooks": {"read_book": 3, "play_computer": 1, "work_computer": 4},
+    "grades": [[90, "A"], [80, "B"], [70, "C"], [60, "D"], [0, "F"]]
+  },
+  "retirement": {
+    "stage": "elder",
+    "pension_per_level": 14,
+    "min_level": 1
+  },
+  "careers": {
+    "cook": {
+      "label": "Cook",
+      "primary_skill": "cooking",
+      "days": [0, 1, 2, 3, 4],
+      "hooks": {"cook_meal": 3, "prep_food": 1.5, "eat_meal": 0.5},
+      "trait_bonus": {"glutton": 2, "neat": 1, "lazy": -1},
+      "levels": [
+        {"title": "Dishwasher",    "start": 10, "end": 16, "pay": 14, "requires": {}},
+        {"title": "Line Cook",     "start": 10, "end": 17, "pay": 20, "requires": {"skills": {"cooking": 2}}},
+        {"title": "Sous Chef",     "start": 14, "end": 22, "pay": 28, "requires": {"skills": {"cooking": 4}}},
+        {"title": "Head Chef",     "start": 14, "end": 22, "pay": 38, "requires": {"skills": {"cooking": 6}}},
+        {"title": "Restaurateur",  "start": 11, "end": 19, "pay": 52, "requires": {"skills": {"cooking": 8}}}
+      ]
+    },
+    "coder": {
+      "label": "Coder",
+      "primary_skill": "logic",
+      "days": [0, 1, 2, 3, 4],
+      "hooks": {"work_computer": 4, "play_computer": 1, "read_book": 1},
+      "trait_bonus": {"gamer": 2, "bookworm": 1, "workaholic": 2, "lazy": -2},
+      "levels": [
+        {"title": "Help Desk",     "start": 9, "end": 17, "pay": 16, "requires": {}},
+        {"title": "Junior Dev",    "start": 9, "end": 17, "pay": 22, "requires": {"skills": {"logic": 2}}},
+        {"title": "Developer",     "start": 9, "end": 17, "pay": 30, "requires": {"skills": {"logic": 4}}},
+        {"title": "Tech Lead",     "start": 9, "end": 16, "pay": 40, "requires": {"skills": {"logic": 6}}},
+        {"title": "Architect",     "start": 10, "end": 16, "pay": 54, "requires": {"skills": {"logic": 8}}}
+      ]
+    },
+    "painter": {
+      "label": "Painter",
+      "primary_skill": "painting",
+      "days": [1, 2, 3, 4, 5],
+      "hooks": {"paint_canvas": 4, "read_book": 1},
+      "trait_bonus": {"creative": 3, "bookworm": 1, "lazy": -1},
+      "levels": [
+        {"title": "Sign Painter",      "start": 9,  "end": 15, "pay": 13, "requires": {}},
+        {"title": "Gallery Assistant", "start": 10, "end": 17, "pay": 19, "requires": {"skills": {"painting": 2}}},
+        {"title": "Studio Artist",     "start": 10, "end": 17, "pay": 27, "requires": {"skills": {"painting": 4}}},
+        {"title": "Exhibiting Artist", "start": 11, "end": 17, "pay": 37, "requires": {"skills": {"painting": 6}}},
+        {"title": "Master Painter",    "start": 11, "end": 16, "pay": 50, "requires": {"skills": {"painting": 8}}}
+      ]
+    },
+    "fitness_coach": {
+      "label": "Fitness Coach",
+      "primary_skill": "fitness",
+      "days": [0, 1, 2, 3, 5],
+      "hooks": {"exercise": 4},
+      "trait_bonus": {"active": 3, "social": 1, "lazy": -3},
+      "levels": [
+        {"title": "Gym Attendant",     "start": 6,  "end": 12, "pay": 14, "requires": {}},
+        {"title": "Personal Trainer",  "start": 6,  "end": 13, "pay": 20, "requires": {"skills": {"fitness": 2}}},
+        {"title": "Coach",             "start": 7,  "end": 15, "pay": 28, "requires": {"skills": {"fitness": 4}}},
+        {"title": "Head Coach",        "start": 7,  "end": 15, "pay": 38, "requires": {"skills": {"fitness": 6}}},
+        {"title": "Wellness Director", "start": 8,  "end": 16, "pay": 51, "requires": {"skills": {"fitness": 8}}}
+      ]
+    }
+  }
+}
