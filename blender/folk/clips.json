@@ -1,0 +1,43 @@
+{
+ "clips": [
+  "Idle",
+  "Walk",
+  "Run",
+  "Sit_Idle",
+  "Sit_Eat",
+  "Sit_Watch",
+  "Sleep",
+  "Use_Stand",
+  "Cook",
+  "Wash",
+  "Read",
+  "Exercise_Treadmill",
+  "Paint",
+  "Type",
+  "Dance",
+  "Talk",
+  "Laugh",
+  "Wave",
+  "Cry",
+  "Angry",
+  "Sad_Idle",
+  "Hug",
+  "Kiss",
+  "Carry",
+  "Shower",
+  "ToiletSit",
+  "Swim_idle",
+  "Baby_Idle",
+  "Baby_Crawl",
+  "Faint",
+  "Fall"
+ ],
+ "variants": [
+  "folk_adult",
+  "folk_teen",
+  "folk_child",
+  "folk_elder",
+  "folk_toddler",
+  "folk_baby"
+ ]
+}

@@ -14,6 +14,8 @@ var trait_box: HFlowContainer
 var needs_box: VBoxContainer
 var skills_box: VBoxContainer
 var rel_box: VBoxContainer
+var family_box: VBoxContainer          # "Family" tab: partner / parents / children / siblings + action buttons
+var family_buttons: Dictionary = {}    # action id -> Button
 var goal_label: Label
 var why_label: Label
 var why_toggle: CheckButton
@@ -62,6 +64,13 @@ func _ready() -> void:
 	rel_box = VBoxContainer.new()
 	rel_box.name = "People"
 	tabs.add_child(rel_box)
+	var fam_scroll := ScrollContainer.new()
+	fam_scroll.name = "Family"
+	fam_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	tabs.add_child(fam_scroll)
+	family_box = VBoxContainer.new()
+	family_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	fam_scroll.add_child(family_box)
 	var why_box := VBoxContainer.new()
 	why_box.name = "Why?"
 	tabs.add_child(why_box)
@@ -83,6 +92,7 @@ func _ready() -> void:
 	UIU.connect_ev("buff_removed", _on_buff_event)
 	UIU.connect_ev("skill_changed", _on_skill_changed)
 	UIU.connect_ev("relationship_changed", _on_rel_changed)
+	UIU.connect_ev("game_event", _on_family_event)
 
 func show_folk(f) -> void:
 	folk = f
@@ -92,14 +102,22 @@ func show_folk(f) -> void:
 		return
 	folk_id = int(UIU.prop(f, "id", -1))
 	name_label.text = str(UIU.prop(f, "name", "?"))
-	portrait.color = UIU.folk_color(f)
+	portrait.color = portrait_color(f)
 	_build_needs()
 	_build_traits()
 	_build_skills()
 	_build_relationships()
+	_build_family()
 	_refresh_mood()
 	_refresh_goal()
 	_refresh_why()
+
+## Portrait colour: the registry colour picked on the title screen when there is one, else the folk's shirt (Genetics).
+static func portrait_color(f) -> Color:
+	var id := int(UIU.prop(f, "id", -1))
+	if UIU.folk_colors.has(id):
+		return UIU.folk_colors[id]
+	return Genetics.ui_color(f)
 
 # ---------------- needs ----------------
 func _build_needs() -> void:
@@ -311,6 +329,87 @@ func _build_relationships() -> void:
 func _on_rel_changed(a: int, b: int, _track: String = "", _v: float = 0.0) -> void:
 	if a == folk_id or b == folk_id:
 		_build_relationships()
+
+# ---------------- family ----------------
+const FAMILY_EVENTS := ["married", "divorced", "engaged", "baby_born", "adopted", "moved_in", "moved_out", "child_removed", "engagement_broken"]
+
+func _on_family_event(ev: String, _payload: Dictionary = {}) -> void:
+	if ev in FAMILY_EVENTS and folk != null:
+		_build_family()
+
+func _family_line(n: Dictionary, extra: String = "") -> String:
+	var s := "%s  (%s, %d)" % [str(n.get("name", "?")), str(n.get("stage", "")).capitalize(), int(n.get("age_years", 0))]
+	if not bool(n.get("alive", true)):
+		s += "  [passed away]"
+	elif not bool(n.get("on_lot", false)):
+		s += "  [elsewhere]"
+	if extra != "":
+		s += "  - " + extra
+	return s
+
+func _family_section(title: String, lines: Array) -> void:
+	family_box.add_child(UIU.make_label(title, 12, UITheme.ACCENT))
+	if lines.is_empty():
+		family_box.add_child(UIU.make_label("  -", 13, UITheme.MUTED))
+	for l in lines:
+		var lab := UIU.make_label("  " + str(l), 13)
+		lab.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		family_box.add_child(lab)
+
+func _build_family() -> void:
+	if family_box == null:
+		return
+	for c in family_box.get_children():
+		c.queue_free()
+	family_buttons.clear()
+	if folk == null or folk_id < 0:
+		return
+	var t: Dictionary = Family.tree_for(folk_id, 1, 1)
+	var partner: Dictionary = t["partner"]
+	var plines: Array = []
+	if not partner.is_empty():
+		plines.append(_family_line(partner, {"spouse": "Spouse", "fiance": "Engaged", "partner": "Partner", "sweetheart": "Sweetheart"}.get(str(partner.get("status", "")), "")))
+	_family_section("PARTNER", plines)
+	var par: Array = []
+	for p in t["parents"]:
+		par.append(_family_line(p, Family.relation_label(folk_id, int(p["id"]))))
+	_family_section("PARENTS", par)
+	var kids: Array = []
+	for c in t["children"]:
+		kids.append(_family_line(c, Family.relation_label(folk_id, int(c["id"]))))
+	_family_section("CHILDREN", kids)
+	var sibs: Array = []
+	for s in t["siblings"]:
+		sibs.append(_family_line(s, Family.relation_label(folk_id, int(s["id"]))))
+	_family_section("SIBLINGS", sibs)
+	if not (t["exes"] as Array).is_empty():
+		var ex: Array = []
+		for e in t["exes"]:
+			ex.append(_family_line(e))
+		_family_section("EXES", ex)
+	# actions go through the same interaction ids as the pie menu
+	var stage := str(UIU.prop(folk, "age_stage", "adult"))
+	var grown := stage == "adult" or stage == "elder"
+	var pid := int(partner.get("id", -1))
+	var pst := str(partner.get("status", ""))
+	var here := not partner.is_empty() and bool(partner.get("on_lot", false))
+	var row := HFlowContainer.new()
+	family_box.add_child(row)
+	_family_button(row, "propose", "Propose", grown and here and pst in ["sweetheart", "partner"], pid, "Needs a sweetheart or partner who is here.")
+	_family_button(row, "try_for_baby", "Try for Baby", grown and here and pst in ["sweetheart", "partner", "spouse", "fiance"], pid, "Needs a partner who is here.")
+	_family_button(row, "have_wedding", "Hold Wedding", grown and here and pst == "fiance", pid, "Needs a fiance(e) who is here.")
+	_family_button(row, "adopt_child", "Adopt a Child", grown, -1, "Adults only.")
+
+func _family_button(row: Control, iid: String, text: String, enabled: bool, target: int, why_not: String) -> void:
+	var b := Button.new()
+	b.text = text
+	b.disabled = not enabled
+	if not enabled:
+		b.tooltip_text = why_not
+		b.mouse_filter = Control.MOUSE_FILTER_STOP
+	b.pressed.connect(func(): UIU.enqueue(folk, iid, target))
+	row.add_child(b)
+	family_buttons[iid] = b
 
 # ---------------- why? ----------------
 func _refresh_why() -> void:

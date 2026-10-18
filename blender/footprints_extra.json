@@ -1,0 +1,192 @@
+{
+  "crib": [
+    1,
+    2,
+    1.12
+  ],
+  "dresser": [
+    1,
+    1,
+    0.98
+  ],
+  "wardrobe": [
+    1,
+    1,
+    1.97
+  ],
+  "nightstand": [
+    1,
+    1,
+    0.93
+  ],
+  "armchair": [
+    1,
+    1,
+    1.01
+  ],
+  "coffee_table": [
+    2,
+    1,
+    0.48
+  ],
+  "dining_chair": [
+    1,
+    1,
+    1.35
+  ],
+  "bar_stool": [
+    1,
+    1,
+    0.8
+  ],
+  "single_bed": [
+    1,
+    2,
+    0.9
+  ],
+  "bunk_bed": [
+    1,
+    2,
+    1.8
+  ],
+  "desk": [
+    1,
+    1,
+    1.1
+  ],
+  "bookcase_tall": [
+    1,
+    1,
+    2.14
+  ],
+  "piano": [
+    2,
+    1,
+    1.36
+  ],
+  "guitar_stand": [
+    1,
+    1,
+    1.45
+  ],
+  "fishing_spot": [
+    2,
+    1,
+    0.81
+  ],
+  "garden_plot": [
+    2,
+    1,
+    0.78
+  ],
+  "mailbox": [
+    1,
+    1,
+    1.39
+  ],
+  "grill": [
+    1,
+    1,
+    1.17
+  ],
+  "hot_tub": [
+    2,
+    2,
+    0.93
+  ],
+  "mirror": [
+    1,
+    1,
+    1.85
+  ],
+  "fireplace": [
+    2,
+    1,
+    2.3
+  ],
+  "stereo": [
+    1,
+    1,
+    1.0
+  ],
+  "bar_counter": [
+    2,
+    1,
+    1.32
+  ],
+  "ceiling_fan": [
+    1,
+    1,
+    2.58
+  ],
+  "pendant_light": [
+    1,
+    1,
+    2.62
+  ],
+  "washing_machine": [
+    1,
+    1,
+    0.94
+  ],
+  "microwave_cart": [
+    1,
+    1,
+    1.12
+  ],
+  "coffee_maker": [
+    1,
+    1,
+    1.26
+  ],
+  "tea_kettle": [
+    1,
+    1,
+    0.63
+  ],
+  "easel_large": [
+    2,
+    1,
+    1.93
+  ],
+  "workbench": [
+    2,
+    1,
+    2.0
+  ],
+  "dumbbell_rack": [
+    1,
+    1,
+    0.76
+  ],
+  "pool_table": [
+    2,
+    1,
+    0.96
+  ],
+  "fire_extinguisher": [
+    1,
+    1,
+    1.0
+  ],
+  "smoke_alarm": [
+    1,
+    1,
+    2.6
+  ],
+  "vending_machine": [
+    1,
+    1,
+    1.8
+  ],
+  "terminal": [
+    1,
+    1,
+    1.61
+  ],
+  "telescope": [
+    1,
+    1,
+    1.64
+  ]
+}

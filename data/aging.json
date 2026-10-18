@@ -6,7 +6,7 @@
     "age_rate": {"short": 1.6, "normal": 1.0, "long": 0.6, "epic": 0.3}
   },
   "stages": [
-    {"id": "baby",    "label": "Baby",    "from_day": 0,   "trait_slots": 0, "allow_tags": ["sleep", "rest", "emergency", "snack", "social"]},
+    {"id": "baby",    "label": "Baby",    "from_day": 0,   "trait_slots": 0, "allow_tags": ["sleep", "rest", "emergency"]},
     {"id": "toddler", "label": "Toddler", "from_day": 4,   "trait_slots": 1, "forbid_tags": ["work", "exercise", "flirt", "cook", "game", "conflict", "chore"]},
     {"id": "child",   "label": "Child",   "from_day": 12,  "trait_slots": 2, "forbid_tags": ["work", "flirt", "cook"]},
     {"id": "teen",    "label": "Teen",    "from_day": 28,  "trait_slots": 3, "forbid_tags": ["work"]},
@@ -23,7 +23,7 @@
     "days": 3,
     "success_chance": 0.45,
     "min_romance": 45,
-    "inherit_chance": 0.45,
+    "inherit_chance": 0.35,
     "max_inherited": 2,
     "cooldown_days": 4,
     "min_stage": "adult"

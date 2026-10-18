@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "notes": "Registry for extra content. Skills listed here need no code registration (Folk.add_skill_xp creates them). Daily object rules live in data/objects.json state specs (daily_add / daily_requires / daily_reset / spoil_per_day), applied by scripts/systems/content_rules.gd from Careers.on_day.",
+  "skills": {
+    "guitar": {"label": "Guitar"},
+    "piano": {"label": "Piano"},
+    "gardening": {"label": "Gardening"},
+    "fishing": {"label": "Fishing"},
+    "writing": {"label": "Writing"}
+  },
+  "cooking_tiers": [
+    {"min_level": 0, "cook": "cook_meal", "eat": "eat_meal", "buff": "well_fed"},
+    {"min_level": 3, "cook": "cook_meal_good", "eat": "eat_meal_good", "buff": "well_fed_hearty"},
+    {"min_level": 6, "cook": "cook_meal_gourmet", "eat": "eat_meal_gourmet", "buff": "well_fed_gourmet"}
+  ]
+}

@@ -170,13 +170,18 @@ func _offers(f: Array) -> void:
 	K.expect(f, Careers.pending_offer(int(b.id)).is_empty(), "declined offers vanish")
 	Careers.make_offer(b, "cook", 1)
 	K.set_time(10, 8)
+	var _cfg_s: Dictionary = SimEnv.data().get_table("careers")["settings"]
+	var _chance_before = _cfg_s.get("offer_chance_per_day", 0.3)
+	_cfg_s["offer_chance_per_day"] = 0.0   # seed-independent: no fresh random offer replaces the stale one
 	Careers.on_day(10)
+	_cfg_s["offer_chance_per_day"] = _chance_before
 	K.expect(f, Careers.pending_offer(int(b.id)).is_empty() or Careers.has_job(int(b.id)), "stale offers expire")
 	# the computer's "Look for Jobs" action closes the loop
 	var c := K.make_folk(w, "Cy")
 	var pc = w.add_object("computer", Vector2i(20, 20))
 	c.tile = Vector2i(20, 21)
 	var dir = K.director()
+	dir.autonomy_enabled = false   # other folk must not grab the only computer (seed-independent)
 	var ir := Interaction.create("apply_for_job", c, pc.id, true)
 	K.expect(f, ir != null and ir.can_run(c), "apply_for_job is available to the unemployed")
 	c.enqueue(ir)

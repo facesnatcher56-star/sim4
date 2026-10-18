@@ -85,7 +85,8 @@ static func add_townie(age_days: float = -1.0, nm: String = "", traits: Array = 
 	if age_days < 0.0:
 		age_days = SysUtil.rng.randf_range(float(Aging.stage_def("adult").get("from_day", 44)) + 2.0, float(Aging.stage_def("elder").get("from_day", 140)) - 10.0)
 	var t: Dictionary = {"id": id, "name": nm, "traits": traits.duplicate(), "age_days": age_days, "career": career, "level": level,
-		"coins": SysUtil.rng.randi_range(100, 800), "alive": true, "lot": SysUtil.rng.randi_range(1, 6), "last_visit_day": -99}
+		"coins": SysUtil.rng.randi_range(100, 800), "alive": true, "lot": SysUtil.rng.randi_range(1, 6), "last_visit_day": -99,
+		"appearance": Genetics.random_appearance()}
 	townies[id] = t
 	return t
 
@@ -222,6 +223,8 @@ static func _life_events(dc: Dictionary) -> void:
 				baby["name"] = "%s %s" % [str(SysUtil.pick(Aging.cfg().get("name_pool", ["Pip"]))), name_of(a).split(" ")[-1]]
 				RelationshipService.set_flag(int(baby["id"]), a, "family", true, false)
 				RelationshipService.set_flag(int(baby["id"]), b, "family", true, false)
+				baby["appearance"] = Genetics.inherit(Family.person_info(a), Family.person_info(b))["appearance"]
+				Family.note_townie_birth(int(baby["id"]), a, b)
 				_log("%s and %s had a baby, %s." % [name_of(a), name_of(b), baby["name"]])
 	# moving away / arriving
 	for t in alive_townies():
@@ -366,6 +369,7 @@ static func _arrive(sit: Dictionary) -> void:
 		Folk._next_id = keep_next
 		f.household_id = -1
 		f.age_stage = stage_of(t)
+		f.appearance = Genetics.normalize(Genetics.ensure(t))
 		f.set_meta("visitor", true)
 		f.set_meta("townie_id", int(gid))
 		# visitors arrive in decent shape

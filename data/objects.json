@@ -27,10 +27,23 @@
    "stock": {
     "min": 0,
     "max": 10,
-    "start": 10
+    "start": 10,
+    "spoil_per_day": 0.12,
+    "spoiled_key": "spoiled",
+    "spoil_dirt_key": "dirtiness"
    },
    "broken": {
     "start": false
+   },
+   "spoiled": {
+    "min": 0,
+    "max": 10,
+    "start": 0
+   },
+   "dirtiness": {
+    "min": 0,
+    "max": 10,
+    "start": 0
    }
   },
   "advertises": {
@@ -39,7 +52,10 @@
   "decor": 0.5,
   "interactions": [
    "grab_snack",
-   "cook_meal"
+   "cook_meal",
+   "toss_spoiled_food",
+   "clean_object",
+   "repair_object"
   ]
  },
  "stove": {
@@ -82,7 +98,11 @@
   "decor": 0.3,
   "interactions": [
    "cook_meal",
-   "clean_object"
+   "clean_object",
+   "cook_meal_good",
+   "cook_meal_gourmet",
+   "cook_fish_dinner",
+   "repair_object"
   ]
  },
  "counter": {
@@ -121,7 +141,8 @@
   "decor": 0.4,
   "interactions": [
    "prep_food",
-   "clean_object"
+   "clean_object",
+   "prep_food_good"
   ]
  },
  "table": {
@@ -167,7 +188,9 @@
   "decor": 1.0,
   "interactions": [
    "eat_meal",
-   "clean_object"
+   "clean_object",
+   "eat_meal_good",
+   "eat_meal_gourmet"
   ]
  },
  "chair": {
@@ -306,7 +329,8 @@
   "decor": -0.4,
   "interactions": [
    "use_toilet",
-   "clean_toilet"
+   "clean_toilet",
+   "repair_object"
   ]
  },
  "shower": {
@@ -349,7 +373,8 @@
   "decor": 0.3,
   "interactions": [
    "take_shower",
-   "clean_object"
+   "clean_object",
+   "repair_object"
   ]
  },
  "bathtub": {
@@ -397,7 +422,8 @@
   "decor": 0.8,
   "interactions": [
    "take_bath",
-   "clean_object"
+   "clean_object",
+   "repair_object"
   ]
  },
  "sink": {
@@ -441,7 +467,8 @@
   "interactions": [
    "wash_hands",
    "brush_teeth",
-   "wash_dishes"
+   "wash_dishes",
+   "repair_object"
   ]
  },
  "sofa": {
@@ -544,7 +571,8 @@
   },
   "decor": 1.0,
   "interactions": [
-   "watch_tv"
+   "watch_tv",
+   "repair_object"
   ]
  },
  "bookshelf": {
@@ -577,7 +605,8 @@
   },
   "decor": 2.0,
   "interactions": [
-   "read_book"
+   "read_book",
+   "study_recipes"
   ]
  },
  "easel": {
@@ -654,7 +683,8 @@
   },
   "decor": 0.0,
   "interactions": [
-   "exercise"
+   "exercise",
+   "repair_object"
   ]
  },
  "computer": {
@@ -696,7 +726,10 @@
   "decor": 0.6,
   "interactions": [
    "play_computer",
-   "work_computer"
+   "work_computer",
+   "write_on_computer",
+   "research_online",
+   "repair_object"
   ]
  },
  "plant": {
@@ -884,5 +917,1632 @@
   "advertises": {},
   "decor": 1.5,
   "interactions": []
+ },
+ "crib": {
+  "label": "Crib",
+  "size": [
+   1,
+   2
+  ],
+  "price": 220,
+  "tags": [
+   "nursery",
+   "furniture",
+   "baby"
+  ],
+  "model": "res://assets/models/crib.glb",
+  "color": "#e8d8b0",
+  "height": 1.12,
+  "slots": [
+   {
+    "offset": [
+     0,
+     0
+    ],
+    "pose": "lie",
+    "use": [
+     0.5,
+     1.0
+    ],
+    "inside": true,
+    "y": 0.5
+   }
+  ],
+  "state": {
+   "made": {
+    "start": true
+   }
+  },
+  "advertises": {
+   "energy": 4.0
+  },
+  "decor": 1.0,
+  "interactions": [
+   "crib_sleep"
+  ]
+ },
+ "dresser": {
+  "label": "Dresser",
+  "size": [
+   1,
+   1
+  ],
+  "price": 260,
+  "tags": [
+   "bedroom",
+   "furniture",
+   "storage"
+  ],
+  "model": "res://assets/models/dresser.glb",
+  "color": "#a87a4a",
+  "height": 0.98,
+  "slots": [
+   {
+    "offset": [
+     0,
+     1
+    ],
+    "pose": "stand"
+   }
+  ],
+  "state": {
+   "dirtiness": {
+    "min": 0,
+    "max": 10,
+    "start": 0
+   }
+  },
+  "advertises": {
+   "hygiene": 0.6
+  },
+  "decor": 1.0,
+  "interactions": [
+   "change_clothes",
+   "clean_object"
+  ]
+ },
+ "wardrobe": {
+  "label": "Wardrobe",
+  "size": [
+   1,
+   1
+  ],
+  "price": 380,
+  "tags": [
+   "bedroom",
+   "furniture",
+   "storage"
+  ],
+  "model": "res://assets/models/wardrobe.glb",
+  "color": "#6a4a2a",
+  "height": 1.97,
+  "slots": [
+   {
+    "offset": [
+     0,
+     1
+    ],
+    "pose": "stand"
+   }
+  ],
+  "state": {},
+  "advertises": {
+   "hygiene": 0.6
+  },
+  "decor": 1.2,
+  "interactions": [
+   "change_clothes"
+  ]
+ },
+ "nightstand": {
+  "label": "Nightstand",
+  "size": [
+   1,
+   1
+  ],
+  "price": 90,
+  "tags": [
+   "bedroom",
+   "furniture",
+   "light"
+  ],
+  "model": "res://assets/models/nightstand.glb",
+  "color": "#b08a5a",
+  "height": 0.93,
+  "slots": [
+   {
+    "offset": [
+     0,
+     1
+    ],
+    "pose": "stand"
+   }
+  ],
+  "state": {
+   "on": {
+    "start": false
+   }
+  },
+  "advertises": {},
+  "decor": 0.8,
+  "interactions": [
+   "toggle_lamp"
+  ]
+ },
+ "armchair": {
+  "label": "Armchair",
+  "size": [
+   1,
+   1
+  ],
+  "price": 320,
+  "tags": [
+   "living",
+   "seat",
+   "furniture",
+   "comfy"
+  ],
+  "model": "res://assets/models/armchair.glb",
+  "color": "#4a6aa0",
+  "height": 1.01,
+  "slots": [
+   {
+    "offset": [
+     0,
+     0
+    ],
+    "pose": "sit",
+    "use": [
+     0.5,
+     0.5
+    ],
+    "inside": true,
+    "y": 0.1
+   }
+  ],
+  "state": {},
+  "advertises": {
+   "comfort": 2.0,
+   "energy": 0.8
+  },
+  "decor": 1.5,
+  "interactions": [
+   "sit_armchair",
+   "read_armchair"
+  ]
+ },
+ "coffee_table": {
+  "label": "Coffee Table",
+  "size": [
+   2,
+   1
+  ],
+  "price": 140,
+  "tags": [
+   "living",
+   "furniture"
+  ],
+  "model": "res://assets/models/coffee_table.glb",
+  "color": "#8a6a43",
+  "height": 0.48,
+  "slots": [
+   {
+    "offset": [
+     0,
+     1
+    ],
+    "pose": "stand"
+   },
+   {
+    "offset": [
+     1,
+     1
+    ],
+    "pose": "stand"
+   }
+  ],
+  "state": {
+   "dirtiness": {
+    "min": 0,
+    "max": 10,
+    "start": 0
+   }
+  },
+  "advertises": {},
+  "decor": 1.0,
+  "interactions": [
+   "clean_object"
+  ]
+ },
+ "dining_chair": {
+  "label": "Dining Chair",
+  "size": [
+   1,
+   1
+  ],
+  "price": 110,
+  "tags": [
+   "seat",
+   "furniture",
+   "dining"
+  ],
+  "model": "res://assets/models/dining_chair.glb",
+  "color": "#c9a46b",
+  "height": 1.35,
+  "slots": [
+   {
+    "offset": [
+     0,
+     0
+    ],
+    "pose": "sit",
+    "use": [
+     0.5,
+     0.5
+    ],
+    "inside": true
+   }
+  ],
+  "state": {},
+  "advertises": {
+   "comfort": 0.7
+  },
+  "decor": 0.5,
+  "interactions": [
+   "sit_chair"
+  ]
+ },
+ "bar_stool": {
+  "label": "Bar Stool",
+  "size": [
+   1,
+   1
+  ],
+  "price": 70,
+  "tags": [
+   "seat",
+   "furniture",
+   "bar"
+  ],
+  "model": "res://assets/models/bar_stool.glb",
+  "color": "#b04a4a",
+  "height": 0.8,
+  "slots": [
+   {
+    "offset": [
+     0,
+     0
+    ],
+    "pose": "sit",
+    "use": [
+     0.5,
+     0.5
+    ],
+    "inside": true,
+    "y": 0.2
+   }
+  ],
+  "state": {},
+  "advertises": {
+   "comfort": 0.4
+  },
+  "decor": 0.3,
+  "interactions": [
+   "sit_chair"
+  ]
+ },
+ "single_bed": {
+  "label": "Single Bed",
+  "size": [
+   1,
+   2
+  ],
+  "price": 380,
+  "tags": [
+   "bedroom",
+   "bed",
+   "furniture"
+  ],
+  "model": "res://assets/models/single_bed.glb",
+  "color": "#5a9a6a",
+  "height": 0.9,
+  "slots": [
+   {
+    "offset": [
+     1,
+     0
+    ],
+    "pose": "lie",
+    "use": [
+     0.5,
+     1.0
+    ],
+    "y": 0.55
+   }
+  ],
+  "state": {
+   "made": {
+    "start": true
+   }
+  },
+  "advertises": {
+   "energy": 4.5
+  },
+  "decor": 0.8,
+  "interactions": [
+   "sleep_bed",
+   "nap_bed",
+   "make_bed"
+  ]
+ },
+ "bunk_bed": {
+  "label": "Bunk Bed",
+  "size": [
+   1,
+   2
+  ],
+  "price": 520,
+  "tags": [
+   "bedroom",
+   "bed",
+   "furniture",
+   "kids"
+  ],
+  "model": "res://assets/models/bunk_bed.glb",
+  "color": "#8a6a45",
+  "height": 1.8,
+  "slots": [
+   {
+    "offset": [
+     1,
+     0
+    ],
+    "pose": "lie",
+    "use": [
+     0.5,
+     1.0
+    ],
+    "y": 0.45
+   },
+   {
+    "offset": [
+     1,
+     1
+    ],
+    "pose": "lie",
+    "use": [
+     0.5,
+     1.0
+    ],
+    "y": 1.3
+   }
+  ],
+  "state": {
+   "made": {
+    "start": true
+   }
+  },
+  "advertises": {
+   "energy": 4.5
+  },
+  "decor": 0.8,
+  "interactions": [
+   "sleep_bed",
+   "nap_bed",
+   "make_bed"
+  ]
+ },
+ "desk": {
+  "label": "Desk",
+  "size": [
+   1,
+   1
+  ],
+  "price": 200,
+  "tags": [
+   "office",
+   "furniture",
+   "skill"
+  ],
+  "model": "res://assets/models/desk.glb",
+  "color": "#a87a4a",
+  "height": 1.1,
+  "slots": [
+   {
+    "offset": [
+     0,
+     1
+    ],
+    "pose": "stand"
+   }
+  ],
+  "state": {
+   "dirtiness": {
+    "min": 0,
+    "max": 10,
+    "start": 0
+   }
+  },
+  "advertises": {
+   "ambition": 0.8,
+   "fun": 0.6
+  },
+  "decor": 0.8,
+  "interactions": [
+   "write_story",
+   "write_novel",
+   "do_homework",
+   "clean_object"
+  ]
+ },
+ "bookcase_tall": {
+  "label": "Tall Bookcase",
+  "size": [
+   1,
+   1
+  ],
+  "price": 480,
+  "tags": [
+   "living",
+   "furniture",
+   "skill"
+  ],
+  "model": "res://assets/models/bookcase_tall.glb",
+  "color": "#5a3a20",
+  "height": 2.14,
+  "slots": [
+   {
+    "offset": [
+     0,
+     1
+    ],
+    "pose": "stand"
+   }
+  ],
+  "state": {},
+  "advertises": {
+   "fun": 1.8
+  },
+  "decor": 2.5,
+  "interactions": [
+   "read_book",
+   "study_recipes"
+  ]
+ },
+ "piano": {
+  "label": "Upright Piano",
+  "size": [
+   2,
+   1
+  ],
+  "price": 1800,
+  "tags": [
+   "music",
+   "skill",
+   "furniture",
+   "perform"
+  ],
+  "model": "res://assets/models/piano.glb",
+  "color": "#222226",
+  "height": 1.36,
+  "slots": [
+   {
+    "offset": [
+     0,
+     1
+    ],
+    "pose": "sit",
+    "use": [
+     1.0,
+     0.88
+    ]
+   },
+   {
+    "offset": [
+     1,
+     1
+    ],
+    "pose": "stand"
+   }
+  ],
+  "state": {},
+  "advertises": {
+   "fun": 2.0,
+   "creative": 1.0
+  },
+  "decor": 3.0,
+  "interactions": [
+   "play_piano",
+   "practice_piano",
+   "play_piano_concert"
+  ]
+ },
+ "guitar_stand": {
+  "label": "Guitar & Amp",
+  "size": [
+   1,
+   1
+  ],
+  "price": 450,
+  "tags": [
+   "music",
+   "skill",
+   "perform"
+  ],
+  "model": "res://assets/models/guitar_stand.glb",
+  "color": "#c9a46b",
+  "height": 1.45,
+  "slots": [
+   {
+    "offset": [
+     0,
+     1
+    ],
+    "pose": "stand"
+   }
+  ],
+  "state": {
+   "songs": {
+    "min": 0,
+    "max": 99,
+    "start": 0
+   }
+  },
+  "advertises": {
+   "fun": 2.0,
+   "creative": 1.0
+  },
+  "decor": 1.5,
+  "interactions": [
+   "play_guitar",
+   "practice_guitar",
+   "write_song"
+  ]
+ },
+ "fishing_spot": {
+  "label": "Fishing Pond",
+  "size": [
+   2,
+   1
+  ],
+  "price": 350,
+  "tags": [
+   "outdoor",
+   "water",
+   "skill",
+   "fish"
+  ],
+  "model": "res://assets/models/fishing_spot.glb",
+  "color": "#3a7aa0",
+  "height": 0.81,
+  "slots": [
+   {
+    "offset": [
+     0,
+     1
+    ],
+    "pose": "stand"
+   },
+   {
+    "offset": [
+     1,
+     1
+    ],
+    "pose": "stand"
+   }
+  ],
+  "state": {},
+  "advertises": {
+   "fun": 1.8
+  },
+  "decor": 2.0,
+  "interactions": [
+   "fish_pond",
+   "fish_deep_water"
+  ]
+ },
+ "garden_plot": {
+  "label": "Garden Plot",
+  "size": [
+   2,
+   1
+  ],
+  "price": 280,
+  "tags": [
+   "outdoor",
+   "garden",
+   "plant",
+   "skill"
+  ],
+  "model": "res://assets/models/garden_plot.glb",
+  "color": "#5a3a20",
+  "height": 0.78,
+  "slots": [
+   {
+    "offset": [
+     0,
+     1
+    ],
+    "pose": "stand"
+   },
+   {
+    "offset": [
+     1,
+     1
+    ],
+    "pose": "stand"
+   }
+  ],
+  "state": {
+   "growth": {
+    "min": 0,
+    "max": 10,
+    "start": 0,
+    "daily_add": 2.0,
+    "daily_requires": [
+     "water",
+     2
+    ]
+   },
+   "water": {
+    "min": 0,
+    "max": 10,
+    "start": 5,
+    "daily_add": -2.0
+   },
+   "weeds": {
+    "min": 0,
+    "max": 10,
+    "start": 0,
+    "daily_add": 0.7
+   }
+  },
+  "advertises": {
+   "tidy": 1.0
+  },
+  "decor": 1.5,
+  "interactions": [
+   "plant_seeds",
+   "water_garden",
+   "weed_garden",
+   "harvest_crops",
+   "harvest_crops_bountiful"
+  ]
+ },
+ "mailbox": {
+  "label": "Mailbox",
+  "size": [
+   1,
+   1
+  ],
+  "price": 60,
+  "tags": [
+   "outdoor",
+   "utility"
+  ],
+  "model": "res://assets/models/mailbox.glb",
+  "color": "#2a8a98",
+  "height": 1.39,
+  "slots": [
+   {
+    "offset": [
+     0,
+     1
+    ],
+    "pose": "stand"
+   }
+  ],
+  "state": {
+   "mail": {
+    "min": 0,
+    "max": 5,
+    "start": 1,
+    "daily_add": 1.5
+   }
+  },
+  "advertises": {
+   "fun": 0.4
+  },
+  "decor": 0.4,
+  "interactions": [
+   "check_mail"
+  ]
+ },
+ "grill": {
+  "label": "Grill",
+  "size": [
+   1,
+   1
+  ],
+  "price": 420,
+  "tags": [
+   "outdoor",
+   "kitchen",
+   "food",
+   "cook"
+  ],
+  "model": "res://assets/models/grill.glb",
+  "color": "#2a2a2e",
+  "height": 1.17,
+  "slots": [
+   {
+    "offset": [
+     0,
+     1
+    ],
+    "pose": "stand"
+   }
+  ],
+  "state": {
+   "fuel": {
+    "min": 0,
+    "max": 10,
+    "start": 8
+   },
+   "dirtiness": {
+    "min": 0,
+    "max": 10,
+    "start": 0
+   },
+   "broken": {
+    "start": false
+   }
+  },
+  "advertises": {
+   "hunger": 3.0
+  },
+  "decor": 0.6,
+  "interactions": [
+   "grill_food",
+   "grill_gourmet",
+   "refill_grill",
+   "clean_object",
+   "repair_object"
+  ]
+ },
+ "hot_tub": {
+  "label": "Hot Tub",
+  "size": [
+   2,
+   2
+  ],
+  "price": 2200,
+  "tags": [
+   "outdoor",
+   "plumbing",
+   "relax",
+   "water"
+  ],
+  "model": "res://assets/models/hot_tub.glb",
+  "color": "#8abada",
+  "height": 0.93,
+  "slots": [
+   {
+    "offset": [
+     0,
+     2
+    ],
+    "pose": "sit",
+    "use": [
+     0.6,
+     1.0
+    ],
+    "y": 0.2
+   },
+   {
+    "offset": [
+     1,
+     2
+    ],
+    "pose": "sit",
+    "use": [
+     1.4,
+     1.0
+    ],
+    "y": 0.2
+   }
+  ],
+  "state": {
+   "dirtiness": {
+    "min": 0,
+    "max": 10,
+    "start": 0
+   },
+   "broken": {
+    "start": false
+   }
+  },
+  "advertises": {
+   "hygiene": 2.0,
+   "comfort": 3.0,
+   "fun": 1.5
+  },
+  "decor": 2.0,
+  "interactions": [
+   "soak_hot_tub",
+   "clean_object",
+   "repair_object"
+  ]
+ },
+ "mirror": {
+  "label": "Standing Mirror",
+  "size": [
+   1,
+   1
+  ],
+  "price": 150,
+  "tags": [
+   "decor",
+   "furniture",
+   "prepare"
+  ],
+  "model": "res://assets/models/mirror.glb",
+  "color": "#a8b8c8",
+  "height": 1.85,
+  "slots": [
+   {
+    "offset": [
+     0,
+     1
+    ],
+    "pose": "stand"
+   }
+  ],
+  "state": {},
+  "advertises": {
+   "hygiene": 0.5
+  },
+  "decor": 1.2,
+  "interactions": [
+   "check_mirror",
+   "practice_speech"
+  ]
+ },
+ "fireplace": {
+  "label": "Fireplace",
+  "size": [
+   2,
+   1
+  ],
+  "price": 1500,
+  "tags": [
+   "living",
+   "furniture",
+   "comfy",
+   "fire"
+  ],
+  "model": "res://assets/models/fireplace.glb",
+  "color": "#8a3a2a",
+  "height": 2.3,
+  "slots": [
+   {
+    "offset": [
+     0,
+     1
+    ],
+    "pose": "stand"
+   },
+   {
+    "offset": [
+     1,
+     1
+    ],
+    "pose": "stand"
+   }
+  ],
+  "state": {
+   "lit": {
+    "start": false,
+    "daily_reset": false
+   },
+   "fuel": {
+    "min": 0,
+    "max": 10,
+    "start": 6
+   }
+  },
+  "advertises": {
+   "comfort": 2.5
+  },
+  "decor": 3.0,
+  "interactions": [
+   "light_fireplace",
+   "warm_by_fire"
+  ]
+ },
+ "stereo": {
+  "label": "Stereo",
+  "size": [
+   1,
+   1
+  ],
+  "price": 380,
+  "tags": [
+   "living",
+   "electronics",
+   "music",
+   "fun"
+  ],
+  "model": "res://assets/models/stereo.glb",
+  "color": "#2a2a2e",
+  "height": 1.0,
+  "slots": [
+   {
+    "offset": [
+     0,
+     1
+    ],
+    "pose": "stand"
+   }
+  ],
+  "state": {
+   "broken": {
+    "start": false
+   }
+  },
+  "advertises": {
+   "fun": 2.2
+  },
+  "decor": 1.0,
+  "interactions": [
+   "listen_music",
+   "dance",
+   "repair_object"
+  ]
+ },
+ "bar_counter": {
+  "label": "Bar Counter",
+  "size": [
+   2,
+   1
+  ],
+  "price": 900,
+  "tags": [
+   "kitchen",
+   "bar",
+   "furniture",
+   "social"
+  ],
+  "model": "res://assets/models/bar_counter.glb",
+  "color": "#5a3a20",
+  "height": 1.32,
+  "slots": [
+   {
+    "offset": [
+     0,
+     1
+    ],
+    "pose": "stand"
+   },
+   {
+    "offset": [
+     1,
+     1
+    ],
+    "pose": "stand"
+   }
+  ],
+  "state": {
+   "dirtiness": {
+    "min": 0,
+    "max": 10,
+    "start": 0
+   }
+  },
+  "advertises": {
+   "fun": 1.2,
+   "social": 1.0
+  },
+  "decor": 2.0,
+  "interactions": [
+   "mix_drink",
+   "eat_meal_good",
+   "eat_meal_gourmet",
+   "clean_object"
+  ]
+ },
+ "ceiling_fan": {
+  "label": "Ceiling Fan",
+  "size": [
+   1,
+   1
+  ],
+  "price": 180,
+  "tags": [
+   "decor",
+   "light",
+   "ceiling"
+  ],
+  "model": "res://assets/models/ceiling_fan.glb",
+  "color": "#c9a46b",
+  "height": 2.58,
+  "slots": [],
+  "state": {
+   "on": {
+    "start": true
+   }
+  },
+  "advertises": {},
+  "decor": 0.8,
+  "interactions": [
+   "toggle_lamp"
+  ],
+  "layer": "floor",
+  "blocks": false
+ },
+ "pendant_light": {
+  "label": "Pendant Light",
+  "size": [
+   1,
+   1
+  ],
+  "price": 110,
+  "tags": [
+   "decor",
+   "light",
+   "ceiling"
+  ],
+  "model": "res://assets/models/pendant_light.glb",
+  "color": "#e8d28a",
+  "height": 2.62,
+  "slots": [],
+  "state": {
+   "on": {
+    "start": true
+   }
+  },
+  "advertises": {},
+  "decor": 1.0,
+  "interactions": [
+   "toggle_lamp"
+  ],
+  "layer": "floor",
+  "blocks": false
+ },
+ "washing_machine": {
+  "label": "Washing Machine",
+  "size": [
+   1,
+   1
+  ],
+  "price": 550,
+  "tags": [
+   "utility",
+   "appliance",
+   "plumbing",
+   "chore"
+  ],
+  "model": "res://assets/models/washing_machine.glb",
+  "color": "#e8e8e8",
+  "height": 0.94,
+  "slots": [
+   {
+    "offset": [
+     0,
+     1
+    ],
+    "pose": "stand"
+   }
+  ],
+  "state": {
+   "fullness": {
+    "min": 0,
+    "max": 10,
+    "start": 3,
+    "daily_add": 1.5
+   },
+   "broken": {
+    "start": false
+   }
+  },
+  "advertises": {
+   "tidy": 1.0
+  },
+  "decor": 0.0,
+  "interactions": [
+   "do_laundry",
+   "repair_object"
+  ]
+ },
+ "microwave_cart": {
+  "label": "Microwave Cart",
+  "size": [
+   1,
+   1
+  ],
+  "price": 260,
+  "tags": [
+   "kitchen",
+   "food",
+   "appliance"
+  ],
+  "model": "res://assets/models/microwave_cart.glb",
+  "color": "#c8c8cc",
+  "height": 1.12,
+  "slots": [
+   {
+    "offset": [
+     0,
+     1
+    ],
+    "pose": "stand"
+   }
+  ],
+  "state": {
+   "dirtiness": {
+    "min": 0,
+    "max": 10,
+    "start": 0
+   },
+   "broken": {
+    "start": false
+   }
+  },
+  "advertises": {
+   "hunger": 1.8
+  },
+  "decor": 0.2,
+  "interactions": [
+   "microwave_meal",
+   "clean_object",
+   "repair_object"
+  ]
+ },
+ "coffee_maker": {
+  "label": "Coffee Station",
+  "size": [
+   1,
+   1
+  ],
+  "price": 300,
+  "tags": [
+   "kitchen",
+   "food",
+   "appliance",
+   "drink"
+  ],
+  "model": "res://assets/models/coffee_maker.glb",
+  "color": "#2a2a2e",
+  "height": 1.26,
+  "slots": [
+   {
+    "offset": [
+     0,
+     1
+    ],
+    "pose": "stand"
+   }
+  ],
+  "state": {
+   "beans": {
+    "min": 0,
+    "max": 10,
+    "start": 8
+   },
+   "dirtiness": {
+    "min": 0,
+    "max": 10,
+    "start": 0
+   },
+   "broken": {
+    "start": false
+   }
+  },
+  "advertises": {
+   "energy": 1.5
+  },
+  "decor": 0.4,
+  "interactions": [
+   "brew_coffee",
+   "refill_coffee",
+   "clean_object",
+   "repair_object"
+  ]
+ },
+ "tea_kettle": {
+  "label": "Tea Station",
+  "size": [
+   1,
+   1
+  ],
+  "price": 120,
+  "tags": [
+   "kitchen",
+   "food",
+   "appliance",
+   "drink"
+  ],
+  "model": "res://assets/models/tea_kettle.glb",
+  "color": "#b0b8c0",
+  "height": 0.63,
+  "slots": [
+   {
+    "offset": [
+     0,
+     1
+    ],
+    "pose": "stand"
+   }
+  ],
+  "state": {},
+  "advertises": {
+   "comfort": 0.8
+  },
+  "decor": 0.4,
+  "interactions": [
+   "brew_tea"
+  ]
+ },
+ "easel_large": {
+  "label": "Studio Easel",
+  "size": [
+   2,
+   1
+  ],
+  "price": 700,
+  "tags": [
+   "hobby",
+   "skill",
+   "art"
+  ],
+  "model": "res://assets/models/easel_large.glb",
+  "color": "#c9a46b",
+  "height": 1.93,
+  "slots": [
+   {
+    "offset": [
+     0,
+     1
+    ],
+    "pose": "stand"
+   },
+   {
+    "offset": [
+     1,
+     1
+    ],
+    "pose": "stand"
+   }
+  ],
+  "state": {
+   "progress": {
+    "min": 0,
+    "max": 100,
+    "start": 0
+   }
+  },
+  "advertises": {
+   "fun": 2.4
+  },
+  "decor": 2.0,
+  "interactions": [
+   "paint_canvas",
+   "paint_masterpiece"
+  ]
+ },
+ "workbench": {
+  "label": "Workbench",
+  "size": [
+   2,
+   1
+  ],
+  "price": 650,
+  "tags": [
+   "hobby",
+   "skill",
+   "repair",
+   "work"
+  ],
+  "model": "res://assets/models/workbench.glb",
+  "color": "#a87a4a",
+  "height": 2.0,
+  "slots": [
+   {
+    "offset": [
+     0,
+     1
+    ],
+    "pose": "stand"
+   },
+   {
+    "offset": [
+     1,
+     1
+    ],
+    "pose": "stand"
+   }
+  ],
+  "state": {
+   "gadgets": {
+    "min": 0,
+    "max": 99,
+    "start": 0
+   }
+  },
+  "advertises": {
+   "fun": 1.2,
+   "ambition": 1.0
+  },
+  "decor": 0.5,
+  "interactions": [
+   "tinker",
+   "build_gadget"
+  ]
+ },
+ "dumbbell_rack": {
+  "label": "Dumbbell Rack",
+  "size": [
+   1,
+   1
+  ],
+  "price": 350,
+  "tags": [
+   "fitness",
+   "exercise"
+  ],
+  "model": "res://assets/models/dumbbell_rack.glb",
+  "color": "#3a3a3e",
+  "height": 0.76,
+  "slots": [
+   {
+    "offset": [
+     0,
+     1
+    ],
+    "pose": "stand"
+   }
+  ],
+  "state": {},
+  "advertises": {
+   "fitness": 3.0,
+   "fun": 0.6
+  },
+  "decor": 0.0,
+  "interactions": [
+   "lift_weights"
+  ]
+ },
+ "pool_table": {
+  "label": "Bar Pool Table",
+  "size": [
+   2,
+   1
+  ],
+  "price": 1400,
+  "tags": [
+   "living",
+   "fun",
+   "game",
+   "social"
+  ],
+  "model": "res://assets/models/pool_table.glb",
+  "color": "#1a7a46",
+  "height": 0.96,
+  "slots": [
+   {
+    "offset": [
+     0,
+     1
+    ],
+    "pose": "stand"
+   },
+   {
+    "offset": [
+     1,
+     1
+    ],
+    "pose": "stand"
+   }
+  ],
+  "state": {},
+  "advertises": {
+   "fun": 2.4,
+   "social": 1.0
+  },
+  "decor": 2.5,
+  "interactions": [
+   "play_pool"
+  ]
+ },
+ "fire_extinguisher": {
+  "label": "Fire Extinguisher",
+  "size": [
+   1,
+   1
+  ],
+  "price": 55,
+  "tags": [
+   "utility",
+   "safety"
+  ],
+  "model": "res://assets/models/fire_extinguisher.glb",
+  "color": "#c82a20",
+  "height": 1.0,
+  "slots": [
+   {
+    "offset": [
+     0,
+     1
+    ],
+    "pose": "stand"
+   }
+  ],
+  "state": {
+   "charge": {
+    "min": 0,
+    "max": 10,
+    "start": 10,
+    "daily_add": -0.15
+   }
+  },
+  "advertises": {},
+  "decor": -0.1,
+  "interactions": [
+   "inspect_extinguisher"
+  ]
+ },
+ "smoke_alarm": {
+  "label": "Smoke Alarm",
+  "size": [
+   1,
+   1
+  ],
+  "price": 40,
+  "tags": [
+   "utility",
+   "safety",
+   "ceiling"
+  ],
+  "model": "res://assets/models/smoke_alarm.glb",
+  "color": "#f0f0f0",
+  "height": 2.6,
+  "slots": [
+   {
+    "offset": [
+     0,
+     1
+    ],
+    "pose": "stand"
+   }
+  ],
+  "state": {
+   "battery": {
+    "min": 0,
+    "max": 10,
+    "start": 10,
+    "daily_add": -0.5
+   }
+  },
+  "advertises": {},
+  "decor": 0.0,
+  "interactions": [
+   "test_smoke_alarm",
+   "replace_alarm_batteries"
+  ],
+  "layer": "floor",
+  "blocks": false
+ },
+ "vending_machine": {
+  "label": "Vending Machine",
+  "size": [
+   1,
+   1
+  ],
+  "price": 800,
+  "tags": [
+   "utility",
+   "food",
+   "snack",
+   "shop"
+  ],
+  "model": "res://assets/models/vending_machine.glb",
+  "color": "#c82a20",
+  "height": 1.8,
+  "slots": [
+   {
+    "offset": [
+     0,
+     1
+    ],
+    "pose": "stand"
+   }
+  ],
+  "state": {
+   "stock": {
+    "min": 0,
+    "max": 10,
+    "start": 10
+   },
+   "broken": {
+    "start": false
+   }
+  },
+  "advertises": {
+   "hunger": 2.0
+  },
+  "decor": 0.2,
+  "interactions": [
+   "buy_snack",
+   "buy_drink",
+   "restock_vending",
+   "repair_object"
+  ]
+ },
+ "terminal": {
+  "label": "Computer Terminal",
+  "size": [
+   1,
+   1
+  ],
+  "price": 700,
+  "tags": [
+   "electronics",
+   "office",
+   "skill",
+   "career"
+  ],
+  "model": "res://assets/models/terminal.glb",
+  "color": "#4a6a7a",
+  "height": 1.61,
+  "slots": [
+   {
+    "offset": [
+     0,
+     1
+    ],
+    "pose": "stand"
+   }
+  ],
+  "state": {
+   "broken": {
+    "start": false
+   }
+  },
+  "advertises": {
+   "ambition": 1.0,
+   "fun": 1.0
+  },
+  "decor": 0.5,
+  "interactions": [
+   "research_online",
+   "apply_for_job_terminal",
+   "write_on_terminal",
+   "repair_object"
+  ]
+ },
+ "telescope": {
+  "label": "Telescope",
+  "size": [
+   1,
+   1
+  ],
+  "price": 600,
+  "tags": [
+   "hobby",
+   "skill",
+   "science",
+   "night"
+  ],
+  "model": "res://assets/models/telescope.glb",
+  "color": "#e8e8e8",
+  "height": 1.64,
+  "slots": [
+   {
+    "offset": [
+     0,
+     1
+    ],
+    "pose": "stand"
+   }
+  ],
+  "state": {},
+  "advertises": {
+   "fun": 1.2,
+   "creative": 1.0
+  },
+  "decor": 1.0,
+  "interactions": [
+   "stargaze"
+  ]
  }
 }

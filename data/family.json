@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "labels": {
+    "self": "Self", "spouse": "Spouse", "fiance": "Fiance(e)", "partner": "Partner", "sweetheart": "Sweetheart", "ex_spouse": "Ex-spouse",
+    "parent": "Parent", "adoptive_parent": "Adoptive Parent", "child": "Child", "adopted_child": "Adopted Child",
+    "sibling": "Sibling", "half_sibling": "Half-sibling",
+    "grandparent": "Grandparent", "grandchild": "Grandchild", "great_grandparent": "Great-grandparent", "great_grandchild": "Great-grandchild",
+    "aunt_uncle": "Aunt/Uncle", "niece_nephew": "Niece/Nephew", "cousin": "Cousin",
+    "parent_in_law": "Parent-in-law", "child_in_law": "Child-in-law", "sibling_in_law": "Sibling-in-law"
+  },
+  "bits": {
+    "parent_friendship": 40,
+    "sibling_friendship": 25,
+    "grandparent_friendship": 20
+  },
+  "marriage": {
+    "min_romance": 70,
+    "min_friendship": 50,
+    "break_below_romance": 30,
+    "surname": "actor",
+    "merge_households": true,
+    "wedding_romance": 10,
+    "wedding_friendship": 10,
+    "newlywed_buff": "newlywed",
+    "engaged_buff": "engaged",
+    "married_buff": "married"
+  },
+  "divorce": {
+    "friendship_loss": 35,
+    "romance_loss": 80,
+    "coin_share": 0.5,
+    "buff": "divorced"
+  },
+  "adoption": {
+    "orphans": 3,
+    "stages": ["baby", "toddler", "child"],
+    "friendship": 30,
+    "age_days_min": 1,
+    "age_days_max": 24
+  },
+  "moving": {
+    "min_friendship": 35,
+    "spouse_always": true
+  },
+  "toddler": {
+    "skills": ["walking", "talking", "potty"],
+    "daily_xp": 15,
+    "lesson_xp": 40,
+    "proud_buff": "proud_parent"
+  },
+  "pregnancy": {
+    "trimester_buffs": ["pregnant_t1", "pregnant_t2", "pregnant_t3"]
+  },
+  "baby_care": {
+    "check_every_min": 10,
+    "auto_care": true,
+    "start_need": 60,
+    "care_below": {"hunger": -20, "bladder": -25, "hygiene": -35, "energy": -30, "fun": -40, "social": -40},
+    "cry_below": -45,
+    "severe_below": {"hunger": -75, "bladder": -80, "hygiene": -80, "energy": -92},
+    "warn_hours": 6,
+    "remove_hours": 12,
+    "recover_factor": 2.0,
+    "cry_buff": "crying",
+    "household_buff": "baby_crying",
+    "new_parent_buff": "new_parent"
+  }
+}

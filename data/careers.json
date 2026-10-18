@@ -12,26 +12,91 @@
     "offer_chance_per_day": 0.3,
     "offer_expire_days": 3,
     "offer_min_stage": "adult",
-    "mood_gain": {"happy": 3, "energized": 3, "focused": 4, "flirty": 1, "neutral": 0, "bored": -2, "sad": -3, "tense": -2, "uncomfortable": -3, "angry": -4},
-    "buff_gain": {"focused_flow": 2, "proud": 1, "inspired": 1, "hungry": -1, "starving": -3, "tired": -1, "exhausted": -3, "filthy": -2, "grimy": -1, "embarrassed": -1},
+    "mood_gain": {
+      "happy": 3,
+      "energized": 3,
+      "focused": 4,
+      "flirty": 1,
+      "neutral": 0,
+      "bored": -2,
+      "sad": -3,
+      "tense": -2,
+      "uncomfortable": -3,
+      "angry": -4
+    },
+    "buff_gain": {
+      "focused_flow": 2,
+      "proud": 1,
+      "inspired": 1,
+      "hungry": -1,
+      "starving": -3,
+      "tired": -1,
+      "exhausted": -3,
+      "filthy": -2,
+      "grimy": -1,
+      "embarrassed": -1
+    },
     "base_gain": 3,
     "skill_gain_cap": 3,
     "pay_perf_floor": 0.8,
     "pay_perf_span": 0.4,
     "days_per_week": 7,
-    "weekend": [5, 6]
+    "weekend": [
+      5,
+      6
+    ],
+    "task_notify": true,
+    "night_buff_default": "post_night_shift"
   },
   "school": {
-    "stages": ["child", "teen"],
+    "stages": [
+      "child",
+      "teen"
+    ],
     "start": 9.0,
     "end": 15.0,
-    "days": [0, 1, 2, 3, 4],
+    "days": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
     "grade_start": 70,
     "base_gain": 1,
     "mood_scale": 0.8,
     "skip_penalty": 12,
-    "hooks": {"read_book": 3, "play_computer": 1, "work_computer": 4},
-    "grades": [[90, "A"], [80, "B"], [70, "C"], [60, "D"], [0, "F"]]
+    "hooks": {
+      "read_book": 3,
+      "play_computer": 1,
+      "work_computer": 4,
+      "do_homework": 4,
+      "study_recipes": 1,
+      "read_armchair": 3,
+      "research_online": 2
+    },
+    "grades": [
+      [
+        90,
+        "A"
+      ],
+      [
+        80,
+        "B"
+      ],
+      [
+        70,
+        "C"
+      ],
+      [
+        60,
+        "D"
+      ],
+      [
+        0,
+        "F"
+      ]
+    ]
   },
   "retirement": {
     "stage": "elder",
@@ -42,58 +107,2727 @@
     "cook": {
       "label": "Cook",
       "primary_skill": "cooking",
-      "days": [0, 1, 2, 3, 4],
-      "hooks": {"cook_meal": 3, "prep_food": 1.5, "eat_meal": 0.5},
-      "trait_bonus": {"glutton": 2, "neat": 1, "lazy": -1},
+      "days": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "hooks": {
+        "cook_meal": 3,
+        "prep_food": 1.5,
+        "eat_meal": 0.5
+      },
+      "trait_bonus": {
+        "glutton": 2,
+        "neat": 1,
+        "lazy": -1
+      },
       "levels": [
-        {"title": "Dishwasher",    "start": 10, "end": 16, "pay": 14, "requires": {}},
-        {"title": "Line Cook",     "start": 10, "end": 17, "pay": 20, "requires": {"skills": {"cooking": 2}}},
-        {"title": "Sous Chef",     "start": 14, "end": 22, "pay": 28, "requires": {"skills": {"cooking": 4}}},
-        {"title": "Head Chef",     "start": 14, "end": 22, "pay": 38, "requires": {"skills": {"cooking": 6}}},
-        {"title": "Restaurateur",  "start": 11, "end": 19, "pay": 52, "requires": {"skills": {"cooking": 8}}}
-      ]
+        {
+          "title": "Dishwasher",
+          "start": 10,
+          "end": 16,
+          "pay": 14,
+          "requires": {}
+        },
+        {
+          "title": "Line Cook",
+          "start": 10,
+          "end": 17,
+          "pay": 20,
+          "requires": {
+            "skills": {
+              "cooking": 2
+            }
+          }
+        },
+        {
+          "title": "Sous Chef",
+          "start": 14,
+          "end": 22,
+          "pay": 28,
+          "requires": {
+            "skills": {
+              "cooking": 4
+            }
+          }
+        },
+        {
+          "title": "Head Chef",
+          "start": 14,
+          "end": 22,
+          "pay": 38,
+          "requires": {
+            "skills": {
+              "cooking": 6
+            }
+          }
+        },
+        {
+          "title": "Restaurateur",
+          "start": 11,
+          "end": 19,
+          "pay": 52,
+          "requires": {
+            "skills": {
+              "cooking": 8
+            }
+          }
+        }
+      ],
+      "description": "Heat, hustle and hungry diners.",
+      "tasks": [
+        {
+          "id": "cook_a_meal",
+          "label": "Cook a meal at home",
+          "interactions": [
+            "cook_meal",
+            "cook_meal_good",
+            "cook_meal_gourmet",
+            "prep_food",
+            "prep_food_good"
+          ],
+          "count": 1,
+          "bonus": 6,
+          "min_level": 1
+        },
+        {
+          "id": "study_menu",
+          "label": "Study recipes",
+          "interactions": [
+            "study_recipes"
+          ],
+          "count": 1,
+          "bonus": 5,
+          "min_level": 2
+        }
+      ],
+      "alt_skills": [],
+      "branches": {
+        "pastry": {
+          "label": "Pastry Chef",
+          "description": "Sugar, butter and patience.",
+          "from_level": 4,
+          "affinity": {
+            "traits": {
+              "neat": 2,
+              "creative": 2
+            }
+          },
+          "levels": [
+            {
+              "title": "Pastry Chef",
+              "start": 9,
+              "end": 17,
+              "pay": 40,
+              "requires": {
+                "skills": {
+                  "cooking": 6,
+                  "charisma": 1
+                }
+              },
+              "flavor": "Your croissants make strangers weep."
+            },
+            {
+              "title": "Executive Pastry",
+              "start": 9,
+              "end": 17,
+              "pay": 56,
+              "requires": {
+                "skills": {
+                  "cooking": 8
+                }
+              }
+            },
+            {
+              "title": "Dessert Legend",
+              "start": 10,
+              "end": 16,
+              "pay": 70,
+              "requires": {
+                "skills": {
+                  "cooking": 9
+                }
+              }
+            }
+          ]
+        },
+        "grill": {
+          "label": "Grill Master",
+          "description": "Fire, smoke and applause.",
+          "from_level": 4,
+          "affinity": {
+            "traits": {
+              "glutton": 2,
+              "active": 1
+            }
+          },
+          "levels": [
+            {
+              "title": "Grill Master",
+              "start": 14,
+              "end": 22,
+              "pay": 42,
+              "requires": {
+                "skills": {
+                  "cooking": 6
+                }
+              },
+              "flavor": "Flames obey you."
+            },
+            {
+              "title": "Pit Boss",
+              "start": 14,
+              "end": 22,
+              "pay": 58,
+              "requires": {
+                "skills": {
+                  "cooking": 8
+                }
+              }
+            },
+            {
+              "title": "Barbecue Baron",
+              "start": 12,
+              "end": 20,
+              "pay": 72,
+              "requires": {
+                "skills": {
+                  "cooking": 9
+                }
+              }
+            }
+          ]
+        }
+      }
     },
     "coder": {
       "label": "Coder",
       "primary_skill": "logic",
-      "days": [0, 1, 2, 3, 4],
-      "hooks": {"work_computer": 4, "play_computer": 1, "read_book": 1},
-      "trait_bonus": {"gamer": 2, "bookworm": 1, "workaholic": 2, "lazy": -2},
+      "days": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "hooks": {
+        "work_computer": 4,
+        "play_computer": 1,
+        "read_book": 1
+      },
+      "trait_bonus": {
+        "gamer": 2,
+        "bookworm": 1,
+        "workaholic": 2,
+        "lazy": -2
+      },
       "levels": [
-        {"title": "Help Desk",     "start": 9, "end": 17, "pay": 16, "requires": {}},
-        {"title": "Junior Dev",    "start": 9, "end": 17, "pay": 22, "requires": {"skills": {"logic": 2}}},
-        {"title": "Developer",     "start": 9, "end": 17, "pay": 30, "requires": {"skills": {"logic": 4}}},
-        {"title": "Tech Lead",     "start": 9, "end": 16, "pay": 40, "requires": {"skills": {"logic": 6}}},
-        {"title": "Architect",     "start": 10, "end": 16, "pay": 54, "requires": {"skills": {"logic": 8}}}
-      ]
+        {
+          "title": "Help Desk",
+          "start": 9,
+          "end": 17,
+          "pay": 16,
+          "requires": {}
+        },
+        {
+          "title": "Junior Dev",
+          "start": 9,
+          "end": 17,
+          "pay": 22,
+          "requires": {
+            "skills": {
+              "logic": 2
+            }
+          }
+        },
+        {
+          "title": "Developer",
+          "start": 9,
+          "end": 17,
+          "pay": 30,
+          "requires": {
+            "skills": {
+              "logic": 4
+            }
+          }
+        },
+        {
+          "title": "Tech Lead",
+          "start": 9,
+          "end": 16,
+          "pay": 40,
+          "requires": {
+            "skills": {
+              "logic": 6
+            }
+          }
+        },
+        {
+          "title": "Architect",
+          "start": 10,
+          "end": 16,
+          "pay": 54,
+          "requires": {
+            "skills": {
+              "logic": 8
+            }
+          }
+        }
+      ],
+      "description": "Bugs, builds and the glow of a monitor.",
+      "tasks": [
+        {
+          "id": "ship_code",
+          "label": "Work on the computer",
+          "interactions": [
+            "work_computer",
+            "research_online"
+          ],
+          "count": 1,
+          "bonus": 6,
+          "min_level": 1
+        },
+        {
+          "id": "read_docs",
+          "label": "Read up",
+          "interactions": [
+            "read_book"
+          ],
+          "count": 1,
+          "bonus": 4,
+          "min_level": 1
+        }
+      ],
+      "branches": {
+        "security": {
+          "label": "Security Engineer",
+          "description": "Break it before they do.",
+          "from_level": 4,
+          "affinity": {
+            "traits": {
+              "workaholic": 2
+            },
+            "skills": {
+              "logic": 1
+            }
+          },
+          "levels": [
+            {
+              "title": "Security Engineer",
+              "start": 9,
+              "end": 17,
+              "pay": 42,
+              "requires": {
+                "skills": {
+                  "logic": 6
+                }
+              }
+            },
+            {
+              "title": "Red Team Lead",
+              "start": 9,
+              "end": 17,
+              "pay": 58,
+              "requires": {
+                "skills": {
+                  "logic": 8
+                }
+              }
+            },
+            {
+              "title": "CISO",
+              "start": 10,
+              "end": 16,
+              "pay": 72,
+              "requires": {
+                "skills": {
+                  "logic": 9,
+                  "charisma": 3
+                }
+              }
+            }
+          ]
+        },
+        "games": {
+          "label": "Game Developer",
+          "description": "Make the thing you love playing.",
+          "from_level": 4,
+          "affinity": {
+            "traits": {
+              "gamer": 3,
+              "creative": 1
+            }
+          },
+          "levels": [
+            {
+              "title": "Game Developer",
+              "start": 10,
+              "end": 18,
+              "pay": 41,
+              "requires": {
+                "skills": {
+                  "logic": 6
+                }
+              }
+            },
+            {
+              "title": "Lead Designer",
+              "start": 10,
+              "end": 18,
+              "pay": 57,
+              "requires": {
+                "skills": {
+                  "logic": 8,
+                  "painting": 2
+                }
+              }
+            },
+            {
+              "title": "Studio Head",
+              "start": 10,
+              "end": 17,
+              "pay": 71,
+              "requires": {
+                "skills": {
+                  "logic": 9
+                }
+              }
+            }
+          ]
+        }
+      }
     },
     "painter": {
       "label": "Painter",
       "primary_skill": "painting",
-      "days": [1, 2, 3, 4, 5],
-      "hooks": {"paint_canvas": 4, "read_book": 1},
-      "trait_bonus": {"creative": 3, "bookworm": 1, "lazy": -1},
+      "days": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "hooks": {
+        "paint_canvas": 4,
+        "read_book": 1
+      },
+      "trait_bonus": {
+        "creative": 3,
+        "bookworm": 1,
+        "lazy": -1
+      },
       "levels": [
-        {"title": "Sign Painter",      "start": 9,  "end": 15, "pay": 13, "requires": {}},
-        {"title": "Gallery Assistant", "start": 10, "end": 17, "pay": 19, "requires": {"skills": {"painting": 2}}},
-        {"title": "Studio Artist",     "start": 10, "end": 17, "pay": 27, "requires": {"skills": {"painting": 4}}},
-        {"title": "Exhibiting Artist", "start": 11, "end": 17, "pay": 37, "requires": {"skills": {"painting": 6}}},
-        {"title": "Master Painter",    "start": 11, "end": 16, "pay": 50, "requires": {"skills": {"painting": 8}}}
+        {
+          "title": "Sign Painter",
+          "start": 9,
+          "end": 15,
+          "pay": 13,
+          "requires": {}
+        },
+        {
+          "title": "Gallery Assistant",
+          "start": 10,
+          "end": 17,
+          "pay": 19,
+          "requires": {
+            "skills": {
+              "painting": 2
+            }
+          }
+        },
+        {
+          "title": "Studio Artist",
+          "start": 10,
+          "end": 17,
+          "pay": 27,
+          "requires": {
+            "skills": {
+              "painting": 4
+            }
+          }
+        },
+        {
+          "title": "Exhibiting Artist",
+          "start": 11,
+          "end": 17,
+          "pay": 37,
+          "requires": {
+            "skills": {
+              "painting": 6
+            }
+          }
+        },
+        {
+          "title": "Master Painter",
+          "start": 11,
+          "end": 16,
+          "pay": 50,
+          "requires": {
+            "skills": {
+              "painting": 8
+            }
+          }
+        }
+      ],
+      "description": "Colour, canvas and the occasional tantrum.",
+      "tasks": [
+        {
+          "id": "paint_today",
+          "label": "Paint a canvas",
+          "interactions": [
+            "paint_canvas",
+            "paint_masterpiece"
+          ],
+          "count": 1,
+          "bonus": 7,
+          "min_level": 1
+        }
       ]
     },
     "fitness_coach": {
       "label": "Fitness Coach",
       "primary_skill": "fitness",
-      "days": [0, 1, 2, 3, 5],
-      "hooks": {"exercise": 4},
-      "trait_bonus": {"active": 3, "social": 1, "lazy": -3},
+      "days": [
+        0,
+        1,
+        2,
+        3,
+        5
+      ],
+      "hooks": {
+        "exercise": 4
+      },
+      "trait_bonus": {
+        "active": 3,
+        "social": 1,
+        "lazy": -3
+      },
       "levels": [
-        {"title": "Gym Attendant",     "start": 6,  "end": 12, "pay": 14, "requires": {}},
-        {"title": "Personal Trainer",  "start": 6,  "end": 13, "pay": 20, "requires": {"skills": {"fitness": 2}}},
-        {"title": "Coach",             "start": 7,  "end": 15, "pay": 28, "requires": {"skills": {"fitness": 4}}},
-        {"title": "Head Coach",        "start": 7,  "end": 15, "pay": 38, "requires": {"skills": {"fitness": 6}}},
-        {"title": "Wellness Director", "start": 8,  "end": 16, "pay": 51, "requires": {"skills": {"fitness": 8}}}
+        {
+          "title": "Gym Attendant",
+          "start": 6,
+          "end": 12,
+          "pay": 14,
+          "requires": {}
+        },
+        {
+          "title": "Personal Trainer",
+          "start": 6,
+          "end": 13,
+          "pay": 20,
+          "requires": {
+            "skills": {
+              "fitness": 2
+            }
+          }
+        },
+        {
+          "title": "Coach",
+          "start": 7,
+          "end": 15,
+          "pay": 28,
+          "requires": {
+            "skills": {
+              "fitness": 4
+            }
+          }
+        },
+        {
+          "title": "Head Coach",
+          "start": 7,
+          "end": 15,
+          "pay": 38,
+          "requires": {
+            "skills": {
+              "fitness": 6
+            }
+          }
+        },
+        {
+          "title": "Wellness Director",
+          "start": 8,
+          "end": 16,
+          "pay": 51,
+          "requires": {
+            "skills": {
+              "fitness": 8
+            }
+          }
+        }
+      ],
+      "description": "Whistles, weights and wellness.",
+      "tasks": [
+        {
+          "id": "workout",
+          "label": "Work out",
+          "interactions": [
+            "exercise",
+            "lift_weights"
+          ],
+          "count": 1,
+          "bonus": 6,
+          "min_level": 1
+        }
       ]
+    },
+    "musician": {
+      "label": "Musician",
+      "primary_skill": "guitar",
+      "days": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "hooks": {
+        "play_guitar": 3,
+        "play_piano": 3,
+        "practice_guitar": 3.5,
+        "practice_piano": 3.5,
+        "write_song": 5,
+        "play_piano_concert": 5,
+        "listen_music": 0.5,
+        "serenade": 1
+      },
+      "trait_bonus": {
+        "musical": 3,
+        "showoff": 2,
+        "creative": 1,
+        "lazy": -1
+      },
+      "levels": [
+        {
+          "title": "Street Busker",
+          "start": 17,
+          "end": 23,
+          "pay": 14,
+          "requires": {},
+          "flavor": "A hat on the pavement and a dream."
+        },
+        {
+          "title": "Pub Act",
+          "start": 17,
+          "end": 23,
+          "pay": 20,
+          "requires": {
+            "skills": {
+              "guitar": 2
+            }
+          },
+          "flavor": "Three sets and a free pint."
+        },
+        {
+          "title": "Session Player",
+          "start": 16,
+          "end": 22,
+          "pay": 28,
+          "requires": {
+            "skills": {
+              "guitar": 4
+            }
+          }
+        },
+        {
+          "title": "Headliner",
+          "start": 18,
+          "end": 23,
+          "pay": 38,
+          "requires": {
+            "skills": {
+              "guitar": 6
+            }
+          }
+        },
+        {
+          "title": "Chart Topper",
+          "start": 18,
+          "end": 23,
+          "pay": 52,
+          "requires": {
+            "skills": {
+              "guitar": 8
+            }
+          }
+        }
+      ],
+      "description": "Turn practice into applause. Evening gigs, big dreams.",
+      "tasks": [
+        {
+          "id": "practice_set",
+          "label": "Practice for a session",
+          "interactions": [
+            "play_guitar",
+            "play_piano",
+            "practice_guitar",
+            "practice_piano"
+          ],
+          "count": 1,
+          "bonus": 6,
+          "min_level": 1
+        },
+        {
+          "id": "write_tune",
+          "label": "Write a song",
+          "interactions": [
+            "write_song"
+          ],
+          "count": 1,
+          "bonus": 10,
+          "min_level": 2
+        }
+      ],
+      "alt_skills": [
+        "piano"
+      ],
+      "branches": {
+        "solo": {
+          "label": "Solo Artist",
+          "description": "Your name on the poster.",
+          "from_level": 4,
+          "affinity": {
+            "traits": {
+              "showoff": 3,
+              "musical": 1
+            }
+          },
+          "levels": [
+            {
+              "title": "Solo Artist",
+              "start": 18,
+              "end": 24,
+              "pay": 40,
+              "requires": {
+                "skills": {
+                  "guitar": 6
+                }
+              },
+              "flavor": "Fans know the words."
+            },
+            {
+              "title": "Arena Act",
+              "start": 18,
+              "end": 24,
+              "pay": 56,
+              "requires": {
+                "skills": {
+                  "guitar": 8
+                }
+              }
+            },
+            {
+              "title": "Living Legend",
+              "start": 19,
+              "end": 24,
+              "pay": 70,
+              "requires": {
+                "skills": {
+                  "guitar": 9,
+                  "charisma": 3
+                }
+              }
+            }
+          ]
+        },
+        "composer": {
+          "label": "Composer",
+          "description": "Write it down, let others play it.",
+          "from_level": 4,
+          "affinity": {
+            "traits": {
+              "creative": 2,
+              "perfectionist": 2
+            },
+            "skills": {
+              "writing": 1
+            }
+          },
+          "levels": [
+            {
+              "title": "Composer",
+              "start": 10,
+              "end": 18,
+              "pay": 39,
+              "requires": {
+                "skills": {
+                  "piano": 5,
+                  "writing": 2
+                }
+              },
+              "flavor": "Scores for the stage."
+            },
+            {
+              "title": "Film Composer",
+              "start": 10,
+              "end": 18,
+              "pay": 55,
+              "requires": {
+                "skills": {
+                  "piano": 7,
+                  "writing": 3
+                }
+              }
+            },
+            {
+              "title": "Maestro",
+              "start": 11,
+              "end": 17,
+              "pay": 70,
+              "requires": {
+                "skills": {
+                  "piano": 9
+                }
+              }
+            }
+          ]
+        }
+      },
+      "shifts": {
+        "late_gig": {
+          "label": "Late Gig",
+          "start": 21,
+          "end": 3,
+          "pay_mult": 1.3,
+          "min_level": 2,
+          "return_buff": "post_night_shift",
+          "days": [
+            3,
+            4,
+            5,
+            6
+          ]
+        }
+      }
+    },
+    "gardener": {
+      "label": "Gardener",
+      "primary_skill": "gardening",
+      "days": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "hooks": {
+        "plant_seeds": 2,
+        "water_garden": 2,
+        "weed_garden": 2.5,
+        "harvest_crops": 4,
+        "harvest_crops_bountiful": 5,
+        "water_plant": 1,
+        "fish_pond": 0.5
+      },
+      "trait_bonus": {
+        "green_thumb": 3,
+        "outdoorsy": 2,
+        "neat": 1,
+        "lazy": -1
+      },
+      "levels": [
+        {
+          "title": "Weeder",
+          "start": 7,
+          "end": 13,
+          "pay": 13,
+          "requires": {},
+          "flavor": "Knees in the dirt."
+        },
+        {
+          "title": "Groundskeeper",
+          "start": 7,
+          "end": 14,
+          "pay": 19,
+          "requires": {
+            "skills": {
+              "gardening": 2
+            }
+          }
+        },
+        {
+          "title": "Horticulturist",
+          "start": 8,
+          "end": 15,
+          "pay": 27,
+          "requires": {
+            "skills": {
+              "gardening": 4
+            }
+          }
+        },
+        {
+          "title": "Head Gardener",
+          "start": 8,
+          "end": 16,
+          "pay": 37,
+          "requires": {
+            "skills": {
+              "gardening": 6
+            }
+          }
+        },
+        {
+          "title": "Garden Laureate",
+          "start": 9,
+          "end": 16,
+          "pay": 50,
+          "requires": {
+            "skills": {
+              "gardening": 8
+            }
+          }
+        }
+      ],
+      "description": "Early mornings, honest work, and things that grow.",
+      "tasks": [
+        {
+          "id": "tend_beds",
+          "label": "Water or weed the garden",
+          "interactions": [
+            "water_garden",
+            "weed_garden",
+            "plant_seeds"
+          ],
+          "count": 1,
+          "bonus": 5,
+          "min_level": 1
+        },
+        {
+          "id": "bring_in_harvest",
+          "label": "Harvest a crop",
+          "interactions": [
+            "harvest_crops",
+            "harvest_crops_bountiful"
+          ],
+          "count": 1,
+          "bonus": 9,
+          "min_level": 2
+        }
+      ],
+      "branches": {
+        "landscape": {
+          "label": "Landscape Designer",
+          "description": "Whole estates, one hedge at a time.",
+          "from_level": 4,
+          "affinity": {
+            "traits": {
+              "creative": 2,
+              "outdoorsy": 1
+            },
+            "skills": {
+              "painting": 1
+            }
+          },
+          "levels": [
+            {
+              "title": "Landscape Designer",
+              "start": 9,
+              "end": 17,
+              "pay": 38,
+              "requires": {
+                "skills": {
+                  "gardening": 6,
+                  "painting": 2
+                }
+              }
+            },
+            {
+              "title": "Estate Planner",
+              "start": 9,
+              "end": 17,
+              "pay": 54,
+              "requires": {
+                "skills": {
+                  "gardening": 8,
+                  "painting": 3
+                }
+              }
+            },
+            {
+              "title": "Master of Grounds",
+              "start": 10,
+              "end": 16,
+              "pay": 68,
+              "requires": {
+                "skills": {
+                  "gardening": 9
+                }
+              }
+            }
+          ]
+        },
+        "botanist": {
+          "label": "Botanist",
+          "description": "Name every leaf in Latin.",
+          "from_level": 4,
+          "affinity": {
+            "traits": {
+              "bookworm": 2,
+              "perfectionist": 1
+            },
+            "skills": {
+              "logic": 1
+            }
+          },
+          "levels": [
+            {
+              "title": "Botanist",
+              "start": 9,
+              "end": 17,
+              "pay": 39,
+              "requires": {
+                "skills": {
+                  "gardening": 6,
+                  "logic": 3
+                }
+              }
+            },
+            {
+              "title": "Plant Geneticist",
+              "start": 9,
+              "end": 17,
+              "pay": 55,
+              "requires": {
+                "skills": {
+                  "gardening": 8,
+                  "logic": 4
+                }
+              }
+            },
+            {
+              "title": "Seed Guardian",
+              "start": 10,
+              "end": 16,
+              "pay": 69,
+              "requires": {
+                "skills": {
+                  "gardening": 9,
+                  "logic": 5
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "handyperson": {
+      "label": "Handyperson",
+      "primary_skill": "handiness",
+      "days": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "hooks": {
+        "repair_object": 4,
+        "tinker": 2,
+        "build_gadget": 5,
+        "do_laundry": 1,
+        "replace_alarm_batteries": 1.5,
+        "inspect_extinguisher": 1.5,
+        "toss_spoiled_food": 1,
+        "clean_object": 0.5
+      },
+      "trait_bonus": {
+        "handy": 3,
+        "perfectionist": 1,
+        "clumsy": -3,
+        "lazy": -1
+      },
+      "levels": [
+        {
+          "title": "Odd-Jobber",
+          "start": 8,
+          "end": 15,
+          "pay": 14,
+          "requires": {},
+          "flavor": "Screws, spanners and tea breaks."
+        },
+        {
+          "title": "Fixer",
+          "start": 8,
+          "end": 16,
+          "pay": 20,
+          "requires": {
+            "skills": {
+              "handiness": 2
+            }
+          }
+        },
+        {
+          "title": "Contractor",
+          "start": 8,
+          "end": 16,
+          "pay": 28,
+          "requires": {
+            "skills": {
+              "handiness": 4
+            }
+          }
+        },
+        {
+          "title": "Master Builder",
+          "start": 8,
+          "end": 17,
+          "pay": 38,
+          "requires": {
+            "skills": {
+              "handiness": 6
+            }
+          }
+        },
+        {
+          "title": "Site Foreman",
+          "start": 9,
+          "end": 17,
+          "pay": 51,
+          "requires": {
+            "skills": {
+              "handiness": 8,
+              "charisma": 2
+            }
+          }
+        }
+      ],
+      "description": "If it's broken, you can fix it. If it isn't, you can improve it.",
+      "tasks": [
+        {
+          "id": "fix_something",
+          "label": "Fix something broken",
+          "interactions": [
+            "repair_object"
+          ],
+          "count": 1,
+          "bonus": 9,
+          "min_level": 1
+        },
+        {
+          "id": "bench_time",
+          "label": "Tinker at the workbench",
+          "interactions": [
+            "tinker",
+            "build_gadget"
+          ],
+          "count": 1,
+          "bonus": 5,
+          "min_level": 1
+        }
+      ],
+      "branches": {
+        "electrician": {
+          "label": "Electrician",
+          "description": "Wires, volts and a steady hand.",
+          "from_level": 4,
+          "affinity": {
+            "traits": {
+              "perfectionist": 2
+            },
+            "skills": {
+              "logic": 2
+            }
+          },
+          "levels": [
+            {
+              "title": "Electrician",
+              "start": 8,
+              "end": 16,
+              "pay": 40,
+              "requires": {
+                "skills": {
+                  "handiness": 6,
+                  "logic": 3
+                }
+              }
+            },
+            {
+              "title": "Master Electrician",
+              "start": 8,
+              "end": 16,
+              "pay": 56,
+              "requires": {
+                "skills": {
+                  "handiness": 8,
+                  "logic": 4
+                }
+              }
+            },
+            {
+              "title": "Grid Engineer",
+              "start": 9,
+              "end": 17,
+              "pay": 70,
+              "requires": {
+                "skills": {
+                  "handiness": 9,
+                  "logic": 5
+                }
+              }
+            }
+          ]
+        },
+        "carpenter": {
+          "label": "Carpenter",
+          "description": "Joints so tight light can't pass.",
+          "from_level": 4,
+          "affinity": {
+            "traits": {
+              "creative": 1,
+              "neat": 1
+            }
+          },
+          "levels": [
+            {
+              "title": "Carpenter",
+              "start": 8,
+              "end": 16,
+              "pay": 39,
+              "requires": {
+                "skills": {
+                  "handiness": 6
+                }
+              }
+            },
+            {
+              "title": "Cabinetmaker",
+              "start": 8,
+              "end": 16,
+              "pay": 55,
+              "requires": {
+                "skills": {
+                  "handiness": 8
+                }
+              }
+            },
+            {
+              "title": "Heirloom Maker",
+              "start": 9,
+              "end": 16,
+              "pay": 69,
+              "requires": {
+                "skills": {
+                  "handiness": 9,
+                  "painting": 2
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "scientist": {
+      "label": "Scientist",
+      "primary_skill": "logic",
+      "days": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "hooks": {
+        "research_online": 4,
+        "stargaze": 3,
+        "build_gadget": 2,
+        "tinker": 1,
+        "read_book": 1.5,
+        "write_on_computer": 1
+      },
+      "trait_bonus": {
+        "bookworm": 3,
+        "workaholic": 2,
+        "perfectionist": 1,
+        "creative": 1,
+        "lazy": -2
+      },
+      "levels": [
+        {
+          "title": "Lab Assistant",
+          "start": 9,
+          "end": 17,
+          "pay": 16,
+          "requires": {
+            "skills": {
+              "logic": 1
+            }
+          },
+          "flavor": "Label the tubes, wash the beakers."
+        },
+        {
+          "title": "Technician",
+          "start": 9,
+          "end": 17,
+          "pay": 22,
+          "requires": {
+            "skills": {
+              "logic": 3
+            }
+          }
+        },
+        {
+          "title": "Researcher",
+          "start": 9,
+          "end": 17,
+          "pay": 30,
+          "requires": {
+            "skills": {
+              "logic": 5
+            }
+          }
+        },
+        {
+          "title": "Lead Scientist",
+          "start": 9,
+          "end": 16,
+          "pay": 41,
+          "requires": {
+            "skills": {
+              "logic": 7
+            }
+          }
+        },
+        {
+          "title": "Laureate",
+          "start": 10,
+          "end": 16,
+          "pay": 56,
+          "requires": {
+            "skills": {
+              "logic": 9
+            }
+          }
+        }
+      ],
+      "description": "Hypotheses, experiments and the occasional small explosion.",
+      "tasks": [
+        {
+          "id": "run_experiment",
+          "label": "Research online",
+          "interactions": [
+            "research_online"
+          ],
+          "count": 1,
+          "bonus": 7,
+          "min_level": 1
+        },
+        {
+          "id": "sky_watch",
+          "label": "Stargaze",
+          "interactions": [
+            "stargaze"
+          ],
+          "count": 1,
+          "bonus": 8,
+          "min_level": 2
+        }
+      ],
+      "branches": {
+        "astronomer": {
+          "label": "Astronomer",
+          "description": "The universe is the lab.",
+          "from_level": 4,
+          "affinity": {
+            "traits": {
+              "night_owl": 3,
+              "creative": 1
+            }
+          },
+          "levels": [
+            {
+              "title": "Astronomer",
+              "start": 20,
+              "end": 4,
+              "pay": 44,
+              "requires": {
+                "skills": {
+                  "logic": 7
+                }
+              },
+              "flavor": "Long nights under the dome."
+            },
+            {
+              "title": "Observatory Chief",
+              "start": 20,
+              "end": 4,
+              "pay": 60,
+              "requires": {
+                "skills": {
+                  "logic": 8
+                }
+              }
+            },
+            {
+              "title": "Cosmologist",
+              "start": 20,
+              "end": 4,
+              "pay": 74,
+              "requires": {
+                "skills": {
+                  "logic": 9
+                }
+              }
+            }
+          ]
+        },
+        "inventor": {
+          "label": "Inventor",
+          "description": "Prototypes everywhere.",
+          "from_level": 4,
+          "affinity": {
+            "traits": {
+              "handy": 2,
+              "creative": 2
+            },
+            "skills": {
+              "handiness": 2
+            }
+          },
+          "levels": [
+            {
+              "title": "Inventor",
+              "start": 9,
+              "end": 17,
+              "pay": 43,
+              "requires": {
+                "skills": {
+                  "logic": 7,
+                  "handiness": 3
+                }
+              }
+            },
+            {
+              "title": "Chief Inventor",
+              "start": 9,
+              "end": 17,
+              "pay": 59,
+              "requires": {
+                "skills": {
+                  "logic": 8,
+                  "handiness": 4
+                }
+              }
+            },
+            {
+              "title": "Patent Magnate",
+              "start": 10,
+              "end": 16,
+              "pay": 73,
+              "requires": {
+                "skills": {
+                  "logic": 9,
+                  "handiness": 5
+                }
+              }
+            }
+          ]
+        }
+      },
+      "shifts": {
+        "night_lab": {
+          "label": "Night Lab",
+          "start": 22,
+          "end": 6,
+          "pay_mult": 1.25,
+          "min_level": 2,
+          "return_buff": "post_night_shift"
+        }
+      }
+    },
+    "writer": {
+      "label": "Writer",
+      "primary_skill": "writing",
+      "days": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "hooks": {
+        "write_story": 3.5,
+        "write_novel": 6,
+        "write_on_computer": 3,
+        "write_on_terminal": 3,
+        "read_book": 1.5,
+        "read_armchair": 1,
+        "stargaze": 1
+      },
+      "trait_bonus": {
+        "creative": 3,
+        "bookworm": 2,
+        "perfectionist": 1,
+        "lazy": -1
+      },
+      "levels": [
+        {
+          "title": "Proofreader",
+          "start": 9,
+          "end": 15,
+          "pay": 13,
+          "requires": {},
+          "flavor": "Commas, commas, commas."
+        },
+        {
+          "title": "Columnist",
+          "start": 9,
+          "end": 16,
+          "pay": 19,
+          "requires": {
+            "skills": {
+              "writing": 2
+            }
+          }
+        },
+        {
+          "title": "Author",
+          "start": 10,
+          "end": 16,
+          "pay": 27,
+          "requires": {
+            "skills": {
+              "writing": 4
+            }
+          }
+        },
+        {
+          "title": "Bestseller",
+          "start": 10,
+          "end": 16,
+          "pay": 37,
+          "requires": {
+            "skills": {
+              "writing": 6
+            }
+          }
+        },
+        {
+          "title": "Literary Icon",
+          "start": 10,
+          "end": 15,
+          "pay": 50,
+          "requires": {
+            "skills": {
+              "writing": 8
+            }
+          }
+        }
+      ],
+      "description": "Words for a living. Deadlines for company.",
+      "tasks": [
+        {
+          "id": "daily_pages",
+          "label": "Write a story or chapter",
+          "interactions": [
+            "write_story",
+            "write_novel",
+            "write_on_computer",
+            "write_on_terminal"
+          ],
+          "count": 1,
+          "bonus": 7,
+          "min_level": 1
+        },
+        {
+          "id": "reading_hour",
+          "label": "Read a book",
+          "interactions": [
+            "read_book",
+            "read_armchair"
+          ],
+          "count": 1,
+          "bonus": 4,
+          "min_level": 1
+        }
+      ],
+      "branches": {
+        "novelist": {
+          "label": "Novelist",
+          "description": "Whole worlds, bound in leather.",
+          "from_level": 4,
+          "affinity": {
+            "traits": {
+              "creative": 2,
+              "loner": 1
+            }
+          },
+          "levels": [
+            {
+              "title": "Novelist",
+              "start": 10,
+              "end": 16,
+              "pay": 39,
+              "requires": {
+                "skills": {
+                  "writing": 6
+                }
+              }
+            },
+            {
+              "title": "Series Author",
+              "start": 10,
+              "end": 16,
+              "pay": 55,
+              "requires": {
+                "skills": {
+                  "writing": 8
+                }
+              }
+            },
+            {
+              "title": "Nobel Hopeful",
+              "start": 10,
+              "end": 15,
+              "pay": 68,
+              "requires": {
+                "skills": {
+                  "writing": 9
+                }
+              }
+            }
+          ]
+        },
+        "journalist": {
+          "label": "Journalist",
+          "description": "Chase the story.",
+          "from_level": 4,
+          "affinity": {
+            "traits": {
+              "social": 2,
+              "hot_headed": 1
+            },
+            "skills": {
+              "charisma": 2
+            }
+          },
+          "levels": [
+            {
+              "title": "Journalist",
+              "start": 8,
+              "end": 16,
+              "pay": 40,
+              "requires": {
+                "skills": {
+                  "writing": 6,
+                  "charisma": 3
+                }
+              }
+            },
+            {
+              "title": "Correspondent",
+              "start": 8,
+              "end": 16,
+              "pay": 56,
+              "requires": {
+                "skills": {
+                  "writing": 7,
+                  "charisma": 4
+                }
+              }
+            },
+            {
+              "title": "Editor in Chief",
+              "start": 9,
+              "end": 17,
+              "pay": 70,
+              "requires": {
+                "skills": {
+                  "writing": 8,
+                  "charisma": 5
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "barista": {
+      "label": "Barista",
+      "primary_skill": "charisma",
+      "days": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "hooks": {
+        "brew_coffee": 3,
+        "brew_tea": 2,
+        "mix_drink": 2,
+        "chat": 1,
+        "tell_joke": 1,
+        "cook_meal": 1,
+        "refill_coffee": 1
+      },
+      "trait_bonus": {
+        "social": 2,
+        "foodie": 2,
+        "romantic": 1,
+        "loner": -2
+      },
+      "levels": [
+        {
+          "title": "Cashier",
+          "start": 6,
+          "end": 12,
+          "pay": 12,
+          "requires": {},
+          "flavor": "Names on cups, usually spelled wrong."
+        },
+        {
+          "title": "Barista",
+          "start": 6,
+          "end": 13,
+          "pay": 18,
+          "requires": {
+            "skills": {
+              "charisma": 1
+            }
+          }
+        },
+        {
+          "title": "Senior Barista",
+          "start": 7,
+          "end": 14,
+          "pay": 26,
+          "requires": {
+            "skills": {
+              "charisma": 3,
+              "cooking": 1
+            }
+          }
+        },
+        {
+          "title": "Cafe Manager",
+          "start": 7,
+          "end": 15,
+          "pay": 36,
+          "requires": {
+            "skills": {
+              "charisma": 5,
+              "cooking": 2
+            }
+          }
+        },
+        {
+          "title": "Cafe Owner",
+          "start": 8,
+          "end": 16,
+          "pay": 48,
+          "requires": {
+            "skills": {
+              "charisma": 7,
+              "cooking": 3
+            }
+          }
+        }
+      ],
+      "description": "Steam, smiles and regulars who know your name.",
+      "tasks": [
+        {
+          "id": "brew_one",
+          "label": "Brew a coffee or tea",
+          "interactions": [
+            "brew_coffee",
+            "brew_tea"
+          ],
+          "count": 1,
+          "bonus": 6,
+          "min_level": 1
+        },
+        {
+          "id": "make_conversation",
+          "label": "Chat with someone",
+          "interactions": [
+            "chat",
+            "tell_joke"
+          ],
+          "count": 2,
+          "bonus": 5,
+          "min_level": 2
+        }
+      ],
+      "branches": {
+        "roaster": {
+          "label": "Roaster",
+          "description": "Single origin, double obsession.",
+          "from_level": 4,
+          "affinity": {
+            "traits": {
+              "perfectionist": 2,
+              "foodie": 2
+            },
+            "skills": {
+              "cooking": 2
+            }
+          },
+          "levels": [
+            {
+              "title": "Roaster",
+              "start": 7,
+              "end": 15,
+              "pay": 38,
+              "requires": {
+                "skills": {
+                  "charisma": 5,
+                  "cooking": 4
+                }
+              }
+            },
+            {
+              "title": "Head Roaster",
+              "start": 7,
+              "end": 15,
+              "pay": 53,
+              "requires": {
+                "skills": {
+                  "charisma": 6,
+                  "cooking": 5
+                }
+              }
+            },
+            {
+              "title": "Coffee Magnate",
+              "start": 8,
+              "end": 16,
+              "pay": 66,
+              "requires": {
+                "skills": {
+                  "charisma": 7,
+                  "cooking": 6
+                }
+              }
+            }
+          ]
+        },
+        "mixologist": {
+          "label": "Mixologist",
+          "description": "Shake it, stir it, make it a show.",
+          "from_level": 4,
+          "affinity": {
+            "traits": {
+              "showoff": 2,
+              "social": 2
+            }
+          },
+          "levels": [
+            {
+              "title": "Mixologist",
+              "start": 16,
+              "end": 24,
+              "pay": 40,
+              "requires": {
+                "skills": {
+                  "charisma": 6,
+                  "cooking": 3
+                }
+              },
+              "flavor": "Bottle-flipping optional."
+            },
+            {
+              "title": "Bar Manager",
+              "start": 16,
+              "end": 24,
+              "pay": 56,
+              "requires": {
+                "skills": {
+                  "charisma": 7,
+                  "cooking": 3
+                }
+              }
+            },
+            {
+              "title": "Cocktail Legend",
+              "start": 17,
+              "end": 24,
+              "pay": 70,
+              "requires": {
+                "skills": {
+                  "charisma": 8,
+                  "cooking": 4
+                }
+              }
+            }
+          ]
+        }
+      },
+      "shifts": {
+        "closing": {
+          "label": "Closing Shift",
+          "start": 17,
+          "end": 1,
+          "pay_mult": 1.2,
+          "min_level": 1,
+          "return_buff": "post_night_shift"
+        }
+      }
+    },
+    "doctor": {
+      "label": "Doctor",
+      "primary_skill": "logic",
+      "days": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "hooks": {
+        "research_online": 2,
+        "read_book": 2,
+        "study_recipes": 0.5,
+        "exercise": 1,
+        "tutor": 1
+      },
+      "trait_bonus": {
+        "bookworm": 2,
+        "workaholic": 2,
+        "active": 1,
+        "perfectionist": 1,
+        "lazy": -3,
+        "clumsy": -2
+      },
+      "levels": [
+        {
+          "title": "Medical Aide",
+          "start": 8,
+          "end": 16,
+          "pay": 17,
+          "requires": {
+            "skills": {
+              "logic": 2
+            }
+          },
+          "flavor": "Bedpans and bright smiles."
+        },
+        {
+          "title": "Nurse",
+          "start": 8,
+          "end": 16,
+          "pay": 24,
+          "requires": {
+            "skills": {
+              "logic": 3,
+              "charisma": 1
+            }
+          }
+        },
+        {
+          "title": "Resident",
+          "start": 7,
+          "end": 17,
+          "pay": 33,
+          "requires": {
+            "skills": {
+              "logic": 5,
+              "charisma": 2
+            }
+          }
+        },
+        {
+          "title": "Physician",
+          "start": 8,
+          "end": 16,
+          "pay": 44,
+          "requires": {
+            "skills": {
+              "logic": 7,
+              "charisma": 3
+            }
+          }
+        },
+        {
+          "title": "Chief of Medicine",
+          "start": 9,
+          "end": 16,
+          "pay": 60,
+          "requires": {
+            "skills": {
+              "logic": 9,
+              "charisma": 4
+            }
+          }
+        }
+      ],
+      "description": "Long hours, steady hands, and the best kind of tired.",
+      "tasks": [
+        {
+          "id": "study_cases",
+          "label": "Research or read",
+          "interactions": [
+            "research_online",
+            "read_book"
+          ],
+          "count": 1,
+          "bonus": 7,
+          "min_level": 1
+        },
+        {
+          "id": "keep_fit",
+          "label": "Stay in shape",
+          "interactions": [
+            "exercise",
+            "lift_weights"
+          ],
+          "count": 1,
+          "bonus": 4,
+          "min_level": 2
+        }
+      ],
+      "branches": {
+        "surgeon": {
+          "label": "Surgeon",
+          "description": "Precision under pressure.",
+          "from_level": 4,
+          "affinity": {
+            "traits": {
+              "perfectionist": 2
+            },
+            "skills": {
+              "handiness": 1
+            }
+          },
+          "levels": [
+            {
+              "title": "Surgeon",
+              "start": 7,
+              "end": 17,
+              "pay": 47,
+              "requires": {
+                "skills": {
+                  "logic": 7,
+                  "handiness": 3,
+                  "fitness": 2
+                }
+              }
+            },
+            {
+              "title": "Chief Surgeon",
+              "start": 7,
+              "end": 17,
+              "pay": 64,
+              "requires": {
+                "skills": {
+                  "logic": 8,
+                  "handiness": 4
+                }
+              }
+            },
+            {
+              "title": "Pioneer of Surgery",
+              "start": 8,
+              "end": 16,
+              "pay": 78,
+              "requires": {
+                "skills": {
+                  "logic": 9,
+                  "handiness": 5
+                }
+              }
+            }
+          ]
+        },
+        "researcher": {
+          "label": "Medical Researcher",
+          "description": "The cure is in the data.",
+          "from_level": 4,
+          "affinity": {
+            "traits": {
+              "bookworm": 2,
+              "workaholic": 1
+            }
+          },
+          "levels": [
+            {
+              "title": "Medical Researcher",
+              "start": 9,
+              "end": 17,
+              "pay": 45,
+              "requires": {
+                "skills": {
+                  "logic": 8
+                }
+              }
+            },
+            {
+              "title": "Lab Director",
+              "start": 9,
+              "end": 17,
+              "pay": 62,
+              "requires": {
+                "skills": {
+                  "logic": 9
+                }
+              }
+            },
+            {
+              "title": "Cure Finder",
+              "start": 10,
+              "end": 16,
+              "pay": 76,
+              "requires": {
+                "skills": {
+                  "logic": 9,
+                  "charisma": 4
+                }
+              }
+            }
+          ]
+        }
+      },
+      "shifts": {
+        "er_night": {
+          "label": "ER Night Shift",
+          "start": 20,
+          "end": 6,
+          "pay_mult": 1.35,
+          "min_level": 2,
+          "return_buff": "post_night_shift"
+        }
+      }
+    },
+    "athlete": {
+      "label": "Athlete",
+      "primary_skill": "fitness",
+      "days": [
+        0,
+        1,
+        2,
+        3,
+        5,
+        6
+      ],
+      "hooks": {
+        "exercise": 3,
+        "lift_weights": 4,
+        "dance": 1,
+        "play_pool": 0.3,
+        "eat_meal_good": 0.5
+      },
+      "trait_bonus": {
+        "active": 3,
+        "outdoorsy": 1,
+        "lazy": -3
+      },
+      "levels": [
+        {
+          "title": "Amateur",
+          "start": 6,
+          "end": 12,
+          "pay": 14,
+          "requires": {},
+          "flavor": "Early laps, cold showers."
+        },
+        {
+          "title": "Semi-Pro",
+          "start": 6,
+          "end": 13,
+          "pay": 21,
+          "requires": {
+            "skills": {
+              "fitness": 2
+            }
+          }
+        },
+        {
+          "title": "Pro",
+          "start": 7,
+          "end": 14,
+          "pay": 30,
+          "requires": {
+            "skills": {
+              "fitness": 4
+            },
+            "traits_not": [
+              "lazy"
+            ]
+          }
+        },
+        {
+          "title": "All-Star",
+          "start": 8,
+          "end": 15,
+          "pay": 40,
+          "requires": {
+            "skills": {
+              "fitness": 6
+            }
+          }
+        },
+        {
+          "title": "Legend",
+          "start": 9,
+          "end": 15,
+          "pay": 55,
+          "requires": {
+            "skills": {
+              "fitness": 8
+            }
+          }
+        }
+      ],
+      "description": "Your body is the instrument. Tune it daily.",
+      "tasks": [
+        {
+          "id": "train",
+          "label": "Lift weights or exercise",
+          "interactions": [
+            "exercise",
+            "lift_weights"
+          ],
+          "count": 1,
+          "bonus": 7,
+          "min_level": 1
+        },
+        {
+          "id": "cross_train",
+          "label": "Cross-train by dancing",
+          "interactions": [
+            "dance"
+          ],
+          "count": 1,
+          "bonus": 4,
+          "min_level": 2
+        }
+      ],
+      "branches": {
+        "sprinter": {
+          "label": "Sprinter",
+          "description": "Fast twitch, fast money.",
+          "from_level": 4,
+          "affinity": {
+            "traits": {
+              "active": 2
+            }
+          },
+          "levels": [
+            {
+              "title": "Sprinter",
+              "start": 6,
+              "end": 13,
+              "pay": 42,
+              "requires": {
+                "skills": {
+                  "fitness": 6
+                }
+              }
+            },
+            {
+              "title": "Record Holder",
+              "start": 7,
+              "end": 14,
+              "pay": 58,
+              "requires": {
+                "skills": {
+                  "fitness": 8
+                }
+              }
+            },
+            {
+              "title": "Olympian",
+              "start": 8,
+              "end": 14,
+              "pay": 72,
+              "requires": {
+                "skills": {
+                  "fitness": 9
+                }
+              }
+            }
+          ]
+        },
+        "strongfolk": {
+          "label": "Strongfolk",
+          "description": "Lift the thing, then lift the heavier thing.",
+          "from_level": 4,
+          "affinity": {
+            "traits": {
+              "glutton": 1
+            }
+          },
+          "levels": [
+            {
+              "title": "Strongfolk",
+              "start": 7,
+              "end": 14,
+              "pay": 41,
+              "requires": {
+                "skills": {
+                  "fitness": 6
+                }
+              }
+            },
+            {
+              "title": "Champion Lifter",
+              "start": 8,
+              "end": 15,
+              "pay": 57,
+              "requires": {
+                "skills": {
+                  "fitness": 8
+                }
+              }
+            },
+            {
+              "title": "Titan",
+              "start": 9,
+              "end": 15,
+              "pay": 71,
+              "requires": {
+                "skills": {
+                  "fitness": 9
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "teacher": {
+      "label": "Teacher",
+      "primary_skill": "charisma",
+      "days": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "hooks": {
+        "tutor": 4,
+        "read_book": 2,
+        "do_homework": 2,
+        "chat": 1,
+        "tell_joke": 1,
+        "read_armchair": 1
+      },
+      "trait_bonus": {
+        "social": 2,
+        "bookworm": 2,
+        "loner": -2,
+        "hot_headed": -2
+      },
+      "levels": [
+        {
+          "title": "Teaching Aide",
+          "start": 8,
+          "end": 15,
+          "pay": 13,
+          "requires": {},
+          "flavor": "Glue sticks and patience."
+        },
+        {
+          "title": "Tutor",
+          "start": 8,
+          "end": 15,
+          "pay": 19,
+          "requires": {
+            "skills": {
+              "charisma": 2
+            }
+          }
+        },
+        {
+          "title": "Teacher",
+          "start": 8,
+          "end": 15,
+          "pay": 27,
+          "requires": {
+            "skills": {
+              "charisma": 4,
+              "logic": 2
+            }
+          }
+        },
+        {
+          "title": "Head of Department",
+          "start": 8,
+          "end": 16,
+          "pay": 36,
+          "requires": {
+            "skills": {
+              "charisma": 6,
+              "logic": 3
+            }
+          }
+        },
+        {
+          "title": "Principal",
+          "start": 8,
+          "end": 16,
+          "pay": 49,
+          "requires": {
+            "skills": {
+              "charisma": 8,
+              "logic": 4
+            }
+          }
+        }
+      ],
+      "description": "Every day a hundred small questions, and one big difference.",
+      "tasks": [
+        {
+          "id": "lesson_plan",
+          "label": "Read or do homework",
+          "interactions": [
+            "read_book",
+            "do_homework",
+            "read_armchair"
+          ],
+          "count": 1,
+          "bonus": 5,
+          "min_level": 1
+        },
+        {
+          "id": "help_a_friend",
+          "label": "Tutor someone",
+          "interactions": [
+            "tutor"
+          ],
+          "count": 1,
+          "bonus": 8,
+          "min_level": 2
+        }
+      ],
+      "branches": {
+        "professor": {
+          "label": "Professor",
+          "description": "Lecture halls and long footnotes.",
+          "from_level": 4,
+          "affinity": {
+            "traits": {
+              "bookworm": 2
+            },
+            "skills": {
+              "logic": 2
+            }
+          },
+          "levels": [
+            {
+              "title": "Professor",
+              "start": 9,
+              "end": 16,
+              "pay": 39,
+              "requires": {
+                "skills": {
+                  "charisma": 6,
+                  "logic": 5
+                }
+              }
+            },
+            {
+              "title": "Tenured Professor",
+              "start": 9,
+              "end": 16,
+              "pay": 54,
+              "requires": {
+                "skills": {
+                  "charisma": 7,
+                  "logic": 6
+                }
+              }
+            },
+            {
+              "title": "Dean",
+              "start": 9,
+              "end": 16,
+              "pay": 67,
+              "requires": {
+                "skills": {
+                  "charisma": 8,
+                  "logic": 7
+                }
+              }
+            }
+          ]
+        },
+        "coach": {
+          "label": "School Coach",
+          "description": "Whistle, clipboard, trophy case.",
+          "from_level": 4,
+          "affinity": {
+            "traits": {
+              "active": 2,
+              "social": 1
+            }
+          },
+          "levels": [
+            {
+              "title": "School Coach",
+              "start": 8,
+              "end": 16,
+              "pay": 38,
+              "requires": {
+                "skills": {
+                  "charisma": 6,
+                  "fitness": 3
+                }
+              }
+            },
+            {
+              "title": "Head Coach",
+              "start": 8,
+              "end": 16,
+              "pay": 53,
+              "requires": {
+                "skills": {
+                  "charisma": 7,
+                  "fitness": 4
+                }
+              }
+            },
+            {
+              "title": "Hall of Famer",
+              "start": 9,
+              "end": 16,
+              "pay": 66,
+              "requires": {
+                "skills": {
+                  "charisma": 8,
+                  "fitness": 5
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "chef": {
+      "label": "Chef",
+      "primary_skill": "cooking",
+      "days": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "hooks": {
+        "cook_meal_good": 4,
+        "cook_meal_gourmet": 6,
+        "cook_fish_dinner": 5,
+        "grill_food": 3,
+        "grill_gourmet": 5,
+        "prep_food_good": 2,
+        "cook_meal": 2,
+        "study_recipes": 3,
+        "eat_meal_gourmet": 1
+      },
+      "trait_bonus": {
+        "foodie": 3,
+        "perfectionist": 2,
+        "glutton": 1,
+        "clumsy": -2,
+        "lazy": -1
+      },
+      "levels": [
+        {
+          "title": "Prep Cook",
+          "start": 11,
+          "end": 19,
+          "pay": 15,
+          "requires": {
+            "skills": {
+              "cooking": 1
+            }
+          },
+          "flavor": "Onions. So many onions."
+        },
+        {
+          "title": "Line Chef",
+          "start": 12,
+          "end": 20,
+          "pay": 22,
+          "requires": {
+            "skills": {
+              "cooking": 3
+            }
+          }
+        },
+        {
+          "title": "Chef de Partie",
+          "start": 14,
+          "end": 23,
+          "pay": 31,
+          "requires": {
+            "skills": {
+              "cooking": 5
+            }
+          }
+        },
+        {
+          "title": "Executive Chef",
+          "start": 14,
+          "end": 23,
+          "pay": 42,
+          "requires": {
+            "skills": {
+              "cooking": 7
+            }
+          }
+        },
+        {
+          "title": "Culinary Star",
+          "start": 12,
+          "end": 21,
+          "pay": 58,
+          "requires": {
+            "skills": {
+              "cooking": 9,
+              "charisma": 2
+            }
+          }
+        }
+      ],
+      "description": "Plating, pressure and the perfect sear.",
+      "tasks": [
+        {
+          "id": "fine_dish",
+          "label": "Cook a good meal",
+          "interactions": [
+            "cook_meal_good",
+            "cook_meal_gourmet",
+            "cook_fish_dinner",
+            "grill_gourmet"
+          ],
+          "count": 1,
+          "bonus": 8,
+          "min_level": 2
+        },
+        {
+          "id": "recipe_study",
+          "label": "Study recipes",
+          "interactions": [
+            "study_recipes",
+            "cook_meal",
+            "prep_food_good"
+          ],
+          "count": 1,
+          "bonus": 4,
+          "min_level": 1
+        }
+      ],
+      "branches": {
+        "saucier": {
+          "label": "Saucier",
+          "description": "The heart of French cuisine, in a pan.",
+          "from_level": 4,
+          "affinity": {
+            "traits": {
+              "perfectionist": 2
+            },
+            "skills": {
+              "cooking": 1
+            }
+          },
+          "levels": [
+            {
+              "title": "Saucier",
+              "start": 14,
+              "end": 23,
+              "pay": 45,
+              "requires": {
+                "skills": {
+                  "cooking": 7
+                }
+              }
+            },
+            {
+              "title": "Sous-Chef Supreme",
+              "start": 14,
+              "end": 23,
+              "pay": 61,
+              "requires": {
+                "skills": {
+                  "cooking": 8
+                }
+              }
+            },
+            {
+              "title": "Michelin Master",
+              "start": 13,
+              "end": 21,
+              "pay": 76,
+              "requires": {
+                "skills": {
+                  "cooking": 9,
+                  "charisma": 3
+                }
+              }
+            }
+          ]
+        },
+        "forager": {
+          "label": "Forager Chef",
+          "description": "Garden, pond, plate.",
+          "from_level": 4,
+          "affinity": {
+            "traits": {
+              "green_thumb": 2,
+              "outdoorsy": 2
+            },
+            "skills": {
+              "gardening": 1
+            }
+          },
+          "levels": [
+            {
+              "title": "Forager Chef",
+              "start": 12,
+              "end": 21,
+              "pay": 44,
+              "requires": {
+                "skills": {
+                  "cooking": 7,
+                  "gardening": 2
+                }
+              }
+            },
+            {
+              "title": "Farm-to-Table Lead",
+              "start": 12,
+              "end": 21,
+              "pay": 60,
+              "requires": {
+                "skills": {
+                  "cooking": 8,
+                  "gardening": 3
+                }
+              }
+            },
+            {
+              "title": "Culinary Naturalist",
+              "start": 12,
+              "end": 20,
+              "pay": 75,
+              "requires": {
+                "skills": {
+                  "cooking": 9,
+                  "gardening": 4
+                }
+              }
+            }
+          ]
+        }
+      },
+      "shifts": {
+        "dinner_service": {
+          "label": "Dinner Service",
+          "start": 17,
+          "end": 1,
+          "pay_mult": 1.25,
+          "min_level": 2,
+          "return_buff": "post_night_shift"
+        }
+      }
     }
   }
 }

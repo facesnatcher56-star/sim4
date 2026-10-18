@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "hair_styles": 6,
+  "skin_tones": ["#f6d7c3", "#eac0a0", "#d9a47f", "#c68863", "#a86b4a", "#8a5238", "#6b3e2a", "#4a2a1c"],
+  "hair_colors": [
+    {"id": "black",     "hex": "#1e1a18", "dominance": 5.0},
+    {"id": "dark_brown","hex": "#3d281c", "dominance": 4.0},
+    {"id": "brown",     "hex": "#6a4630", "dominance": 3.5},
+    {"id": "auburn",    "hex": "#7a3b22", "dominance": 2.5},
+    {"id": "blonde",    "hex": "#d8b45e", "dominance": 2.0},
+    {"id": "red",       "hex": "#b2442a", "dominance": 1.5},
+    {"id": "platinum",  "hex": "#ece3c8", "dominance": 1.0}
+  ],
+  "eye_colors": [
+    {"id": "brown", "hex": "#5b3a22", "dominance": 5.0},
+    {"id": "amber", "hex": "#a4702a", "dominance": 2.5},
+    {"id": "hazel", "hex": "#7b6a32", "dominance": 2.5},
+    {"id": "green", "hex": "#3f8a5a", "dominance": 1.5},
+    {"id": "blue",  "hex": "#3f72b8", "dominance": 1.2},
+    {"id": "gray",  "hex": "#8d98a3", "dominance": 1.0}
+  ],
+  "shirt_colors": ["#d96a5b", "#e0a24a", "#6fae6b", "#4f9ec4", "#8b72c9", "#d97aa8", "#e8e2d0", "#3f4a63", "#5aa89a", "#c9784a"],
+  "pants_colors": ["#3a4660", "#5a4a3a", "#2e2e34", "#6a7a8a", "#7b6a4a", "#4a5a46"],
+  "height": {"min": 0.9, "max": 1.1},
+  "build": {"min": 0.9, "max": 1.1},
+  "inherit": {
+    "skin_weight_sigma": 0.18,
+    "color_mutation_sigma": 0.012,
+    "color_mutation_max": 0.03,
+    "hair_mix_chance": 0.12,
+    "eye_mix_chance": 0.08,
+    "palette_mutation_chance": 0.03,
+    "hair_style_random_chance": 0.12,
+    "body_noise_sigma": 0.02,
+    "trait_chance": 0.35,
+    "random_extra_traits": 1,
+    "cap_stage": "adult"
+  }
+}

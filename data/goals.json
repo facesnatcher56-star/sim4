@@ -12,123 +12,3479 @@
     "master_chef": {
       "label": "Master Chef",
       "description": "Live for the kitchen: cook, taste, and rise through the restaurant world.",
-      "fit_traits": ["glutton", "neat"],
+      "fit_traits": [
+        "glutton",
+        "neat"
+      ],
       "milestones": [
-        {"id": "cook_first", "label": "Cook 3 meals", "objective": {"type": "interaction", "ids": ["cook_meal", "prep_food"], "count": 3}, "points": 40, "reward": [{"add_buff": "proud"}]},
-        {"id": "cooking_3", "label": "Reach cooking level 3", "objective": {"type": "cond", "cond": [{"skill_at_least": ["cooking", 3]}]}, "points": 80, "reward": [{"coins_add": 150}]},
-        {"id": "cook_job", "label": "Get a job as a Cook", "objective": {"type": "cond", "cond": [{"career_is": "cook"}]}, "points": 100, "reward": [{"coins_add": 200}]},
-        {"id": "cooking_6", "label": "Reach cooking level 6", "objective": {"type": "cond", "cond": [{"skill_at_least": ["cooking", 6]}]}, "points": 200, "reward": [{"coins_add": 500}, {"add_buff": "proud"}]},
-        {"id": "sous_chef", "label": "Become a Sous Chef or better", "objective": {"type": "cond", "cond": [{"career_is": "cook"}, {"career_level_at_least": 3}]}, "points": 400, "reward": [{"coins_add": 1000}]}
+        {
+          "id": "cook_first",
+          "label": "Cook 3 meals",
+          "objective": {
+            "type": "interaction",
+            "ids": [
+              "cook_meal",
+              "prep_food"
+            ],
+            "count": 3
+          },
+          "points": 40,
+          "reward": [
+            {
+              "add_buff": "proud"
+            }
+          ]
+        },
+        {
+          "id": "cooking_3",
+          "label": "Reach cooking level 3",
+          "objective": {
+            "type": "cond",
+            "cond": [
+              {
+                "skill_at_least": [
+                  "cooking",
+                  3
+                ]
+              }
+            ]
+          },
+          "points": 80,
+          "reward": [
+            {
+              "coins_add": 150
+            }
+          ]
+        },
+        {
+          "id": "cook_job",
+          "label": "Get a job as a Cook",
+          "objective": {
+            "type": "cond",
+            "cond": [
+              {
+                "career_is": "cook"
+              }
+            ]
+          },
+          "points": 100,
+          "reward": [
+            {
+              "coins_add": 200
+            }
+          ]
+        },
+        {
+          "id": "cooking_6",
+          "label": "Reach cooking level 6",
+          "objective": {
+            "type": "cond",
+            "cond": [
+              {
+                "skill_at_least": [
+                  "cooking",
+                  6
+                ]
+              }
+            ]
+          },
+          "points": 200,
+          "reward": [
+            {
+              "coins_add": 500
+            },
+            {
+              "add_buff": "proud"
+            }
+          ]
+        },
+        {
+          "id": "sous_chef",
+          "label": "Become a Sous Chef or better",
+          "objective": {
+            "type": "cond",
+            "cond": [
+              {
+                "career_is": "cook"
+              },
+              {
+                "career_level_at_least": 3
+              }
+            ]
+          },
+          "points": 400,
+          "reward": [
+            {
+              "coins_add": 1000
+            }
+          ]
+        }
       ]
     },
     "athlete": {
       "label": "Peak Performance",
       "description": "Sweat, strength and stamina.",
-      "fit_traits": ["active"],
+      "fit_traits": [
+        "active"
+      ],
       "milestones": [
-        {"id": "workout_3", "label": "Exercise 3 times", "objective": {"type": "interaction", "id": "exercise", "count": 3}, "points": 40, "reward": [{"add_buff": "pumped"}]},
-        {"id": "fitness_3", "label": "Reach fitness level 3", "objective": {"type": "cond", "cond": [{"skill_at_least": ["fitness", 3]}]}, "points": 90, "reward": [{"coins_add": 150}]},
-        {"id": "workout_10", "label": "Exercise 10 times", "objective": {"type": "interaction", "id": "exercise", "count": 10}, "points": 120, "reward": [{"coins_add": 200}]},
-        {"id": "fitness_6", "label": "Reach fitness level 6", "objective": {"type": "cond", "cond": [{"skill_at_least": ["fitness", 6]}]}, "points": 250, "reward": [{"coins_add": 600}]},
-        {"id": "coach_job", "label": "Work as a Coach (level 3)", "objective": {"type": "cond", "cond": [{"career_is": "fitness_coach"}, {"career_level_at_least": 3}]}, "points": 400, "reward": [{"coins_add": 1000}]}
+        {
+          "id": "workout_3",
+          "label": "Exercise 3 times",
+          "objective": {
+            "type": "interaction",
+            "id": "exercise",
+            "count": 3
+          },
+          "points": 40,
+          "reward": [
+            {
+              "add_buff": "pumped"
+            }
+          ]
+        },
+        {
+          "id": "fitness_3",
+          "label": "Reach fitness level 3",
+          "objective": {
+            "type": "cond",
+            "cond": [
+              {
+                "skill_at_least": [
+                  "fitness",
+                  3
+                ]
+              }
+            ]
+          },
+          "points": 90,
+          "reward": [
+            {
+              "coins_add": 150
+            }
+          ]
+        },
+        {
+          "id": "workout_10",
+          "label": "Exercise 10 times",
+          "objective": {
+            "type": "interaction",
+            "id": "exercise",
+            "count": 10
+          },
+          "points": 120,
+          "reward": [
+            {
+              "coins_add": 200
+            }
+          ]
+        },
+        {
+          "id": "fitness_6",
+          "label": "Reach fitness level 6",
+          "objective": {
+            "type": "cond",
+            "cond": [
+              {
+                "skill_at_least": [
+                  "fitness",
+                  6
+                ]
+              }
+            ]
+          },
+          "points": 250,
+          "reward": [
+            {
+              "coins_add": 600
+            }
+          ]
+        },
+        {
+          "id": "coach_job",
+          "label": "Work as a Coach (level 3)",
+          "objective": {
+            "type": "cond",
+            "cond": [
+              {
+                "career_is": "fitness_coach"
+              },
+              {
+                "career_level_at_least": 3
+              }
+            ]
+          },
+          "points": 400,
+          "reward": [
+            {
+              "coins_add": 1000
+            }
+          ]
+        }
       ]
     },
     "social_butterfly": {
       "label": "Social Butterfly",
       "description": "The more friends, the merrier.",
-      "fit_traits": ["social", "romantic"],
+      "fit_traits": [
+        "social",
+        "romantic"
+      ],
       "milestones": [
-        {"id": "chat_5", "label": "Have 5 conversations", "objective": {"type": "interaction", "id": "chat", "count": 5}, "points": 40, "reward": [{"add_buff": "social_glow"}]},
-        {"id": "friend_1", "label": "Make a friend", "objective": {"type": "cond", "cond": [{"friends_at_least": 1}]}, "points": 80, "reward": [{"coins_add": 100}]},
-        {"id": "friend_3", "label": "Have 3 friends", "objective": {"type": "cond", "cond": [{"friends_at_least": 3}]}, "points": 160, "reward": [{"coins_add": 300}]},
-        {"id": "best_friend", "label": "Make a best friend", "objective": {"type": "cond", "cond": [{"bit_count": ["best_friend", 1]}]}, "points": 250, "reward": [{"add_buff": "social_glow"}, {"coins_add": 400}]},
-        {"id": "visitors_3", "label": "Host 3 visitors", "objective": {"type": "game_event", "name": "visit_started", "count": 3}, "points": 300, "reward": [{"coins_add": 600}]}
+        {
+          "id": "chat_5",
+          "label": "Have 5 conversations",
+          "objective": {
+            "type": "interaction",
+            "id": "chat",
+            "count": 5
+          },
+          "points": 40,
+          "reward": [
+            {
+              "add_buff": "social_glow"
+            }
+          ]
+        },
+        {
+          "id": "friend_1",
+          "label": "Make a friend",
+          "objective": {
+            "type": "cond",
+            "cond": [
+              {
+                "friends_at_least": 1
+              }
+            ]
+          },
+          "points": 80,
+          "reward": [
+            {
+              "coins_add": 100
+            }
+          ]
+        },
+        {
+          "id": "friend_3",
+          "label": "Have 3 friends",
+          "objective": {
+            "type": "cond",
+            "cond": [
+              {
+                "friends_at_least": 3
+              }
+            ]
+          },
+          "points": 160,
+          "reward": [
+            {
+              "coins_add": 300
+            }
+          ]
+        },
+        {
+          "id": "best_friend",
+          "label": "Make a best friend",
+          "objective": {
+            "type": "cond",
+            "cond": [
+              {
+                "bit_count": [
+                  "best_friend",
+                  1
+                ]
+              }
+            ]
+          },
+          "points": 250,
+          "reward": [
+            {
+              "add_buff": "social_glow"
+            },
+            {
+              "coins_add": 400
+            }
+          ]
+        },
+        {
+          "id": "visitors_3",
+          "label": "Host 3 visitors",
+          "objective": {
+            "type": "game_event",
+            "name": "visit_started",
+            "count": 3
+          },
+          "points": 300,
+          "reward": [
+            {
+              "coins_add": 600
+            }
+          ]
+        }
       ]
     },
     "artist": {
       "label": "Creative Genius",
       "description": "Paint, create, and be inspired.",
-      "fit_traits": ["creative", "bookworm"],
+      "fit_traits": [
+        "creative",
+        "bookworm"
+      ],
       "milestones": [
-        {"id": "paint_3", "label": "Paint 3 canvases", "objective": {"type": "interaction", "id": "paint_canvas", "count": 3}, "points": 40, "reward": [{"add_buff": "inspired"}]},
-        {"id": "painting_3", "label": "Reach painting level 3", "objective": {"type": "cond", "cond": [{"skill_at_least": ["painting", 3]}]}, "points": 90, "reward": [{"coins_add": 150}]},
-        {"id": "inspired_3", "label": "Feel inspired 3 times", "objective": {"type": "buff", "id": "inspired", "count": 3}, "points": 120, "reward": [{"coins_add": 200}]},
-        {"id": "painting_6", "label": "Reach painting level 6", "objective": {"type": "cond", "cond": [{"skill_at_least": ["painting", 6]}]}, "points": 260, "reward": [{"coins_add": 600}]},
-        {"id": "painter_job", "label": "Work as a Studio Artist (level 3)", "objective": {"type": "cond", "cond": [{"career_is": "painter"}, {"career_level_at_least": 3}]}, "points": 400, "reward": [{"coins_add": 1000}]}
+        {
+          "id": "paint_3",
+          "label": "Paint 3 canvases",
+          "objective": {
+            "type": "interaction",
+            "id": "paint_canvas",
+            "count": 3
+          },
+          "points": 40,
+          "reward": [
+            {
+              "add_buff": "inspired"
+            }
+          ]
+        },
+        {
+          "id": "painting_3",
+          "label": "Reach painting level 3",
+          "objective": {
+            "type": "cond",
+            "cond": [
+              {
+                "skill_at_least": [
+                  "painting",
+                  3
+                ]
+              }
+            ]
+          },
+          "points": 90,
+          "reward": [
+            {
+              "coins_add": 150
+            }
+          ]
+        },
+        {
+          "id": "inspired_3",
+          "label": "Feel inspired 3 times",
+          "objective": {
+            "type": "buff",
+            "id": "inspired",
+            "count": 3
+          },
+          "points": 120,
+          "reward": [
+            {
+              "coins_add": 200
+            }
+          ]
+        },
+        {
+          "id": "painting_6",
+          "label": "Reach painting level 6",
+          "objective": {
+            "type": "cond",
+            "cond": [
+              {
+                "skill_at_least": [
+                  "painting",
+                  6
+                ]
+              }
+            ]
+          },
+          "points": 260,
+          "reward": [
+            {
+              "coins_add": 600
+            }
+          ]
+        },
+        {
+          "id": "painter_job",
+          "label": "Work as a Studio Artist (level 3)",
+          "objective": {
+            "type": "cond",
+            "cond": [
+              {
+                "career_is": "painter"
+              },
+              {
+                "career_level_at_least": 3
+              }
+            ]
+          },
+          "points": 400,
+          "reward": [
+            {
+              "coins_add": 1000
+            }
+          ]
+        }
       ]
     },
     "fortune_seeker": {
       "label": "Fortune Seeker",
       "description": "Money, promotions, and a very full wallet.",
-      "fit_traits": ["workaholic"],
+      "fit_traits": [
+        "workaholic"
+      ],
       "milestones": [
-        {"id": "get_job", "label": "Get a job", "objective": {"type": "cond", "cond": [{"has_job": true}]}, "points": 50, "reward": [{"coins_add": 100}]},
-        {"id": "earn_2000", "label": "Hold 2000 coins", "objective": {"type": "cond", "cond": [{"coins_at_least": 2000}]}, "points": 100, "reward": [{"add_buff": "proud"}]},
-        {"id": "promoted_1", "label": "Get promoted", "objective": {"type": "game_event", "name": "promoted", "count": 1}, "points": 160, "reward": [{"coins_add": 300}]},
-        {"id": "level_3", "label": "Reach career level 3", "objective": {"type": "cond", "cond": [{"career_level_at_least": 3}]}, "points": 250, "reward": [{"coins_add": 600}]},
-        {"id": "earn_8000", "label": "Hold 8000 coins", "objective": {"type": "cond", "cond": [{"coins_at_least": 8000}]}, "points": 400, "reward": [{"add_buff": "proud"}]}
+        {
+          "id": "get_job",
+          "label": "Get a job",
+          "objective": {
+            "type": "cond",
+            "cond": [
+              {
+                "has_job": true
+              }
+            ]
+          },
+          "points": 50,
+          "reward": [
+            {
+              "coins_add": 100
+            }
+          ]
+        },
+        {
+          "id": "earn_2000",
+          "label": "Hold 2000 coins",
+          "objective": {
+            "type": "cond",
+            "cond": [
+              {
+                "coins_at_least": 2000
+              }
+            ]
+          },
+          "points": 100,
+          "reward": [
+            {
+              "add_buff": "proud"
+            }
+          ]
+        },
+        {
+          "id": "promoted_1",
+          "label": "Get promoted",
+          "objective": {
+            "type": "game_event",
+            "name": "promoted",
+            "count": 1
+          },
+          "points": 160,
+          "reward": [
+            {
+              "coins_add": 300
+            }
+          ]
+        },
+        {
+          "id": "level_3",
+          "label": "Reach career level 3",
+          "objective": {
+            "type": "cond",
+            "cond": [
+              {
+                "career_level_at_least": 3
+              }
+            ]
+          },
+          "points": 250,
+          "reward": [
+            {
+              "coins_add": 600
+            }
+          ]
+        },
+        {
+          "id": "earn_8000",
+          "label": "Hold 8000 coins",
+          "objective": {
+            "type": "cond",
+            "cond": [
+              {
+                "coins_at_least": 8000
+              }
+            ]
+          },
+          "points": 400,
+          "reward": [
+            {
+              "add_buff": "proud"
+            }
+          ]
+        }
       ]
     },
     "family_folk": {
       "label": "Family Folk",
       "description": "Home, love and little footsteps.",
-      "fit_traits": ["romantic", "social"],
+      "fit_traits": [
+        "romantic",
+        "social"
+      ],
       "milestones": [
-        {"id": "crush", "label": "Develop a crush", "objective": {"type": "cond", "cond": [{"bit_count": ["crush", 1]}]}, "points": 50, "reward": [{"add_buff": "flirty_buzz"}]},
-        {"id": "sweetheart", "label": "Find a sweetheart", "objective": {"type": "cond", "cond": [{"any": [{"bit_count": ["sweetheart", 1]}, {"bit_count": ["partner", 1]}, {"bit_count": ["spouse", 1]}]}]}, "points": 150, "reward": [{"coins_add": 200}]},
-        {"id": "partner", "label": "Become partners", "objective": {"type": "cond", "cond": [{"any": [{"bit_count": ["partner", 1]}, {"bit_count": ["spouse", 1]}]}]}, "points": 250, "reward": [{"coins_add": 400}]},
-        {"id": "baby", "label": "Welcome a baby", "objective": {"type": "game_event", "name": "baby_born", "count": 1}, "points": 400, "reward": [{"coins_add": 800}, {"add_buff": "proud"}]},
-        {"id": "birthday_3", "label": "Celebrate 3 birthdays", "objective": {"type": "game_event", "name": "birthday", "count": 3}, "points": 150, "reward": [{"coins_add": 300}]}
+        {
+          "id": "crush",
+          "label": "Develop a crush",
+          "objective": {
+            "type": "cond",
+            "cond": [
+              {
+                "bit_count": [
+                  "crush",
+                  1
+                ]
+              }
+            ]
+          },
+          "points": 50,
+          "reward": [
+            {
+              "add_buff": "flirty_buzz"
+            }
+          ]
+        },
+        {
+          "id": "sweetheart",
+          "label": "Find a sweetheart",
+          "objective": {
+            "type": "cond",
+            "cond": [
+              {
+                "any": [
+                  {
+                    "bit_count": [
+                      "sweetheart",
+                      1
+                    ]
+                  },
+                  {
+                    "bit_count": [
+                      "partner",
+                      1
+                    ]
+                  },
+                  {
+                    "bit_count": [
+                      "spouse",
+                      1
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "points": 150,
+          "reward": [
+            {
+              "coins_add": 200
+            }
+          ]
+        },
+        {
+          "id": "partner",
+          "label": "Become partners",
+          "objective": {
+            "type": "cond",
+            "cond": [
+              {
+                "any": [
+                  {
+                    "bit_count": [
+                      "partner",
+                      1
+                    ]
+                  },
+                  {
+                    "bit_count": [
+                      "spouse",
+                      1
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "points": 250,
+          "reward": [
+            {
+              "coins_add": 400
+            }
+          ]
+        },
+        {
+          "id": "baby",
+          "label": "Welcome a baby",
+          "objective": {
+            "type": "game_event",
+            "name": "baby_born",
+            "count": 1
+          },
+          "points": 400,
+          "reward": [
+            {
+              "coins_add": 800
+            },
+            {
+              "add_buff": "proud"
+            }
+          ]
+        },
+        {
+          "id": "birthday_3",
+          "label": "Celebrate 3 birthdays",
+          "objective": {
+            "type": "game_event",
+            "name": "birthday",
+            "count": 3
+          },
+          "points": 150,
+          "reward": [
+            {
+              "coins_add": 300
+            }
+          ]
+        }
+      ]
+    },
+    "melody_maker": {
+      "label": "Melody Maker",
+      "description": "Fingers on strings and keys: write songs and play for crowds.",
+      "fit_traits": [
+        "musical",
+        "creative",
+        "showoff"
+      ],
+      "milestones": [
+        {
+          "id": "play_3",
+          "label": "Play an instrument 3 times",
+          "objective": {
+            "type": "interaction",
+            "count": 3,
+            "ids": [
+              "play_guitar",
+              "play_piano"
+            ]
+          },
+          "points": 40,
+          "reward": [
+            {
+              "add_buff": "melodic"
+            }
+          ]
+        },
+        {
+          "id": "music_3",
+          "label": "Reach guitar or piano level 3",
+          "objective": {
+            "type": "cond",
+            "cond": [
+              {
+                "any": [
+                  {
+                    "skill_at_least": [
+                      "guitar",
+                      3
+                    ]
+                  },
+                  {
+                    "skill_at_least": [
+                      "piano",
+                      3
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "points": 90,
+          "reward": [
+            {
+              "coins_add": 150
+            }
+          ]
+        },
+        {
+          "id": "song_1",
+          "label": "Write a song",
+          "objective": {
+            "type": "game_event",
+            "name": "wrote_song",
+            "count": 1
+          },
+          "points": 150,
+          "reward": [
+            {
+              "coins_add": 250
+            },
+            {
+              "add_buff": "proud"
+            }
+          ]
+        },
+        {
+          "id": "recital_1",
+          "label": "Give a recital",
+          "objective": {
+            "type": "game_event",
+            "name": "performed",
+            "count": 1
+          },
+          "points": 250,
+          "reward": [
+            {
+              "coins_add": 400
+            }
+          ]
+        },
+        {
+          "id": "musician_3",
+          "label": "Work as a Session Player (level 3)",
+          "objective": {
+            "type": "cond",
+            "cond": [
+              {
+                "career_is": "musician"
+              },
+              {
+                "career_level_at_least": 3
+              }
+            ]
+          },
+          "points": 400,
+          "reward": [
+            {
+              "coins_add": 1000
+            }
+          ]
+        }
+      ]
+    },
+    "garden_guardian": {
+      "label": "Garden Guardian",
+      "description": "Seeds, soil and a very full pantry.",
+      "fit_traits": [
+        "green_thumb",
+        "outdoorsy"
+      ],
+      "milestones": [
+        {
+          "id": "plant_1",
+          "label": "Plant seeds",
+          "objective": {
+            "type": "interaction",
+            "count": 1,
+            "id": "plant_seeds"
+          },
+          "points": 40,
+          "reward": [
+            {
+              "add_buff": "green_thumb"
+            }
+          ]
+        },
+        {
+          "id": "harvest_3",
+          "label": "Harvest crops 3 times",
+          "objective": {
+            "type": "game_event",
+            "name": "harvested_crops",
+            "count": 3
+          },
+          "points": 100,
+          "reward": [
+            {
+              "coins_add": 150
+            }
+          ]
+        },
+        {
+          "id": "gardening_4",
+          "label": "Reach gardening level 4",
+          "objective": {
+            "type": "cond",
+            "cond": [
+              {
+                "skill_at_least": [
+                  "gardening",
+                  4
+                ]
+              }
+            ]
+          },
+          "points": 180,
+          "reward": [
+            {
+              "coins_add": 300
+            }
+          ]
+        },
+        {
+          "id": "produce_gift",
+          "label": "Share produce with a friend",
+          "objective": {
+            "type": "interaction",
+            "count": 1,
+            "id": "gift_produce"
+          },
+          "points": 150,
+          "reward": [
+            {
+              "add_buff": "proud"
+            }
+          ]
+        },
+        {
+          "id": "gardener_3",
+          "label": "Work as a Horticulturist (level 3)",
+          "objective": {
+            "type": "cond",
+            "cond": [
+              {
+                "career_is": "gardener"
+              },
+              {
+                "career_level_at_least": 3
+              }
+            ]
+          },
+          "points": 400,
+          "reward": [
+            {
+              "coins_add": 1000
+            }
+          ]
+        }
+      ]
+    },
+    "master_angler": {
+      "label": "Master Angler",
+      "description": "Patience, a rod and the big one that got away.",
+      "fit_traits": [
+        "outdoorsy",
+        "loner"
+      ],
+      "milestones": [
+        {
+          "id": "fish_3",
+          "label": "Go fishing 3 times",
+          "objective": {
+            "type": "interaction",
+            "count": 3,
+            "ids": [
+              "fish_pond",
+              "fish_deep_water"
+            ]
+          },
+          "points": 40,
+          "reward": [
+            {
+              "add_buff": "fresh_catch"
+            }
+          ]
+        },
+        {
+          "id": "fishing_3",
+          "label": "Reach fishing level 3",
+          "objective": {
+            "type": "cond",
+            "cond": [
+              {
+                "skill_at_least": [
+                  "fishing",
+                  3
+                ]
+              }
+            ]
+          },
+          "points": 100,
+          "reward": [
+            {
+              "coins_add": 150
+            }
+          ]
+        },
+        {
+          "id": "catch_5",
+          "label": "Catch 5 fish",
+          "objective": {
+            "type": "game_event",
+            "name": "caught_fish",
+            "count": 5
+          },
+          "points": 160,
+          "reward": [
+            {
+              "coins_add": 250
+            }
+          ]
+        },
+        {
+          "id": "cook_catch",
+          "label": "Cook your catch",
+          "objective": {
+            "type": "interaction",
+            "count": 1,
+            "id": "cook_fish_dinner"
+          },
+          "points": 160,
+          "reward": [
+            {
+              "add_buff": "proud"
+            }
+          ]
+        },
+        {
+          "id": "rare_fish",
+          "label": "Land a rare fish",
+          "objective": {
+            "type": "game_event",
+            "name": "caught_rare_fish",
+            "count": 1
+          },
+          "points": 400,
+          "reward": [
+            {
+              "coins_add": 1000
+            }
+          ]
+        }
+      ]
+    },
+    "home_hero": {
+      "label": "Home Hero",
+      "description": "If it breaks, you fix it. If it works, you improve it.",
+      "fit_traits": [
+        "handy",
+        "perfectionist"
+      ],
+      "milestones": [
+        {
+          "id": "repair_2",
+          "label": "Repair 2 broken things",
+          "objective": {
+            "type": "game_event",
+            "name": "repaired_object",
+            "count": 2
+          },
+          "points": 50,
+          "reward": [
+            {
+              "add_buff": "tidy_pride"
+            }
+          ]
+        },
+        {
+          "id": "handy_3",
+          "label": "Reach handiness level 3",
+          "objective": {
+            "type": "cond",
+            "cond": [
+              {
+                "skill_at_least": [
+                  "handiness",
+                  3
+                ]
+              }
+            ]
+          },
+          "points": 90,
+          "reward": [
+            {
+              "coins_add": 150
+            }
+          ]
+        },
+        {
+          "id": "gadget_1",
+          "label": "Build a gadget",
+          "objective": {
+            "type": "game_event",
+            "name": "built_gadget",
+            "count": 1
+          },
+          "points": 150,
+          "reward": [
+            {
+              "coins_add": 250
+            }
+          ]
+        },
+        {
+          "id": "handy_6",
+          "label": "Reach handiness level 6",
+          "objective": {
+            "type": "cond",
+            "cond": [
+              {
+                "skill_at_least": [
+                  "handiness",
+                  6
+                ]
+              }
+            ]
+          },
+          "points": 260,
+          "reward": [
+            {
+              "coins_add": 600
+            }
+          ]
+        },
+        {
+          "id": "handyperson_3",
+          "label": "Work as a Contractor (level 3)",
+          "objective": {
+            "type": "cond",
+            "cond": [
+              {
+                "career_is": "handyperson"
+              },
+              {
+                "career_level_at_least": 3
+              }
+            ]
+          },
+          "points": 400,
+          "reward": [
+            {
+              "coins_add": 1000
+            }
+          ]
+        }
+      ]
+    },
+    "wordsmith": {
+      "label": "Wordsmith",
+      "description": "Write the book everyone talks about.",
+      "fit_traits": [
+        "creative",
+        "bookworm"
+      ],
+      "milestones": [
+        {
+          "id": "story_3",
+          "label": "Write 3 stories",
+          "objective": {
+            "type": "interaction",
+            "count": 3,
+            "ids": [
+              "write_story",
+              "write_on_computer",
+              "write_on_terminal"
+            ]
+          },
+          "points": 40,
+          "reward": [
+            {
+              "add_buff": "inspired"
+            }
+          ]
+        },
+        {
+          "id": "writing_3",
+          "label": "Reach writing level 3",
+          "objective": {
+            "type": "cond",
+            "cond": [
+              {
+                "skill_at_least": [
+                  "writing",
+                  3
+                ]
+              }
+            ]
+          },
+          "points": 100,
+          "reward": [
+            {
+              "coins_add": 150
+            }
+          ]
+        },
+        {
+          "id": "chapter_1",
+          "label": "Write a novel chapter",
+          "objective": {
+            "type": "game_event",
+            "name": "novel_chapter",
+            "count": 1
+          },
+          "points": 160,
+          "reward": [
+            {
+              "coins_add": 250
+            }
+          ]
+        },
+        {
+          "id": "writing_6",
+          "label": "Reach writing level 6",
+          "objective": {
+            "type": "cond",
+            "cond": [
+              {
+                "skill_at_least": [
+                  "writing",
+                  6
+                ]
+              }
+            ]
+          },
+          "points": 260,
+          "reward": [
+            {
+              "coins_add": 600
+            }
+          ]
+        },
+        {
+          "id": "writer_3",
+          "label": "Work as an Author (level 3)",
+          "objective": {
+            "type": "cond",
+            "cond": [
+              {
+                "career_is": "writer"
+              },
+              {
+                "career_level_at_least": 3
+              }
+            ]
+          },
+          "points": 400,
+          "reward": [
+            {
+              "coins_add": 1000
+            }
+          ]
+        }
+      ]
+    },
+    "curious_mind": {
+      "label": "Curious Mind",
+      "description": "Ask why, then build the experiment.",
+      "fit_traits": [
+        "bookworm",
+        "workaholic",
+        "night_owl"
+      ],
+      "milestones": [
+        {
+          "id": "research_3",
+          "label": "Research online 3 times",
+          "objective": {
+            "type": "interaction",
+            "count": 3,
+            "id": "research_online"
+          },
+          "points": 40,
+          "reward": [
+            {
+              "add_buff": "eureka"
+            }
+          ]
+        },
+        {
+          "id": "logic_4",
+          "label": "Reach logic level 4",
+          "objective": {
+            "type": "cond",
+            "cond": [
+              {
+                "skill_at_least": [
+                  "logic",
+                  4
+                ]
+              }
+            ]
+          },
+          "points": 100,
+          "reward": [
+            {
+              "coins_add": 150
+            }
+          ]
+        },
+        {
+          "id": "stars_3",
+          "label": "Stargaze 3 times",
+          "objective": {
+            "type": "game_event",
+            "name": "stargazed",
+            "count": 3
+          },
+          "points": 140,
+          "reward": [
+            {
+              "coins_add": 200
+            }
+          ]
+        },
+        {
+          "id": "eureka_3",
+          "label": "Have 3 eureka moments",
+          "objective": {
+            "type": "buff",
+            "id": "eureka",
+            "count": 3
+          },
+          "points": 200,
+          "reward": [
+            {
+              "coins_add": 300
+            }
+          ]
+        },
+        {
+          "id": "scientist_3",
+          "label": "Work as a Researcher (level 3)",
+          "objective": {
+            "type": "cond",
+            "cond": [
+              {
+                "career_is": "scientist"
+              },
+              {
+                "career_level_at_least": 3
+              }
+            ]
+          },
+          "points": 400,
+          "reward": [
+            {
+              "coins_add": 1000
+            }
+          ]
+        }
+      ]
+    },
+    "gracious_host": {
+      "label": "Gracious Host",
+      "description": "Fire up the grill, mix a round, make everyone welcome.",
+      "fit_traits": [
+        "social",
+        "foodie",
+        "showoff"
+      ],
+      "milestones": [
+        {
+          "id": "grill_2",
+          "label": "Grill food twice",
+          "objective": {
+            "type": "interaction",
+            "count": 2,
+            "ids": [
+              "grill_food",
+              "grill_gourmet"
+            ]
+          },
+          "points": 40,
+          "reward": [
+            {
+              "add_buff": "social_glow"
+            }
+          ]
+        },
+        {
+          "id": "drinks_3",
+          "label": "Mix 3 drinks",
+          "objective": {
+            "type": "interaction",
+            "count": 3,
+            "id": "mix_drink"
+          },
+          "points": 90,
+          "reward": [
+            {
+              "coins_add": 150
+            }
+          ]
+        },
+        {
+          "id": "pool_3",
+          "label": "Play pool 3 times",
+          "objective": {
+            "type": "interaction",
+            "count": 3,
+            "id": "play_pool"
+          },
+          "points": 120,
+          "reward": [
+            {
+              "coins_add": 200
+            }
+          ]
+        },
+        {
+          "id": "visitors_3",
+          "label": "Host 3 visitors",
+          "objective": {
+            "type": "game_event",
+            "name": "visit_started",
+            "count": 3
+          },
+          "points": 250,
+          "reward": [
+            {
+              "coins_add": 400
+            }
+          ]
+        },
+        {
+          "id": "barista_3",
+          "label": "Work as a Senior Barista (level 3)",
+          "objective": {
+            "type": "cond",
+            "cond": [
+              {
+                "career_is": "barista"
+              },
+              {
+                "career_level_at_least": 3
+              }
+            ]
+          },
+          "points": 400,
+          "reward": [
+            {
+              "coins_add": 1000
+            }
+          ]
+        }
+      ]
+    },
+    "iron_will": {
+      "label": "Iron Will",
+      "description": "Lift, run, recover, repeat.",
+      "fit_traits": [
+        "active",
+        "outdoorsy"
+      ],
+      "milestones": [
+        {
+          "id": "lift_3",
+          "label": "Lift weights 3 times",
+          "objective": {
+            "type": "interaction",
+            "count": 3,
+            "id": "lift_weights"
+          },
+          "points": 40,
+          "reward": [
+            {
+              "add_buff": "pumped"
+            }
+          ]
+        },
+        {
+          "id": "fit_5",
+          "label": "Reach fitness level 5",
+          "objective": {
+            "type": "cond",
+            "cond": [
+              {
+                "skill_at_least": [
+                  "fitness",
+                  5
+                ]
+              }
+            ]
+          },
+          "points": 140,
+          "reward": [
+            {
+              "coins_add": 250
+            }
+          ]
+        },
+        {
+          "id": "dance_2",
+          "label": "Dance twice",
+          "objective": {
+            "type": "interaction",
+            "count": 2,
+            "id": "dance"
+          },
+          "points": 90,
+          "reward": [
+            {
+              "coins_add": 100
+            }
+          ]
+        },
+        {
+          "id": "lift_15",
+          "label": "Lift weights 15 times",
+          "objective": {
+            "type": "interaction",
+            "count": 15,
+            "id": "lift_weights"
+          },
+          "points": 220,
+          "reward": [
+            {
+              "coins_add": 500
+            }
+          ]
+        },
+        {
+          "id": "athlete_3",
+          "label": "Work as a Pro athlete (level 3)",
+          "objective": {
+            "type": "cond",
+            "cond": [
+              {
+                "career_is": "athlete"
+              },
+              {
+                "career_level_at_least": 3
+              }
+            ]
+          },
+          "points": 400,
+          "reward": [
+            {
+              "coins_add": 1000
+            }
+          ]
+        }
+      ]
+    },
+    "gourmet_legend": {
+      "label": "Gourmet Legend",
+      "description": "From toast to tasting menu.",
+      "fit_traits": [
+        "foodie",
+        "perfectionist"
+      ],
+      "milestones": [
+        {
+          "id": "good_meal_3",
+          "label": "Cook 3 good meals",
+          "objective": {
+            "type": "interaction",
+            "count": 3,
+            "ids": [
+              "cook_meal_good",
+              "prep_food_good"
+            ]
+          },
+          "points": 50,
+          "reward": [
+            {
+              "add_buff": "proud"
+            }
+          ]
+        },
+        {
+          "id": "cooking_5",
+          "label": "Reach cooking level 5",
+          "objective": {
+            "type": "cond",
+            "cond": [
+              {
+                "skill_at_least": [
+                  "cooking",
+                  5
+                ]
+              }
+            ]
+          },
+          "points": 140,
+          "reward": [
+            {
+              "coins_add": 250
+            }
+          ]
+        },
+        {
+          "id": "gourmet_1",
+          "label": "Cook a gourmet meal",
+          "objective": {
+            "type": "interaction",
+            "count": 1,
+            "ids": [
+              "cook_meal_gourmet",
+              "cook_fish_dinner",
+              "grill_gourmet"
+            ]
+          },
+          "points": 200,
+          "reward": [
+            {
+              "coins_add": 300
+            }
+          ]
+        },
+        {
+          "id": "savour_3",
+          "label": "Feel gourmet-fed 3 times",
+          "objective": {
+            "type": "buff",
+            "id": "well_fed_gourmet",
+            "count": 3
+          },
+          "points": 220,
+          "reward": [
+            {
+              "coins_add": 400
+            }
+          ]
+        },
+        {
+          "id": "chef_3",
+          "label": "Work as a Chef de Partie (level 3)",
+          "objective": {
+            "type": "cond",
+            "cond": [
+              {
+                "career_is": "chef"
+              },
+              {
+                "career_level_at_least": 3
+              }
+            ]
+          },
+          "points": 400,
+          "reward": [
+            {
+              "coins_add": 1000
+            }
+          ]
+        }
       ]
     }
   },
   "whims": {
-    "take_shower":    {"label": "Take a shower", "when": [{"stat_below": ["hygiene", 20]}], "objective": {"type": "interaction", "ids": ["take_shower", "take_bath"]}, "points": 20, "weight": 2.0},
-    "eat_something":  {"label": "Eat something", "when": [{"stat_below": ["hunger", 15]}], "objective": {"type": "interaction", "ids": ["eat_meal", "grab_snack"]}, "points": 20, "weight": 2.0},
-    "get_some_sleep": {"label": "Get some sleep", "when": [{"stat_below": ["energy", 0]}], "objective": {"type": "interaction", "ids": ["sleep_bed", "nap_bed", "nap_sofa"]}, "points": 20, "weight": 2.0},
-    "make_a_friend":  {"label": "Make a friend", "when": [{"not": {"friends_at_least": 2}}], "objective": {"type": "game_event", "name": "relationship_bit_changed", "payload_eq": {"bit": "friend"}}, "points": 60, "weight": 1.2, "trait_weight": {"social": 2.0, "loner": 0.3}},
-    "chat_with_someone": {"label": "Chat with someone", "when": [{"stat_below": ["social", 20]}], "objective": {"type": "interaction", "id": "chat"}, "points": 25, "weight": 1.5, "trait_weight": {"social": 1.8}},
-    "tell_a_joke":    {"label": "Tell a joke", "when": [{"stat_above": ["social", -40]}], "objective": {"type": "interaction", "id": "tell_joke"}, "points": 20, "weight": 0.8, "trait_weight": {"social": 1.5}},
-    "compliment_someone": {"label": "Compliment someone", "when": [{"stat_above": ["social", -60]}], "objective": {"type": "interaction", "id": "compliment"}, "points": 20, "weight": 0.7, "trait_weight": {"romantic": 1.5}},
-    "flirt_a_little": {"label": "Flirt with someone", "when": [{"has_trait": "romantic"}], "objective": {"type": "interaction", "id": "flirt"}, "points": 35, "weight": 1.2},
-    "watch_tv":       {"label": "Watch some TV", "when": [{"stat_below": ["fun", 10]}], "objective": {"type": "interaction", "id": "watch_tv"}, "points": 15, "weight": 1.0, "trait_weight": {"bookworm": 0.3}},
-    "read_a_book":    {"label": "Read a book", "when": [{"stat_below": ["fun", 40]}], "objective": {"type": "interaction", "id": "read_book"}, "points": 20, "weight": 0.9, "trait_weight": {"bookworm": 2.5}},
-    "paint_a_picture":{"label": "Paint a picture", "when": [{"stat_above": ["fun", -50]}], "objective": {"type": "interaction", "id": "paint_canvas"}, "points": 30, "weight": 0.8, "trait_weight": {"creative": 3.0}},
-    "work_out":       {"label": "Work out", "when": [{"stat_above": ["energy", 10]}], "objective": {"type": "interaction", "id": "exercise"}, "points": 30, "weight": 0.7, "trait_weight": {"active": 3.0, "lazy": 0.2}},
-    "cook_a_meal":    {"label": "Cook a meal", "when": [{"stat_below": ["hunger", 40]}], "objective": {"type": "interaction", "ids": ["cook_meal", "prep_food"]}, "points": 30, "weight": 1.0, "trait_weight": {"glutton": 1.5}},
-    "play_a_game":    {"label": "Play on the computer", "when": [{"stat_below": ["fun", 50]}], "objective": {"type": "interaction", "id": "play_computer"}, "points": 20, "weight": 0.8, "trait_weight": {"gamer": 3.0}},
-    "tidy_up":        {"label": "Do a chore", "when": [{"has_trait": "neat"}], "objective": {"type": "interaction", "tag": "chore"}, "points": 25, "weight": 1.5},
-    "soak_in_the_bath": {"label": "Relax in the bath", "when": [{"stat_below": ["comfort", 30]}], "objective": {"type": "buff", "id": "relaxed"}, "points": 35, "weight": 0.8},
-    "get_inspired":   {"label": "Feel inspired", "when": [{"has_trait": "creative"}], "objective": {"type": "buff", "id": "inspired"}, "points": 40, "weight": 1.0},
-    "water_the_plants": {"label": "Water a plant", "when": [{"stat_above": ["fun", -80]}], "objective": {"type": "interaction", "id": "water_plant"}, "points": 15, "weight": 0.5},
-    "make_up":        {"label": "Apologize to someone", "when": [{"bit_count": ["enemy", 1]}], "objective": {"type": "interaction", "id": "apologize"}, "points": 45, "weight": 2.0},
-    "earn_some_coins":{"label": "Earn 100 coins", "when": [{"stat_above": ["energy", -30]}], "dynamic": "coins_gain", "params": {"amount": 100}, "objective": {"type": "cond", "cond": []}, "points": 40, "weight": 0.8, "cooldown_hours": 72},
-    "get_promoted":   {"label": "Get promoted", "when": [{"has_job": true}], "objective": {"type": "game_event", "name": "promoted"}, "points": 80, "weight": 0.6, "expire_hours": 48},
-    "invite_visitor": {"label": "Have a visitor over", "when": [{"stat_below": ["social", 30]}], "objective": {"type": "game_event", "name": "visit_started"}, "points": 50, "weight": 0.7, "expire_hours": 36},
-    "level_up_cooking":  {"label": "Reach cooking level %d", "when": [{"skill_below": ["cooking", 10]}], "dynamic": "skill_next", "params": {"skill": "cooking"}, "objective": {"type": "cond", "cond": []}, "points": 40, "weight": 0.7, "trait_weight": {"glutton": 1.5}, "expire_hours": 48},
-    "level_up_fitness":  {"label": "Reach fitness level %d", "when": [{"skill_below": ["fitness", 10]}], "dynamic": "skill_next", "params": {"skill": "fitness"}, "objective": {"type": "cond", "cond": []}, "points": 40, "weight": 0.6, "trait_weight": {"active": 2.0}, "expire_hours": 48},
-    "level_up_logic":    {"label": "Reach logic level %d", "when": [{"skill_below": ["logic", 10]}], "dynamic": "skill_next", "params": {"skill": "logic"}, "objective": {"type": "cond", "cond": []}, "points": 40, "weight": 0.6, "trait_weight": {"gamer": 1.3, "bookworm": 1.5}, "expire_hours": 48},
-    "level_up_painting": {"label": "Reach painting level %d", "when": [{"skill_below": ["painting", 10]}], "dynamic": "skill_next", "params": {"skill": "painting"}, "objective": {"type": "cond", "cond": []}, "points": 40, "weight": 0.6, "trait_weight": {"creative": 2.0}, "expire_hours": 48}
+    "take_shower": {
+      "label": "Take a shower",
+      "when": [
+        {
+          "stat_below": [
+            "hygiene",
+            20
+          ]
+        }
+      ],
+      "objective": {
+        "type": "interaction",
+        "ids": [
+          "take_shower",
+          "take_bath"
+        ]
+      },
+      "points": 20,
+      "weight": 2.0
+    },
+    "eat_something": {
+      "label": "Eat something",
+      "when": [
+        {
+          "stat_below": [
+            "hunger",
+            15
+          ]
+        }
+      ],
+      "objective": {
+        "type": "interaction",
+        "ids": [
+          "eat_meal",
+          "grab_snack"
+        ]
+      },
+      "points": 20,
+      "weight": 2.0
+    },
+    "get_some_sleep": {
+      "label": "Get some sleep",
+      "when": [
+        {
+          "stat_below": [
+            "energy",
+            0
+          ]
+        }
+      ],
+      "objective": {
+        "type": "interaction",
+        "ids": [
+          "sleep_bed",
+          "nap_bed",
+          "nap_sofa"
+        ]
+      },
+      "points": 20,
+      "weight": 2.0
+    },
+    "make_a_friend": {
+      "label": "Make a friend",
+      "when": [
+        {
+          "not": {
+            "friends_at_least": 2
+          }
+        }
+      ],
+      "objective": {
+        "type": "game_event",
+        "name": "relationship_bit_changed",
+        "payload_eq": {
+          "bit": "friend"
+        }
+      },
+      "points": 60,
+      "weight": 1.2,
+      "trait_weight": {
+        "social": 2.0,
+        "loner": 0.3
+      }
+    },
+    "chat_with_someone": {
+      "label": "Chat with someone",
+      "when": [
+        {
+          "stat_below": [
+            "social",
+            20
+          ]
+        }
+      ],
+      "objective": {
+        "type": "interaction",
+        "id": "chat"
+      },
+      "points": 25,
+      "weight": 1.5,
+      "trait_weight": {
+        "social": 1.8
+      }
+    },
+    "tell_a_joke": {
+      "label": "Tell a joke",
+      "when": [
+        {
+          "stat_above": [
+            "social",
+            -40
+          ]
+        }
+      ],
+      "objective": {
+        "type": "interaction",
+        "id": "tell_joke"
+      },
+      "points": 20,
+      "weight": 0.8,
+      "trait_weight": {
+        "social": 1.5
+      }
+    },
+    "compliment_someone": {
+      "label": "Compliment someone",
+      "when": [
+        {
+          "stat_above": [
+            "social",
+            -60
+          ]
+        }
+      ],
+      "objective": {
+        "type": "interaction",
+        "id": "compliment"
+      },
+      "points": 20,
+      "weight": 0.7,
+      "trait_weight": {
+        "romantic": 1.5
+      }
+    },
+    "flirt_a_little": {
+      "label": "Flirt with someone",
+      "when": [
+        {
+          "has_trait": "romantic"
+        }
+      ],
+      "objective": {
+        "type": "interaction",
+        "id": "flirt"
+      },
+      "points": 35,
+      "weight": 1.2
+    },
+    "watch_tv": {
+      "label": "Watch some TV",
+      "when": [
+        {
+          "stat_below": [
+            "fun",
+            10
+          ]
+        }
+      ],
+      "objective": {
+        "type": "interaction",
+        "id": "watch_tv"
+      },
+      "points": 15,
+      "weight": 1.0,
+      "trait_weight": {
+        "bookworm": 0.3
+      }
+    },
+    "read_a_book": {
+      "label": "Read a book",
+      "when": [
+        {
+          "stat_below": [
+            "fun",
+            40
+          ]
+        }
+      ],
+      "objective": {
+        "type": "interaction",
+        "id": "read_book"
+      },
+      "points": 20,
+      "weight": 0.9,
+      "trait_weight": {
+        "bookworm": 2.5
+      }
+    },
+    "paint_a_picture": {
+      "label": "Paint a picture",
+      "when": [
+        {
+          "stat_above": [
+            "fun",
+            -50
+          ]
+        }
+      ],
+      "objective": {
+        "type": "interaction",
+        "id": "paint_canvas"
+      },
+      "points": 30,
+      "weight": 0.8,
+      "trait_weight": {
+        "creative": 3.0
+      }
+    },
+    "work_out": {
+      "label": "Work out",
+      "when": [
+        {
+          "stat_above": [
+            "energy",
+            10
+          ]
+        }
+      ],
+      "objective": {
+        "type": "interaction",
+        "id": "exercise"
+      },
+      "points": 30,
+      "weight": 0.7,
+      "trait_weight": {
+        "active": 3.0,
+        "lazy": 0.2
+      }
+    },
+    "cook_a_meal": {
+      "label": "Cook a meal",
+      "when": [
+        {
+          "stat_below": [
+            "hunger",
+            40
+          ]
+        }
+      ],
+      "objective": {
+        "type": "interaction",
+        "ids": [
+          "cook_meal",
+          "prep_food"
+        ]
+      },
+      "points": 30,
+      "weight": 1.0,
+      "trait_weight": {
+        "glutton": 1.5
+      }
+    },
+    "play_a_game": {
+      "label": "Play on the computer",
+      "when": [
+        {
+          "stat_below": [
+            "fun",
+            50
+          ]
+        }
+      ],
+      "objective": {
+        "type": "interaction",
+        "id": "play_computer"
+      },
+      "points": 20,
+      "weight": 0.8,
+      "trait_weight": {
+        "gamer": 3.0
+      }
+    },
+    "tidy_up": {
+      "label": "Do a chore",
+      "when": [
+        {
+          "has_trait": "neat"
+        }
+      ],
+      "objective": {
+        "type": "interaction",
+        "tag": "chore"
+      },
+      "points": 25,
+      "weight": 1.5
+    },
+    "soak_in_the_bath": {
+      "label": "Relax in the bath",
+      "when": [
+        {
+          "stat_below": [
+            "comfort",
+            30
+          ]
+        }
+      ],
+      "objective": {
+        "type": "buff",
+        "id": "relaxed"
+      },
+      "points": 35,
+      "weight": 0.8
+    },
+    "get_inspired": {
+      "label": "Feel inspired",
+      "when": [
+        {
+          "has_trait": "creative"
+        }
+      ],
+      "objective": {
+        "type": "buff",
+        "id": "inspired"
+      },
+      "points": 40,
+      "weight": 1.0
+    },
+    "water_the_plants": {
+      "label": "Water a plant",
+      "when": [
+        {
+          "stat_above": [
+            "fun",
+            -80
+          ]
+        }
+      ],
+      "objective": {
+        "type": "interaction",
+        "id": "water_plant"
+      },
+      "points": 15,
+      "weight": 0.5
+    },
+    "make_up": {
+      "label": "Apologize to someone",
+      "when": [
+        {
+          "bit_count": [
+            "enemy",
+            1
+          ]
+        }
+      ],
+      "objective": {
+        "type": "interaction",
+        "id": "apologize"
+      },
+      "points": 45,
+      "weight": 2.0
+    },
+    "earn_some_coins": {
+      "label": "Earn 100 coins",
+      "when": [
+        {
+          "stat_above": [
+            "energy",
+            -30
+          ]
+        }
+      ],
+      "dynamic": "coins_gain",
+      "params": {
+        "amount": 100
+      },
+      "objective": {
+        "type": "cond",
+        "cond": []
+      },
+      "points": 40,
+      "weight": 0.8,
+      "cooldown_hours": 72
+    },
+    "get_promoted": {
+      "label": "Get promoted",
+      "when": [
+        {
+          "has_job": true
+        }
+      ],
+      "objective": {
+        "type": "game_event",
+        "name": "promoted"
+      },
+      "points": 80,
+      "weight": 0.6,
+      "expire_hours": 48
+    },
+    "invite_visitor": {
+      "label": "Have a visitor over",
+      "when": [
+        {
+          "stat_below": [
+            "social",
+            30
+          ]
+        }
+      ],
+      "objective": {
+        "type": "game_event",
+        "name": "visit_started"
+      },
+      "points": 50,
+      "weight": 0.7,
+      "expire_hours": 36
+    },
+    "level_up_cooking": {
+      "label": "Reach cooking level %d",
+      "when": [
+        {
+          "skill_below": [
+            "cooking",
+            10
+          ]
+        }
+      ],
+      "dynamic": "skill_next",
+      "params": {
+        "skill": "cooking"
+      },
+      "objective": {
+        "type": "cond",
+        "cond": []
+      },
+      "points": 40,
+      "weight": 0.7,
+      "trait_weight": {
+        "glutton": 1.5
+      },
+      "expire_hours": 48
+    },
+    "level_up_fitness": {
+      "label": "Reach fitness level %d",
+      "when": [
+        {
+          "skill_below": [
+            "fitness",
+            10
+          ]
+        }
+      ],
+      "dynamic": "skill_next",
+      "params": {
+        "skill": "fitness"
+      },
+      "objective": {
+        "type": "cond",
+        "cond": []
+      },
+      "points": 40,
+      "weight": 0.6,
+      "trait_weight": {
+        "active": 2.0
+      },
+      "expire_hours": 48
+    },
+    "level_up_logic": {
+      "label": "Reach logic level %d",
+      "when": [
+        {
+          "skill_below": [
+            "logic",
+            10
+          ]
+        }
+      ],
+      "dynamic": "skill_next",
+      "params": {
+        "skill": "logic"
+      },
+      "objective": {
+        "type": "cond",
+        "cond": []
+      },
+      "points": 40,
+      "weight": 0.6,
+      "trait_weight": {
+        "gamer": 1.3,
+        "bookworm": 1.5
+      },
+      "expire_hours": 48
+    },
+    "level_up_painting": {
+      "label": "Reach painting level %d",
+      "when": [
+        {
+          "skill_below": [
+            "painting",
+            10
+          ]
+        }
+      ],
+      "dynamic": "skill_next",
+      "params": {
+        "skill": "painting"
+      },
+      "objective": {
+        "type": "cond",
+        "cond": []
+      },
+      "points": 40,
+      "weight": 0.6,
+      "trait_weight": {
+        "creative": 2.0
+      },
+      "expire_hours": 48
+    },
+    "play_some_guitar": {
+      "label": "Play the guitar",
+      "when": [
+        {
+          "stat_below": [
+            "fun",
+            80
+          ]
+        }
+      ],
+      "objective": {
+        "type": "interaction",
+        "count": 1,
+        "id": "play_guitar"
+      },
+      "points": 30,
+      "weight": 1.0,
+      "trait_weight": {
+        "musical": 3.0
+      }
+    },
+    "tickle_the_ivories": {
+      "label": "Play the piano",
+      "when": [
+        {
+          "stat_below": [
+            "fun",
+            80
+          ]
+        }
+      ],
+      "objective": {
+        "type": "interaction",
+        "count": 1,
+        "id": "play_piano"
+      },
+      "points": 30,
+      "weight": 1.0,
+      "trait_weight": {
+        "musical": 3.0
+      }
+    },
+    "write_a_song": {
+      "label": "Write a song",
+      "when": [
+        {
+          "skill_at_least": [
+            "guitar",
+            3
+          ]
+        }
+      ],
+      "objective": {
+        "type": "interaction",
+        "count": 1,
+        "id": "write_song"
+      },
+      "points": 60,
+      "weight": 0.8,
+      "trait_weight": {
+        "musical": 2.0,
+        "creative": 1.5
+      }
+    },
+    "give_recital": {
+      "label": "Give a recital",
+      "when": [
+        {
+          "skill_at_least": [
+            "piano",
+            4
+          ]
+        }
+      ],
+      "objective": {
+        "type": "interaction",
+        "count": 1,
+        "id": "play_piano_concert"
+      },
+      "points": 60,
+      "weight": 0.8,
+      "trait_weight": {
+        "showoff": 2.5
+      }
+    },
+    "practice_scales": {
+      "label": "Practice an instrument",
+      "when": [
+        {
+          "stat_above": [
+            "energy",
+            -30
+          ]
+        }
+      ],
+      "objective": {
+        "type": "interaction",
+        "count": 1,
+        "ids": [
+          "practice_guitar",
+          "practice_piano"
+        ]
+      },
+      "points": 35,
+      "weight": 0.7,
+      "trait_weight": {
+        "perfectionist": 2.5
+      }
+    },
+    "listen_to_music": {
+      "label": "Listen to music",
+      "when": [
+        {
+          "stat_below": [
+            "fun",
+            60
+          ]
+        }
+      ],
+      "objective": {
+        "type": "interaction",
+        "count": 1,
+        "id": "listen_music"
+      },
+      "points": 20,
+      "weight": 1.0,
+      "trait_weight": {
+        "musical": 2.0
+      }
+    },
+    "dance_around": {
+      "label": "Dance",
+      "when": [
+        {
+          "stat_above": [
+            "energy",
+            -30
+          ]
+        },
+        {
+          "stat_below": [
+            "fun",
+            70
+          ]
+        }
+      ],
+      "objective": {
+        "type": "interaction",
+        "count": 1,
+        "id": "dance"
+      },
+      "points": 30,
+      "weight": 0.8,
+      "trait_weight": {
+        "showoff": 1.5,
+        "lazy": 0.3
+      }
+    },
+    "serenade_someone": {
+      "label": "Serenade someone",
+      "when": [
+        {
+          "skill_at_least": [
+            "guitar",
+            2
+          ]
+        }
+      ],
+      "objective": {
+        "type": "interaction",
+        "count": 1,
+        "id": "serenade"
+      },
+      "points": 50,
+      "weight": 0.8,
+      "trait_weight": {
+        "romantic": 2.0,
+        "showoff": 1.5
+      }
+    },
+    "feel_melodic": {
+      "label": "Feel melodic",
+      "when": [
+        {
+          "stat_below": [
+            "fun",
+            70
+          ]
+        }
+      ],
+      "objective": {
+        "type": "buff",
+        "id": "melodic",
+        "count": 1
+      },
+      "points": 35,
+      "weight": 0.6,
+      "trait_weight": {
+        "musical": 2.0
+      }
+    },
+    "plant_a_garden": {
+      "label": "Plant some seeds",
+      "when": [
+        {
+          "stat_above": [
+            "energy",
+            -30
+          ]
+        }
+      ],
+      "objective": {
+        "type": "interaction",
+        "count": 1,
+        "id": "plant_seeds"
+      },
+      "points": 30,
+      "weight": 0.8,
+      "trait_weight": {
+        "green_thumb": 3.0
+      }
+    },
+    "water_the_garden": {
+      "label": "Water the garden",
+      "when": [
+        {
+          "stat_above": [
+            "energy",
+            -30
+          ]
+        }
+      ],
+      "objective": {
+        "type": "interaction",
+        "count": 1,
+        "id": "water_garden"
+      },
+      "points": 20,
+      "weight": 0.8,
+      "trait_weight": {
+        "green_thumb": 2.5
+      }
+    },
+    "pull_weeds": {
+      "label": "Pull some weeds",
+      "when": [
+        {
+          "stat_above": [
+            "energy",
+            -30
+          ]
+        }
+      ],
+      "objective": {
+        "type": "interaction",
+        "count": 1,
+        "id": "weed_garden"
+      },
+      "points": 25,
+      "weight": 0.6,
+      "trait_weight": {
+        "green_thumb": 2.0,
+        "lazy": 0.3
+      }
+    },
+    "bring_in_harvest": {
+      "label": "Bring in a harvest",
+      "when": [
+        {
+          "stat_above": [
+            "energy",
+            -30
+          ]
+        }
+      ],
+      "objective": {
+        "type": "interaction",
+        "count": 1,
+        "ids": [
+          "harvest_crops",
+          "harvest_crops_bountiful"
+        ]
+      },
+      "points": 40,
+      "weight": 0.7,
+      "trait_weight": {
+        "green_thumb": 2.5
+      }
+    },
+    "share_the_harvest": {
+      "label": "Share produce with someone",
+      "when": [
+        {
+          "stat_above": [
+            "social",
+            -60
+          ]
+        }
+      ],
+      "objective": {
+        "type": "interaction",
+        "count": 1,
+        "id": "gift_produce"
+      },
+      "points": 45,
+      "weight": 0.6,
+      "trait_weight": {
+        "social": 1.5
+      }
+    },
+    "go_fishing": {
+      "label": "Go fishing",
+      "when": [
+        {
+          "stat_below": [
+            "fun",
+            75
+          ]
+        }
+      ],
+      "objective": {
+        "type": "interaction",
+        "count": 1,
+        "id": "fish_pond"
+      },
+      "points": 30,
+      "weight": 0.8,
+      "trait_weight": {
+        "outdoorsy": 3.0
+      }
+    },
+    "fish_the_deep": {
+      "label": "Fish the deep water",
+      "when": [
+        {
+          "skill_at_least": [
+            "fishing",
+            3
+          ]
+        }
+      ],
+      "objective": {
+        "type": "interaction",
+        "count": 1,
+        "id": "fish_deep_water"
+      },
+      "points": 50,
+      "weight": 0.7,
+      "trait_weight": {
+        "outdoorsy": 2.5
+      }
+    },
+    "catch_something": {
+      "label": "Catch something fresh",
+      "when": [
+        {
+          "stat_below": [
+            "fun",
+            80
+          ]
+        }
+      ],
+      "objective": {
+        "type": "buff",
+        "id": "fresh_catch",
+        "count": 1
+      },
+      "points": 40,
+      "weight": 0.6,
+      "trait_weight": {
+        "outdoorsy": 2.5
+      }
+    },
+    "fix_something": {
+      "label": "Fix something",
+      "when": [
+        {
+          "stat_above": [
+            "energy",
+            -30
+          ]
+        }
+      ],
+      "objective": {
+        "type": "interaction",
+        "count": 1,
+        "id": "repair_object"
+      },
+      "points": 40,
+      "weight": 0.8,
+      "trait_weight": {
+        "handy": 3.0,
+        "clumsy": 0.3
+      }
+    },
+    "tinker_at_bench": {
+      "label": "Tinker at the workbench",
+      "when": [
+        {
+          "stat_below": [
+            "fun",
+            80
+          ]
+        }
+      ],
+      "objective": {
+        "type": "interaction",
+        "count": 1,
+        "id": "tinker"
+      },
+      "points": 30,
+      "weight": 0.8,
+      "trait_weight": {
+        "handy": 2.0,
+        "creative": 1.5
+      }
+    },
+    "do_the_laundry": {
+      "label": "Do the laundry",
+      "when": [
+        {
+          "stat_above": [
+            "energy",
+            -30
+          ]
+        }
+      ],
+      "objective": {
+        "type": "interaction",
+        "count": 1,
+        "id": "do_laundry"
+      },
+      "points": 25,
+      "weight": 0.8,
+      "trait_weight": {
+        "neat": 2.0,
+        "lazy": 0.4
+      }
+    },
+    "build_a_gadget": {
+      "label": "Build a gadget",
+      "when": [
+        {
+          "skill_at_least": [
+            "handiness",
+            3
+          ]
+        }
+      ],
+      "objective": {
+        "type": "interaction",
+        "count": 1,
+        "id": "build_gadget"
+      },
+      "points": 60,
+      "weight": 0.7,
+      "trait_weight": {
+        "handy": 2.5
+      }
+    },
+    "check_the_alarm": {
+      "label": "Check the smoke alarm",
+      "when": [
+        {
+          "stat_above": [
+            "energy",
+            -30
+          ]
+        }
+      ],
+      "objective": {
+        "type": "interaction",
+        "count": 1,
+        "ids": [
+          "test_smoke_alarm",
+          "replace_alarm_batteries",
+          "inspect_extinguisher"
+        ]
+      },
+      "points": 25,
+      "weight": 0.5,
+      "trait_weight": {
+        "perfectionist": 2.0
+      }
+    },
+    "toss_the_bad_food": {
+      "label": "Clear out spoiled food",
+      "when": [
+        {
+          "stat_above": [
+            "energy",
+            -30
+          ]
+        }
+      ],
+      "objective": {
+        "type": "interaction",
+        "count": 1,
+        "id": "toss_spoiled_food"
+      },
+      "points": 25,
+      "weight": 0.7,
+      "trait_weight": {
+        "neat": 2.0
+      }
+    },
+    "write_a_story": {
+      "label": "Write a story",
+      "when": [
+        {
+          "stat_below": [
+            "fun",
+            85
+          ]
+        }
+      ],
+      "objective": {
+        "type": "interaction",
+        "count": 1,
+        "ids": [
+          "write_story",
+          "write_on_computer",
+          "write_on_terminal"
+        ]
+      },
+      "points": 30,
+      "weight": 0.8,
+      "trait_weight": {
+        "creative": 2.5,
+        "bookworm": 1.5
+      }
+    },
+    "write_a_chapter": {
+      "label": "Write a novel chapter",
+      "when": [
+        {
+          "skill_at_least": [
+            "writing",
+            3
+          ]
+        }
+      ],
+      "objective": {
+        "type": "interaction",
+        "count": 1,
+        "id": "write_novel"
+      },
+      "points": 60,
+      "weight": 0.7,
+      "trait_weight": {
+        "creative": 2.0
+      }
+    },
+    "stargaze_tonight": {
+      "label": "Stargaze",
+      "when": [
+        {
+          "time_between": [
+            19,
+            5
+          ]
+        }
+      ],
+      "objective": {
+        "type": "interaction",
+        "count": 1,
+        "id": "stargaze"
+      },
+      "points": 35,
+      "weight": 0.8,
+      "trait_weight": {
+        "night_owl": 3.0
+      }
+    },
+    "research_something": {
+      "label": "Research something online",
+      "when": [
+        {
+          "stat_above": [
+            "energy",
+            -30
+          ]
+        }
+      ],
+      "objective": {
+        "type": "interaction",
+        "count": 1,
+        "id": "research_online"
+      },
+      "points": 30,
+      "weight": 0.8,
+      "trait_weight": {
+        "bookworm": 2.0,
+        "workaholic": 1.5
+      }
+    },
+    "have_a_eureka": {
+      "label": "Have a eureka moment",
+      "when": [
+        {
+          "stat_above": [
+            "energy",
+            -30
+          ]
+        }
+      ],
+      "objective": {
+        "type": "buff",
+        "id": "eureka",
+        "count": 1
+      },
+      "points": 45,
+      "weight": 0.5,
+      "trait_weight": {
+        "bookworm": 1.5
+      }
+    },
+    "brew_a_coffee": {
+      "label": "Brew a coffee",
+      "when": [
+        {
+          "stat_below": [
+            "energy",
+            25
+          ]
+        }
+      ],
+      "objective": {
+        "type": "interaction",
+        "count": 1,
+        "id": "brew_coffee"
+      },
+      "points": 20,
+      "weight": 1.4
+    },
+    "brew_a_tea": {
+      "label": "Brew some tea",
+      "when": [
+        {
+          "stat_below": [
+            "comfort",
+            40
+          ]
+        }
+      ],
+      "objective": {
+        "type": "interaction",
+        "count": 1,
+        "id": "brew_tea"
+      },
+      "points": 20,
+      "weight": 0.8
+    },
+    "mix_a_drink": {
+      "label": "Mix a drink",
+      "when": [
+        {
+          "stat_below": [
+            "fun",
+            70
+          ]
+        }
+      ],
+      "objective": {
+        "type": "interaction",
+        "count": 1,
+        "id": "mix_drink"
+      },
+      "points": 30,
+      "weight": 0.7,
+      "trait_weight": {
+        "social": 1.5,
+        "showoff": 1.5
+      }
+    },
+    "grill_something": {
+      "label": "Grill something",
+      "when": [
+        {
+          "stat_below": [
+            "hunger",
+            30
+          ]
+        }
+      ],
+      "objective": {
+        "type": "interaction",
+        "count": 1,
+        "ids": [
+          "grill_food",
+          "grill_gourmet"
+        ]
+      },
+      "points": 35,
+      "weight": 1.0,
+      "trait_weight": {
+        "glutton": 1.5,
+        "outdoorsy": 1.5
+      }
+    },
+    "cook_a_good_meal": {
+      "label": "Cook a good meal",
+      "when": [
+        {
+          "skill_at_least": [
+            "cooking",
+            3
+          ]
+        },
+        {
+          "stat_below": [
+            "hunger",
+            45
+          ]
+        }
+      ],
+      "objective": {
+        "type": "interaction",
+        "count": 1,
+        "ids": [
+          "cook_meal_good",
+          "prep_food_good"
+        ]
+      },
+      "points": 40,
+      "weight": 1.0,
+      "trait_weight": {
+        "foodie": 2.5
+      }
+    },
+    "cook_a_gourmet_meal": {
+      "label": "Cook a gourmet meal",
+      "when": [
+        {
+          "skill_at_least": [
+            "cooking",
+            6
+          ]
+        },
+        {
+          "stat_below": [
+            "hunger",
+            50
+          ]
+        }
+      ],
+      "objective": {
+        "type": "interaction",
+        "count": 1,
+        "ids": [
+          "cook_meal_gourmet",
+          "cook_fish_dinner",
+          "grill_gourmet"
+        ]
+      },
+      "points": 70,
+      "weight": 0.8,
+      "trait_weight": {
+        "foodie": 3.0
+      }
+    },
+    "savour_a_feast": {
+      "label": "Enjoy a gourmet meal",
+      "when": [
+        {
+          "stat_below": [
+            "hunger",
+            50
+          ]
+        }
+      ],
+      "objective": {
+        "type": "buff",
+        "id": "well_fed_gourmet",
+        "count": 1
+      },
+      "points": 50,
+      "weight": 0.6,
+      "trait_weight": {
+        "foodie": 3.0
+      }
+    },
+    "study_recipes": {
+      "label": "Study some recipes",
+      "when": [
+        {
+          "stat_below": [
+            "fun",
+            85
+          ]
+        }
+      ],
+      "objective": {
+        "type": "interaction",
+        "count": 1,
+        "id": "study_recipes"
+      },
+      "points": 25,
+      "weight": 0.6,
+      "trait_weight": {
+        "foodie": 2.0,
+        "bookworm": 1.3
+      }
+    },
+    "soak_in_the_tub": {
+      "label": "Soak in the hot tub",
+      "when": [
+        {
+          "stat_below": [
+            "comfort",
+            45
+          ]
+        }
+      ],
+      "objective": {
+        "type": "interaction",
+        "count": 1,
+        "id": "soak_hot_tub"
+      },
+      "points": 40,
+      "weight": 0.8,
+      "trait_weight": {
+        "germaphobe": 0.0
+      }
+    },
+    "light_a_fire": {
+      "label": "Light the fireplace",
+      "when": [
+        {
+          "stat_below": [
+            "comfort",
+            50
+          ]
+        }
+      ],
+      "objective": {
+        "type": "interaction",
+        "count": 1,
+        "id": "light_fireplace"
+      },
+      "points": 25,
+      "weight": 0.7
+    },
+    "warm_up_by_fire": {
+      "label": "Warm up by the fire",
+      "when": [
+        {
+          "stat_below": [
+            "comfort",
+            40
+          ]
+        }
+      ],
+      "objective": {
+        "type": "buff",
+        "id": "warmed_by_fire",
+        "count": 1
+      },
+      "points": 35,
+      "weight": 0.6
+    },
+    "sink_into_armchair": {
+      "label": "Relax in an armchair",
+      "when": [
+        {
+          "stat_below": [
+            "comfort",
+            40
+          ]
+        }
+      ],
+      "objective": {
+        "type": "interaction",
+        "count": 1,
+        "ids": [
+          "sit_armchair",
+          "read_armchair"
+        ]
+      },
+      "points": 20,
+      "weight": 1.0,
+      "trait_weight": {
+        "lazy": 1.5
+      }
+    },
+    "shoot_some_pool": {
+      "label": "Play pool",
+      "when": [
+        {
+          "stat_below": [
+            "fun",
+            60
+          ]
+        }
+      ],
+      "objective": {
+        "type": "interaction",
+        "count": 1,
+        "id": "play_pool"
+      },
+      "points": 30,
+      "weight": 0.8,
+      "trait_weight": {
+        "social": 1.5,
+        "gamer": 1.2
+      }
+    },
+    "lift_some_weights": {
+      "label": "Lift weights",
+      "when": [
+        {
+          "stat_above": [
+            "energy",
+            -30
+          ]
+        }
+      ],
+      "objective": {
+        "type": "interaction",
+        "count": 1,
+        "id": "lift_weights"
+      },
+      "points": 30,
+      "weight": 0.7,
+      "trait_weight": {
+        "active": 3.0,
+        "lazy": 0.2
+      }
+    },
+    "check_the_mail": {
+      "label": "Check the mail",
+      "when": [
+        {
+          "stat_above": [
+            "fun",
+            -80
+          ]
+        }
+      ],
+      "objective": {
+        "type": "interaction",
+        "count": 1,
+        "id": "check_mail"
+      },
+      "points": 15,
+      "weight": 0.5
+    },
+    "grab_from_machine": {
+      "label": "Buy something from the vending machine",
+      "when": [
+        {
+          "stat_below": [
+            "hunger",
+            40
+          ]
+        }
+      ],
+      "objective": {
+        "type": "interaction",
+        "count": 1,
+        "ids": [
+          "buy_snack",
+          "buy_drink"
+        ]
+      },
+      "points": 20,
+      "weight": 0.6,
+      "trait_weight": {
+        "frugal": 0.0
+      }
+    },
+    "change_outfit": {
+      "label": "Change into something nice",
+      "when": [
+        {
+          "stat_above": [
+            "hygiene",
+            -20
+          ]
+        }
+      ],
+      "objective": {
+        "type": "interaction",
+        "count": 1,
+        "id": "change_clothes"
+      },
+      "points": 20,
+      "weight": 0.8,
+      "trait_weight": {
+        "showoff": 2.0
+      }
+    },
+    "look_sharp": {
+      "label": "Look sharp",
+      "when": [
+        {
+          "stat_above": [
+            "hygiene",
+            -20
+          ]
+        }
+      ],
+      "objective": {
+        "type": "buff",
+        "id": "dapper",
+        "count": 1
+      },
+      "points": 30,
+      "weight": 0.7,
+      "trait_weight": {
+        "showoff": 2.0,
+        "romantic": 1.5
+      }
+    },
+    "practice_a_speech": {
+      "label": "Practice a speech",
+      "when": [
+        {
+          "stat_above": [
+            "energy",
+            -30
+          ]
+        }
+      ],
+      "objective": {
+        "type": "interaction",
+        "count": 1,
+        "id": "practice_speech"
+      },
+      "points": 30,
+      "weight": 0.5,
+      "trait_weight": {
+        "showoff": 2.0,
+        "social": 1.3
+      }
+    },
+    "tutor_a_friend": {
+      "label": "Tutor a friend",
+      "when": [
+        {
+          "skill_at_least": [
+            "charisma",
+            1
+          ]
+        }
+      ],
+      "objective": {
+        "type": "interaction",
+        "count": 1,
+        "id": "tutor"
+      },
+      "points": 45,
+      "weight": 0.6,
+      "trait_weight": {
+        "bookworm": 1.5,
+        "social": 1.5
+      }
+    },
+    "paint_a_masterpiece": {
+      "label": "Paint a masterpiece",
+      "when": [
+        {
+          "skill_at_least": [
+            "painting",
+            4
+          ]
+        }
+      ],
+      "objective": {
+        "type": "interaction",
+        "count": 1,
+        "id": "paint_masterpiece"
+      },
+      "points": 60,
+      "weight": 0.7,
+      "trait_weight": {
+        "creative": 3.0
+      }
+    },
+    "finish_a_work_task": {
+      "label": "Finish a task for work",
+      "when": [
+        {
+          "has_job": true
+        }
+      ],
+      "objective": {
+        "type": "game_event",
+        "name": "daily_task_done",
+        "count": 1
+      },
+      "points": 45,
+      "weight": 0.9,
+      "expire_hours": 24
+    },
+    "level_up_guitar": {
+      "label": "Reach guitar level %d",
+      "when": [
+        {
+          "skill_below": [
+            "guitar",
+            10
+          ]
+        }
+      ],
+      "objective": {
+        "type": "cond",
+        "cond": []
+      },
+      "points": 40,
+      "weight": 0.5,
+      "dynamic": "skill_next",
+      "params": {
+        "skill": "guitar"
+      },
+      "trait_weight": {
+        "musical": 2.5
+      },
+      "expire_hours": 48
+    },
+    "level_up_piano": {
+      "label": "Reach piano level %d",
+      "when": [
+        {
+          "skill_below": [
+            "piano",
+            10
+          ]
+        }
+      ],
+      "objective": {
+        "type": "cond",
+        "cond": []
+      },
+      "points": 40,
+      "weight": 0.5,
+      "dynamic": "skill_next",
+      "params": {
+        "skill": "piano"
+      },
+      "trait_weight": {
+        "musical": 2.5
+      },
+      "expire_hours": 48
+    },
+    "level_up_gardening": {
+      "label": "Reach gardening level %d",
+      "when": [
+        {
+          "skill_below": [
+            "gardening",
+            10
+          ]
+        }
+      ],
+      "objective": {
+        "type": "cond",
+        "cond": []
+      },
+      "points": 40,
+      "weight": 0.5,
+      "dynamic": "skill_next",
+      "params": {
+        "skill": "gardening"
+      },
+      "trait_weight": {
+        "green_thumb": 2.5
+      },
+      "expire_hours": 48
+    },
+    "level_up_fishing": {
+      "label": "Reach fishing level %d",
+      "when": [
+        {
+          "skill_below": [
+            "fishing",
+            10
+          ]
+        }
+      ],
+      "objective": {
+        "type": "cond",
+        "cond": []
+      },
+      "points": 40,
+      "weight": 0.5,
+      "dynamic": "skill_next",
+      "params": {
+        "skill": "fishing"
+      },
+      "trait_weight": {
+        "outdoorsy": 2.5
+      },
+      "expire_hours": 48
+    },
+    "level_up_writing": {
+      "label": "Reach writing level %d",
+      "when": [
+        {
+          "skill_below": [
+            "writing",
+            10
+          ]
+        }
+      ],
+      "objective": {
+        "type": "cond",
+        "cond": []
+      },
+      "points": 40,
+      "weight": 0.5,
+      "dynamic": "skill_next",
+      "params": {
+        "skill": "writing"
+      },
+      "trait_weight": {
+        "creative": 2.0
+      },
+      "expire_hours": 48
+    },
+    "level_up_handiness": {
+      "label": "Reach handiness level %d",
+      "when": [
+        {
+          "skill_below": [
+            "handiness",
+            10
+          ]
+        }
+      ],
+      "objective": {
+        "type": "cond",
+        "cond": []
+      },
+      "points": 40,
+      "weight": 0.5,
+      "dynamic": "skill_next",
+      "params": {
+        "skill": "handiness"
+      },
+      "trait_weight": {
+        "handy": 2.5
+      },
+      "expire_hours": 48
+    }
   },
   "perk_buffs": {
-    "perk_iron_bladder":  {"label": "Iron Bladder", "mood": {}, "duration_min": 0, "need_decay_mult": {"bladder": 0.65}},
-    "perk_light_sleeper": {"label": "Efficient Sleeper", "mood": {}, "duration_min": 0, "need_decay_mult": {"energy": 0.8}},
-    "perk_clean_freak":   {"label": "Always Fresh", "mood": {}, "duration_min": 0, "need_decay_mult": {"hygiene": 0.7}},
-    "perk_good_company":  {"label": "Good Company", "mood": {}, "duration_min": 0, "need_decay_mult": {"social": 0.7}},
-    "perk_easy_going":    {"label": "Easy Going", "mood": {}, "duration_min": 0, "need_decay_mult": {"fun": 0.8}},
-    "perk_hearty":        {"label": "Hearty Appetite", "mood": {}, "duration_min": 0, "need_decay_mult": {"hunger": 0.8}},
-    "perk_sunny":         {"label": "Sunny Disposition", "mood": {"happy": 1}, "duration_min": 0}
+    "perk_iron_bladder": {
+      "label": "Iron Bladder",
+      "mood": {},
+      "duration_min": 0,
+      "need_decay_mult": {
+        "bladder": 0.65
+      }
+    },
+    "perk_light_sleeper": {
+      "label": "Efficient Sleeper",
+      "mood": {},
+      "duration_min": 0,
+      "need_decay_mult": {
+        "energy": 0.8
+      }
+    },
+    "perk_clean_freak": {
+      "label": "Always Fresh",
+      "mood": {},
+      "duration_min": 0,
+      "need_decay_mult": {
+        "hygiene": 0.7
+      }
+    },
+    "perk_good_company": {
+      "label": "Good Company",
+      "mood": {},
+      "duration_min": 0,
+      "need_decay_mult": {
+        "social": 0.7
+      }
+    },
+    "perk_easy_going": {
+      "label": "Easy Going",
+      "mood": {},
+      "duration_min": 0,
+      "need_decay_mult": {
+        "fun": 0.8
+      }
+    },
+    "perk_hearty": {
+      "label": "Hearty Appetite",
+      "mood": {},
+      "duration_min": 0,
+      "need_decay_mult": {
+        "hunger": 0.8
+      }
+    },
+    "perk_sunny": {
+      "label": "Sunny Disposition",
+      "mood": {
+        "happy": 1
+      },
+      "duration_min": 0
+    }
   },
   "perks": {
-    "iron_bladder":  {"label": "Iron Bladder", "cost": 150, "description": "Bladder empties 35% slower.", "effects": [{"grant_buff": "perk_iron_bladder"}]},
-    "light_sleeper": {"label": "Efficient Sleeper", "cost": 200, "description": "Energy lasts 20% longer.", "effects": [{"grant_buff": "perk_light_sleeper"}]},
-    "clean_freak":   {"label": "Always Fresh", "cost": 200, "description": "Hygiene drains 30% slower.", "effects": [{"grant_buff": "perk_clean_freak"}]},
-    "good_company":  {"label": "Good Company", "cost": 250, "description": "Social need drains 30% slower.", "effects": [{"grant_buff": "perk_good_company"}]},
-    "easy_going":    {"label": "Easy Going", "cost": 250, "description": "Fun drains 20% slower.", "effects": [{"grant_buff": "perk_easy_going"}]},
-    "hearty":        {"label": "Hearty Appetite", "cost": 250, "description": "Hunger drains 20% slower.", "effects": [{"grant_buff": "perk_hearty"}]},
-    "sunny":         {"label": "Sunny Disposition", "cost": 400, "description": "A little happier, always.", "effects": [{"grant_buff": "perk_sunny"}]},
-    "learn_creative":{"label": "Spark of Creativity", "cost": 350, "description": "Gain the Creative trait (needs a free trait slot).", "effects": [{"add_trait": "creative"}]},
-    "learn_active":  {"label": "Fitness Fan", "cost": 350, "description": "Gain the Active trait (needs a free trait slot).", "effects": [{"add_trait": "active"}]},
-    "windfall":      {"label": "Windfall", "cost": 300, "description": "Instantly receive 500 coins.", "effects": [{"coins_add": 500}]}
+    "iron_bladder": {
+      "label": "Iron Bladder",
+      "cost": 150,
+      "description": "Bladder empties 35% slower.",
+      "effects": [
+        {
+          "grant_buff": "perk_iron_bladder"
+        }
+      ]
+    },
+    "light_sleeper": {
+      "label": "Efficient Sleeper",
+      "cost": 200,
+      "description": "Energy lasts 20% longer.",
+      "effects": [
+        {
+          "grant_buff": "perk_light_sleeper"
+        }
+      ]
+    },
+    "clean_freak": {
+      "label": "Always Fresh",
+      "cost": 200,
+      "description": "Hygiene drains 30% slower.",
+      "effects": [
+        {
+          "grant_buff": "perk_clean_freak"
+        }
+      ]
+    },
+    "good_company": {
+      "label": "Good Company",
+      "cost": 250,
+      "description": "Social need drains 30% slower.",
+      "effects": [
+        {
+          "grant_buff": "perk_good_company"
+        }
+      ]
+    },
+    "easy_going": {
+      "label": "Easy Going",
+      "cost": 250,
+      "description": "Fun drains 20% slower.",
+      "effects": [
+        {
+          "grant_buff": "perk_easy_going"
+        }
+      ]
+    },
+    "hearty": {
+      "label": "Hearty Appetite",
+      "cost": 250,
+      "description": "Hunger drains 20% slower.",
+      "effects": [
+        {
+          "grant_buff": "perk_hearty"
+        }
+      ]
+    },
+    "sunny": {
+      "label": "Sunny Disposition",
+      "cost": 400,
+      "description": "A little happier, always.",
+      "effects": [
+        {
+          "grant_buff": "perk_sunny"
+        }
+      ]
+    },
+    "learn_creative": {
+      "label": "Spark of Creativity",
+      "cost": 350,
+      "description": "Gain the Creative trait (needs a free trait slot).",
+      "effects": [
+        {
+          "add_trait": "creative"
+        }
+      ]
+    },
+    "learn_active": {
+      "label": "Fitness Fan",
+      "cost": 350,
+      "description": "Gain the Active trait (needs a free trait slot).",
+      "effects": [
+        {
+          "add_trait": "active"
+        }
+      ]
+    },
+    "windfall": {
+      "label": "Windfall",
+      "cost": 300,
+      "description": "Instantly receive 500 coins.",
+      "effects": [
+        {
+          "coins_add": 500
+        }
+      ]
+    }
   }
 }

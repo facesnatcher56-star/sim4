@@ -16,3 +16,12 @@ Outputs: assets/models/*.glb, assets/models/manifest.json, blender/footprints.js
 Skinned mesh "folk_mesh" + Skeleton with bones: hips (root), torso, head, arm_l, arm_r, leg_l, leg_r (character faces -Z; _r is +X).
 Animations (24 fps): Idle, Walk, Sit, Sleep, Use, Eat. Set loop mode in Godot (Idle/Walk/Sit/Sleep/Use loop cleanly).
 Sit: hips lowered 0.43m, legs straight forward (no knees). Sleep: lying on back, head toward +Z, hips at body height ~0.14 above origin (add surface height, e.g. bed 0.55). No knees/elbows: limbs are rigid boxes.
+
+
+## Folk v2 (blender/folk.py) — ANIMATION agent
+`blender.exe --background --python blender/folk.py [-- --only folk_adult --render <dir>]` builds assets/models/folk_{adult,teen,child,elder,toddler,baby}.glb
+(+ folk.glb = copy of adult). Rig: hips, spine, chest, neck, head, shoulder/upper_arm/forearm/hand _L/_R, thigh/shin/foot _L/_R (_R = +X).
+Materials (tintable): skin, hair, eyes, shirt, pants, shoes (+ eyewhite, mouth). Hair: nodes hair_0..hair_5 (show one). Clips (24 fps, baked):
+Idle Walk Run Sit_Idle Sit_Eat Sit_Watch Sleep Use_Stand Cook Wash Read Exercise_Treadmill Paint Type Dance Talk Laugh Wave Cry Angry Sad_Idle
+Hug Kiss Carry Faint Fall Shower ToiletSit Swim_idle Baby_Idle Baby_Crawl. Sim state -> clip mapping: data/animation_map.json (scripts/world/folk_view.gd).
+build_all.py no longer rebuilds the folk (set LEGACY_FOLK=1 for the old blocky ones).

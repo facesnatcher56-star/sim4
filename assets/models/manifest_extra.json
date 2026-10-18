@@ -1,0 +1,724 @@
+{
+  "crib": {
+    "file": "res://assets/models/crib.glb",
+    "footprint": [
+      1,
+      2,
+      1.12
+    ],
+    "notes": "1x2 baby crib; slats on the long sides; headboard at +Z; sleeper lies inside",
+    "bounds_min": [
+      -0.46,
+      0.0,
+      -0.925
+    ],
+    "bounds_max": [
+      0.46,
+      1.125,
+      0.925
+    ]
+  },
+  "dresser": {
+    "file": "res://assets/models/dresser.glb",
+    "footprint": [
+      1,
+      1,
+      0.98
+    ],
+    "notes": "drawers face -Z",
+    "bounds_min": [
+      -0.49,
+      0.0,
+      -0.195
+    ],
+    "bounds_max": [
+      0.49,
+      0.98,
+      0.38
+    ]
+  },
+  "wardrobe": {
+    "file": "res://assets/models/wardrobe.glb",
+    "footprint": [
+      1,
+      1,
+      1.97
+    ],
+    "notes": "double doors face -Z; 1.95 m tall",
+    "bounds_min": [
+      -0.5,
+      0.0,
+      -0.215
+    ],
+    "bounds_max": [
+      0.5,
+      1.97,
+      0.42
+    ]
+  },
+  "nightstand": {
+    "file": "res://assets/models/nightstand.glb",
+    "footprint": [
+      1,
+      1,
+      0.93
+    ],
+    "notes": "bedside table with lamp; drawers face -Z; 0.5 m body centred in the tile",
+    "bounds_min": [
+      -0.27,
+      0.03,
+      -0.142
+    ],
+    "bounds_max": [
+      0.27,
+      0.93,
+      0.33
+    ]
+  },
+  "armchair": {
+    "file": "res://assets/models/armchair.glb",
+    "footprint": [
+      1,
+      1,
+      1.01
+    ],
+    "notes": "backrest at +Z; sitter faces -Z",
+    "bounds_min": [
+      -0.45,
+      0.0,
+      -0.425
+    ],
+    "bounds_max": [
+      0.45,
+      1.01,
+      0.44
+    ]
+  },
+  "coffee_table": {
+    "file": "res://assets/models/coffee_table.glb",
+    "footprint": [
+      2,
+      1,
+      0.48
+    ],
+    "notes": "2x1 low table, long axis X",
+    "bounds_min": [
+      -0.75,
+      0.0,
+      -0.35
+    ],
+    "bounds_max": [
+      0.75,
+      0.485,
+      0.35
+    ]
+  },
+  "dining_chair": {
+    "file": "res://assets/models/dining_chair.glb",
+    "footprint": [
+      1,
+      1,
+      1.35
+    ],
+    "notes": "padded seat top y~0.46, back at +Z",
+    "bounds_min": [
+      -0.23,
+      0.0,
+      -0.23
+    ],
+    "bounds_max": [
+      0.23,
+      1.35,
+      0.23
+    ]
+  },
+  "bar_stool": {
+    "file": "res://assets/models/bar_stool.glb",
+    "footprint": [
+      1,
+      1,
+      0.8
+    ],
+    "notes": "seat top y~0.80",
+    "bounds_min": [
+      -0.2,
+      0.0,
+      -0.2
+    ],
+    "bounds_max": [
+      0.2,
+      0.8,
+      0.2
+    ]
+  },
+  "single_bed": {
+    "file": "res://assets/models/single_bed.glb",
+    "footprint": [
+      1,
+      2,
+      0.9
+    ],
+    "notes": "1x2; headboard/pillow at +Z; mattress top y~0.55",
+    "bounds_min": [
+      -0.475,
+      0.1,
+      -1.0
+    ],
+    "bounds_max": [
+      0.475,
+      0.9,
+      0.99
+    ]
+  },
+  "bunk_bed": {
+    "file": "res://assets/models/bunk_bed.glb",
+    "footprint": [
+      1,
+      2,
+      1.8
+    ],
+    "notes": "1x2; lower mattress top y~0.45, upper y~1.3; ladder on +X side",
+    "bounds_min": [
+      -0.495,
+      0.0,
+      -0.985
+    ],
+    "bounds_max": [
+      0.495,
+      1.8,
+      0.985
+    ]
+  },
+  "desk": {
+    "file": "res://assets/models/desk.glb",
+    "footprint": [
+      1,
+      1,
+      1.1
+    ],
+    "notes": "writing desk; user stands/sits at -Z side",
+    "bounds_min": [
+      -0.48,
+      0.01,
+      -0.28
+    ],
+    "bounds_max": [
+      0.48,
+      1.1,
+      0.4
+    ]
+  },
+  "bookcase_tall": {
+    "file": "res://assets/models/bookcase_tall.glb",
+    "footprint": [
+      1,
+      1,
+      2.14
+    ],
+    "notes": "2.1 m bookcase, open front faces -Z",
+    "bounds_min": [
+      -0.5,
+      0.0,
+      -0.1
+    ],
+    "bounds_max": [
+      0.5,
+      2.145,
+      0.265
+    ]
+  },
+  "piano": {
+    "file": "res://assets/models/piano.glb",
+    "footprint": [
+      2,
+      1,
+      1.36
+    ],
+    "notes": "2x1 upright piano; keys and stool on the -Z side",
+    "bounds_min": [
+      -0.95,
+      0.0,
+      -0.56
+    ],
+    "bounds_max": [
+      0.95,
+      1.36,
+      0.48
+    ]
+  },
+  "guitar_stand": {
+    "file": "res://assets/models/guitar_stand.glb",
+    "footprint": [
+      1,
+      1,
+      1.45
+    ],
+    "notes": "stand with an acoustic guitar and a small amp",
+    "bounds_min": [
+      -0.236,
+      -0.007,
+      -0.136
+    ],
+    "bounds_max": [
+      0.48,
+      1.45,
+      0.336
+    ]
+  },
+  "fishing_spot": {
+    "file": "res://assets/models/fishing_spot.glb",
+    "footprint": [
+      2,
+      1,
+      0.81
+    ],
+    "notes": "2x1 pond edge with a short pier on the -Z side; water behind it",
+    "bounds_min": [
+      -0.98,
+      0.0,
+      -0.49
+    ],
+    "bounds_max": [
+      0.98,
+      0.81,
+      0.57
+    ]
+  },
+  "garden_plot": {
+    "file": "res://assets/models/garden_plot.glb",
+    "footprint": [
+      2,
+      1,
+      0.78
+    ],
+    "notes": "2x1 raised bed; origin at footprint centre",
+    "bounds_min": [
+      -0.98,
+      0.0,
+      -0.48
+    ],
+    "bounds_max": [
+      0.98,
+      0.78,
+      0.48
+    ]
+  },
+  "mailbox": {
+    "file": "res://assets/models/mailbox.glb",
+    "footprint": [
+      1,
+      1,
+      1.39
+    ],
+    "notes": "post-mounted mailbox; slot faces -Z",
+    "bounds_min": [
+      -0.15,
+      0.0,
+      -0.3
+    ],
+    "bounds_max": [
+      0.18,
+      1.39,
+      0.3
+    ]
+  },
+  "grill": {
+    "file": "res://assets/models/grill.glb",
+    "footprint": [
+      1,
+      1,
+      1.17
+    ],
+    "notes": "kettle barbecue with side shelf",
+    "bounds_min": [
+      -0.351,
+      -0.006,
+      -0.48
+    ],
+    "bounds_max": [
+      0.5,
+      1.17,
+      0.36
+    ]
+  },
+  "hot_tub": {
+    "file": "res://assets/models/hot_tub.glb",
+    "footprint": [
+      2,
+      2,
+      0.93
+    ],
+    "notes": "2x2 wooden hot tub; water surface y~0.8; steps on -Z side",
+    "bounds_min": [
+      -0.95,
+      0.0,
+      -1.15
+    ],
+    "bounds_max": [
+      0.95,
+      0.93,
+      0.95
+    ]
+  },
+  "mirror": {
+    "file": "res://assets/models/mirror.glb",
+    "footprint": [
+      1,
+      1,
+      1.85
+    ],
+    "notes": "standing mirror, glass faces -Z",
+    "bounds_min": [
+      -0.31,
+      0.0,
+      -0.08
+    ],
+    "bounds_max": [
+      0.31,
+      1.85,
+      0.32
+    ]
+  },
+  "fireplace": {
+    "file": "res://assets/models/fireplace.glb",
+    "footprint": [
+      2,
+      1,
+      2.3
+    ],
+    "notes": "2x1 brick fireplace with hearth on the -Z side",
+    "bounds_min": [
+      -0.99,
+      0.0,
+      -0.525
+    ],
+    "bounds_max": [
+      0.99,
+      2.3,
+      0.475
+    ]
+  },
+  "stereo": {
+    "file": "res://assets/models/stereo.glb",
+    "footprint": [
+      1,
+      1,
+      1.0
+    ],
+    "notes": "cabinet with tall speakers; faces -Z",
+    "bounds_min": [
+      -0.48,
+      0.0,
+      -0.12
+    ],
+    "bounds_max": [
+      0.48,
+      1.0,
+      0.3
+    ]
+  },
+  "bar_counter": {
+    "file": "res://assets/models/bar_counter.glb",
+    "footprint": [
+      2,
+      1,
+      1.32
+    ],
+    "notes": "2x1 bar; customers stand on the -Z side",
+    "bounds_min": [
+      -1.0,
+      0.0,
+      -0.25
+    ],
+    "bounds_max": [
+      1.0,
+      1.32,
+      0.45
+    ]
+  },
+  "ceiling_fan": {
+    "file": "res://assets/models/ceiling_fan.glb",
+    "footprint": [
+      1,
+      1,
+      2.58
+    ],
+    "notes": "CEILING piece (geometry at y 2.2-2.6); use layer 'floor'",
+    "bounds_min": [
+      -0.55,
+      2.1,
+      -0.475
+    ],
+    "bounds_max": [
+      0.55,
+      2.58,
+      0.475
+    ]
+  },
+  "pendant_light": {
+    "file": "res://assets/models/pendant_light.glb",
+    "footprint": [
+      1,
+      1,
+      2.62
+    ],
+    "notes": "CEILING piece (geometry at y 1.85-2.6); use layer 'floor'",
+    "bounds_min": [
+      -0.292,
+      1.83,
+      -0.3
+    ],
+    "bounds_max": [
+      0.292,
+      2.62,
+      0.3
+    ]
+  },
+  "washing_machine": {
+    "file": "res://assets/models/washing_machine.glb",
+    "footprint": [
+      1,
+      1,
+      0.94
+    ],
+    "notes": "front-loader; door faces -Z",
+    "bounds_min": [
+      -0.41,
+      0.0,
+      -0.335
+    ],
+    "bounds_max": [
+      0.41,
+      0.94,
+      0.41
+    ]
+  },
+  "microwave_cart": {
+    "file": "res://assets/models/microwave_cart.glb",
+    "footprint": [
+      1,
+      1,
+      1.12
+    ],
+    "notes": "microwave on a small cabinet; faces -Z",
+    "bounds_min": [
+      -0.43,
+      0.0,
+      -0.215
+    ],
+    "bounds_max": [
+      0.43,
+      1.12,
+      0.4
+    ]
+  },
+  "coffee_maker": {
+    "file": "res://assets/models/coffee_maker.glb",
+    "footprint": [
+      1,
+      1,
+      1.26
+    ],
+    "notes": "coffee machine on a counter stand; faces -Z",
+    "bounds_min": [
+      -0.43,
+      0.0,
+      -0.2
+    ],
+    "bounds_max": [
+      0.43,
+      1.26,
+      0.4
+    ]
+  },
+  "tea_kettle": {
+    "file": "res://assets/models/tea_kettle.glb",
+    "footprint": [
+      1,
+      1,
+      0.63
+    ],
+    "notes": "kettle and mugs on a small stand",
+    "bounds_min": [
+      -0.35,
+      0.0,
+      -0.21
+    ],
+    "bounds_max": [
+      0.35,
+      0.63,
+      0.35
+    ]
+  },
+  "easel_large": {
+    "file": "res://assets/models/easel_large.glb",
+    "footprint": [
+      2,
+      1,
+      1.93
+    ],
+    "notes": "2x1 studio easel; canvas faces -Z",
+    "bounds_min": [
+      -0.85,
+      -0.011,
+      -0.45
+    ],
+    "bounds_max": [
+      1.1,
+      1.93,
+      0.421
+    ]
+  },
+  "workbench": {
+    "file": "res://assets/models/workbench.glb",
+    "footprint": [
+      2,
+      1,
+      2.0
+    ],
+    "notes": "2x1 workbench with pegboard at +Z; user at -Z",
+    "bounds_min": [
+      -0.95,
+      0.0,
+      -0.3
+    ],
+    "bounds_max": [
+      0.95,
+      2.0,
+      0.42
+    ]
+  },
+  "dumbbell_rack": {
+    "file": "res://assets/models/dumbbell_rack.glb",
+    "footprint": [
+      1,
+      1,
+      0.76
+    ],
+    "notes": "weights rack",
+    "bounds_min": [
+      -0.405,
+      0.0,
+      -0.5
+    ],
+    "bounds_max": [
+      0.42,
+      0.762,
+      0.35
+    ]
+  },
+  "pool_table": {
+    "file": "res://assets/models/pool_table.glb",
+    "footprint": [
+      2,
+      1,
+      0.96
+    ],
+    "notes": "2x1 bar pool table; players stand on the -Z side",
+    "bounds_min": [
+      -0.975,
+      0.0,
+      -0.475
+    ],
+    "bounds_max": [
+      0.975,
+      0.961,
+      0.51
+    ]
+  },
+  "fire_extinguisher": {
+    "file": "res://assets/models/fire_extinguisher.glb",
+    "footprint": [
+      1,
+      1,
+      1.0
+    ],
+    "notes": "extinguisher on a small plate with a wall board at +Z",
+    "bounds_min": [
+      -0.17,
+      0.0,
+      0.1
+    ],
+    "bounds_max": [
+      0.17,
+      1.0,
+      0.415
+    ]
+  },
+  "smoke_alarm": {
+    "file": "res://assets/models/smoke_alarm.glb",
+    "footprint": [
+      1,
+      1,
+      2.6
+    ],
+    "notes": "CEILING piece (geometry at y 2.5-2.6); use layer 'floor'",
+    "bounds_min": [
+      -0.127,
+      2.51,
+      -0.13
+    ],
+    "bounds_max": [
+      0.127,
+      2.6,
+      0.13
+    ]
+  },
+  "vending_machine": {
+    "file": "res://assets/models/vending_machine.glb",
+    "footprint": [
+      1,
+      1,
+      1.8
+    ],
+    "notes": "front (glass) faces -Z",
+    "bounds_min": [
+      -0.425,
+      0.0,
+      -0.4
+    ],
+    "bounds_max": [
+      0.425,
+      1.8,
+      0.45
+    ]
+  },
+  "terminal": {
+    "file": "res://assets/models/terminal.glb",
+    "footprint": [
+      1,
+      1,
+      1.61
+    ],
+    "notes": "kiosk terminal / ATM; screen faces -Z",
+    "bounds_min": [
+      -0.39,
+      0.0,
+      -0.28
+    ],
+    "bounds_max": [
+      0.39,
+      1.61,
+      0.44
+    ]
+  },
+  "telescope": {
+    "file": "res://assets/models/telescope.glb",
+    "footprint": [
+      1,
+      1,
+      1.64
+    ],
+    "notes": "tripod telescope pointing towards -Z",
+    "bounds_min": [
+      -0.278,
+      -0.005,
+      -0.443
+    ],
+    "bounds_max": [
+      0.281,
+      1.643,
+      0.369
+    ]
+  }
+}

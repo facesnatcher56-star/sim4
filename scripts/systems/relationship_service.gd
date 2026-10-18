@@ -145,6 +145,10 @@ static func bit_for(a: int, b: int) -> String:
 			return str(bd["id"])
 	return "stranger"
 
+## Specific kin relation of b to a (parent, child, sibling, grandparent, spouse, ...) from the Family service, "" if none.
+static func kin_bit(a: int, b: int) -> String:
+	return Family.relation_id(a, b)
+
 static func bit_label(bit: String) -> String:
 	for bd in bit_defs():
 		if str(bd["id"]) == bit:

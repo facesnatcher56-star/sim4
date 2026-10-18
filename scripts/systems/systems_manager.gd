@@ -48,6 +48,7 @@ func setup() -> void:
 	_events.object_placed.connect(_on_object_placed)
 	_events.object_removed.connect(_on_object_removed)
 	SysContent.install()
+	FamilyContent.install()
 	_hook_world()
 
 func teardown() -> void:
@@ -82,11 +83,14 @@ static func reset_all() -> void:
 	Aging.reset()
 	Story.reset()
 	Away.reset()
+	Family.reset()
+	BabyCare.reset()
 
 ## Start a fresh game: reset systems, give every household starting funds, register all current folk, make townies.
 func new_game(household_ids: Array = [], lifespan: String = "") -> void:
 	reset_all()
 	SysContent.install()
+	FamilyContent.install()
 	if lifespan != "":
 		Aging.set_lifespan(lifespan)
 	var hids: Array = household_ids if not household_ids.is_empty() else Economy.household_ids()
@@ -99,6 +103,7 @@ func new_game(household_ids: Array = [], lifespan: String = "") -> void:
 ## Make sure every folk on the lot has aging / goals records (idempotent).
 func ensure_registered() -> void:
 	Aging.ensure_all()
+	Genetics.ensure_all()
 	Goals.ensure_all()
 	Careers.enroll_school()
 
@@ -109,6 +114,7 @@ func _on_minute(_total: int) -> void:
 	Careers.on_minute()
 	Away.on_minute()
 	Story.on_minute()
+	BabyCare.on_minute()
 
 func _on_hour(hour: int) -> void:
 	if not enabled:
@@ -116,12 +122,14 @@ func _on_hour(hour: int) -> void:
 	ensure_registered()
 	Goals.on_hour()
 	Story.on_hour(hour)
+	Family.on_hour()
 
 func _on_day(day: int) -> void:
 	if not enabled:
 		return
 	ensure_registered()
 	Aging.on_day(day)
+	Family.on_day(day)
 	Careers.on_day(day)
 	Economy.on_day(day)
 	RelationshipService.on_day(day)
@@ -191,6 +199,7 @@ func _on_folk_added(folk_id: int) -> void:
 	var f = SysUtil.folk(folk_id)
 	if f != null and SysUtil.is_resident(f):
 		Aging.register(f)
+		Genetics.ensure(f)
 		Goals.ensure_profile(f)
 
 func _on_object_placed(object_id: int) -> void:
@@ -203,6 +212,7 @@ func _on_object_removed(object_id: int) -> void:
 func _on_game_event(ev_name: String, payload: Dictionary) -> void:
 	if not enabled:
 		return
+	Family.on_event(ev_name, payload)
 	match ev_name:
 		"order_groceries":
 			var f = SysUtil.folk(int(payload.get("folk_id", -1)))
@@ -217,8 +227,9 @@ func _on_game_event(ev_name: String, payload: Dictionary) -> void:
 		"apologize":
 			RelationshipService.on_apologize(int(payload.get("folk_id", -1)), int(payload.get("target_id", -1)))
 		"propose":
-			var out: String = RelationshipService.propose(int(payload.get("folk_id", -1)), int(payload.get("target_id", -1)))
-			SysUtil.notify("%s" % {"accepted": "They said yes!", "declined": "They said no...", "too_soon": "'It's too soon,' they said.", "no_bond": "They barely know each other."}.get(out, out), "relationship")
+			var out: String = Family.on_propose(int(payload.get("folk_id", -1)), int(payload.get("target_id", -1)))
+			if out != "engaged":      # Family announces engagements itself
+				SysUtil.notify("%s" % {"accepted": "They said yes!", "declined": "They said no...", "too_soon": "'It's too soon,' they said.", "no_bond": "They barely know each other.", "already_engaged": "They are already engaged.", "already_married": "They are already married."}.get(out, out), "relationship")
 		"social_done":
 			Story.on_social_done(int(payload.get("folk_id", -1)), int(payload.get("target_id", -1)), str(payload.get("interaction", "")))
 	# feed goals for the acting folk (and the other party, for relationship events)

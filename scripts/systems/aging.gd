@@ -189,11 +189,14 @@ static func try_for_baby(actor_id: int, partner_id: int) -> Dictionary:
 	var rom: float = minf(RelationshipService.value(actor_id, partner_id, "romance"), RelationshipService.value(partner_id, actor_id, "romance"))
 	if rom < float(pc.get("min_romance", 45)):
 		return {"ok": false, "reason": "not_romantic_enough"}
+	if not (RelationshipService.bit_for(actor_id, partner_id) in ["sweetheart", "partner", "spouse"]):
+		return {"ok": false, "reason": "not_a_couple"}
 	cooldowns[actor_id] = SysUtil.day() + int(pc.get("cooldown_days", 4))
 	if not SysUtil.chance(float(pc.get("success_chance", 0.45))):
 		return {"ok": false, "reason": "no_luck"}
-	pregnancies[actor_id] = {"father": partner_id, "due_day": SysUtil.day() + int(pc.get("days", 3)), "started": SysUtil.day()}
+	pregnancies[actor_id] = {"father": partner_id, "due_day": SysUtil.day() + int(pc.get("days", 3)), "started": SysUtil.day(), "started_min": SysUtil.now()}
 	a.add_buff("pregnant")
+	Family.update_pregnancies()
 	SysUtil.notify("%s is expecting a baby!" % a.name, "birthday")
 	SysUtil.game_event("pregnant", {"folk_id": actor_id, "target_id": partner_id})
 	return {"ok": true, "reason": "pregnant"}
@@ -210,20 +213,13 @@ static func _birth(mother_id: int, father_id: int) -> void:
 		return
 	var pc: Dictionary = cfg().get("pregnancy", {})
 	var father = SysUtil.folk(father_id)
-	var inherited: Array = []
-	var pool: Array = []
-	for t in m.traits:
-		pool.append(t)
-	var ftraits: Array = father.traits if father != null else Story.traits_of(father_id)
-	for t in ftraits:
-		if not pool.has(t):
-			pool.append(t)
-	for t in pool:
-		if inherited.size() < int(pc.get("max_inherited", 2)) and SysUtil.chance(float(pc.get("inherit_chance", 0.45))):
-			inherited.append(t)
+	var gen: Dictionary = Genetics.inherit(Family.person_info(mother_id), Family.person_info(father_id), null,
+		{"chance": float(pc.get("inherit_chance", 0.35)), "cap": int(pc.get("max_inherited", 2))})
+	var inherited: Array = gen["traits"]
 	var names: Array = cfg().get("name_pool", ["Pip"])
 	var baby_name: String = str(SysUtil.pick(names)) + " " + _surname(str(m.name))
 	var baby := Folk.create(baby_name, [])
+	baby.appearance = gen["appearance"]
 	baby.household_id = int(m.household_id)
 	baby.age_stage = "baby"
 	register(baby, 0.0, [mother_id, father_id])
@@ -233,6 +229,7 @@ static func _birth(mother_id: int, father_id: int) -> void:
 			(records[pid]["children"] as Array).append(int(baby.id))
 	SysUtil.world_add_folk(baby, m.tile)
 	m.remove_buff("pregnant")
+	Family.on_birth(baby, mother_id, father_id)
 	for pid2 in [mother_id, father_id]:
 		RelationshipService.set_flag(int(baby.id), int(pid2), "family", true, false)
 		RelationshipService.add_both(int(baby.id), int(pid2), "friendship", 40.0)
@@ -282,6 +279,7 @@ static func kill(folk_id: int, cause: String = "old age") -> Dictionary:
 			o.add_buff(str(cfg().get("grief", {}).get("buff", "grieving")))
 			o.add_to_stat("fun", -15.0)
 	legacy["mourners"] = mourners
+	Family.on_death(folk_id, mourners)
 	# inheritance
 	legacy["inheritance"] = _inherit(f, mourners)
 	RelationshipService.sync_folk(f)
@@ -349,9 +347,13 @@ static func legacy_summary(folk_id: int) -> Dictionary:
 	if best_skill != "":
 		summary += "mastered %s %d, " % [best_skill, best_lvl]
 	summary += "left %d friends and %d children." % [friends, kids]
+	var desc: int = Family.descendants_of(folk_id).size()
+	if desc > kids:
+		summary += " %d descendants in all." % desc
 	return {"folk_id": folk_id, "name": nm, "years": years, "career": career_txt, "best_skill": best_skill, "best_skill_level": best_lvl,
 		"friends": friends, "children": kids, "aspiration": asp, "summary": summary,
-		"lifetime_points": Goals.lifetime_points(folk_id), "traits": f.traits.duplicate() if f != null else []}
+		"lifetime_points": Goals.lifetime_points(folk_id), "descendants": desc,
+		"spouse": Family.name_of(Family.spouse_of(folk_id)) if Family.spouse_of(folk_id) >= 0 else "", "traits": f.traits.duplicate() if f != null else []}
 
 static func on_try_for_baby(actor_id: int, target_id: int) -> Dictionary:
 	return try_for_baby(actor_id, target_id)
@@ -384,3 +386,5 @@ static func from_dict(d: Dictionary) -> void:
 		pregnancies[k]["father"] = int(pregnancies[k]["father"])
 		pregnancies[k]["due_day"] = int(pregnancies[k]["due_day"])
 		pregnancies[k]["started"] = int(pregnancies[k]["started"])
+		if pregnancies[k].has("started_min"):
+			pregnancies[k]["started_min"] = int(pregnancies[k]["started_min"])

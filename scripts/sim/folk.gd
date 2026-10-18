@@ -22,6 +22,8 @@ var tile: Vector2i = Vector2i.ZERO
 var queue: Array = []           # Array of Interaction, highest effective priority first
 var current: Interaction = null
 var household_id: int = 0
+## Look (see the APPEARANCE CONTRACT at the top of scripts/systems/genetics.gd). {} = not generated yet.
+var appearance: Dictionary = {}
 var posture: String = "stand"   # stand | sit | lie  (set by the running interaction; UI reads it)
 var work_start: float = -1.0    # hour of day the job starts, -1 = no job (careers system sets these)
 var work_end: float = -1.0
@@ -54,6 +56,7 @@ static func create(p_name: String, p_traits: Array = [], p_id: int = -1) -> Folk
 	var f := Folk.new(p_name, p_id)
 	for t in p_traits:
 		f.traits.append(str(t))
+	f.appearance = Genetics.random_appearance()
 	return f
 
 func setup_needs() -> void:
@@ -305,6 +308,7 @@ func to_dict() -> Dictionary:
 		"work_start": work_start, "work_end": work_end,
 		"memory": memory.duplicate(true), "relationships": rel,
 		"history_counts": history_counts.duplicate(),
+		"appearance": appearance.duplicate(true),
 	}
 
 static func from_dict(d: Dictionary) -> Folk:
@@ -332,5 +336,6 @@ static func from_dict(d: Dictionary) -> Folk:
 	for k in rel:
 		f.relationships[int(k)] = (rel[k] as Dictionary).duplicate()
 	f.history_counts = (d.get("history_counts", {}) as Dictionary).duplicate()
+	f.appearance = Genetics.normalize(d.get("appearance", {}))
 	f.refresh_mood()
 	return f

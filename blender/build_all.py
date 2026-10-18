@@ -710,7 +710,9 @@ def main():
                           "notes": NOTES.get(name, ""),
                           "bounds_min": [round(v, 3) for v in mn], "bounds_max": [round(v, 3) for v in mx]}
         print("built", name, [round(v, 2) for v in mn], [round(v, 2) for v in mx])
-    for name, s in (("folk", 1.0), ("folk_child", 0.68)):
+    # NOTE: folk models are now built by blender/folk.py (folk_adult/teen/child/elder/toddler/baby + folk.glb copy).
+    # The legacy blocky builder only runs with LEGACY_FOLK=1 so a full rebuild does not overwrite them.
+    for name, s in ((("folk", 1.0), ("folk_child", 0.68)) if os.environ.get("LEGACY_FOLK") else ()):
         path = build_folk(name, s, tint=("shirt" if s == 1.0 else "fabric_red"))
         manifest[name] = {"file": "res://assets/models/%s.glb" % name, "footprint": [1, 1, round(1.72 * s, 2)],
                           "notes": "skinned armature; bones hips,torso,head,arm_l,arm_r,leg_l,leg_r; clips Idle,Walk,Sit,Sleep,Use,Eat; faces -Z"}

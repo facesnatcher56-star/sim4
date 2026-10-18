@@ -16,7 +16,7 @@ func run() -> Array:
 func _data(f: Array) -> void:
 	K.setup()
 	var g: Dictionary = SimEnv.data().get_table("goals")
-	K.expect(f, (g["aspirations"] as Dictionary).size() == 6, "6 aspirations")
+	K.expect(f, (g["aspirations"] as Dictionary).size() >= 6, "at least 6 aspirations")
 	K.expect(f, (g["whims"] as Dictionary).size() >= 20, "about 20 whims, got %d" % (g["whims"] as Dictionary).size())
 	for aid in g["aspirations"]:
 		K.expect(f, (g["aspirations"][aid]["milestones"] as Array).size() >= 4, "%s has a milestone track" % aid)
