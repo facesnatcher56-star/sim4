@@ -316,6 +316,12 @@ static func invite_over(townie_id: int, host_id: int, duration: int = 180) -> Di
 		return {}
 	return schedule_visit([townie_id], host_id, SysUtil.now() + 15, duration, "visit")
 
+## Player-driven: ask a townie to meet a folk at a neighbourhood venue (see NeighborhoodService.invite_to_venue).
+static func invite_to_venue(townie_id: int, host_id: int, lot_id: String, delay: int = 40, duration: int = 120) -> Dictionary:
+	if lot_id == Neighborhood.HOME:
+		return invite_over(townie_id, host_id, duration)
+	return NeighborhoodService.invite_to_venue(townie_id, host_id, lot_id, delay, duration)
+
 ## A party: several townies at once.
 static func start_party(host_id: int, townie_ids: Array, duration: int = 240) -> Dictionary:
 	return schedule_visit(townie_ids, host_id, SysUtil.now() + 20, duration, "party")
@@ -556,6 +562,8 @@ static func try_burglary(force: bool = false) -> int:
 	var res: Array = SysUtil.residents()
 	if res.is_empty():
 		return 0
+	if Neighborhood.current_lot != Neighborhood.HOME:
+		return 0      # the loaded lot is not the home: no burglary while the player is out and about
 	for f in res:
 		if SysUtil.is_away(f):
 			continue

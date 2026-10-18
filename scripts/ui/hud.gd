@@ -14,6 +14,9 @@ var coins_label: Label
 var speed_buttons: Dictionary = {}     # speed int -> Button
 var build_button: Button
 var save_button: Button
+var map_button: Button
+var lot_label: Label
+var travel_panel: TravelPanel
 var folk_panel: FolkPanel
 var queue_bar: QueueBar
 var pie: PieMenu
@@ -61,6 +64,9 @@ func _ready() -> void:
 	pie = PieMenu.new()
 	add_child(pie)
 	_build_save_menu()
+	travel_panel = TravelPanel.new()
+	add_child(travel_panel)
+	UIU.connect_ev("game_event", func(n, _p): if n == "lot_changed": _update_clock())
 	UIU.connect_ev("selection_changed", _on_selection_changed)
 	UIU.connect_ev("coins_changed", _on_coins_changed)
 	UIU.connect_ev("folk_added", func(_i): rebuild_folk_row())
@@ -101,11 +107,19 @@ func _build_top_bar() -> void:
 		b.pressed.connect(set_speed.bind(s[0]))
 		h.add_child(b)
 		speed_buttons[s[0]] = b
+	h.add_child(WeatherHud.new())    # weather + season + date widget (scripts/ui/weather_hud.gd)
 	var sp := Control.new()
 	sp.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	h.add_child(sp)
+	lot_label = UIU.make_label("", 15, UITheme.ACCENT)
+	h.add_child(lot_label)
 	coins_label = UIU.make_label("0 Coins", 18, Color("#f2c94c"))
 	h.add_child(coins_label)
+	map_button = Button.new()
+	map_button.text = "Map"
+	map_button.tooltip_text = "Neighbourhood map and travel (M)"
+	map_button.pressed.connect(func(): travel_panel.toggle())
+	h.add_child(map_button)
 	build_button = Button.new()
 	build_button.text = "Build/Buy"
 	build_button.toggle_mode = true
@@ -213,7 +227,7 @@ func rebuild_folk_row() -> void:
 	if not World.has_method("all_folk"):
 		return
 	for f in World.all_folk():
-		if f.has_meta("visitor") or f.has_meta("away"):
+		if f.has_meta("visitor") or f.has_meta("away") or f.has_meta("offlot"):
 			continue
 		var b := Button.new()
 		b.custom_minimum_size = Vector2(46, 46)
@@ -251,12 +265,15 @@ func _on_selection_changed(kind: String, id: int) -> void:
 			pie.close()
 
 func _on_coins_changed(_hh: int, amount: int) -> void:
+	if _hh <= 0:
+		return      # ambient NPCs (household -1) pay with their own pocket money
 	coins = amount
 	coins_label.text = "%d Coins" % amount
 
 # ------------------------------------------------------------ time
 func _update_clock(_t = 0) -> void:
 	time_label.text = UIU.clock_text()
+	lot_label.text = "" if Neighborhood.current_lot == Neighborhood.HOME else "at %s  " % Neighborhood.label_of(Neighborhood.current_lot)
 	day_label.text = "Day %d" % UIU.day_number()
 
 func set_speed(s: int) -> void:
@@ -294,6 +311,7 @@ func _unhandled_input(ev: InputEvent) -> void:
 			KEY_2: set_speed(2)
 			KEY_3: set_speed(3)
 			KEY_B: build_panel.set_active(not build_panel.active)
+			KEY_M: travel_panel.toggle()
 			KEY_TAB: if lot_view: lot_view.call("cycle_wall_mode")
 			KEY_ESCAPE:
 				if pie.visible: pie.close()

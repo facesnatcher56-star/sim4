@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "notes": "Seasonal holidays for scripts/systems/holidays.gd. 'day' is the day of the season (1-based; -1 = last day, clamped to the season length). Every folk gets the holiday's 'buff' while it lasts plus the hidden 'holiday_today' marker; 'whim' is injected into the Goals whim table; 'party_bonus' is added to the score of Story parties each game hour; objects with any of decor.tags near a folk (>= decor.min_count) grant 'festive_home'.",
+  "decor": {"tags": ["plant", "light", "fire"], "min_count": 2, "radius": 7, "buff": "festive_home"},
+  "default_party_bonus": 1.5,
+  "holidays": {
+    "new_year": {"label": "New Year's Dawn", "season": "spring", "day": 1, "min_year": 2, "buff": "festive_new_year", "party_bonus": 2.5,
+      "notify": "New Year's Dawn! A fresh year begins - celebrate with friends.",
+      "whim": {"label": "Toast the new year with someone", "objective": {"type": "interaction", "ids": ["chat", "tell_joke", "give_holiday_gift"], "count": 2}}},
+    "spring_bloom": {"label": "Bloom Festival", "season": "spring", "day": 4, "buff": "festive_bloom", "party_bonus": 2.0,
+      "notify": "The Bloom Festival has begun! The air smells of flowers.",
+      "whim": {"label": "Tend a plant for the Bloom Festival", "objective": {"type": "interaction", "ids": ["water_plant", "water_garden", "plant_seeds"]}}},
+    "midsummer": {"label": "Midsummer", "season": "summer", "day": 4, "buff": "festive_midsummer", "party_bonus": 3.0,
+      "notify": "Midsummer! Long bright days and warm music.",
+      "whim": {"label": "Dance or play music for Midsummer", "objective": {"type": "interaction", "ids": ["dance", "listen_music", "play_guitar", "play_piano"]}}},
+    "firefly_night": {"label": "Firefly Night", "season": "summer", "day": 7, "buff": "festive_firefly", "party_bonus": 2.0,
+      "notify": "Firefly Night: switch on the lamps and enjoy the evening.",
+      "whim": {"label": "Stargaze or toast the evening", "objective": {"type": "interaction", "ids": ["stargaze", "chat", "listen_music"]}}},
+    "harvest_feast": {"label": "Harvest Feast", "season": "autumn", "day": 5, "buff": "festive_harvest", "party_bonus": 3.0,
+      "notify": "The Harvest Feast is here! Cook something wonderful.",
+      "whim": {"label": "Cook a feast", "objective": {"type": "interaction", "ids": ["cook_meal", "cook_meal_good", "cook_meal_gourmet", "grill_food"]}}},
+    "hollow_eve": {"label": "Hollow Eve", "season": "autumn", "day": 7, "buff": "festive_hollow", "party_bonus": 2.5,
+      "notify": "Hollow Eve: tell a spooky joke and keep the lamps lit.",
+      "whim": {"label": "Tell a spooky joke", "objective": {"type": "interaction", "ids": ["tell_joke", "chat"]}}},
+    "winter_lights": {"label": "Winter Lights", "season": "winter", "day": 3, "buff": "festive_lights", "party_bonus": 3.0,
+      "notify": "Winter Lights! Gather by the fire and light up the house.",
+      "whim": {"label": "Warm up by the fire for Winter Lights", "objective": {"type": "interaction", "ids": ["warm_by_fire", "light_fireplace", "toggle_lamp"]}}},
+    "gift_day": {"label": "Gift Day", "season": "winter", "day": -1, "buff": "festive_gift", "party_bonus": 3.5,
+      "notify": "Gift Day! Give someone a present.",
+      "whim": {"label": "Give someone a gift", "objective": {"type": "interaction", "ids": ["give_holiday_gift"]}}}
+  },
+  "buffs": {
+    "festive_new_year": {"label": "New Year Cheer", "mood": {"happy": 2, "energized": 1}, "duration_min": 0, "autonomy_mult": {"tag:social": 1.4}, "thought": "A whole new year!"},
+    "festive_bloom": {"label": "Bloom Festival", "mood": {"happy": 2}, "duration_min": 0, "autonomy_mult": {"tag:plant": 1.5, "tag:outdoor": 1.3}, "thought": "Everything is blooming."},
+    "festive_midsummer": {"label": "Midsummer Joy", "mood": {"happy": 2, "energized": 1}, "duration_min": 0, "autonomy_mult": {"tag:outdoor": 1.3, "tag:music": 1.4}, "thought": "Midsummer!"},
+    "festive_firefly": {"label": "Firefly Night", "mood": {"happy": 2}, "duration_min": 0, "autonomy_mult": {"tag:outdoor": 1.2, "tag:light": 1.4}, "thought": "The fireflies are out."},
+    "festive_harvest": {"label": "Harvest Feast", "mood": {"happy": 2}, "duration_min": 0, "need_decay_mult": {"hunger": 0.8}, "autonomy_mult": {"tag:food": 1.3}, "thought": "Time for the feast."},
+    "festive_hollow": {"label": "Hollow Eve", "mood": {"happy": 1, "tense": 1}, "duration_min": 0, "autonomy_mult": {"tag:social": 1.3}, "thought": "A little spooky, a lot of fun."},
+    "festive_lights": {"label": "Winter Lights", "mood": {"happy": 2}, "duration_min": 0, "autonomy_mult": {"tag:light": 1.5, "tag:fire": 1.3}, "thought": "The lights are beautiful."},
+    "festive_gift": {"label": "Gift Day", "mood": {"happy": 2}, "duration_min": 0, "autonomy_mult": {"interaction:give_holiday_gift": 2.5}, "thought": "Gift Day!"}
+  }
+}

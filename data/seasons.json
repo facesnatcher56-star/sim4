@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "notes": "Calendar data for scripts/systems/seasons.gd. Day 1 of the game is spring day 1 (a Monday). season_length_days is the default; the live value is stored in the save (Seasons.set_length).",
+  "season_length_days": 7,
+  "min_length_days": 2,
+  "max_length_days": 30,
+  "weekdays": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+  "weekday_long": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+  "weekend_days": [5, 6],
+  "seasons": [
+    {"id": "spring", "label": "Spring", "color": "#8fd36b", "base_temp": 13.0, "diurnal_amp": 5.0, "sunrise": 6.2, "sunset": 19.6,
+     "grass_tint": "#7fd05a", "grass_alpha": 0.22, "ground": "#4f8a3c", "leaf": "#8fd06a", "leaf_alpha": 1.0, "blossom": "#f6b8d0", "month_label": "Bloom"},
+    {"id": "summer", "label": "Summer", "color": "#f2c94c", "base_temp": 25.0, "diurnal_amp": 6.0, "sunrise": 5.3, "sunset": 20.7,
+     "grass_tint": "#c9c43c", "grass_alpha": 0.24, "ground": "#4a7a32", "leaf": "#3f9a3a", "leaf_alpha": 1.0, "blossom": "", "month_label": "Sunpeak"},
+    {"id": "autumn", "label": "Autumn", "color": "#e08a3c", "base_temp": 11.0, "diurnal_amp": 4.5, "sunrise": 6.9, "sunset": 18.2,
+     "grass_tint": "#cf8a22", "grass_alpha": 0.42, "ground": "#756f30", "leaf": "#d9772e", "leaf_alpha": 1.0, "blossom": "", "month_label": "Harvest"},
+    {"id": "winter", "label": "Winter", "color": "#9cc8ea", "base_temp": -2.0, "diurnal_amp": 3.0, "sunrise": 7.7, "sunset": 16.6,
+     "grass_tint": "#b9c9d3", "grass_alpha": 0.3, "ground": "#667a70", "leaf": "#6b5a48", "leaf_alpha": 0.0, "blossom": "", "month_label": "Frostwane"}
+  ]
+}

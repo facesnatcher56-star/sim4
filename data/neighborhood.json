@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "home_id": "home",
+  "grid": [5, 4],
+  "travel": {"base_min": 5, "per_block_min": 4, "max_min": 40, "toast_seconds": 1.6},
+  "pantry": {"units_per_trip": 6, "fridge_max": 10},
+  "starts": [
+    {"id": "classic", "label": "Fernwood Classic", "template": "classic", "funds": 6000,
+     "description": "The original two-bedroom house with a fenced yard. Balanced and roomy."},
+    {"id": "small", "label": "Starter Studio", "template": "small", "funds": 8000,
+     "description": "A cosy one-room flat with a bathroom nook. Cheap to run, with extra starting funds."},
+    {"id": "medium", "label": "Family Home", "template": "medium", "funds": 4500,
+     "description": "Two bedrooms, kitchen-diner, laundry corner and a garden. Fits a small family."},
+    {"id": "large", "label": "Grand Estate", "template": "large", "funds": 2500,
+     "description": "Three bedrooms, big kitchen with a bar, fireplace, studio, gym corner and a yard with hot tub. Starts with the leanest wallet."}
+  ],
+  "lots": [
+    {"id": "home", "label": "Home", "type": "home", "pos": [2, 2], "color": "#3fb8af", "blurb": "Your household's lot."},
+    {"id": "park", "label": "Willow Green Park", "type": "park", "template": "park", "pos": [2, 1], "color": "#6aa84f", "blurb": "Fresh air, fishing, grills and benches."},
+    {"id": "cafe", "label": "Moss & Mug Cafe", "type": "cafe", "template": "cafe", "pos": [3, 1], "color": "#c98a4b", "blurb": "Coffee by day, bar and dancing by night."},
+    {"id": "gym", "label": "Ironleaf Gym", "type": "gym", "template": "gym", "pos": [1, 1], "color": "#d9534f", "blurb": "Treadmills and weights. Entry fee."},
+    {"id": "library", "label": "Hollow Oak Library", "type": "library", "template": "library", "pos": [1, 0], "color": "#8a6fb0", "blurb": "Quiet books, computers and a terminal."},
+    {"id": "market", "label": "Greenbarrow Market", "type": "market", "template": "market", "pos": [3, 2], "color": "#e0b43c", "blurb": "Groceries for the home fridge, snacks and drinks."},
+    {"id": "office", "label": "Brightline Offices", "type": "office", "template": "office", "pos": [4, 0], "color": "#5b8def", "blurb": "Work buildings: desks, computers, a terminal bank."},
+    {"id": "school", "label": "Larkfield School", "type": "school", "template": "school", "pos": [0, 0], "color": "#e8913d", "blurb": "Desks and a computer lab on school days."},
+    {"id": "townie_a", "label": "Maple Row 12", "type": "townie_home", "template": "medium", "pos": [1, 3], "color": "#9aa7b4", "blurb": "A neighbour's family home."},
+    {"id": "townie_b", "label": "Cedar Court 4", "type": "townie_home", "template": "small", "pos": [4, 2], "color": "#9aa7b4", "blurb": "A neighbour's snug flat."},
+    {"id": "townie_c", "label": "Hillcrest Manor", "type": "townie_home", "template": "large", "pos": [0, 2], "color": "#9aa7b4", "blurb": "A neighbour's grand house."}
+  ]
+}

@@ -39,7 +39,8 @@ static func snapshot(label: String = "") -> Dictionary:
 		"systems": {
 			"economy": Economy.to_dict(), "careers": Careers.to_dict(), "relationships": RelationshipService.to_dict(),
 			"goals": Goals.to_dict(), "aging": Aging.to_dict(), "story": Story.to_dict(), "away": Away.to_dict(),
-			"family": Family.to_dict(), "babycare": BabyCare.to_dict(),
+			"family": Family.to_dict(), "babycare": BabyCare.to_dict(), "weather": Weather.to_dict(),
+			"neighborhood": Neighborhood.to_dict(),
 		},
 	}
 
@@ -145,8 +146,12 @@ static func restore(d: Dictionary) -> bool:
 	for f4 in WorldIface.all_folk():
 		RelationshipService.restore_folk(f4)
 	Away.from_dict(sy.get("away", {}))
+	Weather.from_dict(sy.get("weather", {}))
 	SysContent.install()
 	FamilyContent.install()
+	WeatherContent.install()
+	NeighborhoodService.install()
+	Neighborhood.from_dict(sy.get("neighborhood", {}))
 	return true
 
 ## Autosave (slot 0) — SystemsManager calls this each game day.

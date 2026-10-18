@@ -49,6 +49,8 @@ func setup() -> void:
 	_events.object_removed.connect(_on_object_removed)
 	SysContent.install()
 	FamilyContent.install()
+	WeatherContent.install()
+	NeighborhoodService.install()
 	_hook_world()
 
 func teardown() -> void:
@@ -85,12 +87,17 @@ static func reset_all() -> void:
 	Away.reset()
 	Family.reset()
 	BabyCare.reset()
+	Weather.reset()
+	Neighborhood.reset()
 
 ## Start a fresh game: reset systems, give every household starting funds, register all current folk, make townies.
 func new_game(household_ids: Array = [], lifespan: String = "") -> void:
 	reset_all()
 	SysContent.install()
 	FamilyContent.install()
+	WeatherContent.install()
+	NeighborhoodService.install()
+	Weather.new_game()
 	if lifespan != "":
 		Aging.set_lifespan(lifespan)
 	var hids: Array = household_ids if not household_ids.is_empty() else Economy.household_ids()
@@ -111,15 +118,20 @@ func ensure_registered() -> void:
 func _on_minute(_total: int) -> void:
 	if not enabled:
 		return
+	NeighborhoodService.before_minute()
 	Careers.on_minute()
 	Away.on_minute()
 	Story.on_minute()
 	BabyCare.on_minute()
+	NeighborhoodService.after_minute()
+	Weather.on_minute()
 
 func _on_hour(hour: int) -> void:
 	if not enabled:
 		return
 	ensure_registered()
+	Weather.on_hour(hour)
+	Holidays.on_hour()
 	Goals.on_hour()
 	Story.on_hour(hour)
 	Family.on_hour()
@@ -128,9 +140,11 @@ func _on_day(day: int) -> void:
 	if not enabled:
 		return
 	ensure_registered()
+	Holidays.on_day(day)
 	Aging.on_day(day)
 	Family.on_day(day)
 	Careers.on_day(day)
+	Weather.on_day(day)
 	Economy.on_day(day)
 	RelationshipService.on_day(day)
 	Story.on_day(day)
@@ -152,6 +166,7 @@ func _on_interaction_started(folk_id: int, iid: String, target_id: int) -> void:
 func _on_interaction_finished(folk_id: int, iid: String, success: bool) -> void:
 	if not enabled:
 		return
+	Weather.on_interaction_finished(folk_id, iid, success)
 	var rec: Dictionary = Away.on_finished(folk_id, iid, success)
 	if not rec.is_empty():
 		var f = SysUtil.folk(folk_id)
@@ -165,6 +180,7 @@ func _on_interaction_finished(folk_id: int, iid: String, success: bool) -> void:
 	var f2 = SysUtil.folk(folk_id)
 	if f2 == null:
 		return
+	NeighborhoodService.on_interaction_finished(folk_id, iid, success)
 	if success:
 		Economy.note_usage(int(f2.household_id), iid)
 	Careers.on_interaction(folk_id, iid, success)
@@ -201,6 +217,8 @@ func _on_folk_added(folk_id: int) -> void:
 		Aging.register(f)
 		Genetics.ensure(f)
 		Goals.ensure_profile(f)
+	if f != null:
+		Weather.on_folk_added(f)
 
 func _on_object_placed(object_id: int) -> void:
 	Economy.on_object_placed(object_id)
@@ -213,6 +231,8 @@ func _on_game_event(ev_name: String, payload: Dictionary) -> void:
 	if not enabled:
 		return
 	Family.on_event(ev_name, payload)
+	NeighborhoodService.on_game_event(ev_name, payload)
+	Weather.on_game_event(ev_name, payload)
 	match ev_name:
 		"order_groceries":
 			var f = SysUtil.folk(int(payload.get("folk_id", -1)))

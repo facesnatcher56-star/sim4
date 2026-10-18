@@ -374,6 +374,7 @@ func _process(delta: float) -> void:
 	var f = World.get_folk(folk_id)
 	if f == null:
 		return
+	visible = not (f.has_meta("away") or f.has_meta("offlot"))    # off-lot folk (work, travel, other lots) are hidden
 	_check_tick += 1
 	if _check_tick % 20 == 0:
 		if stage_of(f) != _stage_now:
@@ -547,7 +548,7 @@ func _move(delta: float) -> void:
 	if mult <= 0.0:
 		_moving = false
 		return
-	var speed := BASE_SPEED * mult * (1.0 + 0.4 * float(_waypoints.size()))
+	var speed := BASE_SPEED * mult * (1.0 + 0.4 * float(_waypoints.size())) * Weather.walk_speed_mult_at(Vector2i(int(floor(position.x)), int(floor(position.z))))
 	var goal: Vector3 = _waypoints[0] if not _waypoints.is_empty() else _target
 	var to := goal - position
 	to.y = 0

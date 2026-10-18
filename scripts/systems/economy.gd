@@ -223,6 +223,7 @@ static func compute_bill(hid: int) -> int:
 	var b: Dictionary = bill_cfg()
 	var amount: float = float(b.get("base", 50)) + float(lot_value(hid)) * float(b.get("lot_value_rate", 0.015))
 	amount += float(usage.get(hid, 0.0)) * float(b.get("utility_rate", 0.8))
+	amount *= Weather.bill_multiplier()    # heating / cooling over the billing cycle (1.0 when mild)
 	return int(round(amount))
 
 static func outstanding(hid: int) -> Array:
@@ -294,6 +295,7 @@ static func on_day(day: int) -> void:
 	while day >= next_bill_day:
 		for hid2 in household_ids():
 			issue_bill(int(hid2))
+		Weather.reset_bill_period()
 		next_bill_day += every
 	# issued bills with due == today are handled tomorrow
 

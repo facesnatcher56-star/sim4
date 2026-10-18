@@ -14,6 +14,8 @@ var trait_box: HFlowContainer
 var needs_box: VBoxContainer
 var skills_box: VBoxContainer
 var rel_box: VBoxContainer
+var rel_scroll: ScrollContainer
+var _rel_pending := false
 var family_box: VBoxContainer          # "Family" tab: partner / parents / children / siblings + action buttons
 var family_buttons: Dictionary = {}    # action id -> Button
 var goal_label: Label
@@ -53,7 +55,7 @@ func _ready() -> void:
 	goal_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	root.add_child(goal_label)
 	tabs = TabContainer.new()
-	tabs.custom_minimum_size = Vector2(0, 250)
+	tabs.custom_minimum_size = Vector2(0, 300)
 	root.add_child(tabs)
 	needs_box = VBoxContainer.new()
 	needs_box.name = "Needs"
@@ -61,9 +63,14 @@ func _ready() -> void:
 	skills_box = VBoxContainer.new()
 	skills_box.name = "Skills"
 	tabs.add_child(skills_box)
+	rel_scroll = ScrollContainer.new()
+	rel_scroll.name = "People"
+	rel_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	tabs.add_child(rel_scroll)
 	rel_box = VBoxContainer.new()
-	rel_box.name = "People"
-	tabs.add_child(rel_box)
+	rel_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	rel_box.add_theme_constant_override("separation", 5)
+	rel_scroll.add_child(rel_box)
 	var fam_scroll := ScrollContainer.new()
 	fam_scroll.name = "Family"
 	fam_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -179,10 +186,14 @@ func _need_tooltip(nid: String, r: float) -> String:
 		t += "\nNo mood effect right now."
 	return t
 
-func _active_buff_ids() -> Array:
+func _active_buff_ids(include_hidden: bool = false) -> Array:
 	var out: Array = []
+	var defs := UIU.tbl("buffs")
 	for b in UIU.prop(folk, "buffs", []):
-		out.append(UIU.buff_id(b))
+		var bid := UIU.buff_id(b)
+		if not include_hidden and bool(defs.get(bid, {}).get("hidden", false)):
+			continue
+		out.append(bid)
 	return out
 
 func _buff_label(id: String) -> String:
@@ -215,19 +226,66 @@ func _refresh_mood() -> void:
 			mood = str(m)
 	_apply_mood(mood, inten)
 
+func mood_color(mood: String) -> Color:
+	if UIU.MOOD_COLORS.has(mood):
+		return UIU.MOOD_COLORS[mood]
+	if Emotions.mood_defs().has(mood):
+		return Emotions.color(mood)
+	return UIU.MOOD_COLORS["neutral"]
+
+## The procedural face only knows the original moods; richer moods borrow the closest expression (colour stays their own).
+const FACE_OF := {"confident": "happy", "embarrassed": "sad", "inspired": "happy", "playful": "happy", "dazed": "uncomfortable", "jealous": "angry",
+	"lonely": "sad", "nostalgic": "sad", "anxious": "tense", "content": "happy", "guilty": "sad", "proud": "happy"}
+
 func _apply_mood(mood: String, inten: int) -> void:
-	mood_icon.mood = mood
-	mood_icon.color = UIU.MOOD_COLORS.get(mood, UIU.MOOD_COLORS["neutral"])
-	portrait.mood = mood
-	mood_label.text = "%s %s" % [mood.capitalize(), "●".repeat(clampi(inten, 0, 3))]
-	var lines := ["Mood: %s (intensity %d)" % [mood, inten], "Buffs:"]
+	var face: String = FACE_OF.get(mood, mood)
+	mood_icon.mood = face
+	mood_icon.color = mood_color(mood)
+	portrait.mood = face
+	var mlabel: String = Emotions.label(mood) if Emotions.mood_defs().has(mood) else mood.capitalize()
+	mood_label.text = "%s %s" % [mlabel, "●".repeat(clampi(inten, 0, 3))]
+	mood_area.tooltip_text = mood_tooltip(mood, inten)
+
+## What drives the mood: strongest contributing buffs first, then what the mood does (data/emotions.json).
+func mood_tooltip(mood: String, inten: int) -> String:
+	var lines: Array = ["Mood: %s (intensity %d)" % [mood, inten]]
+	var blurb := Emotions.blurb(mood)
+	if blurb != "":
+		lines.append(blurb)
+	var rows: Array = []
+	if folk is Folk:
+		rows = Mood.breakdown(folk)["rows"]
+	else:
+		for id in _active_buff_ids():
+			rows.append({"id": id, "label": _buff_label(id), "toward": 0.0, "hidden": false, "weights": {}})
+	lines.append("Driven by:")
 	var any := false
-	for id in _active_buff_ids():
-		lines.append("  • " + _buff_label(id))
+	for r in rows:
+		if bool(r.get("hidden", false)):
+			continue
 		any = true
+		if folk is Folk:
+			var parts: Array = []
+			for k in r["weights"]:
+				parts.append("%s %+d" % [k, int(r["weights"][k])])
+			var mark := "▶ " if float(r["toward"]) > 0.0 else "   "
+			lines.append("  %s%s  (%s)" % [mark, str(r["label"]), ", ".join(parts)])
+		else:
+			lines.append("  • " + str(r["label"]))
 	if not any:
-		lines.append("  (none)")
-	mood_area.tooltip_text = "\n".join(lines)
+		lines.append("  (nothing in particular)")
+	var fx: Array = Emotions.describe_effects(mood, inten)
+	if not fx.is_empty():
+		lines.append("Effects:")
+		for l in fx:
+			lines.append("  " + str(l))
+	var others: Array = []
+	for id2 in _active_buff_ids():
+		if not rows.any(func(r): return str(r["id"]) == id2):
+			others.append(_buff_label(id2))
+	if not others.is_empty():
+		lines.append("Other buffs: " + ", ".join(others))
+	return "\n".join(lines)
 
 func _on_mood_changed(fid: int, mood: String, intensity: int) -> void:
 	if fid == folk_id:
@@ -307,35 +365,159 @@ func _on_skill_changed(fid: int, _skill: String, _level: int) -> void:
 		_build_skills()
 
 # ---------------- relationships ----------------
-func _build_relationships() -> void:
-	for c in rel_box.get_children():
-		c.queue_free()
+const TRACK_COLORS := {"friendship": Color("#4cc78a"), "romance": Color("#ee86a6"), "trust": Color("#35a7b0")}
+
+func _known_ids() -> Array:
+	var ids: Array = []
 	var rels = UIU.prop(folk, "relationships", {})
-	if not (rels is Dictionary) or rels.size() == 0:
+	if rels is Dictionary:
+		for k in rels:
+			if int(k) != folk_id and not ids.has(int(k)):
+				ids.append(int(k))
+	for k2 in RelationshipService.all_known(folk_id):
+		if int(k2) != folk_id and not ids.has(int(k2)):
+			ids.append(int(k2))
+	return ids
+
+func _track_value(oid: int, track: String) -> float:
+	var rels = UIU.prop(folk, "relationships", {})
+	if rels is Dictionary and rels.has(oid) and rels[oid] is Dictionary and (rels[oid] as Dictionary).has(track):
+		return float(rels[oid][track])
+	return RelationshipService.value(folk_id, oid, track)
+
+func _build_relationships() -> void:
+	_rel_pending = false
+	for c in rel_box.get_children():
+		rel_box.remove_child(c)
+		c.queue_free()
+	if folk == null or folk_id < 0:
+		return
+	var ids := _known_ids()
+	var goal := SocialDynamics.goal_text(folk_id)
+	if goal != "":
+		var gl := UIU.make_label("Social goal: " + goal, 12, UITheme.ACCENT)
+		gl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		rel_box.add_child(gl)
+	if ids.is_empty():
 		rel_box.add_child(UIU.make_label("Hasn't met anyone yet.", 13, UITheme.MUTED))
 		return
-	for other_id in rels:
-		var other = UIU.get_folk(int(other_id))
-		var nm := str(UIU.prop(other, "name", "Folk #%s" % other_id))
-		var tracks = rels[other_id]
-		var txt := nm
-		if tracks is Dictionary:
-			var parts: Array = []
-			for tr in tracks:
-				parts.append("%s %d" % [tr, int(tracks[tr])])
-			txt += ":  " + ", ".join(parts)
-		rel_box.add_child(UIU.make_label(txt, 13))
+	ids.sort_custom(func(a, b):
+		return _track_value(a, "friendship") + _track_value(a, "romance") > _track_value(b, "friendship") + _track_value(b, "romance"))
+	for oid in ids:
+		rel_box.add_child(_rel_card(int(oid)))
+
+func _chip(text: String, col: Color, tip: String = "") -> PanelContainer:
+	var chip := PanelContainer.new()
+	chip.add_theme_stylebox_override("panel", UITheme.box(col.darkened(0.45), 10, col, 1, 6))
+	chip.add_child(UIU.make_label(text, 11))
+	chip.tooltip_text = tip
+	return chip
+
+func _meter(title: String, value: float, col: Color) -> VBoxContainer:
+	var v := VBoxContainer.new()
+	v.add_theme_constant_override("separation", 1)
+	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	v.add_child(UIU.make_label("%s %d" % [title, int(round(value))], 10, UITheme.MUTED))
+	var bar := ProgressBar.new()
+	bar.min_value = -100.0
+	bar.max_value = 100.0
+	bar.value = value
+	bar.show_percentage = false
+	bar.custom_minimum_size = Vector2(60, 8)
+	bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	bar.add_theme_stylebox_override("fill", UITheme.box(col if value >= 0.0 else Color("#e5534b"), 3, Color(0, 0, 0, 0), 0, 0))
+	v.add_child(bar)
+	return v
+
+func _rel_card(oid: int) -> PanelContainer:
+	var other = UIU.get_folk(oid)
+	var nm := str(UIU.prop(other, "name", SysUtil.folk_name(oid) if other == null else "Folk #%d" % oid))
+	var card := PanelContainer.new()
+	card.name = "rel_%d" % oid
+	card.add_theme_stylebox_override("panel", UITheme.box(UITheme.PANEL_HI.darkened(0.2), 8, Color(1, 1, 1, 0.06), 1, 8))
+	card.tooltip_text = RelationshipService.describe(folk_id, oid)
+	var col := VBoxContainer.new()
+	col.add_theme_constant_override("separation", 3)
+	card.add_child(col)
+	# --- head: name, relationship bit, romance stage, tension, their mood
+	var head := HFlowContainer.new()
+	head.add_theme_constant_override("h_separation", 5)
+	col.add_child(head)
+	head.add_child(UIU.make_label(nm, 14))
+	var bit := RelationshipService.bit_for(folk_id, oid)
+	if bit != "stranger":
+		head.add_child(_chip(RelationshipService.bit_label(bit), Color(RelationshipService.bit_color(bit)), "How %s sees %s" % [str(UIU.prop(folk, "name", "they")), nm]))
+	var stage := RelationshipService.romance_stage(folk_id, oid)
+	if stage in ["crush", "flirting"]:
+		head.add_child(_chip(RelationshipService.stage_label(stage), Color("#ee86a6"), "Romance stage"))
+	var ten := _track_value(oid, "tension")
+	if ten >= 10.0:
+		head.add_child(_chip("Tense %d" % int(ten), Color("#e5534b"), "Unresolved tension - make up, forgive or apologize. It fades slowly over days."))
+	if other != null and other.has_method("get_mood"):
+		var om: Dictionary = other.get_mood()
+		var mn := str(om.get("mood", "neutral"))
+		if mn != "neutral":
+			var ml := UIU.make_label("● " + (Emotions.label(mn) if Emotions.mood_defs().has(mn) else mn.capitalize()), 11, mood_color(mn))
+			ml.tooltip_text = mood_tooltip_for(other)
+			ml.mouse_filter = Control.MOUSE_FILTER_STOP
+			head.add_child(ml)
+	# --- tracks
+	var meters := HBoxContainer.new()
+	meters.add_theme_constant_override("separation", 8)
+	col.add_child(meters)
+	meters.add_child(_meter("Friendship", _track_value(oid, "friendship"), TRACK_COLORS["friendship"]))
+	meters.add_child(_meter("Romance", _track_value(oid, "romance"), TRACK_COLORS["romance"]))
+	meters.add_child(_meter("Trust", _track_value(oid, "trust"), TRACK_COLORS["trust"]))
+	# --- what is known about them ('?' until discovered)
+	var ks := RelationshipService.known_summary(folk_id, oid)
+	var tparts: Array = []
+	for t in ks["traits"]:
+		tparts.append(str(t["label"]))
+	var known_txt := "Traits: %s\nJob: %s   Dream: %s" % [" · ".join(tparts) if not tparts.is_empty() else "-", str(ks["career"]), str(ks["aspiration"])]
+	if not (ks["interests"] as Array).is_empty():
+		known_txt += "\nInterests: " + ", ".join(ks["interests"])
+	var kl := UIU.make_label(known_txt, 11, UITheme.TEXT.darkened(0.15))
+	kl.name = "known"
+	kl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	col.add_child(kl)
+	# --- chemistry + shared history
+	var extra: Array = []
+	if _track_value(oid, "romance") > 5.0 or stage != "none":
+		extra.append("Spark %s" % RelationshipService.spark_hearts(folk_id, oid))
+	extra.append("Together: %s" % RelationshipService.compat_label(RelationshipService.compatibility(folk_id, oid)))
+	var hl := UIU.make_label("  ·  ".join(extra), 11, UITheme.MUTED)
+	col.add_child(hl)
+	var snippets := RelationshipService.history_snippets(folk_id, oid, 2)
+	if not snippets.is_empty():
+		var sl := UIU.make_label("\n".join(snippets), 10, UITheme.MUTED)
+		sl.name = "history"
+		sl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		col.add_child(sl)
+	return card
+
+func mood_tooltip_for(other) -> String:
+	var om: Dictionary = other.get_mood()
+	var mn := str(om.get("mood", "neutral"))
+	var lines: Array = ["%s is %s" % [str(UIU.prop(other, "name", "They")), mn]]
+	lines.append_array(Emotions.describe_effects(mn, int(om.get("intensity", 1))))
+	return "\n".join(lines)
 
 func _on_rel_changed(a: int, b: int, _track: String = "", _v: float = 0.0) -> void:
-	if a == folk_id or b == folk_id:
-		_build_relationships()
+	if (a == folk_id or b == folk_id) and not _rel_pending:
+		_rel_pending = true
+		call_deferred("_build_relationships")
 
 # ---------------- family ----------------
+const SOCIAL_EVENTS := ["knowledge_revealed", "breakup", "argument", "argument_resolved", "date_accepted", "gossip_spread", "secret_shared", "cheating_discovered"]
 const FAMILY_EVENTS := ["married", "divorced", "engaged", "baby_born", "adopted", "moved_in", "moved_out", "child_removed", "engagement_broken"]
 
 func _on_family_event(ev: String, _payload: Dictionary = {}) -> void:
 	if ev in FAMILY_EVENTS and folk != null:
 		_build_family()
+	if ev in SOCIAL_EVENTS and folk != null and not _rel_pending:
+		_rel_pending = true
+		call_deferred("_build_relationships")
 
 func _family_line(n: Dictionary, extra: String = "") -> String:
 	var s := "%s  (%s, %d)" % [str(n.get("name", "?")), str(n.get("stage", "")).capitalize(), int(n.get("age_years", 0))]

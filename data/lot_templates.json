@@ -1894,6 +1894,3228 @@
     ]
    ],
    "price": 26490
+  },
+  "cafe": {
+   "label": "Moss & Mug Cafe",
+   "description": "A warm cafe by day, a lively bar by night: a long counter, stools, tables and a dance floor.",
+   "kind": "venue",
+   "venue": "cafe",
+   "floors": [
+    {
+     "rect": [
+      0,
+      18,
+      31,
+      18
+     ],
+     "type": "stone"
+    },
+    {
+     "rect": [
+      0,
+      19,
+      31,
+      23
+     ],
+     "type": "concrete"
+    },
+    {
+     "rect": [
+      5,
+      4,
+      26,
+      17
+     ],
+     "type": "wood"
+    },
+    {
+     "rect": [
+      19,
+      9,
+      25,
+      16
+     ],
+     "type": "carpet"
+    }
+   ],
+   "walls": [
+    {
+     "a": [
+      5,
+      4
+     ],
+     "b": [
+      27,
+      4
+     ],
+     "type": "wall"
+    },
+    {
+     "a": [
+      5,
+      18
+     ],
+     "b": [
+      27,
+      18
+     ],
+     "type": "wall"
+    },
+    {
+     "a": [
+      5,
+      4
+     ],
+     "b": [
+      5,
+      18
+     ],
+     "type": "wall"
+    },
+    {
+     "a": [
+      27,
+      4
+     ],
+     "b": [
+      27,
+      18
+     ],
+     "type": "wall"
+    }
+   ],
+   "objects": [
+    {
+     "def": "door",
+     "tile": [
+      15,
+      17
+     ],
+     "rot": 2
+    },
+    {
+     "def": "window",
+     "tile": [
+      8,
+      17
+     ],
+     "rot": 2
+    },
+    {
+     "def": "window",
+     "tile": [
+      12,
+      17
+     ],
+     "rot": 2
+    },
+    {
+     "def": "window",
+     "tile": [
+      19,
+      17
+     ],
+     "rot": 2
+    },
+    {
+     "def": "window",
+     "tile": [
+      23,
+      17
+     ],
+     "rot": 2
+    },
+    {
+     "def": "window",
+     "tile": [
+      9,
+      4
+     ],
+     "rot": 0
+    },
+    {
+     "def": "window",
+     "tile": [
+      12,
+      4
+     ],
+     "rot": 0
+    },
+    {
+     "def": "window",
+     "tile": [
+      18,
+      4
+     ],
+     "rot": 0
+    },
+    {
+     "def": "window",
+     "tile": [
+      22,
+      4
+     ],
+     "rot": 0
+    },
+    {
+     "def": "window",
+     "tile": [
+      5,
+      8
+     ],
+     "rot": 3
+    },
+    {
+     "def": "window",
+     "tile": [
+      5,
+      13
+     ],
+     "rot": 3
+    },
+    {
+     "def": "window",
+     "tile": [
+      26,
+      12
+     ],
+     "rot": 1
+    },
+    {
+     "def": "window",
+     "tile": [
+      26,
+      15
+     ],
+     "rot": 1
+    },
+    {
+     "def": "cafe_counter",
+     "tile": [
+      7,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "cafe_counter",
+     "tile": [
+      10,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "cafe_counter",
+     "tile": [
+      13,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "coffee_maker",
+     "tile": [
+      6,
+      4
+     ],
+     "rot": 0
+    },
+    {
+     "def": "coffee_maker",
+     "tile": [
+      15,
+      4
+     ],
+     "rot": 0
+    },
+    {
+     "def": "bar_stool",
+     "tile": [
+      7,
+      7
+     ],
+     "rot": 0
+    },
+    {
+     "def": "bar_stool",
+     "tile": [
+      8,
+      7
+     ],
+     "rot": 0
+    },
+    {
+     "def": "bar_stool",
+     "tile": [
+      10,
+      7
+     ],
+     "rot": 0
+    },
+    {
+     "def": "bar_stool",
+     "tile": [
+      11,
+      7
+     ],
+     "rot": 0
+    },
+    {
+     "def": "bar_stool",
+     "tile": [
+      13,
+      7
+     ],
+     "rot": 0
+    },
+    {
+     "def": "bar_stool",
+     "tile": [
+      14,
+      7
+     ],
+     "rot": 0
+    },
+    {
+     "def": "table",
+     "tile": [
+      7,
+      11
+     ],
+     "rot": 0
+    },
+    {
+     "def": "dining_chair",
+     "tile": [
+      7,
+      10
+     ],
+     "rot": 0
+    },
+    {
+     "def": "dining_chair",
+     "tile": [
+      8,
+      10
+     ],
+     "rot": 0
+    },
+    {
+     "def": "table",
+     "tile": [
+      7,
+      15
+     ],
+     "rot": 0
+    },
+    {
+     "def": "dining_chair",
+     "tile": [
+      7,
+      14
+     ],
+     "rot": 0
+    },
+    {
+     "def": "dining_chair",
+     "tile": [
+      8,
+      14
+     ],
+     "rot": 0
+    },
+    {
+     "def": "table",
+     "tile": [
+      12,
+      11
+     ],
+     "rot": 0
+    },
+    {
+     "def": "dining_chair",
+     "tile": [
+      12,
+      10
+     ],
+     "rot": 0
+    },
+    {
+     "def": "dining_chair",
+     "tile": [
+      13,
+      10
+     ],
+     "rot": 0
+    },
+    {
+     "def": "table",
+     "tile": [
+      12,
+      15
+     ],
+     "rot": 0
+    },
+    {
+     "def": "dining_chair",
+     "tile": [
+      12,
+      14
+     ],
+     "rot": 0
+    },
+    {
+     "def": "dining_chair",
+     "tile": [
+      13,
+      14
+     ],
+     "rot": 0
+    },
+    {
+     "def": "stereo",
+     "tile": [
+      20,
+      9
+     ],
+     "rot": 0
+    },
+    {
+     "def": "stereo",
+     "tile": [
+      22,
+      9
+     ],
+     "rot": 0
+    },
+    {
+     "def": "stereo",
+     "tile": [
+      24,
+      9
+     ],
+     "rot": 0
+    },
+    {
+     "def": "vending_machine",
+     "tile": [
+      26,
+      6
+     ],
+     "rot": 1
+    },
+    {
+     "def": "plant",
+     "tile": [
+      5,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "plant",
+     "tile": [
+      26,
+      16
+     ],
+     "rot": 2
+    },
+    {
+     "def": "plant",
+     "tile": [
+      18,
+      16
+     ],
+     "rot": 2
+    },
+    {
+     "def": "trash_bin",
+     "tile": [
+      5,
+      16
+     ],
+     "rot": 2
+    },
+    {
+     "def": "lamp",
+     "tile": [
+      17,
+      11
+     ],
+     "rot": 0
+    }
+   ],
+   "spawn": [
+    [
+     15,
+     19
+    ],
+    [
+     16,
+     19
+    ],
+    [
+     14,
+     19
+    ]
+   ],
+   "entry": [
+    15,
+    19
+   ],
+   "staff": [
+    {
+     "role": "barista",
+     "tile": [
+      8,
+      4
+     ]
+    },
+    {
+     "role": "bartender",
+     "tile": [
+      11,
+      4
+     ],
+     "hours": [
+      17,
+      24
+     ]
+    }
+   ],
+   "price": 0
+  },
+  "gym": {
+   "label": "Ironleaf Gym",
+   "description": "Treadmills, free weights, mats and mirrors. Burns energy, builds fitness.",
+   "kind": "venue",
+   "venue": "gym",
+   "floors": [
+    {
+     "rect": [
+      0,
+      18,
+      31,
+      18
+     ],
+     "type": "stone"
+    },
+    {
+     "rect": [
+      0,
+      19,
+      31,
+      23
+     ],
+     "type": "concrete"
+    },
+    {
+     "rect": [
+      5,
+      4,
+      26,
+      17
+     ],
+     "type": "tile"
+    },
+    {
+     "rect": [
+      16,
+      8,
+      24,
+      13
+     ],
+     "type": "wood"
+    }
+   ],
+   "walls": [
+    {
+     "a": [
+      5,
+      4
+     ],
+     "b": [
+      27,
+      4
+     ],
+     "type": "wall"
+    },
+    {
+     "a": [
+      5,
+      18
+     ],
+     "b": [
+      27,
+      18
+     ],
+     "type": "wall"
+    },
+    {
+     "a": [
+      5,
+      4
+     ],
+     "b": [
+      5,
+      18
+     ],
+     "type": "wall"
+    },
+    {
+     "a": [
+      27,
+      4
+     ],
+     "b": [
+      27,
+      18
+     ],
+     "type": "wall"
+    }
+   ],
+   "objects": [
+    {
+     "def": "door",
+     "tile": [
+      15,
+      17
+     ],
+     "rot": 2
+    },
+    {
+     "def": "window",
+     "tile": [
+      8,
+      17
+     ],
+     "rot": 2
+    },
+    {
+     "def": "window",
+     "tile": [
+      12,
+      17
+     ],
+     "rot": 2
+    },
+    {
+     "def": "window",
+     "tile": [
+      19,
+      17
+     ],
+     "rot": 2
+    },
+    {
+     "def": "window",
+     "tile": [
+      23,
+      17
+     ],
+     "rot": 2
+    },
+    {
+     "def": "window",
+     "tile": [
+      9,
+      4
+     ],
+     "rot": 0
+    },
+    {
+     "def": "window",
+     "tile": [
+      12,
+      4
+     ],
+     "rot": 0
+    },
+    {
+     "def": "window",
+     "tile": [
+      18,
+      4
+     ],
+     "rot": 0
+    },
+    {
+     "def": "window",
+     "tile": [
+      22,
+      4
+     ],
+     "rot": 0
+    },
+    {
+     "def": "window",
+     "tile": [
+      5,
+      8
+     ],
+     "rot": 3
+    },
+    {
+     "def": "window",
+     "tile": [
+      5,
+      13
+     ],
+     "rot": 3
+    },
+    {
+     "def": "window",
+     "tile": [
+      26,
+      12
+     ],
+     "rot": 1
+    },
+    {
+     "def": "window",
+     "tile": [
+      26,
+      15
+     ],
+     "rot": 1
+    },
+    {
+     "def": "treadmill",
+     "tile": [
+      7,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "treadmill",
+     "tile": [
+      9,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "treadmill",
+     "tile": [
+      11,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "treadmill",
+     "tile": [
+      13,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "dumbbell_rack",
+     "tile": [
+      17,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "dumbbell_rack",
+     "tile": [
+      19,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "dumbbell_rack",
+     "tile": [
+      21,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "dumbbell_rack",
+     "tile": [
+      7,
+      16
+     ],
+     "rot": 2
+    },
+    {
+     "def": "dumbbell_rack",
+     "tile": [
+      9,
+      16
+     ],
+     "rot": 2
+    },
+    {
+     "def": "dumbbell_rack",
+     "tile": [
+      11,
+      16
+     ],
+     "rot": 2
+    },
+    {
+     "def": "rug",
+     "tile": [
+      16,
+      9
+     ],
+     "rot": 0
+    },
+    {
+     "def": "rug",
+     "tile": [
+      18,
+      9
+     ],
+     "rot": 0
+    },
+    {
+     "def": "rug",
+     "tile": [
+      20,
+      9
+     ],
+     "rot": 0
+    },
+    {
+     "def": "rug",
+     "tile": [
+      22,
+      9
+     ],
+     "rot": 0
+    },
+    {
+     "def": "mirror",
+     "tile": [
+      5,
+      9
+     ],
+     "rot": 3
+    },
+    {
+     "def": "mirror",
+     "tile": [
+      5,
+      11
+     ],
+     "rot": 3
+    },
+    {
+     "def": "vending_machine",
+     "tile": [
+      26,
+      7
+     ],
+     "rot": 1
+    },
+    {
+     "def": "vending_machine",
+     "tile": [
+      26,
+      9
+     ],
+     "rot": 1
+    },
+    {
+     "def": "plant",
+     "tile": [
+      5,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "plant",
+     "tile": [
+      26,
+      16
+     ],
+     "rot": 2
+    },
+    {
+     "def": "plant",
+     "tile": [
+      5,
+      16
+     ],
+     "rot": 2
+    },
+    {
+     "def": "trash_bin",
+     "tile": [
+      16,
+      16
+     ],
+     "rot": 2
+    },
+    {
+     "def": "treadmill",
+     "tile": [
+      20,
+      15
+     ],
+     "rot": 2
+    },
+    {
+     "def": "treadmill",
+     "tile": [
+      22,
+      15
+     ],
+     "rot": 2
+    }
+   ],
+   "spawn": [
+    [
+     15,
+     19
+    ],
+    [
+     16,
+     19
+    ],
+    [
+     14,
+     19
+    ]
+   ],
+   "entry": [
+    15,
+    19
+   ],
+   "staff": [
+    {
+     "role": "trainer",
+     "tile": [
+      16,
+      7
+     ]
+    }
+   ],
+   "price": 0
+  },
+  "library": {
+   "label": "Hollow Oak Library",
+   "description": "Rows of bookcases, quiet desks, computers and a terminal. A calm place to read, write and study.",
+   "kind": "venue",
+   "venue": "library",
+   "floors": [
+    {
+     "rect": [
+      0,
+      18,
+      31,
+      18
+     ],
+     "type": "stone"
+    },
+    {
+     "rect": [
+      0,
+      19,
+      31,
+      23
+     ],
+     "type": "concrete"
+    },
+    {
+     "rect": [
+      5,
+      4,
+      26,
+      17
+     ],
+     "type": "carpet"
+    },
+    {
+     "rect": [
+      20,
+      9,
+      25,
+      14
+     ],
+     "type": "wood"
+    }
+   ],
+   "walls": [
+    {
+     "a": [
+      5,
+      4
+     ],
+     "b": [
+      27,
+      4
+     ],
+     "type": "wall"
+    },
+    {
+     "a": [
+      5,
+      18
+     ],
+     "b": [
+      27,
+      18
+     ],
+     "type": "wall"
+    },
+    {
+     "a": [
+      5,
+      4
+     ],
+     "b": [
+      5,
+      18
+     ],
+     "type": "wall"
+    },
+    {
+     "a": [
+      27,
+      4
+     ],
+     "b": [
+      27,
+      18
+     ],
+     "type": "wall"
+    }
+   ],
+   "objects": [
+    {
+     "def": "door",
+     "tile": [
+      15,
+      17
+     ],
+     "rot": 2
+    },
+    {
+     "def": "window",
+     "tile": [
+      8,
+      17
+     ],
+     "rot": 2
+    },
+    {
+     "def": "window",
+     "tile": [
+      12,
+      17
+     ],
+     "rot": 2
+    },
+    {
+     "def": "window",
+     "tile": [
+      19,
+      17
+     ],
+     "rot": 2
+    },
+    {
+     "def": "window",
+     "tile": [
+      23,
+      17
+     ],
+     "rot": 2
+    },
+    {
+     "def": "window",
+     "tile": [
+      9,
+      4
+     ],
+     "rot": 0
+    },
+    {
+     "def": "window",
+     "tile": [
+      12,
+      4
+     ],
+     "rot": 0
+    },
+    {
+     "def": "window",
+     "tile": [
+      18,
+      4
+     ],
+     "rot": 0
+    },
+    {
+     "def": "window",
+     "tile": [
+      22,
+      4
+     ],
+     "rot": 0
+    },
+    {
+     "def": "window",
+     "tile": [
+      5,
+      8
+     ],
+     "rot": 3
+    },
+    {
+     "def": "window",
+     "tile": [
+      5,
+      13
+     ],
+     "rot": 3
+    },
+    {
+     "def": "window",
+     "tile": [
+      26,
+      12
+     ],
+     "rot": 1
+    },
+    {
+     "def": "window",
+     "tile": [
+      26,
+      15
+     ],
+     "rot": 1
+    },
+    {
+     "def": "bookcase_tall",
+     "tile": [
+      6,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "bookcase_tall",
+     "tile": [
+      7,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "bookcase_tall",
+     "tile": [
+      8,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "bookcase_tall",
+     "tile": [
+      9,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "bookcase_tall",
+     "tile": [
+      12,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "bookcase_tall",
+     "tile": [
+      13,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "bookcase_tall",
+     "tile": [
+      14,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "bookcase_tall",
+     "tile": [
+      15,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "bookcase_tall",
+     "tile": [
+      18,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "bookcase_tall",
+     "tile": [
+      19,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "bookcase_tall",
+     "tile": [
+      20,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "bookcase_tall",
+     "tile": [
+      21,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "bookcase_tall",
+     "tile": [
+      7,
+      9
+     ],
+     "rot": 0
+    },
+    {
+     "def": "bookcase_tall",
+     "tile": [
+      8,
+      9
+     ],
+     "rot": 0
+    },
+    {
+     "def": "bookcase_tall",
+     "tile": [
+      9,
+      9
+     ],
+     "rot": 0
+    },
+    {
+     "def": "bookcase_tall",
+     "tile": [
+      13,
+      9
+     ],
+     "rot": 0
+    },
+    {
+     "def": "bookcase_tall",
+     "tile": [
+      14,
+      9
+     ],
+     "rot": 0
+    },
+    {
+     "def": "bookcase_tall",
+     "tile": [
+      15,
+      9
+     ],
+     "rot": 0
+    },
+    {
+     "def": "computer",
+     "tile": [
+      7,
+      16
+     ],
+     "rot": 2
+    },
+    {
+     "def": "computer",
+     "tile": [
+      9,
+      16
+     ],
+     "rot": 2
+    },
+    {
+     "def": "computer",
+     "tile": [
+      11,
+      16
+     ],
+     "rot": 2
+    },
+    {
+     "def": "terminal",
+     "tile": [
+      14,
+      16
+     ],
+     "rot": 2
+    },
+    {
+     "def": "terminal",
+     "tile": [
+      16,
+      16
+     ],
+     "rot": 2
+    },
+    {
+     "def": "desk",
+     "tile": [
+      19,
+      16
+     ],
+     "rot": 2
+    },
+    {
+     "def": "desk",
+     "tile": [
+      21,
+      16
+     ],
+     "rot": 2
+    },
+    {
+     "def": "desk",
+     "tile": [
+      23,
+      16
+     ],
+     "rot": 2
+    },
+    {
+     "def": "armchair",
+     "tile": [
+      21,
+      11
+     ],
+     "rot": 0
+    },
+    {
+     "def": "armchair",
+     "tile": [
+      24,
+      11
+     ],
+     "rot": 0
+    },
+    {
+     "def": "lamp",
+     "tile": [
+      22,
+      11
+     ],
+     "rot": 0
+    },
+    {
+     "def": "lamp",
+     "tile": [
+      23,
+      11
+     ],
+     "rot": 0
+    },
+    {
+     "def": "coffee_table",
+     "tile": [
+      21,
+      13
+     ],
+     "rot": 0
+    },
+    {
+     "def": "table",
+     "tile": [
+      12,
+      13
+     ],
+     "rot": 0
+    },
+    {
+     "def": "dining_chair",
+     "tile": [
+      12,
+      12
+     ],
+     "rot": 0
+    },
+    {
+     "def": "dining_chair",
+     "tile": [
+      13,
+      12
+     ],
+     "rot": 0
+    },
+    {
+     "def": "plant",
+     "tile": [
+      5,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "plant",
+     "tile": [
+      26,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "plant",
+     "tile": [
+      26,
+      16
+     ],
+     "rot": 2
+    },
+    {
+     "def": "trash_bin",
+     "tile": [
+      5,
+      16
+     ],
+     "rot": 2
+    }
+   ],
+   "spawn": [
+    [
+     15,
+     19
+    ],
+    [
+     16,
+     19
+    ],
+    [
+     14,
+     19
+    ]
+   ],
+   "entry": [
+    15,
+    19
+   ],
+   "staff": [
+    {
+     "role": "librarian",
+     "tile": [
+      17,
+      12
+     ]
+    }
+   ],
+   "price": 0
+  },
+  "market": {
+   "label": "Greenbarrow Market",
+   "description": "Grocery coolers, vending machines and a checkout. Buy groceries to stock the home fridge.",
+   "kind": "venue",
+   "venue": "market",
+   "floors": [
+    {
+     "rect": [
+      0,
+      18,
+      31,
+      18
+     ],
+     "type": "stone"
+    },
+    {
+     "rect": [
+      0,
+      19,
+      31,
+      23
+     ],
+     "type": "concrete"
+    },
+    {
+     "rect": [
+      5,
+      4,
+      26,
+      17
+     ],
+     "type": "tile"
+    }
+   ],
+   "walls": [
+    {
+     "a": [
+      5,
+      4
+     ],
+     "b": [
+      27,
+      4
+     ],
+     "type": "wall"
+    },
+    {
+     "a": [
+      5,
+      18
+     ],
+     "b": [
+      27,
+      18
+     ],
+     "type": "wall"
+    },
+    {
+     "a": [
+      5,
+      4
+     ],
+     "b": [
+      5,
+      18
+     ],
+     "type": "wall"
+    },
+    {
+     "a": [
+      27,
+      4
+     ],
+     "b": [
+      27,
+      18
+     ],
+     "type": "wall"
+    }
+   ],
+   "objects": [
+    {
+     "def": "door",
+     "tile": [
+      15,
+      17
+     ],
+     "rot": 2
+    },
+    {
+     "def": "window",
+     "tile": [
+      8,
+      17
+     ],
+     "rot": 2
+    },
+    {
+     "def": "window",
+     "tile": [
+      12,
+      17
+     ],
+     "rot": 2
+    },
+    {
+     "def": "window",
+     "tile": [
+      19,
+      17
+     ],
+     "rot": 2
+    },
+    {
+     "def": "window",
+     "tile": [
+      23,
+      17
+     ],
+     "rot": 2
+    },
+    {
+     "def": "window",
+     "tile": [
+      9,
+      4
+     ],
+     "rot": 0
+    },
+    {
+     "def": "window",
+     "tile": [
+      12,
+      4
+     ],
+     "rot": 0
+    },
+    {
+     "def": "window",
+     "tile": [
+      18,
+      4
+     ],
+     "rot": 0
+    },
+    {
+     "def": "window",
+     "tile": [
+      22,
+      4
+     ],
+     "rot": 0
+    },
+    {
+     "def": "window",
+     "tile": [
+      5,
+      8
+     ],
+     "rot": 3
+    },
+    {
+     "def": "window",
+     "tile": [
+      5,
+      13
+     ],
+     "rot": 3
+    },
+    {
+     "def": "window",
+     "tile": [
+      26,
+      12
+     ],
+     "rot": 1
+    },
+    {
+     "def": "window",
+     "tile": [
+      26,
+      15
+     ],
+     "rot": 1
+    },
+    {
+     "def": "grocery_cooler",
+     "tile": [
+      6,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "grocery_cooler",
+     "tile": [
+      7,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "grocery_cooler",
+     "tile": [
+      8,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "grocery_cooler",
+     "tile": [
+      9,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "grocery_cooler",
+     "tile": [
+      10,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "grocery_cooler",
+     "tile": [
+      11,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "grocery_cooler",
+     "tile": [
+      6,
+      16
+     ],
+     "rot": 2
+    },
+    {
+     "def": "grocery_cooler",
+     "tile": [
+      7,
+      16
+     ],
+     "rot": 2
+    },
+    {
+     "def": "grocery_cooler",
+     "tile": [
+      8,
+      16
+     ],
+     "rot": 2
+    },
+    {
+     "def": "grocery_cooler",
+     "tile": [
+      9,
+      16
+     ],
+     "rot": 2
+    },
+    {
+     "def": "grocery_cooler",
+     "tile": [
+      10,
+      16
+     ],
+     "rot": 2
+    },
+    {
+     "def": "grocery_cooler",
+     "tile": [
+      11,
+      16
+     ],
+     "rot": 2
+    },
+    {
+     "def": "vending_machine",
+     "tile": [
+      14,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "vending_machine",
+     "tile": [
+      15,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "vending_machine",
+     "tile": [
+      16,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "bookshelf",
+     "tile": [
+      7,
+      9
+     ],
+     "rot": 0
+    },
+    {
+     "def": "bookshelf",
+     "tile": [
+      8,
+      9
+     ],
+     "rot": 0
+    },
+    {
+     "def": "bookshelf",
+     "tile": [
+      9,
+      9
+     ],
+     "rot": 0
+    },
+    {
+     "def": "bookshelf",
+     "tile": [
+      13,
+      9
+     ],
+     "rot": 0
+    },
+    {
+     "def": "bookshelf",
+     "tile": [
+      14,
+      9
+     ],
+     "rot": 0
+    },
+    {
+     "def": "bookshelf",
+     "tile": [
+      15,
+      9
+     ],
+     "rot": 0
+    },
+    {
+     "def": "counter",
+     "tile": [
+      20,
+      7
+     ],
+     "rot": 0
+    },
+    {
+     "def": "counter",
+     "tile": [
+      21,
+      7
+     ],
+     "rot": 0
+    },
+    {
+     "def": "counter",
+     "tile": [
+      22,
+      7
+     ],
+     "rot": 0
+    },
+    {
+     "def": "plant",
+     "tile": [
+      26,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "plant",
+     "tile": [
+      5,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "plant",
+     "tile": [
+      26,
+      16
+     ],
+     "rot": 2
+    },
+    {
+     "def": "plant",
+     "tile": [
+      18,
+      16
+     ],
+     "rot": 2
+    },
+    {
+     "def": "trash_bin",
+     "tile": [
+      24,
+      16
+     ],
+     "rot": 2
+    }
+   ],
+   "spawn": [
+    [
+     15,
+     19
+    ],
+    [
+     16,
+     19
+    ],
+    [
+     14,
+     19
+    ]
+   ],
+   "entry": [
+    15,
+    19
+   ],
+   "staff": [
+    {
+     "role": "cashier",
+     "tile": [
+      21,
+      6
+     ]
+    }
+   ],
+   "price": 0
+  },
+  "office": {
+   "label": "Brightline Offices",
+   "description": "Open-plan computers, a terminal bank, meeting tables and a coffee station.",
+   "kind": "venue",
+   "venue": "office",
+   "floors": [
+    {
+     "rect": [
+      0,
+      18,
+      31,
+      18
+     ],
+     "type": "stone"
+    },
+    {
+     "rect": [
+      0,
+      19,
+      31,
+      23
+     ],
+     "type": "concrete"
+    },
+    {
+     "rect": [
+      5,
+      4,
+      26,
+      17
+     ],
+     "type": "carpet"
+    },
+    {
+     "rect": [
+      5,
+      4,
+      9,
+      8
+     ],
+     "type": "tile"
+    }
+   ],
+   "walls": [
+    {
+     "a": [
+      5,
+      4
+     ],
+     "b": [
+      27,
+      4
+     ],
+     "type": "wall"
+    },
+    {
+     "a": [
+      5,
+      18
+     ],
+     "b": [
+      27,
+      18
+     ],
+     "type": "wall"
+    },
+    {
+     "a": [
+      5,
+      4
+     ],
+     "b": [
+      5,
+      18
+     ],
+     "type": "wall"
+    },
+    {
+     "a": [
+      27,
+      4
+     ],
+     "b": [
+      27,
+      18
+     ],
+     "type": "wall"
+    }
+   ],
+   "objects": [
+    {
+     "def": "door",
+     "tile": [
+      15,
+      17
+     ],
+     "rot": 2
+    },
+    {
+     "def": "window",
+     "tile": [
+      8,
+      17
+     ],
+     "rot": 2
+    },
+    {
+     "def": "window",
+     "tile": [
+      12,
+      17
+     ],
+     "rot": 2
+    },
+    {
+     "def": "window",
+     "tile": [
+      19,
+      17
+     ],
+     "rot": 2
+    },
+    {
+     "def": "window",
+     "tile": [
+      23,
+      17
+     ],
+     "rot": 2
+    },
+    {
+     "def": "window",
+     "tile": [
+      9,
+      4
+     ],
+     "rot": 0
+    },
+    {
+     "def": "window",
+     "tile": [
+      12,
+      4
+     ],
+     "rot": 0
+    },
+    {
+     "def": "window",
+     "tile": [
+      18,
+      4
+     ],
+     "rot": 0
+    },
+    {
+     "def": "window",
+     "tile": [
+      22,
+      4
+     ],
+     "rot": 0
+    },
+    {
+     "def": "window",
+     "tile": [
+      5,
+      8
+     ],
+     "rot": 3
+    },
+    {
+     "def": "window",
+     "tile": [
+      5,
+      13
+     ],
+     "rot": 3
+    },
+    {
+     "def": "window",
+     "tile": [
+      26,
+      12
+     ],
+     "rot": 1
+    },
+    {
+     "def": "window",
+     "tile": [
+      26,
+      15
+     ],
+     "rot": 1
+    },
+    {
+     "def": "computer",
+     "tile": [
+      11,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "computer",
+     "tile": [
+      13,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "computer",
+     "tile": [
+      15,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "computer",
+     "tile": [
+      17,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "computer",
+     "tile": [
+      19,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "computer",
+     "tile": [
+      21,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "computer",
+     "tile": [
+      11,
+      9
+     ],
+     "rot": 0
+    },
+    {
+     "def": "computer",
+     "tile": [
+      13,
+      9
+     ],
+     "rot": 0
+    },
+    {
+     "def": "computer",
+     "tile": [
+      15,
+      9
+     ],
+     "rot": 0
+    },
+    {
+     "def": "computer",
+     "tile": [
+      17,
+      9
+     ],
+     "rot": 0
+    },
+    {
+     "def": "computer",
+     "tile": [
+      19,
+      9
+     ],
+     "rot": 0
+    },
+    {
+     "def": "computer",
+     "tile": [
+      21,
+      9
+     ],
+     "rot": 0
+    },
+    {
+     "def": "terminal",
+     "tile": [
+      24,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "terminal",
+     "tile": [
+      25,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "desk",
+     "tile": [
+      11,
+      12
+     ],
+     "rot": 0
+    },
+    {
+     "def": "desk",
+     "tile": [
+      13,
+      12
+     ],
+     "rot": 0
+    },
+    {
+     "def": "desk",
+     "tile": [
+      15,
+      12
+     ],
+     "rot": 0
+    },
+    {
+     "def": "desk",
+     "tile": [
+      17,
+      12
+     ],
+     "rot": 0
+    },
+    {
+     "def": "table",
+     "tile": [
+      8,
+      13
+     ],
+     "rot": 0
+    },
+    {
+     "def": "dining_chair",
+     "tile": [
+      8,
+      12
+     ],
+     "rot": 0
+    },
+    {
+     "def": "dining_chair",
+     "tile": [
+      9,
+      12
+     ],
+     "rot": 0
+    },
+    {
+     "def": "table",
+     "tile": [
+      22,
+      13
+     ],
+     "rot": 0
+    },
+    {
+     "def": "dining_chair",
+     "tile": [
+      22,
+      12
+     ],
+     "rot": 0
+    },
+    {
+     "def": "dining_chair",
+     "tile": [
+      23,
+      12
+     ],
+     "rot": 0
+    },
+    {
+     "def": "coffee_maker",
+     "tile": [
+      6,
+      4
+     ],
+     "rot": 0
+    },
+    {
+     "def": "fridge",
+     "tile": [
+      7,
+      4
+     ],
+     "rot": 0
+    },
+    {
+     "def": "vending_machine",
+     "tile": [
+      26,
+      10
+     ],
+     "rot": 1
+    },
+    {
+     "def": "plant",
+     "tile": [
+      5,
+      16
+     ],
+     "rot": 2
+    },
+    {
+     "def": "plant",
+     "tile": [
+      26,
+      16
+     ],
+     "rot": 2
+    },
+    {
+     "def": "plant",
+     "tile": [
+      26,
+      7
+     ],
+     "rot": 1
+    },
+    {
+     "def": "trash_bin",
+     "tile": [
+      20,
+      16
+     ],
+     "rot": 2
+    }
+   ],
+   "spawn": [
+    [
+     15,
+     19
+    ],
+    [
+     16,
+     19
+    ],
+    [
+     14,
+     19
+    ]
+   ],
+   "entry": [
+    15,
+    19
+   ],
+   "staff": [],
+   "price": 0
+  },
+  "school": {
+   "label": "Larkfield School",
+   "description": "Rows of desks, bookcases and a computer lab. Open on school days.",
+   "kind": "venue",
+   "venue": "school",
+   "floors": [
+    {
+     "rect": [
+      0,
+      18,
+      31,
+      18
+     ],
+     "type": "stone"
+    },
+    {
+     "rect": [
+      0,
+      19,
+      31,
+      23
+     ],
+     "type": "concrete"
+    },
+    {
+     "rect": [
+      5,
+      4,
+      26,
+      17
+     ],
+     "type": "wood"
+    },
+    {
+     "rect": [
+      16,
+      4,
+      26,
+      8
+     ],
+     "type": "tile"
+    }
+   ],
+   "walls": [
+    {
+     "a": [
+      5,
+      4
+     ],
+     "b": [
+      27,
+      4
+     ],
+     "type": "wall"
+    },
+    {
+     "a": [
+      5,
+      18
+     ],
+     "b": [
+      27,
+      18
+     ],
+     "type": "wall"
+    },
+    {
+     "a": [
+      5,
+      4
+     ],
+     "b": [
+      5,
+      18
+     ],
+     "type": "wall"
+    },
+    {
+     "a": [
+      27,
+      4
+     ],
+     "b": [
+      27,
+      18
+     ],
+     "type": "wall"
+    }
+   ],
+   "objects": [
+    {
+     "def": "door",
+     "tile": [
+      15,
+      17
+     ],
+     "rot": 2
+    },
+    {
+     "def": "window",
+     "tile": [
+      8,
+      17
+     ],
+     "rot": 2
+    },
+    {
+     "def": "window",
+     "tile": [
+      12,
+      17
+     ],
+     "rot": 2
+    },
+    {
+     "def": "window",
+     "tile": [
+      19,
+      17
+     ],
+     "rot": 2
+    },
+    {
+     "def": "window",
+     "tile": [
+      23,
+      17
+     ],
+     "rot": 2
+    },
+    {
+     "def": "window",
+     "tile": [
+      9,
+      4
+     ],
+     "rot": 0
+    },
+    {
+     "def": "window",
+     "tile": [
+      12,
+      4
+     ],
+     "rot": 0
+    },
+    {
+     "def": "window",
+     "tile": [
+      18,
+      4
+     ],
+     "rot": 0
+    },
+    {
+     "def": "window",
+     "tile": [
+      22,
+      4
+     ],
+     "rot": 0
+    },
+    {
+     "def": "window",
+     "tile": [
+      5,
+      8
+     ],
+     "rot": 3
+    },
+    {
+     "def": "window",
+     "tile": [
+      5,
+      13
+     ],
+     "rot": 3
+    },
+    {
+     "def": "window",
+     "tile": [
+      26,
+      12
+     ],
+     "rot": 1
+    },
+    {
+     "def": "window",
+     "tile": [
+      26,
+      15
+     ],
+     "rot": 1
+    },
+    {
+     "def": "bookcase_tall",
+     "tile": [
+      6,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "bookcase_tall",
+     "tile": [
+      7,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "bookcase_tall",
+     "tile": [
+      8,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "bookcase_tall",
+     "tile": [
+      9,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "bookcase_tall",
+     "tile": [
+      10,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "bookcase_tall",
+     "tile": [
+      11,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "computer",
+     "tile": [
+      17,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "computer",
+     "tile": [
+      19,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "computer",
+     "tile": [
+      21,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "computer",
+     "tile": [
+      23,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "desk",
+     "tile": [
+      7,
+      8
+     ],
+     "rot": 0
+    },
+    {
+     "def": "desk",
+     "tile": [
+      9,
+      8
+     ],
+     "rot": 0
+    },
+    {
+     "def": "desk",
+     "tile": [
+      11,
+      8
+     ],
+     "rot": 0
+    },
+    {
+     "def": "desk",
+     "tile": [
+      13,
+      8
+     ],
+     "rot": 0
+    },
+    {
+     "def": "desk",
+     "tile": [
+      15,
+      8
+     ],
+     "rot": 0
+    },
+    {
+     "def": "desk",
+     "tile": [
+      17,
+      8
+     ],
+     "rot": 0
+    },
+    {
+     "def": "desk",
+     "tile": [
+      7,
+      11
+     ],
+     "rot": 0
+    },
+    {
+     "def": "desk",
+     "tile": [
+      9,
+      11
+     ],
+     "rot": 0
+    },
+    {
+     "def": "desk",
+     "tile": [
+      11,
+      11
+     ],
+     "rot": 0
+    },
+    {
+     "def": "desk",
+     "tile": [
+      13,
+      11
+     ],
+     "rot": 0
+    },
+    {
+     "def": "desk",
+     "tile": [
+      15,
+      11
+     ],
+     "rot": 0
+    },
+    {
+     "def": "desk",
+     "tile": [
+      17,
+      11
+     ],
+     "rot": 0
+    },
+    {
+     "def": "desk",
+     "tile": [
+      7,
+      14
+     ],
+     "rot": 0
+    },
+    {
+     "def": "desk",
+     "tile": [
+      9,
+      14
+     ],
+     "rot": 0
+    },
+    {
+     "def": "desk",
+     "tile": [
+      11,
+      14
+     ],
+     "rot": 0
+    },
+    {
+     "def": "desk",
+     "tile": [
+      13,
+      14
+     ],
+     "rot": 0
+    },
+    {
+     "def": "desk",
+     "tile": [
+      15,
+      14
+     ],
+     "rot": 0
+    },
+    {
+     "def": "desk",
+     "tile": [
+      17,
+      14
+     ],
+     "rot": 0
+    },
+    {
+     "def": "table",
+     "tile": [
+      22,
+      12
+     ],
+     "rot": 0
+    },
+    {
+     "def": "dining_chair",
+     "tile": [
+      22,
+      11
+     ],
+     "rot": 0
+    },
+    {
+     "def": "dining_chair",
+     "tile": [
+      23,
+      11
+     ],
+     "rot": 0
+    },
+    {
+     "def": "plant",
+     "tile": [
+      5,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "plant",
+     "tile": [
+      26,
+      16
+     ],
+     "rot": 2
+    },
+    {
+     "def": "plant",
+     "tile": [
+      5,
+      16
+     ],
+     "rot": 2
+    },
+    {
+     "def": "trash_bin",
+     "tile": [
+      24,
+      16
+     ],
+     "rot": 2
+    }
+   ],
+   "spawn": [
+    [
+     15,
+     19
+    ],
+    [
+     16,
+     19
+    ],
+    [
+     14,
+     19
+    ]
+   ],
+   "entry": [
+    15,
+    19
+   ],
+   "staff": [
+    {
+     "role": "teacher",
+     "tile": [
+      21,
+      9
+     ]
+    }
+   ],
+   "price": 0
+  },
+  "park": {
+   "label": "Willow Green Park",
+   "description": "Benches, a fishing pond, grills and picnic tables, garden plots and plenty of fresh air.",
+   "kind": "venue",
+   "venue": "park",
+   "floors": [
+    {
+     "rect": [
+      0,
+      11,
+      31,
+      12
+     ],
+     "type": "stone"
+    },
+    {
+     "rect": [
+      15,
+      0,
+      16,
+      23
+     ],
+     "type": "stone"
+    },
+    {
+     "rect": [
+      12,
+      13,
+      19,
+      17
+     ],
+     "type": "stone"
+    },
+    {
+     "rect": [
+      21,
+      2,
+      29,
+      8
+     ],
+     "type": "dirt"
+    },
+    {
+     "rect": [
+      0,
+      22,
+      31,
+      23
+     ],
+     "type": "concrete"
+    }
+   ],
+   "walls": [],
+   "objects": [
+    {
+     "def": "fishing_spot",
+     "tile": [
+      24,
+      6
+     ],
+     "rot": 0
+    },
+    {
+     "def": "fishing_spot",
+     "tile": [
+      27,
+      6
+     ],
+     "rot": 0
+    },
+    {
+     "def": "park_bench",
+     "tile": [
+      10,
+      10
+     ],
+     "rot": 0
+    },
+    {
+     "def": "park_bench",
+     "tile": [
+      19,
+      10
+     ],
+     "rot": 0
+    },
+    {
+     "def": "park_bench",
+     "tile": [
+      10,
+      13
+     ],
+     "rot": 2
+    },
+    {
+     "def": "park_bench",
+     "tile": [
+      19,
+      13
+     ],
+     "rot": 2
+    },
+    {
+     "def": "park_bench",
+     "tile": [
+      13,
+      15
+     ],
+     "rot": 0
+    },
+    {
+     "def": "park_bench",
+     "tile": [
+      17,
+      15
+     ],
+     "rot": 0
+    },
+    {
+     "def": "grill",
+     "tile": [
+      4,
+      4
+     ],
+     "rot": 0
+    },
+    {
+     "def": "grill",
+     "tile": [
+      7,
+      4
+     ],
+     "rot": 0
+    },
+    {
+     "def": "table",
+     "tile": [
+      3,
+      7
+     ],
+     "rot": 0
+    },
+    {
+     "def": "dining_chair",
+     "tile": [
+      3,
+      6
+     ],
+     "rot": 0
+    },
+    {
+     "def": "dining_chair",
+     "tile": [
+      4,
+      6
+     ],
+     "rot": 0
+    },
+    {
+     "def": "table",
+     "tile": [
+      6,
+      7
+     ],
+     "rot": 0
+    },
+    {
+     "def": "dining_chair",
+     "tile": [
+      6,
+      6
+     ],
+     "rot": 0
+    },
+    {
+     "def": "dining_chair",
+     "tile": [
+      7,
+      6
+     ],
+     "rot": 0
+    },
+    {
+     "def": "garden_plot",
+     "tile": [
+      3,
+      15
+     ],
+     "rot": 0
+    },
+    {
+     "def": "garden_plot",
+     "tile": [
+      6,
+      15
+     ],
+     "rot": 0
+    },
+    {
+     "def": "trash_bin",
+     "tile": [
+      14,
+      10
+     ],
+     "rot": 0
+    },
+    {
+     "def": "trash_bin",
+     "tile": [
+      17,
+      14
+     ],
+     "rot": 2
+    },
+    {
+     "def": "stereo",
+     "tile": [
+      21,
+      14
+     ],
+     "rot": 0
+    },
+    {
+     "def": "plant",
+     "tile": [
+      1,
+      1
+     ],
+     "rot": 0
+    },
+    {
+     "def": "plant",
+     "tile": [
+      9,
+      1
+     ],
+     "rot": 0
+    },
+    {
+     "def": "plant",
+     "tile": [
+      12,
+      3
+     ],
+     "rot": 0
+    },
+    {
+     "def": "plant",
+     "tile": [
+      20,
+      1
+     ],
+     "rot": 0
+    },
+    {
+     "def": "plant",
+     "tile": [
+      30,
+      1
+     ],
+     "rot": 0
+    },
+    {
+     "def": "plant",
+     "tile": [
+      1,
+      9
+     ],
+     "rot": 0
+    },
+    {
+     "def": "plant",
+     "tile": [
+      11,
+      8
+     ],
+     "rot": 0
+    },
+    {
+     "def": "plant",
+     "tile": [
+      19,
+      8
+     ],
+     "rot": 0
+    },
+    {
+     "def": "plant",
+     "tile": [
+      28,
+      15
+     ],
+     "rot": 0
+    },
+    {
+     "def": "plant",
+     "tile": [
+      28,
+      19
+     ],
+     "rot": 0
+    },
+    {
+     "def": "plant",
+     "tile": [
+      1,
+      19
+     ],
+     "rot": 0
+    },
+    {
+     "def": "plant",
+     "tile": [
+      9,
+      19
+     ],
+     "rot": 0
+    },
+    {
+     "def": "plant",
+     "tile": [
+      23,
+      19
+     ],
+     "rot": 0
+    },
+    {
+     "def": "plant",
+     "tile": [
+      30,
+      10
+     ],
+     "rot": 0
+    },
+    {
+     "def": "plant",
+     "tile": [
+      22,
+      17
+     ],
+     "rot": 0
+    },
+    {
+     "def": "plant",
+     "tile": [
+      26,
+      17
+     ],
+     "rot": 0
+    }
+   ],
+   "spawn": [
+    [
+     15,
+     22
+    ],
+    [
+     16,
+     22
+    ],
+    [
+     14,
+     22
+    ]
+   ],
+   "entry": [
+    15,
+    22
+   ],
+   "staff": [],
+   "price": 0
   }
  }
 }

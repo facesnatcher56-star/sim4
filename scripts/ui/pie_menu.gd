@@ -1,7 +1,15 @@
 class_name PieMenu
 extends Control
 ## Popup interaction menu (grouped list). Full-rect click catcher closes it.
+## Objects get a flat grouped list. Folk targets (social menu) get collapsible category sections - Friendly / Funny / Romantic /
+## Deep / Group / Mean / ... - inside a scroll area, with a specific reason on every disabled entry (SocialDynamics.reason_unavailable).
 signal chosen(def_id: String, target_id: int)
+
+const SOCIAL_ORDER := ["Friendly", "Funny", "Romantic", "Deep", "Group", "Mean"]
+const CAT_COLORS := {"Friendly": Color("#4cc78a"), "Funny": Color("#f2c94c"), "Romantic": Color("#ee86a6"), "Deep": Color("#35a7b0"),
+	"Group": Color("#8f6bf0"), "Mean": Color("#e5534b")}
+## Which social sections stay expanded between openings (player's choice persists).
+static var open_cats: Dictionary = {"Friendly": true}
 
 var panel: PanelContainer
 var box: VBoxContainer
@@ -9,6 +17,9 @@ var folk = null
 var target_kind := ""
 var target_id := -1
 var entry_buttons: Array = []
+var category_headers: Dictionary = {}    # category -> header Button (folk menu)
+var category_boxes: Dictionary = {}      # category -> VBoxContainer holding that section's buttons
+var scroll: ScrollContainer = null
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
@@ -35,33 +46,133 @@ func open_with_entries(f, kind: String, id: int, entries: Array, screen_pos: Vec
 	for c in box.get_children():
 		c.queue_free()
 	entry_buttons.clear()
-	var title := UIU.make_label("Interact", 13, UITheme.MUTED)
+	category_headers.clear()
+	category_boxes.clear()
+	scroll = null
+	var target = UIU.get_folk(id) if kind == "folk" else null
+	var title_text := "Interact"
+	if target != null:
+		title_text = "Interact with %s" % str(UIU.prop(target, "name", "them"))
+		var bit := RelationshipService.bit_for(int(UIU.prop(f, "id", -1)), id)
+		if bit != "stranger":
+			title_text += "  (%s)" % RelationshipService.bit_label(bit)
+	var title := UIU.make_label(title_text, 13, UITheme.MUTED)
 	box.add_child(title)
 	if entries.is_empty():
 		box.add_child(UIU.make_label("Nothing to do here.", 14))
+	if kind == "folk" and target != null and not entries.is_empty():
+		_fill_social(f, target, entries)
+	else:
+		_fill_flat(entries)
+	visible = true
+	panel.reset_size()
+	await get_tree().process_frame
+	var vp := get_viewport_rect().size
+	panel.position = Vector2(clampf(screen_pos.x - 20, 0, vp.x - panel.size.x), clampf(screen_pos.y - 20, 0, vp.y - panel.size.y))
+
+func _make_button(e: Dictionary, reason: String) -> Button:
+	var b := Button.new()
+	b.text = e["label"]
+	b.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	b.custom_minimum_size = Vector2(190, 28)
+	b.disabled = not e["enabled"]
+	if not e["enabled"]:
+		b.tooltip_text = reason
+		b.mouse_filter = Control.MOUSE_FILTER_STOP   # keep tooltips on disabled buttons
+	var did: String = e["id"]
+	b.name = "btn_" + did
+	b.pressed.connect(func(): _choose(did))
+	entry_buttons.append(b)
+	return b
+
+func _fill_flat(entries: Array) -> void:
 	var last_cat := ""
 	for e in entries:
 		if e["category"] != last_cat:
 			last_cat = e["category"]
 			var h := UIU.make_label(last_cat.to_upper(), 11, UITheme.ACCENT)
 			box.add_child(h)
-		var b := Button.new()
-		b.text = e["label"]
-		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
-		b.custom_minimum_size = Vector2(190, 28)
-		b.disabled = not e["enabled"]
-		if not e["enabled"]:
-			b.tooltip_text = e["reason"]
-			b.mouse_filter = Control.MOUSE_FILTER_STOP   # keep tooltips on disabled buttons
-		var did: String = e["id"]
-		b.pressed.connect(func(): _choose(did))
-		box.add_child(b)
-		entry_buttons.append(b)
-	visible = true
+		box.add_child(_make_button(e, str(e["reason"])))
+
+func _fill_social(f, target, entries: Array) -> void:
+	var cats: Dictionary = {}
+	for e0 in entries:
+		var e: Dictionary = (e0 as Dictionary).duplicate()
+		var reason: String = str(e["reason"])
+		# the social engine knows more than the plain tests (knowledge, relationship stage...): always ask it
+		var specific: String = SocialDynamics.reason_unavailable(f, target, str(e["id"]), false)
+		if specific != "":
+			e["enabled"] = false
+			reason = specific
+		elif not e["enabled"] and str(e["reason"]) == "":
+			reason = "Unavailable right now"
+		var c: String = str(e["category"])
+		if not cats.has(c):
+			cats[c] = []
+		(cats[c] as Array).append({"e": e, "reason": reason})
+	var order: Array = []
+	for c in SOCIAL_ORDER:
+		if cats.has(c):
+			order.append(c)
+	var rest: Array = []
+	for c2 in cats:
+		if not order.has(c2):
+			rest.append(c2)
+	rest.sort()
+	order.append_array(rest)
+	scroll = ScrollContainer.new()
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	var vp_h: float = get_viewport_rect().size.y if is_inside_tree() else 720.0
+	scroll.custom_minimum_size = Vector2(230, minf(vp_h * 0.68, 520.0))
+	box.add_child(scroll)
+	var list := VBoxContainer.new()
+	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	list.add_theme_constant_override("separation", 2)
+	scroll.add_child(list)
+	for c3 in order:
+		var items: Array = cats[c3]
+		var enabled_n := 0
+		for it in items:
+			if it["e"]["enabled"]:
+				enabled_n += 1
+		var is_open: bool = bool(open_cats.get(c3, false))
+		var header := Button.new()
+		header.flat = true
+		header.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		header.name = "cat_" + str(c3)
+		var col: Color = CAT_COLORS.get(c3, UITheme.ACCENT)
+		header.add_theme_color_override("font_color", col)
+		header.add_theme_color_override("font_hover_color", col.lightened(0.3))
+		list.add_child(header)
+		category_headers[c3] = header
+		var sect := VBoxContainer.new()
+		sect.add_theme_constant_override("separation", 2)
+		sect.visible = is_open
+		list.add_child(sect)
+		category_boxes[c3] = sect
+		for it2 in items:
+			sect.add_child(_make_button(it2["e"], str(it2["reason"])))
+		_set_header_text(header, str(c3), enabled_n, items.size(), is_open)
+		header.pressed.connect(func(): _toggle_category(str(c3), header, sect, enabled_n, items.size()))
+
+func _set_header_text(header: Button, cat: String, enabled_n: int, total: int, is_open: bool) -> void:
+	header.text = "%s %s   %d/%d" % ["▾" if is_open else "▸", cat.to_upper(), enabled_n, total]
+
+func _toggle_category(cat: String, header: Button, sect: Control, enabled_n: int, total: int) -> void:
+	var now_open := not sect.visible
+	sect.visible = now_open
+	open_cats[cat] = now_open
+	_set_header_text(header, cat, enabled_n, total, now_open)
 	panel.reset_size()
-	await get_tree().process_frame
-	var vp := get_viewport_rect().size
-	panel.position = Vector2(clampf(screen_pos.x - 20, 0, vp.x - panel.size.x), clampf(screen_pos.y - 20, 0, vp.y - panel.size.y))
+
+func set_category_open(cat: String, is_open: bool) -> void:
+	if category_boxes.has(cat):
+		(category_boxes[cat] as Control).visible = is_open
+		open_cats[cat] = is_open
+		var header: Button = category_headers[cat]
+		var txt := header.text
+		header.text = ("▾" if is_open else "▸") + txt.substr(1)
+		panel.reset_size()
 
 func _choose(def_id: String) -> void:
 	UIU.enqueue(folk, def_id, target_id)

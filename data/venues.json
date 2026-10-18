@@ -1,0 +1,140 @@
+{
+  "version": 1,
+  "crowd_cap": 6,
+  "crowd_check_min": 10,
+  "meet_check_min": 20,
+  "leave_walk_min": 12,
+  "npc_idle_gap": [4, 12],
+  "closing_notice_min": 20,
+  "types": {
+    "home": {"label": "Home", "hours": [0, 24], "fee": 0, "stay_mult": 1.0},
+    "townie_home": {
+      "label": "Neighbour's Home", "hours": [9, 21], "fee": 0,
+      "crowd": [[0, 0], [9, 1], [21, 0]], "crowd_residents": true,
+      "ambient": {"buff": "venue_homey", "every_min": 180},
+      "stay": [90, 240]
+    },
+    "park": {
+      "label": "Park", "hours": [5, 22], "fee": 0,
+      "crowd": [[0, 0], [5, 1], [8, 3], [11, 4], [14, 5], [17, 6], [20, 3], [22, 0]],
+      "crowd_needs": {"fun": -30, "social": -20, "hunger": 10},
+      "crowd_buff": "venue_crowd_park",
+      "ambient": {"buff": "venue_fresh_air", "every_min": 150},
+      "stay": [60, 180]
+    },
+    "cafe": {
+      "label": "Cafe & Bar", "hours": [7, 24], "fee": 0,
+      "crowd": [[0, 0], [7, 2], [10, 3], [12, 5], [15, 3], [17, 5], [20, 6], [23, 3]],
+      "crowd_needs": {"energy": -10, "social": -25, "hunger": -15, "fun": -10},
+      "crowd_buff": "venue_crowd_cafe",
+      "ambient": {"buff": "venue_cafe_buzz", "every_min": 120},
+      "stay": [60, 150]
+    },
+    "gym": {
+      "label": "Gym", "hours": [6, 22], "fee": 10,
+      "crowd": [[0, 0], [6, 2], [9, 3], [12, 2], [17, 5], [20, 3], [22, 0]],
+      "crowd_needs": {"fun": -20, "energy": 60, "hunger": 40, "hygiene": 60},
+      "crowd_buff": "venue_crowd_gym",
+      "ambient": {"buff": "venue_gym_rush", "every_min": 120},
+      "interaction_xp": {"exercise": ["fitness", 8], "lift_weights": ["fitness", 8]},
+      "stay": [60, 140]
+    },
+    "library": {
+      "label": "Library", "hours": [9, 20], "fee": 0,
+      "crowd": [[0, 0], [9, 1], [11, 2], [14, 3], [17, 2], [20, 0]],
+      "crowd_needs": {"fun": -25, "social": 20},
+      "crowd_buff": "venue_crowd_library",
+      "ambient": {"buff": "venue_quiet_focus", "every_min": 150},
+      "interaction_xp": {"read_book": ["logic", 5], "research_online": ["logic", 6], "do_homework": ["logic", 6], "write_story": ["charisma", 4], "write_novel": ["charisma", 5], "study_recipes": ["cooking", 5]},
+      "stay": [60, 160]
+    },
+    "market": {
+      "label": "Market", "hours": [8, 21], "fee": 0,
+      "crowd": [[0, 0], [8, 1], [10, 3], [12, 4], [16, 5], [19, 3], [21, 0]],
+      "crowd_needs": {"hunger": -25},
+      "crowd_buff": "venue_crowd_market",
+      "ambient": {},
+      "stay": [30, 75]
+    },
+    "office": {
+      "label": "Office", "hours": [8, 18], "days": [0, 1, 2, 3, 4], "fee": 0,
+      "crowd": [[0, 0], [8, 3], [12, 2], [13, 4], [17, 2], [18, 0]],
+      "crowd_needs": {"fun": 20},
+      "crowd_buff": "venue_crowd_office",
+      "ambient": {"buff": "venue_quiet_focus", "every_min": 180},
+      "interaction_xp": {"work_computer": ["logic", 5], "research_online": ["logic", 5]},
+      "stay": [60, 180]
+    },
+    "school": {
+      "label": "School", "hours": [8, 16], "days": [0, 1, 2, 3, 4], "fee": 0,
+      "crowd": [[0, 0], [8, 4], [15, 2], [16, 0]],
+      "crowd_needs": {"fun": 10},
+      "crowd_buff": "venue_crowd_library",
+      "ambient": {"buff": "venue_quiet_focus", "every_min": 180},
+      "interaction_xp": {"do_homework": ["logic", 6], "read_book": ["logic", 4]},
+      "stay": [60, 150]
+    }
+  },
+  "content": {
+    "objects": {
+      "park_bench": {"clone": "sofa", "override": {"label": "Park Bench", "price": 220, "tags": ["outdoor", "seat", "furniture", "comfy", "park"],
+        "color": "#8a5a35", "height": 0.55, "interactions": ["sit_sofa", "nap_sofa"], "decor": 1.0, "model": "res://assets/models/coffee_table.glb"}},
+      "cafe_counter": {"clone": "bar_counter", "override": {"label": "Cafe Counter", "price": 900, "tags": ["kitchen", "bar", "furniture", "social", "shop", "cafe"],
+        "interactions": ["order_coffee", "order_meal", "order_round", "mix_drink", "clean_object"]}},
+      "grocery_cooler": {"clone": "fridge", "override": {"label": "Grocery Cooler", "price": 700, "tags": ["food", "shop", "appliance", "market"],
+        "color": "#9fd0e6", "height": 1.8, "interactions": ["buy_groceries", "buy_fresh_snack"],
+        "state": {"stock": {"min": 0, "max": 40, "start": 40}, "broken": {"start": false}},
+        "advertises": {"hunger": 1.5}}}
+    },
+    "interactions": {
+      "order_coffee": {"label": "Order Coffee", "kind": "super", "target": "object", "objects": ["cafe_counter"], "duration_min": 4, "posture": "stand",
+        "tags": ["drink", "purchase", "shop", "social", "cafe"],
+        "tests": [{"coins_at_least": 4}, {"stat_below": ["energy", 85]}],
+        "per_min": {"energy": 6.0, "fun": 0.6, "social": 0.5},
+        "on_finish": [{"coins_add": -4}, {"add_buff": "cozy"}, {"stat_add": ["social", 3]}],
+        "autonomous": true, "priority": "normal", "advertises": {"energy": 2.0, "social": 0.6},
+        "thought": "A coffee would be lovely.", "cooldown_min": 120},
+      "order_meal": {"label": "Order a Meal", "kind": "super", "target": "object", "objects": ["cafe_counter"], "duration_min": 12, "posture": "stand",
+        "tags": ["food", "meal", "purchase", "shop", "cafe"],
+        "tests": [{"coins_at_least": 12}, {"stat_below": ["hunger", 55]}],
+        "per_min": {"hunger": 6.5, "fun": 0.3},
+        "on_finish": [{"coins_add": -12}, {"add_buff": "well_fed"}],
+        "autonomous": true, "priority": "normal", "advertises": {"hunger": 2.6},
+        "thought": "Something hot to eat, please.", "cooldown_min": 180},
+      "order_round": {"label": "Order a Round", "kind": "super", "target": "object", "objects": ["cafe_counter"], "duration_min": 8, "posture": "stand",
+        "tags": ["drink", "purchase", "shop", "social", "night"],
+        "tests": [{"coins_at_least": 6}, {"time_between": [17, 24]}, {"stat_below": ["fun", 85]}],
+        "per_min": {"fun": 2.2, "social": 1.4},
+        "on_finish": [{"coins_add": -6}, {"chance": 0.4, "add_buff": "social_glow"}],
+        "autonomous": true, "priority": "normal", "advertises": {"fun": 2.2, "social": 1.2},
+        "thought": "Cheers!", "cooldown_min": 150},
+      "buy_groceries": {"label": "Buy Groceries", "kind": "super", "target": "object", "objects": ["grocery_cooler"], "duration_min": 6, "posture": "stand",
+        "tags": ["purchase", "shop", "chore", "food"],
+        "tests": [{"coins_at_least": 25}],
+        "on_finish": [{"coins_add": -25}, {"fire_event": "buy_groceries"}, {"notify": "Groceries bought. They will be stocked in the home fridge."}],
+        "autonomous": false, "priority": "normal", "thought": "Stocking up."},
+      "buy_fresh_snack": {"label": "Grab a Fresh Snack", "kind": "super", "target": "object", "objects": ["grocery_cooler"], "duration_min": 3, "posture": "stand",
+        "tags": ["food", "snack", "purchase", "shop"],
+        "tests": [{"coins_at_least": 5}, {"stat_below": ["hunger", 70]}, {"object_state_above": ["stock", 0]}],
+        "per_min": {"hunger": 11.0},
+        "on_finish": [{"coins_add": -5}, {"object_state_add": ["stock", -1]}, {"stat_add": ["fun", 2]}],
+        "autonomous": true, "priority": "normal", "advertises": {"hunger": 2.0},
+        "thought": "Something fresh.", "cooldown_min": 60},
+      "sys_staff": {"label": "Working", "kind": "super", "target": "self", "duration_min": 100000, "posture": "stand",
+        "tests": [], "per_min": {}, "on_finish": [], "on_cancel": [], "autonomous": false, "priority": "high", "interruptible": true, "tags": ["staff"]}
+    },
+    "buffs": {
+      "venue_fresh_air": {"label": "Fresh Air", "mood": {"happy": 1, "energized": 1}, "duration_min": 150, "thought": "The fresh air does wonders."},
+      "venue_cafe_buzz": {"label": "Cafe Buzz", "mood": {"happy": 1, "flirty": 1}, "duration_min": 120, "thought": "Such a lively place."},
+      "venue_gym_rush": {"label": "Gym Rush", "mood": {"energized": 2}, "duration_min": 120, "need_decay_mult": {"fun": 0.9}, "thought": "Time to get stronger."},
+      "venue_quiet_focus": {"label": "Quiet Focus", "mood": {"focused": 2}, "duration_min": 180, "autonomy_mult": {"skill": 1.2}, "thought": "So quiet. I can think."},
+      "venue_homey": {"label": "Neighbourly", "mood": {"happy": 1}, "duration_min": 180, "need_decay_mult": {"social": 0.8}, "thought": "What a welcoming home."},
+      "venue_crowd_park": {"label": "Park Regular", "hidden": true, "mood": {}, "duration_min": 0, "autonomy_mult": {"outdoor": 2.0, "fish": 1.5, "social": 1.4, "cook": 1.3}},
+      "venue_crowd_cafe": {"label": "Cafe Regular", "hidden": true, "mood": {}, "duration_min": 0, "autonomy_mult": {"drink": 2.0, "social": 1.6, "music": 1.5, "dance": 1.8, "meal": 1.4}},
+      "venue_crowd_gym": {"label": "Gym Regular", "hidden": true, "mood": {}, "duration_min": 0, "autonomy_mult": {"exercise": 3.0, "fitness": 3.0}},
+      "venue_crowd_library": {"label": "Bookworm", "hidden": true, "mood": {}, "duration_min": 0, "autonomy_mult": {"read": 3.0, "skill": 2.0}},
+      "venue_crowd_market": {"label": "Shopper", "hidden": true, "mood": {}, "duration_min": 0, "autonomy_mult": {"shop": 3.0, "food": 1.5}},
+      "venue_crowd_office": {"label": "Office Regular", "hidden": true, "mood": {}, "duration_min": 0, "autonomy_mult": {"skill": 2.0, "work": 2.0, "career": 2.0}}
+    }
+  }
+}

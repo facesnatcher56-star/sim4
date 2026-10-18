@@ -95,6 +95,7 @@ func _ready() -> void:
 	_build_rig()
 	_build_fx()
 	_connect_signals()
+	WeatherView.ensure_on(self)    # sky / sun / weather particles / seasons (scripts/world/weather_view.gd)
 	rebuild_all()
 	var c := Vector2(World.width, World.height) * 0.5
 	_target = Vector3(c.x, 0, c.y)
@@ -718,6 +719,8 @@ func pick(mp: Vector2) -> Dictionary:
 	var id := -1
 	for fid in _folk_views:
 		var fv: FolkView = _folk_views[fid]
+		if not fv.visible:
+			continue
 		var box := AABB(fv.position + Vector3(-0.3, 0.0, -0.3), Vector3(0.6, 1.8, 0.6))
 		if fv.pose == "lie":
 			box = AABB(fv.position + Vector3(-0.5, 0.0, -0.5), Vector3(1.0, 1.0, 1.0))

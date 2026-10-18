@@ -6,6 +6,8 @@ const SPAWN_FALLBACK := [Vector2i(6, 6), Vector2i(7, 6), Vector2i(8, 6)]
 var lot_view: Node = null
 var hud: Hud
 var title: TitleMenu
+var picker: LotPicker
+var pending_household: Dictionary = {}
 var household_name := "Fernwood"
 var playing := false
 
@@ -27,7 +29,15 @@ func _ready() -> void:
 	title = TitleMenu.new()
 	title.theme = UITheme.build()
 	$TitleLayer.add_child(title)
-	title.new_game.connect(start_new_game)
+	title.new_game.connect(_on_title_new_game)
+	picker = LotPicker.new()
+	picker.theme = UITheme.build()
+	picker.visible = false
+	$TitleLayer.add_child(picker)
+	picker.picked.connect(_on_lot_picked)
+	picker.cancelled.connect(func():
+		picker.visible = false
+		title.visible = true)
 	title.continue_game.connect(load_game)
 	title.quit_game.connect(func(): get_tree().quit())
 	if "--autostart" in OS.get_cmdline_user_args():
@@ -51,8 +61,20 @@ func default_household() -> Dictionary:
 		folk.append({"name": names[i], "traits": ts, "color": colors[i]})
 	return {"name": "Fernwood", "folk": folk}
 
+## Title menu -> household created -> choose the home lot.
+func _on_title_new_game(h: Dictionary) -> void:
+	pending_household = h
+	title.visible = false
+	picker.visible = true
+
+func _on_lot_picked(start_id: String) -> void:
+	picker.visible = false
+	start_new_game(pending_household, start_id)
+
 func show_title() -> void:
 	playing = false
+	if picker != null:
+		picker.visible = false
 	UIU.set_speed(0)
 	hud.visible = false
 	title.refresh()
@@ -64,13 +86,13 @@ func _clear_world() -> void:
 	if World.has_method("reset"):
 		World.call("reset")
 
-func start_new_game(h: Dictionary) -> void:
+func start_new_game(h: Dictionary, start_id: String = "classic") -> void:
 	household_name = h.get("name", "Household")
 	hud.household_name = household_name
 	_clear_world()
 	World.current_household_id = 1
-	if World.has_method("load_starter_house"):
-		World.call("load_starter_house")
+	var start_def: Dictionary = Neighborhood.start_def(start_id)
+	Neighborhood.start_game(str(start_def.get("template", LotLoader.CLASSIC)))
 	var spawns: Array = World.starter_spawn_tiles if World.get("starter_spawn_tiles") != null else []
 	if spawns.size() < 3:
 		spawns = SPAWN_FALLBACK
@@ -86,6 +108,7 @@ func start_new_game(h: Dictionary) -> void:
 	if Clock.has_method("reset"):
 		Clock.call("reset")
 	systems.new_game([1])
+	Neighborhood.finish_new_game(start_id)
 	UIU.set_speed(1)
 	_enter_game()
 

@@ -1,8 +1,9 @@
 {
-  "version": 1,
+  "version": 2,
   "tracks": [
     "friendship",
-    "romance"
+    "romance",
+    "trust"
   ],
   "bits": [
     {
@@ -24,16 +25,35 @@
       "color": "#ee86a6"
     },
     {
+      "id": "dating",
+      "label": "Dating",
+      "flag": "dating",
+      "color": "#f19ab8"
+    },
+    {
       "id": "family",
       "label": "Family",
       "flag": "family",
       "color": "#9b7fd4"
     },
     {
+      "id": "ex",
+      "label": "Ex",
+      "flag": "ex",
+      "color": "#8a6d7a"
+    },
+    {
       "id": "best_friend",
       "label": "Best Friend",
       "friendship_min": 70,
       "color": "#3fb27f"
+    },
+    {
+      "id": "confidant",
+      "label": "Confidant",
+      "trust_min": 60,
+      "friendship_min": 35,
+      "color": "#35a7b0"
     },
     {
       "id": "enemy",
@@ -80,7 +100,12 @@
       "per_day": 1.5,
       "negative_per_day": 0.5
     },
-    "bonded_factor": 0.25
+    "bonded_factor": 0.25,
+    "trust": {
+      "idle_days": 4,
+      "per_day": 0.4,
+      "negative_per_day": 0.2
+    }
   },
   "compat": {
     "gain_scale": 0.5,
@@ -153,22 +178,522 @@
       "serenade": 0.6,
       "gift_produce": 0.6,
       "tutor": 0.5,
-      "play_pool": 0.3
+      "play_pool": 0.3,
+      "yell_at": -0.8,
+      "mock": -0.8,
+      "blame": -0.6,
+      "argue": -0.9,
+      "snub": -0.5,
+      "storm_off": -0.5,
+      "spread_rumor": -0.9,
+      "kiss": 0.6,
+      "hug": 0.4,
+      "cuddle": 0.6,
+      "hold_hands": 0.5,
+      "go_on_date": 0.8,
+      "make_up": 0.8,
+      "forgive": 0.7,
+      "share_secret": 0.7,
+      "comfort": 0.6,
+      "group_chat": 0.4,
+      "hang_out": 0.5,
+      "toast": 0.5,
+      "dance_together": 0.5,
+      "break_up": -1.0,
+      "prank": 0.0
     }
   },
   "jealousy": {
     "enabled": true,
     "triggers": [
-      "flirt"
+      "flirt",
+      "wink",
+      "sweet_nothings",
+      "hold_hands",
+      "kiss",
+      "sneak_kiss",
+      "cuddle",
+      "slow_dance",
+      "ask_out",
+      "confess_feelings",
+      "serenade"
     ],
     "range": 14,
     "romance_loss": 8,
     "friendship_loss": 4,
     "buff": "annoyed",
-    "buff_hot": "furious"
+    "buff_hot": "furious",
+    "buff_jealous": "jealous_pang"
   },
   "apologize": {
     "friendship": 5,
     "grudge_relief": 0.5
+  },
+  "tension": {
+    "decay_per_day": 5.0,
+    "max": 100,
+    "avoid_memory": -0.25,
+    "avoid_threshold": 25,
+    "bonded_factor": 0.6
+  },
+  "outcomes": {
+    "thresholds": {
+      "great": 0.8,
+      "good": 0.5,
+      "meh": 0.28
+    },
+    "noise": 0.18,
+    "weights": {
+      "compat": 0.25,
+      "charisma": 0.03,
+      "warmth": 0.15,
+      "grudge": 0.25,
+      "friendship": 0.002,
+      "trust": 0.003,
+      "tension": 0.004,
+      "spark": 0.4,
+      "reputation": 0.0015,
+      "topic_shared": 0.1,
+      "topic_known": 0.05,
+      "topic_boring": -0.06,
+      "repeat": 0.05,
+      "mood_cap": 0.25
+    },
+    "recent_step": 0.02
+  },
+  "topics": {
+    "food": {
+      "label": "food",
+      "traits": [
+        "foodie",
+        "glutton"
+      ],
+      "skills": [
+        "cooking"
+      ],
+      "moods": [],
+      "buffs": [
+        "gourmet_craving",
+        "well_fed_gourmet"
+      ]
+    },
+    "fitness": {
+      "label": "staying fit",
+      "traits": [
+        "active",
+        "outdoorsy"
+      ],
+      "skills": [
+        "fitness"
+      ],
+      "moods": [
+        "energized"
+      ],
+      "buffs": [
+        "pumped",
+        "sore_muscles"
+      ]
+    },
+    "books": {
+      "label": "books",
+      "traits": [
+        "bookworm"
+      ],
+      "skills": [
+        "logic"
+      ],
+      "moods": [],
+      "buffs": [
+        "eureka"
+      ]
+    },
+    "games": {
+      "label": "video games",
+      "traits": [
+        "gamer",
+        "competitive"
+      ],
+      "skills": [],
+      "moods": [],
+      "buffs": []
+    },
+    "music": {
+      "label": "music",
+      "traits": [
+        "musical"
+      ],
+      "skills": [
+        "guitar",
+        "piano"
+      ],
+      "moods": [
+        "nostalgic"
+      ],
+      "buffs": [
+        "melodic",
+        "stage_glow"
+      ]
+    },
+    "art": {
+      "label": "art",
+      "traits": [
+        "creative"
+      ],
+      "skills": [
+        "painting",
+        "writing"
+      ],
+      "moods": [
+        "inspired"
+      ],
+      "buffs": [
+        "inspired"
+      ]
+    },
+    "plants": {
+      "label": "gardening",
+      "traits": [
+        "green_thumb",
+        "outdoorsy"
+      ],
+      "skills": [
+        "gardening"
+      ],
+      "moods": [],
+      "buffs": [
+        "fresh_produce",
+        "green_thumb"
+      ]
+    },
+    "work": {
+      "label": "work",
+      "traits": [
+        "workaholic",
+        "perfectionist"
+      ],
+      "skills": [],
+      "moods": [],
+      "buffs": [
+        "on_a_roll"
+      ],
+      "career": true
+    },
+    "fixing": {
+      "label": "fixing things",
+      "traits": [
+        "handy"
+      ],
+      "skills": [
+        "handiness"
+      ],
+      "moods": [],
+      "buffs": [
+        "tidy_pride"
+      ]
+    },
+    "romance": {
+      "label": "love and romance",
+      "traits": [
+        "romantic",
+        "charmer"
+      ],
+      "skills": [],
+      "moods": [
+        "flirty"
+      ],
+      "buffs": [
+        "flirty_buzz",
+        "smitten"
+      ]
+    },
+    "gossip": {
+      "label": "the latest gossip",
+      "traits": [
+        "gossip"
+      ],
+      "skills": [],
+      "moods": [],
+      "buffs": [
+        "gossip_buzz"
+      ]
+    },
+    "feelings": {
+      "label": "how they are feeling",
+      "traits": [
+        "empath"
+      ],
+      "skills": [],
+      "moods": [
+        "sad",
+        "anxious",
+        "lonely",
+        "guilty"
+      ],
+      "buffs": []
+    },
+    "dreams": {
+      "label": "the future",
+      "traits": [
+        "optimist"
+      ],
+      "skills": [],
+      "moods": [
+        "inspired"
+      ],
+      "buffs": []
+    },
+    "humor": {
+      "label": "funny things",
+      "traits": [
+        "charmer",
+        "optimist",
+        "showoff"
+      ],
+      "skills": [
+        "charisma"
+      ],
+      "moods": [
+        "playful"
+      ],
+      "buffs": [
+        "laughing_fit"
+      ]
+    },
+    "the_party": {
+      "label": "that party",
+      "traits": [
+        "social"
+      ],
+      "skills": [],
+      "moods": [
+        "playful"
+      ],
+      "buffs": [
+        "party_buzz",
+        "tipsy"
+      ]
+    },
+    "weather": {
+      "label": "the weather",
+      "traits": [],
+      "skills": [],
+      "moods": [],
+      "buffs": [],
+      "boring": true
+    },
+    "chores": {
+      "label": "chores",
+      "traits": [
+        "neat",
+        "germaphobe"
+      ],
+      "skills": [],
+      "moods": [],
+      "buffs": [
+        "fresh_laundry"
+      ],
+      "boring": true
+    }
+  },
+  "topic_rules": {
+    "repeat_decay": 0.6,
+    "recover_per_day": 1.0,
+    "shared_weight": 3.0,
+    "one_weight": 1.4,
+    "mood_weight": 1.0,
+    "boring_weight": 0.5,
+    "base_weight": 0.6,
+    "max_count": 8
+  },
+  "knowledge": {
+    "passive_chance": 0.22,
+    "friendship_scale": 0.004,
+    "full_bits": [
+      "sweetheart",
+      "partner",
+      "spouse",
+      "family"
+    ],
+    "interest_min_skill": 2
+  },
+  "arguments": {
+    "window_min": 90,
+    "max_level": 4,
+    "screaming_level": 3,
+    "level_mult": 0.25,
+    "hot_headed_mult": 1.3,
+    "friendship_loss": 6,
+    "trust_loss": 2,
+    "furious_buff": "furious",
+    "fuming_buff": "fuming",
+    "resolved_bonus_friendship": 3,
+    "resolved_bonus_trust": 3,
+    "resolved_buff": "makeup_glow",
+    "resolve_below": 10,
+    "maybe": {
+      "base": 0.12,
+      "compat_scale": 0.45,
+      "hot_headed": 0.15,
+      "tension_scale": 0.004,
+      "amount": 12
+    }
+  },
+  "romance": {
+    "crush_min": 20,
+    "flirt_min": 30,
+    "date_min": 22,
+    "official_min": 40,
+    "ex_days": 20,
+    "breakup_romance_cap": 5,
+    "dating_flag": "dating",
+    "first_kiss_memory": 0.5,
+    "spark_weight": 0.4,
+    "cheat": {
+      "range": 14,
+      "daily_discover": 0.08,
+      "trust_loss": 45,
+      "romance_loss": 35,
+      "friendship_loss": 10,
+      "tension": 35,
+      "auto_breakup": 0.6,
+      "buff": "cheated_on",
+      "guilty": "guilty_pang",
+      "reputation": -6
+    }
+  },
+  "gossip": {
+    "max_items": 6,
+    "witness_range": 9,
+    "backfire_base": 0.15,
+    "backfire_closeness": 0.25,
+    "honest_bonus": 0.2,
+    "gossip_trait_bonus": -0.1,
+    "trust_loss": 30,
+    "friendship_loss": 12,
+    "tension": 25,
+    "reputation_loss": 8,
+    "subject_friendship_loss": 4,
+    "subject_reputation_loss": 3,
+    "trust_gain_if_likes": 1.0,
+    "rumor_reputation_loss": 7,
+    "rumor_backfire": 0.35
+  },
+  "secrets": [
+    {
+      "kind": "crush",
+      "text": "has a crush on someone",
+      "severity": 0.5,
+      "traits": [
+        "romantic"
+      ]
+    },
+    {
+      "kind": "embarrassing",
+      "text": "once cried at a pet food commercial",
+      "severity": 0.3,
+      "traits": []
+    },
+    {
+      "kind": "money",
+      "text": "is secretly broke",
+      "severity": 0.6,
+      "traits": [
+        "frugal"
+      ]
+    },
+    {
+      "kind": "fear",
+      "text": "is terrified of the dark",
+      "severity": 0.3,
+      "traits": [
+        "shy"
+      ]
+    },
+    {
+      "kind": "failure",
+      "text": "flunked a big exam and never told anyone",
+      "severity": 0.5,
+      "traits": [
+        "perfectionist"
+      ]
+    },
+    {
+      "kind": "dream",
+      "text": "secretly dreams of leaving town",
+      "severity": 0.4,
+      "traits": []
+    },
+    {
+      "kind": "mischief",
+      "text": "once shoplifted a candy bar",
+      "severity": 0.5,
+      "traits": [
+        "hot_headed"
+      ]
+    },
+    {
+      "kind": "vice",
+      "text": "eats breakfast food at midnight and hides the wrappers",
+      "severity": 0.3,
+      "traits": [
+        "glutton"
+      ]
+    }
+  ],
+  "group": {
+    "max_size": 6,
+    "min_group": 3,
+    "social_per_min": 0.6,
+    "turn_min": 10,
+    "pair_friend_per_turn": 0.3,
+    "score_per_min": 0.1,
+    "idle_end_min": 45
+  },
+  "gathering": {
+    "duration_min": 90,
+    "max_guests": 5,
+    "min_friendship": 12,
+    "member_score_per_min": 0.2,
+    "friendship_bond": 2.0,
+    "buff": "group_warmth",
+    "story_factor": 0.5,
+    "min_members": 3
+  },
+  "goals": {
+    "friend_target": 3,
+    "reconcile_tension": 22,
+    "company_social_below": 35,
+    "date_chance_per_hour": 0.12,
+    "affection_chance_per_hour": 0.1,
+    "contact_hours": 10
+  },
+  "reputation": {
+    "min": -100,
+    "max": 100,
+    "decay_per_day": 1.0
+  },
+  "story_scores": {
+    "group_chat": 1.5,
+    "toast": 2.0,
+    "tell_group_story": 1.5,
+    "dance_together": 1.5,
+    "group_hug": 1.5,
+    "party_game": 2.0,
+    "funny_story": 1.5,
+    "hang_out": 1.0,
+    "greet": 0.5,
+    "talk_interests": 1.0,
+    "swap_stories": 1.0,
+    "high_five": 0.5,
+    "karaoke": 2.0,
+    "yell_at": -3.0,
+    "argue": -3.0,
+    "snub": -1.5,
+    "mock": -2.0,
+    "prank": -0.5,
+    "spread_rumor": -2.0,
+    "tell_pun": 0.5,
+    "do_impression": 1.0,
+    "host_gathering": 1.0
   }
 }

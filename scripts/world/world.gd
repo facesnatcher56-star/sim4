@@ -1061,6 +1061,9 @@ func save_dict(include_folk: bool = false) -> Dictionary:
 		wl.append([e.x, e.y, e.z, walls[e]])
 	var ol: Array = []
 	for o in objects.values():
+		for sk in o.stats:      # WorldIface.state_set updates the Stat mirror only; persist its value
+			if o.state.has(sk) and o.stats[sk] != null:
+				o.state[sk] = float(o.stats[sk].get("value"))
 		ol.append(o.to_dict())
 	var ml: Array = []
 	for t in mess:
