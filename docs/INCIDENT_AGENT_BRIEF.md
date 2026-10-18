@@ -16,3 +16,10 @@ Conventions:
 Headless Godot does NOT quit on a script error or parse error: it hangs until something kills it. Always run Godot through the guard, never bare:
 `powershell -File tools/godot_guard.ps1 -Seconds 120 -Args "--headless","--path",".","--script","res://tests/run_one.gd","--","<test_name>"`
 It kills Godot immediately on SCRIPT ERROR / Parse Error / Failed to load script, or after N seconds with no output, prints the tail of the log and exits non-zero. Use -Seconds 120 for single tests, -Seconds 300 for the fast tier, -Seconds 600 for slow tests/--import on a cold cache. Never leave a command without a timeout; if a run is killed, read the log, fix the error, rerun. If the same run hangs twice, stop and report instead of retrying.
+
+## Multiplayer-ready rules (task 24 part A, all agents, from now on)
+1. Every player action is a COMMAND `{player_id, folk_id, action, args, game_minute}` through one command layer (`SimDirector.command` today; build-mode, career, travel and dialogue choices too). UI code never mutates sim state directly.
+2. Determinism: all randomness from seeded rng streams owned by systems (no unseeded `randf()`/`randi()`/`RandomNumberGenerator.new()` without a seed in sim code); the sim never reads frame time or the OS clock; the per-minute order is stable. Same seed twice => same state hash after N days.
+3. The sim is separate from the view: no sim decisions in view code; view state is never saved as sim state.
+4. Everything is serialisable at any minute (mid-interaction, mid-trip, mid-fire, mid-trial) and loads identically.
+5. Keep `household_id`s generic: use the `players` table (player id -> household id) once it exists; never assume household 1 is the player in new code.
