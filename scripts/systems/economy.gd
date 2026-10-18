@@ -306,11 +306,12 @@ static func on_day(day: int) -> void:
 			if int(missed[hid]) >= int(b.get("repossess_after_cycles", 3)):
 				_repossess(hid)
 	# 2) a new billing cycle (after processing, so a fresh bill is not instantly due)
-	while day >= next_bill_day:
+	# One bill per call, even if the clock skipped several cycles: missed cycles are merged, never stacked.
+	if day >= next_bill_day:
 		for hid2 in household_ids():
 			issue_bill(int(hid2))
 		Weather.reset_bill_period()
-		next_bill_day += every
+		next_bill_day += every * (1 + (day - next_bill_day) / every)
 	# issued bills with due == today are handled tomorrow
 
 static func _repossess(hid: int) -> void:
