@@ -1,0 +1,64 @@
+{
+ "_doc": "Task 22: the cruise ship. The ship MAP (five decks, the `levels` template format of task 10) is data/destinations/ship.json (built by tools/vacation_gen.py). Here: sailings, prices, ports of call, crew, the daily programme, theme nights, weather and the numbers of the on-board happenings. Hours are clock hours (17.5 = 17:30).",
+ "ship": {
+  "id": "starlight", "name": "Starlight Voyager", "map": "ship",
+  "board_open_hour": 13.0, "all_aboard_hour": 16.5, "sail_hour": 17.0, "dock_hour": 8.0, "ashore_hour": 9.0, "last_call_hour": 15.5, "auto_board_hour": 16.0,
+  "home_arrive_hour": 7.0, "disembark_hour": 9.0, "board_walk_min": 25, "transit_min": 30, "lengths": [3, 14],
+  "passengers": 8, "crew_cap": 11, "quay_label": "Harbour Quay"
+ },
+ "classes": {
+  "inside": {"label": "Inside cabin", "per_day": 70, "beds": 2},
+  "ocean": {"label": "Ocean-view cabin", "per_day": 115, "beds": 2},
+  "suite": {"label": "Suite", "per_day": 230, "beds": 2}
+ },
+ "fees": {"boarding": 45, "port_per_person": 12, "onboard_credit_per_day": 28, "gratuity_per_day": 6},
+ "packages": {
+  "standard": {"label": "Standard cruise", "extra": 0},
+  "honeymoon": {"label": "Honeymoon package", "extra": 260, "needs": "married", "buff": "bonded_glow", "text": "Champagne, roses on the pillows and a table for two."},
+  "anniversary": {"label": "Anniversary package", "extra": 180, "needs": "couple", "buff": "bonded_glow", "text": "A cake in the cabin and a toast from the captain."}
+ },
+ "ports": {
+  "sunny_cove": {"label": "Sunny Cove", "map": "beach", "blurb": "Beaches and a bright little harbour."},
+  "old_harbour": {"label": "Old Harbour", "map": "city", "blurb": "Cobbled streets, shops and a museum."},
+  "pine_bay": {"label": "Pine Bay", "map": "mountain", "blurb": "A forest trail down to the water."}
+ },
+ "route_order": ["sunny_cove", "old_harbour", "pine_bay"],
+ "left_behind": {"flight_base": 380, "flight_per_day_left": 45, "wait_min": 120, "transit_min": 600, "stress_buff": "left_behind"},
+ "crew": {
+  "captain": {"label": "Captain", "outfit": "office", "names": ["Captain Halvard", "Captain Reyes", "Captain Okafor"]},
+  "waiter": {"label": "Waiter", "outfit": "barista"},
+  "bartender": {"label": "Bartender", "outfit": "bartender"},
+  "entertainer": {"label": "Entertainer", "outfit": "creative"},
+  "cleaner": {"label": "Cleaner", "outfit": "student"},
+  "medical": {"label": "Medical officer", "outfit": "librarian"},
+  "security": {"label": "Security", "outfit": "trainer"},
+  "lifeguard": {"label": "Lifeguard", "outfit": "trainer"}
+ },
+ "passenger_traits": ["social", "outgoing", "romantic", "foodie", "active", "bookworm", "shy", "creative", "lazy", "grumpy", "goofy"],
+ "program": [
+  {"id": "sail_away", "day": "embark", "hour": 17.0, "text": "The horn sounds and {ship} slides away from the quay.", "effects": [{"stat_add": ["fun", 8]}], "kind": "departure", "log": 2},
+  {"id": "welcome_buffet", "day": "embark", "hour": 18.5, "text": "{names} tucked into the welcome buffet.", "effects": [{"stat_add": ["hunger", 30]}, {"add_buff": "well_fed_hearty"}], "log": 1},
+  {"id": "safety_drill", "day": "embark", "hour": 16.7, "text": "Everybody mustered on deck for the safety drill.", "effects": [], "log": 1},
+  {"id": "captains_dinner", "day": "first_sea", "hour": 19.0, "text": "{names} dressed up for the captain's dinner and sat at the captain's table.", "effects": [{"add_buff": "dressed_up"}, {"add_buff": "captains_table"}, {"stat_add": ["hunger", 35]}], "log": 2},
+  {"id": "formal_night", "day": "first_sea", "hour": 21.0, "text": "Formal night: everyone in their best danced under the chandeliers.", "effects": [{"add_buff": "dressed_up"}, {"stat_add": ["fun", 15]}], "log": 1},
+  {"id": "talent_show", "day": "sea", "hour": 20.5, "text": "{names} watched the passengers' talent show. Someone juggled badly and was cheered anyway.", "effects": [{"stat_add": ["fun", 16]}, {"add_buff": "entertained"}], "log": 1},
+  {"id": "deck_party", "day": "sea", "hour": 15.0, "text": "A deck party broke out round the pool. {names} joined in.", "effects": [{"stat_add": ["fun", 22]}, {"stat_add": ["social", 18]}], "log": 1},
+  {"id": "theme_night", "day": "sea", "hour": 22.0, "text": "Theme night: {theme}. {names} went along.", "effects": [{"stat_add": ["fun", 18]}, {"stat_add": ["social", 12]}], "log": 1},
+  {"id": "show", "day": "any", "hour": 20.5, "text": "{names} caught the evening show in the theatre.", "effects": [{"add_buff": "entertained"}, {"stat_add": ["fun", 14]}], "log": 1},
+  {"id": "breakfast", "day": "any", "hour": 8.0, "text": "", "effects": [{"stat_add": ["hunger", 18]}], "log": 0},
+  {"id": "farewell_dinner", "day": "last_night", "hour": 19.0, "text": "A farewell dinner: the crew sang goodbye to the passengers.", "effects": [{"stat_add": ["fun", 10]}, {"stat_add": ["hunger", 25]}], "log": 1}
+ ],
+ "theme_nights": ["Decades party", "Pirate night", "Tropical shirts", "Masquerade", "White night", "Retro disco"],
+ "sea": {"weights": {"calm": 6, "breezy": 3, "rough": 1.2}, "seasick": {"calm": 0.0, "breezy": 0.03, "rough": 0.2}, "seasick_traits_mult": {"active": 0.6, "clumsy": 1.4}, "storm_seasick": 0.55},
+ "romance": {"chance_per_evening": 0.14, "adult_only": true, "break_up_chance": 0.25, "drama_chance": 0.05},
+ "crime": {"cabin_theft_loss": [40, 220], "alarm_cuts": 0.5, "locked_cuts": 0.4},
+ "incident": {
+  "storm_hours": 9, "storm_delay_port_chance": 0.6, "overboard_search_hours": 3, "overboard_rescue_chance": 0.84, "overboard_death_chance": 0.5,
+  "fire_alarm_minutes": 25, "noro_days": 3, "noro_spread": 0.45, "noro_cancel_port": true, "security_arrest_delay_min": 90
+ },
+ "killer": {
+  "start_delay_hours": 18, "gap_hours": [14, 26], "victim_cap": 3, "restrict_after_victims": 1, "headcount_hours": [8, 19], "port_police_delay_min": 45,
+  "isolation_hours": [23, 5], "mistake_per_victim": 0.28, "security_find_chance": 0.18, "scared_buff": "ship_scare"
+ },
+ "log_labels": {"dinner": "Dining", "show": "Show", "port": "Port", "romance": "Romance", "incident": "Incident", "missed": "Missed boarding", "crime": "Crime", "death": "Death"}
+}

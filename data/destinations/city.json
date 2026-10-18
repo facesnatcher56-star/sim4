@@ -1,0 +1,693 @@
+{
+ "id": "city",
+ "template": {
+  "label": "Harbour City",
+  "description": "A big city: museum, restaurants, shopping, nightlife - and pickpockets.",
+  "kind": "venue",
+  "floors": [
+   {
+    "rect": [
+     0,
+     0,
+     31,
+     21
+    ],
+    "type": "concrete"
+   },
+   {
+    "rect": [
+     0,
+     9,
+     31,
+     12
+    ],
+    "type": "stone"
+   },
+   {
+    "rect": [
+     14,
+     20,
+     16,
+     21
+    ],
+    "type": "stone"
+   },
+   {
+    "rect": [
+     1,
+     2,
+     8,
+     7
+    ],
+    "type": "carpet"
+   },
+   {
+    "rect": [
+     9,
+     2,
+     16,
+     7
+    ],
+    "type": "wood"
+   },
+   {
+    "rect": [
+     17,
+     2,
+     23,
+     7
+    ],
+    "type": "carpet"
+   },
+   {
+    "rect": [
+     24,
+     2,
+     30,
+     7
+    ],
+    "type": "wood"
+   },
+   {
+    "rect": [
+     1,
+     14,
+     12,
+     19
+    ],
+    "type": "tile"
+   },
+   {
+    "rect": [
+     14,
+     14,
+     17,
+     17
+    ],
+    "type": "water"
+   }
+  ],
+  "walls": [
+   {
+    "a": [
+     1,
+     2
+    ],
+    "b": [
+     9,
+     2
+    ],
+    "type": "wall"
+   },
+   {
+    "a": [
+     1,
+     8
+    ],
+    "b": [
+     9,
+     8
+    ],
+    "type": "wall"
+   },
+   {
+    "a": [
+     1,
+     2
+    ],
+    "b": [
+     1,
+     8
+    ],
+    "type": "wall"
+   },
+   {
+    "a": [
+     9,
+     2
+    ],
+    "b": [
+     9,
+     8
+    ],
+    "type": "wall"
+   },
+   {
+    "a": [
+     9,
+     2
+    ],
+    "b": [
+     17,
+     2
+    ],
+    "type": "wall"
+   },
+   {
+    "a": [
+     9,
+     8
+    ],
+    "b": [
+     17,
+     8
+    ],
+    "type": "wall"
+   },
+   {
+    "a": [
+     9,
+     2
+    ],
+    "b": [
+     9,
+     8
+    ],
+    "type": "wall"
+   },
+   {
+    "a": [
+     17,
+     2
+    ],
+    "b": [
+     17,
+     8
+    ],
+    "type": "wall"
+   },
+   {
+    "a": [
+     17,
+     2
+    ],
+    "b": [
+     24,
+     2
+    ],
+    "type": "wall"
+   },
+   {
+    "a": [
+     17,
+     8
+    ],
+    "b": [
+     24,
+     8
+    ],
+    "type": "wall"
+   },
+   {
+    "a": [
+     17,
+     2
+    ],
+    "b": [
+     17,
+     8
+    ],
+    "type": "wall"
+   },
+   {
+    "a": [
+     24,
+     2
+    ],
+    "b": [
+     24,
+     8
+    ],
+    "type": "wall"
+   },
+   {
+    "a": [
+     24,
+     2
+    ],
+    "b": [
+     31,
+     2
+    ],
+    "type": "wall"
+   },
+   {
+    "a": [
+     24,
+     8
+    ],
+    "b": [
+     31,
+     8
+    ],
+    "type": "wall"
+   },
+   {
+    "a": [
+     24,
+     2
+    ],
+    "b": [
+     24,
+     8
+    ],
+    "type": "wall"
+   },
+   {
+    "a": [
+     31,
+     2
+    ],
+    "b": [
+     31,
+     8
+    ],
+    "type": "wall"
+   },
+   {
+    "a": [
+     1,
+     14
+    ],
+    "b": [
+     13,
+     14
+    ],
+    "type": "wall"
+   },
+   {
+    "a": [
+     1,
+     20
+    ],
+    "b": [
+     13,
+     20
+    ],
+    "type": "wall"
+   },
+   {
+    "a": [
+     1,
+     14
+    ],
+    "b": [
+     1,
+     20
+    ],
+    "type": "wall"
+   },
+   {
+    "a": [
+     13,
+     14
+    ],
+    "b": [
+     13,
+     20
+    ],
+    "type": "wall"
+   }
+  ],
+  "objects": [
+   {
+    "def": "door",
+    "tile": [
+     4,
+     7
+    ],
+    "rot": 2
+   },
+   {
+    "def": "window",
+    "tile": [
+     2,
+     2
+    ],
+    "rot": 0
+   },
+   {
+    "def": "window",
+    "tile": [
+     7,
+     2
+    ],
+    "rot": 0
+   },
+   {
+    "def": "door",
+    "tile": [
+     12,
+     7
+    ],
+    "rot": 2
+   },
+   {
+    "def": "window",
+    "tile": [
+     10,
+     2
+    ],
+    "rot": 0
+   },
+   {
+    "def": "window",
+    "tile": [
+     15,
+     2
+    ],
+    "rot": 0
+   },
+   {
+    "def": "door",
+    "tile": [
+     20,
+     7
+    ],
+    "rot": 2
+   },
+   {
+    "def": "window",
+    "tile": [
+     18,
+     2
+    ],
+    "rot": 0
+   },
+   {
+    "def": "window",
+    "tile": [
+     22,
+     2
+    ],
+    "rot": 0
+   },
+   {
+    "def": "door",
+    "tile": [
+     27,
+     7
+    ],
+    "rot": 2
+   },
+   {
+    "def": "window",
+    "tile": [
+     25,
+     2
+    ],
+    "rot": 0
+   },
+   {
+    "def": "window",
+    "tile": [
+     29,
+     2
+    ],
+    "rot": 0
+   },
+   {
+    "def": "exhibit",
+    "tile": [
+     2,
+     3
+    ],
+    "rot": 0
+   },
+   {
+    "def": "exhibit",
+    "tile": [
+     4,
+     3
+    ],
+    "rot": 0
+   },
+   {
+    "def": "exhibit",
+    "tile": [
+     6,
+     3
+    ],
+    "rot": 0
+   },
+   {
+    "def": "bookshelf",
+    "tile": [
+     7,
+     3
+    ],
+    "rot": 0
+   },
+   {
+    "def": "table",
+    "tile": [
+     10,
+     3
+    ],
+    "rot": 0
+   },
+   {
+    "def": "table",
+    "tile": [
+     13,
+     3
+    ],
+    "rot": 0
+   },
+   {
+    "def": "table",
+    "tile": [
+     10,
+     5
+    ],
+    "rot": 0
+   },
+   {
+    "def": "table",
+    "tile": [
+     13,
+     5
+    ],
+    "rot": 0
+   },
+   {
+    "def": "bar_counter",
+    "tile": [
+     15,
+     3
+    ],
+    "rot": 0
+   },
+   {
+    "def": "fridge",
+    "tile": [
+     9,
+     3
+    ],
+    "rot": 0
+   },
+   {
+    "def": "bed",
+    "tile": [
+     18,
+     3
+    ],
+    "rot": 0
+   },
+   {
+    "def": "wardrobe",
+    "tile": [
+     22,
+     3
+    ],
+    "rot": 0
+   },
+   {
+    "def": "toilet",
+    "tile": [
+     22,
+     5
+    ],
+    "rot": 0
+   },
+   {
+    "def": "sink",
+    "tile": [
+     22,
+     6
+    ],
+    "rot": 2
+   },
+   {
+    "def": "shower",
+    "tile": [
+     18,
+     6
+    ],
+    "rot": 2
+   },
+   {
+    "def": "computer",
+    "tile": [
+     20,
+     6
+    ],
+    "rot": 2
+   },
+   {
+    "def": "stereo",
+    "tile": [
+     25,
+     3
+    ],
+    "rot": 0
+   },
+   {
+    "def": "bar_counter",
+    "tile": [
+     27,
+     3
+    ],
+    "rot": 0
+   },
+   {
+    "def": "bar_stool",
+    "tile": [
+     25,
+     6
+    ],
+    "rot": 0
+   },
+   {
+    "def": "pool_table",
+    "tile": [
+     28,
+     5
+    ],
+    "rot": 0
+   },
+   {
+    "def": "door",
+    "tile": [
+     6,
+     14
+    ],
+    "rot": 0
+   },
+   {
+    "def": "shop_stall",
+    "tile": [
+     2,
+     15
+    ],
+    "rot": 0
+   },
+   {
+    "def": "shop_stall",
+    "tile": [
+     4,
+     15
+    ],
+    "rot": 0
+   },
+   {
+    "def": "shop_stall",
+    "tile": [
+     8,
+     15
+    ],
+    "rot": 0
+   },
+   {
+    "def": "souvenir_stand",
+    "tile": [
+     10,
+     15
+    ],
+    "rot": 0
+   },
+   {
+    "def": "vending_machine",
+    "tile": [
+     11,
+     18
+    ],
+    "rot": 2
+   },
+   {
+    "def": "sofa",
+    "tile": [
+     18,
+     14
+    ],
+    "rot": 0
+   },
+   {
+    "def": "sofa",
+    "tile": [
+     20,
+     17
+    ],
+    "rot": 0
+   },
+   {
+    "def": "plant",
+    "tile": [
+     13,
+     13
+    ],
+    "rot": 0
+   },
+   {
+    "def": "plant",
+    "tile": [
+     18,
+     12
+    ],
+    "rot": 0
+   },
+   {
+    "def": "travel_desk",
+    "tile": [
+     25,
+     15
+    ],
+    "rot": 0
+   },
+   {
+    "def": "shop_stall",
+    "tile": [
+     27,
+     17
+    ],
+    "rot": 0
+   },
+   {
+    "def": "souvenir_stand",
+    "tile": [
+     29,
+     15
+    ],
+    "rot": 0
+   }
+  ],
+  "spawn": [
+   [
+    14,
+    20
+   ],
+   [
+    15,
+    20
+   ],
+   [
+    16,
+    20
+   ]
+  ],
+  "entry": [
+   15,
+   21
+  ]
+ }
+}

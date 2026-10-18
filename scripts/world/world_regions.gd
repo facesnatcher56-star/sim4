@@ -80,6 +80,28 @@ func add_region(d: Dictionary) -> int:
 	return id
 
 
+## Task 22 (vacation zones): forget a region and give its tiles back to whatever region lies underneath (lowest id wins, like add order).
+func remove_region(id: int) -> void:
+	if not regions.has(id):
+		return
+	var rc: Rect2i = regions[id]["rect"]
+	regions.erase(id)
+	var clip := rc.intersection(Rect2i(0, 0, world.width, world.height))
+	var ids: Array = regions.keys()
+	ids.sort()
+	for y in range(clip.position.y, clip.end.y):
+		for x in range(clip.position.x, clip.end.x):
+			_tile[y * world.width + x] = NONE
+	for rid in ids:
+		var r2: Rect2i = (regions[rid]["rect"] as Rect2i).intersection(clip)
+		for y2 in range(r2.position.y, r2.end.y):
+			for x2 in range(r2.position.x, r2.end.x):
+				_tile[y2 * world.width + x2] = int(rid)
+	if home_id == id:
+		home_id = NONE
+	world.rooms.invalidate_all()
+
+
 func region(id: int) -> Dictionary:
 	return regions.get(id, {})
 

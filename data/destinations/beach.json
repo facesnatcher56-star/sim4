@@ -1,0 +1,496 @@
+{
+ "id": "beach",
+ "template": {
+  "label": "Sunny Cove Resort",
+  "description": "A beach resort: sun, surf, a pool and a beach bar.",
+  "kind": "venue",
+  "floors": [
+   {
+    "rect": [
+     0,
+     0,
+     31,
+     2
+    ],
+    "type": "water"
+   },
+   {
+    "rect": [
+     0,
+     3,
+     31,
+     12
+    ],
+    "type": "sand"
+   },
+   {
+    "rect": [
+     0,
+     13,
+     31,
+     21
+    ],
+    "type": "lawn"
+   },
+   {
+    "rect": [
+     14,
+     20,
+     16,
+     21
+    ],
+    "type": "concrete"
+   },
+   {
+    "rect": [
+     5,
+     14,
+     26,
+     19
+    ],
+    "type": "carpet"
+   },
+   {
+    "rect": [
+     5,
+     14,
+     10,
+     19
+    ],
+    "type": "tile"
+   }
+  ],
+  "walls": [
+   {
+    "a": [
+     5,
+     14
+    ],
+    "b": [
+     27,
+     14
+    ],
+    "type": "wall"
+   },
+   {
+    "a": [
+     5,
+     20
+    ],
+    "b": [
+     27,
+     20
+    ],
+    "type": "wall"
+   },
+   {
+    "a": [
+     5,
+     14
+    ],
+    "b": [
+     5,
+     20
+    ],
+    "type": "wall"
+   },
+   {
+    "a": [
+     27,
+     14
+    ],
+    "b": [
+     27,
+     20
+    ],
+    "type": "wall"
+   },
+   {
+    "a": [
+     5,
+     17
+    ],
+    "b": [
+     11,
+     17
+    ],
+    "type": "wall"
+   },
+   {
+    "a": [
+     11,
+     14
+    ],
+    "b": [
+     11,
+     20
+    ],
+    "type": "wall"
+   }
+  ],
+  "objects": [
+   {
+    "def": "door",
+    "tile": [
+     15,
+     19
+    ],
+    "rot": 2
+   },
+   {
+    "def": "door",
+    "tile": [
+     10,
+     15
+    ],
+    "rot": 1
+   },
+   {
+    "def": "door",
+    "tile": [
+     10,
+     18
+    ],
+    "rot": 1
+   },
+   {
+    "def": "window",
+    "tile": [
+     8,
+     14
+    ],
+    "rot": 0
+   },
+   {
+    "def": "window",
+    "tile": [
+     13,
+     14
+    ],
+    "rot": 0
+   },
+   {
+    "def": "window",
+    "tile": [
+     20,
+     14
+    ],
+    "rot": 0
+   },
+   {
+    "def": "window",
+    "tile": [
+     24,
+     14
+    ],
+    "rot": 0
+   },
+   {
+    "def": "window",
+    "tile": [
+     26,
+     16
+    ],
+    "rot": 1
+   },
+   {
+    "def": "bed",
+    "tile": [
+     5,
+     14
+    ],
+    "rot": 0
+   },
+   {
+    "def": "wardrobe",
+    "tile": [
+     9,
+     14
+    ],
+    "rot": 0
+   },
+   {
+    "def": "toilet",
+    "tile": [
+     10,
+     14
+    ],
+    "rot": 0
+   },
+   {
+    "def": "bed",
+    "tile": [
+     5,
+     18
+    ],
+    "rot": 0
+   },
+   {
+    "def": "wardrobe",
+    "tile": [
+     9,
+     17
+    ],
+    "rot": 0
+   },
+   {
+    "def": "sink",
+    "tile": [
+     10,
+     17
+    ],
+    "rot": 0
+   },
+   {
+    "def": "shower",
+    "tile": [
+     9,
+     19
+    ],
+    "rot": 2
+   },
+   {
+    "def": "toilet",
+    "tile": [
+     10,
+     19
+    ],
+    "rot": 2
+   },
+   {
+    "def": "sofa",
+    "tile": [
+     13,
+     14
+    ],
+    "rot": 0
+   },
+   {
+    "def": "tv",
+    "tile": [
+     16,
+     14
+    ],
+    "rot": 0
+   },
+   {
+    "def": "computer",
+    "tile": [
+     18,
+     14
+    ],
+    "rot": 0
+   },
+   {
+    "def": "plant",
+    "tile": [
+     20,
+     14
+    ],
+    "rot": 0
+   },
+   {
+    "def": "travel_desk",
+    "tile": [
+     22,
+     14
+    ],
+    "rot": 0
+   },
+   {
+    "def": "table",
+    "tile": [
+     14,
+     17
+    ],
+    "rot": 0
+   },
+   {
+    "def": "vending_machine",
+    "tile": [
+     24,
+     14
+    ],
+    "rot": 0
+   },
+   {
+    "def": "plant",
+    "tile": [
+     26,
+     19
+    ],
+    "rot": 2
+   },
+   {
+    "def": "lamp",
+    "tile": [
+     12,
+     19
+    ],
+    "rot": 2
+   },
+   {
+    "def": "sunbed",
+    "tile": [
+     2,
+     5
+    ],
+    "rot": 0
+   },
+   {
+    "def": "sunbed",
+    "tile": [
+     5,
+     5
+    ],
+    "rot": 0
+   },
+   {
+    "def": "sunbed",
+    "tile": [
+     8,
+     5
+    ],
+    "rot": 0
+   },
+   {
+    "def": "sunbed",
+    "tile": [
+     11,
+     5
+    ],
+    "rot": 0
+   },
+   {
+    "def": "beach_umbrella",
+    "tile": [
+     3,
+     4
+    ],
+    "rot": 0
+   },
+   {
+    "def": "beach_umbrella",
+    "tile": [
+     9,
+     4
+    ],
+    "rot": 0
+   },
+   {
+    "def": "swimming_pool",
+    "tile": [
+     14,
+     7
+    ],
+    "rot": 0
+   },
+   {
+    "def": "sunbed",
+    "tile": [
+     14,
+     10
+    ],
+    "rot": 0
+   },
+   {
+    "def": "sunbed",
+    "tile": [
+     17,
+     10
+    ],
+    "rot": 0
+   },
+   {
+    "def": "surf_rack",
+    "tile": [
+     21,
+     4
+    ],
+    "rot": 0
+   },
+   {
+    "def": "surf_rack",
+    "tile": [
+     23,
+     4
+    ],
+    "rot": 0
+   },
+   {
+    "def": "bar_counter",
+    "tile": [
+     25,
+     8
+    ],
+    "rot": 0
+   },
+   {
+    "def": "table",
+    "tile": [
+     26,
+     6
+    ],
+    "rot": 0
+   },
+   {
+    "def": "souvenir_stand",
+    "tile": [
+     28,
+     10
+    ],
+    "rot": 0
+   },
+   {
+    "def": "sunbed",
+    "tile": [
+     29,
+     5
+    ],
+    "rot": 0
+   },
+   {
+    "def": "hot_tub",
+    "tile": [
+     2,
+     9
+    ],
+    "rot": 0
+   },
+   {
+    "def": "plant",
+    "tile": [
+     1,
+     13
+    ],
+    "rot": 0
+   },
+   {
+    "def": "plant",
+    "tile": [
+     30,
+     13
+    ],
+    "rot": 0
+   }
+  ],
+  "spawn": [
+   [
+    14,
+    20
+   ],
+   [
+    15,
+    20
+   ],
+   [
+    16,
+    20
+   ]
+  ],
+  "entry": [
+   15,
+   21
+  ]
+ }
+}

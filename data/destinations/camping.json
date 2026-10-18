@@ -1,0 +1,256 @@
+{
+ "id": "camping",
+ "template": {
+  "label": "Fernhollow Campsite",
+  "description": "A cheap camping trip: tents, a campfire, stories, bugs and rain.",
+  "kind": "venue",
+  "floors": [
+   {
+    "rect": [
+     0,
+     0,
+     31,
+     21
+    ],
+    "type": "grass"
+   },
+   {
+    "rect": [
+     0,
+     0,
+     8,
+     5
+    ],
+    "type": "water"
+   },
+   {
+    "rect": [
+     14,
+     15,
+     16,
+     21
+    ],
+    "type": "dirt"
+   },
+   {
+    "rect": [
+     27,
+     17,
+     29,
+     19
+    ],
+    "type": "tile"
+   }
+  ],
+  "walls": [
+   {
+    "a": [
+     27,
+     17
+    ],
+    "b": [
+     30,
+     17
+    ],
+    "type": "wall"
+   },
+   {
+    "a": [
+     27,
+     20
+    ],
+    "b": [
+     30,
+     20
+    ],
+    "type": "wall"
+   },
+   {
+    "a": [
+     27,
+     17
+    ],
+    "b": [
+     27,
+     20
+    ],
+    "type": "wall"
+   },
+   {
+    "a": [
+     30,
+     17
+    ],
+    "b": [
+     30,
+     20
+    ],
+    "type": "wall"
+   }
+  ],
+  "objects": [
+   {
+    "def": "tent",
+    "tile": [
+     4,
+     8
+    ],
+    "rot": 0
+   },
+   {
+    "def": "tent",
+    "tile": [
+     8,
+     8
+    ],
+    "rot": 0
+   },
+   {
+    "def": "tent",
+    "tile": [
+     12,
+     8
+    ],
+    "rot": 0
+   },
+   {
+    "def": "campfire",
+    "tile": [
+     18,
+     10
+    ],
+    "rot": 0
+   },
+   {
+    "def": "log_bench",
+    "tile": [
+     16,
+     12
+    ],
+    "rot": 0
+   },
+   {
+    "def": "log_bench",
+    "tile": [
+     20,
+     12
+    ],
+    "rot": 0
+   },
+   {
+    "def": "cooler",
+    "tile": [
+     24,
+     9
+    ],
+    "rot": 0
+   },
+   {
+    "def": "grill",
+    "tile": [
+     24,
+     12
+    ],
+    "rot": 0
+   },
+   {
+    "def": "fishing_spot",
+    "tile": [
+     2,
+     6
+    ],
+    "rot": 0
+   },
+   {
+    "def": "hiking_trail",
+    "tile": [
+     28,
+     5
+    ],
+    "rot": 0
+   },
+   {
+    "def": "telescope",
+    "tile": [
+     26,
+     15
+    ],
+    "rot": 0
+   },
+   {
+    "def": "plant",
+    "tile": [
+     1,
+     12
+    ],
+    "rot": 0
+   },
+   {
+    "def": "plant",
+    "tile": [
+     30,
+     3
+    ],
+    "rot": 0
+   },
+   {
+    "def": "plant",
+    "tile": [
+     20,
+     3
+    ],
+    "rot": 0
+   },
+   {
+    "def": "door",
+    "tile": [
+     28,
+     19
+    ],
+    "rot": 2
+   },
+   {
+    "def": "toilet",
+    "tile": [
+     27,
+     17
+    ],
+    "rot": 0
+   },
+   {
+    "def": "sink",
+    "tile": [
+     29,
+     17
+    ],
+    "rot": 0
+   },
+   {
+    "def": "shower",
+    "tile": [
+     28,
+     17
+    ],
+    "rot": 0
+   }
+  ],
+  "spawn": [
+   [
+    14,
+    20
+   ],
+   [
+    15,
+    20
+   ],
+   [
+    16,
+    20
+   ]
+  ],
+  "entry": [
+   15,
+   21
+  ]
+ }
+}

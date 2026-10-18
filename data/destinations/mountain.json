@@ -1,0 +1,377 @@
+{
+ "id": "mountain",
+ "template": {
+  "label": "Pinecrest Cabin",
+  "description": "A cabin by a lake in the mountains: hiking, fishing, a campfire and, in winter, skiing.",
+  "kind": "venue",
+  "floors": [
+   {
+    "rect": [
+     0,
+     0,
+     31,
+     21
+    ],
+    "type": "grass"
+   },
+   {
+    "rect": [
+     20,
+     0,
+     31,
+     6
+    ],
+    "type": "water"
+   },
+   {
+    "rect": [
+     19,
+     7,
+     31,
+     8
+    ],
+    "type": "sand"
+   },
+   {
+    "rect": [
+     14,
+     15,
+     16,
+     21
+    ],
+    "type": "dirt"
+   },
+   {
+    "rect": [
+     4,
+     5,
+     17,
+     12
+    ],
+    "type": "wood"
+   }
+  ],
+  "walls": [
+   {
+    "a": [
+     4,
+     5
+    ],
+    "b": [
+     18,
+     5
+    ],
+    "type": "wall"
+   },
+   {
+    "a": [
+     4,
+     13
+    ],
+    "b": [
+     18,
+     13
+    ],
+    "type": "wall"
+   },
+   {
+    "a": [
+     4,
+     5
+    ],
+    "b": [
+     4,
+     13
+    ],
+    "type": "wall"
+   },
+   {
+    "a": [
+     18,
+     5
+    ],
+    "b": [
+     18,
+     13
+    ],
+    "type": "wall"
+   }
+  ],
+  "objects": [
+   {
+    "def": "door",
+    "tile": [
+     10,
+     12
+    ],
+    "rot": 2
+   },
+   {
+    "def": "window",
+    "tile": [
+     6,
+     12
+    ],
+    "rot": 2
+   },
+   {
+    "def": "window",
+    "tile": [
+     14,
+     12
+    ],
+    "rot": 2
+   },
+   {
+    "def": "window",
+    "tile": [
+     4,
+     8
+    ],
+    "rot": 3
+   },
+   {
+    "def": "window",
+    "tile": [
+     17,
+     8
+    ],
+    "rot": 1
+   },
+   {
+    "def": "fridge",
+    "tile": [
+     5,
+     5
+    ],
+    "rot": 0
+   },
+   {
+    "def": "stove",
+    "tile": [
+     6,
+     5
+    ],
+    "rot": 0
+   },
+   {
+    "def": "counter",
+    "tile": [
+     7,
+     5
+    ],
+    "rot": 0
+   },
+   {
+    "def": "sink",
+    "tile": [
+     8,
+     5
+    ],
+    "rot": 0
+   },
+   {
+    "def": "fireplace",
+    "tile": [
+     10,
+     5
+    ],
+    "rot": 0
+   },
+   {
+    "def": "tv",
+    "tile": [
+     13,
+     5
+    ],
+    "rot": 0
+   },
+   {
+    "def": "bed",
+    "tile": [
+     15,
+     5
+    ],
+    "rot": 0
+   },
+   {
+    "def": "wardrobe",
+    "tile": [
+     15,
+     8
+    ],
+    "rot": 0
+   },
+   {
+    "def": "sofa",
+    "tile": [
+     6,
+     9
+    ],
+    "rot": 0
+   },
+   {
+    "def": "table",
+    "tile": [
+     10,
+     9
+    ],
+    "rot": 0
+   },
+   {
+    "def": "toilet",
+    "tile": [
+     5,
+     11
+    ],
+    "rot": 2
+   },
+   {
+    "def": "shower",
+    "tile": [
+     16,
+     11
+    ],
+    "rot": 2
+   },
+   {
+    "def": "lamp",
+    "tile": [
+     12,
+     11
+    ],
+    "rot": 2
+   },
+   {
+    "def": "campfire",
+    "tile": [
+     22,
+     13
+    ],
+    "rot": 0
+   },
+   {
+    "def": "log_bench",
+    "tile": [
+     20,
+     15
+    ],
+    "rot": 0
+   },
+   {
+    "def": "log_bench",
+    "tile": [
+     24,
+     15
+    ],
+    "rot": 0
+   },
+   {
+    "def": "fishing_spot",
+    "tile": [
+     22,
+     8
+    ],
+    "rot": 0
+   },
+   {
+    "def": "fishing_spot",
+    "tile": [
+     26,
+     8
+    ],
+    "rot": 0
+   },
+   {
+    "def": "hiking_trail",
+    "tile": [
+     10,
+     15
+    ],
+    "rot": 0
+   },
+   {
+    "def": "hiking_trail",
+    "tile": [
+     5,
+     16
+    ],
+    "rot": 0
+   },
+   {
+    "def": "telescope",
+    "tile": [
+     12,
+     16
+    ],
+    "rot": 0
+   },
+   {
+    "def": "ski_rack",
+    "tile": [
+     28,
+     13
+    ],
+    "rot": 0
+   },
+   {
+    "def": "grill",
+    "tile": [
+     20,
+     12
+    ],
+    "rot": 0
+   },
+   {
+    "def": "hot_tub",
+    "tile": [
+     18,
+     3
+    ],
+    "rot": 0
+   },
+   {
+    "def": "souvenir_stand",
+    "tile": [
+     28,
+     17
+    ],
+    "rot": 0
+   },
+   {
+    "def": "plant",
+    "tile": [
+     3,
+     3
+    ],
+    "rot": 0
+   },
+   {
+    "def": "plant",
+    "tile": [
+     12,
+     3
+    ],
+    "rot": 0
+   }
+  ],
+  "spawn": [
+   [
+    14,
+    20
+   ],
+   [
+    15,
+    20
+   ],
+   [
+    16,
+    20
+   ]
+  ],
+  "entry": [
+   15,
+   21
+  ]
+ }
+}
