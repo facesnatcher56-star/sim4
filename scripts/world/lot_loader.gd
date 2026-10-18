@@ -125,6 +125,7 @@ static func place(template_id: String, w, origin: Vector2i) -> bool:
 		var a: Array = wl["a"]
 		var b: Array = wl["b"]
 		_wall_line(w, Vector2i(int(a[0]), int(a[1])) + origin, Vector2i(int(b[0]), int(b[1])) + origin, str(wl["type"]))
+	LotLevels.prepare(t, w, origin, template_id)         # multi-floor templates: upper floors + walls before any object
 	var ol: Array = t.get("objects", [])
 	report["objects"] = ol.size()
 	# wall-mounted pieces need their wall first (all walls exist by now); everything else follows
@@ -136,7 +137,7 @@ static func place(template_id: String, w, origin: Vector2i) -> bool:
 				continue
 			var tile := Vector2i(int(o["tile"][0]), int(o["tile"][1])) + origin
 			var rot: int = int(o.get("rot", 0))
-			var id: int = w.place_object(str(o["def"]), tile, rot)
+			var id: int = w.place_object(str(o["def"]), tile, rot, int(o.get("level", 0)))
 			if id == -1:
 				(report["failed"] as Array).append("%s at %s rot %d: %s" % [o["def"], str(tile), rot, str(w.last_error)])
 			else:
@@ -165,7 +166,7 @@ static func _world_size() -> Array:
 	return [32, 24]
 
 ## Raw wall line (no coins, no undo). type "none" erases.
-static func _wall_line(w, a: Vector2i, b: Vector2i, type: String) -> void:
+static func _wall_line(w, a: Vector2i, b: Vector2i, type: String, level: int = 0) -> void:
 	var edges: Array = []
 	if a.y == b.y:
 		for x in range(mini(a.x, b.x), maxi(a.x, b.x)):
@@ -174,7 +175,7 @@ static func _wall_line(w, a: Vector2i, b: Vector2i, type: String) -> void:
 		for y in range(mini(a.y, b.y), maxi(a.y, b.y)):
 			edges.append(Vector3i(a.x, y, 1))
 	for e in edges:
-		w.set_edge(e, type)
+		w.set_edge(e, type, level)
 
 ## Tiles a folk can stand on to use `o` (slot approach tiles), for reachability checks.
 static func use_tiles(w, o) -> Array[Vector2i]:
@@ -197,6 +198,11 @@ static func unreachable_objects(w, from: Vector2i, rect: Rect2i = Rect2i()) -> A
 			continue
 		var ok := false
 		for t in use_tiles(w, o):
+			if o.level != 0:                          # upstairs / basement: by stairs or lift
+				if w.in_bounds(t) and w.has_route(Vector3i(from.x, from.y, 0), Vector3i(t.x, t.y, o.level)):
+					ok = true
+					break
+				continue
 			if t == from or (w.in_bounds(t) and w.has_path(from, t)):
 				ok = true
 				break

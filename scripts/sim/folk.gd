@@ -23,6 +23,7 @@ var needs: Dictionary = {}      # String -> Stat
 var skills: Dictionary = {}     # String -> {"xp": float, "level": int}
 var buffs: Array = []           # [{"id": String, "remaining": float (minutes, -1 = until removed)}]
 var tile: Vector2i = Vector2i.ZERO
+var level: int = 0              # floor of the building the folk is on (0 = ground, negative = basement); tile + level = position
 var queue: Array = []           # Array of Interaction, highest effective priority first
 var current: Interaction = null
 var household_id: int = 0
@@ -75,12 +76,25 @@ func setup_needs() -> void:
 func has_trait(t: String) -> bool:
 	return traits.has(t)
 
+var _td_hash: int = 0
+var _td_cache: Array = []
+var _td_data = null
+
+## Definitions of this folk's traits. Memoised (autonomy asks hundreds of times per decision): rebuilt when the trait list
+## or the data tables change.
 func trait_defs() -> Array:
+	var data = SimEnv.data()
+	var h := traits.hash()
+	if h == _td_hash and is_same(data, _td_data):
+		return _td_cache
 	var out: Array = []
 	for t in traits:
-		var d: Dictionary = SimEnv.data().trait_def(t)
+		var d: Dictionary = data.trait_def(t)
 		if not d.is_empty():
 			out.append(d)
+	_td_hash = h
+	_td_data = data
+	_td_cache = out
 	return out
 
 # ---------- stats ----------
@@ -104,22 +118,34 @@ func _emit_need(nid: String, force: bool = false) -> void:
 
 ## Product of trait + buff + running-interaction decay multipliers for a need.
 func decay_mult(need: String) -> float:
-	var m := 1.0
+	return _decay_mult(need, _decay_maps(), Scenario.need_drain() if household_id > 0 else 1.0)
+
+## The per-need decay multiplier tables of the traits and buffs (looked up once per tick, not once per need).
+func _decay_maps() -> Array:
+	var maps: Array = []
 	for td in trait_defs():
-		m *= float((td.get("need_decay_mult", {}) as Dictionary).get(need, 1.0))
+		maps.append(td.get("need_decay_mult", {}))
 	for b in buffs:
-		var bd: Dictionary = SimEnv.data().buff_def(str(b["id"]))
-		m *= float((bd.get("need_decay_mult", {}) as Dictionary).get(need, 1.0))
+		maps.append(SimEnv.data().buff_def(str(b["id"])).get("need_decay_mult", {}))
+	return maps
+
+func _decay_mult(need: String, maps: Array, drain: float) -> float:
+	var m := 1.0
+	for mp in maps:
+		m *= float((mp as Dictionary).get(need, 1.0))
 	if current != null and current.state == "running":
 		m *= current.decay_mult_for(need)
 	if household_id > 0:
-		m *= Scenario.need_drain()      # new-game difficulty (1.0 on Normal), household members only
+		m *= drain      # new-game difficulty (1.0 on Normal), household members only
 	return m
 
 func tick_needs(minutes: float) -> void:
+	var maps := _decay_maps()
+	var drain: float = Scenario.need_drain() if household_id > 0 else 1.0
 	for nid in needs:
 		var s: Stat = needs[nid]
-		s.tick(minutes, decay_mult(nid))
+		if s.decay_per_min != 0.0:
+			s.tick(minutes, _decay_mult(nid, maps, drain))
 		_emit_need(nid)
 
 # ---------- buffs ----------
@@ -259,6 +285,16 @@ func memory_bias(key: String) -> float:
 			total += float(m["value"]) * pow(0.5, maxf(age, 0.0) / MEMORY_HALF_LIFE_MIN)
 	return clampf(total, -MEMORY_BIAS_LIMIT, MEMORY_BIAS_LIMIT)
 
+## memory_bias() of every key at once (one pass over the memory): key -> unclamped sum. clampf(sum, -MEMORY_BIAS_LIMIT, MEMORY_BIAS_LIMIT)
+## is exactly memory_bias(key); keys that are not in the map have no bias.
+func memory_bias_map() -> Dictionary:
+	var now := SimEnv.now_min()
+	var sums: Dictionary = {}
+	for m in memory:
+		var age := float(now - int(m["t"]))
+		sums[m["key"]] = float(sums.get(m["key"], 0.0)) + float(m["value"]) * pow(0.5, maxf(age, 0.0) / MEMORY_HALF_LIFE_MIN)
+	return sums
+
 func prune_memory() -> void:
 	var now := SimEnv.now_min()
 	var keep: Array = []
@@ -310,7 +346,7 @@ func to_dict() -> Dictionary:
 	return {
 		"id": id, "name": name, "age_stage": age_stage, "traits": traits.duplicate(),
 		"needs": nd, "skills": skills.duplicate(true), "buffs": bl,
-		"tile": [tile.x, tile.y], "household_id": household_id,
+		"tile": [tile.x, tile.y], "level": level, "household_id": household_id,
 		"work_start": work_start, "work_end": work_end,
 		"memory": memory.duplicate(true), "relationships": rel,
 		"history_counts": history_counts.duplicate(),
@@ -334,6 +370,7 @@ static func from_dict(d: Dictionary) -> Folk:
 		f.buffs.append({"id": str(b["id"]), "remaining": float(b.get("remaining", -1.0))})
 	var tl: Array = d.get("tile", [0, 0])
 	f.tile = Vector2i(int(tl[0]), int(tl[1]))
+	f.level = int(d.get("level", 0))
 	f.household_id = int(d.get("household_id", 0))
 	f.work_start = float(d.get("work_start", -1.0))
 	f.work_end = float(d.get("work_end", -1.0))

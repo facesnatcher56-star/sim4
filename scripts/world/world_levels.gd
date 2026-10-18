@@ -14,6 +14,7 @@ const MAX_LEVELS := 64                 # sanity bound for the data (nothing in t
 var world: WorldGrid
 var buildings: Dictionary = {}         # id -> {id, rect: Rect2i, min: int, max: int, roof: String, label: String, region: int}
 var layers: Dictionary = {}            # level (int, != 0) -> LevelLayer
+var ground_holes: Dictionary = {}      # Vector2i -> true: ground tiles with a stairwell from a basement below (blocked, no floor drawn)
 var gen: int = 0                       # bumped on any structural change (route + view caches)
 var _next_bid: int = 1
 
@@ -135,6 +136,18 @@ func is_walkable(tile: Vector2i, level: int = 0) -> bool:
 		return world.is_walkable(tile)
 	var lay := layer(level, false)
 	return lay != null and lay.floors.has(tile) and not lay.blocked.has(tile)
+
+
+## A floor of a higher level of the building lies over this tile (a roof / ceiling for the weather).
+func covered(tile: Vector2i, level: int = 0) -> bool:
+	var bid := building_at(tile)
+	if bid < 0:
+		return false
+	for m in range(level + 1, int(buildings[bid]["max"]) + 1):
+		var lay := layer(m, false)
+		if lay != null and lay.floors.has(tile) and not lay.holes.has(tile):
+			return true
+	return false
 
 
 func blocked_set(level: int) -> Dictionary:

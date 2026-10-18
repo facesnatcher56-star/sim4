@@ -49,13 +49,14 @@ static func on_minute() -> void:
 	var c: Dictionary = cfg()
 	if c.is_empty():
 		return
+	var water: Variant = _water_objects(c)
 	for f in WorldIface.all_folk():
 		if Hospital.is_in(f) or str(f.age_stage) == "baby":
 			continue
-		_scan(f, c)
+		_scan(f, c, water)
 	AccidentRescue.on_minute()
 
-static func _scan(f, c: Dictionary) -> void:
+static func _scan(f, c: Dictionary, water: Variant) -> void:
 	if SysUtil.is_away(f):
 		return                       # job markers are set only around the hourly dice (on_hour / after_hour), never while a save can see them
 	var hour: float = SimEnv.hour_f()
@@ -90,12 +91,16 @@ static func _scan(f, c: Dictionary) -> void:
 	if icy:
 		mark(f, "acc_icy")
 	# next to water
-	if _near_water(f, c):
+	if _near_water(f, c, water):
 		mark(f, "acc_near_water")
 	# company: states, kept fresh (they are short-lived buffs)
-	var adults: int = company(f, ["adult", "elder"]).size()
+	var here: Array = company(f)
+	var adults := 0
+	for o in here:
+		if str(o.age_stage) == "adult" or str(o.age_stage) == "elder":
+			adults += 1
 	_apply(f, "acc_unsupervised", adults == 0 and (str(f.age_stage) == "child" or str(f.age_stage) == "toddler"))
-	_apply(f, "acc_alone", company(f).is_empty())
+	_apply(f, "acc_alone", here.is_empty())
 
 static func _is_electric(obj, c: Dictionary) -> bool:
 	var tags: Array = SimEnv.data().object_def(str(obj.def_id)).get("tags", [])
@@ -119,8 +124,30 @@ static func _on_puddle(tile: Vector2i, c: Dictionary) -> bool:
 		return float(w.mess[tile]) >= float(c.get("puddle_mess", 0.3))
 	return false
 
-static func _near_water(f, c: Dictionary) -> bool:
+## The objects of the water kinds, found in one pass per minute (nobody is near water on most maps: the per-folk lookup below
+## then costs nothing).
+static func _water_objects(c: Dictionary) -> Variant:      # null = this world cannot list its objects (use the plain lookup)
+	var kinds: Array = c.get("water_objects", [])
+	var out: Array = []
+	var w = WorldIface.world()
+	if w == null or not w.has_method("all_objects"):
+		return null
+	if kinds.is_empty():
+		return out
+	for o in w.all_objects():
+		if kinds.has(str(o.def_id)):
+			out.append(o)
+	return out
+
+static func _near_water(f, c: Dictionary, water: Variant) -> bool:
 	var r: int = int(c.get("near_water_tiles", 4))
+	var any: bool = water == null
+	for o in (water if water != null else []):
+		if absi(o.tile.x - f.tile.x) <= r and absi(o.tile.y - f.tile.y) <= r:
+			any = true
+			break
+	if not any:
+		return false
 	for o in WorldIface.objects_near(f.tile, r):
 		if (c.get("water_objects", []) as Array).has(str(o.def_id)) and Vector2(o.tile - f.tile).length() <= float(r):
 			return true

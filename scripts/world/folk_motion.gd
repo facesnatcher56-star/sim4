@@ -5,27 +5,62 @@ extends "res://scripts/world/folk_look.gd"
 const MAX_SLICE := 24     # a tile jump longer than this (fast forward, fast travel, loading) is not animated: the folk is simply there
 
 
+## Point of a (tile, level): tile centre, y = the floor (or the stair step) of that level.
+func _wp(t: Vector2i, lv: int) -> Vector3:
+	var p: Vector3 = World.tile_to_pos(t)
+	p.y = World.walk_y(t, lv)
+	return p
+
+
+## The folk's own multi-floor route (Interaction.path3, computed once) between two positions it passed, as 3D waypoints.
+func _route_slice3(f, a: Vector3i, b: Vector3i) -> Array:
+	if f.current == null or f.current.path3.is_empty():
+		return []
+	var p: Array = f.current.path3
+	var i: int = p.find(b)
+	var j: int = p.find(a)
+	if i < 0 or i <= j or (j < 0 and maxi(absi(p[0].x - a.x), absi(p[0].y - a.y)) > 1):
+		return []
+	var out: Array = []
+	for q in p.slice(j + 1, i + 1):
+		out.append(_wp(Vector2i(q.x, q.y), q.z))
+	return out
+
+
 func _update_waypoints(f) -> void:
-	if f.tile == _last_tile:
+	_level_y = World.walk_y(f.tile, f.level)
+	if f.tile == _last_tile and f.level == _last_level:
 		return
 	var d: Vector2i = f.tile - _last_tile
 	var far: int = maxi(absi(d.x), absi(d.y))
 	if _last_tile.x < -900:
-		position = World.tile_to_pos(f.tile)
+		position = _wp(f.tile, f.level)
+		_ybase = position.y
 		_waypoints.clear()
+	elif f.level != _last_level or (far > 1 and f.current != null and not f.current.path3.is_empty()):
+		var seg3: Array = _route_slice3(f, Vector3i(_last_tile.x, _last_tile.y, _last_level), Vector3i(f.tile.x, f.tile.y, f.level))
+		if seg3.is_empty() or seg3.size() > MAX_SLICE:
+			position = _wp(f.tile, f.level)                  # teleport between floors (loaded game, fast forward)
+			_ybase = position.y
+			_waypoints.clear()
+		else:
+			for w in seg3:
+				_waypoints.append(w)
 	elif far <= 1:
-		_waypoints.append(World.tile_to_pos(f.tile))
+		_waypoints.append(_wp(f.tile, f.level))
 	else:
 		var seg: Array = _route_slice(f, _last_tile, f.tile)
 		if seg.is_empty() and far <= 8:
 			seg = World.find_path(_last_tile, f.tile)          # short hop off any known route
 		if seg.is_empty() or seg.size() > MAX_SLICE:
-			position = World.tile_to_pos(f.tile)               # teleport (fast travel, fast forward, unreachable, loaded game)
+			position = _wp(f.tile, f.level)                    # teleport (fast travel, fast forward, unreachable, loaded game)
+			_ybase = position.y
 			_waypoints.clear()
 		else:
 			for t in seg:
-				_waypoints.append(World.tile_to_pos(t))
+				_waypoints.append(_wp(t, f.level))
 	_last_tile = f.tile
+	_last_level = f.level
 
 
 ## The walker's own route (computed once by Interaction.start) between two tiles it passed: the view follows sidewalks and
@@ -176,16 +211,18 @@ func _move(delta: float) -> void:
 		return
 	var speed := BASE_SPEED * mult * (1.0 + 0.4 * float(_waypoints.size())) * Weather.walk_speed_mult_at(Vector2i(int(floor(position.x)), int(floor(position.z))))
 	var goal: Vector3 = _waypoints[0] if not _waypoints.is_empty() else _target
+	var gy: float = goal.y if not _waypoints.is_empty() else _level_y
 	var to := goal - position
 	to.y = 0
 	var dist := to.length()
 	var step := speed * delta
 	_moving = dist > 0.03
+	_ybase = move_toward(_ybase, gy, (maxf(speed, 1.0) + 2.5) * delta)       # climbing: the height follows the route (a lift ride is vertical)
 	if dist <= step:
 		position.x = goal.x
 		position.z = goal.z
 		_speed_now = dist / maxf(delta, 0.0001)
-		if not _waypoints.is_empty():
+		if not _waypoints.is_empty() and absf(gy - _ybase) <= 0.06:
 			_waypoints.remove_at(0)
 	else:
 		var dir := to / dist

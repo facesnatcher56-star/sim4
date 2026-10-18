@@ -46,6 +46,8 @@ func _update_ghost() -> void:
 		_ghost.visible = false
 		return
 	_ghost.visible = true
+	var lvl := build_level()
+	var gy := LPos.elev(lvl)
 	var d: Dictionary = World.get_def(tool_arg)
 	var tile := Vector2i(floori(g.x), floori(g.z))
 	var rot := build_rot
@@ -62,16 +64,16 @@ func _update_ghost() -> void:
 		else:
 			rot = 3
 		var e := World.mount_edge(tile, rot)
-		_ghost.position = Vector3(e.x + 0.5, 0, e.y) if e.z == 0 else Vector3(e.x, 0, e.y + 0.5)
+		_ghost.position = Vector3(e.x + 0.5, gy, e.y) if e.z == 0 else Vector3(e.x, gy, e.y + 0.5)
 		_ghost.rotation.y = 0.0 if e.z == 0 else PI * 0.5
 	else:
 		var s: Array = d.get("size", [1, 1])
 		var off := WorldObject.rotate_vec(Vector2((int(s[0]) - 1) * 0.5, (int(s[1]) - 1) * 0.5), rot)
-		_ghost.position = Vector3(tile.x + 0.5 + off.x, 0.0, tile.y + 0.5 + off.y)
+		_ghost.position = Vector3(tile.x + 0.5 + off.x, gy, tile.y + 0.5 + off.y)
 		_ghost.rotation.y = _yaw_for_rot(rot)
 	_ghost_origin = tile
 	_ghost_rot = rot
-	var ok := World.can_place(tool_arg, tile, rot)
+	var ok := World.can_place(tool_arg, tile, rot, lvl)
 	if ok != _ghost_ok or not _ghost_tinted:
 		_ghost_ok = ok
 		_ghost_tinted = true
@@ -101,7 +103,7 @@ func _tool_press(mp: Vector2) -> void:
 		return
 	match tool:
 		"place":
-			var id := World.buy_place(tool_arg, _ghost_origin, _ghost_rot)
+			var id := World.buy_place(tool_arg, _ghost_origin, _ghost_rot, -1, build_level())
 			if id < 0:
 				_notify(World.last_error if World.last_error != "" else "Can't place here")
 		"wall", "floor":
@@ -112,7 +114,9 @@ func _tool_press(mp: Vector2) -> void:
 			if p["kind"] == "object":
 				World.sell_object(p["id"])
 			elif p["kind"] == "none" and World.in_bounds(p["tile"]):
-				World.sell_object_at(p["tile"])
+				var so = World.object_at(p["tile"], build_level())
+				if so != null:
+					World.sell_object(so.id)
 
 
 func _tool_motion(mp: Vector2) -> void:
@@ -132,7 +136,7 @@ func _tool_motion(mp: Vector2) -> void:
 			bm.size = Vector3(1.0, 0.4, 0.2) if e.z == 0 else Vector3(0.2, 0.4, 1.0)
 			mi.mesh = bm
 			mi.material_override = _glow_mat(col)
-			mi.position = Vector3(e.x + 0.5, 0.2, e.y) if e.z == 0 else Vector3(e.x, 0.2, e.y + 0.5)
+			mi.position = Vector3(e.x + 0.5, 0.2 + _plane_y, e.y) if e.z == 0 else Vector3(e.x, 0.2 + _plane_y, e.y + 0.5)
 			_preview_root.add_child(mi)
 	elif tool == "floor":
 		var a := Vector2i(floori(_drag_start.x), floori(_drag_start.z))
@@ -144,7 +148,7 @@ func _tool_motion(mp: Vector2) -> void:
 		bm.size = Vector3(hi.x - lo.x + 1, 0.05, hi.y - lo.y + 1)
 		mi.mesh = bm
 		mi.material_override = _glow_mat(Color(1, 1, 1, 0.35))
-		mi.position = Vector3(lo.x + bm.size.x * 0.5, 0.03, lo.y + bm.size.z * 0.5)
+		mi.position = Vector3(lo.x + bm.size.x * 0.5, 0.03 + _plane_y, lo.y + bm.size.z * 0.5)
 		_preview_root.add_child(mi)
 
 
@@ -160,13 +164,13 @@ func _tool_release(mp: Vector2) -> void:
 		var a := _vertex_at(_drag_start)
 		var b := _constrain_line(a, _vertex_at(g))
 		if a != b:
-			var n := World.set_wall_line(a, b, tool_arg if tool_arg != "" else "wall")
+			var n := World.set_wall_line(a, b, tool_arg if tool_arg != "" else "wall", -1, build_level())
 			if n == 0 and World.last_error != "":
 				_notify(World.last_error)
 	elif tool == "floor":
 		var a := Vector2i(floori(_drag_start.x), floori(_drag_start.z))
 		var b := Vector2i(floori(g.x), floori(g.z))
-		var n := World.paint_floor_rect(a, b, tool_arg)
+		var n := World.paint_floor_rect(a, b, tool_arg, -1, build_level())
 		if n == 0 and World.last_error != "":
 			_notify(World.last_error)
 

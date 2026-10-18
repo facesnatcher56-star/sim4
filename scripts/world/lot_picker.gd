@@ -60,8 +60,8 @@ static func pick(seed_value: int, start_id: String, home: String = "") -> Dictio
 			continue
 		salt += 1
 		var t := _draw(lot_pool(l), taken, _rng(seed_value, salt))
-		if t == "":
-			t = str(l.get("template", ""))
+		if t == "" or LotLoader.template(str(l.get("template", ""))).has("levels"):
+			t = str(l.get("template", ""))          # a lot whose own template is a multi-floor building keeps it (generated venues are single-storey for now)
 		out[lid] = t
 		taken[t] = true
 	return out

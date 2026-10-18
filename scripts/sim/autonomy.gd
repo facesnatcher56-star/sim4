@@ -13,9 +13,11 @@ const DISLIKE_BONUS := -3.0
 const DISTANCE_PENALTY := 0.15
 const TOP_N := 3
 const DETAIL_N := 8               # candidates that get a full debug breakdown in last_debug
+const NEAR_RADIUS := 40           # objects considered around the folk: covers a whole 32x24 lot (diagonal 40); streets use their own 12-tile reach
 static var max_scored: int = 120      # hard budget: at most this many candidates are path-scored per choose() (nearest first); tests lower / raise it
 
 static var last_debug: Dictionary = {}   # folk_id -> debug breakdown (see choose())
+static var path_queries: int = 0            # path_length queries made by evaluate() (perf tests count them)
 static var rng: RandomNumberGenerator = null
 static var debug_enabled: bool = true
 
@@ -59,17 +61,45 @@ static func token_matches(token: String, def_id: String, tags: Array, obj, adver
 static var last_refusal: String = ""
 
 static func refuses(folk, def_id: String, def: Dictionary, obj) -> bool:
-	var tags := tags_of(def, obj)
-	for td in folk.trait_defs():
-		for tok in td.get("refuses", []):
-			if token_matches(str(tok), def_id, tags, obj, []):
-				last_refusal = "%s refuses %s" % [str(td.get("label", "trait")), str(tok)]
-				return true
+	var memo := _memo_for(folk)
+	var key: String = "r|" + def_id + "|" + (str(obj.def_id) if obj != null else "")
+	var hit: Variant = memo.get(key, null)
+	if hit == null:
+		var msg := ""
+		var tags := tags_of(def, obj)
+		for td in folk.trait_defs():
+			for tok in td.get("refuses", []):
+				if msg == "" and token_matches(str(tok), def_id, tags, obj, []):
+					msg = "%s refuses %s" % [str(td.get("label", "trait")), str(tok)]
+		hit = msg
+		memo[key] = msg
+	if hit != "":
+		last_refusal = hit
+		return true
 	return false
 
 # ---------------------------------------------------------------- candidates
+static var _offered_src: Dictionary = {}      # the interactions table _offered_cache was built from
+static var _offered_n: int = -1
+static var _offered_cache: Dictionary = {}    # object def id -> [the def's "interactions" list it was built from, its size, result]
+
 ## Autonomous object interactions that objects of kind `def_id` offer (listed on the object, or naming it in `objects`).
+## Static data, so the answer is cached; it is rebuilt when the interactions table, or the object's own list (content
+## injection replaces it), changes.
 static func _offered_by(def_id: String, defs: Dictionary) -> Array:
+	if not is_same(_offered_src, defs) or _offered_n != defs.size():
+		_offered_src = defs
+		_offered_n = defs.size()
+		_offered_cache.clear()
+	var listed: Variant = SimEnv.data().object_def(def_id).get("interactions", null)
+	var c: Variant = _offered_cache.get(def_id, null)
+	if c != null and is_same(c[0], listed) and c[1] == (listed.size() if listed is Array else -1):
+		return c[2]
+	var out := _offered_uncached(def_id, defs)
+	_offered_cache[def_id] = [listed, listed.size() if listed is Array else -1, out]
+	return out
+
+static func _offered_uncached(def_id: String, defs: Dictionary) -> Array:
 	var od: Dictionary = SimEnv.data().object_def(def_id)
 	var ids: Dictionary = {}
 	for iid in od.get("interactions", []):
@@ -88,6 +118,21 @@ static func _offered_by(def_id: String, defs: Dictionary) -> Array:
 		out.append(iid)
 	return out
 
+static var _actor_tests: Dictionary = {}      # interaction id -> [its "tests" list, the tests that look at the actor only]
+
+## The tests of an interaction that can be decided without a target or object (static per definition, so filtered once).
+static func _actor_only_tests(iid: String, d: Dictionary) -> Array:
+	var tests: Array = d.get("tests", [])
+	var c: Variant = _actor_tests.get(iid, null)
+	if c != null and is_same(c[0], tests) and c[2] == tests.size():
+		return c[1]
+	var keep: Array = []
+	for t in tests:
+		if not Cond.uses_target(t) and not Cond.uses_object(t):
+			keep.append(t)
+	_actor_tests[iid] = [tests, keep, tests.size()]
+	return keep
+
 ## Why `folk` can not do `iid` on ANY target of this kind (cooldown, trait refusal, or one of its own target-independent
 ## tests failing), "" when it might. `obj_def` is the object kind for object interactions, "" otherwise. Cached in `cache`.
 static func _closed_reason(folk, iid: String, d: Dictionary, obj_def: String, cache: Dictionary) -> String:
@@ -101,8 +146,8 @@ static func _closed_reason(folk, iid: String, d: Dictionary, obj_def: String, ca
 		why = last_refusal
 	else:
 		var ctx := {"folk": folk, "object": null, "target": null}
-		for c in d.get("tests", []):
-			if not Cond.uses_target(c) and not Cond.uses_object(c) and not Cond.check_one(c, ctx):
+		for c in _actor_only_tests(iid, d):
+			if not Cond.check_one(c, ctx):
 				why = "tests failed / reserved / broken"
 				break
 	cache[key] = why
@@ -117,7 +162,7 @@ static func gather(folk, closed = null) -> Array:
 	var defs: Dictionary = SimEnv.data().interactions()
 	var cache: Dictionary = {}
 	var offered: Dictionary = {}      # object def id -> interaction ids (computed once per kind of object)
-	for o in WorldIface.objects_near(folk.tile, 200):
+	for o in WorldIface.objects_near(folk.tile, NEAR_RADIUS):
 		var def_id := str(o.def_id)
 		if not offered.has(def_id):
 			var open_ids: Array = []
@@ -162,32 +207,94 @@ static func _profile(folk, iid: String, d: Dictionary, obj, cache: Dictionary) -
 	var key: String = iid + "|" + (str(obj.def_id) if obj != null else "")
 	if cache.has(key):
 		return cache[key]
-	var tags := tags_of(d, obj)
-	var adv: Dictionary = d.get("advertises", {})
-	if adv.is_empty() and obj != null:
-		adv = (SimEnv.data().object_def(str(obj.def_id)).get("advertises", {}) as Dictionary)
-	var adv_keys: Array = adv.keys()
+	var info: Array = _static_info(key, d, obj)
+	var tags: Array = info[0]
+	var adv: Dictionary = info[1]
+	var adv_keys: Array = info[2]
 	var base := 0.0
-	var need_scores: Dictionary = {}
 	var top_need := ""
 	var top_val := -1.0
 	for need in adv:
-		var u := urgency(folk, str(need))
-		var part: float = u * float(adv[need])
-		need_scores[need] = {"urgency": snappedf(u, 0.01), "strength": adv[need], "score": snappedf(part, 0.01)}
+		var part: float = urgency(folk, str(need)) * float(adv[need])
 		base += part
 		if part > top_val:
 			top_val = part
 			top_need = str(need)
 	var buff_mult := 1.0
 	var buff_notes: Array = []
-	for b in folk.buffs:
-		var bd: Dictionary = SimEnv.data().buff_def(str(b["id"]))
-		var am: Dictionary = bd.get("autonomy_mult", {})
+	for b in _buff_mults(folk, cache):
+		var am: Dictionary = b[1]
 		for k in am:
 			if token_matches(str(k), iid, tags, obj, adv_keys):
 				buff_mult *= float(am[k])
-				buff_notes.append("%s x%.2f" % [b["id"], float(am[k])])
+				buff_notes.append("%s x%.2f" % [b[0], float(am[k])])
+	var tp: Array = _trait_part(folk, iid, tags, obj, adv_keys)
+	var p := {"base": base, "adv": adv, "top_need": top_need, "buff_mult": buff_mult, "buff_notes": buff_notes,
+		"trait_mult": tp[0], "like": tp[1], "trait_notes": tp[2], "rt": Routine.evaluate(folk, iid, tags, _active_routines(folk, cache))}
+	cache[key] = p
+	return p
+
+## Debug breakdown of the advertised needs (only built for the few candidates that get a full report).
+static func _need_scores(folk, adv: Dictionary) -> Dictionary:
+	var out: Dictionary = {}
+	for need in adv:
+		var u := urgency(folk, str(need))
+		out[need] = {"urgency": snappedf(u, 0.01), "strength": adv[need], "score": snappedf(u * float(adv[need]), 0.01)}
+	return out
+
+## [id, autonomy_mult] of the folk's buffs that carry one (computed once per decision).
+static func _buff_mults(folk, cache: Dictionary) -> Array:
+	if not cache.has("#buffs"):
+		var out: Array = []
+		for b in folk.buffs:
+			var am: Dictionary = SimEnv.data().buff_def(str(b["id"])).get("autonomy_mult", {})
+			if not am.is_empty():
+				out.append([b["id"], am])
+		cache["#buffs"] = out
+	return cache["#buffs"]
+
+## [tags, advertised needs, their keys] of an (interaction, object kind): static data, memoised.
+static func _static_info(key: String, d: Dictionary, obj) -> Array:
+	_validate_memo()
+	var c: Variant = _memo_info.get(key, null)
+	if c != null:
+		return c
+	var adv: Dictionary = d.get("advertises", {})
+	if adv.is_empty() and obj != null:
+		adv = (SimEnv.data().object_def(str(obj.def_id)).get("advertises", {}) as Dictionary)
+	var out := [tags_of(d, obj), adv, adv.keys()]
+	_memo_info[key] = out
+	return out
+
+## Memo of the parts that depend only on the folk's traits and the (interaction, object kind): [trait_mult, like, notes] and
+## the refusal text. Static data, so it survives between decisions; dropped when the data tables change.
+static var _memo_data = null
+static var _memo_defs: Dictionary = {}
+static var _memo: Dictionary = {}
+
+static var _memo_info: Dictionary = {}       # "iid|object kind" -> _static_info
+
+## Drops the memos when the data tables are replaced.
+static func _validate_memo() -> void:
+	var data = SimEnv.data()
+	if not is_same(data, _memo_data) or not is_same(data.interactions(), _memo_defs):
+		_memo_data = data
+		_memo_defs = data.interactions()
+		_memo.clear()
+		_memo_info.clear()
+
+static func _memo_for(folk) -> Dictionary:
+	_validate_memo()
+	var th: int = folk.traits.hash()
+	if not _memo.has(th):
+		_memo[th] = {}
+	return _memo[th]
+
+static func _trait_part(folk, iid: String, tags: Array, obj, adv_keys: Array) -> Array:
+	var memo := _memo_for(folk)
+	var key: String = "t|" + iid + "|" + (str(obj.def_id) if obj != null else "")
+	if memo.has(key):
+		return memo[key]
 	var trait_mult := 1.0
 	var like := 0.0
 	var trait_notes: Array = []
@@ -205,10 +312,14 @@ static func _profile(folk, iid: String, d: Dictionary, obj, cache: Dictionary) -
 			if token_matches(str(tok), iid, tags, obj, []):
 				like += DISLIKE_BONUS
 				trait_notes.append("%s dislikes %s" % [str(td.get("label", "")), tok])
-	var p := {"base": base, "need_scores": need_scores, "top_need": top_need, "buff_mult": buff_mult, "buff_notes": buff_notes,
-		"trait_mult": trait_mult, "like": like, "trait_notes": trait_notes, "rt": Routine.evaluate(folk, iid, tags)}
-	cache[key] = p
-	return p
+	var out := [trait_mult, like, trait_notes]
+	memo[key] = out
+	return out
+## Active routines of the folk, computed once per decision (kept in the profile cache under "#routines").
+static func _active_routines(folk, cache: Dictionary) -> Array:
+	if not cache.has("#routines"):
+		cache["#routines"] = Routine.active_routines(folk)
+	return cache["#routines"]
 
 static func _memory_key(cand: Dictionary, iid: String) -> String:
 	match str(cand["kind"]):
@@ -248,11 +359,15 @@ static func evaluate(folk, cand: Dictionary, profiles: Dictionary = {}, detail: 
 		return rec
 	# distance
 	var dest: Vector2i = folk.tile
+	var dest_level: int = folk.level
 	if cand["kind"] == "object":
-		dest = WorldIface.use_tile(obj, 0)
+		dest = obj.slot_tile(0) if obj.has_method("slot_tile") else WorldIface.use_tile(obj, 0)
+		dest_level = int(obj.level) if "level" in obj else 0
 	elif cand["kind"] == "folk":
 		dest = (cand["folk"] as Folk).tile
-	var dist := WorldIface.path_length(folk.tile, dest)
+		dest_level = (cand["folk"] as Folk).level
+	path_queries += 1
+	var dist := WorldIface.path_length(folk.tile, dest, folk.level, dest_level)      # floors count: stairs / lifts are part of the distance
 	if dist < 0:
 		rec["skipped"] = true
 		rec["skip_reason"] = "unreachable"
@@ -274,7 +389,7 @@ static func evaluate(folk, cand: Dictionary, profiles: Dictionary = {}, detail: 
 	if not detail:
 		return rec
 	rec["sub"] = {
-		"needs": p["need_scores"], "base": snappedf(base, 0.01), "buff_mult": snappedf(float(p["buff_mult"]), 0.001),
+		"needs": _need_scores(folk, p["adv"]), "base": snappedf(base, 0.01), "buff_mult": snappedf(float(p["buff_mult"]), 0.001),
 		"trait_mult": snappedf(float(p["trait_mult"]), 0.001), "like_bonus": p["like"], "routine_mult": snappedf(float(rt["mult"]), 0.001),
 		"routine_bonus": rt["bonus"], "distance": dist, "distance_penalty": snappedf(dist_pen, 0.01),
 		"memory_key": mem_key, "memory_bias": snappedf(bias, 0.001),
@@ -303,18 +418,72 @@ static func evaluate(folk, cand: Dictionary, profiles: Dictionary = {}, detail: 
 	rec["reason"] = "%s%s: %s" % [rec["label"], tgt, "; ".join(parts)]
 	return rec
 
+## Cheap first pass of choose(): the candidate's score with the straight-line lower bound as its distance (steps >= Chebyshev
+## distance), no interaction tests, no path query. It is an UPPER bound of the real score (evaluate()), returned as a row with
+## "estimated" = true; choose() replaces the rows that matter by the real evaluation.
+static func _bound_row(folk, cand: Dictionary, profiles: Dictionary, bias_map: Dictionary) -> Dictionary:
+	var iid: String = cand["id"]
+	var d: Dictionary = SimEnv.data().interaction_def(iid)
+	var obj = cand["obj"]
+	var row := {
+		"interaction": iid, "label": str(d.get("label", iid)), "target_id": cand["target_id"], "kind": cand["kind"],
+		"object": str(obj.def_id) if obj != null else "", "skipped": false, "skip_reason": "", "score": 0.0, "sub": {}, "estimated": true,
+	}
+	if d.is_empty():
+		row["skipped"] = true
+		row["skip_reason"] = "unknown interaction"
+		return row
+	var dest: Vector2i = folk.tile
+	if obj != null:
+		dest = obj.slot_tile(0) if obj.has_method("slot_tile") else WorldIface.use_tile(obj, 0)
+	elif cand["kind"] == "folk":
+		dest = (cand["folk"] as Folk).tile
+	var p: Dictionary = _profile(folk, iid, d, obj, profiles)
+	var base: float = p["base"]
+	var rt: Dictionary = p["rt"]
+	var score := base * float(p["buff_mult"]) * float(p["trait_mult"]) * float(rt["mult"]) + float(p["like"])
+	if base > 0.0 or float(rt["bonus"]) > 0.0:
+		score += float(rt["bonus"])
+	score -= DISTANCE_PENALTY * float(maxi(absi(folk.tile.x - dest.x), absi(folk.tile.y - dest.y)))
+	if not bias_map.is_empty():
+		score *= 1.0 + clampf(clampf(float(bias_map.get(_memory_key(cand, iid), 0.0)), -Folk.MEMORY_BIAS_LIMIT, Folk.MEMORY_BIAS_LIMIT), -0.5, 0.5)
+	row["score"] = score
+	return row
+
 ## Choose what `folk` should do next. Returns {} when nothing is possible, else
 ## {interaction_id, target_id, target_kind, score, reason, label}.
 static func choose(folk) -> Dictionary:
 	var scored: Array = []
 	var all_rec: Array = []
 	var profiles: Dictionary = {}
+	# 1. distance-free pass: every candidate gets a score with the straight-line lower bound as its distance (an UPPER bound
+	#    of the real score); no path query yet.
+	var bias_map: Dictionary = folk.memory_bias_map()
+	var pending: Array = []
 	for cand in _budget(folk, gather(folk, all_rec)):
-		var rec := evaluate(folk, cand, profiles, false, true)
-		all_rec.append(rec)
+		var row := _bound_row(folk, cand, profiles, bias_map)
+		all_rec.append(row)
+		if not row["skipped"]:
+			if float(row["score"]) > 0.0:
+				pending.append([row, cand, all_rec.size() - 1])
+			else:
+				row["skipped"] = true
+				row["skip_reason"] = "score <= 0"
+	pending.sort_custom(func(a, b): return float(a[0]["score"]) > float(b[0]["score"]))
+	# 2. real path lengths, best bound first, until the bound of the next candidate cannot beat the DETAIL_N-th real score:
+	#    the result is exactly what scoring every candidate would give, with a handful of path queries.
+	var kth := -INF
+	for e in pending:
+		if scored.size() >= DETAIL_N and float(e[0]["score"]) <= kth:
+			break
+		var rec := evaluate(folk, e[1], profiles, false, true)
+		all_rec[e[2]] = rec
 		if not rec["skipped"]:
 			if float(rec["score"]) > 0.0:
-				scored.append([rec, cand, all_rec.size() - 1])
+				scored.append([rec, e[1], e[2]])
+				if scored.size() >= DETAIL_N:
+					scored.sort_custom(func(a, b): return float(a[0]["score"]) > float(b[0]["score"]))
+					kth = float(scored[DETAIL_N - 1][0]["score"])
 			else:
 				rec["skipped"] = true
 				rec["skip_reason"] = "score <= 0"
@@ -366,11 +535,14 @@ static func _budget(folk, cands: Array) -> Array:
 	var keyed: Array = []
 	for c in cands:
 		var t: Vector2i = folk.tile
+		var lv: int = folk.level
 		if c["obj"] != null:
 			t = c["obj"].tile
+			lv = int(c["obj"].level) if "level" in c["obj"] else 0
 		elif c["folk"] != null:
 			t = c["folk"].tile
-		keyed.append([absi(t.x - folk.tile.x) + absi(t.y - folk.tile.y), c])
+			lv = c["folk"].level
+		keyed.append([absi(t.x - folk.tile.x) + absi(t.y - folk.tile.y) + 6 * absi(lv - folk.level), c])
 	keyed.sort_custom(func(a, b): return a[0] < b[0])
 	var out: Array = []
 	for i in max_scored:

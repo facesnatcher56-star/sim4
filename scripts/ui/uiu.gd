@@ -132,7 +132,7 @@ static func enqueue(folk, def_id: String, target_id: int, extra: Dictionary = {}
 		return false
 	var it = null
 	if extra.has("tile") and ic.has_method("create_goto"):
-		it = ic.call("create_goto", folk, extra["tile"], true)
+		it = ic.call("create_goto", folk, extra["tile"], true, int(extra.get("level", 0)))
 	else:
 		it = ic.call("create", def_id, folk, target_id, true)
 	if it == null:

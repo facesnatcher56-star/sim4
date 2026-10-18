@@ -43,6 +43,9 @@ var show_mood: bool = true
 
 var _waypoints: Array[Vector3] = []
 var _last_tile: Vector2i = Vector2i(-999, -999)
+var _last_level: int = 0
+var _ybase: float = 0.0               # height of the floor / stair step under the feet (multi-floor); position.y adds the pose lift to it
+var _level_y: float = 0.0             # height the folk should stand at when it has no waypoints left
 var _target: Vector3 = Vector3.ZERO
 var _target_yaw: float = 0.0
 var _target_pose: String = "idle"

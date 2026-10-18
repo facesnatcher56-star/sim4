@@ -11,6 +11,7 @@ extends RefCounted
 
 const STREET := 0                  # room id of the street (region mode only)
 const PART_STRIDE := 100000        # room id = partition key * stride + index (legacy: just the index)
+const LEVEL_KEY := 10000000        # partition keys >= this are (level, building) partitions of an upper / lower level: LEVEL_KEY + (level + 512) * 1024 + building
 const DX := [1, -1, 0, 0]                  # neighbour step and the wall edge in between (edge key = tile + E, see WorldGrid)
 const DY := [0, 0, 1, -1]
 const EX := [1, 0, 0, 0]
@@ -39,15 +40,19 @@ func invalidate_all() -> void:
 
 
 ## A change happened at this tile (wall edge next to it, object, mess, floor): drop its partition.
-func mark_dirty(tile: Vector2i) -> void:
+func mark_dirty(tile: Vector2i, level: int = 0) -> void:
 	if _parts.is_empty():
 		return
-	_parts.erase(_key(tile))
+	_parts.erase(_key(tile, level))
+	if level == 0 and world.levels.any():
+		var bid := world.levels.building_at(tile)
+		if bid >= 0:
+			_parts.erase(level_key(1, bid))        # the ground below changed: rooms above may lose / gain a roof
 
 
-func mark_dirty_edge(e: Vector3i) -> void:
-	mark_dirty(Vector2i(e.x, e.y))
-	mark_dirty(Vector2i(e.x, e.y - 1) if e.z == 0 else Vector2i(e.x - 1, e.y))
+func mark_dirty_edge(e: Vector3i, level: int = 0) -> void:
+	mark_dirty(Vector2i(e.x, e.y), level)
+	mark_dirty(Vector2i(e.x, e.y - 1) if e.z == 0 else Vector2i(e.x - 1, e.y), level)
 
 
 func mark_dirty_rect(lo: Vector2i, hi: Vector2i) -> void:
@@ -64,14 +69,23 @@ func mark_dirty_rect(lo: Vector2i, hi: Vector2i) -> void:
 # ------------------------------------------------------------------ partitions
 
 ## Partition key of a tile: 0 in legacy mode, region id inside a closed lot, -1 for the street.
-func _key(tile: Vector2i) -> int:
+func _key(tile: Vector2i, level: int = 0) -> int:
+	if level != 0:
+		var bid := world.levels.building_at(tile)
+		return -2 if bid < 0 else level_key(level, bid)
 	if not world.regions.has_regions():
 		return 0
 	var rid := world.regions.region_at(tile)
 	return rid if world.regions.is_lot(rid) else -1
 
 
+static func level_key(level: int, bid: int) -> int:
+	return LEVEL_KEY + (level + 512) * 1024 + bid
+
+
 func _rect_of(key: int) -> Rect2i:
+	if key >= LEVEL_KEY:
+		return world.levels.building((key - LEVEL_KEY) % 1024).get("rect", Rect2i())
 	if key == 0 and not world.regions.has_regions():
 		return Rect2i(0, 0, world.width, world.height)
 	return (world.regions.region(key)["rect"] as Rect2i).intersection(Rect2i(0, 0, world.width, world.height))
@@ -84,6 +98,8 @@ func _part(key: int) -> Dictionary:
 
 
 func _build_part(key: int) -> Dictionary:
+	if key >= LEVEL_KEY:
+		return WorldRoomsLevels.build(world, (key - LEVEL_KEY) / 1024 - 512, (key - LEVEL_KEY) % 1024, key * PART_STRIDE)
 	var rc := _rect_of(key)
 	var base: int = 0 if key == 0 else key * PART_STRIDE
 	var rooms: Array = []
@@ -174,10 +190,12 @@ func _objects_in(rc: Rect2i) -> Array:
 # ------------------------------------------------------------------ queries
 
 ## The room dictionary at a tile: a partition room, the street, or {} (out of bounds).
-func _room_at(tile: Vector2i) -> Dictionary:
+func _room_at(tile: Vector2i, level: int = 0) -> Dictionary:
 	if not world.in_bounds(tile):
 		return {}
-	var key := _key(tile)
+	var key := _key(tile, level)
+	if key == -2:
+		return {}
 	if key == -1:
 		return _street(tile)
 	var p := _part(key)
@@ -193,13 +211,13 @@ func _street(tile: Vector2i) -> Dictionary:
 		"score": fd * 3.0 - m, "cleanliness": 1.0 / (1.0 + m / 4.0)}
 
 
-func room_id(tile: Vector2i) -> int:
-	return int(_room_at(tile).get("id", -1))
+func room_id(tile: Vector2i, level: int = 0) -> int:
+	return int(_room_at(tile, level).get("id", -1))
 
 
 ## Tiles of the room (empty for the street: it is "everything else").
-func room_tiles(tile: Vector2i) -> Array[Vector2i]:
-	var r := _room_at(tile)
+func room_tiles(tile: Vector2i, level: int = 0) -> Array[Vector2i]:
+	var r := _room_at(tile, level)
 	if r.is_empty():
 		return []
 	var out: Array[Vector2i] = []
@@ -207,9 +225,11 @@ func room_tiles(tile: Vector2i) -> Array[Vector2i]:
 	return out
 
 
-func is_outdoor(tile: Vector2i) -> bool:
-	var r := _room_at(tile)
-	return not r.is_empty() and bool(r["outdoor"])
+func is_outdoor(tile: Vector2i, level: int = 0) -> bool:
+	var r := _room_at(tile, level)
+	if r.is_empty() or not bool(r["outdoor"]):
+		return false
+	return not (world.levels.any() and world.levels.covered(tile, level))      # a deck / porch under a floor above is roofed
 
 
 ## Number of rooms (region mode: +1 for the street). Builds every lot's rooms.
@@ -223,8 +243,8 @@ func room_count() -> int:
 	return n
 
 
-func room_info(tile: Vector2i) -> Dictionary:
-	var r := _room_at(tile)
+func room_info(tile: Vector2i, level: int = 0) -> Dictionary:
+	var r := _room_at(tile, level)
 	if r.is_empty():
 		return {}
 	return {"id": r["id"], "size": r["tiles"].size(), "outdoor": r["outdoor"], "decor": r["decor"],
@@ -233,12 +253,12 @@ func room_info(tile: Vector2i) -> Dictionary:
 
 
 ## Environment score of the room containing `tile`: sum(decor) + floor bonus - mess. ~ -10..+20.
-func room_score(tile: Vector2i) -> float:
-	var r := _room_at(tile)
+func room_score(tile: Vector2i, level: int = 0) -> float:
+	var r := _room_at(tile, level)
 	return 0.0 if r.is_empty() else float(r["score"])
 
 
 ## 0..1 (1 = spotless)
-func room_cleanliness(tile: Vector2i) -> float:
-	var r := _room_at(tile)
+func room_cleanliness(tile: Vector2i, level: int = 0) -> float:
+	var r := _room_at(tile, level)
 	return 1.0 if r.is_empty() else float(r["cleanliness"])

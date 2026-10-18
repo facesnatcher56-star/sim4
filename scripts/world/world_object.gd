@@ -8,6 +8,8 @@ var id: int = -1
 var def_id: String = ""
 var tile: Vector2i = Vector2i.ZERO
 var rot: int = 0
+var level: int = 0         # 0 = ground, negative = basement, no upper limit (multi-floor: see WorldLevels)
+var span: int = 0          # extra levels ABOVE `level` the object also stands on (elevator shaft)
 var state: Dictionary = {}
 var slots_reserved: Dictionary = {}
 var def: Dictionary = {}   # shared reference to the definition dictionary
@@ -183,7 +185,17 @@ func init_state_from_def() -> void:
 
 
 func to_dict() -> Dictionary:
-	return {
+	var d := {
 		"id": id, "def_id": def_id, "tile": [tile.x, tile.y], "rot": rot,
 		"state": state.duplicate(true),
 	}
+	if level != 0:
+		d["level"] = level
+	if span != 0:
+		d["span"] = span
+	return d
+
+
+## Position as (x, y, level).
+func lpos() -> Vector3i:
+	return Vector3i(tile.x, tile.y, level)

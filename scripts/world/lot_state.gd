@@ -90,6 +90,14 @@ var _floors_dirty: bool = false
 var _cut_dirty: bool = true
 var _last_cam_sig: String = ""
 var _model_cache: Dictionary = {}
+var level_view = null                # LevelView: multi-floor buildings (null until ensure_on)
+var _plane_y: float = 0.0            # height of the plane mouse picking hits: the viewed floor
+var _ground_hidden: Rect2i = Rect2i() # basement view: the ground inside this rectangle is not drawn
+
+
+## Level the build tools work on: the viewed floor of the active building, else the ground.
+func build_level() -> int:
+	return int(level_view.viewed) if level_view != null and level_view.building >= 0 else 0
 
 
 func _glow_mat(c: Color) -> StandardMaterial3D:

@@ -15,6 +15,8 @@ const ACTIONS := [
 	["sim_zoom_in", "Zoom in", "Camera", ["m:%d" % MOUSE_BUTTON_WHEEL_UP]],
 	["sim_zoom_out", "Zoom out", "Camera", ["m:%d" % MOUSE_BUTTON_WHEEL_DOWN]],
 	["sim_wall_mode", "Cycle wall view", "Camera", ["k:%d" % KEY_TAB]],
+	["sim_level_up", "Floor up", "Camera", ["k:%d" % KEY_PAGEUP]],
+	["sim_level_down", "Floor down", "Camera", ["k:%d" % KEY_PAGEDOWN]],
 	["sim_pause", "Pause / resume", "Time", ["k:%d" % KEY_SPACE]],
 	["sim_speed_1", "Normal speed", "Time", ["k:%d" % KEY_1]],
 	["sim_speed_2", "Fast", "Time", ["k:%d" % KEY_2]],

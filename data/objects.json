@@ -2544,5 +2544,209 @@
   "interactions": [
    "stargaze"
   ]
+ },
+ "stairs": {
+  "label": "Staircase",
+  "size": [
+   2,
+   1
+  ],
+  "price": 900,
+  "tags": [
+   "structure",
+   "stairs"
+  ],
+  "portal": {
+   "kind": "stairs",
+   "dz": 1
+  },
+  "color": "#a98b64",
+  "height": 1.6,
+  "slots": [],
+  "state": {
+   "broken": {
+    "start": false
+   }
+  },
+  "advertises": {},
+  "decor": 0.2,
+  "interactions": [],
+  "model": "",
+  "model_fallback": "procedural boxes (LevelProps); no model file"
+ },
+ "stairs_down": {
+  "label": "Stairs Down",
+  "size": [
+   2,
+   1
+  ],
+  "price": 900,
+  "tags": [
+   "structure",
+   "stairs"
+  ],
+  "portal": {
+   "kind": "stairs",
+   "dz": -1
+  },
+  "color": "#7d6a4e",
+  "height": 0.5,
+  "slots": [],
+  "state": {
+   "broken": {
+    "start": false
+   }
+  },
+  "advertises": {},
+  "decor": 0.2,
+  "interactions": [],
+  "model": "",
+  "model_fallback": "procedural boxes (LevelProps); no model file"
+ },
+ "ladder": {
+  "label": "Ladder",
+  "size": [
+   1,
+   1
+  ],
+  "price": 250,
+  "tags": [
+   "structure",
+   "stairs"
+  ],
+  "portal": {
+   "kind": "ladder",
+   "dz": 1
+  },
+  "color": "#8a7a5a",
+  "height": 2.6,
+  "slots": [],
+  "state": {
+   "broken": {
+    "start": false
+   }
+  },
+  "advertises": {},
+  "decor": 0.2,
+  "interactions": [],
+  "model": "",
+  "model_fallback": "procedural boxes (LevelProps); no model file"
+ },
+ "ladder_down": {
+  "label": "Ladder Down",
+  "size": [
+   1,
+   1
+  ],
+  "price": 250,
+  "tags": [
+   "structure",
+   "stairs"
+  ],
+  "portal": {
+   "kind": "ladder",
+   "dz": -1
+  },
+  "color": "#6f6248",
+  "height": 0.4,
+  "slots": [],
+  "state": {
+   "broken": {
+    "start": false
+   }
+  },
+  "advertises": {},
+  "decor": 0.2,
+  "interactions": [],
+  "model": "",
+  "model_fallback": "procedural boxes (LevelProps); no model file"
+ },
+ "fire_escape": {
+  "label": "Fire Escape",
+  "size": [
+   2,
+   1
+  ],
+  "price": 700,
+  "tags": [
+   "structure",
+   "stairs",
+   "outdoor"
+  ],
+  "portal": {
+   "kind": "stairs",
+   "dz": 1,
+   "exterior": true
+  },
+  "color": "#4d5560",
+  "height": 1.6,
+  "slots": [],
+  "state": {
+   "broken": {
+    "start": false
+   }
+  },
+  "advertises": {},
+  "decor": 0.2,
+  "interactions": [],
+  "model": "",
+  "model_fallback": "procedural boxes (LevelProps); no model file"
+ },
+ "elevator": {
+  "label": "Lift",
+  "size": [
+   1,
+   1
+  ],
+  "price": 1800,
+  "tags": [
+   "structure",
+   "elevator"
+  ],
+  "portal": {
+   "kind": "elevator"
+  },
+  "color": "#b8c2cc",
+  "height": 2.6,
+  "slots": [],
+  "state": {
+   "broken": {
+    "start": false
+   },
+   "out_of_order": {
+    "start": false
+   }
+  },
+  "advertises": {},
+  "decor": 0.2,
+  "interactions": [],
+  "capacity": 4,
+  "model": "",
+  "model_fallback": "procedural boxes (LevelProps); no model file"
+ },
+ "pillar": {
+  "label": "Pillar",
+  "size": [
+   1,
+   1
+  ],
+  "price": 120,
+  "tags": [
+   "structure",
+   "support"
+  ],
+  "color": "#a0a0a0",
+  "height": 2.6,
+  "slots": [],
+  "state": {
+   "broken": {
+    "start": false
+   }
+  },
+  "advertises": {},
+  "decor": 0.2,
+  "interactions": [],
+  "model": "",
+  "model_fallback": "procedural boxes (LevelProps); no model file"
  }
 }

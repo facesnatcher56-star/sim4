@@ -60,15 +60,16 @@ func object_price(def_id: String) -> int:
 	return int(world.get_def(def_id).get("price", 0))
 
 ## Buy and place. Returns object id, or -1 (see last_error).
-func buy_place(def_id: String, tile: Vector2i, rot: int = 0, household_id: int = -1) -> int:
+func buy_place(def_id: String, tile: Vector2i, rot: int = 0, household_id: int = -1, level: int = 0) -> int:
 	var hid := world.current_household_id if household_id < 0 else household_id
-	if not world.can_place(def_id, tile, rot):
+	if not world.can_place(def_id, tile, rot, level):
 		return -1
-	var price := object_price(def_id)
+	var span: int = world.objs.default_span(world.get_def(def_id), tile, level)
+	var price := object_price(def_id) * (1 + span)          # a lift is paid per floor it serves
 	if not _spend(hid, price):
 		world.last_error = "not enough coins"
 		return -1
-	var id := world._create_object(def_id, tile, posmod(rot, 4), -1)
+	var id := world._create_object(def_id, tile, posmod(rot, 4), -1, level, span)
 	_push_undo({"t": "place", "id": id, "price": price, "hid": hid})
 	return id
 
@@ -79,6 +80,10 @@ func sell_object(object_id: int, household_id: int = -1) -> bool:
 		return false
 	if not world.regions.can_build(o.tile):
 		return world.regions.deny()
+	var why: String = world.lbuild.can_remove_object(o)
+	if why != "":
+		world.last_error = why
+		return false
 	var hid := world.current_household_id if household_id < 0 else household_id
 	var refund := int(floor(object_price(o.def_id) * world.SELL_RATIO))
 	var data: Dictionary = o.to_dict()
@@ -116,7 +121,7 @@ func undo_last() -> bool:
 			var d: Dictionary = op["data"]
 			_spend(op["hid"], op["refund"])
 			var t: Array = d["tile"]
-			var nid := world._create_object(d["def_id"], Vector2i(t[0], t[1]), int(d["rot"]), int(d["id"]))
+			var nid := world._create_object(d["def_id"], Vector2i(t[0], t[1]), int(d["rot"]), int(d["id"]), int(d.get("level", 0)), int(d.get("span", 0)))
 			if nid != -1:
 				world.objects[nid].state = (d["state"] as Dictionary).duplicate(true)
 		"walls":
@@ -138,4 +143,6 @@ func undo_last() -> bool:
 				world.rooms.mark_dirty(c["t"])
 			world._emit("floors_changed")
 			_refund(op["hid"], op["cost"])
+		_:
+			return world.lbuild.undo(op)
 	return true

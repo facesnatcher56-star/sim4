@@ -2,7 +2,7 @@ class_name SaveLoad
 extends RefCounted
 ## Versioned save files: user://saves/slot<N>.json. Contains the clock, World.save_dict() (when a real World exists),
 ## every Folk (to_dict) and the state of all systems. Slot 0 is the daily autosave.
-## Version 3 = one continuous map (regions in the world dict, no lot stash). Older saves are refused with OLD_SAVE_MSG.
+## Version 4 = multi-floor (world.levels, level on folk and objects). Version 3 = one continuous map (regions in the world dict, no lot stash). Older saves are refused with OLD_SAVE_MSG.
 
 const DIR := "user://saves"
 const FORMAT := "sim4"

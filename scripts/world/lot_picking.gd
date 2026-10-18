@@ -29,7 +29,7 @@ func ground_point(mp: Vector2) -> Variant:
 	var dir := _cam.project_ray_normal(mp)
 	if absf(dir.y) < 0.0001:
 		return null
-	var t := -o.y / dir.y
+	var t := (_plane_y - o.y) / dir.y
 	if t < 0:
 		return null
 	return o + dir * t
@@ -47,14 +47,14 @@ func _object_aabb(o) -> AABB:
 	if o.is_wall_mounted():
 		var e: Vector3i = World.mount_edge(o.tile, o.rot)
 		if e.z == 0:
-			return AABB(Vector3(e.x + 0.05, 0, e.y - 0.12), Vector3(0.9, 2.0, 0.24))
-		return AABB(Vector3(e.x - 0.12, 0, e.y + 0.05), Vector3(0.24, 2.0, 0.9))
+			return AABB(Vector3(e.x + 0.05, LPos.elev(o.level), e.y - 0.12), Vector3(0.9, 2.0, 0.24))
+		return AABB(Vector3(e.x - 0.12, LPos.elev(o.level), e.y + 0.05), Vector3(0.24, 2.0, 0.9))
 	var lo := Vector2(1e9, 1e9)
 	var hi := Vector2(-1e9, -1e9)
 	for t in o.footprint():
 		lo = lo.min(Vector2(t))
 		hi = hi.max(Vector2(t) + Vector2.ONE)
-	return AABB(Vector3(lo.x, 0, lo.y), Vector3(hi.x - lo.x, h, hi.y - lo.y))
+	return AABB(Vector3(lo.x, LPos.elev(o.level), lo.y), Vector3(hi.x - lo.x, h, hi.y - lo.y))
 
 
 func pick(mp: Vector2) -> Dictionary:
@@ -84,6 +84,8 @@ func pick(mp: Vector2) -> Dictionary:
 		var node = _obj_nodes.get(o.id, null)
 		if node != null and not node.visible:
 			continue          # behind a standing building shell
+		if level_view != null and not level_view.object_shown(o):
+			continue          # on a floor that is not the one being looked at
 		var bb := _object_aabb(o)
 		var hit = bb.intersects_ray(ro, rd)
 		if hit != null:

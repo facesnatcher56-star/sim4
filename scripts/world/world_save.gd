@@ -91,6 +91,8 @@ func save_dict(include_folk: bool = false) -> Dictionary:
 		d["floors"] = Array(world.floors)
 	if world.regions.has_regions():
 		d["regions"] = world.regions.to_dict()
+	if world.levels.any():
+		d["levels"] = world.levels.to_dict()
 	if include_folk:
 		var fl: Array = []
 		for f in world.folk.values():
@@ -104,11 +106,13 @@ func load_dict(d: Dictionary) -> void:
 	_load_floors(d)
 	if d.has("regions"):
 		world.regions.from_dict(d["regions"])
+	if d.has("levels"):
+		world.levels.from_dict(d["levels"])
 	for w in d.get("walls", []):
 		world.walls[Vector3i(int(w[0]), int(w[1]), int(w[2]))] = str(w[3])
 	for od in d.get("objects", []):
 		var t: Array = od["tile"]
-		var nid := world._create_object(str(od["def_id"]), Vector2i(int(t[0]), int(t[1])), int(od["rot"]), int(od["id"]))
+		var nid := world._create_object(str(od["def_id"]), Vector2i(int(t[0]), int(t[1])), int(od["rot"]), int(od["id"]), int(od.get("level", 0)), int(od.get("span", 0)))
 		if nid != -1:
 			var st: Dictionary = od.get("state", {})
 			for k in st:

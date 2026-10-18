@@ -76,15 +76,16 @@ func _work_from_elsewhere() -> void:
 	var r: Dictionary = Neighborhood.travel([mira.id], "park", {"quiet": true, "fast": true})      # tobin stays home
 	_check(bool(r["ok"]), "mira heads to the park")
 	var coins_before: int = Economy.balance(1)
-	Kit.run(60)
+	Kit.run(30)                                # 08:10: the real commute (task 11) sets off ~08:20 for the 09:00 shift, so look before that
 	_check(Neighborhood.where(tobin.id) == "home" and Neighborhood.where(mira.id) == "park", "mira at the park, tobin at home")
-	Kit.run(60 + 40)                           # 09:20
+	Kit.run(60 + 70)                           # 09:20
 	_check(Away.active.has(mira.id) and str(Away.info(mira.id).get("reason", "")) == "work", "mira left the park for work")
 	_check(Away.active.has(tobin.id) and str(Away.info(tobin.id).get("reason", "")) == "work", "tobin at home was dispatched to work too (reason %s)" % str(Away.info(tobin.id).get("reason", "")))
 	Kit.run(9 * 60)                            # past 17:00 + margin
 	_check(str(Away.info(mira.id).get("reason", "")) != "work" and str(Away.info(tobin.id).get("reason", "")) != "work", "both are back from work")
 	_check(Economy.balance(1) > coins_before + 150, "wages were paid (%d -> %d)" % [coins_before, Economy.balance(1)])
-	_check(Neighborhood.where(mira.id) == "park" and not mira.has_meta("away"), "mira returned to the lot she left from")
+	# A real commute (task 11) walks the folk HOME when the shift ends, wherever she set off from (the old instant rabbit hole left her at the park).
+	_check(Neighborhood.where(mira.id) == "home" and not mira.has_meta("away"), "mira commuted home from work (she had set off from the park)")
 	Kit.run(5)
 	_check(Neighborhood.where(tobin.id) == "home", "tobin is back at home")
 	_check(Careers.jobs[mira.id]["days_worked"] >= 1 and Careers.jobs[tobin.id]["days_worked"] >= 1, "both shifts were completed")

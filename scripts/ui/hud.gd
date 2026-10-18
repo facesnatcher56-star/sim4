@@ -23,6 +23,7 @@ var pie: PieMenu
 var thoughts: ThoughtLayer
 var toasts: ToastFeed
 var build_panel: BuildPanel
+var floor_selector: FloorSelector
 var goals_dialog: GoalsDialog
 var career_dialog: CareerDialog
 var household_dialog: HouseholdDialog
@@ -328,6 +329,10 @@ func do_save(slot: int, lab: Label = null) -> bool:
 # ------------------------------------------------------------ wiring
 func set_lot_view(lv) -> void:
 	lot_view = lv
+	if floor_selector == null:
+		floor_selector = FloorSelector.new()
+		add_child(floor_selector)
+	floor_selector.lot_view = lv
 	thoughts.lot_view = lv
 	build_panel.lot_view = lv
 	if lv != null and lv.has_signal("tile_clicked"):
@@ -491,4 +496,7 @@ func go_here(tile: Vector2i) -> bool:
 	var f = _resolve(selected_folk_id)
 	if f == null or tile.x < 0:
 		return false
-	return UIU.enqueue(f, "go_here", -1, {"tile": tile})
+	var lvl := 0
+	if lot_view != null and lot_view.get("level_view") != null and lot_view.level_view.active():
+		lvl = lot_view.build_level()                      # right-click on the floor you are looking at
+	return UIU.enqueue(f, "go_here", -1, {"tile": tile, "level": lvl})

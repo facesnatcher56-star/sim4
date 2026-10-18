@@ -15,6 +15,7 @@ func _make_rain() -> GPUParticles3D:
 	var pm := ParticleProcessMaterial.new()
 	pm.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_BOX
 	pm.emission_box_extents = Vector3(34, 0.5, 34)
+	pm.collision_mode = ParticleProcessMaterial.COLLISION_HIDE_ON_CONTACT      # buildings' roofs stop it (LevelView rain blockers)
 	pm.direction = Vector3(0.12, -1.0, 0.04)
 	pm.spread = 1.5
 	pm.initial_velocity_min = 24.0
@@ -47,6 +48,7 @@ func _make_snow() -> GPUParticles3D:
 	var pm := ParticleProcessMaterial.new()
 	pm.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_BOX
 	pm.emission_box_extents = Vector3(34, 0.5, 34)
+	pm.collision_mode = ParticleProcessMaterial.COLLISION_HIDE_ON_CONTACT
 	pm.direction = Vector3(0.1, -1.0, 0.0)
 	pm.spread = 12.0
 	pm.initial_velocity_min = 1.3

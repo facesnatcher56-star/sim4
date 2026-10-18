@@ -38,6 +38,7 @@ func _ready() -> void:
 	u.tooltip_text = "Undo last build action (Ctrl+Z)"
 	u.pressed.connect(undo)
 	tools.add_child(u)
+	root.add_child(LevelBuildBar.new())
 	var opts := HBoxContainer.new()
 	root.add_child(opts)
 	wall_option = OptionButton.new()
@@ -56,6 +57,8 @@ func _ready() -> void:
 	for fl in fnames:
 		floor_option.add_item(str(fl).capitalize())
 		floor_option.set_item_metadata(floor_option.item_count - 1, fl)
+	floor_option.add_item("Remove floor")
+	floor_option.set_item_metadata(floor_option.item_count - 1, "none")
 	floor_option.item_selected.connect(func(i):
 		floor_id = str(floor_option.get_item_metadata(i))
 		if tool == "floor": set_tool("floor"))

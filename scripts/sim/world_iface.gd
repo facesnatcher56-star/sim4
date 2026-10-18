@@ -121,17 +121,59 @@ static func use_tile(obj, slot_idx: int) -> Vector2i:
 			return obj.tile + v
 	return obj.tile
 
-## Number of steps from a to b, 0 if same tile, -1 when unreachable.
-static func path_length(from: Vector2i, to: Vector2i) -> int:
-	if from == to:
+## Number of steps from a to b, 0 if same tile, -1 when unreachable. Uses the world's cached length (`path_length`: LRU per
+## pair, distance fields, no tile list); only a world without one (the test stub) falls back to a path.
+static func path_length(from: Vector2i, to: Vector2i, from_level: int = 0, to_level: int = 0) -> int:
+	if from == to and from_level == to_level:
 		return 0
+	if from_level != 0 or to_level != 0:             # multi-floor: cost in tile units, stairs and lifts included
+		var w2 = world()
+		if w2 != null and w2.has_method("route_length"):
+			var c: float = w2.route_length(Vector3i(from.x, from.y, from_level), Vector3i(to.x, to.y, to_level))
+			return -1 if c < 0.0 else int(ceil(c))
+		return absi(from.x - to.x) + absi(from.y - to.y)
 	var w = world()
-	if w != null and w.has_method("find_path"):
-		var p: Array = w.find_path(from, to)
-		if p.is_empty():
-			return -1
-		return p.size()
+	if w != null:
+		if w.has_method("path_length"):
+			return int(w.path_length(from, to))
+		if w.has_method("find_path"):
+			var p: Array = w.find_path(from, to)
+			return -1 if p.is_empty() else p.size()
 	return absi(from.x - to.x) + absi(from.y - to.y)
+
+## Multi-floor route (entries Vector3i(x, y, level), start excluded, goal included; [] unreachable or already there).
+static func find_route(from: Vector3i, to: Vector3i, stair_mult: float = 1.0) -> Array:
+	var w = world()
+	if w != null and w.has_method("find_route"):
+		return w.find_route(from, to, stair_mult)
+	return []
+
+## Cost of an existing route in tile units (stairs / lift rides included).
+static func route_cost(route: Array, stair_mult: float = 1.0) -> float:
+	var w = world()
+	if w != null and "router" in w:
+		return w.router.cost_of(route, stair_mult)
+	return float(route.size())
+
+## Books the lifts on a route; returns the extra game minutes of waiting.
+static func book_route(route: Array, folk_id: int, walk_min_per_step: float) -> float:
+	var w = world()
+	if w != null and "portals" in w:
+		return w.portals.elevators.book_route(route, folk_id, walk_min_per_step)
+	return 0.0
+
+## How much harder stairs are for this folk (elder / toddler / injured / exhausted).
+static func stair_mult(f) -> float:
+	return LevelPortals.stair_mult(f)
+
+## Is there a floor of that level at the tile (a folk can be on it)?
+static func level_valid(tile: Vector2i, level: int) -> bool:
+	if level == 0:
+		return true
+	var w = world()
+	if w == null or not ("levels" in w):
+		return false
+	return w.levels.has_level(w.levels.building_at(tile), level)
 
 static func find_path(from: Vector2i, to: Vector2i) -> Array:
 	var w = world()

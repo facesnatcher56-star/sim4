@@ -148,12 +148,18 @@ static func status_chips(f) -> Array:
 static func on_minute() -> void:
 	var now: int = SysUtil.now()
 	for f in WorldIface.all_folk():
+		var resident: bool = SysUtil.is_resident(f) and not SysUtil.is_away(f)
+		var r: Variant = records.get(int(f.id), null)
+		if r == null:
+			if not resident:
+				continue                       # no health record and nothing to track: strangers cost nothing per minute
+			r = rec_of(int(f.id))
 		if Hospital.is_in(f):
 			continue
-		var r: Dictionary = rec_of(int(f.id))
-		HealthInjury.tick_minute(f, r)
-		HealthIllness.tick_minute(f, r)
-		if SysUtil.is_resident(f) and not SysUtil.is_away(f):
+		if not (r as Dictionary).is_empty():
+			HealthInjury.tick_minute(f, r)         # (both only act on a person who has an injury / illness record)
+			HealthIllness.tick_minute(f, r)
+		if resident:
 			HealthNeeds.tick(f, r, now)
 			HealthExposure.tick(f, r, now)
 			HealthCollapse.tick(f, r, now)

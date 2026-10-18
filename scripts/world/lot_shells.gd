@@ -53,7 +53,11 @@ func _rebuild_shells() -> void:
 		var want := Vector2(rect.size) + Vector2.ONE * (SHELL_MARGIN * 2.0)
 		root.position = Vector3(rect.position.x + rect.size.x * 0.5, 0.0, rect.position.y + rect.size.y * 0.5)
 		root.rotation.y = PI
-		model.scale = Vector3(want.x / fp.x, 1.0, want.y / fp.y)
+		var storeys := 1.0
+		var bid: int = World.levels.building_at(rect.position + rect.size / 2)
+		if bid >= 0:
+			storeys = float(maxi(1, int(World.levels.building(bid)["max"]) + 1))      # a tower's shell is as tall as the tower
+		model.scale = Vector3(want.x / fp.x, storeys, want.y / fp.y)
 		root.add_child(model)
 		add_child(root)
 		_shells[str(r["lot"])] = {"root": root, "rect": rect, "open": false, "lot": str(r["lot"]), "home": str(r["kind"]) == "home"}
@@ -81,7 +85,7 @@ func _update_shells(delta: float) -> void:
 	var changed: Array = []
 	for sh in _shells.values():
 		var rect: Rect2i = sh["rect"]
-		var open: bool = not shells_enabled or (bool(sh["home"]) and tool != "select")
+		var open: bool = not shells_enabled or (bool(sh["home"]) and tool != "select") or (level_view != null and level_view.wants_open(sh["rect"]))
 		if not open:
 			var near := rect.grow(OPEN_RADIUS)
 			for t in watchers:

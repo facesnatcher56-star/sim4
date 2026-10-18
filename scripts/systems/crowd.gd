@@ -10,6 +10,12 @@ extends RefCounted
 const STAFF_ID_BASE := 5000
 const ACTIVE_RADIUS := 40
 const DROP_RADIUS := 64
+const OUTDOOR_MAX_MIN := 20     # an NPC who has been outside its venue (on the street, walking) for longer than this heads home
+const RECOVER_TO := 10.0        # inside a venue the venue serves its customers: needs below this are pulled up towards it ...
+const RECOVER_BASE := 0.12      # ... by this much per minute, plus RECOVER_PER_HOUR per hour of the visit so far (capped at RECOVER_MAX)
+const RECOVER_PER_HOUR := 0.08
+const RECOVER_MAX := 0.5
+const ARRIVE_MIN := -25.0       # a customer arrives with every need above this (the venue-tuned ones are low, never at the go-home floor)
 const NEED_FLOOR := -35.0      # an NPC with a need below this goes home (needs are -100..100; they are re-rolled on the next visit by spawn_npc)
 
 static var _last_check: Dictionary = {}     # lot_id -> game minute of the last full crowd update
@@ -181,13 +187,14 @@ static func spawn_npc(t: Dictionary, lot_id: String, vtype: String, stay_overrid
 	var sr: Array = Venues.stay_range(vtype)
 	var stay: int = stay_override if stay_override > 0 else SysUtil.rng.randi_range(int(sr[0]), int(sr[1]))
 	f.set_meta("crowd", lot_id)
+	f.set_meta("arrived_min", SimEnv.now_min())
 	f.set_meta("leave_min", SimEnv.now_min() + stay)
 	for n in f.needs:
 		(f.needs[n] as Stat).set_value(SysUtil.rng.randf_range(15.0, 65.0))
 	var cn: Dictionary = vd.get("crowd_needs", {})
 	for n2 in cn:
 		if f.needs.has(n2):
-			(f.needs[n2] as Stat).set_value(float(cn[n2]) + SysUtil.rng.randf_range(-8.0, 8.0))
+			(f.needs[n2] as Stat).set_value(maxf(float(cn[n2]) + SysUtil.rng.randf_range(-8.0, 8.0), ARRIVE_MIN))
 	RelationshipService.restore_folk(f)
 	SysUtil.world_add_folk(f, tile)
 	Aging.apply_stage_buff(f)
@@ -201,6 +208,24 @@ static func spawn_npc(t: Dictionary, lot_id: String, vtype: String, stay_overrid
 	if cb != "":
 		f.add_buff(cb)
 	return f
+
+## Stand-in for what the customer does at the venue (eat, drink, chat, play): inside the lot the needs creep back up the longer the visit lasts,
+## so a regular never sinks to rock bottom; outside it (street, walking) nothing serves them and after OUTDOOR_MAX_MIN they head home.
+static func _serve(f, now: int) -> void:
+	var lot_id: String = str(f.get_meta("crowd"))
+	if NeighborhoodLots.lot_at(f.tile) != lot_id:
+		var since: int = int(f.get_meta("outside_since", now))
+		f.set_meta("outside_since", since)
+		if now - since > OUTDOOR_MAX_MIN:
+			start_leaving(f)
+		return
+	f.remove_meta("outside_since")
+	var hours: float = float(now - int(f.get_meta("arrived_min", now))) / 60.0
+	var rate: float = minf(RECOVER_MAX, RECOVER_BASE + RECOVER_PER_HOUR * hours)
+	for n in f.needs:
+		var st: Stat = f.needs[n]
+		if st.value < RECOVER_TO:
+			st.add(minf(rate, RECOVER_TO - st.value))
 
 ## An NPC whose time is up walks to the lot's door (one route, computed once by the go_here interaction) and is removed there.
 static func start_leaving(f) -> void:
@@ -219,6 +244,8 @@ static func _step_leavers(now: int) -> void:
 		if not f.has_meta("leaving"):
 			if now >= int(f.get_meta("leave_min", 0)) or lowest_need(f) < NEED_FLOOR:      # time is up (also far from the player) or a need is low: go home
 				start_leaving(f)
+			else:
+				_serve(f, now)
 			continue
 		if f.tile == NeighborhoodLots.entry_tile(str(f.get_meta("crowd"))) or now >= int(f.get_meta("leaving")) or (f.current == null and f.queue.is_empty()):
 			_remove(f)

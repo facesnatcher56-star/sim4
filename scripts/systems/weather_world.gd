@@ -60,7 +60,7 @@ static func _hourly_objects(cur: String, kind: String, e: Dictionary) -> void:
 		if str(o.def_id) == "garden_plot":
 			key = "water"
 			amt = float(g.get("rain_water_per_hour", 0.6))
-		elif tags.has("plant") and can_out and bool(w.is_outdoor(o.tile)) and (d.get("state", {}) as Dictionary).has("water"):
+		elif tags.has("plant") and can_out and bool(w.is_outdoor(o.tile, int(o.level))) and (d.get("state", {}) as Dictionary).has("water"):
 			key = "water"
 			amt = float(g.get("plant_rain_water_per_hour", 0.8))
 		if key != "":

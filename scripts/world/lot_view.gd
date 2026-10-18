@@ -15,6 +15,7 @@ func _ready() -> void:
 	_build_rig()
 	_build_fx()
 	_connect_signals()
+	LevelView.ensure_on(self)      # upper floors / basements of multi-floor buildings (scripts/world/level_view.gd)
 	WeatherView.ensure_on(self)    # sky / sun / weather particles / seasons (scripts/world/weather_view.gd)
 	FireView.ensure_on(self)       # flames / smoke / scorch marks (scripts/world/fire_view.gd)
 	DisasterView.ensure_on(self)   # siren / tornado / flood / quake shake / blizzard / blackout visuals (scripts/world/disaster_view.gd)
@@ -214,6 +215,8 @@ func rebuild_all() -> void:
 
 
 func _add_object_node(o) -> void:
+	if o.level != 0:
+		return        # upper floors and basements are drawn by LevelView (only the floor being looked at)
 	if _obj_nodes.has(o.id):
 		_obj_nodes[o.id].queue_free()
 		_obj_nodes.erase(o.id)
@@ -227,7 +230,12 @@ func _add_object_node(o) -> void:
 	node.rotation.y = _yaw_for_rot(o.rot)
 	if o.is_floor_layer():
 		node.position.y = 0.005
-	node.add_child(make_def_visual(o.def_id))
+	var props: Node3D = LevelProps.make(o)          # stairs / lifts / pillars: procedural parts instead of a plain box
+	if props != null:
+		node.rotation.y = 0.0
+		node.add_child(props)
+	else:
+		node.add_child(make_def_visual(o.def_id))
 	node.visible = not _shell_hides(o.tile)
 	_obj_root.add_child(node)
 	_obj_nodes[o.id] = node
@@ -359,6 +367,82 @@ func _process(delta: float) -> void:
 	_update_xray(delta)
 	_update_ghost()
 	_update_shells(delta)
+	_enforce_ground_hidden()
+
+
+## Basement view: hide the ground (floor chunks, walls, objects) of the chunks the building stands in. Empty rect = show again.
+func set_ground_hidden_rect(rc: Rect2i) -> void:
+	_ground_hidden = rc
+	_cut_ground_plane(rc)
+	if rc.size == Vector2i.ZERO:
+		for c in _chunks:
+			(_chunks[c]["root"] as Node3D).visible = _vis.has(c) or _vis.is_empty()
+		for c in _wall_nodes:
+			(_wall_nodes[c]["root"] as Node3D).visible = true
+		for oid in _obj_nodes:
+			var o = World.get_object(oid)
+			if o != null and o.level == 0:
+				(_obj_nodes[oid] as Node3D).visible = not _shell_hides(o.tile)
+
+
+## The big grass plane under everything would cover a basement: while one is shown it becomes four strips around the building.
+func _cut_ground_plane(rc: Rect2i) -> void:
+	if _ground_mi == null:
+		return
+	var ring := get_node_or_null("GroundRing")
+	if ring != null:
+		ring.queue_free()
+	_ground_mi.visible = rc.size == Vector2i.ZERO
+	if rc.size == Vector2i.ZERO:
+		return
+	var root := Node3D.new()
+	root.name = "GroundRing"
+	add_child(root)
+	var big := 400.0
+	var strips := [Rect2(-big, -big, big + rc.position.x, 2.0 * big), Rect2(rc.end.x, -big, big, 2.0 * big),
+		Rect2(rc.position.x, -big, rc.size.x, big + rc.position.y), Rect2(rc.position.x, rc.end.y, rc.size.x, big)]
+	for r in strips:
+		var mi := MeshInstance3D.new()
+		var pm := PlaneMesh.new()
+		pm.size = (r as Rect2).size
+		mi.mesh = pm
+		mi.position = Vector3(r.position.x + r.size.x * 0.5, -0.03, r.position.y + r.size.y * 0.5)
+		mi.material_override = _ground_mi.material_override
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		root.add_child(mi)
+	# the pit: soil floor and sides so the basement sits in the ground instead of floating over the sky
+	var soil := StandardMaterial3D.new()
+	soil.albedo_color = Color(0.36, 0.27, 0.19)
+	soil.cull_mode = BaseMaterial3D.CULL_DISABLED
+	var depth := 3.3
+	var cx := rc.position.x + rc.size.x * 0.5
+	var cz := rc.position.y + rc.size.y * 0.5
+	for b in [[Vector3(rc.size.x, 0.1, rc.size.y), Vector3(cx, -depth, cz)],
+			[Vector3(rc.size.x, depth, 0.05), Vector3(cx, -depth * 0.5, rc.position.y)], [Vector3(rc.size.x, depth, 0.05), Vector3(cx, -depth * 0.5, rc.end.y)],
+			[Vector3(0.05, depth, rc.size.y), Vector3(rc.position.x, -depth * 0.5, cz)], [Vector3(0.05, depth, rc.size.y), Vector3(rc.end.x, -depth * 0.5, cz)]]:
+		var bm := BoxMesh.new()
+		bm.size = b[0]
+		var bi := MeshInstance3D.new()
+		bi.mesh = bm
+		bi.position = b[1]
+		bi.material_override = soil
+		bi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		root.add_child(bi)
+
+
+func _enforce_ground_hidden() -> void:
+	if _ground_hidden.size == Vector2i.ZERO:
+		return
+	for c in _chunks:
+		if World.regions.chunk_rect(c).intersects(_ground_hidden):
+			(_chunks[c]["root"] as Node3D).visible = false
+	for c in _wall_nodes:
+		if World.regions.chunk_rect(c).intersects(_ground_hidden):
+			(_wall_nodes[c]["root"] as Node3D).visible = false
+	for oid in _obj_nodes:
+		var o = World.get_object(oid)
+		if o != null and o.level == 0 and _ground_hidden.has_point(o.tile):
+			(_obj_nodes[oid] as Node3D).visible = false
 
 
 ## Screen position (viewport pixels) to anchor pie menus / balloons. (-1,-1) when unknown.

@@ -18,6 +18,7 @@ if ($GodotArgs.Count -eq 1) { $GodotArgs = @($GodotArgs[0] -split ",") }   # pow
 $argLine = ($GodotArgs | ForEach-Object { if ($_ -match '\s') { '"' + $_ + '"' } else { $_ } }) -join " "
 $p = Start-Process -FilePath $Godot -ArgumentList $argLine -WorkingDirectory $root -RedirectStandardOutput $Log -RedirectStandardError $err -PassThru -NoNewWindow
 if ($null -eq $p) { Write-Host "GUARD: could not start Godot"; exit 4 }
+$null = $p.Handle          # keeps the exit code readable after the process ends
 $bad = "SCRIPT ERROR|Parse Error|Failed to load script"
 $lastSize = -1
 $lastChange = Get-Date

@@ -11,3 +11,8 @@ Conventions:
 - Windowed screenshots (tests/*_shot.gd patterns) of new visuals/UI; Read them and fix obvious problems. Delete throwaway screenshots/scripts before finishing.
 - Tools: Godot exe C:\Users\lloyd\AppData\Local\Godot47\Godot_v4.7-stable_win64_console.exe; `--headless --path . --import` after class_name changes (retry if another agent is importing; ignore their transient parse errors and report); run single tests with `--headless --path . --script res://tests/run_one.gd -- <name>`; fast tier `--script res://tests/run_all.gd`; slow `-- --slow`. Blender 5.1 at C:\Program Files\Blender Foundation\Blender 5.1\blender.exe for any new models (blender/ build_extra pattern; keep models simple; box fallbacks exist).
 - Do not commit or push. Final report: what landed, per-event target rate vs measured, hooks you added in shared files, tests with exact result lines, rough edges, and extra events you added.
+
+## Hung-run rule (all agents)
+Headless Godot does NOT quit on a script error or parse error: it hangs until something kills it. Always run Godot through the guard, never bare:
+`powershell -File tools/godot_guard.ps1 -Seconds 120 -Args "--headless","--path",".","--script","res://tests/run_one.gd","--","<test_name>"`
+It kills Godot immediately on SCRIPT ERROR / Parse Error / Failed to load script, or after N seconds with no output, prints the tail of the log and exits non-zero. Use -Seconds 120 for single tests, -Seconds 300 for the fast tier, -Seconds 600 for slow tests/--import on a cold cache. Never leave a command without a timeout; if a run is killed, read the log, fix the error, rerun. If the same run hangs twice, stop and report instead of retrying.

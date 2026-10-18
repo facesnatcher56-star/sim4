@@ -11,7 +11,7 @@ func _process(delta: float) -> void:
 	var f = World.get_folk(folk_id)
 	if f == null:
 		return
-	visible = not f.has_meta("away") and not has_meta("occluded")    # away (work, school, party, fast travel) or behind a building shell: not drawn
+	visible = not f.has_meta("away") and not has_meta("occluded") and not has_meta("level_hidden")    # away (work, school, party, fast travel) or behind a building shell: not drawn
 	if not visible:
 		_last_tile = Vector2i(-999, -999)      # not animated while hidden: it reappears on its tile
 		return
@@ -153,7 +153,7 @@ func _apply_pose(f, delta: float) -> void:
 	if _anim != null:
 		_play_clip_name(_resolve_clip(wanted))
 		_anim.speed_scale = _anim_speed(wanted)
-		position.y = _elev + _sit_lift() if pose in ["sit", "lie"] else 0.0
+		position.y = _ybase + (_elev + _sit_lift() if pose in ["sit", "lie"] else 0.0)
 		return
 	if _rig == null:
 		return

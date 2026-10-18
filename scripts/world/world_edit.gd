@@ -79,6 +79,15 @@ func set_wall_line(a: Vector2i, b: Vector2i, type: String = "wall", household_id
 			would += 1
 	if would == 0:
 		return 0
+	if type == "none" and world.levels.any():                  # no floating floors: a wall the upper floor rests on stays
+		var gone: Array = []
+		for e in _line_edges(a, b):
+			if world.walls.has(e):
+				gone.append(e)
+		var why: String = world.lbuild.removal_blocked(gone, 0)
+		if why != "":
+			world.last_error = why
+			return 0
 	var cost := 0 if type == "none" else would * world.WALL_PRICE
 	if cost > 0 and not world._spend(hid, cost):
 		world.last_error = "not enough coins"

@@ -38,6 +38,11 @@ func _three_day_balance(f: Array) -> void:
 	for m in total_min:
 		SimEnv.clock().advance_minutes(1)
 		dir.tick_minute(1)
+		# The loner's social need drains so slowly (and the others keep chatting to him) that he is rarely lonely enough to start a
+		# talk himself, so a count of 0..1 says nothing about autonomy. Make him lonely every evening (17:00) and check he then picks socials.
+		if m % 1440 == 600:
+			var dev = folks[3]
+			dev.add_to_stat("social", -50.0 - dev.get_stat_value("social"))
 		for fk2 in folks:
 			var cur = fk2.current
 			if cur != null and cur.state == "running" and cur.target_kind == "folk" and not seen_interaction.has(cur):

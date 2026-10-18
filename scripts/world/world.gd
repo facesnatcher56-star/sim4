@@ -81,6 +81,10 @@ var build: WorldBuild
 var saver: WorldSave
 var regions: WorldRegions
 var nav: WorldNav
+var levels: WorldLevels          # multi-floor buildings: sparse levels != 0 (level 0 stays in this class)
+var portals: LevelPortals        # stairs / ladders / elevators between levels
+var router: LevelRouter          # routes across levels
+var lbuild: LevelBuild           # build mode on upper levels: add floor / basement, structure rules, costs
 
 
 func _init() -> void:
@@ -92,6 +96,10 @@ func _init() -> void:
 	saver = WorldSave.new(self)
 	regions = WorldRegions.new(self)
 	nav = WorldNav.new(self)
+	levels = WorldLevels.new(self)
+	portals = LevelPortals.new(self)
+	router = LevelRouter.new(self)
+	lbuild = LevelBuild.new(self)
 
 
 func _ready() -> void:
@@ -134,6 +142,9 @@ func reset(w: int = DEFAULT_W, h: int = DEFAULT_H) -> void:
 	floors.fill("grass")
 	regions.reset()
 	nav.reset()
+	levels.reset()
+	portals.reset()
+	router.reset()
 	walls.clear()
 	mounts.clear()
 	objects.clear()
@@ -188,13 +199,17 @@ func pos_to_tile(p: Vector3) -> Vector2i:
 	return Vector2i(floori(p.x), floori(p.z))
 
 
-func is_walkable(t: Vector2i) -> bool:
+func is_walkable(t: Vector2i, level: int = 0) -> bool:
+	if level != 0:
+		return in_bounds(t) and levels.is_walkable(t, level)
 	return in_bounds(t) and not _blocked.has(t)
 
 
-func get_floor(t: Vector2i) -> String:
+func get_floor(t: Vector2i, level: int = 0) -> String:
 	if not in_bounds(t):
 		return ""
+	if level != 0:
+		return levels.floor_at(t, level)
 	return floors[t.y * width + t.x]
 
 
@@ -215,7 +230,9 @@ func wall_at(e: Vector3i) -> String:
 
 
 ## True if movement between orthogonally adjacent tiles is not stopped by a wall edge.
-func edge_open(a: Vector2i, b: Vector2i) -> bool:
+func edge_open(a: Vector2i, b: Vector2i, level: int = 0) -> bool:
+	if level != 0:
+		return levels.edge_open(a, b, level)
 	var t: String = walls.get(edge_between(a, b), "")
 	return t == "" or not (t in BLOCKING_WALLS)
 
@@ -288,8 +305,9 @@ func reservation_of(folk_id: int) -> Variant:
 
 # ------------------------------------------------------------------ folk registry
 
-func add_folk(f, tile: Vector2i) -> void:
+func add_folk(f, tile: Vector2i, level: int = 0) -> void:
 	f.tile = tile
+	f.level = level
 	folk[f.id] = f
 	_emit("folk_added", f.id)
 
@@ -339,45 +357,50 @@ func sell_object_at(t: Vector2i, household_id: int = -1) -> bool: return build.s
 func can_afford(household_id: int, amount: int) -> bool: return build.can_afford(household_id, amount)
 func clear_undo() -> void: build.clear_undo()
 func undo_count() -> int: return build.undo_count()
-func buy_place(def_id: String, tile: Vector2i, rot: int = 0, household_id: int = -1) -> int: return build.buy_place(def_id, tile, rot, household_id)
+func buy_place(def_id: String, tile: Vector2i, rot: int = 0, household_id: int = -1, level: int = 0) -> int: return build.buy_place(def_id, tile, rot, household_id, level)
 func _spend(household_id: int, amount: int) -> bool: return build._spend(household_id, amount)
 func object_price(def_id: String) -> int: return build.object_price(def_id)
 func _push_undo(op: Dictionary) -> void: build._push_undo(op)
 func set_floor_rect_raw(a: Vector2i, b: Vector2i, type: String) -> void: edit.set_floor_rect_raw(a, b, type)
 func _line_edges(a: Vector2i, b: Vector2i) -> Array[Vector3i]: return edit._line_edges(a, b)
 func set_floor_raw(t: Vector2i, type: String) -> void: edit.set_floor_raw(t, type)
-func set_edge(e: Vector3i, type: String) -> bool: return edit.set_edge(e, type)
+func set_edge(e: Vector3i, type: String, level: int = 0) -> bool: return edit.set_edge(e, type) if level == 0 else levels.set_edge(e, type, level)
 func add_wall(a: Vector2i, b: Vector2i) -> void: edit.add_wall(a, b)
-func set_wall_line(a: Vector2i, b: Vector2i, type: String = "wall", household_id: int = -1) -> int: return edit.set_wall_line(a, b, type, household_id)
-func paint_floor(t: Vector2i, type: String, household_id: int = -1) -> bool: return edit.paint_floor(t, type, household_id)
-func paint_floor_rect(a: Vector2i, b: Vector2i, type: String, household_id: int = -1) -> int: return edit.paint_floor_rect(a, b, type, household_id)
-func _create_object(def_id: String, tile: Vector2i, rot: int, force_id: int) -> int: return objs._create_object(def_id, tile, rot, force_id)
-func place_object(def_id: String, tile: Vector2i, rot: int = 0) -> int: return objs.place_object(def_id, tile, rot)
+func set_wall_line(a: Vector2i, b: Vector2i, type: String = "wall", household_id: int = -1, level: int = 0) -> int: return edit.set_wall_line(a, b, type, household_id) if level == 0 else lbuild.set_wall_line(a, b, type, household_id, level)
+func paint_floor(t: Vector2i, type: String, household_id: int = -1, level: int = 0) -> bool: return paint_floor_rect(t, t, type, household_id, level) > 0
+func paint_floor_rect(a: Vector2i, b: Vector2i, type: String, household_id: int = -1, level: int = 0) -> int: return edit.paint_floor_rect(a, b, type, household_id) if level == 0 else lbuild.paint_floor_rect(a, b, type, household_id, level)
+func _create_object(def_id: String, tile: Vector2i, rot: int, force_id: int, level: int = 0, span: int = 0) -> int: return objs._create_object(def_id, tile, rot, force_id, level, span)
+func place_object(def_id: String, tile: Vector2i, rot: int = 0, level: int = 0) -> int: return objs.place_object(def_id, tile, rot, level)
 func objects_in_radius(tile: Vector2i, r: float) -> Array: return objs.objects_in_radius(tile, r)
 func all_objects() -> Array: return objs.all_objects()
 func objects_in_lot_of(tile: Vector2i, r: float) -> Array: return objs.objects_in_lot_of(tile, r)
-func object_at(t: Vector2i): return objs.object_at(t)
+func object_at(t: Vector2i, level: int = 0): return objs.object_at(t, level)
 func objects_of_def(def_id: String) -> Array: return objs.objects_of_def(def_id)
 func set_object_state(object_id: int, key: String, value: Variant) -> void: objs.set_object_state(object_id, key, value)
 func objects_with_tag(tag: String) -> Array: return objs.objects_with_tag(tag)
 func get_object(object_id: int): return objs.get_object(object_id)
 func remove_object(object_id: int) -> bool: return objs.remove_object(object_id)
-func can_place(def_id: String, tile: Vector2i, rot: int = 0) -> bool: return objs.can_place(def_id, tile, rot)
+func can_place(def_id: String, tile: Vector2i, rot: int = 0, level: int = 0) -> bool: return objs.can_place(def_id, tile, rot, level)
 func add_object_state(object_id: int, key: String, delta: float) -> void: objs.add_object_state(object_id, key, delta)
 func find_path(from: Vector2i, to: Vector2i, diagonals: bool = true) -> Array[Vector2i]: return nav.find_path(from, to, diagonals)
 func path_length(from: Vector2i, to: Vector2i) -> float: return nav.path_length(from, to)
 func has_path(from: Vector2i, to: Vector2i) -> bool: return nav.has_path(from, to)
+## Multi-floor: positions are Vector3i(x, y, level) (LPos). Costs are in tile units (stairs / lifts count), -1 = unreachable.
+func find_route(from: Vector3i, to: Vector3i, stair_mult: float = 1.0) -> Array[Vector3i]: return router.find_route(from, to, stair_mult)
+func route_length(from: Vector3i, to: Vector3i, stair_mult: float = 1.0) -> float: return router.route_length(from, to, stair_mult)
+func has_route(from: Vector3i, to: Vector3i) -> bool: return router.has_route(from, to)
+func walk_y(tile: Vector2i, level: int = 0) -> float: return portals.walk_y(tile, level)
 func nearest_reachable_neighbor(from: Vector2i, target: Vector2i) -> Vector2i: return paths.nearest_reachable_neighbor(from, target)
-func room_cleanliness(tile: Vector2i) -> float: return rooms.room_cleanliness(tile)
-func room_tiles(tile: Vector2i) -> Array[Vector2i]: return rooms.room_tiles(tile)
-func room_info(tile: Vector2i) -> Dictionary: return rooms.room_info(tile)
-func room_id(tile: Vector2i) -> int: return rooms.room_id(tile)
+func room_cleanliness(tile: Vector2i, level: int = 0) -> float: return rooms.room_cleanliness(tile, level)
+func room_tiles(tile: Vector2i, level: int = 0) -> Array[Vector2i]: return rooms.room_tiles(tile, level)
+func room_info(tile: Vector2i, level: int = 0) -> Dictionary: return rooms.room_info(tile, level)
+func room_id(tile: Vector2i, level: int = 0) -> int: return rooms.room_id(tile, level)
 func room_count() -> int: return rooms.room_count()
-func is_outdoor(tile: Vector2i) -> bool: return rooms.is_outdoor(tile)
+func is_outdoor(tile: Vector2i, level: int = 0) -> bool: return rooms.is_outdoor(tile, level)
 func can_build(tile: Vector2i) -> bool: return regions.can_build(tile)
 func region_at(tile: Vector2i) -> int: return regions.region_at(tile)
 func chunk_of(tile: Vector2i) -> Vector2i: return regions.chunk_of(tile)
-func room_score(tile: Vector2i) -> float: return rooms.room_score(tile)
+func room_score(tile: Vector2i, level: int = 0) -> float: return rooms.room_score(tile, level)
 func load_dict(d: Dictionary) -> void: saver.load_dict(d)
 func save_dict(include_folk: bool = false) -> Dictionary: return saver.save_dict(include_folk)
 func load_starter_house() -> void: saver.load_starter_house()

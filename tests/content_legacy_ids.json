@@ -21,7 +21,14 @@
   "trash_bin",
   "rug",
   "door",
-  "window"
+  "window",
+  "stairs",
+  "stairs_down",
+  "ladder",
+  "ladder_down",
+  "fire_escape",
+  "elevator",
+  "pillar"
  ],
  "interactions": [
   "grab_snack",

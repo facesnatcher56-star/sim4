@@ -13,16 +13,27 @@ extends RefCounted
 ##   "once": true                                   # each interaction only boosted once per day per routine
 ## }
 
-## Returns {"mult": float, "bonus": float, "names": Array[String]} for an interaction.
-static func evaluate(folk, def_id: String, tags: Array) -> Dictionary:
+## The routines that are active for `folk` right now ([[id, def], ...]); depends on the time of day and the job only, so one
+## decision can compute it once and pass it to evaluate() for every candidate.
+static func active_routines(folk) -> Array:
+	var out: Array = []
+	var routines: Dictionary = SimEnv.data().routines()
+	for rid in routines:
+		if _active(folk, routines[rid]):
+			out.append([rid, routines[rid]])
+	return out
+
+## Returns {"mult": float, "bonus": float, "names": Array[String]} for an interaction. `active` = active_routines(folk) when
+## the caller already has it.
+static func evaluate(folk, def_id: String, tags: Array, active: Variant = null) -> Dictionary:
 	var mult := 1.0
 	var bonus := 0.0
 	var names: Array = []
-	var routines: Dictionary = SimEnv.data().routines()
-	for rid in routines:
-		var r: Dictionary = routines[rid]
-		if not _active(folk, r):
-			continue
+	if active == null:
+		active = active_routines(folk)
+	for pair in active:
+		var rid = pair[0]
+		var r: Dictionary = pair[1]
 		if bool(r.get("once", false)) and folk.routine_log.has(_log_key(str(rid), def_id)):
 			continue
 		var hit := false

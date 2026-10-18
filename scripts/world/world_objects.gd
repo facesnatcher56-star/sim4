@@ -12,13 +12,19 @@ func _init(w: WorldGrid) -> void:
 
 # ------------------------------------------------------------------ objects
 
-func can_place(def_id: String, tile: Vector2i, rot: int = 0) -> bool:
+func can_place(def_id: String, tile: Vector2i, rot: int = 0, level: int = 0) -> bool:
 	world.last_error = ""
 	var d := world.get_def(def_id)
 	if d.is_empty():
 		world.last_error = "unknown object"
 		return false
 	rot = posmod(rot, 4)
+	var lay: LevelLayer = null
+	if level != 0:
+		if not world.levels.has_level(world.levels.building_at(tile), level):
+			world.last_error = "there is no floor here"
+			return false
+		lay = world.levels.layer(level)
 	if str(d.get("mount", "")) == "wall":
 		if not world.in_bounds(tile):
 			world.last_error = "out of bounds"
@@ -26,24 +32,29 @@ func can_place(def_id: String, tile: Vector2i, rot: int = 0) -> bool:
 		if not world.regions.can_build(tile):
 			return world.regions.deny()
 		var e := world.mount_edge(tile, rot)
-		if world.walls.get(e, "") != "wall":
+		if world.levels.wall_at(e, level) != "wall":
 			world.last_error = "needs a wall"
 			return false
-		if world.mounts.has(e):
+		if world.levels.mounts_of(level).has(e):
 			world.last_error = "edge taken"
 			return false
 		return true
 	var fp := world.WorldObjectScript.footprint_of(d, tile, rot)
 	var floor_layer := str(d.get("layer", "")) == "floor"
+	var occ: Dictionary = world._occ if lay == null else lay.occ
+	var occ_floor: Dictionary = world._occ_floor if lay == null else lay.occ_floor
 	for t in fp:
 		if not world.in_bounds(t):
 			world.last_error = "out of bounds"
 			return false
+		if lay != null and (not lay.floors.has(t) or lay.holes.has(t)):
+			world.last_error = "needs a floor"
+			return false
 		if floor_layer:
-			if world._occ_floor.has(t):
+			if occ_floor.has(t):
 				world.last_error = "occupied"
 				return false
-		elif world._occ.has(t):
+		elif occ.has(t) or (lay != null and lay.blocked.has(t)):
 			world.last_error = "occupied"
 			return false
 	if not world.regions.can_build_all(fp):
@@ -52,17 +63,25 @@ func can_place(def_id: String, tile: Vector2i, rot: int = 0) -> bool:
 	for t in fp:
 		for dd in [Vector2i(1, 0), Vector2i(0, 1)]:
 			var nb: Vector2i = t + dd
-			if nb in fp and not world.edge_open(t, nb):
+			if nb in fp and not world.edge_open(t, nb, level):
 				world.last_error = "wall in the way"
 				return false
+	if LevelPortals.is_portal_def(d) and not world.lbuild.portal_fits(d, tile, rot, level):
+		return false
 	return true
 
-func place_object(def_id: String, tile: Vector2i, rot: int = 0) -> int:
-	if not can_place(def_id, tile, rot):
+func place_object(def_id: String, tile: Vector2i, rot: int = 0, level: int = 0) -> int:
+	if not can_place(def_id, tile, rot, level):
 		return -1
-	return _create_object(def_id, tile, posmod(rot, 4), -1)
+	return _create_object(def_id, tile, posmod(rot, 4), -1, level, default_span(world.get_def(def_id), tile, level))
 
-func _create_object(def_id: String, tile: Vector2i, rot: int, force_id: int) -> int:
+## Elevator shafts run from the placed level up to the highest level of the building.
+func default_span(d: Dictionary, tile: Vector2i, level: int) -> int:
+	if str((d.get("portal", {}) as Dictionary).get("kind", "")) != "elevator":
+		return 0
+	return maxi(0, world.levels.range_at(tile).y - level)
+
+func _create_object(def_id: String, tile: Vector2i, rot: int, force_id: int, level: int = 0, span: int = 0) -> int:
 	var d := world.get_def(def_id)
 	var o = world.WorldObjectScript.new()
 	o.id = force_id if force_id >= 0 else world._next_id
@@ -71,25 +90,42 @@ func _create_object(def_id: String, tile: Vector2i, rot: int, force_id: int) -> 
 	o.def = d
 	o.tile = tile
 	o.rot = rot
+	o.level = level
+	o.span = span
 	o.init_state_from_def()
 	world.objects[o.id] = o
+	var lay: LevelLayer = world.levels.layer(level) if level != 0 else null
 	if o.is_wall_mounted():
 		var e := world.mount_edge(tile, rot)
-		world.mounts[e] = o.id
 		var wt := str(d.get("wall_type", "door"))
-		world.walls[e] = wt
-		world.nav.touch_edge(e)
+		if lay == null:
+			world.mounts[e] = o.id
+			world.walls[e] = wt
+			world.nav.touch_edge(e)
+		else:
+			lay.mounts[e] = o.id
+			lay.walls[e] = wt
+			lay.touch()
+			world.levels.touch()
+			world.rooms.mark_dirty_edge(e, level)
 	else:
 		for t in o.footprint():
 			if o.is_floor_layer():
-				world._occ_floor[t] = o.id
+				(world._occ_floor if lay == null else lay.occ_floor)[t] = o.id
 			else:
-				world._occ[t] = o.id
+				(world._occ if lay == null else lay.occ)[t] = o.id
 				if o.blocks():
-					world.nav.touch_tile(t)
-					world._blocked[t] = true
+					if lay == null:
+						world.nav.touch_tile(t)
+						world._blocked[t] = true
+					else:
+						lay.blocked[t] = true
+		if lay != null:
+			lay.touch()
+			world.levels.touch()
+	world.portals.on_created(o)
 	world.regions.index_object(o)
-	world.rooms.mark_dirty(tile)
+	world.rooms.mark_dirty(tile, level)
 	world._emit("object_placed", o.id)
 	return o.id
 
@@ -97,25 +133,43 @@ func remove_object(object_id: int) -> bool:
 	if not world.objects.has(object_id):
 		return false
 	var o = world.objects[object_id]
+	var lay: LevelLayer = world.levels.layer(o.level, false) if o.level != 0 else null
+	world.portals.on_removed(o)
 	if o.is_wall_mounted():
 		var e: Vector3i = world.mount_edge(o.tile, o.rot)
-		world.mounts.erase(e)
-		if world.walls.has(e):
-			world.walls[e] = "wall"
-		world.nav.touch_edge(e)
+		if lay == null:
+			world.mounts.erase(e)
+			if world.walls.has(e):
+				world.walls[e] = "wall"
+			world.nav.touch_edge(e)
+		elif lay != null:
+			lay.mounts.erase(e)
+			if lay.walls.has(e):
+				lay.walls[e] = "wall"
+			lay.touch()
+			world.levels.touch()
+			world.rooms.mark_dirty_edge(e, o.level)
 	else:
 		for t in o.footprint():
 			if o.is_floor_layer():
-				if world._occ_floor.get(t, -1) == object_id:
-					world._occ_floor.erase(t)
+				var of: Dictionary = world._occ_floor if lay == null else lay.occ_floor
+				if of.get(t, -1) == object_id:
+					of.erase(t)
 			else:
-				if world._occ.get(t, -1) == object_id:
-					world._occ.erase(t)
-				world._blocked.erase(t)
-				world.nav.touch_tile(t)
+				var oc: Dictionary = world._occ if lay == null else lay.occ
+				if oc.get(t, -1) == object_id:
+					oc.erase(t)
+				if lay == null:
+					world._blocked.erase(t)
+					world.nav.touch_tile(t)
+				else:
+					lay.blocked.erase(t)
+		if lay != null:
+			lay.touch()
+			world.levels.touch()
 	world.objects.erase(object_id)
 	world.regions.unindex_object(object_id)
-	world.rooms.mark_dirty(o.tile)
+	world.rooms.mark_dirty(o.tile, o.level)
 	world._emit("object_removed", object_id)
 	return true
 
@@ -125,10 +179,18 @@ func get_object(object_id: int):
 func all_objects() -> Array:
 	return world.objects.values()
 
-func object_at(t: Vector2i):
-	var id: int = world._occ.get(t, -1)
+func object_at(t: Vector2i, level: int = 0):
+	var occ: Dictionary = world._occ
+	var occ_floor: Dictionary = world._occ_floor
+	if level != 0:
+		var lay := world.levels.layer(level, false)
+		if lay == null:
+			return null
+		occ = lay.occ
+		occ_floor = lay.occ_floor
+	var id: int = occ.get(t, -1)
 	if id == -1:
-		id = world._occ_floor.get(t, -1)
+		id = occ_floor.get(t, -1)
 	return world.objects.get(id, null)
 
 func objects_with_tag(tag: String) -> Array:
@@ -203,7 +265,9 @@ func set_object_state(object_id: int, key: String, value: Variant) -> void:
 	if o.state.get(key) == value:
 		return
 	o.state[key] = value
-	world.rooms.mark_dirty(o.tile)   # decor/mess depend on state
+	if world.portals.portals.has(object_id):
+		world.levels.touch()      # lift out of order / repaired: routes change
+	world.rooms.mark_dirty(o.tile, o.level)   # decor/mess depend on state
 	world._emit("object_state_changed", object_id, key)
 
 func add_object_state(object_id: int, key: String, delta: float) -> void:

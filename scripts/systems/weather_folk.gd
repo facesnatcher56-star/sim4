@@ -10,7 +10,7 @@ static func is_outside(f) -> bool:
 		return bool(Weather.outdoors_fn.call(f))
 	var w = WorldIface.world()
 	if w != null and w.has_method("is_outdoor"):
-		return bool(w.is_outdoor(f.tile))
+		return bool(w.is_outdoor(f.tile, int(f.level)))      # floors: only the top roof is rained on
 	return bool(f.get_meta("outdoors", false))
 
 static func _has_def(buff_id: String) -> bool:

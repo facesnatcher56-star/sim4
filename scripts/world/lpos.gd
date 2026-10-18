@@ -30,6 +30,25 @@ static func level_at_y(y: float) -> int:
 	return roundi(y / H)
 
 
+## Short label for buttons: G (ground), 1, 2, 3 ... above, B1, B2 ... below.
+static func level_label(level: int) -> String:
+	if level == 0:
+		return "G"
+	return str(level) if level > 0 else "B%d" % -level
+
+
+## Words for tooltips and the build panel: "Ground floor", "3rd floor", "Basement 2".
+static func level_name(level: int) -> String:
+	if level == 0:
+		return "Ground floor"
+	if level < 0:
+		return "Basement %d" % -level
+	var suffix := "th"
+	if level % 100 < 11 or level % 100 > 13:
+		suffix = {1: "st", 2: "nd", 3: "rd"}.get(level % 10, "th")
+	return "%d%s floor" % [level, suffix]
+
+
 ## Tiles of a route as plain Vector2i (levels dropped).
 static func tiles_of(route: Array) -> Array[Vector2i]:
 	var out: Array[Vector2i] = []

@@ -84,7 +84,7 @@ func _update_follow(delta: float) -> void:
 	if fv == null or not is_instance_valid(fv):
 		_follow_id = -1
 		return
-	var goal := Vector3(fv.position.x, 0.0, fv.position.z)
+	var goal := Vector3(fv.position.x, _target.y, fv.position.z)      # y belongs to LevelView (the viewed floor)
 	if GameSettings.reduce_motion():
 		_target = goal
 	else:

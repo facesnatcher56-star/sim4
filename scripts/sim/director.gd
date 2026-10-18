@@ -36,15 +36,36 @@ func _on_minute(_total: int) -> void:
 func tick_minute(minutes: int = 1) -> void:
 	ticks += 1
 	for f in WorldIface.all_folk():
-		tick_folk(f, float(minutes))
+		if f.household_id <= 0 and f.has_meta("visitor") and STRANGER_PERIOD > 1:
+			_tick_stranger(f, float(minutes))
+		else:
+			tick_folk(f, float(minutes))
 
-func tick_folk(f: Folk, minutes: float = 1.0) -> void:
+## Strangers (crowd NPCs, townies, visitors: household_id <= 0 and meta "visitor") decay needs / buffs / mood once per STRANGER_PERIOD minutes, with
+## the elapsed minutes (decay is linear, so the result is the same up to the clamp and the threshold buffs lagging a few minutes).
+## Their interactions, emergencies and autonomy still run every minute. Household members are always ticked every minute.
+const STRANGER_PERIOD := 5
+var _stranger_acc: Dictionary = {}       # folk id -> minutes not yet applied to needs / buffs / mood
+
+func _tick_stranger(f: Folk, minutes: float) -> void:
+	var owed: float = float(_stranger_acc.get(f.id, 0.0)) + minutes
+	if (ticks + int(f.id)) % STRANGER_PERIOD == 0:
+		_stranger_acc.erase(f.id)
+		tick_folk(f, minutes, owed)
+	else:
+		_stranger_acc[f.id] = owed
+		tick_folk(f, minutes, 0.0)
+
+## `passive_minutes` = minutes of need decay / buff ageing to apply (default: `minutes`; 0 = skip them this time).
+func tick_folk(f: Folk, minutes: float = 1.0, passive_minutes: float = -1.0) -> void:
 	var t0 := Time.get_ticks_usec() if prof_on else 0
 	var hh := ("household " if prof_on and int(f.household_id) > 0 and not f.has_meta("visitor") else "other ")
-	f.tick_needs(minutes)
-	f.tick_buffs(minutes)
-	f.update_thresholds()
-	f.refresh_mood()
+	var pm: float = minutes if passive_minutes < 0.0 else passive_minutes
+	if pm > 0.0:
+		f.tick_needs(pm)
+		f.tick_buffs(pm)
+		f.update_thresholds()
+		f.refresh_mood()
 	if prof_on:
 		_prof(hh + "needs/buffs/mood", t0)
 		t0 = Time.get_ticks_usec()

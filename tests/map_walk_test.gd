@@ -1,4 +1,4 @@
-extends RefCounted
+﻿extends RefCounted
 ## A folk walks from its home to a venue on the continuous map in game time (real path length -> real minutes), the venue entry
 ## rules apply when it gets there (fee charged on arrival, closed hours turn it away), fast travel still hides it for a while,
 ## and a save made in the middle of a walk resumes the walk.
@@ -137,7 +137,13 @@ func _save_mid_walk() -> void:
 	_check(Kit.world().regions.has_regions() and Kit.world().width == World.MAP_W, "the big map is back")
 	Kit.run(int(r["minutes"]) + 15)
 	_check(Neighborhood.where(mira.id) == "market", "the walk resumed and finished (%s)" % Neighborhood.where(mira.id))
-	_check(Neighborhood.pantry == 0 and Economy.balance(1) == 500, "no stray charges (%d)" % Economy.balance(1))
+	# No bill/fee/fine may hit the ledger. Once she has arrived, autonomy may legitimately pick a small market interaction (a snack or a
+	# drink, loot "coins_add" -2..-5 on finish, never through Economy), so the coins can dip a few below 500 depending on the random pick.
+	var charged := 0
+	for e in Economy.ledger_for(1):
+		if str(e["reason"]) != "starting funds":
+			charged += 1
+	_check(Neighborhood.pantry == 0 and charged == 0 and Economy.balance(1) <= 500 and Economy.balance(1) >= 480, "no stray charges (%d, %d ledgered)" % [Economy.balance(1), charged])
 
 ## A townie who lives in another lot appears on the road (at most MAX_GUEST_WALK tiles from the door) and walks to the host.
 func _visitors_walk_in() -> void:
@@ -254,10 +260,13 @@ func _leavers_walk_out() -> void:
 	var moved := npc.tile != start or start == door
 	var seen_walking: bool = npc.current != null and npc.current.def_id == "go_here"
 	var left_after := -1
-	for m in 14:
-		if SysUtil.folk(npc.id) == null:
+	# time to reach the door depends on where the NPC happened to stand: allow the real route time plus a margin
+	var walk_min: int = int(ceil(float(maxi(0, WorldIface.path_length(start, door))) * float(Interaction.WALK_MIN_PER_TILE) * 1.6)) + 8
+	for m in maxi(14, walk_min):
+		if SysUtil.folk(npc.id) != npc:      # gone (the same townie may be re-spawned by the crowd rebalance: compare the instance, not the id)
 			left_after = m
 			break
 		Kit.run(1)
 	_check(moved or seen_walking, "the NPC walks towards the door instead of vanishing")
-	_check(left_after >= 0 or SysUtil.folk(npc.id) == null, "and is gone within the walk-out time")
+	var still = SysUtil.folk(npc.id)
+	_check(left_after >= 0 or still != npc, "and is gone within the walk-out time (start %s door %s now %s doing %s, walk_min %d)" % [str(start), str(door), str(still.tile) if still != null else "-", (still.current.def_id if still != null and still.current != null else "-"), walk_min])

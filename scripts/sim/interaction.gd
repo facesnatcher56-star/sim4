@@ -1,4 +1,4 @@
-﻿class_name Interaction
+class_name Interaction
 extends RefCounted
 ## Runtime instance of an interaction definition from data/interactions.json.
 ## Lifecycle: queued -> walking -> running -> finished | cancelled.
@@ -24,6 +24,9 @@ var travel_left: float = 0.0
 var def: Dictionary = {}
 var params: Dictionary = {}        # free-form extras (UI/systems)
 var goto_tile: Vector2i = Vector2i(-1, -1)   # "go_here" destination
+var goto_level: int = 0                      # level of the "go_here" destination (multi-floor)
+var path3: Array[Vector3i] = []              # multi-floor route (x, y, level), empty on the ground; `path` then holds its tiles
+var level_extra_min: float = 0.0             # waiting for a lift on the route (game minutes, already in travel_total)
 var actor: Folk = null
 var obj = null
 var target_folk: Folk = null
@@ -53,10 +56,11 @@ static func create(p_def_id: String, p_actor: Folk, p_target_id: int = -1, p_pla
 	return i
 
 ## Player 'Go here' command: walk to a free tile (UI right-click on bare ground).
-static func create_goto(p_actor: Folk, tile: Vector2i, p_player: bool = true) -> Interaction:
+static func create_goto(p_actor: Folk, tile: Vector2i, p_player: bool = true, level: int = 0) -> Interaction:
 	var i := create("go_here", p_actor, -1, p_player)
 	if i != null:
 		i.goto_tile = tile
+		i.goto_level = level
 	return i
 
 func label() -> String:
@@ -145,13 +149,21 @@ func start() -> bool:
 		use_tile = goto_tile
 	var n := 0                           # the real route is computed ONCE here; tick() only walks along it
 	path = []
-	if use_tile != actor.tile:
+	path3 = []
+	level_extra_min = 0.0
+	var to_level := _dest_level()
+	if actor.level != 0 and not WorldIface.level_valid(actor.tile, actor.level):
+		actor.level = 0                  # a stale level (teleported / hidden trip): the folk is on the ground
+	if actor.level != 0 or to_level != 0:
+		n = _plan_levels(use_tile, to_level)            # stairs / lifts: multi-floor route
+	elif use_tile != actor.tile:
 		path = WorldIface.find_path(actor.tile, use_tile)
 		n = path.size() if not path.is_empty() else WorldIface.path_length(actor.tile, use_tile)
 	if n < 0:
 		_release()
 		return false
 	travel_total = n * WALK_MIN_PER_TILE / (Health.speed_mult(actor) * Weather.walk_speed_mult()) + float(params.get("delay_min", 0.0))      # injured folk and snow / rain walk slower; delay_min = traffic wait (commutes)
+	travel_total += level_extra_min
 	travel_left = travel_total
 	actor.current = self
 	SimEnv.emit("interaction_started", actor.id, def_id, target_id)
@@ -165,14 +177,40 @@ func start() -> bool:
 		state = "walking"
 	return true
 
+## Level the walk ends on: the object's / the other folk's / the go-here target's.
+func _dest_level() -> int:
+	if target_kind == "object" and obj != null:
+		return int(obj.level) if "level" in obj else 0
+	if target_kind == "folk" and target_folk != null:
+		return target_folk.level
+	return goto_level if goto_tile.x >= 0 else actor.level
+
+## Multi-floor walk: route over stairs / lifts. Returns its length in tile units (stairs and lifts count), -1 if unreachable.
+func _plan_levels(use_tile: Vector2i, to_level: int) -> int:
+	var from3 := Vector3i(actor.tile.x, actor.tile.y, actor.level)
+	var to3 := Vector3i(use_tile.x, use_tile.y, to_level)
+	if from3 == to3:
+		return 0
+	var smult := WorldIface.stair_mult(actor)
+	var r := WorldIface.find_route(from3, to3, smult)
+	if r.is_empty():
+		return -1
+	path3 = r
+	path = LPos.tiles_of(r)
+	level_extra_min = WorldIface.book_route(r, actor.id, WALK_MIN_PER_TILE)
+	return int(ceil(WorldIface.route_cost(r, smult)))
+
 func _arrive() -> void:
 	state = "running"
 	if target_kind == "object" and obj != null:
 		actor.tile = WorldIface.use_tile(obj, slot_idx)
+		actor.level = _dest_level()
 	elif target_kind == "folk" and target_folk != null:
 		actor.tile = target_folk.tile
+		actor.level = target_folk.level
 	elif goto_tile.x >= 0:
 		actor.tile = goto_tile
+		actor.level = goto_level
 	actor.posture = str(def.get("posture", "stand"))
 
 func tick(minutes: float) -> void:
@@ -186,6 +224,8 @@ func tick(minutes: float) -> void:
 			var idx := clampi(int(frac * path.size()) - 1, -1, path.size() - 1)
 			if idx >= 0:
 				actor.tile = path[idx]
+				if not path3.is_empty():
+					actor.level = path3[idx].z
 		if travel_left <= 0.0001:
 			_arrive()
 		else:
