@@ -50,31 +50,16 @@ Fence gates are one-edge `door` wall segments on the fence line (so the lot conn
 | venue | 5,4,22,14 (park: whole lot) | - | the 7 venue templates: same shell, south door (tile column 15; `school_v2` 7), same spawn / entry tiles `[15,19]...` |
 Home front doors sit at a different column per layout (the path and fence gate follow it). Venue spawn tiles are unchanged and the forecourt is open stone.
 
-## Mapping (what the lead wires in)
-Ids: `small_01..06`, `medium_01..06`, `large_01..04`, `classic_01..03`, townies `townie_a` (Maple Row 12, big family, medium footprint),
-`townie_b` (Cedar Court 4, cluttered artist, small footprint), `townie_c` (Hillcrest Manor, tidy retiree, large footprint),
-venues `<type>_v1..v3` for `park cafe gym library market office school`.
-
-| Slot | Template | How |
-|---|---|---|
-| neighbourhood `townie_a` / `townie_b` / `townie_c` | `townie_a` / `townie_b` / `townie_c` | fixed (set `"template"` in data/neighborhood.json) |
-| scenario `solo` (start `small`) | pick from `HouseGenerator.pool("small")` | per game: seeded random pick, or the Free Play chooser lists all six |
-| scenarios `couple`, `family` (start `medium`) | `pool("medium")` | same |
-| scenario `roommates` (start `large`) | `pool("large")` | same |
-| scenario `sandbox` / start `classic` | `classic` or `pool("classic")` | same |
-| venue lots `park cafe gym library market office school` | `venue_pool(type)` = `[type, type_v1, type_v2, type_v3]` | pick per game / region; if two lots of one type exist, give them different alternates |
-Rule that keeps the whole map duplicate-free: pick WITHOUT replacement across all lots (home, townies, venues); the generated set is pairwise distinct
-(floor plans and layouts), also distinct from `classic/small/medium/large` and the 7 venue originals, so any combination is safe.
-Suggested `neighborhood.json` change: add `"variants": "small"` (pool name) to each `starts` entry and resolve `template` through `HouseGenerator.pool(...)`
-in `Neighborhood.start_def` / `NewGame.start`; the start card thumbnail (`LotThumb`) works for the new ids once LotLoader knows them.
-
-## Integration steps for lot_loader (not done here)
-1. `LotLoader._templates()`: after parsing `lot_templates.json`, merge the generated lots:
-   `for k in HouseGenerator.lots(): lots[k] = HouseGenerator.lots()[k]` (or read `data/generated_lots.json` the same way; `Data.tables["generated_lots"]` already holds it).
-   Then `LotLoader.apply("small_03")`, `template_ids()`, `entry_of()`, `LotThumb.template_id = "small_03"`, `Crowd.update_staff` (reads `staff`) all work unchanged.
-2. Region sizes for the big map are unchanged: every home keeps the lot-local 32x24 footprint / entry of its class.
-3. `tests/hood_lots_test.gd` iterates `LotLoader.template_ids()`; give generated ids their `min_objects` (small 14, medium 30, large 50, classic 40; venues as before) -
-   `tests/house_world_test.gd` already proves them with a copy of the LotLoader placement logic (`tests/house_kit.gd apply`).
+## Mapping (DONE: LotPicker)
+`scripts/world/lot_picker.gd`: on a new game `LotPicker.pick(world_seed, start_id, home)` draws one template per lot WITHOUT replacement (home first, then
+townies, then venues in neighbourhood.json order), deterministic per seed. Pools: home = `starts[].pool` (small / medium / large / classic; classic also offers the
+hand-made house); `townie_a/b/c` = their own id + the medium / small / large pool (`lots[].pool`); venues = `venue_pool(type)`. The picks go into the regions
+(`region.template`, saved with the world; `Neighborhood.template_of(lot)` reads them) and `Neighborhood.world_seed` is saved in the neighbourhood block, so a
+loaded game never re-rolls. `NewGame.start` opts: `world_seed` (default random), `home_template` (default drawn from the pool). The start picker shows the
+drawn home on each card (`ScenarioCard.set_home`) with a "Reroll home" button (another layout of the same pool). All lots are 32x24 rects, so every
+footprint fits (`map_lots_test`: entry walkable, every object / staff post / spawn reachable from the street gate, 5 world seeds x 5 scenarios, all
+11 layout signatures pairwise distinct, save/load keeps template ids). `Neighborhood.start_game(template, seed = 1)` is the deterministic entry for tests.
+Screenshots: `SHOT_SEED=n godot ... tests/bigmap_shot.gd -- prefix shells:0 <lot>:30:12:sunny:lot=<id>:0`.
 
 ## How a home is built (so it makes sense to the player)
 Rooms: treemap of room rectangles (open-plan "zones" - living / kitchen / dining / sleep - share one wall-less group, even L-shaped), optionally around a 1-2 tile hall

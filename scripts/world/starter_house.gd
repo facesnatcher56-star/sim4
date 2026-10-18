@@ -25,10 +25,10 @@ static func build(w, o: Vector2i = Vector2i.ZERO) -> void:
 	w.add_wall(Vector2i(14, 4) + o, Vector2i(14, 10) + o)
 	w.add_wall(Vector2i(11, 10) + o, Vector2i(11, 16) + o)
 	# yard fence (gate at the front)
-	w.set_wall_line(Vector2i(2, 2) + o, Vector2i(30, 2) + o, "fence", 0)
-	w.set_wall_line(Vector2i(30, 2) + o, Vector2i(30, 22) + o, "fence", 0)
-	w.set_wall_line(Vector2i(2, 22) + o, Vector2i(30, 22) + o, "fence", 0)
-	w.set_wall_line(Vector2i(2, 2) + o, Vector2i(2, 22) + o, "fence", 0)
+	_fence(w, Vector2i(2, 2) + o, Vector2i(30, 2) + o)
+	_fence(w, Vector2i(30, 2) + o, Vector2i(30, 22) + o)
+	_fence(w, Vector2i(2, 22) + o, Vector2i(30, 22) + o)
+	_fence(w, Vector2i(2, 2) + o, Vector2i(2, 22) + o)
 	w.set_edge(Vector3i(15 + o.x, 22 + o.y, 0), "door")   # gate
 
 	# --- doors and windows (wall mounted)
@@ -97,3 +97,13 @@ static func build(w, o: Vector2i = Vector2i.ZERO) -> void:
 
 	w.starter_spawn_tiles.assign([Vector2i(6, 5) + o, Vector2i(6, 8) + o, Vector2i(16, 5) + o])
 	w.starter_bedroom_tile = Vector2i(6, 5) + o
+
+
+## Raw fence line (no coins: set_wall_line would try to charge a household and silently build nothing on the big map).
+static func _fence(w, a: Vector2i, b: Vector2i) -> void:
+	if a.y == b.y:
+		for x in range(mini(a.x, b.x), maxi(a.x, b.x)):
+			w.set_edge(Vector3i(x, a.y, 0), "fence")
+	else:
+		for y in range(mini(a.y, b.y), maxi(a.y, b.y)):
+			w.set_edge(Vector3i(a.x, y, 1), "fence")

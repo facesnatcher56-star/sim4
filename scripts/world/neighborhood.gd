@@ -24,6 +24,7 @@ static var pantry: int = 0               # grocery units bought at the market, d
 static var visits: Dictionary = {}       # lot_id -> number of times a resident went there
 static var last_report: Dictionary = {}
 static var meetups: Array = []           # invitations to hang out at a venue
+static var world_seed: int = 0          # per-game seed of the lot layout draw (LotPicker); saved
 static var selected: int = -1            # folk id the HUD has selected (lot_of_selected)
 
 # ------------------------------------------------------------------ data
@@ -58,6 +59,11 @@ static func start_def(start_id: String) -> Dictionary:
 static func template_of(lot_id: String) -> String:
 	if lot_id == HOME:
 		return home_template
+	var w = WorldIface.world()
+	if w != null and w.get("regions") != null:
+		var t := str((w.regions as WorldRegions).by_lot(lot_id).get("template", ""))
+		if t != "":
+			return t          # the template this game's map was built with (saved in the regions)
 	return str(lot(lot_id).get("template", ""))
 
 static func label_of(lot_id: String) -> String:
@@ -186,12 +192,15 @@ static func everyone_home() -> bool:
 
 # ------------------------------------------------------------------ new game
 ## Build the whole map: roads, every lot with its template, `template_id` on the home lot. Forgets everything else.
-static func start_game(template_id: String = LotLoader.CLASSIC) -> bool:
+## Every other lot draws its own layout from its pool (LotPicker) with `p_seed` (default 1; new games pass a random one).
+static func start_game(template_id: String = LotLoader.CLASSIC, p_seed: int = 1) -> bool:
 	reset()
 	home_template = template_id
+	world_seed = p_seed
 	NeighborhoodContent.install()
 	var w = WorldIface.world()
-	var res: Dictionary = MapLots.build(w, template_id)
+	var picks: Dictionary = LotPicker.pick(p_seed, "", template_id)
+	var res: Dictionary = MapLots.build(w, template_id, picks)
 	last_report = (res["reports"] as Dictionary).get(HOME, {})
 	for lid in (res["reports"] as Dictionary):
 		var fails: Array = (res["reports"][lid] as Dictionary).get("failed", [])
@@ -203,7 +212,8 @@ static func start_game(template_id: String = LotLoader.CLASSIC) -> bool:
 ## `funds` >= 0 overrides the start's own number (the new-game flow passes scenario funds x difficulty).
 static func finish_new_game(start_id: String, funds: int = -1) -> void:
 	var sd: Dictionary = start_def(start_id)
-	home_template = str(sd.get("template", LotLoader.CLASSIC))
+	var hr: Dictionary = WorldIface.world().regions.home()
+	home_template = str(hr.get("template", "")) if str(hr.get("template", "")) != "" else str(sd.get("template", LotLoader.CLASSIC))
 	if funds < 0 and sd.has("funds"):
 		funds = int(sd["funds"])
 	if funds >= 0:
@@ -275,7 +285,7 @@ static func to_dict() -> Dictionary:
 		var to: String = NeighborhoodLots.walking_to(f)
 		if to != "":
 			walks[str(f.id)] = {"lot": to, "dest": [entry_tile(to).x, entry_tile(to).y]}
-	return {"home_template": home_template, "loc": SysUtil.str_keys(loc), "pantry": pantry, "visits": visits.duplicate(),
+	return {"home_template": home_template, "world_seed": world_seed, "loc": SysUtil.str_keys(loc), "pantry": pantry, "visits": visits.duplicate(),
 		"meetups": meetups.duplicate(true), "npc_ids": Crowd.npc_ids(), "walks": walks, "version": SAVE_VERSION}
 
 static func from_dict(d: Dictionary) -> void:
@@ -283,6 +293,7 @@ static func from_dict(d: Dictionary) -> void:
 	if d.is_empty():
 		return
 	home_template = str(d.get("home_template", LotLoader.CLASSIC))
+	world_seed = int(d.get("world_seed", 0))
 	var lc: Dictionary = SysUtil.int_keys(d.get("loc", {}))
 	for k2 in lc:
 		loc[int(k2)] = str(lc[k2])

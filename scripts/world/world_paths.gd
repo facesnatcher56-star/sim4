@@ -47,6 +47,16 @@ func find_path(from: Vector2i, to: Vector2i, diagonals: bool = true) -> Array[Ve
 	return _search(from, to, diagonals, whole)
 
 
+## A* restricted to `rect` (clipped to the map): never searches outside it, so an unreachable goal fails after at most
+## rect-area expansions. WorldNav uses it for the legs inside a lot / a park / around a street tile.
+func find_path_rect(from: Vector2i, to: Vector2i, rect: Rect2i, diagonals: bool = true) -> Array[Vector2i]:
+	var win := rect.intersection(Rect2i(0, 0, world.width, world.height))
+	if from == to or not win.has_point(from) or not win.has_point(to):
+		var none: Array[Vector2i] = []
+		return none
+	return _search_big(from, to, diagonals, win)
+
+
 func _find_big(from: Vector2i, to: Vector2i, diagonals: bool, whole: Rect2i) -> Array[Vector2i]:
 	var dist := maxi(absi(from.x - to.x), absi(from.y - to.y))
 	var m := WINDOW_MARGIN + dist / 3
@@ -208,7 +218,7 @@ func _key(f: float, h: float, idx: int) -> int:
 	return (int(f * 256.0) << 40) | (int(h * 256.0) << 24) | idx
 
 
-func _ipush(h: PackedInt64Array, v: int) -> void:
+static func _ipush(h: PackedInt64Array, v: int) -> void:
 	h.append(v)
 	var i := h.size() - 1
 	while i > 0:
@@ -220,7 +230,7 @@ func _ipush(h: PackedInt64Array, v: int) -> void:
 	h[i] = v
 
 
-func _ipop(h: PackedInt64Array) -> int:
+static func _ipop(h: PackedInt64Array) -> int:
 	var top: int = h[0]
 	var last: int = h[h.size() - 1]
 	h.resize(h.size() - 1)

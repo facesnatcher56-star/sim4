@@ -124,7 +124,7 @@ static func _update_lot(lot_id: String, now: int, force: bool) -> void:
 		var t: Dictionary = _pick_townie(lot_id, vtype)
 		if t.is_empty():
 			break
-		spawn_npc(t, lot_id, vtype)
+		spawn_npc(t, lot_id, vtype, -1, not (force or first))
 
 static func _pick_townie(lot_id: String, vtype: String) -> Dictionary:
 	var present: Array = present_townie_ids()
@@ -153,11 +153,15 @@ static func _pick_townie(lot_id: String, vtype: String) -> Dictionary:
 	return pick if pick != null else {}
 
 ## Create one ambient NPC from a townie record, at the lot's spawn tiles.
-static func spawn_npc(t: Dictionary, lot_id: String, vtype: String, stay_override: int = -1) -> Folk:
+## `arrive`: the NPC appears at the lot's street gate and walks in to a spot inside (a lot waking up fills at once without it).
+static func spawn_npc(t: Dictionary, lot_id: String, vtype: String, stay_override: int = -1, arrive: bool = false) -> Folk:
 	var tid: int = int(t["id"])
 	var vd: Dictionary = Venues.type_def(vtype)
 	var entries: Array = NeighborhoodLots.spawns_of(lot_id)
 	var tile: Vector2i = entries[SysUtil.rng.randi_range(0, entries.size() - 1)]
+	var inside: Vector2i = tile
+	if arrive:
+		tile = NeighborhoodLots.gate_tile(lot_id)
 	var keep_next: int = Folk._next_id
 	var f := Folk.create(str(t["name"]), (t["traits"] as Array).duplicate(), tid)
 	Folk._next_id = keep_next
@@ -181,38 +185,32 @@ static func spawn_npc(t: Dictionary, lot_id: String, vtype: String, stay_overrid
 	Aging.apply_stage_buff(f)
 	f.idle_until_min = CrowdDrive.NEVER          # NPCs are driven by CrowdDrive (cheap), never by the full Autonomy search
 	f.set_meta("next_act", SimEnv.now_min() + SysUtil.rng.randi_range(1, 4))
+	if arrive and tile != inside:
+		var walk_in := Interaction.create_goto(f, inside, false)
+		if walk_in != null:
+			f.enqueue(walk_in)
 	var cb: String = str(vd.get("crowd_buff", ""))
 	if cb != "":
 		f.add_buff(cb)
 	return f
 
+## An NPC whose time is up walks to the lot's door (one route, computed once by the go_here interaction) and is removed there.
 static func _start_leaving(f) -> void:
 	if f.has_meta("leaving"):
 		return
 	f.set_meta("leaving", SimEnv.now_min() + int(cfg().get("leave_walk_min", 12)))
 	f.cancel_current("leaving")
 	f.clear_queue()
-	var ir := Interaction.create("sys_staff", f, -1, false)      # a no-op that keeps autonomy quiet while they walk out
+	var ir := Interaction.create_goto(f, NeighborhoodLots.entry_tile(str(f.get_meta("crowd"))), false)
 	if ir != null:
 		f.enqueue(ir)
 
+## Cheap per-minute check: nobody path-finds here any more. Gone once at the door (or when the walk-out time is up).
 static func _step_leavers(now: int) -> void:
-	var w = WorldIface.world()
-	if w == null:
-		return
 	for f in crowd_folk():
 		if not f.has_meta("leaving"):
 			continue
-		var entry: Vector2i = NeighborhoodLots.entry_tile(str(f.get_meta("crowd")))
-		if f.tile == entry or now >= int(f.get_meta("leaving")):
-			_remove(f)
-			continue
-		var path: Array = w.find_path(f.tile, entry)
-		if path.is_empty():
-			_remove(f)
-			continue
-		f.tile = path[mini(1, path.size() - 1)]
-		if f.tile == entry:
+		if f.tile == NeighborhoodLots.entry_tile(str(f.get_meta("crowd"))) or now >= int(f.get_meta("leaving")) or (f.current == null and f.queue.is_empty()):
 			_remove(f)
 
 # ------------------------------------------------------------------ staff

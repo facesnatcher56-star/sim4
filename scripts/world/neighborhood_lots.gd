@@ -42,6 +42,12 @@ static func entry_tile(lot_id: String) -> Vector2i:
 		return Vector2i(-1, -1)
 	return r.get("door", r["entry"])
 
+## The lot's own street gate tile (inside the rect, next to the sidewalk): where crowd NPCs walk in and out.
+static func gate_tile(lot_id: String) -> Vector2i:
+	var rg = _regions()
+	var r: Dictionary = {} if rg == null else rg.by_lot(lot_id)
+	return Vector2i(-1, -1) if r.is_empty() else (r["entry"] as Vector2i)
+
 ## Street tile just outside the lot's gate.
 static func street_tile(lot_id: String) -> Vector2i:
 	var rc := rect_of(lot_id)
@@ -123,10 +129,15 @@ static func detach_travel(f) -> void:
 		f.remove_buff("away")
 
 # ------------------------------------------------------------------ region watcher
+const DOOR_REACH := 2           # a walker counts as "in" a lot once it is this close (tiles) to its gate or door
+const RESUME_MAX_MIN := 180     # a trip cut short by work / an emergency is resumed within this many game minutes, else dropped
+const RESUME := "resume_walk"   # meta [lot id, game minute the walk was cut]
+
 static func on_minute() -> void:
 	for f in SysUtil.residents():
 		if SysUtil.is_away(f):
 			continue
+		_resume_walk(f)
 		var now: String = lot_at(f.tile)
 		if not f.has_meta(IN_LOT):
 			f.set_meta(IN_LOT, now)
@@ -135,14 +146,65 @@ static func on_minute() -> void:
 		if now == prev:
 			continue
 		var heading: String = walking_to(f)
-		if f.current != null and f.current.state == "walking" and heading != now:
+		var walking: bool = f.current != null and f.current.state == "walking"
+		if walking and heading != now:
 			continue          # just passing through
+		if walking and prev == "" and now != "" and not at_door(f.tile, now):
+			continue          # walking in, but not through the gate / door (cut across the lawn): not inside yet
 		f.set_meta(IN_LOT, now)
 		if prev != "":
 			_on_leave(f, prev)
 		if now != "":
 			_on_enter(f, now)
 
+## Within DOOR_REACH tiles of the lot's street gate or its door tile.
+static func at_door(tile: Vector2i, lot_id: String) -> bool:
+	var rg = _regions()
+	var r: Dictionary = {} if rg == null else rg.by_lot(lot_id)
+	if r.is_empty():
+		return true
+	for key in ["entry", "door"]:
+		if r.has(key):
+			var d: Vector2i = r[key]
+			if maxi(absi(d.x - tile.x), absi(d.y - tile.y)) <= DOOR_REACH:
+				return true
+	return false
+
+## A player trip (go_here tagged with a lot) was cut short by something more urgent: remember it, resume it afterwards.
+static func on_walk_cut(f, reason: String, lot_id: String) -> void:
+	if f == null or lot_id == "" or not (reason in ["preempted", "interrupted"]):
+		return
+	if str(f.get_meta("walk_to", "")) == lot_id:
+		f.set_meta(RESUME, [lot_id, SimEnv.now_min()])
+
+static func _resume_walk(f) -> void:
+	if not f.has_meta(RESUME) or walking_to(f) != "":
+		return
+	var rw: Array = f.get_meta(RESUME)
+	f.remove_meta(RESUME)
+	var lot_id: String = str(rw[0])
+	if SimEnv.now_min() - int(rw[1]) > RESUME_MAX_MIN or lot_at(f.tile) == lot_id:
+		f.remove_meta("walk_to")
+		Neighborhood.loc.erase(int(f.id))
+		if lot_at(f.tile) != lot_id:
+			SysUtil.notify("%s gave up on going to %s." % [f.name, Neighborhood.label_of(lot_id)], "travel")
+		return
+	walk_to(f, entry_tile(lot_id), lot_id)        # queued behind whatever is more urgent, ahead of autonomy
+
+## A folk with nothing to do on a street and an urgent need heads home (once per ~hour).
+static func stranded_home(f) -> bool:
+	var now := SimEnv.now_min()
+	if lot_at(f.tile) != "" or now < int(f.get_meta("home_try", 0)) or not SysUtil.is_resident(f):
+		return false
+	var urgent := false
+	for n in f.needs:
+		if Autonomy.urgency(f, str(n)) > 4.0:
+			urgent = true
+	if not urgent:
+		return false
+	f.set_meta("home_try", now + 60)
+	var home: Vector2i = entry_tile(Neighborhood.HOME)
+	return home.x >= 0 and walk_to(f, home, Neighborhood.HOME)
 static func mark_inside(f, lot_id: String) -> void:
 	f.set_meta(IN_LOT, lot_id)
 

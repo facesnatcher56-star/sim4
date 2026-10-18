@@ -2,9 +2,12 @@ class_name ScenarioCard
 extends PanelContainer
 ## One start option on the new-game screen: floor-plan thumbnail, title, short description and chips (who / where / money / tone).
 signal picked(scenario_id: String)
+signal rerolled(scenario_id: String)
 
 var scenario_id := ""
 var money_label: Label
+var thumb: LotThumb
+var reroll_btn: Button
 var _selected := false
 
 static func coins_text(n: int) -> String:
@@ -24,10 +27,15 @@ func setup(def: Dictionary, funds: int) -> void:
 	var v := VBoxContainer.new()
 	v.add_theme_constant_override("separation", 6)
 	add_child(v)
-	var thumb := LotThumb.new()
+	thumb = LotThumb.new()
 	thumb.template_id = str(Neighborhood.start_def(str(def.get("start_id", "classic"))).get("template", "classic"))
 	thumb.custom_minimum_size = Vector2(0, 156)
 	v.add_child(thumb)
+	reroll_btn = Button.new()
+	reroll_btn.text = "Reroll home"
+	reroll_btn.tooltip_text = "Show another floor plan for this start"
+	reroll_btn.pressed.connect(func(): rerolled.emit(scenario_id))
+	v.add_child(reroll_btn)
 	var head := HBoxContainer.new()
 	v.add_child(head)
 	var title := UIU.make_label(str(def["label"]), 20)
@@ -53,6 +61,12 @@ func setup(def: Dictionary, funds: int) -> void:
 		if ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_LEFT:
 			picked.emit(scenario_id))
 	set_selected(false)
+
+## Show this home layout (and the Reroll button only when the start has more than one to offer).
+func set_home(template_id: String, can_reroll: bool) -> void:
+	thumb.template_id = template_id
+	reroll_btn.visible = can_reroll
+	thumb.tooltip_text = str(LotLoader.template(template_id).get("label", ""))
 
 func set_funds(funds: int) -> void:
 	money_label.text = coins_text(funds)

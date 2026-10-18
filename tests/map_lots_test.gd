@@ -4,6 +4,10 @@ extends RefCounted
 ## standable, only the home lot is buildable, ownership is per object (home = household, everything else community).
 
 const Kit = preload("res://tests/hood_kit.gd")
+const SKit = preload("res://tests/start_kit.gd")
+const SEEDS := [11, 2222, 33333, 444444, 5555555]
+const SCENARIOS := ["solo", "couple", "family", "roommates", "sandbox"]
+const HOME_POOL := {"solo": "small", "couple": "medium", "family": "medium", "roommates": "large", "sandbox": "classic"}
 
 var fails: Array = []
 
@@ -13,19 +17,65 @@ func _check(cond: bool, msg: String) -> void:
 
 func run() -> Array:
 	fails = []
-	for start in ["classic", "small"]:
-		_whole_map(start)
+	for i in SEEDS.size():       # real new-game path, five world seeds, every scenario
+		var sc: String = SCENARIOS[i]
+		SKit.new_game(sc, "normal", {}, -1, {"world_seed": SEEDS[i]})
+		_whole_map("%s/%d" % [sc, SEEDS[i]])
+		_distinct(sc, int(SEEDS[i]))
+	SKit.teardown()
+	_same_seed_same_map()
 	_build_rules()
 	_ownership()
 	Kit.teardown()
 	return fails
 
+## All 11 lots pairwise distinct layouts; home from the scenario's pool; seed saved.
+func _distinct(sc: String, wseed: int) -> void:
+	var seen: Dictionary = {}
+	var rg: WorldRegions = Kit.world().regions
+	for l in Neighborhood.lots():
+		var tid: String = str(rg.by_lot(str(l["id"]))["template"])
+		var sig: String = LotPicker.signature(tid)
+		_check(not seen.has(sig), "%s/%d: %s and %s share a layout (%s)" % [sc, wseed, str(l["id"]), str(seen.get(sig, "")), tid])
+		seen[sig] = str(l["id"])
+	var home: String = Neighborhood.home_template
+	_check(home.begins_with(str(HOME_POOL[sc]) + "_") or (sc == "sandbox" and home == "classic"), "%s: home %s is not from the %s pool" % [sc, home, HOME_POOL[sc]])
+	_check(rg.home()["template"] == home and Neighborhood.world_seed == wseed, "%s: home template / seed recorded" % sc)
+	for lid in ["townie_a", "townie_b", "townie_c"]:
+		var t: String = Neighborhood.template_of(lid)
+		_check(HouseGenerator.pool({"townie_a": "medium", "townie_b": "small", "townie_c": "large"}[lid]).has(t) or t == lid, "%s: %s got %s" % [sc, lid, t])
+	for l in Neighborhood.lots():          # venues: an alternate of their own type
+		if str(l.get("type", "")) in ["park", "cafe", "gym", "library", "market", "office", "school"]:
+			_check(HouseGenerator.venue_pool(str(l["type"])).has(Neighborhood.template_of(str(l["id"]))), "%s: venue %s wrong template" % [sc, l["id"]])
+	# save -> new game with another seed -> restore: template ids and seed come back, same layouts
+	var before: Dictionary = {}
+	for l in Neighborhood.lots():
+		before[str(l["id"])] = Neighborhood.template_of(str(l["id"]))
+	var snap: Variant = JSON.parse_string(JSON.stringify(SaveLoad.snapshot("seeds")))
+	SKit.new_game("solo", "normal", {}, -1, {"world_seed": wseed + 1})
+	_check(SaveLoad.restore(snap), "%s/%d: restore" % [sc, wseed])
+	_check(Neighborhood.world_seed == wseed, "%s/%d: world seed restored (%d)" % [sc, wseed, Neighborhood.world_seed])
+	for lid in before:
+		_check(Neighborhood.template_of(lid) == before[lid], "%s/%d: %s template %s -> %s after load" % [sc, wseed, lid, before[lid], Neighborhood.template_of(lid)])
+
+## Same seed -> identical map; another seed -> a different one.
+func _same_seed_same_map() -> void:
+	var a: Dictionary = LotPicker.pick(77, "medium")
+	_check(a == LotPicker.pick(77, "medium"), "same seed, same picks")
+	var differs := false
+	for s in range(78, 90):
+		differs = differs or LotPicker.pick(s, "medium") != a
+	_check(differs, "other seeds give other maps")
+	_check(LotPicker.pick(5, "medium", "medium_03")["home"] == "medium_03", "a chosen home stays")
+
 func _whole_map(start: String) -> void:
-	Kit.new_game(start)
 	var W: Node = Kit.world()
 	var rg: WorldRegions = W.regions
 	_check(W.width == World.MAP_W and W.height == World.MAP_H, "%s: the map is %dx%d" % [start, W.width, W.height])
 	var min_objects := {"classic": 40, "small": 14, "medium": 30, "large": 50, "park": 25, "cafe": 30, "gym": 25, "library": 40, "market": 25, "office": 30, "school": 40}
+	for gid in LotLoader.generated_ids():
+		var g: Dictionary = LotLoader.template(str(gid))
+		min_objects[gid] = {"small": 14, "medium": 30, "large": 50, "classic": 40}.get(str(g.get("size", "")), 10) if str(g.get("kind", "")) == "home" else int(min_objects.get(str(g.get("venue", "")), 10))
 	var lots: Array = Neighborhood.lots()
 	_check(lots.size() == 11, "%s: 11 lots (%d)" % [start, lots.size()])
 	var per_lot: Dictionary = {}

@@ -3,7 +3,7 @@ extends RefCounted
 ## Runtime instance of an interaction definition from data/interactions.json.
 ## Lifecycle: queued -> walking -> running -> finished | cancelled.
 
-const WALK_MIN_PER_TILE := 0.5
+const WALK_MIN_PER_TILE := 0.3     # game minutes per tile (3.3 tiles per game minute): home -> cafe (89 tiles) ~ 27 min, next lot ~ 10 min; FolkView speeds up to keep pace
 const PRIORITY := {"low": 0, "normal": 1, "high": 2, "urgent": 3}
 const PLAYER_BONUS := 10
 
@@ -143,11 +143,14 @@ func start() -> bool:
 		use_tile = target_folk.tile
 	elif goto_tile.x >= 0:
 		use_tile = goto_tile
-	var n := WorldIface.path_length(actor.tile, use_tile)
+	var n := 0                           # the real route is computed ONCE here; tick() only walks along it
+	path = []
+	if use_tile != actor.tile:
+		path = WorldIface.find_path(actor.tile, use_tile)
+		n = path.size() if not path.is_empty() else WorldIface.path_length(actor.tile, use_tile)
 	if n < 0:
 		_release()
 		return false
-	path = WorldIface.find_path(actor.tile, use_tile) if n > 0 else []
 	travel_total = n * WALK_MIN_PER_TILE
 	travel_left = travel_total
 	actor.current = self
@@ -268,6 +271,8 @@ func finish(p_success: bool = true) -> void:
 	actor.posture = "stand"
 	actor.refresh_mood()
 	SimEnv.emit("interaction_finished", actor.id, def_id, p_success)
+	if not p_success and def_id == "go_here" and params.has("lot"):
+		NeighborhoodLots.on_walk_cut(actor, cancel_reason, str(params["lot"]))      # a trip cut short by something urgent is resumed afterwards
 	SimEnv.emit("queue_changed", actor.id)
 
 ## Stop early. reason: "interrupted" | "preempted" | "broken" | "object_removed" | "player" | ...

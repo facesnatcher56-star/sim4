@@ -22,6 +22,13 @@ func run() -> Array:
 	var ids: Array = LotLoader.template_ids()
 	_check(ids.size() >= 11, "classic + 3 homes + venues expected, got %s" % str(ids))
 	var min_objects := {"classic": 40, "small": 14, "medium": 30, "large": 50, "park": 25, "cafe": 30, "gym": 25, "library": 40, "market": 25, "office": 30, "school": 40}
+	for gid in LotLoader.generated_ids():          # generated layouts: the generator report's minimums per size class
+		var g: Dictionary = LotLoader.template(str(gid))
+		if str(g.get("kind", "")) == "home":
+			min_objects[gid] = {"small": 14, "medium": 30, "large": 50, "classic": 40}.get(str(g.get("size", "")), 14)
+		else:
+			min_objects[gid] = int(min_objects.get(str(g.get("venue", "")), 10))
+	ids.append_array(LotLoader.generated_ids())
 	for tid in ids:
 		var ok: bool = LotLoader.apply(str(tid))
 		var rep: Dictionary = LotLoader.report

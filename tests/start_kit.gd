@@ -14,7 +14,7 @@ static func clock() -> Node:
 	return root().get_node("Clock")
 
 ## Start `scenario_id` (preset household) at `diff`. `h` replaces the generated household (custom play).
-static func new_game(scenario_id: String, diff: String = "normal", h: Dictionary = {}, funds_base: int = -1) -> Array:
+static func new_game(scenario_id: String, diff: String = "normal", h: Dictionary = {}, funds_base: int = -1, extra: Dictionary = {}) -> Array:
 	SimEnv.release_standalone()
 	WorldIface.stub = null
 	WorldIface.coins.clear()
@@ -30,6 +30,7 @@ static func new_game(scenario_id: String, diff: String = "normal", h: Dictionary
 	mgr.autosave_enabled = false
 	mgr.setup()
 	var opts := {"scenario": scenario_id, "difficulty": diff, "funds": Scenario.funds_for(scenario_id, diff, funds_base)}
+	opts.merge(extra, true)      # e.g. world_seed, home_template
 	return NewGame.start(mgr, h, str(def.get("start_id", "classic")), opts)
 
 static func teardown() -> void:

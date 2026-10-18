@@ -106,6 +106,7 @@ func _fill(f: Folk) -> void:
 	var choice := Autonomy.choose(f)
 	if choice.is_empty():
 		f.idle_until_min = now + IDLE_RETRY_MIN
+		NeighborhoodLots.stranded_home(f)          # nothing to do out on the street and a need is pressing: head home
 		return
 	var ir2 := Interaction.create(str(choice["interaction_id"]), f, int(choice["target_id"]), false)
 	if ir2 == null or not ir2.start():

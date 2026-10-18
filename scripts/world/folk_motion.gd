@@ -2,27 +2,43 @@ extends "res://scripts/world/folk_look.gd"
 ## FolkView layer: path following, facing, social partner alignment.
 
 
+const MAX_SLICE := 24     # a tile jump longer than this (fast forward, fast travel, loading) is not animated: the folk is simply there
+
+
 func _update_waypoints(f) -> void:
 	if f.tile == _last_tile:
 		return
 	var d: Vector2i = f.tile - _last_tile
+	var far: int = maxi(absi(d.x), absi(d.y))
 	if _last_tile.x < -900:
 		position = World.tile_to_pos(f.tile)
 		_waypoints.clear()
-	elif maxi(absi(d.x), absi(d.y)) <= 1:
+	elif far <= 1:
 		_waypoints.append(World.tile_to_pos(f.tile))
-	elif maxi(absi(d.x), absi(d.y)) > 8:
-		position = World.tile_to_pos(f.tile)       # fast travel / instant move: the folk is simply there
-		_waypoints.clear()
 	else:
-		var p: Array = World.find_path(_last_tile, f.tile)
-		if p.is_empty():
-			position = World.tile_to_pos(f.tile)   # teleport (unreachable / loaded game)
+		var seg: Array = _route_slice(f, _last_tile, f.tile)
+		if seg.is_empty() and far <= 8:
+			seg = World.find_path(_last_tile, f.tile)          # short hop off any known route
+		if seg.is_empty() or seg.size() > MAX_SLICE:
+			position = World.tile_to_pos(f.tile)               # teleport (fast travel, fast forward, unreachable, loaded game)
 			_waypoints.clear()
 		else:
-			for t in p:
+			for t in seg:
 				_waypoints.append(World.tile_to_pos(t))
 	_last_tile = f.tile
+
+
+## The walker's own route (computed once by Interaction.start) between two tiles it passed: the view follows sidewalks and
+## crosswalks exactly as routed, it never plans a path of its own for a long walk.
+func _route_slice(f, a: Vector2i, b: Vector2i) -> Array:
+	if f.current == null or f.current.path.is_empty():
+		return []
+	var p: Array = f.current.path
+	var i: int = p.find(b)
+	var j: int = p.find(a)
+	if i < 0 or i <= j or (j < 0 and maxi(absi(p[0].x - a.x), absi(p[0].y - a.y)) > 1):
+		return []
+	return p.slice(j + 1, i + 1)
 
 
 func _is_running(f) -> bool:

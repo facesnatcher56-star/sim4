@@ -4,12 +4,12 @@ extends RefCounted
 ## places every lot's template at its region rect (LotLoader.place, origin = rect position), with `World.regions.enforce`
 ## off while it works, then switches build rules on (only the home region stays buildable).
 ##
-##   MapLots.build(World, home_template) -> {ok, reports: {lot_id: LotLoader.report}, seconds}
+##   MapLots.build(World, home_template, picks = {lot_id: template}) -> {ok, reports: {lot_id: LotLoader.report}, seconds}
 ##   MapLots.walk_spot(lot_id)           tile inside the lot where visitors arrive / walk to (door side, standable)
 ##   MapLots.gate(lot_id)                street-side gate tile of the lot (last row of its rect)
 ## Region fields set here: template (home = the chosen one), door = walk_spot.
 
-static func build(w, home_template: String) -> Dictionary:
+static func build(w, home_template: String, picks: Dictionary = {}) -> Dictionary:
 	var t0 := Time.get_ticks_usec()
 	MapBuilder.build(w)
 	var rg: WorldRegions = w.regions
@@ -23,6 +23,7 @@ static func build(w, home_template: String) -> Dictionary:
 		if str(r["kind"]) == "home":
 			home = r
 			continue
+		r["template"] = str(picks.get(str(r["lot"]), r["template"]))
 		ok = _place(w, r, str(r["template"]), reports) and ok
 	if not home.is_empty():          # last: leaves the home's spawn tiles in the world
 		home["template"] = home_template

@@ -13,6 +13,7 @@ const DISLIKE_BONUS := -3.0
 const DISTANCE_PENALTY := 0.15
 const TOP_N := 3
 const DETAIL_N := 8               # candidates that get a full debug breakdown in last_debug
+static var max_scored: int = 120      # hard budget: at most this many candidates are path-scored per choose() (nearest first); tests lower / raise it
 
 static var last_debug: Dictionary = {}   # folk_id -> debug breakdown (see choose())
 static var rng: RandomNumberGenerator = null
@@ -308,7 +309,7 @@ static func choose(folk) -> Dictionary:
 	var scored: Array = []
 	var all_rec: Array = []
 	var profiles: Dictionary = {}
-	for cand in gather(folk, all_rec):
+	for cand in _budget(folk, gather(folk, all_rec)):
 		var rec := evaluate(folk, cand, profiles, false, true)
 		all_rec.append(rec)
 		if not rec["skipped"]:
@@ -356,3 +357,22 @@ static func choose(folk) -> Dictionary:
 			"result": result,
 		}
 	return result
+
+## Keep the max_scored candidates nearest to the folk (cheap Manhattan pre-sort) so a decision never costs more than a fixed
+## number of path queries, however many objects / folk share the lot.
+static func _budget(folk, cands: Array) -> Array:
+	if cands.size() <= max_scored:
+		return cands
+	var keyed: Array = []
+	for c in cands:
+		var t: Vector2i = folk.tile
+		if c["obj"] != null:
+			t = c["obj"].tile
+		elif c["folk"] != null:
+			t = c["folk"].tile
+		keyed.append([absi(t.x - folk.tile.x) + absi(t.y - folk.tile.y), c])
+	keyed.sort_custom(func(a, b): return a[0] < b[0])
+	var out: Array = []
+	for i in max_scored:
+		out.append(keyed[i][1])
+	return out

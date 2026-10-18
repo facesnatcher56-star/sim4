@@ -30,7 +30,9 @@ func _process(_d: float) -> bool:
 		print("simulated %d days in %d ms" % [_days, Time.get_ticks_msec() - t0])
 		_report()
 	if _frames == 60:
-		root.get_texture().get_image().save_png(_prefix + "_end.png")
+		var tex := root.get_texture()
+		if tex != null and DisplayServer.get_name() != "headless":
+			tex.get_image().save_png(_prefix + "_end.png")
 		quit(0)
 	return false
 

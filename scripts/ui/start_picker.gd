@@ -9,6 +9,8 @@ var selected_id := ""
 var difficulty := "normal"
 var household: Dictionary = {}
 var start_id := "classic"
+var world_seed := 0                # drawn per picker opening; the whole map follows from it
+var homes: Dictionary = {}         # scenario id -> home template shown on its card
 var funds_base := -1               # Free Play funds option (-1 = the scenario's own funds)
 var cards: Dictionary = {}
 var diff_buttons: Dictionary = {}
@@ -44,6 +46,7 @@ func _ready() -> void:
 		row.add_child(card)
 		card.setup(s, Scenario.funds_for(str(s["id"]), Scenario.default_difficulty()))
 		card.picked.connect(select)
+		card.rerolled.connect(reroll_home)
 		cards[str(s["id"])] = card
 	_build_options(root)
 	var bottom := HBoxContainer.new()
@@ -105,6 +108,11 @@ func open() -> void:
 	if creator != null:
 		creator.visible = false
 	difficulty = Scenario.default_difficulty()
+	world_seed = randi() & 0x7fffffff
+	homes.clear()
+	for k in cards:
+		var sid := str(Scenario.def(k).get("start_id", "classic"))
+		_set_home(k, LotPicker.home_for(sid, world_seed + hash(k)), sid)
 	select(Scenario.default_id())
 	set_difficulty(difficulty)
 	visible = true
@@ -116,6 +124,8 @@ func select(scenario_id: String) -> void:
 	var def := Scenario.def(scenario_id)
 	household = HouseholdSetup.make_household(scenario_id)
 	start_id = str(def.get("start_id", "classic"))
+	if not LotPicker.home_pool(start_id).has(homes.get(scenario_id, "")):
+		_set_home(scenario_id, LotPicker.home_for(start_id, world_seed), start_id)
 	funds_base = -1
 	funds_opt.clear()
 	for o in def.get("funds_options", []):
@@ -127,6 +137,16 @@ func select(scenario_id: String) -> void:
 	for k in cards:
 		(cards[k] as ScenarioCard).set_selected(k == scenario_id)
 	_refresh()
+
+func _set_home(scenario_id: String, tid: String, sid: String) -> void:
+	homes[scenario_id] = tid
+	(cards[scenario_id] as ScenarioCard).set_home(tid, LotPicker.home_pool(sid).size() > 1)
+
+## Another floor plan of the same start (never the one shown now).
+func reroll_home(scenario_id: String) -> void:
+	if scenario_id != selected_id:
+		select(scenario_id)
+	_set_home(scenario_id, LotPicker.home_for(start_id, randi(), str(homes.get(scenario_id, ""))), start_id)
 
 func set_difficulty(d: String) -> void:
 	difficulty = d
@@ -165,6 +185,8 @@ func _on_start() -> void:
 
 func _on_creator_done(h: Dictionary, sid: String) -> void:
 	household = h
+	if sid != start_id:          # another kind of home chosen in Free Play: its own pool
+		_set_home(selected_id, LotPicker.home_for(sid, world_seed), sid)
 	start_id = sid
 	creator.visible = false
 	_refresh()
@@ -172,4 +194,5 @@ func _on_creator_done(h: Dictionary, sid: String) -> void:
 		_emit_chosen()
 
 func _emit_chosen() -> void:
-	chosen.emit({"scenario": selected_id, "difficulty": difficulty, "start_id": start_id, "funds": funds(), "household": household})
+	chosen.emit({"scenario": selected_id, "difficulty": difficulty, "start_id": start_id, "funds": funds(), "household": household,
+		"home_template": str(homes.get(selected_id, "")), "world_seed": world_seed})

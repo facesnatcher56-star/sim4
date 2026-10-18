@@ -38,7 +38,7 @@ func _bills_and_needs() -> void:
 	var bills := {}
 	var drops := {}
 	for d in ["relaxed", "normal", "hard"]:
-		var folk: Array = Kit.new_game("solo", d)
+		var folk: Array = Kit.new_game("solo", d, {}, -1, {"world_seed": 5})      # same seed = same home = same lot value
 		bills[d] = Economy.compute_bill(1)
 		var f: Folk = folk[0]
 		var before: float = f.get_stat_value("hunger")

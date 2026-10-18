@@ -37,6 +37,16 @@ func _defaults() -> void:
 		_check(str(cfg["scenario"]) == "solo" and (cfg["household"]["folk"] as Array).size() == 1, "default start is one Folk")
 		_check(int(cfg["funds"]) == 4000 and str(cfg["start_id"]) == "small", "default start: 4000 coins in the studio")
 		_check(HouseholdSetup.validate(cfg["household"]) == "", "default household is valid")
+		_check(str(cfg["home_template"]).begins_with("small_"), "the card shows a studio from the small pool (%s)" % str(cfg["home_template"]))
+		_check((sp.cards["solo"] as ScenarioCard).thumb.template_id == cfg["home_template"], "the thumbnail shows the chosen home")
+	var first: String = str(sp.homes["solo"])
+	for i in 6:      # Reroll home: always another layout of the pool, and it is what Start sends
+		sp.reroll_home("solo")
+		_check(str(sp.homes["solo"]) != first and str(sp.homes["solo"]).begins_with("small_"), "reroll gives another small home (%s)" % sp.homes["solo"])
+		first = str(sp.homes["solo"])
+	got.clear()
+	sp.start_btn.pressed.emit()
+	_check(got.size() == 1 and got[0]["home_template"] == first, "Start sends the rerolled home")
 	sp.select("sandbox")
 	_check(sp.start_btn.text == "Create Household" and not sp.custom_btn.visible, "Free Play creates a household instead of starting")
 	sp.queue_free()
@@ -60,7 +70,7 @@ func _solo() -> void:
 	_built(folk, "solo", 1)
 	_check(Scenario.goals().size() == 4, "solo has 4 goals")
 	_check(str(folk[0].age_stage) == "adult" and folk[0].traits.size() == 3, "solo: one adult with 3 traits")
-	_check(Neighborhood.home_template == "small", "solo lives in the studio")
+	_check(Neighborhood.home_template.begins_with("small_"), "solo lives in the studio (%s)" % Neighborhood.home_template)
 	_check(Kit.world().starter_spawn_tiles.has(folk[0].tile), "solo spawns at the door")
 
 func _couple() -> void:
@@ -70,7 +80,7 @@ func _couple() -> void:
 	var b: int = folk[1].id
 	_check(RelationshipBits.bit_for(a, b) == "partner" and RelationshipBits.bit_for(b, a) == "partner", "couple: partners both ways (%s)" % RelationshipBits.bit_for(a, b))
 	_check(RelationshipService.value(a, b, "romance") >= 45.0, "couple: romance high enough to try for a baby")
-	_check(Neighborhood.home_template == "medium", "couple: medium home")
+	_check(Neighborhood.home_template.begins_with("medium_"), "couple: medium home (%s)" % Neighborhood.home_template)
 
 func _family() -> void:
 	var folk: Array = Kit.new_game("family")
@@ -92,7 +102,7 @@ func _roommates() -> void:
 	for i in 3:
 		for j in range(i + 1, 3):
 			_check(not FamilyTree.is_kin(folk[i].id, folk[j].id) and FamilyTree.spouse_of(folk[i].id) < 0, "roommates: unrelated")
-	_check(Neighborhood.home_template == "large", "roommates: large home")
+	_check(Neighborhood.home_template.begins_with("large_"), "roommates: large home (%s)" % Neighborhood.home_template)
 
 func _member(nm: String, stage: String, rel: String, asp: String = "") -> Dictionary:
 	return {"name": nm, "stage": stage, "rel": rel, "traits": HouseholdSetup.random_traits(HouseholdSetup.trait_count(stage)), "aspiration": asp,

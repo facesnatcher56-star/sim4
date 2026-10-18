@@ -47,7 +47,8 @@ func _run() -> void:
 	await _frames(5)
 	var W = root.get_node("World")
 	var t0 := Time.get_ticks_usec()
-	_main.start_new_game(_main.default_household())
+	var shot_seed: int = int(OS.get_environment("SHOT_SEED")) if OS.get_environment("SHOT_SEED") != "" else -1      # SHOT_SEED=n: fixed world seed
+	_main.start_new_game(_main.default_household(), "classic", {"world_seed": shot_seed})
 	await _frames(3)
 	print("start_new_game + 3 frames: %.0f ms, %d regions" % [float(Time.get_ticks_usec() - t0) / 1000.0, W.regions.regions.size()])
 	await _frames(20)

@@ -200,6 +200,9 @@ static func _begin_leave(sit: Dictionary) -> void:
 			f.cancel_current("leaving")
 			f.clear_queue()
 			f.add_buff("cheered_up")
+			var out := Interaction.create_goto(f, entrance(), false)       # guests walk to the door before they are gone
+			if out != null:
+				f.enqueue(out)
 	sit["leave_done_min"] = SysUtil.now() + 8
 
 static func _finish_situation(sit: Dictionary) -> void:

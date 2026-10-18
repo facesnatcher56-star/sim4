@@ -19,6 +19,9 @@ func run() -> Array:
 	_fast_travel()
 	_save_mid_walk()
 	_visitors_walk_in()
+	_sidewalk_walk()
+	_interrupted_trip()
+	_leavers_walk_out()
 	Kit.teardown()
 	return fails
 
@@ -33,7 +36,7 @@ func _walk_to_cafe() -> void:
 	_check(bool(r["ok"]), "walk to the cafe starts: %s" % str(r.get("reason", "")))
 	var mins: int = int(r["minutes"])
 	print("  [walk] home -> cafe: %d min (path %d tiles)" % [mins, WorldIface.path_length(start, Neighborhood.entry_tile("cafe"))])
-	_check(mins >= 15 and mins <= 90, "walking time from path length is plausible (%d min)" % mins)
+	_check(mins >= 8 and mins <= 45, "walking time from path length is plausible (%d min)" % mins)
 	_check(not mira.has_meta("away") and Neighborhood.heading_to(mira.id) == "cafe" and Neighborhood.traveling(mira.id), "the folk is walking, not hidden")
 	Kit.run(3)
 	_check(mira.current != null and mira.current.def_id == "go_here", "walking is a go_here interaction (%s)" % (mira.current.def_id if mira.current != null else "none"))
@@ -71,8 +74,9 @@ func _fee_on_arrival() -> void:
 	WorldIface.coins[1] = 15
 	var r2: Dictionary = Neighborhood.travel([wren.id], "gym", {"quiet": true})
 	_check(bool(r2["ok"]), "affordable trip starts")
-	WorldIface.coins[1] = 0                            # spent the money on the way
-	Kit.run(int(r2["minutes"]) + 12)
+	for _m in int(r2["minutes"]) + 12:                  # spent the money on the way (and stays broke: wages may arrive on a long walk)
+		WorldIface.coins[1] = 0
+		Kit.run(1)
 	_check(Neighborhood.where(wren.id) != "gym" and Kit.has_note("Entry costs"), "no money at the gate: turned away (wren at %s %s heading %s, doing %s, %d min planned)" % [Neighborhood.where(wren.id), str(wren.tile), Neighborhood.heading_to(wren.id), wren.current.def_id if wren.current != null else "-", int(r2["minutes"])] + " denied=%s in_lot=%s coins=%d notes=%s" % [str(wren.get_meta("denied", "")), str(wren.get_meta("in_lot", "?")), Economy.balance(1), str(Kit.notes.slice(-5))])
 
 func _closed_hours() -> void:
@@ -160,3 +164,100 @@ func _visitors_walk_in() -> void:
 	_check(Neighborhood.lot_at(g.tile) != "home" or steps > 0, "the guest starts outside")
 	Kit.run(40)
 	_check(Neighborhood.lot_at(g.tile) == "home", "the guest walked into the home lot (%s at %s)" % [Neighborhood.lot_at(g.tile), str(g.tile)])
+
+## The walker follows the sidewalks: every minute it stands on its start lot, the destination lot, a sidewalk or a crosswalk -
+## never on asphalt outside a crosswalk or on the lawn of another lot; it counts as inside only at the gate / door.
+func _sidewalk_walk() -> void:
+	var folk: Array = Kit.new_game("small")
+	var mira: Folk = folk[0]
+	var W: Node = Kit.world()
+	Kit.set_time(2, 12)
+	var r: Dictionary = Neighborhood.travel([mira.id], "cafe", {"quiet": true, "free": true})
+	_check(bool(r["ok"]), "walk to the cafe starts")
+	var home_id: int = W.region_at(mira.tile)
+	var cafe_id: int = W.region_at(Neighborhood.entry_tile("cafe"))
+	var crossed := false
+	var entered_at := Vector2i(-1, -1)
+	var bad: Array = []
+	for m in int(r["minutes"]) + 12:
+		Kit.run(1)
+		for t in _tiles_since(mira):
+			var rid: int = W.region_at(t)
+			var fl: String = W.get_floor(t)
+			crossed = crossed or fl == "crosswalk"
+			if not (rid == home_id or rid == cafe_id or fl == "sidewalk" or fl == "crosswalk"):
+				bad.append("%s (%s, region %d)" % [str(t), fl, rid])
+		if entered_at.x < 0 and str(mira.get_meta("in_lot", "")) == "cafe":
+			entered_at = mira.tile
+	_check(bad.is_empty(), "the walker stays on sidewalks / crosswalks / its own lots; off-route tiles: %s" % str(bad.slice(0, 5)))
+	_check(crossed, "the walk crossed a road on a crosswalk")
+	_check(entered_at.x >= 0 and NeighborhoodLots.at_door(entered_at, "cafe"), "the cafe entry rule fired at the gate / door (tile %s)" % str(entered_at))
+	_check(Neighborhood.where(mira.id) == "cafe", "arrived (%s)" % Neighborhood.where(mira.id))
+
+var _seen: Dictionary = {}
+## Tiles the folk's route passed since the last call (the interaction's path up to its current tile).
+func _tiles_since(f: Folk) -> Array:
+	var out: Array = []
+	if f.current != null and f.current.state == "walking":
+		var p: Array = f.current.path
+		var i: int = p.find(f.tile)
+		for k in range(maxi(int(_seen.get(f.id, -1)) + 1, 0), i + 1):
+			out.append(p[k])
+		_seen[f.id] = i
+	else:
+		_seen[f.id] = -1
+		out.append(f.tile)
+	return out
+
+## A walk cut short by something urgent is resumed; one that cannot be resumed in time is dropped with a toast.
+func _interrupted_trip() -> void:
+	var folk: Array = Kit.new_game("small")
+	var mira: Folk = folk[0]
+	Kit.set_time(2, 12)
+	WorldIface.coins[1] = 500
+	var r: Dictionary = Neighborhood.travel([mira.id], "market", {"quiet": true, "free": true})
+	_check(bool(r["ok"]), "walk to the market starts")
+	Kit.run(4)
+	mira.current.cancel("preempted")                          # work shift / emergency took over
+	_check(mira.has_meta("resume_walk"), "the cut trip is remembered")
+	Kit.run(2)
+	_check(NeighborhoodLots.walking_to(mira) == "market", "and re-issued (%s)" % NeighborhoodLots.walking_to(mira))
+	Kit.run(int(r["minutes"]) + 12)
+	_check(Neighborhood.where(mira.id) == "market", "the interrupted trip still arrived (%s)" % Neighborhood.where(mira.id))
+	# a trip that was cut long ago is dropped with a toast instead of being resumed
+	var tobin: Folk = folk[1]
+	var r2: Dictionary = Neighborhood.travel([tobin.id], "gym", {"quiet": true, "free": true})
+	_check(bool(r2["ok"]), "second walk starts")
+	Kit.run(2)
+	tobin.current.cancel("preempted")
+	tobin.set_meta("resume_walk", ["gym", SimEnv.now_min() - NeighborhoodLots.RESUME_MAX_MIN - 5])
+	Kit.run(2)
+	_check(NeighborhoodLots.walking_to(tobin) == "" and not tobin.has_meta("walk_to"), "a stale cut trip is dropped")
+	_check(Kit.has_note("gave up on going to"), "with a toast")
+
+## NPCs leave a venue on foot: one route to the door (a go_here, no per-minute path search), gone once they reach it.
+func _leavers_walk_out() -> void:
+	var folk: Array = Kit.new_game("small")
+	Kit.set_time(2, 12)
+	Neighborhood.travel([folk[0].id], "cafe", {"instant": true, "free": true, "quiet": true})
+	Kit.run(8)
+	var crowd: Array = Crowd.crowd_folk("cafe")
+	_check(not crowd.is_empty(), "the cafe has a crowd")
+	if crowd.is_empty():
+		return
+	var npc: Folk = crowd[0]
+	var door: Vector2i = Neighborhood.entry_tile("cafe")
+	var start: Vector2i = npc.tile
+	Crowd._start_leaving(npc)
+	_check(npc.has_meta("leaving"), "marked as leaving")
+	Kit.run(1)
+	var moved := npc.tile != start or start == door
+	var seen_walking: bool = npc.current != null and npc.current.def_id == "go_here"
+	var left_after := -1
+	for m in 14:
+		if SysUtil.folk(npc.id) == null:
+			left_after = m
+			break
+		Kit.run(1)
+	_check(moved or seen_walking, "the NPC walks towards the door instead of vanishing")
+	_check(left_after >= 0 or SysUtil.folk(npc.id) == null, "and is gone within the walk-out time")

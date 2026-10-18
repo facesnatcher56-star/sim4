@@ -7,7 +7,10 @@ const CLASSIC_FLOORS := [[4, 4, 9, 9, "carpet"], [10, 4, 13, 9, "tile"], [14, 4,
 	[11, 10, 19, 15, "wood"], [15, 16, 15, 20, "stone"]]
 const CLASSIC_WALLS := [[4, 4, 20, 4], [4, 16, 20, 16], [4, 4, 4, 16], [20, 4, 20, 16], [4, 10, 20, 10], [10, 4, 10, 10], [14, 4, 14, 10], [11, 10, 11, 16]]
 
-var template_id: String = "classic"
+var template_id: String = "classic":
+	set(v):
+		template_id = v
+		queue_redraw()
 const FLOOR_COLORS := {"grass": "#4f7d3f", "dirt": "#7a5c3b", "stone": "#8a8a8a", "concrete": "#6f7478", "wood": "#a9794a", "tile": "#c3d2da", "carpet": "#7a6290"}
 
 func _draw() -> void:

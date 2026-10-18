@@ -5,13 +5,13 @@
   "travel": {"base_min": 5, "per_block_min": 4, "max_min": 40, "toast_seconds": 1.6},
   "pantry": {"units_per_trip": 6, "fridge_max": 10},
   "starts": [
-    {"id": "classic", "label": "Fernwood Classic", "template": "classic", "funds": 5000, "size": "2 bedrooms", "running_costs": "Medium",
+    {"id": "classic", "pool": "classic", "label": "Fernwood Classic", "template": "classic", "funds": 5000, "size": "2 bedrooms", "running_costs": "Medium",
      "description": "The original two-bedroom house with a fenced yard. Balanced and roomy."},
-    {"id": "small", "label": "Starter Studio", "template": "small", "funds": 5000, "size": "Studio", "running_costs": "Low",
+    {"id": "small", "pool": "small", "label": "Starter Studio", "template": "small", "funds": 5000, "size": "Studio", "running_costs": "Low",
      "description": "A cosy one-room flat with a bathroom nook. Little space, but the cheapest to run."},
-    {"id": "medium", "label": "Family Home", "template": "medium", "funds": 5000, "size": "2-3 bedrooms", "running_costs": "Medium",
+    {"id": "medium", "pool": "medium", "label": "Family Home", "template": "medium", "funds": 5000, "size": "2-3 bedrooms", "running_costs": "Medium",
      "description": "Two bedrooms, kitchen-diner, laundry corner and a garden. Fits a small family."},
-    {"id": "large", "label": "Grand Estate", "template": "large", "funds": 5000, "size": "3 bedrooms + extras", "running_costs": "High",
+    {"id": "large", "pool": "large", "label": "Grand Estate", "template": "large", "funds": 5000, "size": "3 bedrooms + extras", "running_costs": "High",
      "description": "Three bedrooms, big kitchen with a bar, fireplace, studio, gym corner and a yard with hot tub. Lots of room and the biggest bills."}
   ],
   "lots": [
@@ -23,8 +23,8 @@
     {"id": "market", "label": "Greenbarrow Market", "type": "market", "template": "market", "pos": [3, 2], "color": "#e0b43c", "blurb": "Groceries for the home fridge, snacks and drinks."},
     {"id": "office", "label": "Brightline Offices", "type": "office", "template": "office", "pos": [4, 0], "color": "#5b8def", "blurb": "Work buildings: desks, computers, a terminal bank."},
     {"id": "school", "label": "Larkfield School", "type": "school", "template": "school", "pos": [0, 0], "color": "#e8913d", "blurb": "Desks and a computer lab on school days."},
-    {"id": "townie_a", "label": "Maple Row 12", "type": "townie_home", "template": "medium", "pos": [1, 3], "color": "#9aa7b4", "blurb": "A neighbour's family home."},
-    {"id": "townie_b", "label": "Cedar Court 4", "type": "townie_home", "template": "small", "pos": [4, 2], "color": "#9aa7b4", "blurb": "A neighbour's snug flat."},
-    {"id": "townie_c", "label": "Hillcrest Manor", "type": "townie_home", "template": "large", "pos": [0, 2], "color": "#9aa7b4", "blurb": "A neighbour's grand house."}
+    {"id": "townie_a", "label": "Maple Row 12", "type": "townie_home", "template": "townie_a", "pool": "medium", "pos": [1, 3], "color": "#9aa7b4", "blurb": "A neighbour's family home."},
+    {"id": "townie_b", "label": "Cedar Court 4", "type": "townie_home", "template": "townie_b", "pool": "small", "pos": [4, 2], "color": "#9aa7b4", "blurb": "A neighbour's snug flat."},
+    {"id": "townie_c", "label": "Hillcrest Manor", "type": "townie_home", "template": "townie_c", "pool": "large", "pos": [0, 2], "color": "#9aa7b4", "blurb": "A neighbour's grand house."}
   ]
 }

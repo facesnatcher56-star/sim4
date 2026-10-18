@@ -80,6 +80,7 @@ var rooms: WorldRooms
 var build: WorldBuild
 var saver: WorldSave
 var regions: WorldRegions
+var nav: WorldNav
 
 
 func _init() -> void:
@@ -90,6 +91,7 @@ func _init() -> void:
 	build = WorldBuild.new(self)
 	saver = WorldSave.new(self)
 	regions = WorldRegions.new(self)
+	nav = WorldNav.new(self)
 
 
 func _ready() -> void:
@@ -131,6 +133,7 @@ func reset(w: int = DEFAULT_W, h: int = DEFAULT_H) -> void:
 	floors.resize(w * h)
 	floors.fill("grass")
 	regions.reset()
+	nav.reset()
 	walls.clear()
 	mounts.clear()
 	objects.clear()
@@ -361,9 +364,9 @@ func get_object(object_id: int): return objs.get_object(object_id)
 func remove_object(object_id: int) -> bool: return objs.remove_object(object_id)
 func can_place(def_id: String, tile: Vector2i, rot: int = 0) -> bool: return objs.can_place(def_id, tile, rot)
 func add_object_state(object_id: int, key: String, delta: float) -> void: objs.add_object_state(object_id, key, delta)
-func find_path(from: Vector2i, to: Vector2i, diagonals: bool = true) -> Array[Vector2i]: return paths.find_path(from, to, diagonals)
-func path_length(from: Vector2i, to: Vector2i) -> float: return paths.path_length(from, to)
-func has_path(from: Vector2i, to: Vector2i) -> bool: return paths.has_path(from, to)
+func find_path(from: Vector2i, to: Vector2i, diagonals: bool = true) -> Array[Vector2i]: return nav.find_path(from, to, diagonals)
+func path_length(from: Vector2i, to: Vector2i) -> float: return nav.path_length(from, to)
+func has_path(from: Vector2i, to: Vector2i) -> bool: return nav.has_path(from, to)
 func nearest_reachable_neighbor(from: Vector2i, target: Vector2i) -> Vector2i: return paths.nearest_reachable_neighbor(from, target)
 func room_cleanliness(tile: Vector2i) -> float: return rooms.room_cleanliness(tile)
 func room_tiles(tile: Vector2i) -> Array[Vector2i]: return rooms.room_tiles(tile)

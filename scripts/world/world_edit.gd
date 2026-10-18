@@ -42,6 +42,7 @@ func set_edge(e: Vector3i, type: String) -> bool:
 	else:
 		world.walls[e] = type
 	world.rooms.mark_dirty_edge(e)
+	world.nav.touch_edge(e)
 	world._emit("walls_changed")
 	return true
 

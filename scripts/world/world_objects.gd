@@ -78,6 +78,7 @@ func _create_object(def_id: String, tile: Vector2i, rot: int, force_id: int) -> 
 		world.mounts[e] = o.id
 		var wt := str(d.get("wall_type", "door"))
 		world.walls[e] = wt
+		world.nav.touch_edge(e)
 	else:
 		for t in o.footprint():
 			if o.is_floor_layer():
@@ -85,6 +86,7 @@ func _create_object(def_id: String, tile: Vector2i, rot: int, force_id: int) -> 
 			else:
 				world._occ[t] = o.id
 				if o.blocks():
+					world.nav.touch_tile(t)
 					world._blocked[t] = true
 	world.regions.index_object(o)
 	world.rooms.mark_dirty(tile)
@@ -100,6 +102,7 @@ func remove_object(object_id: int) -> bool:
 		world.mounts.erase(e)
 		if world.walls.has(e):
 			world.walls[e] = "wall"
+		world.nav.touch_edge(e)
 	else:
 		for t in o.footprint():
 			if o.is_floor_layer():
@@ -109,6 +112,7 @@ func remove_object(object_id: int) -> bool:
 				if world._occ.get(t, -1) == object_id:
 					world._occ.erase(t)
 				world._blocked.erase(t)
+				world.nav.touch_tile(t)
 	world.objects.erase(object_id)
 	world.regions.unindex_object(object_id)
 	world.rooms.mark_dirty(o.tile)
@@ -158,13 +162,16 @@ func objects_in_radius(tile: Vector2i, r: float) -> Array:
 		out.append(s[1])
 	return out
 
-## Objects of the lot the tile stands in, nearest first, within `r` tiles. Streets, parks and open ground have none: on the
-## one big map a folk only ever uses things of its own lot (the sim's autonomy asks for this, see WorldIface.objects_near).
+## Objects of the lot the tile stands in, nearest first, within `r` tiles. Streets, parks and open ground use STREET_REACH
+## instead: only street / park things (bench, fountain, lamp post: objects outside every lot) within that many tiles - a folk
+## on the road never wanders into a lot by itself (that is an explicit player errand, see NeighborhoodTravel).
+const STREET_REACH := 12.0
+
 func objects_in_lot_of(tile: Vector2i, r: float) -> Array:
 	var rg: WorldRegions = world.regions
 	var rid := rg.region_at(tile)
 	if rid == WorldRegions.NONE or not rg.is_lot(rid):
-		return []
+		return _street_objects_near(tile, minf(r, STREET_REACH))
 	var rc: Rect2i = rg.regions[rid]["rect"]
 	var scored: Array = []
 	for c in rg.chunks_in_rect(rc):
@@ -204,3 +211,24 @@ func add_object_state(object_id: int, key: String, delta: float) -> void:
 	if o == null:
 		return
 	set_object_state(object_id, key, float(o.state.get(key, 0.0)) + delta)
+
+func _street_objects_near(tile: Vector2i, r: float) -> Array:
+	var rg: WorldRegions = world.regions
+	var ri := int(ceil(r))
+	var scored: Array = []
+	for c in rg.chunks_in_rect(Rect2i(tile - Vector2i(ri, ri), Vector2i(2 * ri + 1, 2 * ri + 1))):
+		for oid in rg.chunk_objects(c):
+			var o = world.objects.get(oid, null)
+			if o == null or o.is_wall_mounted() or o.is_floor_layer():
+				continue
+			var orid := rg.region_at(o.tile)
+			if orid != WorldRegions.NONE and rg.is_lot(orid):
+				continue
+			var d := Vector2(o.tile).distance_to(Vector2(tile))
+			if d <= r:
+				scored.append([d, o])
+	scored.sort_custom(func(a, b): return a[0] < b[0] or (a[0] == b[0] and a[1].id < b[1].id))
+	var out: Array = []
+	for s in scored:
+		out.append(s[1])
+	return out
