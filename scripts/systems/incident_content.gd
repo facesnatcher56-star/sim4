@@ -7,3 +7,4 @@ extends RefCounted
 static func install() -> void:
 	IncidentDefs.ensure()
 	ContentMerge.install(IncidentDefs.content)
+	HealthContent.install()

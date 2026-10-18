@@ -248,6 +248,8 @@ static func _tell_residents_about(a: int, b: int, text: String) -> void:
 # ------------------------------------------------------------------ visits & invites
 # ------------------------------------------------------------------ burglar
 static func on_hour(hour: int) -> void:
+	if JusticeState.enabled:
+		return          # burglary is the crime track now (CrimeBurglary): a visible townie burglar
 	var b: Dictionary = cfg().get("burglar", {})
 	if hour < int(b.get("hour_min", 1)) or hour > int(b.get("hour_max", 5)):
 		return

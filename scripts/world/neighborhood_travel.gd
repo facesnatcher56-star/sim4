@@ -25,6 +25,8 @@ static func movable(folk_ids: Array) -> Array:
 	return out
 
 static func can_travel(folk_ids: Array, lot_id: String) -> Dictionary:
+	if DisasterState.travel_blocked():
+		return {"ok": false, "reason": "The blizzard has closed the roads."}
 	if Neighborhood.lot(lot_id).is_empty():
 		return {"ok": false, "reason": "Unknown place."}
 	var ids: Array = movable(folk_ids)

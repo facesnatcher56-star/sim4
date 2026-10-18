@@ -1,0 +1,9 @@
+{
+ "causes": {
+  "fire": {
+   "label": "Fire", "text": "{name} could not escape the fire.", "legacy_text": "Their life ended in a house fire.",
+   "grief": {"strength": 1.8, "days": 6}, "child_text": "I'm so scared. Where did they go?",
+   "memory": {"value": -0.9, "text": "the night of the fire"}, "grave_style": "urn", "unexpected": true, "severity": 5
+  }
+ }
+}

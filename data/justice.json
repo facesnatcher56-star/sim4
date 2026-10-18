@@ -1,0 +1,1206 @@
+{
+ "_doc": "Crime and justice (tasks 04 / 09 / 09b), read by scripts/systems/justice_state.gd (table 'justice'). Sections: general, evidence, discovery, investigation, police, burglary, robbery, assault, murder, serial, process, lawyers, trial, charges (severity, bail, weighted sentence options), sentences, prison, appeal, civil, careers. Days are game days (a game year = 28). Tune rates here, not in code.",
+ "general": {
+  "case_cap": 160,
+  "log_hours": 72,
+  "staff_min_pop": 7
+ },
+ "evidence": {
+  "witness_weight": 0.7,
+  "recovered_weight": 0.5,
+  "soft_cap": 0.52,
+  "court_soft_share": 0.5,
+  "motive_weight": 0.3,
+  "opportunity_weight": 0.12,
+  "record_weight": 0.08,
+  "reputation_weight": 0.06,
+  "gossip_weight": 0.06
+ },
+ "discovery": {
+  "missing": {
+   "base_per_hour": 0.07,
+   "relative_per_hour": 0.8,
+   "job_per_hour": 1.0,
+   "school_per_hour": 1.5,
+   "friend_per_hour": 0.05,
+   "threshold": 12.0
+  },
+  "body_found_per_hour": {
+   "street": 0.006,
+   "town": 0.0015,
+   "home": 0.0008
+  },
+  "theft": {
+   "items_per_hour": 0.5,
+   "coins_per_hour": 0.12,
+   "townie_per_hour": 0.15
+  },
+  "search_found_per_day": 0.3,
+  "search_give_up_days": 8
+ },
+ "investigation": {
+  "work_min": 0.09,
+  "work_max": 0.17,
+  "cold_power": 0.15,
+  "missing_power": 0.25,
+  "detective_assist": 0.4,
+  "tip_per_day": 0.05,
+  "min_days": 1,
+  "arrest_threshold": 0.62,
+  "noise": 0.05,
+  "cold_after_days": 30
+ },
+ "police": {
+  "base_strength": 0.55,
+  "per_officer": 0.12,
+  "per_detective": 0.2,
+  "serial_hunt_bonus": 0.4,
+  "max_strength": 1.6,
+  "patrol_per_officer": 0.15,
+  "serial_patrol": 0.5,
+  "uneasy_days_murder": 10,
+  "response_min": [
+   12,
+   30
+  ],
+  "catch_on_scene": 0.5
+ },
+ "burglary": {
+  "lamp_abort": 0.35,
+  "awake_abort": 0.65,
+  "alarm_abort": 0.5,
+  "townie_abort": 0.3,
+  "wake_chance": 0.3,
+  "trace_min": 0.15,
+  "trace_max": 0.4,
+  "coin_share": 0.15,
+  "coin_min": 20,
+  "coin_max": 300,
+  "witness_far": 0.2,
+  "take_after_min": 4,
+  "leave_after_min": 6,
+  "gone_after_min": 5,
+  "item_vs_coins": 0.8,
+  "burglar_weights": {
+   "poor": 3.0,
+   "modest": 1.5,
+   "comfortable": 0.4,
+   "jobless": 2.0,
+   "record": 2.0
+  },
+  "confront": {
+   "flee_base": 0.45,
+   "fitness_bonus": 0.06,
+   "death": 0.01
+  }
+ },
+ "robbery": {
+  "townie_out_share": 0.2,
+  "min_coins": 20,
+  "share": 0.5,
+  "death": 0.004,
+  "report": 0.85
+ },
+ "assault": {
+  "min_level": 3,
+  "min_tension": 45,
+  "base": 0.06,
+  "traits": {
+   "hot_headed": 3.0,
+   "jealous": 1.5,
+   "competitive": 1.2,
+   "easygoing": 0.3,
+   "forgiving": 0.3,
+   "empath": 0.4,
+   "drunk": 2.0
+  },
+  "drunk_buffs": [
+   "tipsy",
+   "drunk"
+  ],
+  "minor": 0.75,
+  "aggressor_hurt": 0.25,
+  "friendship_loss": 25,
+  "trust_loss": 20,
+  "reputation": 5,
+  "police_called": 0.5,
+  "far_anger": 0.5,
+  "far_daily": 0.02
+ },
+ "murder": {
+  "tension_w": 0.5,
+  "grudge_w": 0.45,
+  "hate_w": 0.4,
+  "greed_w": 0.15,
+  "traits": {
+   "hot_headed": 1.5,
+   "jealous": 1.3,
+   "grudgeholder": 1.5,
+   "competitive": 1.1,
+   "forgiving": 0.25,
+   "empath": 0.25,
+   "easygoing": 0.3,
+   "generous": 0.7,
+   "optimist": 0.8
+  },
+  "start_at": 0.55,
+  "build_per_day": 12.0,
+  "decay": 0.88,
+  "warn_at": 45.0,
+  "vow_at": 75.0,
+  "min_days": 6,
+  "daily_chance": 0.02,
+  "far_opportunity": 0.5,
+  "player_lead_min": 180,
+  "witness_public": 0.45,
+  "witness_home": 0.25,
+  "witness_alone": 0.04,
+  "trace_min": 0.25,
+  "trace_max": 0.55
+ },
+ "serial": {
+  "witness_mult": 0.4,
+  "pattern_window_days": 45,
+  "isolated_at": 0.3,
+  "pattern_count": 3,
+  "fear_days": 30,
+  "victim_cap": 5,
+  "mistake_min": 0.15,
+  "mistake_max": 0.4,
+  "catch_per_mistake": 0.12,
+  "gap_min": 4,
+  "gap_max": 12,
+  "player_mult": 0.3
+ },
+ "process": {
+  "trial_delay": [
+   3,
+   5
+  ],
+  "trial_hour": 9,
+  "bail_max_severity": 3
+ },
+ "lawyers": {
+  "public_skill": 0.3,
+  "private": [
+   {
+    "label": "A private lawyer",
+    "fee": 150,
+    "skill": 0.6
+   },
+   {
+    "label": "A star lawyer",
+    "fee": 500,
+    "skill": 0.85
+   }
+  ]
+ },
+ "trial": {
+  "k": 9.0,
+  "doubt": 0.58,
+  "lawyer_weight": 0.55,
+  "charisma_weight": 0.08,
+  "reputation_weight": 0.1,
+  "record_penalty": 0.04,
+  "jury_weight": 0.25,
+  "jurors": 6,
+  "witness_against": 0.1,
+  "witness_for": 0.12,
+  "friend_for": 0.04,
+  "player_weight": 0.14,
+  "lie_weight": 1.4,
+  "hung_z": 0.35,
+  "hung_chance": 0.4,
+  "perjury_chance": 0.3,
+  "perjury_fine": 150,
+  "court_hours": 3
+ },
+ "charges": {
+  "theft": {
+   "label": "Theft",
+   "severity": 1,
+   "bail": 40,
+   "sentences": [
+    {
+     "type": "fine",
+     "weight": 5,
+     "fine": 60
+    },
+    {
+     "type": "service",
+     "weight": 3,
+     "min": 2,
+     "max": 4
+    },
+    {
+     "type": "probation",
+     "weight": 2,
+     "min": 7,
+     "max": 14
+    }
+   ]
+  },
+  "burglary": {
+   "label": "Burglary",
+   "severity": 2,
+   "bail": 120,
+   "sentences": [
+    {
+     "type": "service",
+     "weight": 2,
+     "min": 3,
+     "max": 5
+    },
+    {
+     "type": "probation",
+     "weight": 3,
+     "min": 10,
+     "max": 20
+    },
+    {
+     "type": "jail",
+     "weight": 4,
+     "min": 2,
+     "max": 6
+    },
+    {
+     "type": "fine",
+     "weight": 1,
+     "fine": 150
+    }
+   ]
+  },
+  "assault": {
+   "label": "Assault",
+   "severity": 2,
+   "bail": 100,
+   "sentences": [
+    {
+     "type": "fine",
+     "weight": 3,
+     "fine": 90
+    },
+    {
+     "type": "service",
+     "weight": 3,
+     "min": 2,
+     "max": 5
+    },
+    {
+     "type": "jail",
+     "weight": 2,
+     "min": 2,
+     "max": 4
+    },
+    {
+     "type": "probation",
+     "weight": 2,
+     "min": 8,
+     "max": 14
+    }
+   ]
+  },
+  "robbery": {
+   "label": "Robbery",
+   "severity": 3,
+   "bail": 250,
+   "sentences": [
+    {
+     "type": "jail",
+     "weight": 5,
+     "min": 4,
+     "max": 9
+    },
+    {
+     "type": "prison",
+     "weight": 3,
+     "min": 12,
+     "max": 25
+    },
+    {
+     "type": "probation",
+     "weight": 1,
+     "min": 14,
+     "max": 14
+    }
+   ]
+  },
+  "arson": {
+   "label": "Arson",
+   "severity": 3,
+   "bail": 300,
+   "sentences": [
+    {
+     "type": "jail",
+     "weight": 3,
+     "min": 6,
+     "max": 10
+    },
+    {
+     "type": "prison",
+     "weight": 5,
+     "min": 15,
+     "max": 30
+    }
+   ]
+  },
+  "perjury": {
+   "label": "Perjury",
+   "severity": 1,
+   "bail": 50,
+   "sentences": [
+    {
+     "type": "fine",
+     "weight": 1,
+     "fine": 150
+    }
+   ]
+  },
+  "manslaughter": {
+   "label": "Manslaughter",
+   "severity": 4,
+   "bail": 600,
+   "sentences": [
+    {
+     "type": "prison",
+     "weight": 6,
+     "min": 20,
+     "max": 45
+    },
+    {
+     "type": "jail",
+     "weight": 1,
+     "min": 8,
+     "max": 10
+    }
+   ]
+  },
+  "murder": {
+   "label": "Murder",
+   "severity": 5,
+   "bail": 2000,
+   "sentences": [
+    {
+     "type": "prison",
+     "weight": 6,
+     "min": 70,
+     "max": 160
+    },
+    {
+     "type": "prison",
+     "weight": 2,
+     "life": true,
+     "min": 9999,
+     "max": 9999
+    }
+   ]
+  },
+  "vandalism": {
+   "label": "Vandalism",
+   "severity": 1,
+   "bail": 30,
+   "petty": true,
+   "sentences": [
+    {
+     "type": "fine",
+     "weight": 1,
+     "fine": 40
+    }
+   ]
+  },
+  "trespassing": {
+   "label": "Trespassing",
+   "severity": 1,
+   "bail": 20,
+   "petty": true,
+   "sentences": [
+    {
+     "type": "fine",
+     "weight": 1,
+     "fine": 30
+    }
+   ]
+  },
+  "disturbance": {
+   "label": "Public disturbance",
+   "severity": 1,
+   "bail": 20,
+   "petty": true,
+   "sentences": [
+    {
+     "type": "fine",
+     "weight": 1,
+     "fine": 25
+    }
+   ]
+  },
+  "shoplifting": {
+   "label": "Shoplifting",
+   "severity": 1,
+   "bail": 20,
+   "petty": true,
+   "sentences": [
+    {
+     "type": "fine",
+     "weight": 1,
+     "fine": 30
+    }
+   ]
+  },
+  "fraud": {
+   "label": "Fraud",
+   "severity": 2,
+   "bail": 120,
+   "sentences": [
+    {
+     "type": "fine",
+     "weight": 3,
+     "fine": 180
+    },
+    {
+     "type": "service",
+     "weight": 2,
+     "min": 3,
+     "max": 6
+    },
+    {
+     "type": "probation",
+     "weight": 3,
+     "min": 10,
+     "max": 20
+    },
+    {
+     "type": "jail",
+     "weight": 2,
+     "min": 2,
+     "max": 6
+    }
+   ]
+  },
+  "embezzlement": {
+   "label": "Embezzlement",
+   "severity": 3,
+   "bail": 300,
+   "sentences": [
+    {
+     "type": "probation",
+     "weight": 2,
+     "min": 14,
+     "max": 21
+    },
+    {
+     "type": "jail",
+     "weight": 5,
+     "min": 5,
+     "max": 10
+    },
+    {
+     "type": "prison",
+     "weight": 3,
+     "min": 12,
+     "max": 24
+    }
+   ]
+  },
+  "blackmail": {
+   "label": "Blackmail",
+   "severity": 2,
+   "bail": 150,
+   "sentences": [
+    {
+     "type": "jail",
+     "weight": 4,
+     "min": 3,
+     "max": 8
+    },
+    {
+     "type": "probation",
+     "weight": 3,
+     "min": 10,
+     "max": 20
+    },
+    {
+     "type": "fine",
+     "weight": 2,
+     "fine": 200
+    }
+   ]
+  }
+ },
+ "sentences": {
+  "plea_mult": 0.6,
+  "probation_mult": 1.5,
+  "jail_max_days": 10,
+  "long_warning_days": 80
+ },
+ "prison": {
+  "fight_chance": 0.03,
+  "fight_penalty": 25,
+  "fight_days": 3,
+  "good_per_day": 1.5,
+  "townie_visit": 0.12,
+  "parole_after": 0.5,
+  "parole_behaviour": 65,
+  "parole_chance": 0.12,
+  "visit_friendship": 3,
+  "release_reputation": 6,
+  "forgive_days": 56,
+  "record_blocks": [
+   "police_officer",
+   "detective",
+   "lawyer",
+   "judge"
+  ]
+ },
+ "appeal": {
+  "new_evidence_innocent": 0.012,
+  "new_evidence_guilty": 0.0008,
+  "pardon_behaviour": 90,
+  "pardon_chance": 0.002,
+  "player_overturn": 0.5,
+  "sentence_cut": 0.25,
+  "compensation": 300,
+  "fee": 200
+ },
+ "civil": {
+  "days": [
+   4,
+   7
+  ],
+  "base_win": 0.55,
+  "settle_share": 0.5,
+  "lawsuit": {
+   "chance": 0.3,
+   "amount": 250
+  },
+  "inheritance": {
+   "min_estate": 300,
+   "chance": 0.1
+  }
+ },
+ "careers": {
+  "police_officer": {
+   "label": "Police Officer",
+   "primary_skill": "fitness",
+   "alt_skills": [
+    "charisma"
+   ],
+   "days": [
+    0,
+    1,
+    2,
+    3,
+    4
+   ],
+   "description": "Keep the streets quiet and the nights safe.",
+   "hooks": {
+    "work_case_file": 3,
+    "exercise": 2
+   },
+   "trait_bonus": {
+    "active": 2,
+    "hot_headed": -1,
+    "lazy": -2
+   },
+   "levels": [
+    {
+     "title": "Cadet",
+     "start": 8,
+     "end": 16,
+     "pay": 18,
+     "requires": {}
+    },
+    {
+     "title": "Officer",
+     "start": 8,
+     "end": 16,
+     "pay": 26,
+     "requires": {
+      "skills": {
+       "fitness": 2
+      }
+     }
+    },
+    {
+     "title": "Sergeant",
+     "start": 8,
+     "end": 16,
+     "pay": 36,
+     "requires": {
+      "skills": {
+       "fitness": 4,
+       "charisma": 2
+      }
+     }
+    },
+    {
+     "title": "Chief of Police",
+     "start": 9,
+     "end": 17,
+     "pay": 50,
+     "requires": {
+      "skills": {
+       "logic": 5,
+       "charisma": 4
+      }
+     }
+    }
+   ],
+   "tasks": [
+    {
+     "id": "patrol_files",
+     "label": "Work a case file",
+     "interactions": [
+      "work_case_file"
+     ],
+     "count": 1,
+     "bonus": 6,
+     "min_level": 1
+    }
+   ]
+  },
+  "detective": {
+   "label": "Detective",
+   "primary_skill": "logic",
+   "days": [
+    0,
+    1,
+    2,
+    3,
+    4
+   ],
+   "description": "Follow the clues. Solve the cases of the town.",
+   "hooks": {
+    "work_case_file": 4,
+    "research_online": 2,
+    "read_book": 1
+   },
+   "trait_bonus": {
+    "bookworm": 2,
+    "perfectionist": 1,
+    "lazy": -2
+   },
+   "levels": [
+    {
+     "title": "Junior Detective",
+     "start": 9,
+     "end": 17,
+     "pay": 28,
+     "requires": {
+      "skills": {
+       "logic": 3
+      }
+     }
+    },
+    {
+     "title": "Detective",
+     "start": 9,
+     "end": 17,
+     "pay": 38,
+     "requires": {
+      "skills": {
+       "logic": 5
+      }
+     }
+    },
+    {
+     "title": "Senior Detective",
+     "start": 9,
+     "end": 17,
+     "pay": 50,
+     "requires": {
+      "skills": {
+       "logic": 7
+      }
+     }
+    },
+    {
+     "title": "Chief Inspector",
+     "start": 10,
+     "end": 16,
+     "pay": 66,
+     "requires": {
+      "skills": {
+       "logic": 9,
+       "charisma": 3
+      }
+     }
+    }
+   ],
+   "tasks": [
+    {
+     "id": "work_a_case",
+     "label": "Work a case file",
+     "interactions": [
+      "work_case_file"
+     ],
+     "count": 1,
+     "bonus": 8,
+     "min_level": 1
+    }
+   ]
+  },
+  "lawyer": {
+   "label": "Lawyer",
+   "primary_skill": "charisma",
+   "alt_skills": [
+    "logic"
+   ],
+   "days": [
+    0,
+    1,
+    2,
+    3,
+    4
+   ],
+   "description": "Argue the case. Defend the accused.",
+   "hooks": {
+    "work_case_file": 3,
+    "research_online": 2
+   },
+   "trait_bonus": {
+    "charmer": 2,
+    "honest": 1,
+    "shy": -2
+   },
+   "levels": [
+    {
+     "title": "Paralegal",
+     "start": 9,
+     "end": 17,
+     "pay": 22,
+     "requires": {
+      "skills": {
+       "logic": 2
+      }
+     }
+    },
+    {
+     "title": "Associate",
+     "start": 9,
+     "end": 17,
+     "pay": 34,
+     "requires": {
+      "skills": {
+       "logic": 4,
+       "charisma": 3
+      }
+     }
+    },
+    {
+     "title": "Counsel",
+     "start": 9,
+     "end": 17,
+     "pay": 48,
+     "requires": {
+      "skills": {
+       "logic": 6,
+       "charisma": 5
+      }
+     }
+    },
+    {
+     "title": "Senior Partner",
+     "start": 10,
+     "end": 18,
+     "pay": 68,
+     "requires": {
+      "skills": {
+       "logic": 8,
+       "charisma": 7
+      }
+     }
+    }
+   ],
+   "tasks": [
+    {
+     "id": "prepare_defence",
+     "label": "Prepare a case file",
+     "interactions": [
+      "work_case_file"
+     ],
+     "count": 1,
+     "bonus": 7,
+     "min_level": 1
+    }
+   ]
+  },
+  "judge": {
+   "label": "Judge",
+   "primary_skill": "logic",
+   "alt_skills": [
+    "charisma"
+   ],
+   "days": [
+    0,
+    1,
+    2,
+    3,
+    4
+   ],
+   "description": "Weigh the evidence. Be fair.",
+   "hooks": {
+    "work_case_file": 4,
+    "read_book": 2
+   },
+   "trait_bonus": {
+    "honest": 3,
+    "grudgeholder": -2
+   },
+   "levels": [
+    {
+     "title": "Magistrate",
+     "start": 9,
+     "end": 16,
+     "pay": 44,
+     "requires": {
+      "skills": {
+       "logic": 6,
+       "charisma": 4
+      }
+     }
+    },
+    {
+     "title": "Judge",
+     "start": 9,
+     "end": 16,
+     "pay": 60,
+     "requires": {
+      "skills": {
+       "logic": 7,
+       "charisma": 5
+      }
+     }
+    },
+    {
+     "title": "Chief Justice",
+     "start": 10,
+     "end": 16,
+     "pay": 84,
+     "requires": {
+      "skills": {
+       "logic": 9,
+       "charisma": 7
+      }
+     }
+    }
+   ],
+   "tasks": [
+    {
+     "id": "review_files",
+     "label": "Review a case file",
+     "interactions": [
+      "work_case_file"
+     ],
+     "count": 1,
+     "bonus": 8,
+     "min_level": 1
+    }
+   ]
+  }
+ },
+ "petty": {
+  "vandalism": {
+   "label": "Vandalism",
+   "caught": 0.3,
+   "fine": [
+    20,
+    60
+   ],
+   "service": [
+    1,
+    2
+   ],
+   "service_share": 0.35,
+   "reputation": 2,
+   "cost": [
+    20,
+    60
+   ]
+  },
+  "trespassing": {
+   "label": "Trespassing",
+   "caught": 0.35,
+   "fine": [
+    15,
+    45
+   ],
+   "service": [
+    1,
+    2
+   ],
+   "service_share": 0.3,
+   "reputation": 1
+  },
+  "disturbance": {
+   "label": "Public disturbance",
+   "caught": 0.45,
+   "fine": [
+    10,
+    40
+   ],
+   "service": [
+    1,
+    2
+   ],
+   "service_share": 0.3,
+   "reputation": 2
+  },
+  "shoplifting": {
+   "label": "Shoplifting",
+   "caught": 0.4,
+   "fine": [
+    15,
+    50
+   ],
+   "service": [
+    1,
+    3
+   ],
+   "service_share": 0.4,
+   "reputation": 3
+  }
+ },
+ "pressure": {
+  "broke": 0.3,
+  "poor": 0.2,
+  "modest": 0.08,
+  "debt": 0.15,
+  "big_debt": 0.15,
+  "late_bill": 0.1,
+  "repossessed": 0.2,
+  "jobless": 0.15,
+  "record_no_job": 0.15,
+  "per_child": 0.05,
+  "min_risk": 0.15,
+  "daily": 0.02,
+  "klepto_daily": 0.02,
+  "conscience": {
+   "base": 0.5,
+   "traits": {
+    "honest": 0.4,
+    "dishonest": -0.35,
+    "kleptomaniac": -0.1,
+    "generous": 0.1,
+    "forgiving": 0.05,
+    "grudgeholder": -0.05,
+    "competitive": -0.05
+   }
+  },
+  "help": {
+   "loan": 0.25,
+   "charity": 0.2,
+   "family": 0.3,
+   "job": 0.3,
+   "days": 14
+  }
+ },
+ "fraud": {
+  "office_careers": [
+   "coder",
+   "scientist",
+   "teacher",
+   "lawyer",
+   "writer",
+   "judge"
+  ],
+  "amount": [
+   80,
+   400
+  ],
+  "audit_days": [
+   7,
+   21
+  ],
+  "embezzle_daily": 0.004,
+  "embezzle_min_risk": 0.1,
+  "scam_daily": 0.002,
+  "scam_amount": [
+   40,
+   150
+  ],
+  "scam_kinds": [
+   "a fake lottery win",
+   "a worthless 'investment'",
+   "a fake charity collection"
+  ],
+  "arson_min_risk": 0.5,
+  "arson_daily": 0.003,
+  "arson_payout": [
+   300,
+   900
+  ],
+  "arson_detect": 0.6
+ },
+ "blackmail": {
+  "amount": [
+   40,
+   160
+  ],
+  "every_days": 7,
+  "daily": 0.01,
+  "police_leak": 0.35,
+  "confront_base": 0.4,
+  "expose_reputation": 8
+ },
+ "revenge": {
+  "base": 0.08,
+  "traits": {
+   "vengeful": 4.0,
+   "hot_headed": 2.0,
+   "grudgeholder": 2.0,
+   "forgiving": 0.1,
+   "easygoing": 0.3,
+   "empath": 0.4
+  },
+  "forgive_base": 0.004,
+  "forgive_forgiving": 0.08,
+  "whisper_at": 4,
+  "vandal_at": 6,
+  "fight_at": 11,
+  "after_fight": 5,
+  "rage_at": 16,
+  "rage_push": 25.0,
+  "after_rage": 10,
+  "vigilante_daily": 0.002,
+  "apology_chance": 0.6
+ },
+ "rate": {
+  "window_days": 28,
+  "crime_scale": 30.0,
+  "poverty_scale": 20.0,
+  "jobless_scale": 25.0,
+  "per_officer": 6.0,
+  "police_cap": 20.0,
+  "per_lamp": 1.5,
+  "lamp_cap": 12.0,
+  "watch": 12.0,
+  "base": 8.0,
+  "uneasy_at": 55.0,
+  "watch_trigger": 55.0,
+  "watch_daily": 0.05,
+  "watch_days": 28,
+  "season_days": 7,
+  "weights": {
+   "murder": 8,
+   "serial": 10,
+   "manslaughter": 6,
+   "robbery": 4,
+   "burglary": 3,
+   "assault": 3,
+   "arson": 5,
+   "theft": 1.5,
+   "fraud": 1.5,
+   "embezzlement": 1.5,
+   "blackmail": 2,
+   "vandalism": 0.3,
+   "trespassing": 0.2,
+   "disturbance": 0.2,
+   "shoplifting": 0.3
+  }
+ },
+ "traits_townie_chance": {
+  "dishonest": 0.06,
+  "kleptomaniac": 0.02,
+  "vengeful": 0.04,
+  "reckless": 0.05
+ },
+ "traits": {
+  "dishonest": {
+   "label": "Dishonest",
+   "need_decay_mult": {},
+   "autonomy_mult": {
+    "prank": 1.4,
+    "gossip": 1.2
+   },
+   "likes": [],
+   "dislikes": [],
+   "refuses": [],
+   "buffs_on": {},
+   "description": "Bends the truth, and the rules, when it pays.",
+   "conflicts": [
+    "honest"
+   ],
+   "affinities": [
+    "charmer",
+    "competitive"
+   ],
+   "social": {
+    "honesty": -1.0,
+    "give": {
+     "all": -0.02
+    }
+   }
+  },
+  "kleptomaniac": {
+   "label": "Kleptomaniac",
+   "need_decay_mult": {},
+   "autonomy_mult": {},
+   "likes": [],
+   "dislikes": [],
+   "refuses": [],
+   "buffs_on": {},
+   "description": "Cannot resist pocketing little things. Mostly harmless.",
+   "conflicts": [
+    "honest"
+   ],
+   "affinities": [
+    "dishonest"
+   ],
+   "social": {}
+  },
+  "vengeful": {
+   "label": "Vengeful",
+   "need_decay_mult": {},
+   "autonomy_mult": {
+    "conflict": 1.4
+   },
+   "likes": [
+    "tag:conflict"
+   ],
+   "dislikes": [],
+   "refuses": [],
+   "buffs_on": {
+    "annoyed": "furious"
+   },
+   "description": "Never forgets a wrong, and pays it back.",
+   "conflicts": [
+    "forgiving",
+    "easygoing",
+    "empath"
+   ],
+   "affinities": [
+    "grudgeholder",
+    "hot_headed"
+   ],
+   "social": {
+    "arg_mult": 1.3,
+    "neg_mult": 1.3
+   }
+  },
+  "reckless": {
+   "label": "Reckless",
+   "need_decay_mult": {},
+   "autonomy_mult": {
+    "conflict": 1.3,
+    "exercise": 1.2
+   },
+   "likes": [],
+   "dislikes": [],
+   "refuses": [],
+   "buffs_on": {},
+   "description": "Acts first, thinks later. Fights, risks and accidents follow.",
+   "conflicts": [
+    "perfectionist",
+    "germaphobe"
+   ],
+   "affinities": [
+    "hot_headed",
+    "active"
+   ],
+   "social": {
+    "arg_mult": 1.2
+   }
+  }
+ }
+}

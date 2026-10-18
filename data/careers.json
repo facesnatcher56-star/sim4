@@ -107,6 +107,8 @@
     "cook": {
       "label": "Cook",
       "primary_skill": "cooking",
+      "workplace": "cafe",
+      "visible_work": "work_counter",
       "days": [
         0,
         1,
@@ -306,6 +308,7 @@
     "coder": {
       "label": "Coder",
       "primary_skill": "logic",
+      "workplace": "office",
       "days": [
         0,
         1,
@@ -503,6 +506,7 @@
     "painter": {
       "label": "Painter",
       "primary_skill": "painting",
+      "workplace": "library",
       "days": [
         1,
         2,
@@ -590,6 +594,8 @@
     "fitness_coach": {
       "label": "Fitness Coach",
       "primary_skill": "fitness",
+      "workplace": "gym",
+      "visible_work": "work_gym",
       "days": [
         0,
         1,
@@ -676,6 +682,7 @@
     "musician": {
       "label": "Musician",
       "primary_skill": "guitar",
+      "workplace": "cafe",
       "days": [
         2,
         3,
@@ -905,6 +912,7 @@
     "gardener": {
       "label": "Gardener",
       "primary_skill": "gardening",
+      "workplace": "park",
       "days": [
         0,
         1,
@@ -1117,6 +1125,7 @@
     "handyperson": {
       "label": "Handyperson",
       "primary_skill": "handiness",
+      "workplace": "market",
       "days": [
         0,
         1,
@@ -1323,6 +1332,7 @@
     "scientist": {
       "label": "Scientist",
       "primary_skill": "logic",
+      "workplace": "office",
       "days": [
         0,
         1,
@@ -1541,6 +1551,8 @@
     "writer": {
       "label": "Writer",
       "primary_skill": "writing",
+      "workplace": "library",
+      "visible_work": "work_desk",
       "days": [
         0,
         1,
@@ -1748,6 +1760,8 @@
     "barista": {
       "label": "Barista",
       "primary_skill": "charisma",
+      "workplace": "cafe",
+      "visible_work": "work_counter",
       "days": [
         0,
         1,
@@ -1972,6 +1986,7 @@
     "doctor": {
       "label": "Doctor",
       "primary_skill": "logic",
+      "workplace": "office",
       "days": [
         0,
         1,
@@ -2196,6 +2211,8 @@
     "athlete": {
       "label": "Athlete",
       "primary_skill": "fitness",
+      "workplace": "gym",
+      "visible_work": "work_gym",
       "days": [
         0,
         1,
@@ -2393,6 +2410,7 @@
     "teacher": {
       "label": "Teacher",
       "primary_skill": "charisma",
+      "workplace": "school",
       "days": [
         0,
         1,
@@ -2602,6 +2620,8 @@
     "chef": {
       "label": "Chef",
       "primary_skill": "cooking",
+      "workplace": "cafe",
+      "visible_work": "work_counter",
       "days": [
         1,
         2,

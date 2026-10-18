@@ -1,0 +1,812 @@
+{
+ "_doc": "Crime (task 04): burglary, street robbery, assault, murder, serial killer, theft by guests. Rates are per household / person / town per game year at the Rare default. The hour-limited ones are multiplied up because only the night hours pass the condition (burglary 2.4 x 6/24 = 0.6 a year; robbery 2.2 while out at night ~0.1 a year for a night-walker). Murder and assault have rate 0 on purpose: they come from motive (scripts/systems/crime_murder.gd, crime_assault.gd); the incidents exist for the F9 force button. The case record and all follow-up (discovery, police, trial) live in data/justice.json + scripts/systems/case_*.gd, justice_*.gd.",
+ "handlers": {
+  "crime_burglary": {
+   "script": "res://scripts/systems/crime_burglary.gd",
+   "method": "on_incident"
+  },
+  "crime_guest_theft": {
+   "script": "res://scripts/systems/crime_burglary.gd",
+   "method": "on_guest_theft"
+  },
+  "crime_street_robbery": {
+   "script": "res://scripts/systems/crime_street.gd",
+   "method": "on_incident"
+  },
+  "crime_assault": {
+   "script": "res://scripts/systems/crime_force.gd",
+   "method": "assault"
+  },
+  "crime_murder": {
+   "script": "res://scripts/systems/crime_force.gd",
+   "method": "murder"
+  },
+  "crime_serial": {
+   "script": "res://scripts/systems/crime_serial.gd",
+   "method": "on_incident"
+  },
+  "crime_petty": {
+   "script": "res://scripts/systems/crime_petty.gd",
+   "method": "on_incident"
+  }
+ },
+ "content": {
+  "buffs": {
+   "intruder": {
+    "label": "Intruder",
+    "mood": {},
+    "duration_min": 0,
+    "hidden": true
+   },
+   "intruder_alert": {
+    "label": "Intruder in the house!",
+    "mood": {
+     "tense": 4,
+     "uncomfortable": 2
+    },
+    "duration_min": 120,
+    "thought": "Someone is in the house!"
+   },
+   "uneasy_at_night": {
+    "label": "Uneasy at night",
+    "mood": {
+     "tense": 1,
+     "uncomfortable": 1
+    },
+    "duration_min": 14400,
+    "thought": "I don't like being out after dark lately."
+   },
+   "troubled_conscience": {
+    "label": "Troubled Conscience",
+    "mood": {
+     "uncomfortable": 2,
+     "sad": 1
+    },
+    "duration_min": 4320,
+    "thought": "What have I done?"
+   },
+   "calmed_down": {
+    "label": "Calmed Down",
+    "mood": {
+     "happy": 1
+    },
+    "duration_min": 600,
+    "thought": "Maybe it is not worth it."
+   },
+   "in_custody": {
+    "label": "In custody",
+    "mood": {},
+    "duration_min": 0,
+    "hidden": true
+   },
+   "community_service": {
+    "label": "Community Service",
+    "mood": {
+     "uncomfortable": 1
+    },
+    "duration_min": 1440,
+    "thought": "Paying my debt, one day at a time."
+   },
+   "fresh_start": {
+    "label": "Fresh Start",
+    "mood": {
+     "happy": 1
+    },
+    "duration_min": 10080,
+    "thought": "A clean slate. Let me make it count."
+   },
+   "visited_inside": {
+    "label": "A Visit",
+    "mood": {
+     "happy": 2
+    },
+    "duration_min": 720,
+    "thought": "It meant so much that they came."
+   },
+   "blackmailed": {
+    "label": "Being Blackmailed",
+    "mood": {
+     "tense": 3,
+     "uncomfortable": 2
+    },
+    "duration_min": 20160,
+    "thought": "They know. They will tell, unless I pay."
+   }
+  },
+  "objects": {
+   "burglar_alarm": {
+    "def": {
+     "label": "Burglar Alarm",
+     "size": [
+      1,
+      1
+     ],
+     "price": 150,
+     "tags": [
+      "utility",
+      "safety",
+      "security",
+      "ceiling"
+     ],
+     "model": "res://assets/models/smoke_alarm.glb",
+     "color": "#c0392b",
+     "height": 2.6,
+     "slots": [
+      {
+       "offset": [
+        0,
+        1
+       ],
+       "pose": "stand"
+      }
+     ],
+     "state": {},
+     "advertises": {},
+     "decor": 0.0,
+     "interactions": [],
+     "layer": "floor",
+     "blocks": false
+    }
+   },
+   "phone": {
+    "def": {
+     "label": "Phone",
+     "size": [
+      1,
+      1
+     ],
+     "price": 45,
+     "tags": [
+      "electronics",
+      "utility"
+     ],
+     "model": "res://assets/models/lamp.glb",
+     "color": "#2e86ab",
+     "height": 1.0,
+     "slots": [
+      {
+       "offset": [
+        0,
+        1
+       ],
+       "pose": "stand"
+      }
+     ],
+     "state": {},
+     "advertises": {},
+     "decor": 0.2,
+     "interactions": [
+      "call_police"
+     ]
+    }
+   }
+  },
+  "interactions": {
+   "burgle_item": {
+    "label": "Take Valuables",
+    "kind": "super",
+    "target": "object",
+    "objects": [],
+    "tags": [
+     "crime"
+    ],
+    "duration_min": 6,
+    "posture": "stand",
+    "tests": [],
+    "per_min": {},
+    "on_finish": [],
+    "autonomous": false,
+    "priority": "normal",
+    "hidden": true,
+    "thought": "Quick and quiet..."
+   },
+   "confront_intruder": {
+    "label": "Confront the Intruder",
+    "kind": "super",
+    "category": "mean",
+    "target": "folk",
+    "tags": [
+     "social",
+     "conflict"
+    ],
+    "duration_min": 2,
+    "posture": "stand",
+    "tests": [
+     {
+      "has_buff": "intruder_alert"
+     }
+    ],
+    "target_tests": [
+     {
+      "has_buff": "intruder"
+     }
+    ],
+    "per_min": {},
+    "on_finish": [
+     {
+      "fire_event": "confront_intruder"
+     }
+    ],
+    "autonomous": false,
+    "priority": "high",
+    "thought": "Get out of my house!"
+   },
+   "call_police": {
+    "label": "Call the Police",
+    "kind": "super",
+    "target": "object",
+    "objects": [
+     "phone",
+     "computer",
+     "nightstand"
+    ],
+    "tags": [
+     "crime"
+    ],
+    "duration_min": 2,
+    "posture": "stand",
+    "tests": [
+     {
+      "has_buff": "intruder_alert"
+     }
+    ],
+    "per_min": {},
+    "on_finish": [
+     {
+      "fire_event": "call_police"
+     }
+    ],
+    "autonomous": false,
+    "priority": "high",
+    "thought": "I am calling the police!"
+   },
+   "work_case_file": {
+    "label": "Work a Case File",
+    "kind": "super",
+    "target": "object",
+    "objects": [
+     "desk",
+     "computer"
+    ],
+    "tags": [
+     "work",
+     "skill"
+    ],
+    "duration_min": 45,
+    "posture": "sit",
+    "tests": [
+     {
+      "any": [
+       {
+        "career_is": "detective"
+       },
+       {
+        "career_is": "police_officer"
+       },
+       {
+        "career_is": "lawyer"
+       },
+       {
+        "career_is": "judge"
+       }
+      ]
+     }
+    ],
+    "per_min": {
+     "fun": -0.02
+    },
+    "skill_xp_per_min": {
+     "logic": 0.25
+    },
+    "on_finish": [
+     {
+      "fire_event": "work_case"
+     }
+    ],
+    "autonomous": false,
+    "priority": "normal",
+    "thought": "Let me go through the file again."
+   },
+   "pay_blackmailer": {
+    "label": "Pay the Blackmailer",
+    "kind": "super",
+    "category": "mean",
+    "target": "folk",
+    "tags": [
+     "social",
+     "conflict"
+    ],
+    "duration_min": 4,
+    "posture": "stand",
+    "tests": [
+     {
+      "has_buff": "blackmailed"
+     }
+    ],
+    "target_tests": [
+     {
+      "posture_not": "lie"
+     }
+    ],
+    "per_min": {},
+    "on_finish": [
+     {
+      "fire_event": "blackmail_pay"
+     }
+    ],
+    "autonomous": false,
+    "priority": "normal",
+    "thought": "Fine. Take it. Just keep quiet."
+   },
+   "refuse_blackmailer": {
+    "label": "Refuse (Let It Out)",
+    "kind": "super",
+    "category": "mean",
+    "target": "folk",
+    "tags": [
+     "social",
+     "conflict"
+    ],
+    "duration_min": 4,
+    "posture": "stand",
+    "tests": [
+     {
+      "has_buff": "blackmailed"
+     }
+    ],
+    "target_tests": [
+     {
+      "posture_not": "lie"
+     }
+    ],
+    "per_min": {},
+    "on_finish": [
+     {
+      "fire_event": "blackmail_refuse"
+     }
+    ],
+    "autonomous": false,
+    "priority": "normal",
+    "thought": "Do your worst."
+   },
+   "report_blackmail": {
+    "label": "Report to the Police",
+    "kind": "super",
+    "category": "mean",
+    "target": "folk",
+    "tags": [
+     "social",
+     "conflict"
+    ],
+    "duration_min": 4,
+    "posture": "stand",
+    "tests": [
+     {
+      "has_buff": "blackmailed"
+     }
+    ],
+    "target_tests": [
+     {
+      "posture_not": "lie"
+     }
+    ],
+    "per_min": {},
+    "on_finish": [
+     {
+      "fire_event": "blackmail_report"
+     }
+    ],
+    "autonomous": false,
+    "priority": "normal",
+    "thought": "This is a crime, and I am done being afraid."
+   },
+   "confront_blackmailer": {
+    "label": "Confront the Blackmailer",
+    "kind": "super",
+    "category": "mean",
+    "target": "folk",
+    "tags": [
+     "social",
+     "conflict"
+    ],
+    "duration_min": 4,
+    "posture": "stand",
+    "tests": [
+     {
+      "has_buff": "blackmailed"
+     }
+    ],
+    "target_tests": [
+     {
+      "posture_not": "lie"
+     }
+    ],
+    "per_min": {},
+    "on_finish": [
+     {
+      "fire_event": "blackmail_confront"
+     }
+    ],
+    "autonomous": false,
+    "priority": "normal",
+    "thought": "You will not do this to me."
+   },
+   "demand_silence_money": {
+    "label": "Blackmail",
+    "kind": "super",
+    "category": "mean",
+    "target": "folk",
+    "tags": [
+     "social",
+     "conflict",
+     "crime"
+    ],
+    "duration_min": 5,
+    "posture": "stand",
+    "tests": [
+     {
+      "any": [
+       {
+        "has_trait": "dishonest"
+       },
+       {
+        "has_trait": "grudgeholder"
+       },
+       {
+        "stat_below": [
+         "fun",
+         40
+        ]
+       }
+      ]
+     }
+    ],
+    "target_tests": [
+     {
+      "posture_not": "lie"
+     }
+    ],
+    "per_min": {},
+    "on_finish": [
+     {
+      "fire_event": "blackmail_demand"
+     }
+    ],
+    "autonomous": false,
+    "priority": "normal",
+    "thought": "I know something about you..."
+   },
+   "organize_watch": {
+    "label": "Start a Neighbourhood Watch",
+    "kind": "super",
+    "target": "object",
+    "objects": [
+     "mailbox"
+    ],
+    "tags": [
+     "social",
+     "community"
+    ],
+    "duration_min": 20,
+    "posture": "stand",
+    "tests": [
+     {
+      "age_stage_is": [
+       "adult",
+       "elder"
+      ]
+     }
+    ],
+    "per_min": {
+     "social": 0.4
+    },
+    "on_finish": [
+     {
+      "fire_event": "start_watch"
+     },
+     {
+      "add_buff": "social_glow"
+     }
+    ],
+    "autonomous": false,
+    "priority": "normal",
+    "thought": "If we look out for each other, the street gets safer."
+   }
+  },
+  "object_interactions": {
+   "computer": [
+    "call_police",
+    "work_case_file"
+   ],
+   "desk": [
+    "work_case_file"
+   ],
+   "nightstand": [
+    "call_police"
+   ],
+   "mailbox": [
+    "organize_watch"
+   ]
+  }
+ },
+ "incidents": {
+  "burglary": {
+   "label": "Burglary",
+   "scope": "lot",
+   "check": "hour",
+   "base_rate_per_year": 2.4,
+   "notify_policy": "household",
+   "severity": 3,
+   "conditions": [
+    {
+     "hour_between": [
+      23,
+      5
+     ]
+    }
+   ],
+   "risk_mults": [
+    {
+     "label": "Rich house",
+     "when": [
+      {
+       "coins_at_least": 1500
+      }
+     ],
+     "mult": 1.4
+    }
+   ],
+   "prevent": [
+    {
+     "label": "Burglar alarm",
+     "when": [
+      {
+       "has_object": "burglar_alarm"
+      }
+     ],
+     "mult": 0.3
+    },
+    {
+     "label": "Lamp left on",
+     "when": [
+      {
+       "has_object": "lamp"
+      }
+     ],
+     "mult": 0.85
+    }
+   ],
+   "outcomes": [
+    {
+     "weight": 1,
+     "effects": [
+      {
+       "handler": "crime_burglary"
+      }
+     ],
+     "text": "",
+     "kind": "bad"
+    }
+   ],
+   "statistical": {
+    "outcomes": [
+     {
+      "weight": 1,
+      "effects": [
+       {
+        "handler": "crime_burglary"
+       }
+      ],
+      "summary": ""
+     }
+    ]
+   }
+  },
+  "guest_theft": {
+   "label": "Theft by a guest",
+   "scope": "lot",
+   "check": "hour",
+   "base_rate_per_year": 3.0,
+   "notify_policy": "household",
+   "severity": 2,
+   "outcomes": [
+    {
+     "weight": 1,
+     "effects": [
+      {
+       "handler": "crime_guest_theft"
+      }
+     ],
+     "text": "",
+     "kind": "bad"
+    }
+   ],
+   "statistical": {
+    "outcomes": [
+     {
+      "weight": 1,
+      "effects": [],
+      "summary": ""
+     }
+    ]
+   }
+  },
+  "street_robbery": {
+   "label": "Street robbery",
+   "scope": "folk",
+   "check": "hour",
+   "base_rate_per_year": 2.2,
+   "notify_policy": "known",
+   "severity": 2,
+   "conditions": [
+    {
+     "hour_between": [
+      22,
+      4
+     ]
+    },
+    {
+     "coins_at_least": 20
+    },
+    {
+     "age_stage_is": [
+      "teen",
+      "adult",
+      "elder"
+     ]
+    }
+   ],
+   "risk_mults": [
+    {
+     "label": "Frail",
+     "when": [
+      {
+       "age_stage_is": "elder"
+      }
+     ],
+     "mult": 1.4
+    }
+   ],
+   "prevent": [
+    {
+     "label": "Strong and watchful",
+     "when": [
+      {
+       "skill_at_least": [
+        "fitness",
+        5
+       ]
+      }
+     ],
+     "mult": 0.6
+    }
+   ],
+   "outcomes": [
+    {
+     "weight": 1,
+     "effects": [
+      {
+       "handler": "crime_street_robbery"
+      }
+     ],
+     "text": "",
+     "kind": "bad"
+    }
+   ],
+   "statistical": {
+    "outcomes": [
+     {
+      "weight": 1,
+      "effects": [
+       {
+        "handler": "crime_street_robbery"
+       }
+      ],
+      "summary": ""
+     }
+    ]
+   }
+  },
+  "assault": {
+   "label": "Assault",
+   "scope": "folk",
+   "check": "day",
+   "base_rate_per_year": 0.0,
+   "notify_policy": "household",
+   "severity": 2,
+   "outcomes": [
+    {
+     "weight": 1,
+     "effects": [
+      {
+       "handler": "crime_assault"
+      }
+     ],
+     "text": "",
+     "kind": "bad"
+    }
+   ],
+   "statistical": {
+    "outcomes": [
+     {
+      "weight": 1,
+      "effects": [
+       {
+        "handler": "crime_assault"
+       }
+      ],
+      "summary": ""
+     }
+    ]
+   }
+  },
+  "murder": {
+   "label": "Murder",
+   "scope": "folk",
+   "check": "day",
+   "base_rate_per_year": 0.0,
+   "notify_policy": "known",
+   "severity": 5,
+   "outcomes": [
+    {
+     "weight": 1,
+     "effects": [
+      {
+       "handler": "crime_murder"
+      }
+     ],
+     "text": "",
+     "kind": "bad"
+    }
+   ],
+   "statistical": {
+    "outcomes": [
+     {
+      "weight": 1,
+      "effects": [
+       {
+        "handler": "crime_murder"
+       }
+      ],
+      "summary": ""
+     }
+    ]
+   }
+  },
+  "serial_killer": {
+   "label": "Serial killer",
+   "scope": "town",
+   "check": "day",
+   "base_rate_per_year": 0.001,
+   "lot_hit": 1.0,
+   "notify_policy": "quiet",
+   "severity": 5,
+   "public": false,
+   "outcomes": [
+    {
+     "weight": 1,
+     "effects": [
+      {
+       "handler": "crime_serial"
+      }
+     ],
+     "text": "",
+     "kind": "bad"
+    }
+   ],
+   "statistical": {
+    "outcomes": [
+     {
+      "weight": 1,
+      "effects": [
+       {
+        "handler": "crime_serial"
+       }
+      ],
+      "summary": ""
+     }
+    ]
+   }
+  }
+ }
+}

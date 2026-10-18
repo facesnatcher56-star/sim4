@@ -1,0 +1,143 @@
+{
+ "_doc": "Task 03: fire. Six sources (kitchen, fireplace, electrical incl. botched repairs, holiday candles, lightning). Full mode arms a source (the fire starts at the next fitting moment: someone cooking, a fireplace left alone, a device used or repaired) and Fire.* simulates spread, smoke, panic, the fire department, losses and deaths (scripts/systems/fire_*.gd). Far lots and townies use the statistical outcomes below with the same rates. Fire API: docs/INCIDENTS.md.",
+ "config": {
+  "fire": {
+   "spread_min": 4, "first_spread_delay": 1, "spread_chance": 0.55, "stage_age": [5, 11], "stage_mult": [0.5, 1.0, 1.5],
+   "burn_base": 9, "burn_flam": 14, "burn_min_floor": 5,
+   "sprinkler_radius": 7, "sprinkler_stop": 0.28, "sprinkler_spread_mult": 0.3, "sprinkler_stop_stage3": 0.1,
+   "smoke_weight": [0.5, 1.0, 1.6], "smoke_full_at": 3.0, "alarm_smoke": 0.12, "smoky_at": 0.25,
+   "notice_room_min": 1, "notice_lot_min": 3, "wake_chance": 0.04, "call_after_aware_min": 1, "call_chance": 0.6,
+   "extinguisher_min_charge": 2, "extinguisher_use": 4, "extinguish_chance": [0.92, 0.65, 0.22], "extinguish_handy_bonus": 0.02,
+   "smother_chance": 0.38, "smother_per_skill": 0.06, "smother_range": 3,
+   "brave_traits": ["active", "outdoorsy", "handy", "competitive"], "timid_traits": ["shy", "clumsy", "pessimist"],
+   "hurt_min": 9, "severe_min": 17, "lethal_min": 28, "trapped_escape_after": 8, "trapped_escape_chance": 0.06,
+   "brigade_delay": [9, 14], "brigade_alarm_saving": 2, "neighbor_call_min": 10, "brigade_crew": 2, "brigade_clean_min": 4, "brigade_rescue_range": 6,
+   "armed_days": {"cooking": 4, "fireplace": 6, "electrical": 6, "candle": 1},
+   "cook_ignite_frac": [0.3, 0.75], "electrical_ignite_min": [2, 6], "fireplace_unattended_min": 20, "fireplace_range": 6,
+   "candle_hours": [18, 23], "scorch_days": 6,
+   "helpless_stages": ["baby", "toddler"], "dependant_stages": ["baby", "toddler"],
+   "cooking_iids": ["cook_meal", "cook_meal_good", "cook_meal_gourmet", "cook_fish_dinner", "grill_food", "grill_gourmet"],
+   "electrical_tags": ["electronics", "appliance"],
+   "flam_tags": {"bed": 0.9, "baby": 0.9, "nursery": 0.8, "art": 0.7, "furniture": 0.6, "bedroom": 0.6, "living": 0.5, "decor": 0.45, "plant": 0.5,
+                 "electronics": 0.55, "office": 0.5, "storage": 0.5, "music": 0.5, "bar": 0.5, "kitchen": 0.4, "appliance": 0.35, "light": 0.3, "fire": 0.15},
+   "flam_ids": {"sink": 0, "toilet": 0, "shower": 0, "bathtub": 0, "hot_tub": 0.1, "fridge": 0.15, "washing_machine": 0.2, "rug": 0.8, "mirror": 0.1,
+                "fire_extinguisher": 0, "smoke_alarm": 0, "sprinkler": 0, "grave": 0, "urn": 0, "ash_pile": 0, "trash_bin": 0.5, "grill": 0.3, "fireplace": 0.15},
+   "flam_floors": {"carpet": 0.5, "wood": 0.3, "grass": 0.08, "lawn": 0.06},
+   "town_objects": {"stove": 1.0, "fridge": 1.0, "tv": 0.8, "computer": 0.4, "stereo": 0.2, "fireplace": 0.25, "smoke_alarm": 0.35, "fire_extinguisher": 0.12, "sprinkler": 0.02},
+   "kind_labels": {"cooking": "kitchen fire", "fireplace": "fireplace fire", "electrical": "electrical fire", "repair": "electrical fire", "candle": "candle fire",
+                   "lightning": "lightning fire", "arson": "fire", "wildfire": "fire"}
+  }
+ },
+ "handlers": {
+  "fire_arm": {"script": "res://scripts/systems/fire_events.gd", "method": "on_arm"},
+  "fire_aftermath": {"script": "res://scripts/systems/fire_events.gd", "method": "on_aftermath"}
+ },
+ "content": {
+  "buffs": {
+   "fire_nearby": {"label": "Fire Nearby", "mood": {}, "duration_min": 3, "hidden": true},
+   "brigade_called": {"label": "Fire Department Called", "mood": {}, "duration_min": 45, "hidden": true},
+   "fire_panic": {"label": "Panicking", "mood": {"tense": 4, "uncomfortable": 2}, "duration_min": 40, "thought": "Fire! Get out!"},
+   "fire_smoke": {"label": "Choking Smoke", "mood": {"uncomfortable": 3, "tense": 1}, "duration_min": 8, "need_decay_mult": {"comfort": 1.4}, "thought": "I can't see in this smoke!"},
+   "shaken": {"label": "Shaken", "mood": {"tense": 2, "sad": 1}, "duration_min": 720, "thought": "I keep smelling smoke..."},
+   "relieved": {"label": "Relieved", "mood": {"happy": 1, "content": 2}, "duration_min": 360, "thought": "Thank goodness everyone is safe."}
+  },
+  "objects": {
+   "sprinkler": {"def": {"label": "Sprinkler", "size": [1, 1], "price": 650, "tags": ["utility", "safety", "ceiling", "fire_safety"], "model": "res://assets/models/sprinkler.glb",
+    "color": "#c9ccd1", "height": 2.6, "layer": "floor", "blocks": false, "slots": [{"offset": [0, 1], "pose": "stand"}], "state": {}, "advertises": {}, "decor": 0.0, "interactions": []}},
+   "ash_pile": {"def": {"label": "Burnt Remains", "size": [1, 1], "price": 0, "tags": ["mess", "ash"], "model": "res://assets/models/ash_pile.glb", "color": "#3b3a3a",
+    "height": 0.25, "layer": "floor", "blocks": false, "slots": [{"offset": [0, 1], "pose": "stand"}], "state": {"dirtiness": {"min": 0, "max": 10, "start": 10}},
+    "advertises": {"tidy": 2.0}, "decor": -0.6, "interactions": ["sweep_ash"]}}
+  },
+  "object_interactions": {
+   "fire_extinguisher": ["use_extinguisher"],
+   "fireplace": ["douse_fireplace"]
+  },
+  "interactions": {
+   "flee_fire": {"label": "Run!", "kind": "super", "target": "self", "hidden": true, "tags": ["fire"], "duration_min": 0.1, "posture": "stand", "interruptible": false,
+    "tests": [], "on_finish": [], "autonomous": false, "priority": "urgent"},
+   "watch_fire": {"label": "Waiting outside", "kind": "super", "target": "self", "hidden": true, "tags": ["fire"], "duration_min": 120, "posture": "stand", "interruptible": false,
+    "tests": [], "per_min": {}, "on_finish": [], "autonomous": false, "priority": "urgent"},
+   "use_extinguisher": {"label": "Fight the Fire", "kind": "super", "target": "object", "objects": ["fire_extinguisher"], "tags": ["fire"], "duration_min": 1, "posture": "stand",
+    "tests": [{"object_state_above": ["charge", 2]}, {"has_buff": "fire_nearby"}], "per_min": {}, "skill_xp_per_min": {"handiness": 1.0},
+    "on_finish": [{"object_state_add": ["charge", -4]}, {"fire_event": "fire_extinguish_try"}], "autonomous": false, "priority": "urgent", "thought": "Pull the pin, aim, squeeze!"},
+   "call_firefighters": {"label": "Call the Fire Department", "kind": "super", "target": "self", "tags": ["fire"], "duration_min": 1, "posture": "stand",
+    "tests": [{"has_buff": "fire_nearby"}, {"lacks_buff": "brigade_called"}], "per_min": {}, "on_finish": [{"fire_event": "fire_call"}], "autonomous": false, "priority": "urgent",
+    "thought": "Hello? There is a fire!"},
+   "douse_fireplace": {"label": "Put Out the Fire", "kind": "super", "target": "object", "objects": ["fireplace"], "tags": ["chore", "fire", "safety"], "duration_min": 3, "posture": "stand",
+    "tests": [{"object_state_eq": ["lit", true]}, {"any": [{"time_between": [22, 6]}, {"stat_above": ["comfort", 85]}]}], "per_min": {},
+    "on_finish": [{"object_state_set": ["lit", false]}], "autonomous": true, "priority": "normal", "advertises": {"tidy": 1.2}, "thought": "Better not leave the fire burning.", "cooldown_min": 90},
+   "sweep_ash": {"label": "Sweep Up the Ashes", "kind": "super", "target": "object", "objects": ["ash_pile"], "tags": ["chore", "clean"], "duration_min": 8, "posture": "stand",
+    "tests": [], "per_min": {"hygiene": -0.2}, "skill_xp_per_min": {"handiness": 0.3}, "on_finish": [{"fire_event": "fire_swept"}], "autonomous": true, "priority": "normal",
+    "advertises": {"tidy": 2.5}, "thought": "Time to clear away the ashes."}
+  }
+ },
+ "incidents": {
+  "kitchen_fire": {
+   "label": "Kitchen fire", "scope": "lot", "check": "day", "base_rate_per_year": 0.3, "notify_policy": "household", "severity": 3,
+   "conditions": [{"has_object": ["stove", "grill"]}],
+   "risk_mults": [
+    {"label": "Some cooking practice", "when": [{"all_members": [{"skill_at_least": ["cooking", 2]}]}], "mult": 0.6},
+    {"label": "Skilled cooks (level 4+): much less risk", "when": [{"all_members": [{"skill_at_least": ["cooking", 4]}]}], "mult": 0.2},
+    {"label": "A clumsy cook", "when": [{"any_member": [{"has_trait": "clumsy"}]}], "mult": 1.5}
+   ],
+   "outcomes": [{"weight": 1, "effects": [{"handler": "fire_arm", "args": {"source": "cooking"}}], "text": "", "kind": "bad"}],
+   "statistical": {"outcomes": [
+    {"weight": 88.9, "effects": [], "summary": "{house} had a kitchen fire, no one hurt."},
+    {"weight": 7.5, "when": [{"lacks_object": "sprinkler"}], "effects": [{"handler": "fire_aftermath", "args": {"loss": 3}}], "summary": "A kitchen fire spread through {house}. The fire department put it out, no one hurt."},
+    {"weight": 2.2, "when": [{"lacks_object": "sprinkler"}], "effects": [{"handler": "fire_aftermath", "args": {"loss": 4}}, {"hospital": {"severity": 2, "reason": "smoke"}}], "summary": "A kitchen fire spread through {house}. Someone was taken to hospital."},
+    {"weight": 1.1, "when": [{"lacks_object": "smoke_alarm"}, {"lacks_object": "sprinkler"}], "effects": [{"handler": "fire_aftermath", "args": {"loss": 5}}, {"kill": "fire"}], "summary": "A fire swept through {house} in the night. Someone did not get out."},
+    {"weight": 0.06, "when": [{"has_object": "smoke_alarm"}, {"lacks_object": "sprinkler"}], "effects": [{"handler": "fire_aftermath", "args": {"loss": 5}}, {"kill": "fire"}], "summary": "A fire swept through {house}. Someone did not get out."}
+   ]}
+  },
+  "fireplace_fire": {
+   "label": "Fireplace fire", "scope": "lot", "check": "day", "base_rate_per_year": 0.06, "notify_policy": "household", "severity": 3,
+   "conditions": [{"has_object": "fireplace"}],
+   "risk_mults": [{"label": "Winter: the fire is lit more often", "when": [{"season_is": ["winter"]}], "mult": 2.0}],
+   "outcomes": [{"weight": 1, "effects": [{"handler": "fire_arm", "args": {"source": "fireplace"}}], "text": "", "kind": "bad"}],
+   "statistical": {"outcomes": [
+    {"weight": 68, "effects": [], "summary": "A spark from the fireplace set a rug alight at {house}. It was put out quickly."},
+    {"weight": 20, "when": [{"lacks_object": "sprinkler"}], "effects": [{"handler": "fire_aftermath", "args": {"loss": 4}}], "summary": "A fire started in the fireplace room of {house}. The fire department put it out, no one hurt."},
+    {"weight": 7, "when": [{"lacks_object": "sprinkler"}], "effects": [{"handler": "fire_aftermath", "args": {"loss": 5}}, {"hospital": {"severity": 2, "reason": "smoke"}}], "summary": "A fire started in the fireplace room of {house}. Someone was taken to hospital."},
+    {"weight": 4.0, "when": [{"lacks_object": "smoke_alarm"}, {"lacks_object": "sprinkler"}], "effects": [{"handler": "fire_aftermath", "args": {"loss": 6}}, {"kill": "fire"}], "summary": "A fire swept through {house} in the night. Someone did not get out."},
+    {"weight": 0.2, "when": [{"has_object": "smoke_alarm"}, {"lacks_object": "sprinkler"}], "effects": [{"handler": "fire_aftermath", "args": {"loss": 6}}, {"kill": "fire"}], "summary": "A fire swept through {house}. Someone did not get out."}
+   ]}
+  },
+  "electrical_fire": {
+   "label": "Electrical fire", "scope": "lot", "check": "day", "base_rate_per_year": 0.07, "notify_policy": "household", "severity": 3,
+   "conditions": [{"has_object": ["tv", "computer", "stereo", "fridge", "stove", "microwave_cart", "coffee_maker", "washing_machine"]}],
+   "risk_mults": [{"label": "Low handiness: botched repairs and wiring", "when": [{"any_member": [{"skill_below": ["handiness", 3]}]}], "mult": 1.6}],
+   "outcomes": [{"weight": 1, "effects": [{"handler": "fire_arm", "args": {"source": "electrical"}}], "text": "", "kind": "bad"}],
+   "statistical": {"outcomes": [
+    {"weight": 80.6, "effects": [], "summary": "A faulty plug set fire to an appliance at {house}. No one was hurt."},
+    {"weight": 12, "when": [{"lacks_object": "sprinkler"}], "effects": [{"handler": "fire_aftermath", "args": {"loss": 3}}], "summary": "An electrical fire damaged {house}. The fire department put it out."},
+    {"weight": 4, "when": [{"lacks_object": "sprinkler"}], "effects": [{"handler": "fire_aftermath", "args": {"loss": 4}}, {"hospital": {"severity": 2, "reason": "smoke"}}], "summary": "An electrical fire damaged {house}. Someone was taken to hospital."},
+    {"weight": 2.2, "when": [{"lacks_object": "smoke_alarm"}, {"lacks_object": "sprinkler"}], "effects": [{"handler": "fire_aftermath", "args": {"loss": 5}}, {"kill": "fire"}], "summary": "A fire swept through {house} in the night. Someone did not get out."},
+    {"weight": 0.1, "when": [{"has_object": "smoke_alarm"}, {"lacks_object": "sprinkler"}], "effects": [{"handler": "fire_aftermath", "args": {"loss": 5}}, {"kill": "fire"}], "summary": "A fire swept through {house}. Someone did not get out."}
+   ]}
+  },
+  "candle_fire": {
+   "label": "Candle fire", "scope": "lot", "check": "day", "base_rate_per_year": 0.14, "notify_policy": "household", "severity": 2,
+   "conditions": [{"any_member": [{"has_buff": "holiday_today"}]}],
+   "outcomes": [{"weight": 1, "effects": [{"handler": "fire_arm", "args": {"source": "candle"}}], "text": "", "kind": "bad"}],
+   "statistical": {"outcomes": [
+    {"weight": 83, "effects": [], "summary": "A holiday candle tipped over at {house}. It was put out quickly."},
+    {"weight": 11, "when": [{"lacks_object": "sprinkler"}], "effects": [{"handler": "fire_aftermath", "args": {"loss": 3}}], "summary": "A holiday candle set {house} alight. The fire department put it out, no one hurt."},
+    {"weight": 3.2, "when": [{"lacks_object": "sprinkler"}], "effects": [{"handler": "fire_aftermath", "args": {"loss": 4}}, {"hospital": {"severity": 2, "reason": "smoke"}}], "summary": "A holiday candle set {house} alight. Someone was taken to hospital."},
+    {"weight": 1.8, "when": [{"lacks_object": "smoke_alarm"}, {"lacks_object": "sprinkler"}], "effects": [{"handler": "fire_aftermath", "args": {"loss": 5}}, {"kill": "fire"}], "summary": "A fire swept through {house} in the night. Someone did not get out."},
+    {"weight": 0.08, "when": [{"has_object": "smoke_alarm"}, {"lacks_object": "sprinkler"}], "effects": [{"handler": "fire_aftermath", "args": {"loss": 5}}, {"kill": "fire"}], "summary": "A fire swept through {house}. Someone did not get out."}
+   ]}
+  },
+  "lightning_fire": {
+   "label": "Lightning strike", "scope": "lot", "check": "hour", "base_rate_per_year": 0.5, "notify_policy": "household", "severity": 3,
+   "conditions": [{"weather_is": ["thunderstorm"]}],
+   "outcomes": [{"weight": 1, "effects": [{"handler": "fire_arm", "args": {"source": "lightning"}}], "text": "", "kind": "bad"}],
+   "statistical": {"outcomes": [
+    {"weight": 56, "effects": [], "summary": "Lightning struck a tree beside {house}. No harm done."},
+    {"weight": 30, "when": [{"lacks_object": "sprinkler"}], "effects": [{"handler": "fire_aftermath", "args": {"loss": 3}}], "summary": "Lightning set the roof of {house} alight. The fire department put it out."},
+    {"weight": 8, "when": [{"lacks_object": "sprinkler"}], "effects": [{"handler": "fire_aftermath", "args": {"loss": 5}}, {"hospital": {"severity": 2, "reason": "smoke"}}], "summary": "Lightning set {house} alight. Someone was taken to hospital."},
+    {"weight": 4.5, "when": [{"lacks_object": "smoke_alarm"}, {"lacks_object": "sprinkler"}], "effects": [{"handler": "fire_aftermath", "args": {"loss": 6}}, {"kill": "fire"}], "summary": "Lightning set {house} alight in the night. Someone did not get out."},
+    {"weight": 0.2, "when": [{"has_object": "smoke_alarm"}, {"lacks_object": "sprinkler"}], "effects": [{"handler": "fire_aftermath", "args": {"loss": 6}}, {"kill": "fire"}], "summary": "Lightning set {house} alight. Someone did not get out."}
+   ]}
+  }
+ }
+}

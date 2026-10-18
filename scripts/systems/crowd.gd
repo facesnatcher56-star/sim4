@@ -10,7 +10,7 @@ extends RefCounted
 const STAFF_ID_BASE := 5000
 const ACTIVE_RADIUS := 40
 const DROP_RADIUS := 64
-const NEED_FLOOR := -50.0        # an NPC with a need below this goes home (needs are -100..100; they are re-rolled on the next visit by spawn_npc)
+const NEED_FLOOR := -35.0      # an NPC with a need below this goes home (needs are -100..100; they are re-rolled on the next visit by spawn_npc)
 
 static var _last_check: Dictionary = {}     # lot_id -> game minute of the last full crowd update
 static var _staff_seq: int = 0

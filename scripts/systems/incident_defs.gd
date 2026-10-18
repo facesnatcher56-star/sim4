@@ -11,7 +11,7 @@ const SCOPES := ["folk", "lot", "town", "townie"]
 const CHECKS := ["hour", "day"]
 const POLICIES := ["household", "known", "town", "quiet"]
 const TOP_KEYS := ["label", "scope", "check", "base_rate_per_year", "notify_policy", "conditions", "risk_mults", "prevent", "warning", "defuse",
-	"outcomes", "statistical", "surprise", "severity", "public", "kind", "tags", "_doc"]
+	"outcomes", "statistical", "surprise", "severity", "public", "kind", "tags", "lot_hit", "_doc"]
 const OUTCOME_KEYS := ["weight", "when", "effects", "text", "kind", "summary", "id", "severity"]
 const WARNING_KEYS := ["lead_min", "thought", "text", "kind", "averted", "doctor_can_defuse"]
 

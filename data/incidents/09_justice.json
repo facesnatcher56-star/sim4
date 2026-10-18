@@ -1,0 +1,183 @@
+{
+ "_doc": "Legal system (task 09): the trial, sentences, prison, appeals and civil cases are driven by scripts/systems/justice_*.gd, prison.gd, courthouse.gd and data/justice.json, not by dice here. This file only adds the small-claims incident (neighbour disputes, ~0.1 a year per household) so civil court has a steady trickle of cases. Task 09c adds vandalism, trespassing and public disturbance (small offences settled with a fine or community service, see crime_petty.gd).",
+ "handlers": {
+  "justice_small_claim": {
+   "script": "res://scripts/systems/justice_civil.gd",
+   "method": "on_small_claim"
+  },
+  "crime_petty": {
+   "script": "res://scripts/systems/crime_petty.gd",
+   "method": "on_incident"
+  }
+ },
+ "incidents": {
+  "small_claims": {
+   "label": "Small claims dispute",
+   "scope": "lot",
+   "check": "day",
+   "base_rate_per_year": 0.1,
+   "notify_policy": "quiet",
+   "severity": 1,
+   "public": false,
+   "outcomes": [
+    {
+     "weight": 1,
+     "effects": [
+      {
+       "handler": "justice_small_claim"
+      }
+     ],
+     "text": "",
+     "kind": "info"
+    }
+   ],
+   "statistical": {
+    "outcomes": [
+     {
+      "weight": 1,
+      "effects": [
+       {
+        "handler": "justice_small_claim"
+       }
+      ],
+      "summary": ""
+     }
+    ]
+   }
+  },
+  "vandalism": {
+   "label": "Vandalism",
+   "scope": "lot",
+   "check": "day",
+   "base_rate_per_year": 0.3,
+   "notify_policy": "quiet",
+   "severity": 1,
+   "public": false,
+   "outcomes": [
+    {
+     "weight": 1,
+     "effects": [
+      {
+       "handler": "crime_petty",
+       "args": {
+        "kind": "vandalism"
+       }
+      }
+     ],
+     "text": "",
+     "kind": "info"
+    }
+   ],
+   "statistical": {
+    "outcomes": [
+     {
+      "weight": 1,
+      "effects": [
+       {
+        "handler": "crime_petty",
+        "args": {
+         "kind": "vandalism"
+        }
+       }
+      ],
+      "summary": ""
+     }
+    ]
+   }
+  },
+  "trespassing": {
+   "label": "Trespassing",
+   "scope": "lot",
+   "check": "day",
+   "base_rate_per_year": 0.2,
+   "notify_policy": "quiet",
+   "severity": 1,
+   "public": false,
+   "outcomes": [
+    {
+     "weight": 1,
+     "effects": [
+      {
+       "handler": "crime_petty",
+       "args": {
+        "kind": "trespassing"
+       }
+      }
+     ],
+     "text": "",
+     "kind": "info"
+    }
+   ],
+   "statistical": {
+    "outcomes": [
+     {
+      "weight": 1,
+      "effects": [
+       {
+        "handler": "crime_petty",
+        "args": {
+         "kind": "trespassing"
+        }
+       }
+      ],
+      "summary": ""
+     }
+    ]
+   }
+  },
+  "public_disturbance": {
+   "label": "Public disturbance",
+   "scope": "folk",
+   "check": "hour",
+   "base_rate_per_year": 1.2,
+   "notify_policy": "quiet",
+   "severity": 1,
+   "public": false,
+   "outcomes": [
+    {
+     "weight": 1,
+     "effects": [
+      {
+       "handler": "crime_petty",
+       "args": {
+        "kind": "disturbance"
+       }
+      }
+     ],
+     "text": "",
+     "kind": "info"
+    }
+   ],
+   "statistical": {
+    "outcomes": [
+     {
+      "weight": 1,
+      "effects": [
+       {
+        "handler": "crime_petty",
+        "args": {
+         "kind": "disturbance"
+        }
+       }
+      ],
+      "summary": ""
+     }
+    ]
+   },
+   "conditions": [
+    {
+     "hour_between": [
+      21,
+      3
+     ]
+    },
+    {
+     "age_stage_is": [
+      "teen",
+      "adult"
+     ]
+    }
+   ]
+  }
+ }
+}

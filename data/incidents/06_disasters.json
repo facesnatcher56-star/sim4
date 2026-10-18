@@ -1,0 +1,230 @@
+{
+ "_doc": "Task 06: natural disasters and utilities (scripts/systems/disaster_*.gd). Town-scope incidents: one roll for the town, then damage PER LOT (home lot FULL with real objects, other lots statistical with a damage record). Every incident has a single handler 'disaster_hit' (args.kind picks the behaviour). Numbers per kind live in config.disasters.damage (arrays are indexed by power 1..3). Base rates are per game year of QUALIFYING conditions; the long-run test measures real yearly frequency.",
+ "config": {
+  "disasters": {
+   "insurance": {
+    "basic": {"label": "Basic cover", "weekly": 30, "cover": 0.4},
+    "full": {"label": "Full cover", "weekly": 70, "cover": 0.75}
+   },
+   "outage": {"hours": [3, 8], "spoil_after_hours": 2, "spoil_chance": 0.5, "cold_below": 8.0, "fuel_per_hour": 1.0, "cutoff_hours": [6, 12]},
+   "blizzard": {"hours": [10, 20], "heat_units_per_hour": 4.0, "hurt_chance": [0.03, 0.06], "outage_chance": 0.3, "cold_buff": "cold"},
+   "tornado": {"siren_min": 6, "view_min": 30},
+   "flood": {"hours": [16, 30], "mould_start": 0.5, "mould_per_day": 0.15, "sick_chance_per_day": 0.25},
+   "quake": {"view_min": 1},
+   "wildfire": {"hours": [30, 50], "sick_chance_per_hour": 0.004, "spread_power": 2},
+   "hail": {"view_min": 20},
+   "meteor": {"hurt_radius": 1, "object_radius": 2, "kill_chance": 0.15, "find_coins": 150},
+   "aftermath": {"visitors": 2, "gift": [25, 80], "visit_delay_min": 180, "visit_minutes": 100, "grief_days": 2},
+   "forecast": {"watch_gap_days": 7, "blizzard_lo": -4.0, "flood_rain_days": 2, "fire_dry_days": 3},
+   "streaks": {"rainy_day_hours": 6, "dry_day_hours": 0},
+   "damage": {
+    "tornado": {"scope": "outdoor", "object_hit": [0.3, 0.55, 0.85], "roof": [0.15, 0.5, 1.0], "cost": [120, 450, 1100], "shield": ["storm_shutters"],
+     "out_hurt": [0.35, 0.5, 0.7], "out_kill": [0.01, 0.03, 0.08], "in_hurt": [0.03, 0.1, 0.22], "in_kill": [0.0, 0.0, 0.01], "cover_hurt": [0.0, 0.0, 0.03],
+     "cause": "tornado", "reason": "the tornado", "far_cost": [[80, 200], [300, 700], [900, 1800]]},
+    "hail": {"scope": "plants", "object_hit": [0.25, 0.5, 0.75], "roof": [0.05, 0.2, 0.5], "cost": [60, 220, 600], "shield": ["storm_shutters"],
+     "out_hurt": [0.1, 0.25, 0.4], "out_kill": [0.0, 0.0, 0.0], "in_hurt": [0.0, 0.0, 0.0], "in_kill": [0.0, 0.0, 0.0], "cover_hurt": [0.0, 0.0, 0.0],
+     "cause": "hail", "reason": "the hail", "far_cost": [[30, 90], [120, 300], [350, 800]]},
+    "flood": {"scope": "floor", "destroy_share": 0.35, "object_hit": [0.2, 0.5, 0.85], "flood": [0.3, 0.6, 1.0], "cost": [100, 380, 900], "shield": ["sandbags"],
+     "out_hurt": [0.02, 0.06, 0.12], "out_kill": [0.0, 0.0, 0.02], "in_hurt": [0.0, 0.03, 0.08], "in_kill": [0.0, 0.0, 0.005], "cover_hurt": [0.0, 0.0, 0.0],
+     "cause": "flood", "reason": "the flood", "far_cost": [[70, 180], [250, 600], [700, 1500]]},
+    "quake": {"scope": "furniture", "destroy_share": 0.5, "object_hit": [0.1, 0.25, 0.5], "cracks": [0.2, 0.5, 1.0], "cost": [80, 320, 900], "shield": [],
+     "out_hurt": [0.02, 0.06, 0.12], "out_kill": [0.0, 0.0, 0.01], "in_hurt": [0.05, 0.15, 0.3], "in_kill": [0.0, 0.0, 0.015], "cover_hurt": [0.0, 0.05, 0.12],
+     "cause": "earthquake", "reason": "the earthquake", "far_cost": [[60, 150], [250, 600], [800, 1700]]},
+    "wildfire": {"scope": "outdoor", "object_hit": [0.4, 0.7, 0.95], "roof": [0.0, 0.0, 0.0], "cost": [100, 400, 1000], "shield": [],
+     "out_hurt": [0.1, 0.2, 0.3], "out_kill": [0.0, 0.01, 0.03], "in_hurt": [0.02, 0.06, 0.12], "in_kill": [0.0, 0.0, 0.01], "cover_hurt": [0.0, 0.0, 0.0],
+     "cause": "wildfire", "reason": "the wildfire", "far_cost": [[100, 250], [400, 900], [1200, 2500]]},
+    "blizzard": {"scope": "plants", "object_hit": [0.2, 0.4, 0.4], "cost": [0, 0, 0], "shield": [],
+     "out_hurt": [0.0, 0.0, 0.0], "out_kill": [0.0, 0.0, 0.0], "in_hurt": [0.0, 0.0, 0.0], "in_kill": [0.0, 0.0, 0.0], "cover_hurt": [0.0, 0.0, 0.0],
+     "cause": "blizzard", "reason": "the cold", "far_cost": [[0, 0], [0, 0], [0, 0]]},
+    "meteor": {"scope": "none", "object_hit": [1.0, 1.0, 1.0], "cost": [0, 0, 0], "shield": [],
+     "out_hurt": [0.0, 0.0, 0.0], "out_kill": [0.0, 0.0, 0.0], "in_hurt": [0.0, 0.0, 0.0], "in_kill": [0.0, 0.0, 0.0], "cover_hurt": [0.0, 0.0, 0.0],
+     "cause": "meteor", "reason": "a meteor", "far_cost": [[0, 0], [0, 0], [0, 0]]}
+   },
+   "texts": {
+    "tornado": ["{house} lost its fence and some garden things to the tornado.", "{house} lost part of its roof and a lot of yard to the tornado.", "{house} was badly wrecked by the tornado."],
+    "hail": ["{house} was pelted by hail: a few dents and a ruined flower bed.", "{house} was battered by hail: things outside are smashed and the roof is dented.", "{house} was flattened by a savage hailstorm: the garden is gone and the roof is cracked."],
+    "flood": ["{house} took in water: the floors are soaked.", "{house} has a flooded ground floor.", "{house} was swamped by the flood."],
+    "quake": ["{house} was rattled by the earthquake: a few things fell.", "{house} was shaken hard: things crashed down and a wall cracked.", "{house} was badly shaken: walls cracked and shelves fell."],
+    "wildfire": ["Embers from the wildfire scorched {house}'s yard.", "The wildfire reached {house}'s yard.", "The wildfire tore through {house}."],
+    "blizzard": ["{house} is buried by the blizzard; everyone is snowed in.", "{house} is buried by the blizzard; everyone is snowed in.", "{house} is buried by the blizzard; everyone is snowed in."],
+    "meteor": ["At {house}, a meteor crashed down nearby.", "At {house}, a meteor crashed down nearby.", "At {house}, a meteor crashed down nearby."]
+   }
+  }
+ },
+ "handlers": {
+  "disaster_hit": {"script": "res://scripts/systems/disaster_events.gd", "method": "on_hit"}
+ },
+ "content": {
+  "buffs": {
+   "power_out": {"label": "No Power", "mood": {"uncomfortable": 1}, "duration_min": 0, "hidden": true},
+   "siren_alert": {"label": "Take Cover!", "mood": {"tense": 2}, "duration_min": 12, "hidden": true, "thought": "That siren... take cover!",
+    "autonomy_mult": {"interaction:take_cover": 30.0}},
+   "storm_shaken": {"label": "Shaken", "mood": {"tense": 2, "sad": 1}, "duration_min": 1440, "thought": "That was terrifying. I'm still shaking."},
+   "home_damaged": {"label": "Damaged Home", "mood": {"uncomfortable": 2}, "duration_min": 0, "thought": "The house is a mess. It needs repairs."},
+   "mouldy_home": {"label": "Mouldy Home", "mood": {"uncomfortable": 2}, "duration_min": 0, "need_decay_mult": {"hygiene": 1.2},
+    "thought": "The whole place smells of damp and mould."},
+   "smoky": {"label": "Smoky Air", "mood": {"uncomfortable": 1}, "duration_min": 180, "thought": "The air tastes of smoke."},
+   "town_mourning": {"label": "Town in Mourning", "mood": {"sad": 2}, "duration_min": 2880, "thought": "The whole town feels quieter today."},
+   "neighbours_cared": {"label": "Neighbours Cared", "mood": {"happy": 2}, "duration_min": 1440, "thought": "It means so much that people came."}
+  },
+  "objects": {
+   "generator": {"def": {"label": "Backup Generator", "size": [1, 1], "price": 700, "tags": ["utility", "safety", "outdoor"], "model": "res://assets/models/generator.glb",
+    "color": "#e0a030", "height": 0.7, "slots": [{"offset": [0, 1], "pose": "stand"}], "state": {"fuel": {"min": 0, "max": 10, "start": 10}},
+    "advertises": {}, "decor": -0.2, "interactions": ["refuel_generator"]}},
+   "storm_shelter": {"def": {"label": "Storm Shelter", "size": [1, 1], "price": 900, "tags": ["utility", "safety", "shelter"], "model": "res://assets/models/storm_shelter.glb",
+    "color": "#6a7480", "height": 0.5, "slots": [{"offset": [0, 1], "pose": "stand"}], "state": {}, "advertises": {}, "decor": 0.0, "interactions": ["take_cover"]}},
+   "storm_shutters": {"def": {"label": "Storm Shutters", "size": [1, 1], "price": 350, "tags": ["utility", "safety", "ceiling"], "model": "res://assets/models/storm_shutters.glb",
+    "color": "#46607a", "height": 1.4, "slots": [{"offset": [0, 1], "pose": "stand"}], "state": {}, "advertises": {}, "decor": 0.0, "interactions": [], "layer": "floor", "blocks": false}},
+   "sandbags": {"def": {"label": "Sandbags", "size": [1, 1], "price": 120, "tags": ["utility", "safety"], "model": "res://assets/models/sandbags.glb",
+    "color": "#b59b6a", "height": 0.4, "slots": [{"offset": [0, 1], "pose": "stand"}], "state": {}, "advertises": {}, "decor": -0.2, "interactions": [], "layer": "floor", "blocks": false}},
+   "debris": {"def": {"label": "Storm Debris", "size": [1, 1], "price": 0, "tags": ["debris", "outdoor", "mess"], "model": "res://assets/models/debris.glb",
+    "color": "#6b5a48", "height": 0.5, "slots": [{"offset": [0, 1], "pose": "stand"}], "state": {}, "advertises": {"tidy": 2.0}, "decor": -1.0, "interactions": ["clear_debris"], "layer": "floor", "blocks": false}},
+   "meteorite": {"def": {"label": "Meteorite", "size": [1, 1], "price": 0, "tags": ["outdoor", "science", "curio"], "model": "res://assets/models/meteorite.glb",
+    "color": "#3a3330", "height": 0.5, "slots": [{"offset": [0, 1], "pose": "stand"}], "state": {}, "advertises": {"fun": 1.5}, "decor": 0.5, "interactions": ["examine_meteorite"], "layer": "floor", "blocks": false}}
+  },
+  "interactions": {
+   "take_cover": {"label": "Take Cover", "kind": "super", "target": "object", "objects": ["storm_shelter", "bathtub", "shower", "toilet"], "tags": ["shelter", "safety"],
+    "duration_min": 20, "posture": "stand", "tests": [{"has_buff": "siren_alert"}], "per_min": {}, "on_finish": [{"remove_buff": "siren_alert"}],
+    "autonomous": true, "priority": "urgent", "advertises": {"comfort": 20.0}, "thought": "Get down and wait it out."},
+   "clear_debris": {"label": "Clear Debris", "kind": "super", "target": "object", "objects": ["debris"], "tags": ["chore", "clean"],
+    "duration_min": 25, "posture": "stand", "tests": [], "per_min": {"energy": -0.2, "hygiene": -0.12}, "skill_xp_per_min": {"handiness": 0.3},
+    "on_finish": [{"fire_event": "debris_cleared"}], "autonomous": true, "priority": "low", "advertises": {"tidy": 3.0}, "thought": "Let's clear this mess away."},
+   "call_repairers": {"label": "Call the Repairers", "kind": "super", "target": "object", "objects": ["mailbox"], "tags": ["repair", "chore"],
+    "duration_min": 5, "posture": "stand", "tests": [{"has_buff": "home_damaged"}], "per_min": {}, "on_finish": [{"fire_event": "call_repairers"}],
+    "autonomous": false, "priority": "normal", "advertises": {}, "thought": "We need proper repairs."},
+   "change_insurance": {"label": "Home Insurance", "kind": "super", "target": "object", "objects": ["mailbox"], "tags": ["paperwork"],
+    "duration_min": 3, "posture": "stand", "tests": [], "per_min": {}, "on_finish": [{"fire_event": "change_insurance"}],
+    "autonomous": false, "priority": "normal", "advertises": {}, "thought": "Is the house properly covered?"},
+   "scrub_mould": {"label": "Scrub Mould", "kind": "super", "target": "object", "objects": ["sink", "bathtub", "shower"], "tags": ["chore", "clean"],
+    "duration_min": 30, "posture": "stand", "tests": [{"has_buff": "mouldy_home"}], "per_min": {"hygiene": -0.3, "energy": -0.15}, "skill_xp_per_min": {"handiness": 0.3},
+    "on_finish": [{"fire_event": "scrubbed_mould"}], "autonomous": true, "priority": "low", "advertises": {"tidy": 3.0}, "thought": "This mould has to go."},
+   "refuel_generator": {"label": "Refuel Generator", "kind": "super", "target": "object", "objects": ["generator"], "tags": ["chore", "utility"],
+    "duration_min": 8, "posture": "stand", "tests": [{"coins_at_least": 25}], "per_min": {}, "on_finish": [{"object_state_set": ["fuel", 10]}, {"coins_add": -25}],
+    "autonomous": false, "priority": "normal", "advertises": {}, "thought": "Better top up the generator."},
+   "examine_meteorite": {"label": "Examine Meteorite", "kind": "super", "target": "object", "objects": ["meteorite"], "tags": ["science", "fun"],
+    "duration_min": 20, "posture": "stand", "tests": [], "per_min": {"fun": 0.4}, "skill_xp_per_min": {"logic": 0.5},
+    "on_finish": [{"add_buff": "eureka"}, {"fire_event": "meteorite_found"}], "autonomous": true, "priority": "low", "advertises": {"fun": 2.0}, "thought": "A piece of the sky!"}
+  },
+  "object_interactions": {
+   "mailbox": ["change_insurance", "call_repairers"],
+   "sink": ["scrub_mould"], "bathtub": ["scrub_mould", "take_cover"], "shower": ["scrub_mould", "take_cover"], "toilet": ["take_cover"]
+  }
+ },
+ "incidents": {
+  "power_outage": {
+   "label": "Power outage", "scope": "town", "check": "hour", "base_rate_per_year": 0.33, "lot_hit": 0.85, "notify_policy": "household", "severity": 2,
+   "risk_mults": [
+    {"label": "Thunderstorm", "when": [{"weather_is": ["thunderstorm"]}], "mult": 6.0},
+    {"label": "High winds", "when": [{"weather_is": ["windy"]}], "mult": 3.0},
+    {"label": "Snow and ice", "when": [{"weather_is": ["snow", "cold_snap"]}], "mult": 2.5}
+   ],
+   "outcomes": [
+    {"weight": 1, "effects": [{"handler": "disaster_hit", "args": {"kind": "outage", "power": 1}}], "text": "{house} lost power.", "kind": "warn"}
+   ],
+   "statistical": {"outcomes": [
+    {"weight": 1, "effects": [{"handler": "disaster_hit", "args": {"kind": "outage", "power": 1}}], "summary": ""}
+   ]}
+  },
+  "utility_cutoff": {
+   "label": "Power cut off", "scope": "lot", "check": "day", "base_rate_per_year": 4.0, "notify_policy": "household", "severity": 2,
+   "conditions": [{"disaster": {"overdue_bills": true}}],
+   "outcomes": [
+    {"weight": 1, "effects": [{"handler": "disaster_hit", "args": {"kind": "outage", "power": 1, "cutoff": true}}], "text": "The power company cut off the power.", "kind": "bad"}
+   ]
+  },
+  "blizzard": {
+   "label": "Blizzard", "scope": "town", "check": "hour", "base_rate_per_year": 3.5, "lot_hit": 1.0, "notify_policy": "household", "severity": 3,
+   "conditions": [{"season_is": ["winter"]}, {"weather_is": ["snow"]}],
+   "outcomes": [
+    {"weight": 6, "effects": [{"handler": "disaster_hit", "args": {"kind": "blizzard", "power": 1}}], "text": "A blizzard buried the house.", "kind": "warn"},
+    {"weight": 3, "effects": [{"handler": "disaster_hit", "args": {"kind": "blizzard", "power": 2}}], "text": "A blizzard buried the house.", "kind": "bad"}
+   ],
+   "statistical": {"outcomes": [
+    {"weight": 6, "effects": [{"handler": "disaster_hit", "args": {"kind": "blizzard", "power": 1}}], "summary": ""},
+    {"weight": 3, "effects": [{"handler": "disaster_hit", "args": {"kind": "blizzard", "power": 2}}], "summary": ""}
+   ]}
+  },
+  "tornado": {
+   "label": "Tornado", "scope": "town", "check": "hour", "base_rate_per_year": 0.17, "lot_hit": 0.35, "notify_policy": "household", "severity": 4,
+   "conditions": [{"season_is": ["spring", "summer"]}, {"weather_is": ["thunderstorm", "windy"]}],
+   "risk_mults": [{"label": "Thunderstorm", "when": [{"weather_is": ["thunderstorm"]}], "mult": 4.0}],
+   "prevent": [{"label": "Storm shutters", "when": [{"has_object": "storm_shutters"}], "mult": 0.6, "per_lot": true}],
+   "outcomes": [
+    {"weight": 6, "effects": [{"handler": "disaster_hit", "args": {"kind": "tornado", "power": 1}}], "text": "The tornado hit the house.", "kind": "warn"},
+    {"weight": 3, "effects": [{"handler": "disaster_hit", "args": {"kind": "tornado", "power": 2}}], "text": "The tornado hit the house.", "kind": "bad"},
+    {"weight": 1, "effects": [{"handler": "disaster_hit", "args": {"kind": "tornado", "power": 3}}], "text": "The tornado hit the house.", "kind": "bad"}
+   ],
+   "statistical": {"outcomes": [
+    {"weight": 6, "effects": [{"handler": "disaster_hit", "args": {"kind": "tornado", "power": 1}}], "summary": "The tornado clipped the house."},
+    {"weight": 3, "effects": [{"handler": "disaster_hit", "args": {"kind": "tornado", "power": 2}}], "summary": "The tornado hit the house."},
+    {"weight": 1, "effects": [{"handler": "disaster_hit", "args": {"kind": "tornado", "power": 3}}], "summary": "The tornado flattened the house."}
+   ]}
+  },
+  "flood": {
+   "label": "Flood", "scope": "town", "check": "hour", "base_rate_per_year": 0.35, "lot_hit": 0.6, "notify_policy": "household", "severity": 3,
+   "conditions": [{"weather_is": ["rain", "thunderstorm"]}, {"disaster": {"rain_days_at_least": 2}}],
+   "prevent": [{"label": "Sandbags", "when": [{"has_object": "sandbags"}], "mult": 0.35, "per_lot": true}],
+   "outcomes": [
+    {"weight": 6, "effects": [{"handler": "disaster_hit", "args": {"kind": "flood", "power": 1}}], "text": "Floodwater reached the house.", "kind": "warn"},
+    {"weight": 3, "effects": [{"handler": "disaster_hit", "args": {"kind": "flood", "power": 2}}], "text": "Floodwater reached the house.", "kind": "bad"},
+    {"weight": 1, "effects": [{"handler": "disaster_hit", "args": {"kind": "flood", "power": 3}}], "text": "Floodwater reached the house.", "kind": "bad"}
+   ],
+   "statistical": {"outcomes": [
+    {"weight": 6, "effects": [{"handler": "disaster_hit", "args": {"kind": "flood", "power": 1}}], "summary": "Floodwater reached the house."},
+    {"weight": 3, "effects": [{"handler": "disaster_hit", "args": {"kind": "flood", "power": 2}}], "summary": "Floodwater filled the house."},
+    {"weight": 1, "effects": [{"handler": "disaster_hit", "args": {"kind": "flood", "power": 3}}], "summary": "The house was swamped."}
+   ]}
+  },
+  "earthquake": {
+   "label": "Earthquake", "scope": "town", "check": "day", "base_rate_per_year": 0.01, "lot_hit": 1.0, "notify_policy": "household", "severity": 4,
+   "outcomes": [
+    {"weight": 6, "effects": [{"handler": "disaster_hit", "args": {"kind": "quake", "power": 1}}], "text": "The earthquake shook the house.", "kind": "warn"},
+    {"weight": 3, "effects": [{"handler": "disaster_hit", "args": {"kind": "quake", "power": 2}}], "text": "The earthquake shook the house.", "kind": "bad"},
+    {"weight": 1, "effects": [{"handler": "disaster_hit", "args": {"kind": "quake", "power": 3}}], "text": "The earthquake shook the house.", "kind": "bad"}
+   ],
+   "statistical": {"outcomes": [
+    {"weight": 6, "effects": [{"handler": "disaster_hit", "args": {"kind": "quake", "power": 1}}], "summary": "The earthquake rattled the house."},
+    {"weight": 3, "effects": [{"handler": "disaster_hit", "args": {"kind": "quake", "power": 2}}], "summary": "The earthquake cracked the house."},
+    {"weight": 1, "effects": [{"handler": "disaster_hit", "args": {"kind": "quake", "power": 3}}], "summary": "The earthquake wrecked the house."}
+   ]}
+  },
+  "wildfire": {
+   "label": "Wildfire", "scope": "town", "check": "hour", "base_rate_per_year": 1.4, "lot_hit": 0.15, "notify_policy": "household", "severity": 4,
+   "conditions": [{"season_is": ["summer"]}, {"weather_is": ["heatwave"]}, {"disaster": {"dry_days_at_least": 3}}],
+   "outcomes": [
+    {"weight": 6, "effects": [{"handler": "disaster_hit", "args": {"kind": "wildfire", "power": 1}}], "text": "Sparks from the wildfire reached the house.", "kind": "warn"},
+    {"weight": 3, "effects": [{"handler": "disaster_hit", "args": {"kind": "wildfire", "power": 2}}], "text": "The wildfire reached the house.", "kind": "bad"},
+    {"weight": 1, "effects": [{"handler": "disaster_hit", "args": {"kind": "wildfire", "power": 3}}], "text": "The wildfire reached the house.", "kind": "bad"}
+   ],
+   "statistical": {"outcomes": [
+    {"weight": 6, "effects": [{"handler": "disaster_hit", "args": {"kind": "wildfire", "power": 1}}], "summary": "Sparks from the wildfire reached the house."},
+    {"weight": 3, "effects": [{"handler": "disaster_hit", "args": {"kind": "wildfire", "power": 2}}], "summary": "The wildfire reached the house."},
+    {"weight": 1, "effects": [{"handler": "disaster_hit", "args": {"kind": "wildfire", "power": 3}}], "summary": "The wildfire tore through the house."}
+   ]}
+  },
+  "hailstorm": {
+   "label": "Hailstorm", "scope": "town", "check": "hour", "base_rate_per_year": 3.6, "lot_hit": 0.7, "notify_policy": "household", "severity": 2,
+   "conditions": [{"season_is": ["spring", "summer", "autumn"]}, {"weather_is": ["thunderstorm"]}],
+   "prevent": [{"label": "Storm shutters", "when": [{"has_object": "storm_shutters"}], "mult": 0.6, "per_lot": true}],
+   "outcomes": [
+    {"weight": 6, "effects": [{"handler": "disaster_hit", "args": {"kind": "hail", "power": 1}}], "text": "Hail pelted the house.", "kind": "warn"},
+    {"weight": 3, "effects": [{"handler": "disaster_hit", "args": {"kind": "hail", "power": 2}}], "text": "Hail pelted the house.", "kind": "warn"},
+    {"weight": 1, "effects": [{"handler": "disaster_hit", "args": {"kind": "hail", "power": 3}}], "text": "Hail pelted the house.", "kind": "bad"}
+   ],
+   "statistical": {"outcomes": [
+    {"weight": 6, "effects": [{"handler": "disaster_hit", "args": {"kind": "hail", "power": 1}}], "summary": "Hail dented the house."},
+    {"weight": 3, "effects": [{"handler": "disaster_hit", "args": {"kind": "hail", "power": 2}}], "summary": "Hail smashed the garden."},
+    {"weight": 1, "effects": [{"handler": "disaster_hit", "args": {"kind": "hail", "power": 3}}], "summary": "Hail wrecked the roof."}
+   ]}
+  },
+  "meteor_strike": {
+   "label": "Meteor strike", "scope": "town", "check": "day", "base_rate_per_year": 0.0005, "lot_hit": 1.0, "notify_policy": "household", "severity": 3, "surprise": true,
+   "outcomes": [
+    {"weight": 1, "effects": [{"handler": "disaster_hit", "args": {"kind": "meteor", "power": 1}}], "text": "A meteor crashed down.", "kind": "warn"}
+   ],
+   "statistical": {"outcomes": [
+    {"weight": 1, "effects": [{"handler": "disaster_hit", "args": {"kind": "meteor", "power": 1}}], "summary": ""}
+   ]}
+  }
+ }
+}

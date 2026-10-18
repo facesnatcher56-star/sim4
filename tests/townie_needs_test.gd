@@ -28,6 +28,9 @@ func _strangers() -> Array:
 
 func _crowd_and_visitor_days() -> void:
 	var folk: Array = Kit.new_game("small")
+	Incidents.set_level("off")                 # only neglect may kill here, not a rare event or old age
+	for tid0 in Story.townies:
+		Story.townies[tid0]["age_days"] = 70   # no townie is near the end of life in this window
 	Kit.set_time(2, 8)
 	Neighborhood.travel([folk[0].id], "cafe", {"instant": true, "free": true, "quiet": true})
 	Kit.run(5)

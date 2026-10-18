@@ -124,3 +124,66 @@ Kill with `Aging.kill(folk_or_townie_id, "fire")`. Grief strength <= 1 = normal 
 2. Force each outcome in a test (`Incidents.force(id, {..., "outcome": i})`), check the effect, the toast text and the counters.
 3. Add a long-run check if your rate matters (`tests/incidents_longrun_test.gd` is the pattern: `Incidents.measured_rate(id)`).
 4. Every incident needs counterplay (`prevent` / `warning` / `defuse`) unless it is an act of nature.
+
+## Health API (task 02: needs deaths, illness, injury)
+All in `scripts/systems/health*.gd`, data in `data/incidents/02_needs_health.json` (`config.health`, buffs, interactions, the illness incidents) and
+`data/death_causes/02_needs_health.json`. Hooks are called from `Incidents.on_minute/on_hour/on_day` (state ticks) and `SystemsManager` (events).
+
+**Other tasks call these** (static, safe on any Folk or folk id):
+
+| call | what it does |
+|---|---|
+| `Health.injure(folk_or_id, severity 1..3, cause)` | the injury entry point (the `injure` incident effect and `Hospital.injure` go through it). Adds the `injured` buff for the severity's duration, records `inj`, severity 2+ is admitted to hospital |
+| `Health.is_injured(f)` / `Health.injury_severity(f)` | 0 = healthy |
+| `Health.speed_mult(f)` | walking speed factor (injured 0.8 / 0.6 / 0.45, flu, hypothermia, faint ... ). `Interaction.start` divides the walk time by it, never below 0.3 |
+| `Health.blocks_activity(f, tags)` / `Health.work_block(f, career_id)` | `""` or a reason. Injured / flu folk do not get interactions tagged `exercise`, `fitness`, `dance` (test patch added by `HealthContent`); flu and food poisoning skip work, an injury skips physical careers (all work when severity 2+) |
+| `Health.fall_ill(f, kind, severity, cause)` | kind `cold`, `flu`, `food_poisoning`, `exposure`, `generic`. `Hospital.fall_ill` = generic. Sets the illness buff, the `sick` marker and a record; severity 2+ admits |
+| `Health.is_ill(f)` / `Health.illness_of(f)` | `{kind, severity, since}` |
+| `Health.is_collapsed(f)` / `Health.collapse(f, kind)` / `Health.rescue(f, helper)` | the Collapsed state (kinds hunger, exhaustion, cold, heat): buff `collapsed`, lying on the floor, a housemate helps after about 20 min (`help_collapsed`), or a doctor, or the hospital |
+| `Health.heal(f)` / `Health.on_doctor(f)` | cure; `Incidents.call_doctor` calls `on_doctor` (revives the collapsed, cuts illness 75 percent and injury 50 percent, adds `medicated`) and returns `treated: [...]` |
+| `Health.stage_of(f)` | `{hunger, energy, cold, heat}` 0 fine .. 3 collapsed |
+| `Health.register_neglect_hook(callable)` | **task 07**: `callable(folk, {kind, minutes, needs, day, time})` runs once when a toddler, child or elder has had hunger / hygiene / energy under -60 for 8 hours (buff `neglected`, game event `neglect_noticed`). A collapsed toddler or child is taken to hospital after 6 hours with no help (game event `neglect_emergency`) |
+
+**Rules to remember**
+- Starvation (hunger at the floor 12 h warning, 2 days collapse, from 3 days a small chance per hour of death), exhaustion (collapse after 2 days at the bottom, only elders can die after 5 days), hypothermia and heatstroke (shivering / overheating, then sick, then collapsed, then a small death chance) are **deterministic consequences of neglect**: they use `Health.rng`, not incident dice, and are **not** scaled by the Surprises setting (so Surprises Off still lets long neglect kill). Illness (catching, getting worse, food poisoning) and the scuffle injury are ordinary incidents and **are** scaled. Children and babies never die of these; thresholds are shorter for toddlers, children and elders (`config.health.stage_mult`).
+- Colds and flu spread: every hour a contagious person marks housemates (and anyone they talked to in the last 90 minutes) with a hidden `exposed_cold` / `exposed_flu` buff, which multiplies the catch rate of `catch_cold` / `catch_flu`. Recovery gives a few days of immunity.
+- Eating from a fridge with spoiled food rolls food poisoning (warned 25 minutes ahead; medicine or a doctor defuses it). Tossing the food (existing chore) removes the risk.
+- Counterplay interactions (all in the 02 file): `take_medicine` and `treat_injury` (sink), `put_on_coat` (dresser / wardrobe), `drink_water` (sink), `help_collapsed`, plus ordinary rest and the doctor call.
+- Save: `Health.to_dict/from_dict` inside the incidents block.
+
+## Natural disasters (task 06)
+`data/incidents/06_disasters.json` + `scripts/systems/disaster_*.gd` + `scripts/world/disaster_view.gd`. Town-scope incidents (`power_outage`, `utility_cutoff` (lot scope, overdue bills), `blizzard`, `tornado`, `flood`, `earthquake`, `wildfire`, `hailstorm`, `meteor_strike`) with ONE handler `disaster_hit` (`args.kind`, `args.power` 1..3).
+- **Condition key `disaster`** (`DisasterConds`): `{rain_days_at_least, dry_days_at_least, overdue_bills, insured, damaged, outage}`. Any later task can use it in its own incident file.
+- **State** (`DisasterState`, saved inside `Incidents.to_dict()["disasters"]`): running town events (siren / blizzard / outage / flood / smoke), per-lot damage records (`home:<hid>` real, `town:<n>` statistical), insurance level per household, rain / dry streaks, pending neighbour visits and disaster deaths. `DisasterState.begin(kind, minutes, power, headline)` starts a town event once per roll.
+- **Numbers** are data: `config.disasters.damage[kind]` (arrays indexed by power), `config.disasters.insurance`, `.texts`. Base rates are per game year of QUALIFYING weather; `tests/disaster_longrun_test.gd` checks the real yearly frequency.
+- **Counterplay**: shutters (tornado / hail) and sandbags (flood) lower the power by one; the `storm_shelter` and any bathroom fixture protect people who `take_cover` (autonomous during the siren); `generator` keeps the power on; insurance (mailbox > Home insurance) pays back a share of damage, hospital bills and doctor visits (`Incidents.insurance_fn`) for a weekly premium (`DisasterInsurance.bill_extra` in `Economy.compute_bill`).
+- **Aftermath**: `clear_debris`, `call_repairers` (mailbox, pays the quote), `scrub_mould`, neighbours visiting with gifts, shared grief after deaths (`DisasterAftermath`). Wildfire hands over to `Fire.ignite(target, "wildfire", opts)` for lots it reaches.
+- **Shared-file hooks** (one line each): `Incidents.reset/to_dict/from_dict`, `SystemsManager` minute / hour / day / game-event, `Economy.compute_bill`, `NeighborhoodTravel.can_travel` (blizzard closes the roads), `IncidentCond` (`disaster` key), `IncidentDefs.TOP_KEYS` (`lot_hit`), `LotView._ready` (`DisasterView`).
+
+## Fire API (task 03)
+`data/incidents/03_fire.json` (config.fire, five incidents, buffs, objects `sprinkler` / `ash_pile`, interactions) + `data/death_causes/03_fire.json` (`fire`) + `scripts/systems/fire_*.gd` (class `Fire` in `fire_core.gd`) + `scripts/world/fire_view.gd`. Everything is numbers in `config.fire`.
+
+**Other tasks call these** (all static on `Fire`):
+
+| call | what it does |
+|---|---|
+| `Fire.ignite(target, source = "unknown", opts = {}) -> bool` | `target`: an object, an object id or a `Vector2i` tile. Starts a fire there (false when it already burns, or nothing flammable is there; `arson`, `wildfire` and `lightning` always catch). `opts`: `culprit` (folk id), `force` (burn anything), `stage` 1..3, `quiet` (no "Fire!" toast). `source` picks the words of the summary: `cooking fireplace electrical repair candle lightning arson wildfire` (anything else = "fire") |
+| `Fire.extinguish(target, by = "") -> bool` / `Fire.extinguish_lot(lot, by) -> int` | put a fire out (the object survives, scorched, and is `broken` if it burned a while) |
+| `Fire.is_burning(target)`, `Fire.active()`, `Fire.fires_in(lot)`, `Fire.lots_burning()`, `Fire.smoke_of(lot)` (0..1) | queries. `lot` is the neighbourhood lot id (`Neighborhood.HOME` = `"home"`) |
+| `Fire.call_brigade(lot, caller_id = -1)` | the fire department comes after a delay |
+| `Fire.stats` | counters: ignited, blazes, spread_blazes, spread_events, destroyed, loss, deaths, hurt, by_folk, by_sprinkler, by_brigade, rescued, armed, averted |
+| `Fire.hover_text(object)` | the extra tooltip lines (fire risk / protection) `LotPicking` adds under an object's name |
+
+Game events: `fire_started {lot, tile, source, object}`, `fire_alarm`, `fire_brigade_called`, `fire_brigade_arrived`, `fire_ended`, `fire_out {lot, source, loss, spread, dead}`; chronicle kind `fire` (one entry per blaze, with the losses). Insurance (`Incidents.insurance_fn`) pays back part of the value lost.
+
+**Sources** (incidents, lot scope, rates per household per game year, Rare): `kitchen_fire` 0.3 (x0.6 when everybody cooks at level 2+, x0.2 more at level 4+, x1.5 with a clumsy cook), `fireplace_fire` 0.06 (x2 in winter), `electrical_fire` 0.07 (x1.6 with low handiness: botched repairs), `candle_fire` 0.14 per holiday-year = about 0.04 (holidays only), `lightning_fire` 0.5 per stormy year (thunderstorms only). A rolled incident ARMS a source (`FireEvents`): the kitchen fire starts a few minutes into the next meal, the fireplace one when it burns unattended for 20 minutes, the electrical one when a device is used or repaired, the candle one on the holiday evening, lightning at once; an armed source that finds no moment in 4-6 days fizzles (counted as `averted`). `Incidents.force(id, {lot = "home:1"})` ignites at once.
+
+**What a fire does**: stage 1 small, 2 growing, 3 raging by age (`stage_age`). Every ~4 minutes it may spread to flammable neighbours (walls stop it, tags / ids in `flam_tags` / `flam_ids`, carpet and wood floors), smoke builds per lot, the object burns away after ~9-23 minutes (price lost, `ash_pile` + scorch mark left). Putting it out early leaves the object scorched, broken if it burned a while.
+
+**What people do** (`FireFolk`, each minute): a working smoke alarm wakes everybody; folk in the room notice within a minute, others within 3. Aware adults rescue babies and toddlers, phone the fire department, smother a young fire next to them (chance rises with cooking / handiness), fetch the extinguisher (`use_extinguisher`, 92 / 65 / 22 percent by stage), or run out (`flee_fire`, then `watch_fire` in the street until it is over). Children only run. Smoke hurts anyone in a burning room (`fire_smoke` buff, injured after 9 minutes of exposure); sleepers without an alarm, babies with no adult awake and anyone trapped can die (`Aging.kill(id, "fire")`) after 28 minutes. Sprinklers put small fires out by themselves and slow spread. The fire department (uniformed NPC visitors, ids from 7000) arrives 9-14 minutes after the call (a neighbour calls after 10 minutes if nobody does), puts fires out, carries stuck people out, tidies up and leaves.
+
+**Far lots and townies**: the same five incidents use their `statistical.outcomes` ("The Ashby house had a kitchen fire, no one hurt", hospital, death). `FireTown` gives every townie lot a deterministic `town_objects` list (stove, fireplace, smoke alarm, extinguisher, sprinkler) so the `has_object` conditions and the outcome weights depend on it, keeps the hidden `holiday_today` marker on townie records for candle fires, and a burnt-out lot loses things and recovers after 10 days. Targets: spread ~0.05, death ~0.005 per household-year (tests/fire_longrun_test.gd measures them).
+
+**Prevention shown to the player**: tooltip lines on stove / grill ("Low cooking skill: fire risk", "No working smoke alarm in the house"), fireplace ("Fire risk if left burning alone"), smoke alarm (battery), extinguisher (charge), sprinkler, broken electronics. Chores: `douse_fireplace` (Put Out the Fire), `test_smoke_alarm` / `replace_alarm_batteries` (already existed), `inspect_extinguisher`, `sweep_ash`; commands for the player: `use_extinguisher` ("Fight the Fire") and `call_firefighters` while a fire burns.
+
+**Shared-file hooks** (one line each): `SystemsManager` (`Fire.reset`, `Fire.on_minute`, `Fire.on_day`, interaction-started and game-event routing), `SaveLoad` (`systems.fire`), `LotView._ready` (`FireView.ensure_on`), `LotPicking` (hover tooltip lines), `tests/run_all.gd` (SLOW list).

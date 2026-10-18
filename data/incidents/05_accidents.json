@@ -1,0 +1,2517 @@
+{
+ "_doc": "Task 05: accidents. See scripts/systems/accident_*.gd and config.accidents. Deaths use data/death_causes/05_accidents.json (accident_* ids).",
+ "config": {
+  "accidents": {
+   "_doc": "Accident exposure rules (scripts/systems/accident_*.gd). Rates of the accident incidents are per YEAR OF EXPOSURE: the hourly dice only roll while a marker buff (what the person is doing) holds, so base_rate = per_person_year x 672 / checks_per_year (see `targets`).",
+   "icy_snow_cover": 0.25,
+   "slippery_wetness": 0.5,
+   "puddle_mess": 0.3,
+   "near_water_tiles": 4,
+   "water_objects": [
+    "fishing_spot",
+    "hot_tub"
+   ],
+   "water_interactions": [
+    "fish_pond",
+    "fish_deep_water",
+    "soak_hot_tub"
+   ],
+   "eat_prefix": "eat_meal",
+   "exercise_interactions": [
+    "exercise",
+    "lift_weights"
+   ],
+   "repair_interactions": [
+    "repair_object"
+   ],
+   "electric_tags": [
+    "electronics",
+    "appliance"
+   ],
+   "helper_stages": [
+    "teen",
+    "adult",
+    "elder"
+   ],
+   "physical_careers": {
+    "cook": 1,
+    "chef": 1,
+    "fitness_coach": 1,
+    "athlete": 2,
+    "gardener": 2,
+    "handyperson": 2
+   },
+   "traffic": {
+    "night": 1.0,
+    "dusk": 0.5,
+    "day": 0.25,
+    "night_from": 21.0,
+    "night_to": 5.0,
+    "dusk_from": 18.0,
+    "dawn_to": 7.0,
+    "jaywalk_factor": 1.6
+   },
+   "trouble": {
+    "drowning_scare": {
+     "buff": "acc_trouble_water",
+     "help_per_min": 0.4,
+     "radius": 14.0
+    },
+    "kids_near_water": {
+     "buff": "acc_trouble_water",
+     "help_per_min": 0.4,
+     "radius": 14.0
+    },
+    "choking": {
+     "buff": "acc_trouble_choke",
+     "help_per_min": 0.5,
+     "radius": 10.0
+    }
+   },
+   "townie": {
+    "alone_p": 0.25,
+    "unsupervised_p": 0.3,
+    "work_hours": [
+     9,
+     17
+    ],
+    "markers": {
+     "acc_water": {
+      "p": 0.05,
+      "hours": [
+       8,
+       20
+      ],
+      "objects": [
+       "fishing_spot",
+       "hot_tub"
+      ],
+      "object_mult": 3.0
+     },
+     "acc_eating": {
+      "p": 0.18,
+      "hours": [
+       7,
+       21
+      ]
+     },
+     "acc_repair_electric": {
+      "p": 0.03,
+      "hours": [
+       9,
+       19
+      ]
+     },
+     "acc_exercise": {
+      "p": 0.05,
+      "hours": [
+       6,
+       21
+      ]
+     },
+     "acc_on_road": {
+      "p": 0.08,
+      "traffic": true
+     },
+     "acc_slippery": {
+      "p": 0.15,
+      "hours": [
+       7,
+       20
+      ],
+      "weather": "slippery"
+     },
+     "acc_icy": {
+      "p": 0.5,
+      "hours": [
+       7,
+       20
+      ],
+      "weather": "icy"
+     },
+     "acc_near_water": {
+      "p": 0.15,
+      "hours": [
+       8,
+       19
+      ],
+      "stages": [
+       "toddler",
+       "child"
+      ]
+     },
+     "acc_near_road": {
+      "p": 0.15,
+      "hours": [
+       8,
+       19
+      ],
+      "stages": [
+       "toddler",
+       "child"
+      ]
+     }
+    }
+   },
+   "targets": {
+    "drowning_scare": {
+     "per_person_year": 0.04,
+     "checks_per_year": 90
+    },
+    "kids_near_water": {
+     "per_person_year": 0.03,
+     "checks_per_year": 40
+    },
+    "choking": {
+     "per_person_year": 0.05,
+     "checks_per_year": 70
+    },
+    "electric_shock": {
+     "per_person_year": 0.08,
+     "checks_per_year": 10
+    },
+    "slip_fall": {
+     "per_person_year": 0.2,
+     "checks_per_year": 40
+    },
+    "traffic_hit": {
+     "per_person_year": 0.03,
+     "checks_per_year": 40
+    },
+    "kids_near_road": {
+     "per_person_year": 0.02,
+     "checks_per_year": 30
+    },
+    "workout_injury": {
+     "per_person_year": 0.06,
+     "checks_per_year": 20
+    },
+    "workplace_injury": {
+     "per_person_year": 0.1,
+     "checks_per_year": 160
+    }
+   }
+  }
+ },
+ "handlers": {
+  "accident_outcome": {
+   "script": "res://scripts/systems/accident_outcome.gd",
+   "method": "on_incident"
+  }
+ },
+ "content": {
+  "buffs": {
+   "acc_water": {
+    "label": "Near deep water",
+    "mood": {},
+    "duration_min": 45,
+    "hidden": true
+   },
+   "acc_eating": {
+    "label": "Eating",
+    "mood": {},
+    "duration_min": 45,
+    "hidden": true
+   },
+   "acc_repair_electric": {
+    "label": "Fixing electrics",
+    "mood": {},
+    "duration_min": 45,
+    "hidden": true
+   },
+   "acc_exercise": {
+    "label": "Working out",
+    "mood": {},
+    "duration_min": 45,
+    "hidden": true
+   },
+   "acc_on_road": {
+    "label": "On the road",
+    "mood": {},
+    "duration_min": 45,
+    "hidden": true
+   },
+   "acc_crosswalk": {
+    "label": "On a crosswalk",
+    "mood": {},
+    "duration_min": 45,
+    "hidden": true
+   },
+   "acc_slippery": {
+    "label": "Slippery ground",
+    "mood": {},
+    "duration_min": 45,
+    "hidden": true
+   },
+   "acc_icy": {
+    "label": "Icy ground",
+    "mood": {},
+    "duration_min": 45,
+    "hidden": true
+   },
+   "acc_job_risky": {
+    "label": "Physical job",
+    "mood": {},
+    "duration_min": 45,
+    "hidden": true
+   },
+   "acc_job_very_risky": {
+    "label": "Dangerous job",
+    "mood": {},
+    "duration_min": 45,
+    "hidden": true
+   },
+   "acc_near_water": {
+    "label": "Beside water",
+    "mood": {},
+    "duration_min": 45,
+    "hidden": true
+   },
+   "acc_near_road": {
+    "label": "Beside the road",
+    "mood": {},
+    "duration_min": 45,
+    "hidden": true
+   },
+   "acc_unsupervised": {
+    "label": "Unsupervised",
+    "mood": {},
+    "duration_min": 10,
+    "hidden": true
+   },
+   "acc_alone": {
+    "label": "Alone",
+    "mood": {},
+    "duration_min": 10,
+    "hidden": true
+   },
+   "acc_trouble_water": {
+    "label": "Struggling in the water",
+    "mood": {},
+    "duration_min": 6,
+    "hidden": true
+   },
+   "acc_trouble_choke": {
+    "label": "Choking",
+    "mood": {},
+    "duration_min": 6,
+    "hidden": true
+   },
+   "acc_rescued": {
+    "label": "Rescued",
+    "mood": {},
+    "duration_min": 20,
+    "hidden": true
+   },
+   "shaken_up": {
+    "label": "Shaken Up",
+    "mood": {
+     "tense": 2,
+     "uncomfortable": 1
+    },
+    "duration_min": 360,
+    "thought": "That was far too close..."
+   },
+   "hero_moment": {
+    "label": "Saved the Day",
+    "mood": {
+     "happy": 3
+    },
+    "duration_min": 720,
+    "thought": "I'm so glad I could help."
+   }
+  },
+  "interactions": {
+   "rescue_swimmer": {
+    "label": "Pull to Safety",
+    "kind": "super",
+    "category": "friendly",
+    "target": "folk",
+    "tags": [
+     "help",
+     "rescue"
+    ],
+    "duration_min": 2,
+    "posture": "stand",
+    "tests": [],
+    "target_tests": [
+     {
+      "has_buff": "acc_trouble_water"
+     }
+    ],
+    "per_min": {},
+    "on_finish": [
+     {
+      "target_add_buff": "acc_rescued"
+     },
+     {
+      "target_remove_buff": "acc_trouble_water"
+     },
+     {
+      "target_add_buff": "shaken_up"
+     },
+     {
+      "add_buff": "hero_moment"
+     },
+     {
+      "relationship_add": [
+       "friendship",
+       6
+      ]
+     },
+     {
+      "fire_event": "accident_rescued"
+     }
+    ],
+    "autonomous": false,
+    "priority": "urgent",
+    "advertises": {},
+    "thought": "Hold on, I'm coming!"
+   },
+   "help_choking": {
+    "label": "Help Them Cough It Up",
+    "kind": "super",
+    "category": "friendly",
+    "target": "folk",
+    "tags": [
+     "help",
+     "rescue"
+    ],
+    "duration_min": 1,
+    "posture": "stand",
+    "tests": [],
+    "target_tests": [
+     {
+      "has_buff": "acc_trouble_choke"
+     }
+    ],
+    "per_min": {},
+    "on_finish": [
+     {
+      "target_add_buff": "acc_rescued"
+     },
+     {
+      "target_remove_buff": "acc_trouble_choke"
+     },
+     {
+      "target_add_buff": "shaken_up"
+     },
+     {
+      "add_buff": "hero_moment"
+     },
+     {
+      "relationship_add": [
+       "friendship",
+       6
+      ]
+     },
+     {
+      "fire_event": "accident_rescued"
+     }
+    ],
+    "autonomous": false,
+    "priority": "urgent",
+    "advertises": {},
+    "thought": "They can't breathe!"
+   }
+  },
+  "objects": {
+   "life_ring": {
+    "def": {
+     "label": "Life Ring",
+     "size": [
+      1,
+      1
+     ],
+     "price": 45,
+     "tags": [
+      "utility",
+      "safety",
+      "outdoor"
+     ],
+     "model": "res://assets/models/life_ring.glb",
+     "color": "#e8602c",
+     "height": 0.5,
+     "blocks": false,
+     "slots": [],
+     "state": {},
+     "advertises": {},
+     "decor": 0.2,
+     "interactions": []
+    }
+   },
+   "slip_mat": {
+    "def": {
+     "label": "Non-slip Mat",
+     "size": [
+      1,
+      1
+     ],
+     "price": 30,
+     "tags": [
+      "utility",
+      "safety",
+      "floor"
+     ],
+     "model": "res://assets/models/slip_mat.glb",
+     "color": "#3d6e5a",
+     "height": 0.03,
+     "blocks": false,
+     "layer": "floor",
+     "slots": [],
+     "state": {},
+     "advertises": {},
+     "decor": 0.1,
+     "interactions": []
+    }
+   },
+   "first_aid_kit": {
+    "def": {
+     "label": "First Aid Kit",
+     "size": [
+      1,
+      1
+     ],
+     "price": 60,
+     "tags": [
+      "utility",
+      "safety"
+     ],
+     "model": "res://assets/models/first_aid_kit.glb",
+     "color": "#d9dde0",
+     "height": 0.4,
+     "blocks": false,
+     "slots": [],
+     "state": {},
+     "advertises": {},
+     "decor": 0.0,
+     "interactions": []
+    }
+   }
+  },
+  "object_interactions": {}
+ },
+ "incidents": {
+  "drowning_scare": {
+   "label": "Drowning scare",
+   "scope": "folk",
+   "check": "hour",
+   "base_rate_per_year": 0.3,
+   "notify_policy": "known",
+   "severity": 4,
+   "conditions": [
+    {
+     "lacks_buff": "away"
+    },
+    {
+     "has_buff": "acc_water"
+    }
+   ],
+   "risk_mults": [
+    {
+     "label": "Worn out",
+     "when": [
+      {
+       "stat_below": [
+        "energy",
+        -40
+       ]
+      }
+     ],
+     "mult": 3.0
+    },
+    {
+     "label": "Weak swimmer",
+     "when": [
+      {
+       "skill_below": [
+        "fitness",
+        2
+       ]
+      }
+     ],
+     "mult": 1.6
+    },
+    {
+     "label": "Elder",
+     "when": [
+      {
+       "age_stage_is": "elder"
+      }
+     ],
+     "mult": 2.5
+    },
+    {
+     "label": "Child",
+     "when": [
+      {
+       "age_stage_is": [
+        "child",
+        "toddler"
+       ]
+      }
+     ],
+     "mult": 2.0
+    },
+    {
+     "label": "Alone by the water",
+     "when": [
+      {
+       "has_buff": "acc_alone"
+      }
+     ],
+     "mult": 2.0
+    }
+   ],
+   "prevent": [
+    {
+     "label": "Strong swimmer",
+     "when": [
+      {
+       "skill_at_least": [
+        "fitness",
+        4
+       ]
+      }
+     ],
+     "mult": 0.5
+    },
+    {
+     "label": "Life ring at hand",
+     "when": [
+      {
+       "has_object": "life_ring"
+      }
+     ],
+     "mult": 0.35
+    },
+    {
+     "label": "Outdoorsy",
+     "when": [
+      {
+       "has_trait": "outdoorsy"
+      }
+     ],
+     "mult": 0.75
+    }
+   ],
+   "warning": {
+    "lead_min": 3,
+    "thought": "Help... I can't reach the edge!",
+    "text": "{name} is struggling in the water! Someone help them!",
+    "kind": "warn",
+    "averted": "{name} was pulled to safety just in time."
+   },
+   "defuse": [
+    {
+     "has_buff": "acc_rescued"
+    }
+   ],
+   "outcomes": [
+    {
+     "weight": 1.0,
+     "effects": [
+      {
+       "handler": "accident_outcome",
+       "args": {
+        "kill": "accident_drowning",
+        "cause": "drowning"
+       }
+      }
+     ],
+     "text": "",
+     "kind": "bad",
+     "when": [
+      {
+       "has_buff": "acc_alone"
+      }
+     ],
+     "severity": 4
+    },
+    {
+     "weight": 4,
+     "effects": [
+      {
+       "handler": "accident_outcome",
+       "args": {
+        "severity": 3,
+        "reason": "nearly drowning",
+        "cause": "drowning",
+        "buff": "shaken_up"
+       }
+      }
+     ],
+     "text": "{name} was pulled out of the water, barely breathing, and rushed to hospital.",
+     "kind": "bad",
+     "severity": 4
+    },
+    {
+     "weight": 14,
+     "effects": [
+      {
+       "handler": "accident_outcome",
+       "args": {
+        "severity": 2,
+        "reason": "swallowing water",
+        "cause": "drowning",
+        "buff": "shaken_up"
+       }
+      }
+     ],
+     "text": "{name} swallowed a lot of water and was taken to the clinic.",
+     "kind": "bad",
+     "severity": 3
+    },
+    {
+     "weight": 30,
+     "effects": [
+      {
+       "handler": "accident_outcome",
+       "args": {
+        "severity": 1,
+        "reason": "swallowing water",
+        "cause": "drowning",
+        "buff": "shaken_up"
+       }
+      }
+     ],
+     "text": "{name} coughed up some water and sat shivering on the bank.",
+     "kind": "warn",
+     "when": [
+      {
+       "lacks_object": "first_aid_kit"
+      }
+     ]
+    },
+    {
+     "weight": 30,
+     "effects": [
+      {
+       "handler": "accident_outcome",
+       "args": {
+        "severity": 0,
+        "buff": "shaken_up"
+       }
+      }
+     ],
+     "text": "{name} coughed up some water, then got wrapped up warm from the first aid kit.",
+     "kind": "warn",
+     "when": [
+      {
+       "has_object": "first_aid_kit"
+      }
+     ]
+    },
+    {
+     "weight": 20,
+     "effects": [
+      {
+       "handler": "accident_outcome",
+       "args": {
+        "severity": 0,
+        "buff": "shaken_up"
+       }
+      }
+     ],
+     "text": "{name} scrambled out of the water, soaked and shaken.",
+     "kind": "warn"
+    }
+   ],
+   "statistical": {
+    "outcomes": [
+     {
+      "weight": 1.0,
+      "effects": [
+       {
+        "kill": "accident_drowning"
+       }
+      ],
+      "summary": "{name} drowned.",
+      "when": [
+       {
+        "has_buff": "acc_alone"
+       }
+      ]
+     },
+     {
+      "weight": 4,
+      "effects": [
+       {
+        "hospital": {
+         "severity": 3,
+         "reason": "nearly drowning"
+        }
+       }
+      ],
+      "summary": "{name} was pulled from the water and taken to hospital."
+     },
+     {
+      "weight": 14,
+      "effects": [
+       {
+        "hospital": {
+         "severity": 2,
+         "reason": "swallowing water"
+        }
+       }
+      ],
+      "summary": "{name} swallowed a lot of water and spent a night in hospital."
+     },
+     {
+      "weight": 50,
+      "effects": [],
+      "summary": "{name} had a scare in the water but was fine."
+     }
+    ]
+   }
+  },
+  "kids_near_water": {
+   "label": "Child by the water",
+   "scope": "folk",
+   "check": "hour",
+   "base_rate_per_year": 0.5,
+   "notify_policy": "known",
+   "severity": 4,
+   "conditions": [
+    {
+     "lacks_buff": "away"
+    },
+    {
+     "age_stage_is": [
+      "toddler",
+      "child"
+     ]
+    },
+    {
+     "has_buff": "acc_near_water"
+    },
+    {
+     "has_buff": "acc_unsupervised"
+    }
+   ],
+   "risk_mults": [
+    {
+     "label": "Toddler",
+     "when": [
+      {
+       "age_stage_is": "toddler"
+      }
+     ],
+     "mult": 3.0
+    }
+   ],
+   "prevent": [
+    {
+     "label": "Life ring at hand",
+     "when": [
+      {
+       "has_object": "life_ring"
+      }
+     ],
+     "mult": 0.5
+    }
+   ],
+   "warning": {
+    "lead_min": 3,
+    "thought": "Splash! Help!",
+    "text": "{name} has fallen in the water and nobody is watching! Someone help them!",
+    "kind": "warn",
+    "averted": "{name} was pulled to safety just in time."
+   },
+   "defuse": [
+    {
+     "has_buff": "acc_rescued"
+    }
+   ],
+   "outcomes": [
+    {
+     "weight": 0.6,
+     "effects": [
+      {
+       "handler": "accident_outcome",
+       "args": {
+        "kill": "accident_drowning",
+        "cause": "drowning"
+       }
+      }
+     ],
+     "text": "",
+     "kind": "bad",
+     "when": [
+      {
+       "has_buff": "acc_unsupervised"
+      }
+     ],
+     "severity": 4
+    },
+    {
+     "weight": 4,
+     "effects": [
+      {
+       "handler": "accident_outcome",
+       "args": {
+        "severity": 3,
+        "reason": "nearly drowning",
+        "cause": "drowning",
+        "buff": "shaken_up"
+       }
+      }
+     ],
+     "text": "{name} was pulled out of the water, barely breathing, and rushed to hospital.",
+     "kind": "bad",
+     "severity": 4
+    },
+    {
+     "weight": 14,
+     "effects": [
+      {
+       "handler": "accident_outcome",
+       "args": {
+        "severity": 2,
+        "reason": "swallowing water",
+        "cause": "drowning",
+        "buff": "shaken_up"
+       }
+      }
+     ],
+     "text": "{name} swallowed a lot of water and was taken to the clinic.",
+     "kind": "bad",
+     "severity": 3
+    },
+    {
+     "weight": 30,
+     "effects": [
+      {
+       "handler": "accident_outcome",
+       "args": {
+        "severity": 1,
+        "reason": "swallowing water",
+        "cause": "drowning",
+        "buff": "shaken_up"
+       }
+      }
+     ],
+     "text": "{name} coughed up some water and sat shivering on the bank.",
+     "kind": "warn",
+     "when": [
+      {
+       "lacks_object": "first_aid_kit"
+      }
+     ]
+    },
+    {
+     "weight": 30,
+     "effects": [
+      {
+       "handler": "accident_outcome",
+       "args": {
+        "severity": 0,
+        "buff": "shaken_up"
+       }
+      }
+     ],
+     "text": "{name} coughed up some water, then got wrapped up warm from the first aid kit.",
+     "kind": "warn",
+     "when": [
+      {
+       "has_object": "first_aid_kit"
+      }
+     ]
+    },
+    {
+     "weight": 20,
+     "effects": [
+      {
+       "handler": "accident_outcome",
+       "args": {
+        "severity": 0,
+        "buff": "shaken_up"
+       }
+      }
+     ],
+     "text": "{name} scrambled out of the water, soaked and shaken.",
+     "kind": "warn"
+    }
+   ],
+   "statistical": {
+    "outcomes": [
+     {
+      "weight": 0.6,
+      "effects": [
+       {
+        "kill": "accident_drowning"
+       }
+      ],
+      "summary": "{name} drowned.",
+      "when": [
+       {
+        "has_buff": "acc_unsupervised"
+       }
+      ]
+     },
+     {
+      "weight": 4,
+      "effects": [
+       {
+        "hospital": {
+         "severity": 3,
+         "reason": "nearly drowning"
+        }
+       }
+      ],
+      "summary": "{name} was pulled from the water and taken to hospital."
+     },
+     {
+      "weight": 14,
+      "effects": [
+       {
+        "hospital": {
+         "severity": 2,
+         "reason": "swallowing water"
+        }
+       }
+      ],
+      "summary": "{name} swallowed a lot of water and spent a night in hospital."
+     },
+     {
+      "weight": 50,
+      "effects": [],
+      "summary": "{name} had a scare in the water but was fine."
+     }
+    ]
+   }
+  },
+  "choking": {
+   "label": "Choking",
+   "scope": "folk",
+   "check": "hour",
+   "base_rate_per_year": 0.48,
+   "notify_policy": "known",
+   "severity": 3,
+   "conditions": [
+    {
+     "lacks_buff": "away"
+    },
+    {
+     "has_buff": "acc_eating"
+    }
+   ],
+   "risk_mults": [
+    {
+     "label": "Hungry",
+     "when": [
+      {
+       "stat_below": [
+        "hunger",
+        -20
+       ]
+      }
+     ],
+     "mult": 1.8
+    },
+    {
+     "label": "Starving, wolfing it down",
+     "when": [
+      {
+       "stat_below": [
+        "hunger",
+        -60
+       ]
+      }
+     ],
+     "mult": 1.7
+    },
+    {
+     "label": "Glutton",
+     "when": [
+      {
+       "has_trait": "glutton"
+      }
+     ],
+     "mult": 3.0
+    },
+    {
+     "label": "Small child or elder",
+     "when": [
+      {
+       "age_stage_is": [
+        "toddler",
+        "child",
+        "elder"
+       ]
+      }
+     ],
+     "mult": 1.5
+    }
+   ],
+   "prevent": [
+    {
+     "label": "Calm and unhurried",
+     "when": [
+      {
+       "has_buff": "content_calm"
+      }
+     ],
+     "mult": 0.6
+    }
+   ],
+   "warning": {
+    "lead_min": 2,
+    "thought": "I... can't... breathe...",
+    "text": "{name} is clutching their throat! Quick, help them!",
+    "kind": "warn",
+    "averted": "{name} coughed it up in time and is catching their breath."
+   },
+   "defuse": [
+    {
+     "has_buff": "acc_rescued"
+    }
+   ],
+   "outcomes": [
+    {
+     "weight": 1.5,
+     "effects": [
+      {
+       "handler": "accident_outcome",
+       "args": {
+        "kill": "accident_choking",
+        "cause": "choking"
+       }
+      }
+     ],
+     "text": "",
+     "kind": "bad",
+     "when": [
+      {
+       "has_buff": "acc_alone"
+      }
+     ],
+     "severity": 4
+    },
+    {
+     "weight": 7,
+     "effects": [
+      {
+       "handler": "accident_outcome",
+       "args": {
+        "severity": 2,
+        "reason": "choking",
+        "cause": "choking",
+        "buff": "shaken_up"
+       }
+      }
+     ],
+     "text": "{name} was rushed to the clinic after choking badly.",
+     "kind": "bad",
+     "severity": 3
+    },
+    {
+     "weight": 25,
+     "effects": [
+      {
+       "handler": "accident_outcome",
+       "args": {
+        "severity": 1,
+        "reason": "choking",
+        "cause": "choking",
+        "buff": "shaken_up"
+       }
+      }
+     ],
+     "text": "{name} coughed and spluttered for a long while.",
+     "kind": "warn"
+    },
+    {
+     "weight": 22,
+     "effects": [
+      {
+       "handler": "accident_outcome",
+       "args": {
+        "severity": 0,
+        "buff": "shaken_up"
+       }
+      }
+     ],
+     "text": "{name} finally coughed it up and sat down, shaking.",
+     "kind": "warn"
+    }
+   ],
+   "statistical": {
+    "outcomes": [
+     {
+      "weight": 1.5,
+      "effects": [
+       {
+        "kill": "accident_choking"
+       }
+      ],
+      "summary": "{name} choked on a meal and died.",
+      "when": [
+       {
+        "has_buff": "acc_alone"
+       }
+      ]
+     },
+     {
+      "weight": 7,
+      "effects": [
+       {
+        "hospital": {
+         "severity": 2,
+         "reason": "choking"
+        }
+       }
+      ],
+      "summary": "{name} was taken to hospital after choking."
+     },
+     {
+      "weight": 47,
+      "effects": [],
+      "summary": "{name} choked on a mouthful but was fine."
+     }
+    ]
+   }
+  },
+  "electric_shock": {
+   "label": "Electric shock",
+   "scope": "folk",
+   "check": "hour",
+   "base_rate_per_year": 5.4,
+   "notify_policy": "known",
+   "severity": 3,
+   "conditions": [
+    {
+     "lacks_buff": "away"
+    },
+    {
+     "has_buff": "acc_repair_electric"
+    }
+   ],
+   "risk_mults": [
+    {
+     "label": "Poor with tools",
+     "when": [
+      {
+       "skill_below": [
+        "handiness",
+        2
+       ]
+      }
+     ],
+     "mult": 3.0
+    },
+    {
+     "label": "Wet floor",
+     "when": [
+      {
+       "has_buff": "acc_slippery"
+      }
+     ],
+     "mult": 3.0
+    },
+    {
+     "label": "Clumsy",
+     "when": [
+      {
+       "has_trait": "clumsy"
+      }
+     ],
+     "mult": 2.0
+    },
+    {
+     "label": "Worn out",
+     "when": [
+      {
+       "stat_below": [
+        "energy",
+        -40
+       ]
+      }
+     ],
+     "mult": 1.5
+    }
+   ],
+   "prevent": [
+    {
+     "label": "Skilled with tools",
+     "when": [
+      {
+       "skill_at_least": [
+        "handiness",
+        4
+       ]
+      }
+     ],
+     "mult": 0.3
+    },
+    {
+     "label": "Handy",
+     "when": [
+      {
+       "has_trait": "handy"
+      }
+     ],
+     "mult": 0.6
+    }
+   ],
+   "warning": {
+    "lead_min": 0,
+    "thought": "Zzzt! Careful!"
+   },
+   "outcomes": [
+    {
+     "weight": 0.25,
+     "effects": [
+      {
+       "handler": "accident_outcome",
+       "args": {
+        "kill": "accident_electric",
+        "cause": "electric shock"
+       }
+      }
+     ],
+     "text": "",
+     "kind": "bad",
+     "when": [
+      {
+       "skill_below": [
+        "handiness",
+        2
+       ]
+      },
+      {
+       "has_buff": "acc_slippery"
+      }
+     ],
+     "severity": 4
+    },
+    {
+     "weight": 7,
+     "effects": [
+      {
+       "handler": "accident_outcome",
+       "args": {
+        "severity": 2,
+        "reason": "an electric shock",
+        "cause": "electric shock",
+        "buff": "shaken_up"
+       }
+      }
+     ],
+     "text": "{name} was thrown back by a bad shock and taken to hospital.",
+     "kind": "bad",
+     "severity": 3
+    },
+    {
+     "weight": 22,
+     "effects": [
+      {
+       "handler": "accident_outcome",
+       "args": {
+        "severity": 1,
+        "reason": "an electric shock",
+        "cause": "electric shock",
+        "buff": "shaken_up"
+       }
+      }
+     ],
+     "text": "{name} was shocked and burned a hand.",
+     "kind": "warn",
+     "when": [
+      {
+       "lacks_object": "first_aid_kit"
+      }
+     ]
+    },
+    {
+     "weight": 22,
+     "effects": [
+      {
+       "handler": "accident_outcome",
+       "args": {
+        "severity": 0,
+        "buff": "shaken_up"
+       }
+      }
+     ],
+     "text": "{name} was shocked, but a plaster from the first aid kit did the trick.",
+     "kind": "warn",
+     "when": [
+      {
+       "has_object": "first_aid_kit"
+      }
+     ]
+    },
+    {
+     "weight": 55,
+     "effects": [
+      {
+       "handler": "accident_outcome",
+       "args": {
+        "severity": 0,
+        "buff": "shaken_up"
+       }
+      }
+     ],
+     "text": "{name} got a nasty jolt. Time to be more careful.",
+     "kind": "warn"
+    }
+   ],
+   "statistical": {
+    "outcomes": [
+     {
+      "weight": 0.25,
+      "effects": [
+       {
+        "kill": "accident_electric"
+       }
+      ],
+      "summary": "{name} was killed by an electric shock.",
+      "when": [
+       {
+        "skill_below": [
+         "handiness",
+         2
+        ]
+       },
+       {
+        "has_buff": "acc_slippery"
+       }
+      ]
+     },
+     {
+      "weight": 7,
+      "effects": [
+       {
+        "hospital": {
+         "severity": 2,
+         "reason": "an electric shock"
+        }
+       }
+      ],
+      "summary": "{name} was taken to hospital after an electric shock."
+     },
+     {
+      "weight": 77,
+      "effects": [],
+      "summary": "{name} got a nasty jolt fixing something."
+     }
+    ]
+   }
+  },
+  "slip_fall": {
+   "label": "Slip and fall",
+   "scope": "folk",
+   "check": "hour",
+   "base_rate_per_year": 3.4,
+   "notify_policy": "household",
+   "severity": 2,
+   "conditions": [
+    {
+     "lacks_buff": "away"
+    },
+    {
+     "has_buff": "acc_slippery"
+    }
+   ],
+   "risk_mults": [
+    {
+     "label": "Elder",
+     "when": [
+      {
+       "age_stage_is": "elder"
+      }
+     ],
+     "mult": 3.0
+    },
+    {
+     "label": "Toddler",
+     "when": [
+      {
+       "age_stage_is": "toddler"
+      }
+     ],
+     "mult": 2.5
+    },
+    {
+     "label": "Clumsy",
+     "when": [
+      {
+       "has_trait": "clumsy"
+      }
+     ],
+     "mult": 2.5
+    },
+    {
+     "label": "Ice",
+     "when": [
+      {
+       "has_buff": "acc_icy"
+      }
+     ],
+     "mult": 2.0
+    },
+    {
+     "label": "Tired",
+     "when": [
+      {
+       "stat_below": [
+        "energy",
+        -40
+       ]
+      }
+     ],
+     "mult": 1.5
+    }
+   ],
+   "prevent": [
+    {
+     "label": "Strong and steady",
+     "when": [
+      {
+       "skill_at_least": [
+        "fitness",
+        4
+       ]
+      }
+     ],
+     "mult": 0.6
+    },
+    {
+     "label": "Non-slip mat",
+     "when": [
+      {
+       "has_object": "slip_mat"
+      }
+     ],
+     "mult": 0.4
+    },
+    {
+     "label": "Outdoorsy",
+     "when": [
+      {
+       "has_trait": "outdoorsy"
+      }
+     ],
+     "mult": 0.8
+    }
+   ],
+   "warning": {
+    "lead_min": 0,
+    "thought": "Whoa!"
+   },
+   "outcomes": [
+    {
+     "weight": 0.3,
+     "effects": [
+      {
+       "handler": "accident_outcome",
+       "args": {
+        "kill": "accident_fall",
+        "cause": "fall"
+       }
+      }
+     ],
+     "text": "",
+     "kind": "bad",
+     "when": [
+      {
+       "age_stage_is": "elder"
+      },
+      {
+       "has_buff": "acc_alone"
+      }
+     ],
+     "severity": 4
+    },
+    {
+     "weight": 1.5,
+     "effects": [
+      {
+       "handler": "accident_outcome",
+       "args": {
+        "severity": 3,
+        "reason": "a bad fall",
+        "cause": "fall"
+       }
+      }
+     ],
+     "text": "{name} had a bad fall and was taken to hospital.",
+     "kind": "bad",
+     "when": [
+      {
+       "age_stage_is": [
+        "elder",
+        "toddler"
+       ]
+      }
+     ],
+     "severity": 4
+    },
+    {
+     "weight": 10,
+     "effects": [
+      {
+       "handler": "accident_outcome",
+       "args": {
+        "severity": 2,
+        "reason": "a twisted ankle",
+        "cause": "fall"
+       }
+      }
+     ],
+     "text": "{name} twisted an ankle and was taken to the clinic.",
+     "kind": "bad",
+     "severity": 3
+    },
+    {
+     "weight": 30,
+     "effects": [
+      {
+       "handler": "accident_outcome",
+       "args": {
+        "severity": 1,
+        "reason": "a fall",
+        "cause": "fall"
+       }
+      }
+     ],
+     "text": "{name} slipped and bruised themselves.",
+     "kind": "warn",
+     "when": [
+      {
+       "lacks_object": "first_aid_kit"
+      }
+     ]
+    },
+    {
+     "weight": 30,
+     "effects": [
+      {
+       "handler": "accident_outcome",
+       "args": {
+        "severity": 0
+       }
+      }
+     ],
+     "text": "{name} slipped and was patched up with the first aid kit.",
+     "kind": "warn",
+     "when": [
+      {
+       "has_object": "first_aid_kit"
+      }
+     ]
+    },
+    {
+     "weight": 40,
+     "effects": [
+      {
+       "handler": "accident_outcome",
+       "args": {
+        "severity": 0
+       }
+      }
+     ],
+     "text": "{name} slipped but caught themselves just in time.",
+     "kind": "info"
+    }
+   ],
+   "statistical": {
+    "outcomes": [
+     {
+      "weight": 0.3,
+      "effects": [
+       {
+        "kill": "accident_fall"
+       }
+      ],
+      "summary": "{name} died after a fall on the ice.",
+      "when": [
+       {
+        "age_stage_is": "elder"
+       },
+       {
+        "has_buff": "acc_alone"
+       }
+      ]
+     },
+     {
+      "weight": 11,
+      "effects": [
+       {
+        "hospital": {
+         "severity": 2,
+         "reason": "a fall"
+        }
+       }
+      ],
+      "summary": "{name} slipped and was taken to hospital."
+     },
+     {
+      "weight": 30,
+      "effects": [
+       {
+        "injure": {
+         "severity": 1,
+         "reason": "a fall"
+        }
+       }
+      ],
+      "summary": "{name} slipped and bruised themselves."
+     },
+     {
+      "weight": 40,
+      "effects": [],
+      "summary": "{name} slipped but was fine."
+     }
+    ]
+   }
+  },
+  "traffic_hit": {
+   "label": "Hit by a car",
+   "scope": "folk",
+   "check": "hour",
+   "base_rate_per_year": 0.5,
+   "notify_policy": "known",
+   "severity": 4,
+   "conditions": [
+    {
+     "lacks_buff": "away"
+    },
+    {
+     "has_buff": "acc_on_road"
+    }
+   ],
+   "risk_mults": [
+    {
+     "label": "Toddler",
+     "when": [
+      {
+       "age_stage_is": "toddler"
+      }
+     ],
+     "mult": 4.0
+    },
+    {
+     "label": "Child",
+     "when": [
+      {
+       "age_stage_is": "child"
+      }
+     ],
+     "mult": 3.0
+    },
+    {
+     "label": "Elder",
+     "when": [
+      {
+       "age_stage_is": "elder"
+      }
+     ],
+     "mult": 1.8
+    },
+    {
+     "label": "Child with no grown-up",
+     "when": [
+      {
+       "has_buff": "acc_unsupervised"
+      }
+     ],
+     "mult": 2.0
+    },
+    {
+     "label": "Tired and not looking",
+     "when": [
+      {
+       "stat_below": [
+        "energy",
+        -40
+       ]
+      }
+     ],
+     "mult": 1.8
+    }
+   ],
+   "prevent": [
+    {
+     "label": "Using the crosswalk",
+     "when": [
+      {
+       "has_buff": "acc_crosswalk"
+      }
+     ],
+     "mult": 0.4
+    }
+   ],
+   "warning": {
+    "lead_min": 0,
+    "thought": "Headlights!"
+   },
+   "outcomes": [
+    {
+     "weight": 0.3,
+     "effects": [
+      {
+       "handler": "accident_outcome",
+       "args": {
+        "kill": "accident_traffic",
+        "cause": "traffic"
+       }
+      }
+     ],
+     "text": "",
+     "kind": "bad",
+     "severity": 5
+    },
+    {
+     "weight": 6,
+     "effects": [
+      {
+       "handler": "accident_outcome",
+       "args": {
+        "severity": 3,
+        "reason": "being hit by a car",
+        "cause": "traffic",
+        "buff": "shaken_up"
+       }
+      }
+     ],
+     "text": "{name} was hit by a car and badly hurt.",
+     "kind": "bad",
+     "severity": 4
+    },
+    {
+     "weight": 18,
+     "effects": [
+      {
+       "handler": "accident_outcome",
+       "args": {
+        "severity": 2,
+        "reason": "being hit by a car",
+        "cause": "traffic",
+        "buff": "shaken_up"
+       }
+      }
+     ],
+     "text": "{name} was hit by a car and taken to hospital.",
+     "kind": "bad",
+     "severity": 3
+    },
+    {
+     "weight": 40,
+     "effects": [
+      {
+       "handler": "accident_outcome",
+       "args": {
+        "severity": 1,
+        "reason": "being clipped by a car",
+        "cause": "traffic",
+        "buff": "shaken_up"
+       }
+      }
+     ],
+     "text": "{name} was clipped by a car and badly bruised.",
+     "kind": "warn"
+    },
+    {
+     "weight": 30,
+     "effects": [
+      {
+       "handler": "accident_outcome",
+       "args": {
+        "severity": 0,
+        "buff": "shaken_up"
+       }
+      }
+     ],
+     "text": "A car swerved and honked. {name} jumped back just in time.",
+     "kind": "warn"
+    }
+   ],
+   "statistical": {
+    "outcomes": [
+     {
+      "weight": 0.3,
+      "effects": [
+       {
+        "kill": "accident_traffic"
+       }
+      ],
+      "summary": "{name} was killed by a car."
+     },
+     {
+      "weight": 6,
+      "effects": [
+       {
+        "hospital": {
+         "severity": 3,
+         "reason": "being hit by a car"
+        }
+       }
+      ],
+      "summary": "{name} was badly hurt by a car and taken to hospital."
+     },
+     {
+      "weight": 18,
+      "effects": [
+       {
+        "hospital": {
+         "severity": 2,
+         "reason": "being hit by a car"
+        }
+       }
+      ],
+      "summary": "{name} was hit by a car and taken to hospital."
+     },
+     {
+      "weight": 40,
+      "effects": [
+       {
+        "injure": {
+         "severity": 1,
+         "reason": "a car"
+        }
+       }
+      ],
+      "summary": "{name} was clipped by a car and bruised."
+     },
+     {
+      "weight": 30,
+      "effects": [],
+      "summary": "A car swerved to miss {name}."
+     }
+    ]
+   }
+  },
+  "kids_near_road": {
+   "label": "Child by the road",
+   "scope": "folk",
+   "check": "hour",
+   "base_rate_per_year": 0.45,
+   "notify_policy": "known",
+   "severity": 3,
+   "conditions": [
+    {
+     "lacks_buff": "away"
+    },
+    {
+     "age_stage_is": [
+      "toddler",
+      "child"
+     ]
+    },
+    {
+     "has_buff": "acc_near_road"
+    },
+    {
+     "has_buff": "acc_unsupervised"
+    }
+   ],
+   "risk_mults": [
+    {
+     "label": "Toddler",
+     "when": [
+      {
+       "age_stage_is": "toddler"
+      }
+     ],
+     "mult": 3.0
+    }
+   ],
+   "warning": {
+    "lead_min": 0,
+    "thought": "Ooh, what's over there?"
+   },
+   "outcomes": [
+    {
+     "weight": 0.15,
+     "effects": [
+      {
+       "handler": "accident_outcome",
+       "args": {
+        "kill": "accident_traffic",
+        "cause": "traffic"
+       }
+      }
+     ],
+     "text": "",
+     "kind": "bad",
+     "severity": 5
+    },
+    {
+     "weight": 6,
+     "effects": [
+      {
+       "handler": "accident_outcome",
+       "args": {
+        "severity": 2,
+        "reason": "wandering into the road",
+        "cause": "traffic",
+        "buff": "shaken_up"
+       }
+      }
+     ],
+     "text": "{name} wandered into the road and was hurt by a car.",
+     "kind": "bad",
+     "severity": 3
+    },
+    {
+     "weight": 20,
+     "effects": [
+      {
+       "handler": "accident_outcome",
+       "args": {
+        "severity": 1,
+        "reason": "a scraped knee",
+        "cause": "traffic",
+        "buff": "shaken_up"
+       }
+      }
+     ],
+     "text": "{name} stumbled off the kerb and scraped a knee.",
+     "kind": "warn"
+    },
+    {
+     "weight": 55,
+     "effects": [
+      {
+       "handler": "accident_outcome",
+       "args": {
+        "severity": 0,
+        "buff": "shaken_up"
+       }
+      }
+     ],
+     "text": "A neighbour pulled {name} back from the road just in time.",
+     "kind": "warn"
+    }
+   ],
+   "statistical": {
+    "outcomes": [
+     {
+      "weight": 0.15,
+      "effects": [
+       {
+        "kill": "accident_traffic"
+       }
+      ],
+      "summary": "{name} was killed by a car."
+     },
+     {
+      "weight": 6,
+      "effects": [
+       {
+        "hospital": {
+         "severity": 2,
+         "reason": "wandering into the road"
+        }
+       }
+      ],
+      "summary": "{name} wandered into the road and was taken to hospital."
+     },
+     {
+      "weight": 75,
+      "effects": [],
+      "summary": "{name} was pulled back from the road just in time."
+     }
+    ]
+   }
+  },
+  "workout_injury": {
+   "label": "Workout injury",
+   "scope": "folk",
+   "check": "hour",
+   "base_rate_per_year": 2.0,
+   "notify_policy": "household",
+   "severity": 2,
+   "conditions": [
+    {
+     "lacks_buff": "away"
+    },
+    {
+     "has_buff": "acc_exercise"
+    }
+   ],
+   "risk_mults": [
+    {
+     "label": "Overdoing it",
+     "when": [
+      {
+       "stat_below": [
+        "energy",
+        -20
+       ]
+      }
+     ],
+     "mult": 3.0
+    },
+    {
+     "label": "Running on empty",
+     "when": [
+      {
+       "stat_below": [
+        "hunger",
+        -40
+       ]
+      }
+     ],
+     "mult": 1.8
+    },
+    {
+     "label": "Out of shape",
+     "when": [
+      {
+       "skill_below": [
+        "fitness",
+        2
+       ]
+      }
+     ],
+     "mult": 1.8
+    },
+    {
+     "label": "Competitive streak",
+     "when": [
+      {
+       "has_trait": "competitive"
+      }
+     ],
+     "mult": 1.3
+    }
+   ],
+   "prevent": [
+    {
+     "label": "Fit and strong",
+     "when": [
+      {
+       "skill_at_least": [
+        "fitness",
+        5
+       ]
+      }
+     ],
+     "mult": 0.5
+    }
+   ],
+   "warning": {
+    "lead_min": 0,
+    "thought": "Ow! Something pulled..."
+   },
+   "outcomes": [
+    {
+     "weight": 1,
+     "effects": [
+      {
+       "handler": "accident_outcome",
+       "args": {
+        "severity": 2,
+        "reason": "a bad strain",
+        "cause": "exercise"
+       }
+      }
+     ],
+     "text": "{name} strained something badly and was taken to the clinic.",
+     "kind": "bad",
+     "severity": 3
+    },
+    {
+     "weight": 30,
+     "effects": [
+      {
+       "handler": "accident_outcome",
+       "args": {
+        "severity": 1,
+        "reason": "a twisted ankle",
+        "cause": "exercise"
+       }
+      }
+     ],
+     "text": "{name} twisted an ankle and has to rest.",
+     "kind": "warn",
+     "when": [
+      {
+       "lacks_object": "first_aid_kit"
+      }
+     ]
+    },
+    {
+     "weight": 30,
+     "effects": [
+      {
+       "handler": "accident_outcome",
+       "args": {
+        "severity": 0,
+        "buff": "sore_muscles"
+       }
+      }
+     ],
+     "text": "{name} twisted an ankle but the first aid kit helped.",
+     "kind": "warn",
+     "when": [
+      {
+       "has_object": "first_aid_kit"
+      }
+     ]
+    },
+    {
+     "weight": 40,
+     "effects": [
+      {
+       "handler": "accident_outcome",
+       "args": {
+        "severity": 0,
+        "buff": "sore_muscles"
+       }
+      }
+     ],
+     "text": "{name} pulled a muscle and should rest.",
+     "kind": "warn"
+    }
+   ],
+   "statistical": {
+    "outcomes": [
+     {
+      "weight": 1,
+      "effects": [
+       {
+        "hospital": {
+         "severity": 2,
+         "reason": "a bad strain"
+        }
+       }
+      ],
+      "summary": "{name} strained something badly at the gym."
+     },
+     {
+      "weight": 30,
+      "effects": [
+       {
+        "injure": {
+         "severity": 1,
+         "reason": "a twisted ankle"
+        }
+       }
+      ],
+      "summary": "{name} twisted an ankle working out."
+     },
+     {
+      "weight": 40,
+      "effects": [],
+      "summary": "{name} pulled a muscle working out."
+     }
+    ]
+   }
+  },
+  "treadmill_gives_way": {
+   "label": "Treadmill gives way",
+   "scope": "folk",
+   "check": "hour",
+   "base_rate_per_year": 0.0,
+   "notify_policy": "household",
+   "severity": 2,
+   "surprise": false,
+   "conditions": [],
+   "warning": {
+    "lead_min": 0,
+    "thought": "That sounded wrong..."
+   },
+   "outcomes": [
+    {
+     "weight": 6,
+     "effects": [
+      {
+       "handler": "accident_outcome",
+       "args": {
+        "severity": 2,
+        "reason": "a treadmill fall",
+        "cause": "exercise"
+       }
+      }
+     ],
+     "text": "{name} tumbled off the broken treadmill and was taken to the clinic.",
+     "kind": "bad",
+     "severity": 3
+    },
+    {
+     "weight": 34,
+     "effects": [
+      {
+       "handler": "accident_outcome",
+       "args": {
+        "severity": 1,
+        "reason": "a treadmill fall",
+        "cause": "exercise"
+       }
+      }
+     ],
+     "text": "{name} tumbled off the broken treadmill and hurt a knee.",
+     "kind": "warn",
+     "when": [
+      {
+       "lacks_object": "first_aid_kit"
+      }
+     ]
+    },
+    {
+     "weight": 34,
+     "effects": [
+      {
+       "handler": "accident_outcome",
+       "args": {
+        "severity": 0,
+        "buff": "shaken_up"
+       }
+      }
+     ],
+     "text": "{name} tumbled off the broken treadmill; the first aid kit sorted out the scrapes.",
+     "kind": "warn",
+     "when": [
+      {
+       "has_object": "first_aid_kit"
+      }
+     ]
+    },
+    {
+     "weight": 60,
+     "effects": [
+      {
+       "handler": "accident_outcome",
+       "args": {
+        "severity": 0,
+        "buff": "shaken_up"
+       }
+      }
+     ],
+     "text": "The treadmill shuddered and stopped, and {name} hopped off just in time.",
+     "kind": "info"
+    }
+   ]
+  },
+  "workplace_injury": {
+   "label": "Accident at work",
+   "scope": "folk",
+   "check": "hour",
+   "base_rate_per_year": 0.42,
+   "notify_policy": "known",
+   "severity": 2,
+   "conditions": [
+    {
+     "has_buff": "acc_job_risky"
+    }
+   ],
+   "risk_mults": [
+    {
+     "label": "Dangerous trade",
+     "when": [
+      {
+       "has_buff": "acc_job_very_risky"
+      }
+     ],
+     "mult": 2.0
+    },
+    {
+     "label": "Clumsy",
+     "when": [
+      {
+       "has_trait": "clumsy"
+      }
+     ],
+     "mult": 2.5
+    },
+    {
+     "label": "Worn out",
+     "when": [
+      {
+       "stat_below": [
+        "energy",
+        -40
+       ]
+      }
+     ],
+     "mult": 1.8
+    }
+   ],
+   "prevent": [
+    {
+     "label": "Skilled at the trade",
+     "when": [
+      {
+       "any": [
+        {
+         "skill_at_least": [
+          "cooking",
+          4
+         ]
+        },
+        {
+         "skill_at_least": [
+          "fitness",
+          4
+         ]
+        },
+        {
+         "skill_at_least": [
+          "handiness",
+          4
+         ]
+        },
+        {
+         "skill_at_least": [
+          "gardening",
+          4
+         ]
+        }
+       ]
+      }
+     ],
+     "mult": 0.6
+    },
+    {
+     "label": "Careful",
+     "when": [
+      {
+       "has_trait": "perfectionist"
+      }
+     ],
+     "mult": 0.7
+    }
+   ],
+   "warning": {
+    "lead_min": 0,
+    "thought": "Ow, that's going to hurt..."
+   },
+   "outcomes": [
+    {
+     "weight": 0.1,
+     "effects": [
+      {
+       "handler": "accident_outcome",
+       "args": {
+        "kill": "accident_work",
+        "cause": "workplace"
+       }
+      }
+     ],
+     "text": "",
+     "kind": "bad",
+     "severity": 4
+    },
+    {
+     "weight": 1.5,
+     "effects": [
+      {
+       "handler": "accident_outcome",
+       "args": {
+        "severity": 3,
+        "reason": "an accident at work",
+        "cause": "workplace"
+       }
+      }
+     ],
+     "text": "{name} was badly hurt at work and taken to hospital.",
+     "kind": "bad",
+     "severity": 4
+    },
+    {
+     "weight": 12,
+     "effects": [
+      {
+       "handler": "accident_outcome",
+       "args": {
+        "severity": 2,
+        "reason": "an accident at work",
+        "cause": "workplace"
+       }
+      }
+     ],
+     "text": "{name} had an accident at work and was taken to the clinic.",
+     "kind": "bad",
+     "severity": 3
+    },
+    {
+     "weight": 55,
+     "effects": [
+      {
+       "handler": "accident_outcome",
+       "args": {
+        "severity": 1,
+        "reason": "an accident at work",
+        "cause": "workplace"
+       }
+      }
+     ],
+     "text": "{name} hurt a hand at work but carried on.",
+     "kind": "warn"
+    },
+    {
+     "weight": 30,
+     "effects": [
+      {
+       "handler": "accident_outcome",
+       "args": {
+        "severity": 0,
+        "buff": "shaken_up"
+       }
+      }
+     ],
+     "text": "{name} had a close call at work.",
+     "kind": "info"
+    }
+   ],
+   "statistical": {
+    "outcomes": [
+     {
+      "weight": 0.1,
+      "effects": [
+       {
+        "kill": "accident_work"
+       }
+      ],
+      "summary": "{name} died in an accident at work."
+     },
+     {
+      "weight": 1.5,
+      "effects": [
+       {
+        "hospital": {
+         "severity": 3,
+         "reason": "an accident at work"
+        }
+       }
+      ],
+      "summary": "{name} was badly hurt at work and taken to hospital."
+     },
+     {
+      "weight": 12,
+      "effects": [
+       {
+        "hospital": {
+         "severity": 2,
+         "reason": "an accident at work"
+        }
+       }
+      ],
+      "summary": "{name} had an accident at work and went to hospital."
+     },
+     {
+      "weight": 55,
+      "effects": [
+       {
+        "injure": {
+         "severity": 1,
+         "reason": "an accident at work"
+        }
+       }
+      ],
+      "summary": "{name} hurt a hand at work."
+     },
+     {
+      "weight": 30,
+      "effects": [],
+      "summary": "{name} had a close call at work."
+     }
+    ]
+   }
+  }
+ }
+}

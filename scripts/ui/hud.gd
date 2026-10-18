@@ -28,6 +28,8 @@ var career_dialog: CareerDialog
 var household_dialog: HouseholdDialog
 var help_dialog: HelpDialog
 var incident_debug: IncidentDebug
+var case_board: CaseBoard
+var case_prompt: CasePrompt
 var pause_menu: PauseMenu
 var settings_dialog: SettingsDialog
 var confirm_dialog: ConfirmDialog
@@ -213,12 +215,16 @@ func _build_dialogs() -> void:
 	confirm_dialog = ConfirmDialog.new()
 	IncidentDebug.ensure_action()
 	incident_debug = IncidentDebug.new()
-	for d in [goals_dialog, career_dialog, household_dialog, help_dialog, pause_menu, settings_dialog, confirm_dialog, incident_debug]:
+	CaseBoard.ensure_action()
+	case_board = CaseBoard.new()
+	case_prompt = CasePrompt.new()
+	JusticePlayer.ask_fn = case_prompt.ask
+	for d in [goals_dialog, career_dialog, household_dialog, help_dialog, pause_menu, settings_dialog, confirm_dialog, incident_debug, case_board, case_prompt]:
 		add_child(d)
 	save_menu.visibility_changed.connect(func(): UIDialog.track_open(save_menu.get_instance_id(), save_menu.visible))
 
 func dialogs() -> Array:
-	return [confirm_dialog, settings_dialog, pause_menu, goals_dialog, career_dialog, household_dialog, help_dialog, incident_debug]
+	return [confirm_dialog, settings_dialog, pause_menu, goals_dialog, career_dialog, household_dialog, help_dialog, incident_debug, case_board, case_prompt]
 
 func _on_pause_choice(id: String) -> void:
 	pause_menu.hide_dialog()
@@ -444,6 +450,7 @@ func _unhandled_input(ev: InputEvent) -> void:
 		if lot_view: lot_view.call("cycle_wall_mode")
 	elif ev.is_action_pressed("sim_help"): help_dialog.toggle_for(selected_folk_id)
 	elif ev.is_action_pressed("sim_debug_incidents"): incident_debug.toggle_for(selected_folk_id)
+	elif ev.is_action_pressed("sim_case_board"): case_board.toggle_for(selected_folk_id)
 	else:
 		match ev.keycode:
 			KEY_SLASH:

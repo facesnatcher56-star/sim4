@@ -10,6 +10,15 @@ var autonomy_enabled: bool = true
 var ticks: int = 0
 ## folk_id -> last autonomy choice dictionary (interaction_id, reason, score...)
 var last_choice: Dictionary = {}
+## Profiling (tests/perf_probe.gd): label -> [usec, calls] while prof_on.
+var prof_on: bool = false
+var prof: Dictionary = {}
+
+func _prof(label: String, t0: int) -> void:
+	var rec: Array = prof.get(label, [0, 0])
+	rec[0] += Time.get_ticks_usec() - t0
+	rec[1] += 1
+	prof[label] = rec
 
 func _ready() -> void:
 	connect_clock()
@@ -30,14 +39,24 @@ func tick_minute(minutes: int = 1) -> void:
 		tick_folk(f, float(minutes))
 
 func tick_folk(f: Folk, minutes: float = 1.0) -> void:
+	var t0 := Time.get_ticks_usec() if prof_on else 0
+	var hh := ("household " if prof_on and int(f.household_id) > 0 and not f.has_meta("visitor") else "other ")
 	f.tick_needs(minutes)
 	f.tick_buffs(minutes)
 	f.update_thresholds()
 	f.refresh_mood()
+	if prof_on:
+		_prof(hh + "needs/buffs/mood", t0)
+		t0 = Time.get_ticks_usec()
 	_check_emergencies(f)
 	if f.current != null:
 		f.current.tick(minutes)
+	if prof_on:
+		_prof(hh + "emergency+interaction tick", t0)
+		t0 = Time.get_ticks_usec()
 	_fill(f)
+	if prof_on:
+		_prof(hh + "fill (autonomy)", t0)
 	if ticks % 360 == 0:
 		f.prune_memory()
 

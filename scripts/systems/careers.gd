@@ -106,6 +106,7 @@ static func qualify(f, cid: String, level: int, branch: String = "") -> Dictiona
 	var ld: Dictionary = level_def(cid, level, branch)
 	if ld.is_empty():
 		return {"ok": false, "missing": ["no such level"]}
+	missing.append_array(JusticeCareers.extra_missing(int(f.id), cid))      # a criminal record closes some doors
 	var req: Dictionary = ld.get("requires", {})
 	var sk: Dictionary = req.get("skills", {})
 	for s in sk:

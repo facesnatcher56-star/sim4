@@ -16,6 +16,8 @@ func _ready() -> void:
 	_build_fx()
 	_connect_signals()
 	WeatherView.ensure_on(self)    # sky / sun / weather particles / seasons (scripts/world/weather_view.gd)
+	FireView.ensure_on(self)       # flames / smoke / scorch marks (scripts/world/fire_view.gd)
+	DisasterView.ensure_on(self)   # siren / tornado / flood / quake shake / blizzard / blackout visuals (scripts/world/disaster_view.gd)
 	rebuild_all()
 	frame_home()
 

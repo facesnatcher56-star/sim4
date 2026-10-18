@@ -18,7 +18,7 @@ extends SceneTree
 ## Long simulations: only run with --slow / --all.
 const SLOW := [
 	"systems_family_integration_test.gd", "systems_integration_test.gd", "hood_sim_test.gd", "weather_longrun_test.gd",
-	"social_autonomy_test.gd", "sim_longrun.gd", "incidents_longrun_test.gd",
+	"social_autonomy_test.gd", "sim_longrun.gd", "incidents_longrun_test.gd", "crime_longrun_test.gd", "accident_longrun_test.gd", "health_longrun_test.gd", "disaster_longrun_test.gd", "fire_longrun_test.gd",
 ]
 
 var _done := false

@@ -151,7 +151,7 @@ func start() -> bool:
 	if n < 0:
 		_release()
 		return false
-	travel_total = n * WALK_MIN_PER_TILE
+	travel_total = n * WALK_MIN_PER_TILE / Health.speed_mult(actor)      # injured / unwell folk walk slower
 	travel_left = travel_total
 	actor.current = self
 	SimEnv.emit("interaction_started", actor.id, def_id, target_id)

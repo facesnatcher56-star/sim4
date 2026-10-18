@@ -227,5 +227,8 @@ func _update_hover_label() -> void:
 		if o != null:
 			var bb := _object_aabb(o)
 			_hover_label.text = Graves.hover_text(o) if o.has_tag("grave") and Graves.hover_text(o) != "" else str(o.def.get("label", o.def_id))
+			var fire_tip: String = Fire.hover_text(o)         # fire risk / protection lines (FireRules.hover_text)
+			if fire_tip != "":
+				_hover_label.text += "\n" + fire_tip
 			_hover_label.position = bb.get_center() + Vector3(0, bb.size.y * 0.5 + 0.3, 0)
 			_hover_label.visible = true

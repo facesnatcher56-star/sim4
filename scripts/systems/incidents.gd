@@ -36,7 +36,9 @@ static func reset() -> void:
 	seed_rng(DEFAULT_SEED)
 	level = _settings_level()
 	Hospital.reset()
+	Health.reset()
 	Graves.reset()
+	DisasterState.reset()
 	ChronicleHook.reset()
 
 static func seed_rng(s: int) -> void:
@@ -116,12 +118,15 @@ static func insurance_cover(amount: int, hid: int = 0) -> int:
 static func on_minute() -> void:
 	if not pending.is_empty():
 		IncidentFlow.process_pending()
+	Health.on_minute()
 
 static func on_hour() -> void:
 	Hospital.on_hour()
+	Health.on_hour()
 	IncidentChecks.run("hour")
 
 static func on_day() -> void:
+	Health.on_day()
 	IncidentChecks.run("day")
 
 # ------------------------------------------------------------------ force / statistical
@@ -142,13 +147,14 @@ static func call_doctor(folk_id: int) -> Dictionary:
 		SysUtil.notify("The household cannot afford a doctor right now.", "warn")
 		return {"ok": false, "cost": net, "defused": 0}
 	_timed_checkup(f)
+	var treated: Array = Health.on_doctor(f)
 	var n: int = 0
 	for p in pending:
 		if p["kind"] == "folk" and int(p["sid"]) == folk_id and bool(IncidentDefs.get_def(str(p["id"])).get("warning", {}).get("doctor_can_defuse", false)):
 			p["defused"] = true
 			n += 1
 	SysUtil.notify("The doctor has examined %s." % f.name, "info")
-	return {"ok": true, "cost": net, "defused": n}
+	return {"ok": true, "cost": net, "defused": n, "treated": treated}
 
 static func _timed_checkup(f) -> void:
 	f.add_buff("checked_up")
@@ -156,7 +162,7 @@ static func _timed_checkup(f) -> void:
 # ------------------------------------------------------------------ save
 static func to_dict() -> Dictionary:
 	return {"level": level_id(), "rng_seed": rng.seed, "rng_state": str(rng.state), "counters": counters.duplicate(true), "pending": pending.duplicate(true),
-		"history": _history.duplicate(true), "hospital": Hospital.to_dict(), "graves": Graves.to_dict()}
+		"history": _history.duplicate(true), "hospital": Hospital.to_dict(), "health": Health.to_dict(), "graves": Graves.to_dict(), "disasters": DisasterState.to_dict()}
 
 static func from_dict(d: Dictionary) -> void:
 	reset()
@@ -177,7 +183,9 @@ static func from_dict(d: Dictionary) -> void:
 		pending.append(q)
 	_history = (d.get("history", []) as Array).duplicate(true)
 	Hospital.from_dict(d.get("hospital", {}))
+	Health.from_dict(d.get("health", {}))
 	Graves.from_dict(d.get("graves", {}))
+	DisasterState.from_dict(d.get("disasters", {}))
 
 static func record_history(entry: Dictionary) -> void:
 	_history.append(entry)

@@ -145,7 +145,7 @@ static func lot_value(hid: int) -> int:
 	var total: int = 0
 	for o in objects_of(hid):
 		total += object_price(o)
-	return total
+	return int(float(total) * CrimeRate.value_mult())       # a high crime rate lowers property values
 
 # ------------------------------------------------------------------ buy / sell
 static func sell_ratio(age_days: int) -> float:
@@ -238,6 +238,7 @@ static func compute_bill(hid: int) -> int:
 	amount += float(usage.get(hid, 0.0)) * float(b.get("utility_rate", 0.8))
 	amount *= Weather.bill_multiplier()    # heating / cooling over the billing cycle (1.0 when mild)
 	amount *= Scenario.bill_multiplier()   # new-game difficulty (1.0 on Normal)
+	amount += float(DisasterInsurance.bill_extra(hid))   # optional home insurance premium (task 06)
 	return int(round(amount))
 
 static func outstanding(hid: int) -> Array:

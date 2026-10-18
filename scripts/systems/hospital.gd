@@ -32,17 +32,12 @@ static func _timed_buff(f, buff: String, hours: float) -> void:
 		if str(b["id"]) == buff:
 			b["remaining"] = maxf(float(b["remaining"]), hours * 60.0)
 
+## Injuries and illness are kept by the Health layer (task 02: severity, slow walking, limits, contagion); these stay the entry points.
 static func injure(f, severity: int, reason: String = "") -> void:
-	_timed_buff(f, "injured", _by_sev("injured_hours", severity, 24.0))
-	SysUtil.game_event("injured", {"folk_id": int(f.id), "severity": severity, "reason": reason})
-	if severity >= int(cfg().get("min_admit_severity", 2)):
-		admit(int(f.id), severity, reason)
+	Health.injure(f, severity, reason)
 
 static func fall_ill(f, severity: int, reason: String = "") -> void:
-	_timed_buff(f, "sick", _by_sev("sick_hours", severity, 24.0))
-	SysUtil.game_event("fell_ill", {"folk_id": int(f.id), "severity": severity, "reason": reason})
-	if severity >= int(cfg().get("min_admit_severity", 2)):
-		admit(int(f.id), severity, reason)
+	Health.fall_ill(f, "generic", severity, reason)
 
 # ------------------------------------------------------------------ admit / discharge
 static func admit(folk_id: int, severity: int, reason: String = "") -> bool:
@@ -61,6 +56,7 @@ static func admit(folk_id: int, severity: int, reason: String = "") -> bool:
 		return true
 	if Away.is_away(folk_id):
 		Away.recall(folk_id, "hospital")
+	Health.on_admitted(f)                        # a collapsed patient is brought round first (the lying-down interaction would block the stay)
 	patients[folk_id] = rec
 	f.add_buff("in_hospital")
 	if not Away.send(f, mins, "hospital", {"label": "In hospital", "severity": severity}):
@@ -96,6 +92,7 @@ static func on_returned(f, _rec: Dictionary) -> void:
 		return
 	f.remove_buff("injured")
 	f.remove_buff("sick")
+	Health.on_discharged(f)
 	var paid: int = charge(int(p.get("hid", f.household_id)), int(p["bill"]), str(f.name))
 	SysUtil.notify("%s is home from hospital. The bill was %d coins." % [f.name, paid] if paid > 0 else "%s is home from hospital." % f.name, "info")
 	SysUtil.game_event("discharged", {"folk_id": int(f.id), "bill": paid})
@@ -147,7 +144,8 @@ static func status_chips(f) -> Array:
 	if f.has_buff("injured"):
 		out.append({"text": "Injured", "color": Color("#e8913d"), "tip": "Hurt. Rest helps; a bad injury needs the hospital."})
 	if f.has_buff("sick"):
-		out.append({"text": "Unwell", "color": Color("#c9b037"), "tip": "Feeling ill. Rest, food and a doctor help."})
+		out.append({"text": Health.sick_label(f), "color": Color("#c9b037"), "tip": "Feeling ill. Rest, food and a doctor help."})
+	out.append_array(Health.status_chips(f))
 	return out
 
 static func _clock_text(total_min: int) -> String:

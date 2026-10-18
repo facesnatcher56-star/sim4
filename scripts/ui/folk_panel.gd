@@ -357,6 +357,8 @@ func _build_status() -> void:
 		return
 	for chip in Hospital.status_chips(folk):
 		status_box.add_child(_chip(str(chip["text"]), chip["color"], str(chip["tip"])))
+	for chip2 in JusticePlayer.status_chips(folk):
+		status_box.add_child(_chip(str(chip2["text"]), chip2["color"], str(chip2["tip"])))
 
 func _refresh_goal() -> void:
 	var info: Dictionary = Goals.active_for(folk_id) if folk_id >= 0 else {}

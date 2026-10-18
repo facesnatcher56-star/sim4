@@ -68,6 +68,10 @@ static func _start_shift(f, j: Dictionary, h: float) -> void:
 	if _critical(f):
 		_record_skip(f, j, float(s.get("sick_penalty", 8)), "was too run down and called in sick")
 		return
+	var unwell: String = Health.work_block(f, str(j["career"]))
+	if unwell != "":
+		_record_skip(f, j, float(s.get("sick_penalty", 8)) * 0.5, unwell)
+		return
 	var end_h: float = f.work_end
 	if end_h <= f.work_start:
 		end_h += 24.0

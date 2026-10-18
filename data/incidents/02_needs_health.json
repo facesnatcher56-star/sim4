@@ -1,0 +1,1407 @@
+{
+ "_doc": "Task 02: deaths from needs (starvation, exhaustion, exposure: deterministic, in scripts/systems/health_*.gd, NOT scaled by Surprises), illness (cold, flu, food poisoning: spreads by contact) and injury. Config under config.health; docs/INCIDENTS.md 'Health API'.",
+ "config": {
+  "health": {
+   "stage_mult": {
+    "toddler": 0.5,
+    "child": 0.7,
+    "teen": 1.0,
+    "adult": 1.0,
+    "elder": 0.8
+   },
+   "elder_death_mult": {
+    "elder": 2.0
+   },
+   "needs": {
+    "hunger": {
+     "stat": "hunger",
+     "floor": -92,
+     "reset": -70,
+     "warn_min": 720,
+     "collapse_min": 2880,
+     "death_min": 4320,
+     "death_per_hour": 0.04,
+     "death_stages": [
+      "teen",
+      "adult",
+      "elder"
+     ],
+     "warn_key": "weak_hunger",
+     "warn_buff": "weak_hunger",
+     "collapse_kind": "hunger",
+     "cause": "starvation"
+    },
+    "energy": {
+     "stat": "energy",
+     "floor": -92,
+     "reset": -60,
+     "warn_min": 720,
+     "collapse_min": 2880,
+     "death_min": 7200,
+     "death_per_hour": 0.03,
+     "death_stages": [
+      "elder"
+     ],
+     "warn_key": "worn_out",
+     "warn_buff": "",
+     "collapse_kind": "exhaustion",
+     "cause": "exhaustion"
+    }
+   },
+   "rescue": {
+    "delay_min": 20,
+    "auto_help": true,
+    "hunger_to": 15,
+    "energy_to": -30,
+    "wake_energy": -20,
+    "sleep_energy_per_min": 0.5,
+    "dependent_stages": [
+     "toddler",
+     "child"
+    ],
+    "dependent_hospital_min": 360
+   },
+   "exposure": {
+    "cold": {
+     "below": -3,
+     "hard_below": -9,
+     "outdoor_recover": 1.0,
+     "indoor_recover": 3.0,
+     "coat_mult": 0.4,
+     "sick_hours": 6,
+     "stages": [
+      {
+       "min": 180,
+       "buff": "shivering"
+      },
+      {
+       "min": 360,
+       "buff": "hypothermia",
+       "sick": true
+      },
+      {
+       "min": 600,
+       "collapse": "cold"
+      }
+     ],
+     "death_min": 1080,
+     "death_per_hour": 0.06,
+     "death_stages": [
+      "teen",
+      "adult",
+      "elder"
+     ],
+     "cause": "hypothermia"
+    },
+    "heat": {
+     "above": 33,
+     "hard_above": 38,
+     "outdoor_recover": 1.0,
+     "indoor_recover": 3.0,
+     "water_mult": 0.5,
+     "water_relief_min": 120,
+     "sick_hours": 6,
+     "stages": [
+      {
+       "min": 180,
+       "buff": "overheating"
+      },
+      {
+       "min": 360,
+       "buff": "heat_exhaustion",
+       "sick": true
+      },
+      {
+       "min": 600,
+       "collapse": "heat"
+      }
+     ],
+     "death_min": 960,
+     "death_per_hour": 0.06,
+     "death_stages": [
+      "teen",
+      "adult",
+      "elder"
+     ],
+     "cause": "heatstroke"
+    }
+   },
+   "neglect": {
+    "stages": [
+     "toddler",
+     "child",
+     "elder"
+    ],
+    "needs": [
+     "hunger",
+     "hygiene",
+     "energy"
+    ],
+    "below": -60,
+    "warn_min": 480,
+    "recover_per_min": 2.0
+   },
+   "illness": {
+    "rest_bonus_per_min": 1.0,
+    "talk_window_min": 90,
+    "home_tiles": 30,
+    "exposed_hours": 8,
+    "kinds": {
+     "cold": {
+      "buff": "common_cold",
+      "hours": 48,
+      "contagious": true,
+      "exposed_buff": "exposed_cold",
+      "immune_buff": "immune_cold",
+      "immune_hours": 48
+     },
+     "flu": {
+      "buff": "flu",
+      "hours": 96,
+      "contagious": true,
+      "exposed_buff": "exposed_flu",
+      "immune_buff": "immune_flu",
+      "immune_hours": 96
+     },
+     "food_poisoning": {
+      "buff": "food_poisoning",
+      "hours": 14
+     },
+     "exposure": {
+      "buff": "",
+      "hours": 6
+     },
+     "generic": {
+      "buff": "",
+      "hours": 24
+     }
+    }
+   },
+   "food_poisoning": {
+    "snack_per_item": 0.12,
+    "meal_per_item": 0.05,
+    "max": 0.5,
+    "cook_skill_notices": 5,
+    "skilled_mult": 0.5
+   },
+   "doctor": {
+    "illness_cure": 0.75,
+    "injury_cure": 0.5
+   },
+   "medicine": {
+    "illness_cure": 0.4,
+    "injury_cure": 0.3
+   },
+   "injury": {
+    "blocked_tags": [
+     "exercise",
+     "fitness",
+     "dance"
+    ],
+    "rest_bonus_per_min": 1.0,
+    "scuffle_chance": 0.08,
+    "physical_careers": [
+     "cook",
+     "chef",
+     "barista",
+     "fitness_coach",
+     "gardener",
+     "handyperson",
+     "athlete"
+    ]
+   },
+   "speed": {
+    "injured": {
+     "1": 0.8,
+     "2": 0.6,
+     "3": 0.45
+    },
+    "min": 0.3,
+    "buffs": {
+     "flu": 0.85,
+     "food_poisoning": 0.85,
+     "hypothermia": 0.8,
+     "heat_exhaustion": 0.8,
+     "weak_hunger": 0.85,
+     "shaky": 0.9
+    }
+   },
+   "text": {
+    "weak_hunger": "{name} is faint with hunger. Get them something to eat soon.",
+    "worn_out": "{name} is worn out and can hardly stay awake. They need real sleep.",
+    "shivering": "{name} is shivering. Get them inside and warm.",
+    "hypothermia": "{name} is dangerously cold. They need warmth right now.",
+    "overheating": "{name} is overheating. Find shade and some water.",
+    "heat_exhaustion": "{name} is dizzy from the heat. They need water and shade right now.",
+    "collapsed_hunger": "{name} has collapsed from hunger. Someone needs to feed them, or call a doctor.",
+    "collapsed_exhaustion": "{name} collapsed from exhaustion and is sleeping on the floor.",
+    "collapsed_cold": "{name} has collapsed in the cold. They need help right now.",
+    "collapsed_heat": "{name} has collapsed in the heat. They need help right now.",
+    "woke_up": "{name} woke up on the floor, stiff but rested.",
+    "recovered": "{name} is feeling better.",
+    "healed": "{name} has healed.",
+    "neglected_child": "{name} is not being looked after properly. Someone should step in.",
+    "neglected_elder": "{name} cannot manage alone and needs looking after."
+   },
+   "thought": {
+    "weak_hunger": "I feel so weak... I need food.",
+    "worn_out": "I can't keep going like this...",
+    "shivering": "I'm freezing. I should get inside.",
+    "hypothermia": "I can't feel my hands...",
+    "overheating": "It's so hot. I need some water.",
+    "heat_exhaustion": "Everything is spinning in this heat..."
+   },
+   "chips": {
+    "collapsed": {
+     "text": "Collapsed",
+     "color": "#e5534b",
+     "tip": "Cannot act. Someone can help them up, or call a doctor."
+    },
+    "hypothermia": {
+     "text": "Hypothermia",
+     "color": "#4aa3e8",
+     "tip": "Dangerously cold. Warm them up and get them indoors."
+    },
+    "heat_exhaustion": {
+     "text": "Heat exhaustion",
+     "color": "#e8913d",
+     "tip": "Too hot for too long. Water and shade."
+    },
+    "shivering": {
+     "text": "Shivering",
+     "color": "#6ab7e8",
+     "tip": "Getting cold. A coat or going indoors helps."
+    },
+    "overheating": {
+     "text": "Overheating",
+     "color": "#e8a33d",
+     "tip": "Getting too hot. Water and shade help."
+    },
+    "weak_hunger": {
+     "text": "Faint",
+     "color": "#e8a33d",
+     "tip": "Has not eaten in a very long time."
+    },
+    "neglected": {
+     "text": "Neglected",
+     "color": "#c9708f",
+     "tip": "Is not being looked after properly."
+    }
+   }
+  }
+ },
+ "handlers": {
+  "health_catch": {
+   "script": "res://scripts/systems/health_handlers.gd",
+   "method": "catch_illness"
+  }
+ },
+ "content": {
+  "buffs": {
+   "weak_hunger": {
+    "label": "Faint with Hunger",
+    "mood": {
+     "sad": 2,
+     "uncomfortable": 3
+    },
+    "duration_min": 0,
+    "need_decay_mult": {
+     "energy": 1.3,
+     "fun": 1.2
+    },
+    "thought": "I feel so weak... I need food."
+   },
+   "collapsed": {
+    "label": "Collapsed",
+    "mood": {
+     "sad": 2,
+     "uncomfortable": 3
+    },
+    "duration_min": 0
+   },
+   "shaky": {
+    "label": "Shaky",
+    "mood": {
+     "uncomfortable": 1
+    },
+    "duration_min": 120,
+    "thought": "I'm still a bit shaky."
+   },
+   "shivering": {
+    "label": "Shivering",
+    "mood": {
+     "uncomfortable": 3
+    },
+    "duration_min": 0,
+    "need_decay_mult": {
+     "comfort": 1.8,
+     "energy": 1.2
+    },
+    "autonomy_mult": {
+     "interaction:put_on_coat": 3.0,
+     "tag:fire": 2.5,
+     "tag:comfy": 1.5
+    },
+    "thought": "I'm freezing. I should get inside."
+   },
+   "hypothermia": {
+    "label": "Hypothermia",
+    "mood": {
+     "sad": 2,
+     "uncomfortable": 4
+    },
+    "duration_min": 0,
+    "need_decay_mult": {
+     "comfort": 2.0,
+     "energy": 1.4
+    },
+    "autonomy_mult": {
+     "tag:fire": 3.0,
+     "interaction:put_on_coat": 3.0
+    },
+    "thought": "I can't feel my hands..."
+   },
+   "overheating": {
+    "label": "Overheating",
+    "mood": {
+     "uncomfortable": 3
+    },
+    "duration_min": 0,
+    "need_decay_mult": {
+     "hygiene": 1.4,
+     "energy": 1.2
+    },
+    "autonomy_mult": {
+     "interaction:drink_water": 3.0,
+     "interaction:take_shower": 2.0
+    },
+    "thought": "It's so hot. I need some water."
+   },
+   "heat_exhaustion": {
+    "label": "Heat Exhaustion",
+    "mood": {
+     "sad": 2,
+     "uncomfortable": 4
+    },
+    "duration_min": 0,
+    "need_decay_mult": {
+     "energy": 1.6
+    },
+    "autonomy_mult": {
+     "interaction:drink_water": 4.0,
+     "interaction:take_shower": 3.0
+    },
+    "thought": "Everything is spinning in this heat..."
+   },
+   "bundled_up": {
+    "label": "Warm Clothes",
+    "mood": {
+     "happy": 1
+    },
+    "duration_min": 480
+   },
+   "cooled_down": {
+    "label": "Cooled Down",
+    "mood": {
+     "happy": 1
+    },
+    "duration_min": 120
+   },
+   "medicated": {
+    "label": "Medicated",
+    "mood": {
+     "happy": 1
+    },
+    "duration_min": 720
+   },
+   "neglected": {
+    "label": "Neglected",
+    "mood": {
+     "sad": 3,
+     "uncomfortable": 2
+    },
+    "duration_min": 0
+   },
+   "common_cold": {
+    "label": "Common Cold",
+    "mood": {
+     "uncomfortable": 2,
+     "sad": 1
+    },
+    "duration_min": 2880,
+    "need_decay_mult": {
+     "energy": 1.2,
+     "hygiene": 1.15,
+     "fun": 1.15
+    },
+    "autonomy_mult": {
+     "interaction:take_medicine": 2.5,
+     "tag:rest": 1.6
+    },
+    "thought": "Achoo... I think I'm coming down with something."
+   },
+   "flu": {
+    "label": "Flu",
+    "mood": {
+     "uncomfortable": 3,
+     "sad": 2
+    },
+    "duration_min": 5760,
+    "need_decay_mult": {
+     "energy": 1.5,
+     "fun": 1.2
+    },
+    "autonomy_mult": {
+     "interaction:take_medicine": 3.0,
+     "tag:sleep": 2.5,
+     "tag:rest": 2.0
+    },
+    "thought": "Everything aches. I need to lie down."
+   },
+   "food_poisoning": {
+    "label": "Food Poisoning",
+    "mood": {
+     "uncomfortable": 4,
+     "sad": 1
+    },
+    "duration_min": 720,
+    "need_decay_mult": {
+     "hunger": 2.0,
+     "bladder": 1.6,
+     "hygiene": 1.3
+    },
+    "autonomy_mult": {
+     "interaction:take_medicine": 2.5,
+     "tag:rest": 1.8
+    },
+    "thought": "My stomach is in knots..."
+   },
+   "exposed_cold": {
+    "label": "Exposed to a Cold",
+    "mood": {},
+    "duration_min": 480,
+    "hidden": true
+   },
+   "exposed_flu": {
+    "label": "Exposed to Flu",
+    "mood": {},
+    "duration_min": 480,
+    "hidden": true
+   },
+   "immune_cold": {
+    "label": "Resistant",
+    "mood": {},
+    "duration_min": 2880,
+    "hidden": true
+   },
+   "immune_flu": {
+    "label": "Resistant",
+    "mood": {},
+    "duration_min": 5760,
+    "hidden": true
+   }
+  },
+  "interactions": {
+   "collapse_floor": {
+    "label": "Collapsed",
+    "kind": "super",
+    "posture": "lie",
+    "tests": [],
+    "per_min": {},
+    "autonomous": false,
+    "priority": "urgent",
+    "target": "self",
+    "tags": [
+     "emergency",
+     "collapsed"
+    ],
+    "duration_min": 1440,
+    "interruptible": false,
+    "emergency": [
+     {
+      "has_buff": "collapsed"
+     }
+    ],
+    "need_decay_mult": {
+     "hunger": 0.6,
+     "bladder": 0.5,
+     "fun": 0.3,
+     "social": 0.3
+    },
+    "end_when": [
+     {
+      "lacks_buff": "collapsed"
+     }
+    ],
+    "advertises": {},
+    "thought": "Everything is spinning..."
+   },
+   "help_collapsed": {
+    "label": "Help Them Up",
+    "kind": "super",
+    "posture": "stand",
+    "tests": [
+     {
+      "lacks_buff": "collapsed"
+     },
+     {
+      "lacks_buff": "stage_baby"
+     },
+     {
+      "lacks_buff": "stage_toddler"
+     }
+    ],
+    "per_min": {
+     "social": 0.3
+    },
+    "autonomous": true,
+    "priority": "urgent",
+    "target": "folk",
+    "tags": [
+     "help",
+     "care"
+    ],
+    "duration_min": 8,
+    "target_tests": [
+     {
+      "has_buff": "collapsed"
+     }
+    ],
+    "on_finish": [
+     {
+      "fire_event": "health_rescue"
+     }
+    ],
+    "advertises": {
+     "social": 40.0
+    },
+    "thought": "They need help!"
+   },
+   "take_medicine": {
+    "label": "Take Medicine",
+    "kind": "super",
+    "posture": "stand",
+    "tests": [
+     {
+      "any": [
+       {
+        "has_buff": "sick"
+       },
+       {
+        "has_buff": "common_cold"
+       },
+       {
+        "has_buff": "flu"
+       },
+       {
+        "has_buff": "food_poisoning"
+       }
+      ]
+     },
+     {
+      "lacks_buff": "medicated"
+     },
+     {
+      "coins_at_least": 15
+     }
+    ],
+    "per_min": {},
+    "autonomous": true,
+    "priority": "normal",
+    "target": "object",
+    "objects": [
+     "sink"
+    ],
+    "tags": [
+     "health",
+     "medicine"
+    ],
+    "duration_min": 3,
+    "on_finish": [
+     {
+      "coins_add": -15
+     },
+     {
+      "add_buff": "medicated"
+     },
+     {
+      "fire_event": "health_medicine"
+     }
+    ],
+    "advertises": {
+     "comfort": 3.0
+    },
+    "thought": "I should take something for this.",
+    "cooldown_min": 240
+   },
+   "treat_injury": {
+    "label": "First Aid",
+    "kind": "super",
+    "posture": "stand",
+    "tests": [
+     {
+      "has_buff": "injured"
+     }
+    ],
+    "per_min": {},
+    "autonomous": true,
+    "priority": "normal",
+    "target": "object",
+    "objects": [
+     "sink"
+    ],
+    "tags": [
+     "health",
+     "medicine"
+    ],
+    "duration_min": 4,
+    "on_finish": [
+     {
+      "fire_event": "health_first_aid"
+     }
+    ],
+    "advertises": {
+     "comfort": 3.0
+    },
+    "thought": "Let me patch this up.",
+    "cooldown_min": 360
+   },
+   "put_on_coat": {
+    "label": "Put on Warm Clothes",
+    "kind": "super",
+    "posture": "stand",
+    "tests": [
+     {
+      "lacks_buff": "bundled_up"
+     },
+     {
+      "any": [
+       {
+        "has_buff": "wx_cold"
+       },
+       {
+        "has_buff": "wx_snowy"
+       },
+       {
+        "has_buff": "shivering"
+       },
+       {
+        "has_buff": "cold"
+       }
+      ]
+     }
+    ],
+    "per_min": {},
+    "autonomous": true,
+    "priority": "normal",
+    "target": "object",
+    "objects": [
+     "dresser",
+     "wardrobe"
+    ],
+    "tags": [
+     "health",
+     "clothes"
+    ],
+    "duration_min": 3,
+    "on_finish": [
+     {
+      "add_buff": "bundled_up"
+     }
+    ],
+    "advertises": {
+     "comfort": 2.5
+    },
+    "thought": "It's cold out. A coat first.",
+    "cooldown_min": 120
+   },
+   "drink_water": {
+    "label": "Drink Water",
+    "kind": "super",
+    "posture": "stand",
+    "tests": [
+     {
+      "lacks_buff": "cooled_down"
+     },
+     {
+      "any": [
+       {
+        "has_buff": "wx_hot"
+       },
+       {
+        "has_buff": "hot"
+       },
+       {
+        "has_buff": "overheating"
+       },
+       {
+        "has_buff": "heat_exhaustion"
+       }
+      ]
+     }
+    ],
+    "per_min": {},
+    "autonomous": true,
+    "priority": "normal",
+    "target": "object",
+    "objects": [
+     "sink"
+    ],
+    "tags": [
+     "health",
+     "drink"
+    ],
+    "duration_min": 2,
+    "on_finish": [
+     {
+      "add_buff": "cooled_down"
+     },
+     {
+      "fire_event": "health_cooled"
+     }
+    ],
+    "advertises": {
+     "comfort": 3.0
+    },
+    "thought": "I need some cold water.",
+    "cooldown_min": 60
+   }
+  },
+  "buff_patch": {
+   "injured": {
+    "autonomy_mult": {
+     "interaction:treat_injury": 3.0,
+     "tag:rest": 1.5
+    }
+   },
+   "sick": {
+    "autonomy_mult": {
+     "interaction:take_medicine": 2.5,
+     "tag:rest": 1.5
+    }
+   }
+  },
+  "object_interactions": {
+   "sink": [
+    "take_medicine",
+    "treat_injury",
+    "drink_water"
+   ],
+   "dresser": [
+    "put_on_coat"
+   ],
+   "wardrobe": [
+    "put_on_coat"
+   ]
+  }
+ },
+ "incidents": {
+  "catch_cold": {
+   "label": "Catch a cold",
+   "scope": "folk",
+   "check": "hour",
+   "base_rate_per_year": 0.6,
+   "notify_policy": "household",
+   "severity": 1,
+   "public": false,
+   "conditions": [
+    {
+     "lacks_buff": "common_cold"
+    },
+    {
+     "lacks_buff": "flu"
+    },
+    {
+     "lacks_buff": "immune_cold"
+    },
+    {
+     "lacks_buff": "in_hospital"
+    }
+   ],
+   "risk_mults": [
+    {
+     "label": "Winter",
+     "when": [
+      {
+       "season_is": [
+        "winter"
+       ]
+      }
+     ],
+     "mult": 1.8
+    },
+    {
+     "label": "Autumn",
+     "when": [
+      {
+       "season_is": [
+        "autumn"
+       ]
+      }
+     ],
+     "mult": 1.2
+    },
+    {
+     "label": "Summer",
+     "when": [
+      {
+       "season_is": [
+        "summer"
+       ]
+      }
+     ],
+     "mult": 0.5
+    },
+    {
+     "label": "Chilled to the bone",
+     "when": [
+      {
+       "any": [
+        {
+         "has_buff": "cold"
+        },
+        {
+         "has_buff": "soaked"
+        },
+        {
+         "has_buff": "shivering"
+        }
+       ]
+      }
+     ],
+     "mult": 1.6
+    },
+    {
+     "label": "Low hygiene",
+     "when": [
+      {
+       "stat_below": [
+        "hygiene",
+        -25
+       ]
+      }
+     ],
+     "mult": 1.4
+    },
+    {
+     "label": "Worn out",
+     "when": [
+      {
+       "stat_below": [
+        "energy",
+        -40
+       ]
+      }
+     ],
+     "mult": 1.3
+    },
+    {
+     "label": "Someone close has a cold",
+     "when": [
+      {
+       "has_buff": "exposed_cold"
+      }
+     ],
+     "mult": 14.0
+    },
+    {
+     "label": "Baby or toddler",
+     "when": [
+      {
+       "age_stage_is": [
+        "baby",
+        "toddler"
+       ]
+      }
+     ],
+     "mult": 1.4
+    }
+   ],
+   "prevent": [
+    {
+     "label": "Warm clothes",
+     "when": [
+      {
+       "has_buff": "bundled_up"
+      }
+     ],
+     "mult": 0.7
+    },
+    {
+     "label": "Recent check-up",
+     "when": [
+      {
+       "has_buff": "checked_up"
+      }
+     ],
+     "mult": 0.8
+    }
+   ],
+   "warning": {
+    "lead_min": 0,
+    "thought": "Achoo! My nose is running..."
+   },
+   "outcomes": [
+    {
+     "weight": 1,
+     "effects": [
+      {
+       "handler": "health_catch",
+       "args": {
+        "kind": "cold",
+        "reason": "a cold"
+       }
+      }
+     ],
+     "text": "{name} has caught a cold.",
+     "kind": "warn"
+    }
+   ],
+   "statistical": {
+    "outcomes": [
+     {
+      "weight": 1,
+      "effects": [],
+      "summary": "{name} came down with a cold."
+     }
+    ]
+   }
+  },
+  "catch_flu": {
+   "label": "Catch the flu",
+   "scope": "folk",
+   "check": "hour",
+   "base_rate_per_year": 0.09,
+   "notify_policy": "household",
+   "severity": 2,
+   "public": false,
+   "conditions": [
+    {
+     "lacks_buff": "flu"
+    },
+    {
+     "lacks_buff": "immune_flu"
+    },
+    {
+     "lacks_buff": "in_hospital"
+    }
+   ],
+   "risk_mults": [
+    {
+     "label": "Winter",
+     "when": [
+      {
+       "season_is": [
+        "winter"
+       ]
+      }
+     ],
+     "mult": 2.5
+    },
+    {
+     "label": "Autumn",
+     "when": [
+      {
+       "season_is": [
+        "autumn"
+       ]
+      }
+     ],
+     "mult": 1.2
+    },
+    {
+     "label": "Summer",
+     "when": [
+      {
+       "season_is": [
+        "summer"
+       ]
+      }
+     ],
+     "mult": 0.4
+    },
+    {
+     "label": "Low hygiene",
+     "when": [
+      {
+       "stat_below": [
+        "hygiene",
+        -25
+       ]
+      }
+     ],
+     "mult": 1.3
+    },
+    {
+     "label": "Worn out",
+     "when": [
+      {
+       "stat_below": [
+        "energy",
+        -40
+       ]
+      }
+     ],
+     "mult": 1.3
+    },
+    {
+     "label": "Someone close has the flu",
+     "when": [
+      {
+       "has_buff": "exposed_flu"
+      }
+     ],
+     "mult": 25.0
+    }
+   ],
+   "prevent": [
+    {
+     "label": "Warm clothes",
+     "when": [
+      {
+       "has_buff": "bundled_up"
+      }
+     ],
+     "mult": 0.7
+    },
+    {
+     "label": "Recent check-up",
+     "when": [
+      {
+       "has_buff": "checked_up"
+      }
+     ],
+     "mult": 0.8
+    }
+   ],
+   "warning": {
+    "lead_min": 0,
+    "thought": "I feel feverish..."
+   },
+   "outcomes": [
+    {
+     "weight": 1,
+     "effects": [
+      {
+       "handler": "health_catch",
+       "args": {
+        "kind": "flu",
+        "reason": "the flu"
+       }
+      }
+     ],
+     "text": "{name} has come down with the flu and needs to rest.",
+     "kind": "warn"
+    }
+   ],
+   "statistical": {
+    "outcomes": [
+     {
+      "weight": 9,
+      "effects": [],
+      "summary": "{name} was laid up with the flu."
+     },
+     {
+      "weight": 2,
+      "when": [
+       {
+        "age_stage_is": "elder"
+       }
+      ],
+      "effects": [
+       {
+        "hospital": {
+         "severity": 2,
+         "reason": "the flu"
+        }
+       }
+      ],
+      "summary": "{name} was taken to hospital with the flu."
+     }
+    ]
+   }
+  },
+  "illness_worsens": {
+   "label": "Illness gets worse",
+   "scope": "folk",
+   "check": "day",
+   "base_rate_per_year": 0.25,
+   "notify_policy": "known",
+   "severity": 4,
+   "conditions": [
+    {
+     "has_buff": "flu"
+    },
+    {
+     "lacks_buff": "in_hospital"
+    }
+   ],
+   "risk_mults": [
+    {
+     "label": "Elder",
+     "when": [
+      {
+       "age_stage_is": "elder"
+      }
+     ],
+     "mult": 4.0
+    },
+    {
+     "label": "Baby or toddler",
+     "when": [
+      {
+       "age_stage_is": [
+        "baby",
+        "toddler"
+       ]
+      }
+     ],
+     "mult": 3.0
+    },
+    {
+     "label": "Worn out",
+     "when": [
+      {
+       "has_buff": "exhausted"
+      }
+     ],
+     "mult": 1.5
+    }
+   ],
+   "prevent": [
+    {
+     "label": "Taking medicine",
+     "when": [
+      {
+       "has_buff": "medicated"
+      }
+     ],
+     "mult": 0.25
+    },
+    {
+     "label": "Recent check-up",
+     "when": [
+      {
+       "has_buff": "checked_up"
+      }
+     ],
+     "mult": 0.5
+    }
+   ],
+   "warning": {
+    "lead_min": 360,
+    "thought": "It hurts to breathe...",
+    "text": "{name}'s flu is getting worse. Medicine or a doctor could help.",
+    "kind": "bad",
+    "averted": "{name} is over the worst of it.",
+    "doctor_can_defuse": true
+   },
+   "defuse": [
+    {
+     "has_buff": "medicated"
+    }
+   ],
+   "outcomes": [
+    {
+     "weight": 2,
+     "when": [
+      {
+       "age_stage_is": "elder"
+      },
+      {
+       "lacks_buff": "medicated"
+      }
+     ],
+     "effects": [
+      {
+       "kill": "illness"
+      }
+     ]
+    },
+    {
+     "weight": 8,
+     "effects": [
+      {
+       "hospital": {
+        "severity": 2,
+        "reason": "pneumonia"
+       }
+      }
+     ],
+     "text": "{name}'s flu turned serious and they were taken to hospital.",
+     "kind": "bad"
+    }
+   ],
+   "statistical": {
+    "outcomes": [
+     {
+      "weight": 8,
+      "effects": [
+       {
+        "hospital": {
+         "severity": 2,
+         "reason": "pneumonia"
+        }
+       }
+      ],
+      "summary": "{name} was taken to hospital with a bad chest."
+     },
+     {
+      "weight": 2,
+      "when": [
+       {
+        "age_stage_is": "elder"
+       }
+      ],
+      "effects": [
+       {
+        "kill": "illness"
+       }
+      ],
+      "summary": "{name} died after a long illness."
+     }
+    ]
+   }
+  },
+  "food_poisoning": {
+   "label": "Food poisoning",
+   "scope": "folk",
+   "check": "day",
+   "base_rate_per_year": 0.0,
+   "notify_policy": "household",
+   "severity": 2,
+   "public": false,
+   "_doc": "Rolled by Health when someone eats from a fridge holding spoiled food (HealthIllness.on_started), not by the daily dice.",
+   "conditions": [
+    {
+     "lacks_buff": "food_poisoning"
+    }
+   ],
+   "prevent": [
+    {
+     "label": "Medicine at hand",
+     "when": [
+      {
+       "has_buff": "medicated"
+      }
+     ],
+     "block": true
+    }
+   ],
+   "warning": {
+    "lead_min": 25,
+    "thought": "That tasted a bit off...",
+    "text": "{name} feels queasy. That food may have been spoiled.",
+    "kind": "warn",
+    "averted": "{name}'s queasy stomach settled in time.",
+    "doctor_can_defuse": true
+   },
+   "defuse": [
+    {
+     "has_buff": "medicated"
+    }
+   ],
+   "outcomes": [
+    {
+     "weight": 1,
+     "effects": [
+      {
+       "handler": "health_catch",
+       "args": {
+        "kind": "food_poisoning",
+        "reason": "spoiled food"
+       }
+      }
+     ],
+     "text": "{name} has food poisoning from spoiled food.",
+     "kind": "bad"
+    }
+   ]
+  },
+  "townie_stomach_bug": {
+   "label": "Stomach bug",
+   "scope": "townie",
+   "check": "day",
+   "base_rate_per_year": 0.4,
+   "notify_policy": "known",
+   "severity": 1,
+   "public": false,
+   "conditions": [
+    {
+     "lacks_buff": "food_poisoning"
+    },
+    {
+     "lacks_buff": "in_hospital"
+    }
+   ],
+   "outcomes": [
+    {
+     "weight": 1,
+     "effects": [
+      {
+       "handler": "health_catch",
+       "args": {
+        "kind": "food_poisoning",
+        "reason": "a stomach bug"
+       }
+      }
+     ],
+     "text": "{name} came down with a stomach bug.",
+     "kind": "info"
+    }
+   ],
+   "statistical": {
+    "outcomes": [
+     {
+      "weight": 1,
+      "effects": [],
+      "summary": "{name} had a nasty stomach bug."
+     }
+    ]
+   }
+  },
+  "scuffle_injury": {
+   "label": "Scuffle",
+   "scope": "folk",
+   "check": "day",
+   "base_rate_per_year": 0.0,
+   "notify_policy": "known",
+   "severity": 2,
+   "public": false,
+   "_doc": "Rolled by Health when a Pick a Fight finishes (HealthInjury.on_social).",
+   "conditions": [
+    {
+     "lacks_buff": "in_hospital"
+    }
+   ],
+   "outcomes": [
+    {
+     "weight": 7,
+     "effects": [
+      {
+       "injure": {
+        "severity": 1,
+        "reason": "a scuffle"
+       }
+      }
+     ],
+     "text": "{name} got hurt in a scuffle.",
+     "kind": "warn"
+    },
+    {
+     "weight": 1,
+     "effects": [
+      {
+       "injure": {
+        "severity": 2,
+        "reason": "a bad scuffle"
+       }
+      }
+     ],
+     "text": "{name} was badly hurt in a fight and taken to the clinic.",
+     "kind": "bad"
+    }
+   ]
+  }
+ }
+}

@@ -35,6 +35,32 @@ static func send(f, minutes: float, reason: String, data: Dictionary = {}) -> bo
 	f.enqueue(ir)
 	return true
 
+## A VISIBLE shift (task 11): the folk stays on the map doing the job (no sys_away interaction, no hiding, no "away" meta).
+## Same record shape as a hidden one so pay / performance work the same; VisibleWork ends it with end_visible().
+static func begin_visible(f, minutes: float, reason: String, data: Dictionary, start_min: int = -1) -> bool:
+	if f == null or active.has(f.id) or pending.has(f.id) or minutes <= 1.0:
+		return false
+	var d: Dictionary = data.duplicate(true)
+	d["visible"] = true
+	active[f.id] = {"reason": reason, "minutes": minutes, "data": d, "start_min": SysUtil.now() if start_min < 0 else start_min,
+		"until_min": SysUtil.now() + int(minutes)}
+	SysUtil.game_event("left_lot", {"folk_id": f.id, "reason": reason})
+	return true
+
+static func is_visible(folk_id: int) -> bool:
+	return bool((active.get(folk_id, {}).get("data", {}) as Dictionary).get("visible", false))
+
+## Ends a visible shift: returns the record (like on_finished) or {}.
+static func end_visible(folk_id: int, success: bool) -> Dictionary:
+	if not is_visible(folk_id):
+		return {}
+	var rec: Dictionary = active[folk_id]
+	active.erase(folk_id)
+	rec["completed"] = success
+	rec["worked_min"] = SysUtil.now() - int(rec["start_min"])
+	SysUtil.game_event("returned_to_lot", {"folk_id": folk_id, "reason": rec["reason"], "completed": success})
+	return rec
+
 ## interaction_started hook. Returns the info dict when this was a systems away interaction.
 static func on_started(folk_id: int, iid: String) -> Dictionary:
 	if iid != IID:
@@ -89,6 +115,9 @@ static func recall(folk_id: int, reason: String = "recalled") -> bool:
 	var f = SysUtil.folk(folk_id)
 	if f == null or not active.has(folk_id):
 		return false
+	if is_visible(folk_id):
+		Commute.finish_visible(f, false)
+		return true
 	if f.current != null and f.current.def_id == IID:
 		f.current.cancel(reason)
 		return true
@@ -108,6 +137,12 @@ static func from_dict(d: Dictionary) -> void:
 		var rec: Dictionary = a[k]
 		var f = SysUtil.folk(int(str(k)))
 		if f == null:
+			continue
+		if bool((rec.get("data", {}) as Dictionary).get("visible", false)):      # a visible shift just continues on the map
+			var vr: Dictionary = (rec as Dictionary).duplicate(true)
+			vr["start_min"] = int(vr.get("start_min", 0))
+			vr["until_min"] = int(vr.get("until_min", 0))
+			active[f.id] = vr
 			continue
 		var left: float = float(int(rec.get("until_min", 0)) - SysUtil.now())
 		if left < 2.0:
