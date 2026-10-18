@@ -21,6 +21,12 @@ static func is_school_day(day: int) -> bool:
 static func skip_work_today(folk_id: int) -> void:
 	Careers.skip_flags[folk_id] = SysUtil.day()
 
+static func is_critical(f) -> bool:
+	return _critical(f)
+
+static func player_busy(f) -> bool:
+	return _player_busy(f)
+
 static func _critical(f) -> bool:
 	var lim: float = float(Careers.settings().get("critical_need", -65))
 	for n in ["hunger", "energy", "bladder"]:
@@ -37,23 +43,36 @@ static func _player_busy(f) -> bool:
 	return false
 
 static func on_minute() -> void:
+	Commute.on_minute()
 	var day: int = SysUtil.day()
 	var h: float = SysUtil.hour_f()
 	for f in WorldIface.all_folk():
 		var fid: int = int(f.id)
-		if SysUtil.is_away(f) or Away.pending.has(fid):
+		if SysUtil.is_away(f) or Away.pending.has(fid) or Commute.active(fid) or Away.is_away(fid):
 			continue
 		if Careers.jobs.has(fid):
 			var j: Dictionary = Careers.jobs[fid]
-			if int(j["attempt_day"]) != day and is_work_day(str(j["career"]), day, str(j.get("shift", "day"))) and in_shift_window(h, f.work_start, f.work_end):
+			if int(j["attempt_day"]) != day and is_work_day(str(j["career"]), day, str(j.get("shift", "day"))) \
+					and in_shift_window(h + _lead(f, h, f.work_start, f.work_end), f.work_start, f.work_end):
 				j["attempt_day"] = day
 				_start_shift(f, j, h)
 		elif Careers.school.has(fid):
 			var sc: Dictionary = Careers.cfg().get("school", {})
 			var st: Dictionary = Careers.school[fid]
-			if int(st["attempt_day"]) != day and is_school_day(day) and h >= float(sc.get("start", 9)) and h < float(sc.get("end", 15)):
+			var s0: float = float(sc.get("start", 9))
+			if int(st["attempt_day"]) != day and is_school_day(day) and h + _lead(f, h, s0, float(sc.get("end", 15))) >= s0 and h < float(sc.get("end", 15)):
 				st["attempt_day"] = day
 				_start_school(f, st, h, sc)
+
+## Hours before the start at which a folk has to leave home so that the walk to the workplace gets there on time (0 without a map).
+static func _lead(f, h: float, start: float, end: float) -> float:
+	if not in_shift_window(h + 4.0, start, end):
+		return 0.0                    # nowhere near the start yet: skip the route question
+	return Commute.lead_hours(f)
+
+## Absolute game minute of today's `hour`.
+static func _abs_min(hour: float) -> int:
+	return (SysUtil.day() - 1) * 1440 + int(round(hour * 60.0))
 
 static func _start_shift(f, j: Dictionary, h: float) -> void:
 	var fid: int = int(f.id)
@@ -76,10 +95,30 @@ static func _start_shift(f, j: Dictionary, h: float) -> void:
 	if end_h <= f.work_start:
 		end_h += 24.0
 	var minutes: float = (end_h - h) * 60.0
+	var due: int = _abs_min(f.work_start)
+	if Commute.begin(f, "work", {"due_min": due, "end_min": due + int(round((end_h - f.work_start) * 60.0)), "career": j["career"], "title": title,
+			"shift": str(j.get("shift", "day")), "level": j["level"], "shift_end": f.work_end}):
+		SysUtil.game_event("work_dispatched", {"folk_id": fid, "commute": true})
+		return
 	var data: Dictionary = {"kind": "work", "shift": str(j.get("shift", "day")), "career": j["career"], "level": j["level"], "title": title,
 		"label": "At work: " + title, "shift_end": f.work_end}
 	if Away.send(f, minutes, "work", data):
 		SysUtil.game_event("work_dispatched", {"folk_id": fid})
+
+## Did not turn up (commute abandoned): same bookkeeping as a skip, plus the `missed_shift` event the missing-person score reads.
+static func missed(f, kind: String, why: String) -> void:
+	var fid: int = int(f.id)
+	if kind == "school":
+		var sc: Dictionary = Careers.cfg().get("school", {})
+		var st: Dictionary = Careers.school.get(fid, {})
+		if not st.is_empty():
+			st["skipped"] = int(st["skipped"]) + 1
+			st["grade"] = clampf(float(st["grade"]) - float(sc.get("skip_penalty", 12)), 0.0, 100.0)
+		SysUtil.notify("%s %s." % [f.name, why], "warn")
+		SysUtil.game_event("missed_shift", {"folk_id": fid, "kind": "school", "why": why})
+		return
+	if Careers.jobs.has(fid):
+		_record_skip(f, Careers.jobs[fid], float(Careers.settings().get("skip_penalty", 15)), why)
 
 static func _record_skip(f, j: Dictionary, penalty: float, why: String) -> void:
 	j["days_skipped"] = int(j["days_skipped"]) + 1
@@ -89,6 +128,7 @@ static func _record_skip(f, j: Dictionary, penalty: float, why: String) -> void:
 	_trim_log()
 	CareerProgress.add_performance(int(f.id), -penalty, true)
 	SysUtil.game_event("skipped_work", {"folk_id": f.id, "penalty": penalty})
+	SysUtil.game_event("missed_shift", {"folk_id": f.id, "kind": "work", "why": why})
 
 static func _trim_log() -> void:
 	while Careers.shift_log.size() > 60:
@@ -99,15 +139,19 @@ static func on_left(f, rec: Dictionary) -> void:
 	var fid: int = int(f.id)
 	match str(rec["reason"]):
 		"work":
+			if bool(rec["data"].get("commute", false)):
+				return                  # a real commute already announced the departure (Commute.begin) and the arrival
 			SysUtil.game_event("left_for_work", {"folk_id": fid, "career": rec["data"].get("career", ""), "title": rec["data"].get("title", ""),
 				"shift_end": rec["data"].get("shift_end", 0.0)})
 		"school":
-			SysUtil.game_event("left_for_school", {"folk_id": fid})
+			if not bool(rec["data"].get("commute", false)):
+				SysUtil.game_event("left_for_school", {"folk_id": fid})
 
 ## Away finished (completed shift or interrupted).
 static func on_returned(f, rec: Dictionary) -> void:
 	var fid: int = int(f.id)
 	var completed: bool = bool(rec.get("completed", false))
+	Commute.on_shift_end(f, rec)                 # walk home from the workplace (no-op for an old-style rabbit hole)
 	match str(rec["reason"]):
 		"work":
 			if not Careers.jobs.has(fid):
@@ -169,6 +213,9 @@ static func _start_school(f, st: Dictionary, h: float, sc: Dictionary) -> void:
 		st["skipped"] = int(st["skipped"]) + 1
 		st["grade"] = clampf(float(st["grade"]) - float(sc.get("skip_penalty", 12)), 0.0, 100.0)
 		SysUtil.notify("%s skipped school (-%d grade)." % [f.name, int(sc.get("skip_penalty", 12))], "warn")
+		SysUtil.game_event("missed_shift", {"folk_id": f.id, "kind": "school", "why": "chose to skip school"})
+		return
+	if Commute.begin(f, "school", {"due_min": _abs_min(float(sc.get("start", 9))), "end_min": _abs_min(float(sc.get("end", 15)))}):
 		return
 	var minutes: float = (float(sc.get("end", 15)) - h) * 60.0
 	Away.send(f, minutes, "school", {"label": "At school"})
