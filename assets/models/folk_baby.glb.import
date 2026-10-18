@@ -3,7 +3,7 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://doei2cxd643as"
+uid="uid://c3um0hyswr5mw"
 path="res://.godot/imported/folk_baby.glb-e35f674a5440cfe03a88b01434967fc5.scn"
 
 [deps]
@@ -17,7 +17,6 @@ nodes/root_type=""
 nodes/root_name=""
 nodes/root_script=null
 mesh_library/use_node_names_as_mesh_names=false
-mesh_library/create_categories_from_hierarchy=false
 array_mesh/deduplicate_surfaces=true
 nodes/apply_root_scale=true
 nodes/root_scale=1.0

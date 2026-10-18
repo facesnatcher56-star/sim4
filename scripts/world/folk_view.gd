@@ -11,7 +11,10 @@ func _process(delta: float) -> void:
 	var f = World.get_folk(folk_id)
 	if f == null:
 		return
-	visible = not (f.has_meta("away") or f.has_meta("offlot"))    # off-lot folk (work, travel, other lots) are hidden
+	visible = not f.has_meta("away") and not has_meta("occluded")    # away (work, school, party, fast travel) or behind a building shell: not drawn
+	if not visible:
+		_last_tile = Vector2i(-999, -999)      # not animated while hidden: it reappears on its tile
+		return
 	_check_tick += 1
 	if _check_tick % 20 == 0:
 		if stage_of(f) != _stage_now:

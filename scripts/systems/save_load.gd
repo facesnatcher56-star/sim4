@@ -2,11 +2,12 @@ class_name SaveLoad
 extends RefCounted
 ## Versioned save files: user://saves/slot<N>.json. Contains the clock, World.save_dict() (when a real World exists),
 ## every Folk (to_dict) and the state of all systems. Slot 0 is the daily autosave.
-## NOTE: ui/save_slots.gd writes the same file names with a different (v1) layout; this loader migrates v1 files.
+## Version 3 = one continuous map (regions in the world dict, no lot stash). Older saves are refused with OLD_SAVE_MSG.
 
 const DIR := "user://saves"
 const FORMAT := "sim4"
-const VERSION := 2
+const VERSION := 3
+const OLD_SAVE_MSG := "This is an old save from an earlier version of the game and can't be loaded."
 
 static var last_error: String = ""
 static var autosave_slot: int = 0
@@ -70,19 +71,16 @@ static func summary(slot: int) -> String:
 	var d: Dictionary = read(slot)
 	if d.is_empty():
 		return "Empty"
+	if is_old(d):
+		return "Old save (earlier version)"
 	return "%s - Day %d" % [str(d.get("label", d.get("household_name", "Household"))), int(d.get("day", 1))]
 
-## Upgrade older layouts in place. v1 (ui/save_slots.gd) had no "systems" block.
-static func migrate(d: Dictionary) -> Dictionary:
-	var v: int = int(d.get("version", 1))
-	if v < 2:
-		if not d.has("systems"):
-			d["systems"] = {}
-		d["format"] = FORMAT
-		if not d.has("clock_total") and d.has("clock"):
-			d["clock_total"] = d["clock"]
-		d["version"] = 2
-	return d
+## True for a save file from before the continuous map (any version below VERSION).
+static func is_old(d: Dictionary) -> bool:
+	return not d.is_empty() and int(d.get("version", 1)) < VERSION
+
+static func slot_is_old(slot: int) -> bool:
+	return is_old(read(slot))
 
 static func load_slot(slot: int) -> bool:
 	last_error = ""
@@ -97,7 +95,9 @@ static func load(slot: int) -> bool:
 	return load_slot(slot)
 
 static func restore(d: Dictionary) -> bool:
-	d = migrate(d)
+	if is_old(d):
+		last_error = OLD_SAVE_MSG
+		return false
 	if int(d.get("version", 0)) > VERSION:
 		last_error = "save is from a newer version"
 		return false

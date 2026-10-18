@@ -56,10 +56,10 @@ static func random_traits(count: int, r: RandomNumberGenerator = null) -> Array:
 			out.append(t)
 	return out
 
-static func random_folk(stage: String, rel: String, used: Array, r: RandomNumberGenerator = null) -> Dictionary:
+static func random_folk(stage: String, rel: String, used: Array, r: RandomNumberGenerator = null, looks: Array = []) -> Dictionary:
 	var g := rng_or_new(r)
 	return {"name": random_name(used, g), "stage": stage, "rel": rel, "traits": random_traits(trait_count(stage), g),
-		"aspiration": "", "appearance": Genetics.random_appearance(g)}
+		"aspiration": "", "appearance": Genetics.unique_appearance(looks + GeneticsUnique.registry(), g)}
 
 ## The preset household of a scenario (random names / traits / looks). Children get a look inherited from their parents.
 static func make_household(scenario_id: String, r: RandomNumberGenerator = null) -> Dictionary:
@@ -67,9 +67,11 @@ static func make_household(scenario_id: String, r: RandomNumberGenerator = null)
 	var specs: Array = Scenario.def(scenario_id).get("folk", [{"stage": "adult", "rel": "none"}])
 	var used: Array = []
 	var folk: Array = []
+	var looks: Array = []
 	for s in specs:
-		var fd := random_folk(str(s.get("stage", "adult")), str(s.get("rel", "none")), used, g)
+		var fd := random_folk(str(s.get("stage", "adult")), str(s.get("rel", "none")), used, g, looks)
 		used.append(fd["name"])
+		looks.append(fd["appearance"])
 		folk.append(fd)
 	var h := {"name": "Fernwood", "folk": folk}
 	inherit_child_looks(h, g)
@@ -84,7 +86,11 @@ static func inherit_child_looks(h: Dictionary, r: RandomNumberGenerator = null) 
 	for i in range(1, folk.size()):
 		if str(folk[i].get("rel", "")) == "child":
 			var pb = folk[mate] if mate >= 0 else folk[0]
-			var res: Dictionary = Genetics.inherit(folk[0], pb, r)
+			var kin: Array = []
+			for j in folk.size():
+				if j != i:
+					kin.append(folk[j]["appearance"])
+			var res: Dictionary = Genetics.inherit(folk[0], pb, r, {"others": kin + GeneticsUnique.registry()})
 			folk[i]["appearance"] = res["appearance"]
 
 static func _mate_index(folk: Array) -> int:

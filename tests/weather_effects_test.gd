@@ -172,6 +172,7 @@ func _frost(f: Array) -> void:
 func _bills(f: Array) -> void:
 	var w: StubWorld = W.setup()
 	K.make_folk(w, "Ann")
+	Economy.next_bill_day = 10000     # keep the bill cycle out of the way: it resets the weather bill period
 	W.expect(f, Weather.bill_multiplier() == 1.0, "no history -> bill multiplier 1")
 	SimEnv.clock().total_minutes = W.at(23, 0)          # winter
 	Weather.force("cold_snap")
@@ -185,6 +186,7 @@ func _bills(f: Array) -> void:
 	W.teardown()
 	w = W.setup()
 	K.make_folk(w, "Bo")
+	Economy.next_bill_day = 10000
 	SimEnv.clock().total_minutes = W.at(2, 0)           # mild spring
 	Weather.force("sunny")
 	W.run_min(48 * 60)

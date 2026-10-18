@@ -1,34 +1,30 @@
 class_name Neighborhood
 extends RefCounted
-## The neighbourhood: a map of ~11 lots (the player's home, 3 townie homes and community venues), and travel between them.
-## Only ONE lot is loaded into the World at a time. Leaving a lot stores its state (World.save_dict + Economy ownership)
-## in `stash`; folk who are not on the loaded lot stay in World.folk but are "off-lot": hidden (meta "offlot"/"away") and
-## held in a long `sys_away` ("stay") interaction, so the SimDirector keeps ticking their needs, Careers/School keep
-## dispatching them and Economy keeps paying wages. NeighborhoodService adds simple satisfaction rules for them.
+## The neighbourhood REGISTRY: ~11 lots (the player's home, 3 townie homes, community venues) that all exist at once on the
+## one continuous map (World + World.regions; MapLots places them). There is no lot swapping any more: where a folk is follows
+## from its tile (`where` / `lot_of`), travel is a real walk (NeighborhoodTravel) and the venue entry rules run when a folk
+## walks into a lot (NeighborhoodLots.on_minute). Folk are never parked or hidden because of where they are.
 ##
 ## Public API (all static):
-##   Neighborhood.start_game(template_id)            fresh game: build the home lot
-##   Neighborhood.travel(folk_ids, lot_id, opts)     -> {ok, reason, minutes, lot_id, moved:[ids]}
-##   Neighborhood.go_home(folk_ids = [])             everybody (or the given folk) back home
-##   Neighborhood.where(folk_id) / folk_at(lot_id)   location bookkeeping
-##   Neighborhood.lots() / lot(id) / is_open(id) / travel_minutes(a, b) / residents_of(lot_id)
-##   Neighborhood.to_dict() / from_dict(d)           persistence (the loaded lot itself is saved by SaveLoad's "world")
+##   Neighborhood.start_game(template_id)            fresh game: build the map with every lot, home = template_id
+##   Neighborhood.lots() / lot(id) / lot_ids() / is_open(id) / label_of(id) / residents_of(id) / travel_minutes(a, b)
+##   Neighborhood.where(folk_id) / lot_of(folk) / lot_of_selected() / folk_at(lot_id)     location, derived from the tile
+##   Neighborhood.travel(ids, lot, opts) / can_travel / go_home / movable                 see NeighborhoodTravel
+##   Neighborhood.entry_tile(lot_id) / spawns_of(lot_id)                                  tiles on the map
+##   Neighborhood.to_dict() / from_dict(d)           pantry / visits / meetups / loc / walks (the lots live in the World save)
 
 const HOME := "home"
-const STAY := "stay"
-const TRAVEL := "travel"
+const TRAVEL := "travel"                 # Away reason of fast travel
 const HELD_REASONS := ["work", "school", "party"]    # away reasons we never interrupt
+const SAVE_VERSION := 2
 
-static var current_lot: String = HOME
 static var home_template: String = LotLoader.CLASSIC
-static var stash: Dictionary = {}        # lot_id -> {"world": Dictionary, "owner": Dictionary, "placed": Dictionary}
-static var loc: Dictionary = {}          # folk_id -> lot_id the folk is at (or travelling to)
+static var loc: Dictionary = {}          # folk_id -> lot_id the folk is walking to / was sent to
 static var pantry: int = 0               # grocery units bought at the market, delivered to the home fridge
-static var visits: Dictionary = {}       # lot_id -> number of times the player went there
+static var visits: Dictionary = {}       # lot_id -> number of times a resident went there
 static var last_report: Dictionary = {}
 static var meetups: Array = []           # invitations to hang out at a venue
-
-static var _cfg_cache: Dictionary = {}
+static var selected: int = -1            # folk id the HUD has selected (lot_of_selected)
 
 # ------------------------------------------------------------------ data
 static func cfg() -> Dictionary:
@@ -65,13 +61,15 @@ static func template_of(lot_id: String) -> String:
 	return str(lot(lot_id).get("template", ""))
 
 static func label_of(lot_id: String) -> String:
+	if lot_id == "":
+		return "the street"
 	return str(lot(lot_id).get("label", lot_id))
 
-static func venue_type(lot_id: String = "") -> String:
-	return Venues.type_of_lot(current_lot if lot_id == "" else lot_id)
+static func venue_type(lot_id: String) -> String:
+	return Venues.type_of_lot(lot_id)
 
-static func is_home(lot_id: String = "") -> bool:
-	return (current_lot if lot_id == "" else lot_id) == HOME
+static func is_home(lot_id: String) -> bool:
+	return lot_id == HOME
 
 static func is_open(lot_id: String) -> bool:
 	return Venues.is_open(lot_id)
@@ -87,10 +85,13 @@ static func distance(a: String, b: String) -> int:
 	var pb := pos_of(b)
 	return int(absf(pa.x - pb.x) + absf(pa.y - pb.y))
 
+## Fast-travel time between two lots (block distance on the neighbourhood grid).
 static func travel_minutes(a: String, b: String) -> int:
 	if a == b:
 		return 0
 	var t: Dictionary = cfg().get("travel", {})
+	if a == "":          # from the street: the base time
+		return int(t.get("base_min", 5))
 	var m: int = int(t.get("base_min", 5)) + int(t.get("per_block_min", 4)) * distance(a, b)
 	return clampi(m, int(t.get("base_min", 5)), int(t.get("max_min", 40)))
 
@@ -117,45 +118,86 @@ static func home_of_townie(townie_id: int) -> String:
 					return str(l["id"])
 	return ""
 
+# ------------------------------------------------------------------ map positions
+static func entry_tile(lot_id: String) -> Vector2i:
+	return NeighborhoodLots.entry_tile(lot_id)
+
+static func spawns_of(lot_id: String) -> Array:
+	return NeighborhoodLots.spawns_of(lot_id)
+
+static func rect_of(lot_id: String) -> Rect2i:
+	return NeighborhoodLots.rect_of(lot_id)
+
 # ------------------------------------------------------------------ state
 static func reset() -> void:
-	current_lot = HOME
 	home_template = LotLoader.CLASSIC
-	stash.clear()
 	loc.clear()
 	pantry = 0
 	visits.clear()
 	meetups.clear()
 	last_report = {}
+	selected = -1
 	Crowd.reset()
 
-static func where(folk_id: int) -> String:
-	return str(loc.get(folk_id, current_lot))
+# ------------------------------------------------------------------ who is where (derived from tiles)
+## Lot id of a tile's region ("" on streets / parks).
+static func lot_at(tile: Vector2i) -> String:
+	return NeighborhoodLots.lot_at(tile)
 
-## Resident folk ids at a lot (including folk in transit to it).
+static func lot_of_folk(f) -> String:
+	return "" if f == null else NeighborhoodLots.lot_at(f.tile)
+
+static func lot_of(f) -> String:
+	return lot_of_folk(f)
+
+static func where(folk_id: int) -> String:
+	return lot_of_folk(SysUtil.folk(folk_id))
+
+## Lot of the folk the HUD has selected (first resident when nothing is selected); "" on the street.
+static func lot_of_selected() -> String:
+	var f = SysUtil.folk(selected)
+	if f == null:
+		var res: Array = SysUtil.residents()
+		f = res[0] if not res.is_empty() else null
+	return lot_of_folk(f)
+
+## Resident folk ids standing in a lot.
 static func folk_at(lot_id: String) -> Array:
 	var out: Array = []
 	for f in SysUtil.residents():
-		if where(int(f.id)) == lot_id:
+		if lot_of_folk(f) == lot_id:
 			out.append(int(f.id))
 	return out
 
-static func traveling(folk_id: int) -> bool:
-	return str(Away.info(folk_id).get("reason", "")) == TRAVEL or str((Away.pending.get(folk_id, {}) as Dictionary).get("reason", "")) == TRAVEL
+## Lot a folk is walking to ("" when not travelling).
+static func heading_to(folk_id: int) -> String:
+	return NeighborhoodLots.walking_to(SysUtil.folk(folk_id))
 
-static func is_stored(f) -> bool:
-	return f != null and f.has_meta("offlot")
+static func traveling(folk_id: int) -> bool:
+	return str(Away.info(folk_id).get("reason", "")) == TRAVEL or str((Away.pending.get(folk_id, {}) as Dictionary).get("reason", "")) == TRAVEL \
+		or heading_to(folk_id) != ""
+
+## Everybody of the household is in the home lot (or away at work / school): nobody is out and about.
+static func everyone_home() -> bool:
+	for f in SysUtil.residents():
+		if not SysUtil.is_away(f) and lot_of_folk(f) != HOME:
+			return false
+	return true
 
 # ------------------------------------------------------------------ new game
-## Build the home lot from a template (or "classic") and forget everything about other lots.
+## Build the whole map: roads, every lot with its template, `template_id` on the home lot. Forgets everything else.
 static func start_game(template_id: String = LotLoader.CLASSIC) -> bool:
 	reset()
 	home_template = template_id
 	NeighborhoodContent.install()
-	var ok: bool = LotLoader.apply(template_id)
-	last_report = LotLoader.report.duplicate(true)
-	current_lot = HOME
-	return ok
+	var w = WorldIface.world()
+	var res: Dictionary = MapLots.build(w, template_id)
+	last_report = (res["reports"] as Dictionary).get(HOME, {})
+	for lid in (res["reports"] as Dictionary):
+		var fails: Array = (res["reports"][lid] as Dictionary).get("failed", [])
+		if not fails.is_empty():
+			push_warning("Neighborhood: lot %s built with problems: %s" % [lid, str(fails)])
+	return bool(res["ok"])
 
 ## Call after SystemsManager.new_game (which resets this class): remember the chosen home, scale the starting funds.
 ## `funds` >= 0 overrides the start's own number (the new-game flow passes scenario funds x difficulty).
@@ -169,128 +211,36 @@ static func finish_new_game(start_id: String, funds: int = -1) -> void:
 		WorldIface.coins[hid] = 0
 		Economy.deposit(hid, funds, "starting funds")
 
-# ------------------------------------------------------------------ travel
-## Which of these folk can actually be moved right now (residents that are not at work / school / a party).
+# ------------------------------------------------------------------ travel (see NeighborhoodTravel)
 static func movable(folk_ids: Array) -> Array:
-	var out: Array = []
-	for id in folk_ids:
-		var f = SysUtil.folk(int(id))
-		if f == null or not SysUtil.is_resident(f):
-			continue
-		var rs: String = str(Away.info(int(id)).get("reason", ""))
-		if rs == "" and Away.pending.has(int(id)):
-			rs = str((Away.pending[int(id)] as Dictionary).get("reason", ""))
-		if rs in HELD_REASONS:
-			continue
-		out.append(int(id))
-	return out
+	return NeighborhoodTravel.movable(folk_ids)
 
 static func can_travel(folk_ids: Array, lot_id: String) -> Dictionary:
-	if lot(lot_id).is_empty():
-		return {"ok": false, "reason": "Unknown place."}
-	var ids: Array = movable(folk_ids)
-	if ids.is_empty():
-		return {"ok": false, "reason": "Nobody free to go (at work, school or a party)."}
-	var all_there := true
-	for id in ids:
-		if where(int(id)) != lot_id or traveling(int(id)) or is_stored(SysUtil.folk(int(id))):
-			all_there = false
-	if all_there and lot_id == current_lot:
-		return {"ok": false, "reason": "Already there."}
-	if lot_id != HOME:
-		var chk := Venues.check_entry(lot_id, ids)
-		if not bool(chk["ok"]):
-			return {"ok": false, "reason": str(chk["reason"])}
-	return {"ok": true, "reason": ""}
+	return NeighborhoodTravel.can_travel(folk_ids, lot_id)
 
-## Move `folk_ids` to `lot_id`. The target lot gets loaded into the World (the previous one is stored); folk not
-## travelling stay where they are as off-lot folk. Movers are away for the travel time, then appear at the lot entry.
 static func travel(folk_ids: Array, lot_id: String, opts: Dictionary = {}) -> Dictionary:
-	var chk := can_travel(folk_ids, lot_id)
-	if not bool(chk["ok"]):
-		if not bool(opts.get("quiet", false)):
-			SysUtil.notify(str(chk["reason"]), "warn")
-		return {"ok": false, "reason": chk["reason"], "minutes": 0, "lot_id": lot_id, "moved": []}
-	var ids: Array = movable(folk_ids)
-	var from_lot := current_lot
-	if lot_id != HOME and not bool(opts.get("free", false)):
-		if not Venues.charge_entry(lot_id, ids):
-			return {"ok": false, "reason": "Could not pay the entry fee.", "minutes": 0, "lot_id": lot_id, "moved": []}
-	var minutes: int = 0
-	var per: Dictionary = {}
-	for id in ids:
-		var m: int = travel_minutes(where(int(id)), lot_id)
-		if bool(opts.get("instant", false)):
-			m = 0
-		per[id] = m
-		minutes = maxi(minutes, m)
-	for id in ids:
-		var mf = SysUtil.folk(int(id))
-		NeighborhoodLots._detach_away(mf)
-		if mf.current != null and mf.current.def_id != Away.IID:
-			mf.cancel_current("travel")
-		mf.clear_queue()
-	if lot_id != current_lot:
-		NeighborhoodLots._leave_current_lot(ids)
-		NeighborhoodLots._load_lot(lot_id)
-	var entries: Array = _entry_tiles()
-	var i := 0
-	for id in ids:
-		var f = SysUtil.folk(int(id))
-		loc[int(id)] = lot_id
-		f.tile = entries[i % entries.size()]
-		i += 1
-		NeighborhoodLots._clear_stay_marks(f)
-		var m2: int = int(per[id])
-		if m2 >= 2:
-			Away.send(f, float(m2), TRAVEL, {"label": "Travelling to %s" % label_of(lot_id), "lot_id": lot_id, "from": from_lot})
-			f.set_meta("away", TRAVEL)
-		_refresh_view(int(id))
-	# folk who were already stored here come back out
-	for f2 in SysUtil.residents():
-		if where(int(f2.id)) == lot_id and f2.has_meta("offlot") and not ids.has(int(f2.id)):
-			NeighborhoodLots.appear(f2)
-	visits[lot_id] = int(visits.get(lot_id, 0)) + 1
-	if lot_id == HOME:
-		apply_pantry()
-	var names: Array = []
-	for id in ids:
-		names.append(SysUtil.folk_name(int(id)))
-	var note: String = "%s %s %s (%d min)." % [", ".join(names), "head home" if lot_id == HOME else "head to", "" if lot_id == HOME else label_of(lot_id), minutes]
-	SysUtil.notify(note.strip_edges(), "travel")
-	SysUtil.game_event("lot_changed", {"from": from_lot, "to": lot_id, "folk_ids": ids.duplicate(), "minutes": minutes, "entry": entries[0]})
-	Crowd.on_lot_loaded(lot_id)
-	_focus_camera(Vector2i(WorldIface.world().width / 2, WorldIface.world().height / 2 - 2))
-	return {"ok": true, "reason": "", "minutes": minutes, "lot_id": lot_id, "moved": ids}
+	return NeighborhoodTravel.travel(folk_ids, lot_id, opts)
 
-static func go_home(folk_ids: Array = []) -> Dictionary:
-	var ids: Array = folk_ids
-	if ids.is_empty():
-		for f in SysUtil.residents():
-			ids.append(int(f.id))
-	return travel(ids, HOME)
+static func go_home(folk_ids: Array = [], opts: Dictionary = {}) -> Dictionary:
+	return NeighborhoodTravel.go_home(folk_ids, opts)
 
-static func _entry_tiles() -> Array:
-	var w = WorldIface.world()
-	var out: Array = []
-	if w != null and "starter_spawn_tiles" in w:
-		for t in w.starter_spawn_tiles:
-			out.append(t)
-	if out.is_empty():
-		out.append(Vector2i(w.width / 2, w.height - 3) if w != null else Vector2i(15, 20))
-	return out
+static func walk_minutes(folk_id: int, lot_id: String) -> int:
+	return NeighborhoodTravel.walk_minutes(folk_id, lot_id)
 
-static func entry_tile() -> Vector2i:
-	return _entry_tiles()[0]
-
-static func _focus_camera(t: Vector2i) -> void:
+static func focus_camera(t: Vector2i) -> void:
 	var ml := Engine.get_main_loop()
 	if ml is SceneTree:
 		var lv = (ml as SceneTree).get_first_node_in_group("lot_view")      # no LotView reference: keeps this script headless-safe
 		if lv != null and lv.has_method("focus_tile"):
 			lv.call("focus_tile", t)
 
-static func _refresh_view(fid: int) -> void:
+## Move the camera to the middle of a lot.
+static func focus_lot(lot_id: String) -> void:
+	var rc := rect_of(lot_id)
+	if rc.size != Vector2i.ZERO:
+		focus_camera(rc.position + rc.size / 2)
+
+static func refresh_view(fid: int) -> void:
 	var ev = SimEnv.events()
 	ev.emit_signal("folk_removed", fid)
 	ev.emit_signal("folk_added", fid)
@@ -300,11 +250,13 @@ static func add_pantry(units: int) -> void:
 	pantry += units
 
 static func apply_pantry() -> int:
-	if pantry <= 0 or current_lot != HOME:
+	if pantry <= 0:
 		return 0
 	var cap: int = int(cfg().get("pantry", {}).get("fridge_max", 10))
 	var added := 0
 	for o in WorldIface.world().objects_of_def("fridge"):
+		if NeighborhoodLots.lot_at(o.tile) != HOME:
+			continue
 		var cur: int = int(float(WorldIface.state_get(o, "stock", 0.0)))
 		var add: int = mini(pantry - added, maxi(cap - cur, 0))
 		if add > 0:
@@ -316,23 +268,21 @@ static func apply_pantry() -> int:
 	return added
 
 # ------------------------------------------------------------------ persistence
+## Only the bookkeeping: the lots themselves are in the World save (objects, floors, regions).
 static func to_dict() -> Dictionary:
-	var st: Dictionary = {}
-	for k in stash:
-		var s: Dictionary = stash[k]
-		st[k] = {"world": s["world"], "owner": SysUtil.str_keys(s["owner"]), "placed": SysUtil.str_keys(s["placed"])}
-	return {"current": current_lot, "home_template": home_template, "stash": st, "loc": SysUtil.str_keys(loc), "pantry": pantry,
-		"visits": visits.duplicate(), "meetups": meetups.duplicate(true), "npc_ids": Crowd.npc_ids(), "version": 1}
+	var walks: Dictionary = {}
+	for f in SysUtil.residents():
+		var to: String = NeighborhoodLots.walking_to(f)
+		if to != "":
+			walks[str(f.id)] = {"lot": to, "dest": [entry_tile(to).x, entry_tile(to).y]}
+	return {"home_template": home_template, "loc": SysUtil.str_keys(loc), "pantry": pantry, "visits": visits.duplicate(),
+		"meetups": meetups.duplicate(true), "npc_ids": Crowd.npc_ids(), "walks": walks, "version": SAVE_VERSION}
 
 static func from_dict(d: Dictionary) -> void:
 	reset()
 	if d.is_empty():
 		return
-	current_lot = str(d.get("current", HOME))
 	home_template = str(d.get("home_template", LotLoader.CLASSIC))
-	for k in (d.get("stash", {}) as Dictionary):
-		var s: Dictionary = d["stash"][k]
-		stash[str(k)] = {"world": s["world"], "owner": SysUtil.int_keys(s.get("owner", {})), "placed": SysUtil.int_keys(s.get("placed", {}))}
 	var lc: Dictionary = SysUtil.int_keys(d.get("loc", {}))
 	for k2 in lc:
 		loc[int(k2)] = str(lc[k2])
@@ -343,8 +293,13 @@ static func from_dict(d: Dictionary) -> void:
 	for nid in d.get("npc_ids", []):
 		if SysUtil.folk(int(nid)) != null:
 			SysUtil.world_remove_folk(int(nid))
-	for f in SysUtil.residents():
-		var reason: String = str(Away.info(int(f.id)).get("reason", ""))
-		if reason == STAY:
-			f.set_meta("offlot", str(loc.get(int(f.id), current_lot)))
-	Crowd.on_lot_loaded(current_lot)
+	for f in SysUtil.residents():          # nobody is "entering" a lot just because the game was loaded
+		f.set_meta(NeighborhoodLots.IN_LOT, lot_of_folk(f))
+	var walks: Dictionary = d.get("walks", {})
+	for k in walks:
+		var f2 = SysUtil.folk(int(k))
+		if f2 == null or SysUtil.is_away(f2):
+			continue
+		var w: Dictionary = walks[k]
+		f2.set_meta("walk_to", str(w["lot"]))
+		NeighborhoodLots.walk_to(f2, Vector2i(int(w["dest"][0]), int(w["dest"][1])), str(w["lot"]))

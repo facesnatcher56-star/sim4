@@ -20,7 +20,7 @@ func _contract(f: Array) -> void:
 	var ap: Dictionary = Genetics.random_appearance()
 	K.expect(f, Genetics.is_valid(ap), "random appearance has every contract key: %s" % str(ap.keys()))
 	K.expect(f, ap["skin"] is String and str(ap["skin"]).begins_with("#") and str(ap["skin"]).length() == 7, "skin is #rrggbb: %s" % str(ap["skin"]))
-	K.expect(f, int(ap["hair_style"]) >= 0 and int(ap["hair_style"]) <= 5, "hair_style in 0..5")
+	K.expect(f, int(ap["hair_style"]) >= 0 and int(ap["hair_style"]) <= 15, "hair_style in 0..15")
 	K.expect(f, float(ap["height"]) >= 0.9 and float(ap["height"]) <= 1.1 and float(ap["build"]) >= 0.9 and float(ap["build"]) <= 1.1, "height / build in 0.9..1.1")
 	K.expect(f, ap["color"] == ap["shirt"], "`color` mirrors the shirt (UIU.folk_color understands it)")
 	Genetics.seed_rng(99)

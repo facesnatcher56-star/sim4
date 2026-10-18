@@ -278,7 +278,7 @@ func _build_save_menu() -> void:
 		row.add_child(sb)
 		var lb := Button.new()
 		lb.name = "LoadBtn%d" % i
-		lb.disabled = not SaveSlots.has_slot(i)
+		lb.disabled = not SaveSlots.can_load(i)
 		lb.text = "Load"
 		lb.pressed.connect(func():
 			save_menu.visible = false
@@ -305,7 +305,7 @@ func _refresh_save_menu() -> void:
 		if lab != null:
 			lab.text = "Slot %d: %s" % [i, SaveSlots.slot_summary(i)]
 		if lb != null:
-			lb.disabled = not SaveSlots.has_slot(i)
+			lb.disabled = not SaveSlots.can_load(i)
 
 func do_save(slot: int, lab: Label = null) -> bool:
 	var ok := SaveSlots.save(slot, household_name)
@@ -332,6 +332,7 @@ func _resolve(id: int):
 
 func select_folk(id: int) -> void:
 	selected_folk_id = id
+	Neighborhood.selected = id
 	var f = _resolve(id)
 	folk_panel.show_folk(f)
 	queue_bar.set_folk(f)
@@ -346,7 +347,7 @@ func rebuild_folk_row() -> void:
 	if not World.has_method("all_folk"):
 		return
 	for f in World.all_folk():
-		if f.has_meta("visitor") or f.has_meta("away") or f.has_meta("offlot"):
+		if f.has_meta("visitor") or f.has_meta("away"):
 			continue
 		var b := Button.new()
 		b.custom_minimum_size = Vector2(46, 46)
@@ -358,7 +359,10 @@ func rebuild_folk_row() -> void:
 		fi.set_anchors_preset(Control.PRESET_FULL_RECT)
 		b.add_child(fi)
 		var fid: int = f.id
-		b.pressed.connect(func(): select_folk(fid))
+		b.pressed.connect(func():
+			select_folk(fid)
+			if lot_view != null and lot_view.has_method("focus_on"):
+				lot_view.call("focus_on", "folk", fid))      # the camera goes to wherever that folk is (another lot on the big map)
 		folk_row.add_child(b)
 
 func _on_selection_changed(kind: String, id: int) -> void:
@@ -392,7 +396,8 @@ func _on_coins_changed(_hh: int, amount: int) -> void:
 # ------------------------------------------------------------ time
 func _update_clock(_t = 0) -> void:
 	time_label.text = UIU.clock_text()
-	lot_label.text = "" if Neighborhood.current_lot == Neighborhood.HOME else "at %s  " % Neighborhood.label_of(Neighborhood.current_lot)
+	var here: String = Neighborhood.lot_of_selected()
+	lot_label.text = "" if here == Neighborhood.HOME or here == "" else "at %s  " % Neighborhood.label_of(here)
 	day_label.text = "Day %d" % UIU.day_number()
 
 func set_speed(s: int) -> void:

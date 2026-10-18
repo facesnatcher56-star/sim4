@@ -92,7 +92,7 @@ func _fill_load() -> void:
 		row.add_child(lab)
 		var b := Button.new()
 		b.text = "Load"
-		b.disabled = not SaveSlots.has_slot(i)
+		b.disabled = not SaveSlots.can_load(i)
 		var slot := i
 		b.pressed.connect(func(): continue_game.emit(slot))
 		row.add_child(b)

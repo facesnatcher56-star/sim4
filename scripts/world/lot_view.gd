@@ -1,5 +1,5 @@
 class_name LotView
-extends "res://scripts/world/lot_build.gd"
+extends "res://scripts/world/lot_shells.gd"
 ## 3D view of the lot (see lot_state.gd for the layer chain): rig, floors, objects, folk, main loop.
 ## Display only: all state lives in the World autoload; kept in sync via World/Events signals.
 
@@ -11,6 +11,7 @@ static var instance: LotView = null
 func _ready() -> void:
 	instance = self
 	add_to_group("lot_view")
+	_init_chunk_materials()
 	_build_rig()
 	_build_fx()
 	_connect_signals()
@@ -190,7 +191,7 @@ func _update_daylight() -> void:
 func rebuild_all() -> void:
 	if _floor_root == null:
 		return
-	_build_floors()
+	_rebuild_chunks_all()
 	_build_walls()
 	if _grid_mi != null:
 		_grid_mi.queue_free()      # lot size may have changed
@@ -202,51 +203,10 @@ func rebuild_all() -> void:
 	for o in World.all_objects():
 		_add_object_node(o)
 	_sync_folk()
+	_rebuild_shells()
+	for sh in _shells.values():
+		_set_interior_visible(sh["rect"], false)
 	_walls_dirty = false
-	_floors_dirty = false
-
-
-func _build_floors() -> void:
-	if _floor_mi:
-		_floor_mi.queue_free()
-	if _ground_mi:
-		_ground_mi.queue_free()
-	var st := SurfaceTool.new()
-	st.begin(Mesh.PRIMITIVE_TRIANGLES)
-	for y in World.height:
-		for x in World.width:
-			var t := Vector2i(x, y)
-			var ft: String = World.get_floor(t)
-			var col := Color(str((World.FLOOR_DEFS.get(ft, {}) as Dictionary).get("color", "#6aa84f")))
-			if col.v > 0.72:
-				col.v = 0.72 + (col.v - 0.72) * 0.3    # pale floors blow out under the noon sun
-			if (x + y) % 2 == 1:
-				col = col.darkened(0.035)
-			var m: float = World.mess.get(t, 0.0)
-			if m > 0.0:
-				col = col.lerp(Color(0.35, 0.28, 0.2), clampf(m / 10.0, 0.0, 0.6))
-			st.set_color(col)
-			st.set_normal(Vector3.UP)
-			var a := Vector3(x, 0, y)
-			var b := Vector3(x + 1, 0, y)
-			var c := Vector3(x + 1, 0, y + 1)
-			var d := Vector3(x, 0, y + 1)
-			for v in [a, b, c, a, c, d]:
-				st.add_vertex(v)
-	_floor_mi = MeshInstance3D.new()
-	_floor_mi.mesh = st.commit()
-	var fm := StandardMaterial3D.new()
-	fm.vertex_color_use_as_albedo = true
-	fm.roughness = 0.95
-	_floor_mi.material_override = fm
-	_floor_root.add_child(_floor_mi)
-	_ground_mi = MeshInstance3D.new()
-	var pm := PlaneMesh.new()
-	pm.size = Vector2(300, 300)
-	_ground_mi.mesh = pm
-	_ground_mi.position = Vector3(World.width * 0.5, -0.03, World.height * 0.5)
-	_ground_mi.material_override = _mat(Color(0.36, 0.5, 0.3))
-	_floor_root.add_child(_ground_mi)
 	_floors_dirty = false
 
 
@@ -265,6 +225,7 @@ func _add_object_node(o) -> void:
 	if o.is_floor_layer():
 		node.position.y = 0.005
 	node.add_child(make_def_visual(o.def_id))
+	node.visible = not _shell_hides(o.tile)
 	_obj_root.add_child(node)
 	_obj_nodes[o.id] = node
 	_refresh_object_visual(o)
@@ -365,21 +326,23 @@ func _process(delta: float) -> void:
 		if dx != 0 or dz != 0:
 			var sp := _zoom * 0.9 * delta * GameSettings.pan_speed()
 			_pan(dx * sp, dz * sp)
+	_update_follow(delta)
 	_yaw = lerp_angle(_yaw, _yaw_target, clampf(delta * 10.0, 0.0, 1.0))
 	if absf(angle_difference(_yaw, _yaw_target)) < 0.0005:
 		_yaw = _yaw_target
 	_zoom = lerpf(_zoom, _zoom_target, clampf(delta * 12.0, 0.0, 1.0))
 	_apply_camera()
-	if _floors_dirty:
-		_build_floors()
+	_update_chunks()
 	if _walls_dirty:
 		_build_walls()
+	_sync_wall_chunks()
 	_update_walls(delta)
 	_update_doors(delta)
 	_update_hover()
 	_update_highlights()
 	_update_xray(delta)
 	_update_ghost()
+	_update_shells(delta)
 
 
 ## Screen position (viewport pixels) to anchor pie menus / balloons. (-1,-1) when unknown.

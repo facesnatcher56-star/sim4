@@ -23,6 +23,7 @@ func _signature() -> Array:
 func _roundtrip(f: Array) -> void:
 	var w: StubWorld = W.setup(2468)
 	K.make_folk(w, "Ann")
+	Economy.next_bill_day = 10000          # bills reset the weather bill period; keep them out of this comparison
 	Seasons.set_length(5)
 	SimEnv.clock().total_minutes = W.at(2, 6)
 	W.run_min(TestFixture.pick(13, 5) * 1440 + 400)                         # long enough for snow / bills / holidays state

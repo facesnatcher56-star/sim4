@@ -1,9 +1,9 @@
 class_name TravelPanel
 extends Control
-## Neighbourhood map / travel dialog (opened from the HUD "Map" button or M). Lots are tiles laid out on the map grid
-## from data/neighborhood.json: name, open/closed state, travel time from the current lot, who is there. Pick a lot,
-## tick the folk to bring, press Travel. Townie homes list their residents; venue lots can invite a friend.
-## A short fade + toast covers the lot swap.
+## "Go to..." dialog (opened from the HUD "Map" button or M). Lots are tiles laid out on the map grid from
+## data/neighborhood.json: name, open/closed state, walking time from the selected folk's tile, who is there. Pick a lot (the
+## camera moves to it), tick the folk to bring, press Go: they WALK there. "Fast travel" hides them for a short trip instead
+## (a fade + toast covers it). Townie homes list their residents; venue lots can invite a friend.
 
 signal travelled(result: Dictionary)
 
@@ -21,6 +21,7 @@ var blurb_label: Label
 var info_label: Label
 var people_label: Label
 var travel_button: Button
+var fast_check: CheckBox
 var home_button: Button
 var invite_pick: OptionButton
 var invite_button: Button
@@ -56,7 +57,7 @@ func _build() -> void:
 	dialog.add_child(root)
 	var head := HBoxContainer.new()
 	root.add_child(head)
-	head.add_child(UIU.make_label("Neighbourhood Map", 24, UITheme.ACCENT))
+	head.add_child(UIU.make_label("Go to...", 24, UITheme.ACCENT))
 	var sp := Control.new()
 	sp.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(sp)
@@ -135,8 +136,13 @@ func _build() -> void:
 	home_button.tooltip_text = "Everyone heads home"
 	home_button.pressed.connect(_on_home)
 	br.add_child(home_button)
+	fast_check = CheckBox.new()
+	fast_check.text = "Fast travel"
+	fast_check.tooltip_text = "Skip the walk: the folk are out of sight for a short trip and arrive at the door."
+	fast_check.toggled.connect(func(_on: bool): refresh())
+	br.add_child(fast_check)
 	travel_button = Button.new()
-	travel_button.text = "Travel"
+	travel_button.text = "Go"
 	travel_button.custom_minimum_size = Vector2(130, 36)
 	travel_button.pressed.connect(_on_travel)
 	br.add_child(travel_button)
@@ -180,14 +186,14 @@ func is_open() -> bool:
 	return dialog.visible
 
 func _default_selection() -> String:
-	if Neighborhood.current_lot != Neighborhood.HOME:
+	if Neighborhood.lot_of_selected() != Neighborhood.HOME:
 		return Neighborhood.HOME
 	return "park"
 
 # ------------------------------------------------------------------ content
 func refresh() -> void:
-	var cur: String = Neighborhood.current_lot
-	where_label.text = "You are at: %s" % Neighborhood.label_of(cur)
+	var cur: String = Neighborhood.lot_of_selected()
+	where_label.text = "%s is at: %s" % [_sel_name(), Neighborhood.label_of(cur)]
 	for l in Neighborhood.lots():
 		_style_tile(l)
 	_refresh_detail()
@@ -195,18 +201,17 @@ func refresh() -> void:
 func _style_tile(l: Dictionary) -> void:
 	var lid: String = str(l["id"])
 	var b: Button = tiles[lid]
-	var cur: String = Neighborhood.current_lot
+	var cur: String = Neighborhood.lot_of_selected()
 	var open: bool = Neighborhood.is_open(lid)
 	var here: Array = Neighborhood.folk_at(lid)
-	var mins: int = Neighborhood.travel_minutes(cur, lid)
-	var status: String = "You are here" if lid == cur else ("%d min away" % mins) if mins >= 100 else ("%d min" % mins)
+	var status: String = "You are here" if lid == cur else "~%d min walk" % _estimate(lid)
 	var open_txt: String = "Open" if open else "Closed"
 	var line3: String = ""
 	var parts: Array = []
 	if not here.is_empty():
 		parts.append("%d of yours" % here.size())
-	if lid == cur and Crowd.count() > 0:
-		parts.append("%d locals" % Crowd.count())
+	if Crowd.count(lid) > 0:
+		parts.append("%d locals" % Crowd.count(lid))
 	if str(l.get("type", "")) == "townie_home":
 		var rc: int = Neighborhood.residents_of(lid).size()
 		if rc > 0:
@@ -229,22 +234,47 @@ func _style_tile(l: Dictionary) -> void:
 
 func select_lot(lot_id: String) -> void:
 	selected_lot = lot_id
+	Neighborhood.focus_lot(lot_id)
 	refresh()
+
+func _sel_name() -> String:
+	var f = SysUtil.folk(Neighborhood.selected)
+	if f == null and not SysUtil.residents().is_empty():
+		f = SysUtil.residents()[0]
+	return "You" if f == null else str(f.name)
+
+## Rough walking minutes from the selected folk to a lot (octile distance, no path search: used for the whole list).
+func _estimate(lid: String) -> int:
+	var f = SysUtil.folk(Neighborhood.selected)
+	if f == null and not SysUtil.residents().is_empty():
+		f = SysUtil.residents()[0]
+	var spot: Vector2i = Neighborhood.entry_tile(lid)
+	if f == null or spot.x < 0:
+		return Neighborhood.travel_minutes(Neighborhood.lot_of_selected(), lid)
+	var dx := absf(f.tile.x - spot.x)
+	var dy := absf(f.tile.y - spot.y)
+	return int(ceil((maxf(dx, dy) + 0.41 * minf(dx, dy)) * Interaction.WALK_MIN_PER_TILE * 1.15))
+
+## Exact walking minutes (path search) for the selected lot.
+func _walk_minutes(lid: String) -> int:
+	var m: int = Neighborhood.walk_minutes(Neighborhood.selected, lid) if SysUtil.folk(Neighborhood.selected) != null else -1
+	return m if m >= 0 else _estimate(lid)
 
 func _refresh_detail() -> void:
 	var lid: String = selected_lot
 	var l: Dictionary = Neighborhood.lot(lid)
 	if l.is_empty():
 		return
-	var cur: String = Neighborhood.current_lot
+	var cur: String = Neighborhood.lot_of_selected()
 	title_label.text = str(l["label"])
 	var open: bool = Neighborhood.is_open(lid)
 	status_label.text = Venues.status_text(lid)
 	status_label.add_theme_color_override("font_color", Color("#4cc78a") if open else Color("#e5534b"))
 	blurb_label.text = str(l.get("blurb", ""))
 	var fee: int = Venues.fee(str(l.get("type", "")))
-	var mins: int = Neighborhood.travel_minutes(cur, lid)
-	var info: String = "Travel time: %s" % ("here" if lid == cur else "%d min" % mins)
+	var fast: bool = fast_check.button_pressed
+	var mins: int = Neighborhood.travel_minutes(cur, lid) if fast else _walk_minutes(lid)
+	var info: String = "%s: %s" % ["Fast travel" if fast else "Walking time", "here" if lid == cur else "%d min" % mins]
 	if fee > 0:
 		info += "   |   Entry: %d coins each" % fee
 	info_label.text = info
@@ -256,9 +286,9 @@ func _refresh_detail() -> void:
 		for id in here:
 			names.append(SysUtil.folk_name(int(id)))
 		lines.append("Your household here: %s" % ", ".join(names))
-	if lid == cur and Crowd.count() > 0:
+	if Crowd.count(lid) > 0:
 		var nn: Array = []
-		for f in Crowd.crowd_folk():
+		for f in Crowd.crowd_folk(lid):
 			nn.append(str(f.name))
 		lines.append("Also here: %s" % ", ".join(nn))
 	if str(l.get("type", "")) == "townie_home":
@@ -271,10 +301,11 @@ func _refresh_detail() -> void:
 	_rebuild_invites()
 	var res: Dictionary = Neighborhood.can_travel(_selected_folk(), lid)
 	travel_button.disabled = not bool(res["ok"])
-	travel_button.text = "Travel (%d min)" % mins if lid != cur else "Travel"
+	travel_button.text = "Go (%d min)" % mins if lid != cur else "Go"
 	travel_button.tooltip_text = str(res["reason"])
-	home_button.visible = cur != Neighborhood.HOME or not Neighborhood.folk_at(Neighborhood.HOME).size() == SysUtil.residents().size()
-	home_button.disabled = cur == Neighborhood.HOME and Neighborhood.folk_at(Neighborhood.HOME).size() == SysUtil.residents().size()
+	var all_home: bool = Neighborhood.folk_at(Neighborhood.HOME).size() == SysUtil.residents().size()
+	home_button.visible = not all_home
+	home_button.disabled = all_home
 
 func _rebuild_folk_list() -> void:
 	for c in folk_box.get_children():
@@ -287,6 +318,8 @@ func _rebuild_folk_list() -> void:
 		var cb := CheckBox.new()
 		var at: String = Neighborhood.label_of(Neighborhood.where(fid))
 		var tag: String = "" if not held else "  (%s)" % rs
+		if Neighborhood.heading_to(fid) != "":
+			tag = "  (walking to %s)" % Neighborhood.label_of(Neighborhood.heading_to(fid))
 		cb.text = "%s - at %s%s" % [f.name, at, tag]
 		cb.add_theme_font_size_override("font_size", 13)
 		cb.disabled = held
@@ -354,7 +387,7 @@ func _on_travel() -> void:
 ## Programmatic entry used by the button and tests.
 func do_travel(lot_id: String) -> Dictionary:
 	var ids: Array = _selected_folk()
-	var res: Dictionary = Neighborhood.travel(ids, lot_id)
+	var res: Dictionary = Neighborhood.travel(ids, lot_id, {"fast": fast_check.button_pressed})
 	if bool(res.get("ok", false)):
 		travelled.emit(res)
 	refresh()
@@ -364,13 +397,13 @@ func _on_home() -> void:
 	var ids: Array = []
 	for f in SysUtil.residents():
 		ids.append(int(f.id))
-	var res: Dictionary = Neighborhood.travel(ids, Neighborhood.HOME)
+	var res: Dictionary = Neighborhood.travel(ids, Neighborhood.HOME, {"fast": fast_check.button_pressed})
 	if bool(res.get("ok", false)):
 		close_panel()
 	refresh()
 
 func _on_game_event(ev_name: String, p: Dictionary) -> void:
-	if ev_name == "lot_changed":
+	if ev_name == "lot_changed" and not bool(p.get("walk", false)):
 		var to_id: String = str(p.get("to", ""))
 		_play_fade(Neighborhood.label_of(to_id) if to_id != Neighborhood.HOME else "Home", "", int(p.get("minutes", 0)))
 	if ev_name in ["lot_changed", "returned_to_lot", "left_lot", "met_townie"] and dialog.visible:

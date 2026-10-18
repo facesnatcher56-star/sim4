@@ -51,6 +51,8 @@ func _ready() -> void:
 	floor_option = OptionButton.new()
 	var fd = World.get("FLOOR_DEFS")
 	var fnames: Array = fd.keys() if fd is Dictionary else ["wood", "tile", "carpet", "stone"]
+	if fd is Dictionary:
+		fnames = fnames.filter(func(k): return not bool(fd[k].get("terrain", false)))   # roads/water aren't player floors
 	for fl in fnames:
 		floor_option.add_item(str(fl).capitalize())
 		floor_option.set_item_metadata(floor_option.item_count - 1, fl)
@@ -99,7 +101,7 @@ func build_catalog(table: Dictionary = {}) -> void:
 			var b := Button.new()
 			b.text = "%s\n%d C" % [d.get("label", id), int(d.get("price", 0))]
 			b.custom_minimum_size = Vector2(88, 48)
-			b.tooltip_text = "%s: %d Coins. Click, then click on the lot to place it (R rotates)." % [d.get("label", id), int(d.get("price", 0))]
+			b.tooltip_text = "%s: %d Coins. Click, then click on your lot to place it (R rotates)." % [d.get("label", id), int(d.get("price", 0))]
 			b.pressed.connect(select_def.bind(id))
 			fl.add_child(b)
 			catalog_buttons[id] = b
@@ -128,12 +130,13 @@ func set_tool(t: String) -> void:
 			lot_view.call("set_tool", "select")
 		else:
 			lot_view.call("set_tool", t, arg)
+	var own: String = " You can only build on your own lot (the grid shows it)." if World.regions.has_regions() else ""
 	info_label.text = {
-		"place": "Pick an item below, then click on the lot. R rotates.",
-		"wall": "Drag on the lot to draw a wall line (5 C per segment).",
+		"place": "Pick an item below, then click on your lot. R rotates.",
+		"wall": "Drag on your lot to draw a wall line (5 C per segment).",
 		"floor": "Drag a rectangle to paint floor (2 C per tile).",
 		"sell": "Click an object to sell it (you get part of the price back).",
-	}.get(t, "")
+	}.get(t, "") + (own if t != "" and t != "select" else "")
 	_refresh_buttons()
 
 func select_def(id: String) -> void:

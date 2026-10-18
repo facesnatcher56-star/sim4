@@ -1,15 +1,20 @@
 {
-  "version": 1,
-  "hair_styles": 6,
+  "version": 2,
+  "hair_styles": 16,
+  "counts": {"hair_style": 16, "body_type": 3, "frame": 3, "face": 16, "mouth": 4, "brows": 4, "ears": 3, "facial_hair": 4,
+    "mark": 3, "glasses": 3, "hat": 3, "scarf": 2, "bag": 3, "top": 7, "bottom": 3, "shoes": 4},
   "skin_tones": ["#f6d7c3", "#eac0a0", "#d9a47f", "#c68863", "#a86b4a", "#8a5238", "#6b3e2a", "#4a2a1c"],
   "hair_colors": [
     {"id": "black",     "hex": "#1e1a18", "dominance": 5.0},
     {"id": "dark_brown","hex": "#3d281c", "dominance": 4.0},
     {"id": "brown",     "hex": "#6a4630", "dominance": 3.5},
-    {"id": "auburn",    "hex": "#7a3b22", "dominance": 2.5},
+    {"id": "auburn",    "hex": "#7a3b22", "dominance": 2.5, "freq": 0.7},
     {"id": "blonde",    "hex": "#d8b45e", "dominance": 2.0},
-    {"id": "red",       "hex": "#b2442a", "dominance": 1.5},
-    {"id": "platinum",  "hex": "#ece3c8", "dominance": 1.0}
+    {"id": "red",       "hex": "#b2442a", "dominance": 1.5, "freq": 0.6},
+    {"id": "platinum",  "hex": "#ece3c8", "dominance": 1.0, "freq": 0.35},
+    {"id": "dyed_blue", "hex": "#2f5fd0", "dominance": 0.2, "freq": 0.18},
+    {"id": "dyed_pink", "hex": "#f58ab8", "dominance": 0.2, "freq": 0.18},
+    {"id": "dyed_teal", "hex": "#14a39a", "dominance": 0.2, "freq": 0.12}
   ],
   "eye_colors": [
     {"id": "brown", "hex": "#5b3a22", "dominance": 5.0},
@@ -19,10 +24,29 @@
     {"id": "blue",  "hex": "#3f72b8", "dominance": 1.2},
     {"id": "gray",  "hex": "#8d98a3", "dominance": 1.0}
   ],
-  "shirt_colors": ["#d96a5b", "#e0a24a", "#6fae6b", "#4f9ec4", "#8b72c9", "#d97aa8", "#e8e2d0", "#3f4a63", "#5aa89a", "#c9784a"],
-  "pants_colors": ["#3a4660", "#5a4a3a", "#2e2e34", "#6a7a8a", "#7b6a4a", "#4a5a46"],
+  "shirt_colors": ["#d94a4a", "#8f2a2a", "#f08a24", "#b04a1c", "#f2d02e", "#d8b020", "#b4e03c", "#1f5a35", "#12a05a", "#14a39a",
+    "#3fd0f0", "#2f5fd0", "#1f2f6a", "#7a4ac8", "#3e2275", "#d03098", "#f58ab8", "#1c1c22", "#6a1530", "#ff6f61"],
+  "pants_colors": ["#1b2a5c", "#1c1c22", "#4a3020", "#6a1530", "#1f4a35", "#3a62a8", "#3a1f5a", "#8a3a1a", "#1a5a60"],
+  "accent_colors": ["#e8c030", "#e05050", "#2f5fd0", "#12a05a", "#f58ab8", "#ff6f61", "#7a4ac8", "#f08a24", "#1c1c22", "#14a39a",
+    "#3fd0f0", "#d03098"],
+  "shoe_colors": ["#241c1a", "#1c1c22", "#6a3a22", "#8f2a2a", "#1b2a5c", "#e8e2d0"],
+  "top_weights": [3, 2, 2, 2, 1.2, 0.5, 0.8],
+  "bottom_weights": [0.6, 0.2, 0.2],
+  "shoe_weights": [0.5, 0.2, 0.05, 0.25],
+  "chance": {"facial_hair": 0.22, "mark": 0.2, "glasses": 0.2, "hat": 0.15, "scarf": 0.1, "bag": 0.18},
   "height": {"min": 0.9, "max": 1.1},
   "build": {"min": 0.9, "max": 1.1},
+  "distinct": {
+    "threshold": 3.0,
+    "tries": 60,
+    "weights": [1.0, 1.0, 1.0, 1.0, 1.0, 0.75, 0.5, 0.5, 0.5],
+    "channels": ["hair_style", "hair_band", "skin_band", "top+top_colour", "accessories", "body", "bottom+colour", "height_band", "face"]
+  },
+  "palette": {
+    "min_distance": 0.18,
+    "hair_min_distance": 0.1,
+    "floors": ["#6aa84f", "#8a6a45", "#9a9a9a", "#b0b0b0", "#b8864e", "#d9e4ea", "#8a6f9e", "#4a4d55", "#b9b6ae", "#86c35f", "#d8c690", "#4f8fc9"]
+  },
   "inherit": {
     "skin_weight_sigma": 0.18,
     "color_mutation_sigma": 0.012,

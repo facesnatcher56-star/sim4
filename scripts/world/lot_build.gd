@@ -257,12 +257,15 @@ func _set_grid_visible(on: bool) -> void:
 func _make_grid() -> MeshInstance3D:
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_LINES)
-	for x in range(World.width + 1):
-		st.add_vertex(Vector3(x, 0.025, 0))
-		st.add_vertex(Vector3(x, 0.025, World.height))
-	for z in range(World.height + 1):
-		st.add_vertex(Vector3(0, 0.025, z))
-		st.add_vertex(Vector3(World.width, 0.025, z))
+	var area := Rect2i(0, 0, World.width, World.height)
+	if World.regions.has_regions() and not World.regions.home().is_empty():
+		area = World.regions.home()["rect"]       # big map: only the player's own lot is buildable
+	for x in range(area.position.x, area.end.x + 1):
+		st.add_vertex(Vector3(x, 0.025, area.position.y))
+		st.add_vertex(Vector3(x, 0.025, area.end.y))
+	for z in range(area.position.y, area.end.y + 1):
+		st.add_vertex(Vector3(area.position.x, 0.025, z))
+		st.add_vertex(Vector3(area.end.x, 0.025, z))
 	var mi := MeshInstance3D.new()
 	mi.name = "BuildGrid"
 	mi.mesh = st.commit()

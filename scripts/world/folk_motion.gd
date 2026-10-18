@@ -11,6 +11,9 @@ func _update_waypoints(f) -> void:
 		_waypoints.clear()
 	elif maxi(absi(d.x), absi(d.y)) <= 1:
 		_waypoints.append(World.tile_to_pos(f.tile))
+	elif maxi(absi(d.x), absi(d.y)) > 8:
+		position = World.tile_to_pos(f.tile)       # fast travel / instant move: the folk is simply there
+		_waypoints.clear()
 	else:
 		var p: Array = World.find_path(_last_tile, f.tile)
 		if p.is_empty():

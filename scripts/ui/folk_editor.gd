@@ -18,8 +18,8 @@ var trait_opts: Array = []
 var trait_info: Label
 var asp_opt: OptionButton
 var preview: FolkPreview
-var _rows: Dictionary = {}       # appearance key -> HBoxContainer of swatch buttons
-var _style_btns: Array = []
+var tabs: FolkLookTabs
+var others_provider: Callable = Callable()   # -> Array of the other members' appearances (set by the household creator)
 var _prev_traits: Array = [-1, -1, -1]
 
 func _ready() -> void:
@@ -82,28 +82,19 @@ func _ready() -> void:
 	var mid := VBoxContainer.new()
 	mid.custom_minimum_size = Vector2(330, 0)
 	add_child(mid)
-	var gen: Dictionary = Genetics.cfg()
-	_swatch_group(mid, "Skin tone", "skin", gen.get("skin_tones", []))
-	_hair_style_row(mid)
-	_swatch_group(mid, "Hair colour", "hair_color", _hexes(gen.get("hair_colors", [])))
-	_swatch_group(mid, "Shirt", "shirt", gen.get("shirt_colors", []))
-	_swatch_group(mid, "Trousers", "pants", gen.get("pants_colors", []))
+	tabs = FolkLookTabs.new()
+	tabs.look_changed.connect(_on_look)
+	mid.add_child(tabs)
 	var look := Button.new()
 	look.text = "Random look"
-	look.tooltip_text = "Roll a new random appearance"
+	look.tooltip_text = "Roll a new random appearance that does not look like anyone else in the household or town"
 	look.pressed.connect(func():
-		fd["appearance"] = Genetics.random_appearance()
+		fd["appearance"] = Genetics.unique_appearance(_others())
 		load_folk(fd, is_first, first_name)
 		changed.emit())
 	mid.add_child(look)
 	preview = FolkPreview.new()
 	add_child(preview)
-
-func _hexes(arr: Array) -> Array:
-	var out: Array = []
-	for e in arr:
-		out.append(str(e["hex"]) if e is Dictionary else str(e))
-	return out
 
 func _build_trait_opts(parent: Control) -> void:
 	var traits: Dictionary = SimEnv.data().traits()
@@ -120,32 +111,6 @@ func _build_trait_opts(parent: Control) -> void:
 		parent.add_child(ob)
 		trait_opts.append(ob)
 
-func _swatch_group(parent: Control, title: String, key: String, hexes: Array) -> void:
-	parent.add_child(UIU.make_label(title, 13, UITheme.MUTED))
-	var row := HFlowContainer.new()
-	row.add_theme_constant_override("h_separation", 4)
-	parent.add_child(row)
-	_rows[key] = row
-	for hx in hexes:
-		var b := Button.new()
-		b.custom_minimum_size = SWATCH
-		b.set_meta("hex", str(hx))
-		b.tooltip_text = title
-		b.pressed.connect(func(): _set_look(key, str(hx)))
-		row.add_child(b)
-
-func _hair_style_row(parent: Control) -> void:
-	parent.add_child(UIU.make_label("Hair style", 13, UITheme.MUTED))
-	var row := HBoxContainer.new()
-	parent.add_child(row)
-	for i in 6:
-		var b := Button.new()
-		b.text = str(i + 1)
-		b.toggle_mode = true
-		b.custom_minimum_size = Vector2(36, 30)
-		b.pressed.connect(func(): _set_look("hair_style", i))
-		row.add_child(b)
-		_style_btns.append(b)
 
 # ------------------------------------------------------------------ data in
 ## Show member `data` (the dictionary is edited in place).
@@ -166,7 +131,8 @@ func load_folk(data: Dictionary, first: bool, first_member_name: String) -> void
 	for i in asp_opt.item_count:
 		if str(asp_opt.get_item_metadata(i)) == asp:
 			asp_opt.select(i)
-	_refresh_swatches()
+	fd["appearance"] = Genetics.normalize(fd["appearance"])
+	tabs.load_ap(fd["appearance"])
 	_loading = false
 	preview.show_folk(str(fd.get("stage", "adult")), fd["appearance"])
 
@@ -198,17 +164,6 @@ func _show_traits() -> void:
 		lines.append("%s: %s" % [td.get("label", t), HouseholdSetup.trait_blurb(str(t))])
 	trait_info.text = "\n".join(lines)
 
-func _refresh_swatches() -> void:
-	var ap: Dictionary = fd["appearance"]
-	for key in _rows:
-		for b in (_rows[key] as Control).get_children():
-			var hx: String = str(b.get_meta("hex"))
-			var on: bool = hx.to_lower() == str(ap.get(key, "")).to_lower()
-			b.add_theme_stylebox_override("normal", UITheme.box(Color.html(hx), 5, Color.WHITE if on else Color(0, 0, 0, 0.35), 3 if on else 1, 0))
-			b.add_theme_stylebox_override("hover", UITheme.box(Color.html(hx).lightened(0.15), 5, UITheme.ACCENT, 2, 0))
-			b.add_theme_stylebox_override("pressed", UITheme.box(Color.html(hx), 5, Color.WHITE, 3, 0))
-	for i in _style_btns.size():
-		(_style_btns[i] as Button).button_pressed = (i == int(ap.get("hair_style", 0)))
 
 # ------------------------------------------------------------------ edits
 func _edit(key: String, v) -> void:
@@ -217,13 +172,9 @@ func _edit(key: String, v) -> void:
 	fd[key] = v
 	changed.emit()
 
-func _set_look(key: String, v) -> void:
+func _on_look(_key: String, _v) -> void:
 	var ap: Dictionary = fd["appearance"]
-	ap[key] = v
-	if key == "shirt":
-		ap["color"] = v
 	fd["color"] = Color.html(str(ap["shirt"]))
-	_refresh_swatches()
 	preview.show_folk(str(fd.get("stage", "adult")), ap)
 	changed.emit()
 
@@ -262,3 +213,8 @@ func _trait_picked(slot: int, idx: int) -> void:
 	fd["traits"] = ts
 	_show_traits()
 	changed.emit()
+
+## Appearances this member must not clone: the other household members + everyone already in town.
+func _others() -> Array:
+	var out: Array = others_provider.call() if others_provider.is_valid() else []
+	return out + GeneticsUnique.registry()

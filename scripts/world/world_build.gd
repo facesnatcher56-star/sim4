@@ -77,6 +77,8 @@ func sell_object(object_id: int, household_id: int = -1) -> bool:
 	var o = world.objects.get(object_id, null)
 	if o == null:
 		return false
+	if not world.regions.can_build(o.tile):
+		return world.regions.deny()
 	var hid := world.current_household_id if household_id < 0 else household_id
 	var refund := int(floor(object_price(o.def_id) * world.SELL_RATIO))
 	var data: Dictionary = o.to_dict()
@@ -132,7 +134,8 @@ func undo_last() -> bool:
 		"floor":
 			for c in op["changes"]:
 				world.floors[c["t"].y * world.width + c["t"].x] = c["old"]
-			world.rooms.dirty = true
+				world.regions.mark_floor_dirty(c["t"])
+				world.rooms.mark_dirty(c["t"])
 			world._emit("floors_changed")
 			_refund(op["hid"], op["cost"])
 	return true

@@ -16,6 +16,10 @@ static func has_any() -> bool:
 			return true
 	return false
 
+## A slot the Load buttons may offer: it exists and is not from an older version of the game.
+static func can_load(slot: int) -> bool:
+	return has_slot(slot) and not SaveLoad.slot_is_old(slot)
+
 static func slot_summary(slot: int) -> String:
 	if not has_slot(slot):
 		return "Empty"

@@ -23,6 +23,8 @@ func can_place(def_id: String, tile: Vector2i, rot: int = 0) -> bool:
 		if not world.in_bounds(tile):
 			world.last_error = "out of bounds"
 			return false
+		if not world.regions.can_build(tile):
+			return world.regions.deny()
 		var e := world.mount_edge(tile, rot)
 		if world.walls.get(e, "") != "wall":
 			world.last_error = "needs a wall"
@@ -44,6 +46,8 @@ func can_place(def_id: String, tile: Vector2i, rot: int = 0) -> bool:
 		elif world._occ.has(t):
 			world.last_error = "occupied"
 			return false
+	if not world.regions.can_build_all(fp):
+		return world.regions.deny()
 	# no wall may cut through the footprint
 	for t in fp:
 		for dd in [Vector2i(1, 0), Vector2i(0, 1)]:
@@ -82,7 +86,8 @@ func _create_object(def_id: String, tile: Vector2i, rot: int, force_id: int) -> 
 				world._occ[t] = o.id
 				if o.blocks():
 					world._blocked[t] = true
-	world.rooms.dirty = true
+	world.regions.index_object(o)
+	world.rooms.mark_dirty(tile)
 	world._emit("object_placed", o.id)
 	return o.id
 
@@ -105,7 +110,8 @@ func remove_object(object_id: int) -> bool:
 					world._occ.erase(t)
 				world._blocked.erase(t)
 	world.objects.erase(object_id)
-	world.rooms.dirty = true
+	world.regions.unindex_object(object_id)
+	world.rooms.mark_dirty(o.tile)
 	world._emit("object_removed", object_id)
 	return true
 
@@ -152,6 +158,34 @@ func objects_in_radius(tile: Vector2i, r: float) -> Array:
 		out.append(s[1])
 	return out
 
+## Objects of the lot the tile stands in, nearest first, within `r` tiles. Streets, parks and open ground have none: on the
+## one big map a folk only ever uses things of its own lot (the sim's autonomy asks for this, see WorldIface.objects_near).
+func objects_in_lot_of(tile: Vector2i, r: float) -> Array:
+	var rg: WorldRegions = world.regions
+	var rid := rg.region_at(tile)
+	if rid == WorldRegions.NONE or not rg.is_lot(rid):
+		return []
+	var rc: Rect2i = rg.regions[rid]["rect"]
+	var scored: Array = []
+	for c in rg.chunks_in_rect(rc):
+		for oid in rg.chunk_objects(c):
+			var o = world.objects.get(oid, null)
+			if o == null or not rc.has_point(o.tile):
+				continue
+			var best := INF
+			if o.is_wall_mounted():
+				best = Vector2(o.tile).distance_to(Vector2(tile))
+			else:
+				for t in o.footprint():
+					best = minf(best, Vector2(t).distance_to(Vector2(tile)))
+			if best <= r:
+				scored.append([best, o])
+	scored.sort_custom(func(a, b): return a[0] < b[0] or (a[0] == b[0] and a[1].id < b[1].id))
+	var out: Array = []
+	for s in scored:
+		out.append(s[1])
+	return out
+
 func set_object_state(object_id: int, key: String, value: Variant) -> void:
 	var o = world.objects.get(object_id, null)
 	if o == null:
@@ -162,7 +196,7 @@ func set_object_state(object_id: int, key: String, value: Variant) -> void:
 	if o.state.get(key) == value:
 		return
 	o.state[key] = value
-	world.rooms.dirty = true   # decor/mess depend on state
+	world.rooms.mark_dirty(o.tile)   # decor/mess depend on state
 	world._emit("object_state_changed", object_id, key)
 
 func add_object_state(object_id: int, key: String, delta: float) -> void:

@@ -21,7 +21,9 @@ const CUT_RATIO := 0.16
 const CAM_DIST := 60.0
 const PITCH := deg_to_rad(35.0)
 const ZOOM_MIN := 4.0
-const ZOOM_MAX := 34.0
+const ZOOM_MAX := 34.0           # single lot
+const ZOOM_MAX_BIG := 110.0      # big map: the whole 160x120 neighbourhood fits on screen at 16:9
+const FOLLOW_RATE := 5.0         # camera glide towards the followed folk (1/s)
 
 
 var wall_mode: int = WallMode.CUTAWAY
@@ -60,6 +62,7 @@ var _zoom: float = 14.0
 var _zoom_target: float = 14.0
 var _target: Vector3 = Vector3(16, 0, 12)
 var _dragging_mmb: bool = false
+var _follow_id: int = -1             # folk the camera glides after (big map only; any manual pan lets go)
 
 var _obj_nodes: Dictionary = {}      # object id -> Node3D
 var _folk_views: Dictionary = {}     # folk id -> FolkView

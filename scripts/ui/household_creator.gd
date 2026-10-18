@@ -68,6 +68,13 @@ func _column() -> VBoxContainer:
 	root.add_child(member_row)
 	editor = FolkEditor.new()
 	editor.changed.connect(_on_edited)
+	editor.others_provider = func() -> Array:
+		var out: Array = []
+		var fl := _members()
+		for i in fl.size():
+			if i != selected:
+				out.append(fl[i]["appearance"])
+		return out
 	root.add_child(editor)
 	error_label = UIU.make_label("", 14, Color("#e5534b"))
 	error_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -181,9 +188,11 @@ func _add_member() -> void:
 	if folk.size() >= HouseholdSetup.MAX_FOLK:
 		return
 	var used: Array = []
+	var looks: Array = []
 	for fd in folk:
 		used.append(fd["name"])
-	folk.append(HouseholdSetup.random_folk("adult", "none", used))
+		looks.append(fd["appearance"])
+	folk.append(HouseholdSetup.random_folk("adult", "none", used, null, looks))
 	selected = folk.size() - 1
 	_rebuild_members()
 

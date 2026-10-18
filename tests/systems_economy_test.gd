@@ -70,7 +70,9 @@ func _bills_paid(f: Array) -> void:
 		K.expect(f, Economy.outstanding(1).is_empty(), "funded household auto-pays on the due date")
 		K.expect(f, Economy.balance(1) == 3000 - amt, "balance should drop by the bill")
 	K.expect(f, K.has_note("bills"), "a bill notification must be sent")
-	K.expect(f, Economy.next_bill_day == 14, "next bill cycle is day 14")
+	var cfg: Dictionary = SimEnv.data().get_table("economy").get("bills", {})
+	var expected: int = int(cfg.get("first_day", 7)) + int(cfg.get("every_days", 7))
+	K.expect(f, Economy.next_bill_day == expected, "next bill cycle is day %d" % expected)
 	K.teardown()
 
 func Kit_furnish(w: StubWorld) -> void:

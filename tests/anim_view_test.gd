@@ -100,29 +100,29 @@ func _test_appearance() -> void:
 		"pants": "#00ffff", "height": 1.1, "build": 0.9}
 	var f := _mk_folk("adult", Vector2i(8, 8), ap)
 	var fv := _mk_view(f)
-	var body := _find_mesh(fv, "body")
-	_check(body != null, "body mesh not found")
-	if body != null:
-		var found := {}
-		for s in body.mesh.get_surface_count():
-			var base: Material = body.mesh.surface_get_material(s)
-			var ov: Material = body.get_surface_override_material(s)
-			if ov is BaseMaterial3D:
+	var found := {}
+	for mi in fv._rig.find_children("*", "MeshInstance3D", true, false):
+		var m := mi as MeshInstance3D
+		for s in m.mesh.get_surface_count():
+			var base: Material = m.mesh.surface_get_material(s)
+			var ov: Material = m.get_surface_override_material(s)
+			if ov is BaseMaterial3D and not found.has(str(base.resource_name)):
 				found[str(base.resource_name)] = (ov as BaseMaterial3D).albedo_color
-		_check(found.get("skin", Color.BLACK).is_equal_approx(Color("#ff0000")), "skin not tinted: %s" % str(found.get("skin")))
-		_check(found.get("shirt", Color.BLACK).is_equal_approx(Color("#ffff00")), "shirt not tinted")
-		_check(found.get("pants", Color.BLACK).is_equal_approx(Color("#00ffff")), "pants not tinted")
-		_check(found.get("hair", Color.BLACK).is_equal_approx(Color("#00ff00")), "hair not tinted")
-		_check(found.get("eyes", Color.BLACK).is_equal_approx(Color("#0000ff")), "eyes not tinted")
-	for i in 6:
+	_check(found.get("skin", Color.BLACK).is_equal_approx(Color("#ff0000")), "skin not tinted: %s" % str(found.get("skin")))
+	_check(found.get("shirt", Color.BLACK).is_equal_approx(Color("#ffff00")), "shirt not tinted")
+	_check(found.get("pants", Color.BLACK).is_equal_approx(Color("#00ffff")), "pants not tinted")
+	_check(found.get("hair", Color.BLACK).is_equal_approx(Color("#00ff00")), "hair not tinted")
+	_check(found.get("eyes", Color.BLACK).is_equal_approx(Color("#0000ff")), "eyes not tinted")
+	# only the chosen hair style is kept (unused variant meshes are freed)
+	for i in 16:
 		var h := fv._rig.find_child("hair_%d" % i, true, false) as Node3D
-		_check(h != null and h.visible == (i == 3), "hair_%d visibility wrong (style 3 expected)" % i)
+		_check((h != null) == (i == 3), "hair_%d presence wrong (style 3 expected)" % i)
 	_check(absf(fv._rig.scale.y - 1.1) < 0.001 and absf(fv._rig.scale.x - 0.99) < 0.001, "height/build scale wrong: %s" % str(fv._rig.scale))
 	# changing appearance retints live
 	f.appearance = {"skin": "#00ff00", "hair_style": 1}
 	_step(fv, 25)
 	var h1 := fv._rig.find_child("hair_1", true, false) as Node3D
-	_check(h1 != null and h1.visible, "appearance change did not switch hair style")
+	_check(h1 != null and h1.visible and fv._rig.find_child("hair_3", true, false) == null, "appearance change did not switch hair style")
 	fv.free()
 	W.remove_folk(f.id)
 	# partial / garbage appearance must not crash

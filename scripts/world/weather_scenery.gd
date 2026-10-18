@@ -1,5 +1,5 @@
 extends "res://scripts/world/weather_state.gd"
-## WeatherView layer: trees, seasonal grass tint, snow cover.
+## WeatherView layer: legacy tree ring around the single lot, seasonal grass tint, snow cover. (Big map: the LotView chunks scatter the trees.)
 
 
 func _build_trees() -> void:
@@ -22,6 +22,8 @@ func _build_trees() -> void:
 	cx = ww * 0.5
 	cy = wh * 0.5
 	_tree_dims = Vector2i(int(ww), int(wh))
+	if w != null and w.get("regions") != null and w.regions.has_regions():
+		return        # continuous map: trees are MultiMeshes per chunk (lot_chunks.gd)
 	var r := RandomNumberGenerator.new()
 	r.seed = 424242
 	var n: int = 0
@@ -89,8 +91,6 @@ func _build_trees() -> void:
 
 
 func _update_ground(pos: float) -> void:
-	if _floors_dirty:
-		_rebuild_overlays()
 	var tint: Color = _season_col("grass_tint", pos, Color("#9be36a"))
 	var alpha: float = _season_num("grass_alpha", pos, 0.2)
 	var wet: float = float(p["wet"])
@@ -102,8 +102,8 @@ func _update_ground(pos: float) -> void:
 	ga = lerpf(ga, 0.96, snowc)
 	_grass_mat.albedo_color = Color(g.r, g.g, g.b, ga)
 	var sc := Color(0.95, 0.97, 1.0, clampf(snowc * 0.95, 0.0, 0.95))
-	if snow_mi != null:
-		snow_mi.visible = snowc > 0.02
+	if lot.has_method("set_overlay_snow_visible"):
+		lot.call("set_overlay_snow_visible", snowc > 0.02)
 	_snow_mat.albedo_color = sc
 	var ground = lot.get("_ground_mi")
 	if ground != null and ground is MeshInstance3D and (ground as MeshInstance3D).material_override is StandardMaterial3D:
@@ -111,42 +111,6 @@ func _update_ground(pos: float) -> void:
 		gc = gc.lerp(Color(0.1, 0.14, 0.12), wet * 0.3)
 		gc = gc.lerp(Color(0.92, 0.95, 0.98), snowc)
 		((ground as MeshInstance3D).material_override as StandardMaterial3D).albedo_color = gc
-
-
-func _rebuild_overlays() -> void:
-	_floors_dirty = false
-	var w = WorldIface.world()
-	if w == null or grass_mi == null:
-		return
-	var st_g := SurfaceTool.new()
-	var st_s := SurfaceTool.new()
-	st_g.begin(Mesh.PRIMITIVE_TRIANGLES)
-	st_s.begin(Mesh.PRIMITIVE_TRIANGLES)
-	var snow_types := ["grass", "dirt", "stone", "concrete"]
-	var ng: int = 0
-	var ns: int = 0
-	for y in int(w.height):
-		for x in int(w.width):
-			var ft: String = w.get_floor(Vector2i(x, y))
-			var is_grass: bool = ft == "grass"
-			var is_snow: bool = snow_types.has(ft)
-			if not is_snow:
-				continue
-			var a := Vector3(x, 0.0, y)
-			var b := Vector3(x + 1, 0.0, y)
-			var c := Vector3(x + 1, 0.0, y + 1)
-			var d := Vector3(x, 0.0, y + 1)
-			if is_grass:
-				for v in [a, b, c, a, c, d]:
-					st_g.set_normal(Vector3.UP)
-					st_g.add_vertex((v as Vector3) + Vector3(0, 0.006, 0))
-				ng += 1
-			for v2 in [a, b, c, a, c, d]:
-				st_s.set_normal(Vector3.UP)
-				st_s.add_vertex((v2 as Vector3) + Vector3(0, 0.009, 0))
-			ns += 1
-	grass_mi.mesh = st_g.commit() if ng > 0 else null
-	snow_mi.mesh = st_s.commit() if ns > 0 else null
 
 
 func _update_trees(pos: float) -> void:
@@ -163,6 +127,8 @@ func _update_trees(pos: float) -> void:
 	var bl := Color(str(Seasons.info("spring").get("blossom", "#f6b8d0")))
 	_leaf_mat.albedo_color = leaf.lerp(Color(0.95, 0.97, 1.0), snowc * 0.4)
 	_pine_mat.albedo_color = Color(0.16, 0.36, 0.22).lerp(Color(0.85, 0.9, 0.95), snowc * 0.55)
+	if lot.has_method("set_tree_colors"):      # chunked MultiMesh trees (big map) follow the same seasons
+		lot.call("set_tree_colors", _leaf_mat.albedo_color.lerp(Color(0.5, 0.75, 0.4), 0.15), _pine_mat.albedo_color.lerp(Color(0.2, 0.5, 0.3), 0.2))
 	for t in _trees:
 		var canopy: Node3D = t["canopy"]
 		if bool(t["pine"]):

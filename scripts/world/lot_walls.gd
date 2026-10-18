@@ -1,18 +1,66 @@
-extends "res://scripts/world/lot_models.gd"
-## LotView layer: Wall meshes, cut-away animation and door leaves.
+extends "res://scripts/world/lot_chunks.gd"
+## LotView layer: Wall meshes, cut-away animation and door leaves. Wall / door nodes live in one container per 16x16
+## chunk and only exist for chunks near the camera (chunk_is_kept): a 160x120 map with hundreds of walls never builds them all.
+
+const WALL_CHUNKS_PER_FRAME := 3
+
+var _wall_ends: Dictionary = {}       # lattice point -> number of wall edges meeting there
+var _wall_by_chunk: Dictionary = {}   # Vector2i -> Array of wall edges
+var _wall_nodes: Dictionary = {}      # Vector2i -> {root: Node3D, walls: Array, doors: Array}
 
 
+## World walls changed (or the world was reset): drop every wall node, regroup the edges by chunk, build the near chunks now.
 func _build_walls() -> void:
-	for w in _walls:
-		w["node"].queue_free()
+	for ch in _wall_nodes.values():
+		(ch["root"] as Node3D).queue_free()
+	_wall_nodes.clear()
 	_walls.clear()
 	_doors.clear()
-	var ends: Dictionary = {}      # lattice point -> number of wall edges meeting there
+	_wall_ends.clear()
+	_wall_by_chunk.clear()
 	for e2 in World.walls:
 		for v in ([Vector2i(e2.x, e2.y), Vector2i(e2.x + 1, e2.y)] if e2.z == 0 else [Vector2i(e2.x, e2.y), Vector2i(e2.x, e2.y + 1)]):
-			ends[v] = int(ends.get(v, 0)) + 1
-	for e in World.walls:
-		var kind: String = World.walls[e]
+			_wall_ends[v] = int(_wall_ends.get(v, 0)) + 1
+		var c := World.regions.chunk_of(Vector2i(e2.x, e2.y))
+		if not _wall_by_chunk.has(c):
+			_wall_by_chunk[c] = []
+		(_wall_by_chunk[c] as Array).append(e2)
+	_walls_dirty = false
+	_cut_dirty = true
+	_sync_wall_chunks(true)
+
+
+## Build wall nodes for chunks that came near, free those that went far. Called every frame (cheap when nothing changed).
+func _sync_wall_chunks(force: bool = false) -> void:
+	var changed := false
+	var budget := 9999 if force else WALL_CHUNKS_PER_FRAME
+	for c in _wall_by_chunk:
+		if budget <= 0:
+			break
+		if not _wall_nodes.has(c) and chunk_is_active(c):
+			_build_wall_chunk(c)
+			budget -= 1
+			changed = true
+	for c in _wall_nodes.keys():
+		if not chunk_is_kept(c):
+			(_wall_nodes[c]["root"] as Node3D).queue_free()
+			_wall_nodes.erase(c)
+			changed = true
+	if changed:
+		_walls.clear()
+		_doors.clear()
+		for ch in _wall_nodes.values():
+			_walls.append_array(ch["walls"])
+			_doors.append_array(ch["doors"])
+
+
+func _build_wall_chunk(c: Vector2i) -> void:
+	var root := Node3D.new()
+	root.name = "walls_%d_%d" % [c.x, c.y]
+	_wall_root.add_child(root)
+	var entry := {"root": root, "walls": [], "doors": []}
+	for e in _wall_by_chunk[c]:
+		var kind: String = World.walls[e] if World.walls.has(e) else "wall"
 		var horizontal: bool = e.z == 0
 		var node := Node3D.new()
 		node.position = Vector3(e.x + 0.5, 0, e.y) if horizontal else Vector3(e.x, 0, e.y + 0.5)
@@ -20,17 +68,16 @@ func _build_walls() -> void:
 			node.rotation.y = PI * 0.5
 		var visual := _make_wall_visual(kind)
 		node.add_child(visual["root"])
-		_wall_root.add_child(node)
+		root.add_child(node)
 		if visual.has("leaf") and visual["leaf"] != null:
-			_doors.append({"leaf": visual["leaf"], "pos": node.position, "open": 0.0})
+			(entry["doors"] as Array).append({"leaf": visual["leaf"], "pos": node.position, "open": 0.0})
 		var pts: Array = [Vector2i(e.x, e.y), Vector2i(e.x + 1, e.y)] if horizontal else [Vector2i(e.x, e.y), Vector2i(e.x, e.y + 1)]
-		var free_standing: bool = kind != "wall" and int(ends[pts[0]]) == 1 and int(ends[pts[1]]) == 1   # gate / lone doorway: never cut down
+		var free_standing: bool = kind != "wall" and int(_wall_ends[pts[0]]) == 1 and int(_wall_ends[pts[1]]) == 1   # gate / lone doorway: never cut down
 		var init_scale := 1.0 if (wall_mode == WallMode.UP or kind == "fence" or free_standing) else CUT_RATIO
 		node.scale.y = init_scale
-		_walls.append({"node": node, "e": e, "kind": kind, "pos": node.position, "axis": 0 if horizontal else 1,
+		(entry["walls"] as Array).append({"node": node, "e": e, "kind": kind, "pos": node.position, "axis": 0 if horizontal else 1,
 			"scale": init_scale, "free": free_standing})
-	_walls_dirty = false
-	_cut_dirty = true
+	_wall_nodes[c] = entry
 
 
 func _update_walls(delta: float) -> void:

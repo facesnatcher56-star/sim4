@@ -35,11 +35,31 @@ static func get_object(id: int):
 		return w.get_object(id)
 	return null
 
+## Objects a folk standing on `tile` may use. On the big map (regions defined) that is the objects of its own lot only.
 static func objects_near(tile: Vector2i, r: int = 64) -> Array:
 	var w = world()
+	if w != null and w.has_method("objects_in_lot_of") and w.regions.has_regions():
+		return w.objects_in_lot_of(tile, r)
 	if w != null and w.has_method("objects_in_radius"):
 		return w.objects_in_radius(tile, r)
 	return []
+
+## Folk a folk can interact with: everyone on a plain world; on the big map the folk of its own lot (on a street: the other folk on streets within 12 tiles).
+static func folk_near(f) -> Array:
+	var w = world()
+	if w == null or not ("regions" in w) or not w.regions.has_regions():
+		return all_folk()
+	var rid: int = w.regions.region_at(f.tile)
+	var in_lot: bool = rid != -1 and w.regions.is_lot(rid)
+	var out: Array = []
+	for o in all_folk():
+		var orid: int = w.regions.region_at(o.tile)
+		if in_lot:
+			if orid == rid:
+				out.append(o)
+		elif not (orid != -1 and w.regions.is_lot(orid)) and absi(o.tile.x - f.tile.x) + absi(o.tile.y - f.tile.y) <= 12:
+			out.append(o)          # street folk only meet other street folk (nobody is called into a lot from outside)
+	return out
 
 static func slot_count(obj) -> int:
 	var def: Dictionary = SimEnv.data().object_def(str(obj.def_id))

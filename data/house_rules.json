@@ -1,0 +1,1623 @@
+{
+ "version": 1,
+ "notes": "Rules for HouseGenerator. footprints: shell=[x,y,w,h] of the walled house in lot tiles, fence=[x0,y0,x1,y1] in wall vertices (or null), path_w = front path width, gate widens with it, spawns = spawn tile count, min_objects/min_kinds = quality gate. rooms: area = relative size weight, min_dim/min_area/aspect = size sanity, floor = materials (styles override), hab = needs a window, win = windows per 4 wall tiles. Item keys: d=def (string or list), at=wall|corner|free|facing|front|near|beside|seat|rug|ceil (string or list = try in random order), ref=earlier item of the same room, n=count or [lo,hi], p=chance, dist=[lo,hi], req=layout fails without it, run=lists of defs placed in a row against one wall.",
+ "footprints": {
+  "classic": {
+   "shell": [
+    4,
+    4,
+    16,
+    12
+   ],
+   "fence": [
+    2,
+    2,
+    30,
+    22
+   ],
+   "path_w": 1,
+   "spawns": 3,
+   "min_objects": 34,
+   "min_kinds": 20
+  },
+  "small": {
+   "shell": [
+    5,
+    5,
+    10,
+    7
+   ],
+   "fence": null,
+   "path_w": 2,
+   "spawns": 2,
+   "min_objects": 16,
+   "min_kinds": 12
+  },
+  "medium": {
+   "shell": [
+    4,
+    4,
+    14,
+    11
+   ],
+   "fence": [
+    2,
+    2,
+    26,
+    21
+   ],
+   "path_w": 1,
+   "spawns": 3,
+   "min_objects": 32,
+   "min_kinds": 18
+  },
+  "large": {
+   "shell": [
+    3,
+    3,
+    22,
+    14
+   ],
+   "fence": [
+    1,
+    1,
+    29,
+    23
+   ],
+   "path_w": 2,
+   "spawns": 4,
+   "min_objects": 52,
+   "min_kinds": 26
+  }
+ },
+ "link_cost": {
+  "default": 5,
+  "hall-*": 1,
+  "living-bedroom": 2,
+  "living-master": 2,
+  "living-kids": 2,
+  "living-nursery": 2,
+  "living-bath": 3,
+  "dining-living": 1,
+  "kitchen-living": 1,
+  "kitchen-dining": 1,
+  "kitchen_diner-living": 1,
+  "kitchen-garage": 2,
+  "garage-living": 2,
+  "laundry-kitchen": 1,
+  "laundry-hall": 1,
+  "bath-master": 0.4,
+  "bath-bedroom": 3,
+  "bath-kids": 3,
+  "bath-nursery": 3,
+  "office-living": 2,
+  "office-hall": 1,
+  "forbid": [
+   "bedroom-kitchen",
+   "master-kitchen",
+   "kids-kitchen",
+   "nursery-kitchen",
+   "bedroom-kitchen_diner",
+   "master-kitchen_diner",
+   "kids-kitchen_diner",
+   "nursery-kitchen_diner",
+   "bath-kitchen",
+   "bath-kitchen_diner",
+   "bath-dining",
+   "bedroom-bedroom",
+   "bedroom-master",
+   "bedroom-kids",
+   "bedroom-nursery",
+   "master-kids",
+   "master-nursery",
+   "kids-nursery",
+   "bath-bath",
+   "powder-bedroom",
+   "powder-master",
+   "powder-kids",
+   "powder-nursery",
+   "bedroom-garage",
+   "master-garage",
+   "kids-garage",
+   "bath-garage",
+   "powder-garage",
+   "bath-powder",
+   "bedroom-dining",
+   "master-dining",
+   "kids-dining",
+   "nursery-dining",
+   "bath-laundry",
+   "bedroom-laundry",
+   "master-laundry",
+   "kids-laundry",
+   "bath-office",
+   "bedroom-office",
+   "master-office",
+   "kids-office"
+  ]
+ },
+ "open_prob": {
+  "default": 0.0,
+  "dining-living": 0.8,
+  "kitchen-living": 0.45,
+  "kitchen-dining": 0.6,
+  "hall-living": 0.6,
+  "hall-dining": 0.35,
+  "kitchen_diner-living": 0.5,
+  "lounge-living": 0.6,
+  "library-living": 0.4,
+  "hall-lounge": 0.5
+ },
+ "entry_rooms": [
+  "living",
+  "hall",
+  "dining",
+  "kitchen_diner",
+  "lounge"
+ ],
+ "back_rooms": [
+  "living",
+  "kitchen",
+  "kitchen_diner",
+  "dining",
+  "lounge",
+  "hall"
+ ],
+ "rooms": {
+  "living": {
+   "area": 20,
+   "min_dim": 3,
+   "min_area": 9,
+   "aspect": 3.2,
+   "floor": [
+    "wood",
+    "carpet"
+   ],
+   "hab": true,
+   "win": 1.3,
+   "items": [
+    {
+     "d": "tv",
+     "at": "wall",
+     "req": 1
+    },
+    {
+     "d": "sofa",
+     "at": "facing",
+     "ref": "tv",
+     "dist": [
+      3,
+      5
+     ],
+     "req": 1
+    },
+    {
+     "d": "coffee_table",
+     "at": "front",
+     "ref": "sofa",
+     "p": 0.85
+    },
+    {
+     "d": "armchair",
+     "at": "near",
+     "ref": "coffee_table",
+     "n": [
+      0,
+      2
+     ],
+     "p": 0.7
+    },
+    {
+     "d": [
+      "bookcase_tall",
+      "bookshelf"
+     ],
+     "at": "wall",
+     "n": [
+      1,
+      2
+     ],
+     "p": 0.9
+    },
+    {
+     "d": "rug",
+     "at": "rug",
+     "ref": "coffee_table",
+     "p": 0.85
+    },
+    {
+     "d": "lamp",
+     "at": "corner",
+     "p": 0.8
+    },
+    {
+     "d": "plant",
+     "at": "corner",
+     "n": [
+      1,
+      2
+     ],
+     "p": 0.85
+    },
+    {
+     "d": "stereo",
+     "at": "wall",
+     "p": 0.35
+    },
+    {
+     "d": "pendant_light",
+     "at": "ceil",
+     "p": 0.7
+    },
+    {
+     "d": "armchair",
+     "at": "corner",
+     "n": [
+      1,
+      2
+     ],
+     "big": 36,
+     "p": 0.9
+    },
+    {
+     "d": "bookcase_tall",
+     "at": "wall",
+     "n": [
+      1,
+      3
+     ],
+     "big": 36,
+     "p": 0.9
+    },
+    {
+     "d": "plant",
+     "at": "corner",
+     "n": [
+      1,
+      3
+     ],
+     "big": 36,
+     "p": 0.9
+    },
+    {
+     "d": "lamp",
+     "at": "wall",
+     "big": 36,
+     "p": 0.8
+    }
+   ]
+  },
+  "dining": {
+   "area": 9,
+   "min_dim": 2,
+   "min_area": 6,
+   "aspect": 3.5,
+   "floor": [
+    "wood"
+   ],
+   "hab": true,
+   "win": 1.0,
+   "items": [
+    {
+     "d": "table",
+     "at": [
+      "free",
+      "wall"
+     ],
+     "req": 1
+    },
+    {
+     "d": "dining_chair",
+     "at": "seat",
+     "ref": "table",
+     "n": [
+      2,
+      4
+     ],
+     "req": 1
+    },
+    {
+     "d": "pendant_light",
+     "at": "ceil",
+     "ref": "table",
+     "p": 0.8
+    },
+    {
+     "d": "plant",
+     "at": "corner",
+     "p": 0.5
+    },
+    {
+     "d": "bookcase_tall",
+     "at": "wall",
+     "big": 24,
+     "p": 0.6
+    }
+   ]
+  },
+  "kitchen": {
+   "area": 10,
+   "min_dim": 2,
+   "min_area": 8,
+   "aspect": 3.5,
+   "floor": [
+    "tile"
+   ],
+   "hab": true,
+   "win": 1.0,
+   "items": [
+    {
+     "run": [
+      [
+       "fridge",
+       "counter",
+       "stove",
+       "counter",
+       "sink"
+      ],
+      [
+       "sink",
+       "counter",
+       "stove",
+       "counter",
+       "fridge"
+      ],
+      [
+       "fridge",
+       "counter",
+       "stove",
+       "sink"
+      ],
+      [
+       "fridge",
+       "stove",
+       "counter",
+       "sink"
+      ],
+      [
+       "sink",
+       "stove",
+       "counter",
+       "fridge"
+      ]
+     ],
+     "req": 1
+    },
+    {
+     "d": [
+      "microwave_cart",
+      "coffee_maker",
+      "tea_kettle"
+     ],
+     "at": "wall",
+     "n": [
+      1,
+      2
+     ],
+     "p": 0.9
+    },
+    {
+     "d": "counter",
+     "at": "wall",
+     "n": [
+      0,
+      1
+     ],
+     "p": 0.5
+    },
+    {
+     "d": "bar_counter",
+     "at": "free",
+     "p": 0.55
+    },
+    {
+     "d": "bar_stool",
+     "at": "seat",
+     "ref": "bar_counter",
+     "n": [
+      1,
+      3
+     ],
+     "p": 0.9
+    },
+    {
+     "d": "trash_bin",
+     "at": "corner",
+     "p": 0.8
+    },
+    {
+     "d": "plant",
+     "at": "corner",
+     "p": 0.35
+    },
+    {
+     "d": "fire_extinguisher",
+     "at": "wall",
+     "p": 0.25
+    },
+    {
+     "d": "pendant_light",
+     "at": "ceil",
+     "p": 0.5
+    },
+    {
+     "d": "counter",
+     "at": "wall",
+     "n": [
+      1,
+      2
+     ],
+     "big": 24,
+     "p": 0.8
+    },
+    {
+     "d": "table",
+     "at": "free",
+     "big": 30,
+     "p": 0.5
+    }
+   ]
+  },
+  "kitchen_diner": {
+   "area": 16,
+   "min_dim": 3,
+   "min_area": 12,
+   "aspect": 2.6,
+   "floor": [
+    "tile",
+    "wood"
+   ],
+   "hab": true,
+   "win": 1.1,
+   "items": [
+    {
+     "run": [
+      [
+       "fridge",
+       "counter",
+       "stove",
+       "counter",
+       "sink"
+      ],
+      [
+       "sink",
+       "counter",
+       "stove",
+       "counter",
+       "fridge"
+      ],
+      [
+       "fridge",
+       "counter",
+       "stove",
+       "sink"
+      ]
+     ],
+     "req": 1
+    },
+    {
+     "d": [
+      "microwave_cart",
+      "coffee_maker",
+      "tea_kettle"
+     ],
+     "at": "wall",
+     "n": [
+      1,
+      2
+     ],
+     "p": 0.9
+    },
+    {
+     "d": "table",
+     "at": [
+      "free",
+      "wall"
+     ],
+     "req": 1
+    },
+    {
+     "d": "dining_chair",
+     "at": "seat",
+     "ref": "table",
+     "n": [
+      2,
+      4
+     ],
+     "req": 1
+    },
+    {
+     "d": "trash_bin",
+     "at": "corner",
+     "p": 0.8
+    },
+    {
+     "d": "plant",
+     "at": "corner",
+     "p": 0.4
+    },
+    {
+     "d": "pendant_light",
+     "at": "ceil",
+     "ref": "table",
+     "p": 0.8
+    }
+   ]
+  },
+  "sleep": {
+   "area": 9,
+   "min_dim": 2,
+   "min_area": 6,
+   "aspect": 3.5,
+   "floor": [
+    "carpet",
+    "wood"
+   ],
+   "hab": true,
+   "win": 1.0,
+   "items": [
+    {
+     "d": [
+      "single_bed",
+      "bed"
+     ],
+     "at": "wall",
+     "pref": "corner",
+     "req": 1
+    },
+    {
+     "d": "nightstand",
+     "at": "beside",
+     "ref": "single_bed|bed",
+     "p": 0.9
+    },
+    {
+     "d": [
+      "wardrobe",
+      "dresser"
+     ],
+     "at": "wall",
+     "req": 1
+    },
+    {
+     "d": "lamp",
+     "at": "corner",
+     "p": 0.5
+    }
+   ]
+  },
+  "bedroom": {
+   "area": 12,
+   "min_dim": 3,
+   "min_area": 9,
+   "aspect": 2.6,
+   "floor": [
+    "carpet",
+    "wood"
+   ],
+   "hab": true,
+   "win": 1.2,
+   "items": [
+    {
+     "d": [
+      "bed",
+      "bed",
+      "single_bed"
+     ],
+     "at": "wall",
+     "pref": "corner",
+     "req": 1
+    },
+    {
+     "d": "nightstand",
+     "at": "beside",
+     "ref": "single_bed|bed",
+     "n": [
+      1,
+      2
+     ],
+     "p": 1.0
+    },
+    {
+     "d": [
+      "wardrobe",
+      "dresser"
+     ],
+     "at": "wall",
+     "req": 1
+    },
+    {
+     "d": "dresser",
+     "at": "wall",
+     "p": 0.5
+    },
+    {
+     "d": "rug",
+     "at": "rug",
+     "ref": "single_bed|bed",
+     "p": 0.8
+    },
+    {
+     "d": "lamp",
+     "at": "corner",
+     "p": 0.6
+    },
+    {
+     "d": "plant",
+     "at": "corner",
+     "p": 0.5
+    },
+    {
+     "d": "mirror",
+     "at": "wall",
+     "p": 0.3
+    },
+    {
+     "d": "desk",
+     "at": "wall",
+     "p": 0.3
+    },
+    {
+     "d": "pendant_light",
+     "at": "ceil",
+     "p": 0.4
+    },
+    {
+     "d": "smoke_alarm",
+     "at": "ceil",
+     "p": 0.6
+    },
+    {
+     "d": "armchair",
+     "at": "corner",
+     "big": 20,
+     "p": 0.7
+    },
+    {
+     "d": "computer",
+     "at": "wall",
+     "big": 20,
+     "p": 0.4
+    }
+   ]
+  },
+  "master": {
+   "area": 16,
+   "min_dim": 3,
+   "min_area": 12,
+   "aspect": 2.4,
+   "floor": [
+    "carpet",
+    "wood"
+   ],
+   "hab": true,
+   "win": 1.3,
+   "items": [
+    {
+     "d": "bed",
+     "at": "wall",
+     "pref": "corner",
+     "req": 1
+    },
+    {
+     "d": "nightstand",
+     "at": "beside",
+     "ref": "bed",
+     "n": [
+      1,
+      2
+     ],
+     "p": 1.0
+    },
+    {
+     "d": "wardrobe",
+     "at": "wall",
+     "req": 1
+    },
+    {
+     "d": "dresser",
+     "at": "wall",
+     "p": 0.8
+    },
+    {
+     "d": "mirror",
+     "at": "wall",
+     "p": 0.6
+    },
+    {
+     "d": "armchair",
+     "at": "corner",
+     "p": 0.5
+    },
+    {
+     "d": "rug",
+     "at": "rug",
+     "ref": "bed",
+     "p": 0.85
+    },
+    {
+     "d": "lamp",
+     "at": "corner",
+     "p": 0.6
+    },
+    {
+     "d": "plant",
+     "at": "corner",
+     "p": 0.6
+    },
+    {
+     "d": "desk",
+     "at": "wall",
+     "p": 0.25
+    },
+    {
+     "d": "smoke_alarm",
+     "at": "ceil",
+     "p": 0.6
+    },
+    {
+     "d": "bookcase_tall",
+     "at": "wall",
+     "big": 24,
+     "p": 0.6
+    },
+    {
+     "d": "coffee_table",
+     "at": "free",
+     "big": 28,
+     "p": 0.5
+    }
+   ]
+  },
+  "kids": {
+   "max_area": 22,
+   "area": 11,
+   "min_dim": 3,
+   "min_area": 9,
+   "aspect": 2.6,
+   "floor": [
+    "carpet",
+    "wood"
+   ],
+   "hab": true,
+   "win": 1.2,
+   "items": [
+    {
+     "d": [
+      "bunk_bed",
+      "single_bed"
+     ],
+     "at": "wall",
+     "pref": "corner",
+     "req": 1
+    },
+    {
+     "d": "single_bed",
+     "at": "wall",
+     "p": 0.45
+    },
+    {
+     "d": [
+      "dresser",
+      "wardrobe"
+     ],
+     "at": "wall",
+     "req": 1
+    },
+    {
+     "d": "desk",
+     "at": "wall",
+     "p": 0.8
+    },
+    {
+     "d": "computer",
+     "at": "wall",
+     "p": 0.3
+    },
+    {
+     "d": "rug",
+     "at": "rug",
+     "ref": "bunk_bed|single_bed",
+     "p": 0.8
+    },
+    {
+     "d": "plant",
+     "at": "corner",
+     "p": 0.4
+    },
+    {
+     "d": "lamp",
+     "at": "corner",
+     "p": 0.4
+    },
+    {
+     "d": "smoke_alarm",
+     "at": "ceil",
+     "p": 0.6
+    }
+   ]
+  },
+  "nursery": {
+   "max_area": 16,
+   "area": 9,
+   "min_dim": 3,
+   "min_area": 9,
+   "aspect": 2.4,
+   "floor": [
+    "carpet"
+   ],
+   "hab": true,
+   "win": 1.2,
+   "items": [
+    {
+     "d": "crib",
+     "at": "wall",
+     "pref": "corner",
+     "req": 1
+    },
+    {
+     "d": [
+      "dresser",
+      "wardrobe"
+     ],
+     "at": "wall",
+     "req": 1
+    },
+    {
+     "d": "armchair",
+     "at": "corner",
+     "p": 0.9
+    },
+    {
+     "d": "lamp",
+     "at": "corner",
+     "p": 0.8
+    },
+    {
+     "d": "plant",
+     "at": "corner",
+     "p": 0.5
+    },
+    {
+     "d": "rug",
+     "at": "rug",
+     "ref": "crib",
+     "p": 0.9
+    },
+    {
+     "d": "smoke_alarm",
+     "at": "ceil",
+     "p": 0.6
+    }
+   ]
+  },
+  "bath": {
+   "max_area": 13,
+   "area": 7,
+   "min_dim": 2,
+   "min_area": 6,
+   "aspect": 2.6,
+   "floor": [
+    "tile"
+   ],
+   "hab": false,
+   "win": 0.8,
+   "items": [
+    {
+     "run": [
+      [
+       "toilet",
+       "sink",
+       "shower"
+      ],
+      [
+       "shower",
+       "toilet",
+       "sink"
+      ],
+      [
+       "sink",
+       "toilet",
+       "shower"
+      ],
+      [
+       "toilet",
+       "sink",
+       "bathtub"
+      ],
+      [
+       "bathtub",
+       "toilet",
+       "sink"
+      ]
+     ],
+     "req": 1
+    },
+    {
+     "d": "mirror",
+     "at": "wall",
+     "p": 0.5
+    },
+    {
+     "d": "trash_bin",
+     "at": "corner",
+     "p": 0.8
+    },
+    {
+     "d": "plant",
+     "at": "corner",
+     "p": 0.4
+    }
+   ]
+  },
+  "powder": {
+   "max_area": 8,
+   "area": 4,
+   "min_dim": 2,
+   "min_area": 4,
+   "aspect": 2.6,
+   "floor": [
+    "tile"
+   ],
+   "hab": false,
+   "win": 0.5,
+   "items": [
+    {
+     "run": [
+      [
+       "toilet",
+       "sink"
+      ],
+      [
+       "sink",
+       "toilet"
+      ]
+     ],
+     "req": 1
+    },
+    {
+     "d": "trash_bin",
+     "at": "corner",
+     "p": 0.7
+    },
+    {
+     "d": "plant",
+     "at": "corner",
+     "p": 0.3
+    }
+   ]
+  },
+  "office": {
+   "max_area": 20,
+   "area": 10,
+   "min_dim": 3,
+   "min_area": 9,
+   "aspect": 2.4,
+   "floor": [
+    "wood",
+    "carpet"
+   ],
+   "hab": true,
+   "win": 1.2,
+   "items": [
+    {
+     "d": "desk",
+     "at": "wall",
+     "n": [
+      1,
+      2
+     ],
+     "req": 1
+    },
+    {
+     "d": "computer",
+     "at": "wall",
+     "req": 1
+    },
+    {
+     "d": "bookcase_tall",
+     "at": "wall",
+     "n": [
+      1,
+      2
+     ],
+     "p": 0.9
+    },
+    {
+     "d": "terminal",
+     "at": "wall",
+     "p": 0.25
+    },
+    {
+     "d": "armchair",
+     "at": "corner",
+     "p": 0.4
+    },
+    {
+     "d": "lamp",
+     "at": "corner",
+     "p": 0.7
+    },
+    {
+     "d": "plant",
+     "at": "corner",
+     "p": 0.7
+    },
+    {
+     "d": "rug",
+     "at": "rug",
+     "p": 0.4
+    },
+    {
+     "d": "pendant_light",
+     "at": "ceil",
+     "p": 0.5
+    }
+   ]
+  },
+  "studio": {
+   "max_area": 24,
+   "area": 12,
+   "min_dim": 3,
+   "min_area": 9,
+   "aspect": 3.0,
+   "floor": [
+    "wood"
+   ],
+   "hab": true,
+   "win": 1.5,
+   "items": [
+    {
+     "d": "easel_large",
+     "at": "wall",
+     "req": 1
+    },
+    {
+     "d": "easel",
+     "at": "wall",
+     "n": [
+      1,
+      2
+     ],
+     "p": 0.9
+    },
+    {
+     "d": "bookcase_tall",
+     "at": "wall",
+     "p": 0.7
+    },
+    {
+     "d": "desk",
+     "at": "wall",
+     "p": 0.5
+    },
+    {
+     "d": "plant",
+     "at": "corner",
+     "n": [
+      1,
+      2
+     ],
+     "p": 0.8
+    },
+    {
+     "d": "lamp",
+     "at": "corner",
+     "p": 0.7
+    },
+    {
+     "d": "rug",
+     "at": "rug",
+     "p": 0.6
+    }
+   ]
+  },
+  "gym": {
+   "max_area": 24,
+   "area": 12,
+   "min_dim": 3,
+   "min_area": 9,
+   "aspect": 2.6,
+   "floor": [
+    "tile",
+    "wood"
+   ],
+   "hab": true,
+   "win": 1.0,
+   "items": [
+    {
+     "d": "treadmill",
+     "at": "wall",
+     "n": [
+      1,
+      2
+     ],
+     "req": 1
+    },
+    {
+     "d": "dumbbell_rack",
+     "at": "wall",
+     "req": 1
+    },
+    {
+     "d": "mirror",
+     "at": "wall",
+     "p": 0.8
+    },
+    {
+     "d": "stereo",
+     "at": "wall",
+     "p": 0.5
+    },
+    {
+     "d": "rug",
+     "at": "rug",
+     "p": 0.6
+    },
+    {
+     "d": "plant",
+     "at": "corner",
+     "p": 0.5
+    }
+   ]
+  },
+  "lounge": {
+   "area": 16,
+   "min_dim": 3,
+   "min_area": 12,
+   "aspect": 2.4,
+   "floor": [
+    "wood",
+    "carpet"
+   ],
+   "hab": true,
+   "win": 1.3,
+   "items": [
+    {
+     "d": "piano",
+     "at": "wall",
+     "p": 0.8
+    },
+    {
+     "d": "pool_table",
+     "at": "free",
+     "p": 0.7
+    },
+    {
+     "d": "fireplace",
+     "at": "wall",
+     "p": 0.5
+    },
+    {
+     "d": "guitar_stand",
+     "at": "corner",
+     "p": 0.6
+    },
+    {
+     "d": "armchair",
+     "at": "corner",
+     "n": [
+      1,
+      2
+     ],
+     "p": 0.8
+    },
+    {
+     "d": "stereo",
+     "at": "wall",
+     "p": 0.6
+    },
+    {
+     "d": "bookcase_tall",
+     "at": "wall",
+     "p": 0.5
+    },
+    {
+     "d": "lamp",
+     "at": "corner",
+     "p": 0.7
+    },
+    {
+     "d": "plant",
+     "at": "corner",
+     "p": 0.7
+    },
+    {
+     "d": "pendant_light",
+     "at": "ceil",
+     "p": 0.6
+    }
+   ]
+  },
+  "library": {
+   "area": 14,
+   "min_dim": 3,
+   "min_area": 9,
+   "aspect": 2.6,
+   "floor": [
+    "carpet",
+    "wood"
+   ],
+   "hab": true,
+   "win": 1.0,
+   "items": [
+    {
+     "d": "bookcase_tall",
+     "at": "wall",
+     "n": [
+      3,
+      5
+     ],
+     "req": 1
+    },
+    {
+     "d": "armchair",
+     "at": "corner",
+     "n": [
+      1,
+      2
+     ],
+     "p": 0.9
+    },
+    {
+     "d": "desk",
+     "at": "wall",
+     "p": 0.6
+    },
+    {
+     "d": "telescope",
+     "at": "wall",
+     "p": 0.3
+    },
+    {
+     "d": "lamp",
+     "at": "corner",
+     "n": [
+      1,
+      2
+     ],
+     "p": 0.9
+    },
+    {
+     "d": "plant",
+     "at": "corner",
+     "p": 0.5
+    },
+    {
+     "d": "rug",
+     "at": "rug",
+     "p": 0.5
+    }
+   ]
+  },
+  "laundry": {
+   "max_area": 10,
+   "area": 5,
+   "min_dim": 2,
+   "min_area": 4,
+   "aspect": 3.0,
+   "floor": [
+    "tile",
+    "concrete"
+   ],
+   "hab": false,
+   "win": 0.5,
+   "items": [
+    {
+     "d": "washing_machine",
+     "at": "wall",
+     "req": 1
+    },
+    {
+     "d": "counter",
+     "at": "wall",
+     "n": [
+      1,
+      2
+     ],
+     "p": 0.8
+    },
+    {
+     "d": "trash_bin",
+     "at": "corner",
+     "p": 0.7
+    }
+   ]
+  },
+  "garage": {
+   "max_area": 30,
+   "area": 14,
+   "min_dim": 3,
+   "min_area": 12,
+   "aspect": 2.4,
+   "floor": [
+    "concrete"
+   ],
+   "hab": false,
+   "win": 0.6,
+   "items": [
+    {
+     "d": "workbench",
+     "at": "wall",
+     "req": 1
+    },
+    {
+     "d": "washing_machine",
+     "at": "wall",
+     "p": 0.5
+    },
+    {
+     "d": "bookcase_tall",
+     "at": "wall",
+     "p": 0.7
+    },
+    {
+     "d": "dumbbell_rack",
+     "at": "wall",
+     "p": 0.4
+    },
+    {
+     "d": "fire_extinguisher",
+     "at": "wall",
+     "p": 0.7
+    },
+    {
+     "d": "trash_bin",
+     "at": "corner",
+     "p": 0.8
+    }
+   ]
+  },
+  "hall": {
+   "area": 8,
+   "min_dim": 1,
+   "min_area": 4,
+   "aspect": 99,
+   "floor": [
+    "wood",
+    "stone",
+    "tile"
+   ],
+   "hab": false,
+   "win": 0.3,
+   "items": [
+    {
+     "d": "plant",
+     "at": "corner",
+     "n": [
+      1,
+      2
+     ],
+     "p": 0.8,
+     "deep": 2
+    },
+    {
+     "d": "lamp",
+     "at": "corner",
+     "n": [
+      1,
+      2
+     ],
+     "p": 0.6,
+     "deep": 2
+    },
+    {
+     "d": [
+      "bookshelf",
+      "mirror"
+     ],
+     "at": "wall",
+     "n": [
+      1,
+      3
+     ],
+     "p": 0.7,
+     "deep": 2
+    },
+    {
+     "d": "smoke_alarm",
+     "at": "ceil",
+     "p": 0.8
+    },
+    {
+     "d": "pendant_light",
+     "at": "ceil",
+     "n": [
+      1,
+      2
+     ],
+     "p": 0.6,
+     "deep": 2
+    }
+   ]
+  }
+ },
+ "styles": {
+  "modern": {
+   "floor": {
+    "living": "wood",
+    "bedroom": "wood",
+    "master": "carpet",
+    "hall": "tile",
+    "dining": "wood"
+   }
+  },
+  "cosy": {
+   "floor": {
+    "living": "carpet",
+    "bedroom": "carpet",
+    "kitchen": "wood",
+    "hall": "wood",
+    "dining": "wood"
+   }
+  },
+  "artist": {
+   "floor": {
+    "living": "wood",
+    "studio": "wood",
+    "kitchen": "tile",
+    "bedroom": "wood",
+    "sleep": "carpet"
+   }
+  },
+  "tidy": {
+   "floor": {
+    "living": "carpet",
+    "bedroom": "carpet",
+    "kitchen": "tile",
+    "hall": "stone",
+    "dining": "wood",
+    "library": "carpet"
+   }
+  },
+  "family": {
+   "floor": {
+    "living": "carpet",
+    "bedroom": "carpet",
+    "kids": "carpet",
+    "kitchen": "tile",
+    "hall": "wood",
+    "kitchen_diner": "tile"
+   }
+  },
+  "estate": {
+   "floor": {
+    "living": "wood",
+    "hall": "stone",
+    "master": "carpet",
+    "lounge": "carpet",
+    "kitchen": "tile",
+    "dining": "wood",
+    "library": "wood"
+   }
+  }
+ },
+ "yard": {
+  "small": {
+   "items": [
+    [
+     "plant",
+     2,
+     3
+    ],
+    [
+     "trash_bin",
+     1,
+     1
+    ],
+    [
+     "garden_plot",
+     0,
+     1
+    ],
+    [
+     "grill",
+     0,
+     1
+    ]
+   ]
+  },
+  "classic": {
+   "items": [
+    [
+     "plant",
+     2,
+     4
+    ],
+    [
+     "trash_bin",
+     1,
+     1
+    ],
+    [
+     "garden_plot",
+     1,
+     1
+    ],
+    [
+     "grill",
+     0,
+     1
+    ],
+    [
+     "table",
+     0,
+     1
+    ]
+   ]
+  },
+  "medium": {
+   "items": [
+    [
+     "plant",
+     2,
+     4
+    ],
+    [
+     "trash_bin",
+     1,
+     1
+    ],
+    [
+     "garden_plot",
+     1,
+     2
+    ],
+    [
+     "grill",
+     1,
+     1
+    ],
+    [
+     "table",
+     0,
+     1
+    ]
+   ]
+  },
+  "large": {
+   "items": [
+    [
+     "plant",
+     4,
+     6
+    ],
+    [
+     "trash_bin",
+     1,
+     1
+    ],
+    [
+     "garden_plot",
+     1,
+     3
+    ],
+    [
+     "grill",
+     1,
+     1
+    ],
+    [
+     "hot_tub",
+     0,
+     1
+    ],
+    [
+     "fishing_spot",
+     0,
+     1
+    ],
+    [
+     "telescope",
+     0,
+     1
+    ],
+    [
+     "table",
+     0,
+     1
+    ]
+   ]
+  }
+ }
+}

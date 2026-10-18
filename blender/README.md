@@ -25,3 +25,11 @@ Materials (tintable): skin, hair, eyes, shirt, pants, shoes (+ eyewhite, mouth).
 Idle Walk Run Sit_Idle Sit_Eat Sit_Watch Sleep Use_Stand Cook Wash Read Exercise_Treadmill Paint Type Dance Talk Laugh Wave Cry Angry Sad_Idle
 Hug Kiss Carry Faint Fall Shower ToiletSit Swim_idle Baby_Idle Baby_Crawl. Sim state -> clip mapping: data/animation_map.json (scripts/world/folk_view.gd).
 build_all.py no longer rebuilds the folk (set LEGACY_FOLK=1 for the old blocky ones).
+
+## Folk variety (VARIETY agent)
+folk.py now only holds the rig + animation; geometry lives in folk_mesh.py (Mesher, materials, morph helper), folk_body.py
+(body, tops, bottoms, shoes) and folk_head.py (skull, face parts, 16 hair styles, facial hair, marks, glasses, hats, scarf, bags);
+folk_build.py assembles them. Each age glb holds ~90 toggleable skinned meshes (`hair_N`, `eyes_N`, `top_N`, `bottom_N`, `shoes_N`,
+`hat_N`, `bag_N`...) plus body-shape morph targets (`slim broad soft angular`) on tops and bottoms; Godot (scripts/world/folk_rig_style.gd)
+frees the unused parts and tints `skin hair eyes shirt pants shoes accent freckles`. Appearance keys: scripts/systems/genetics_look.gd.
+Uniqueness: scripts/systems/genetics_unique.gd (weighted perceptual distance >= 3.0 vs everyone in the world).

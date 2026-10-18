@@ -41,7 +41,7 @@ func set_edge(e: Vector3i, type: String) -> bool:
 		world.walls.erase(e)
 	else:
 		world.walls[e] = type
-	world.rooms.dirty = true
+	world.rooms.mark_dirty_edge(e)
 	world._emit("walls_changed")
 	return true
 
@@ -72,6 +72,9 @@ func set_wall_line(a: Vector2i, b: Vector2i, type: String = "wall", household_id
 	var would := 0
 	for e in _line_edges(a, b):
 		if world.walls.get(e, "") != ("" if type == "none" else type):
+			if not world.regions.can_build_edge(e):
+				world.regions.deny()
+				return 0
 			would += 1
 	if would == 0:
 		return 0
@@ -95,12 +98,18 @@ func paint_floor_rect(a: Vector2i, b: Vector2i, type: String, household_id: int 
 	var lo := Vector2i(mini(a.x, b.x), mini(a.y, b.y))
 	var hi := Vector2i(maxi(a.x, b.x), maxi(a.y, b.y))
 	var changes: Array = []
+	var denied := false
 	for y in range(lo.y, hi.y + 1):
 		for x in range(lo.x, hi.x + 1):
 			var t := Vector2i(x, y)
 			if world.in_bounds(t) and world.get_floor(t) != type:
+				if not world.regions.can_build(t):
+					denied = true
+					continue
 				changes.append({"t": t, "old": world.get_floor(t)})
 	if changes.is_empty():
+		if denied:
+			world.regions.deny()
 		return 0
 	var cost: int = changes.size() * world.FLOOR_PRICE
 	if not world._spend(hid, cost):
@@ -108,7 +117,8 @@ func paint_floor_rect(a: Vector2i, b: Vector2i, type: String, household_id: int 
 		return 0
 	for c in changes:
 		world.floors[c["t"].y * world.width + c["t"].x] = type
-	world.rooms.dirty = true
+		world.regions.mark_floor_dirty(c["t"])
+	world.rooms.mark_dirty_rect(lo, hi)
 	world._emit("floors_changed")
 	world._push_undo({"t": "floor", "changes": changes, "new": type, "cost": cost, "hid": hid})
 	return changes.size()
@@ -117,7 +127,10 @@ func paint_floor_rect(a: Vector2i, b: Vector2i, type: String, household_id: int 
 func set_floor_raw(t: Vector2i, type: String) -> void:
 	if world.in_bounds(t):
 		world.floors[t.y * world.width + t.x] = type
-		world.rooms.dirty = true
+		if bool((world.FLOOR_DEFS.get(type, {}) as Dictionary).get("blocks", false)):
+			world._blocked[t] = true            # water: not walkable
+		world.regions.mark_floor_dirty(t)
+		world.rooms.mark_dirty(t)
 
 func set_floor_rect_raw(a: Vector2i, b: Vector2i, type: String) -> void:
 	for y in range(mini(a.y, b.y), maxi(a.y, b.y) + 1):

@@ -29,10 +29,6 @@ func attach(lv: Node3D) -> void:
 		ev.object_placed.connect(func(_i): _lamp_timer = 0.0)
 		ev.object_removed.connect(func(_i): _lamp_timer = 0.0)
 		ev.object_state_changed.connect(func(_i, _k): _lamp_timer = minf(_lamp_timer, 0.2))
-	var w = WorldIface.world()
-	if w != null and w.has_signal("floors_changed"):
-		w.floors_changed.connect(func(): _floors_dirty = true)
-		w.world_reset.connect(func(): _floors_dirty = true)
 	_apply(1.0, true)
 
 
@@ -45,18 +41,11 @@ func _build_visuals() -> void:
 	moon.light_energy = 0.0
 	moon.shadow_enabled = false
 	lot.add_child(moon)
-	_grass_mat = _overlay_mat()
-	_snow_mat = _overlay_mat()
-	grass_mi = MeshInstance3D.new()
-	grass_mi.name = "SeasonGrass"
-	grass_mi.material_override = _grass_mat
-	grass_mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	add_child(grass_mi)
-	snow_mi = MeshInstance3D.new()
-	snow_mi.name = "SnowCover"
-	snow_mi.material_override = _snow_mat
-	snow_mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	add_child(snow_mi)
+	# the grass-tint / snow overlay meshes live in the LotView chunks; share their materials
+	var gm = lot.get("overlay_grass_mat")
+	var sm = lot.get("overlay_snow_mat")
+	_grass_mat = gm if gm != null else _overlay_mat()
+	_snow_mat = sm if sm != null else _overlay_mat()
 	rain = _make_rain()
 	rain.visible = false
 	add_child(rain)

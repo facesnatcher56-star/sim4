@@ -48,14 +48,33 @@ static func _has_open_invite(folk_id: int) -> bool:
 			return true
 	return false
 
+## Where visitors come to: the player's home lot entry on the map (a fixed tile in tests / a single lot).
 static func entrance() -> Vector2i:
 	if Story.spawn_tile != Vector2i(-999, -999):
 		return Story.spawn_tile
+	var door: Vector2i = Neighborhood.entry_tile(Neighborhood.HOME)
+	if door.x >= 0:
+		return door
 	var w = WorldIface.world()
 	if w != null and "starter_spawn_tiles" in w and (w.starter_spawn_tiles as Array).size() > 0:
 		return (w.starter_spawn_tiles as Array)[0]
 	var e: Array = Story.cfg().get("visits", {}).get("entrance", [1, 1])
 	return Vector2i(int(e[0]), int(e[1]))
+
+const MAX_GUEST_WALK := 30      # tiles a guest walks to the door at most: farther away it is placed this far out on its route
+
+## Where a guest appears: at its own home's entry, but at most MAX_GUEST_WALK tiles of road from the host door.
+static func arrival_tile(townie_id: int, door: Vector2i) -> Vector2i:
+	var home_lot: String = Neighborhood.home_of_townie(townie_id)
+	if home_lot == "":
+		return door
+	var start: Vector2i = Neighborhood.entry_tile(home_lot)
+	if start.x < 0:
+		return door
+	var path: Array = WorldIface.find_path(start, door)
+	if path.size() > MAX_GUEST_WALK:
+		return path[path.size() - MAX_GUEST_WALK]
+	return start
 
 ## Schedule guests (townie ids) to visit `host_id` at absolute game minute `arrive_min`.
 static func schedule_visit(guest_ids: Array, host_id: int, arrive_min: int, duration: int, kind: String = "visit") -> Dictionary:
@@ -125,8 +144,13 @@ static func _arrive(sit: Dictionary) -> void:
 	var count: int = 0
 	for gid in sit["guest_ids"]:
 		var t: Dictionary = Story.townies.get(int(gid), {})
-		if t.is_empty() or not bool(t["alive"]) or SysUtil.folk(int(gid)) != null:
+		if t.is_empty() or not bool(t["alive"]):
 			continue
+		var there = SysUtil.folk(int(gid))
+		if there != null:
+			if not there.has_meta("crowd"):
+				continue
+			Crowd.dismiss(there)          # the townie was hanging out at a venue: they leave it to come over
 		var keep_next: int = Folk._next_id      # townie ids (1000+) must not push regular folk ids up
 		var f := Folk.create(str(t["name"]), (t["traits"] as Array).duplicate(), int(gid))
 		Folk._next_id = keep_next
@@ -139,7 +163,7 @@ static func _arrive(sit: Dictionary) -> void:
 		for n in f.needs:
 			(f.needs[n] as Stat).set_value(SysUtil.rng.randf_range(20.0, 70.0))
 		RelationshipService.restore_folk(f)
-		SysUtil.world_add_folk(f, tile)
+		SysUtil.world_add_folk(f, arrival_tile(int(gid), tile))
 		Aging.apply_stage_buff(f)
 		(sit["roles"] as Dictionary)[str(gid)] = "guest"
 		(sit["spawned"] as Array).append(int(gid))

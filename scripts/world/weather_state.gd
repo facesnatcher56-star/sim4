@@ -23,8 +23,6 @@ var env: Environment = null
 var moon: DirectionalLight3D = null
 var rain: GPUParticles3D = null
 var snow: GPUParticles3D = null
-var grass_mi: MeshInstance3D = null
-var snow_mi: MeshInstance3D = null
 var scenery: Node3D = null
 var headless: bool = false
 ## Smoothed parameters (read by tests / screenshots).
@@ -41,7 +39,6 @@ var _flash_timer: float = 6.0
 var _lamp_lights: Dictionary = {}   # object id -> OmniLight3D
 var _lamp_timer: float = 0.0
 var _sky_flash_col: Color = Color.WHITE
-var _floors_dirty: bool = true
 var time_scale_real: float = 1.0
 var fixed_hour: float = -1.0        # >= 0 pins the sun to this hour (screenshots)
 

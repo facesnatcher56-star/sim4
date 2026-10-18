@@ -1,11 +1,11 @@
 class_name NeighborhoodService
 extends RefCounted
-## Per-minute / per-hour glue for the neighbourhood layer (called from SystemsManager):
-##   before_minute()  - off-lot folk whose shift/school starts are woken up so Careers can dispatch them; postpones
-##                      home visits while the player is elsewhere
-##   after_minute()   - reconciles where everybody is, simple "statistical" need satisfaction for off-lot folk,
-##                      ambient NPC crowd + staff, venue buffs, chance meetings, hangout invitations, closing time
-##   on_interaction_finished / on_game_event - venue skill bonuses, groceries, arrival toasts
+## Per-minute / per-hour glue for the neighbourhood layer (called from SystemsManager). Every lot exists at once on the map, so
+## all of this works PER LOT, using each folk's tile (Neighborhood.lot_of):
+##   before_minute()  - postpones home visits while nobody is home
+##   after_minute()   - region watcher (entry rules), ambient NPC crowd + staff per venue lot, venue buffs, chance meetings,
+##                      hangout invitations, closing time
+##   on_interaction_finished / on_game_event - venue skill bonuses, groceries
 ## Invitations: NeighborhoodService.invite_to_venue(townie_id, folk_id, lot_id) (also StoryVisits.invite_to_venue).
 
 static func install() -> void:
@@ -16,42 +16,15 @@ static func cfg() -> Dictionary:
 
 # ------------------------------------------------------------------ minute
 static func before_minute() -> void:
-	for f in SysUtil.residents():
-		if not f.has_meta("offlot"):
-			continue
-		var fid: int = int(f.id)
-		var reason: String = str(Away.info(fid).get("reason", ""))
-		if reason == "" and Away.pending.has(fid):
-			reason = str((Away.pending[fid] as Dictionary).get("reason", ""))
-		if reason != Neighborhood.STAY:
-			continue
-		if _duty_due(f):
-			NeighborhoodLots._detach_away(f)        # CareerShifts.on_minute (next) sends them to work / school; the metas keep them hidden
 	_postpone_visits()
 
 static func after_minute() -> void:
-	_reconcile()
-	_stay_needs()
+	NeighborhoodLots.on_minute()
 	Crowd.update()
 	_ambient()
 	_meetings()
 	_meetups()
 	_closing()
-
-## Is a shift or school day starting for this off-lot folk?
-static func _duty_due(f) -> bool:
-	var fid: int = int(f.id)
-	var day: int = SysUtil.day()
-	var h: float = SysUtil.hour_f()
-	if Careers.jobs.has(fid):
-		var j: Dictionary = Careers.jobs[fid]
-		return int(j["attempt_day"]) != day and CareerShifts.is_work_day(str(j["career"]), day, str(j.get("shift", "day"))) \
-			and CareerShifts.in_shift_window(h, f.work_start, f.work_end)
-	if Careers.school.has(fid):
-		var sc: Dictionary = Careers.cfg().get("school", {})
-		var st: Dictionary = Careers.school[fid]
-		return int(st["attempt_day"]) != day and CareerShifts.is_school_day(day) and h >= float(sc.get("start", 9)) and h < float(sc.get("end", 15))
-	return false
 
 ## Visits scheduled for the home lot cannot start while nobody is home to receive the guests.
 static func _postpone_visits() -> void:
@@ -59,84 +32,43 @@ static func _postpone_visits() -> void:
 	for sit in Story.situations:
 		if str(sit["state"]) != "scheduled" or now < int(sit["arrive_min"]):
 			continue
-		var ready: bool = Neighborhood.current_lot == Neighborhood.HOME
-		if ready:
-			ready = false
-			for hid in sit["host_ids"]:
-				var hf = SysUtil.folk(int(hid))
-				if hf != null and not hf.has_meta("offlot") and Neighborhood.where(int(hid)) == Neighborhood.HOME:
-					ready = true
+		var ready: bool = false
+		for hid in sit["host_ids"]:
+			var hf = SysUtil.folk(int(hid))
+			if hf != null and Neighborhood.where(int(hid)) == Neighborhood.HOME:
+				ready = true
 		if not ready:
 			sit["arrive_min"] = int(sit["arrive_min"]) + 30
 			sit["end_min"] = int(sit["end_min"]) + 30
 
-static func _reconcile() -> void:
-	for f in SysUtil.residents():
-		var fid: int = int(f.id)
-		if Away.active.has(fid) or Away.pending.has(fid):
-			continue
-		var at: String = Neighborhood.where(fid)
-		if at != Neighborhood.current_lot:
-			NeighborhoodLots.make_stay(f)
-		elif f.has_meta("offlot"):
-			NeighborhoodLots.appear(f)
-
-## Cheap stand-in for autonomy: off-lot folk eat, wash, sleep and socialise on simple rules so nobody starves.
-static func _stay_needs() -> void:
-	var h: float = SysUtil.hour_f()
-	var night: bool = h >= 23.0 or h < 6.5
-	for f in SysUtil.residents():
-		if not f.has_meta("offlot") or str(Away.info(int(f.id)).get("reason", "")) != Neighborhood.STAY:
-			continue
-		var at: String = Neighborhood.where(int(f.id))
-		var is_home_like: bool = at == Neighborhood.HOME or Venues.type_of_lot(at) == "townie_home"
-		var vtype: String = Venues.type_of_lot(at)
-		if f.get_stat_value("hunger") < -2.0:
-			var cost: int = 0 if is_home_like else 5
-			if cost == 0 or Economy.spend(int(f.household_id), cost, "meal out"):
-				f.add_to_stat("hunger", 48.0)
-				f.add_to_stat("fun", 3.0)
-		if f.get_stat_value("bladder") < -8.0:
-			f.add_to_stat("bladder", 70.0)
-		if f.get_stat_value("hygiene") < -8.0:
-			f.add_to_stat("hygiene", 55.0 if is_home_like else 25.0)
-		if night and f.get_stat_value("energy") < 92.0:
-			f.add_to_stat("energy", 0.35)
-		elif f.get_stat_value("energy") < -8.0:
-			f.add_to_stat("energy", 35.0)
-		if f.get_stat_value("social") < -8.0:
-			f.add_to_stat("social", 35.0 if vtype in ["cafe", "park", "townie_home"] else 28.0)
-		if f.get_stat_value("fun") < -8.0:
-			f.add_to_stat("fun", 32.0)
-		if f.get_stat_value("comfort") < -8.0:
-			f.add_to_stat("comfort", 30.0)
-
-## Venue ambience: a mood buff for every resident on the lot, refreshed on a timer.
+## Venue ambience: a mood buff for every resident on a venue lot, refreshed on a timer.
 static func _ambient() -> void:
-	if Neighborhood.current_lot == Neighborhood.HOME:
-		return
-	var amb: Dictionary = Venues.ambient(Venues.type_of_lot(Neighborhood.current_lot))
-	if amb.is_empty():
-		return
 	var now: int = SimEnv.now_min()
 	for f in SysUtil.residents():
-		if f.has_meta("offlot") or SysUtil.is_away(f) or Neighborhood.where(int(f.id)) != Neighborhood.current_lot:
+		if SysUtil.is_away(f):
+			continue
+		var lot_id: String = Neighborhood.lot_of(f)
+		if lot_id == "" or lot_id == Neighborhood.HOME:
+			continue
+		var amb: Dictionary = Venues.ambient(Venues.type_of_lot(lot_id))
+		if amb.is_empty():
 			continue
 		if now - int(f.get_meta("amb_last", -9999)) >= int(amb.get("every_min", 120)):
 			f.set_meta("amb_last", now)
 			f.add_buff(str(amb["buff"]))
 
 static func _meetings() -> void:
-	if Neighborhood.current_lot == Neighborhood.HOME:
-		return
 	var now: int = SimEnv.now_min()
 	if now % int(cfg().get("meet_check_min", 20)) != 0:
 		return
-	var lot_label: String = Neighborhood.label_of(Neighborhood.current_lot)
 	for r in SysUtil.residents():
-		if r.has_meta("offlot") or SysUtil.is_away(r):
+		if SysUtil.is_away(r):
 			continue
-		for n in Crowd.crowd_folk():
+		var lot_id: String = Neighborhood.lot_of(r)
+		if lot_id == "" or lot_id == Neighborhood.HOME:
+			continue
+		var lot_label: String = Neighborhood.label_of(lot_id)
+		for n in Crowd.crowd_folk(lot_id):
 			if n.has_meta("leaving"):
 				continue
 			var tid: int = int(n.get_meta("townie_id", -1))
@@ -148,7 +80,7 @@ static func _meetings() -> void:
 					RelationshipService.add_both(rid, tid, "friendship", float(Story.cfg().get("visits", {}).get("acquaintance_friendship", 6)))
 					RelationshipService.add_history(rid, tid, "met", 0.3, tid)
 					SysUtil.notify("%s met %s at %s." % [r.name, n.name, lot_label], "relationship")
-					SysUtil.game_event("met_townie", {"folk_id": rid, "townie_id": tid, "lot_id": Neighborhood.current_lot})
+					SysUtil.game_event("met_townie", {"folk_id": rid, "townie_id": tid, "lot_id": lot_id})
 					break
 			elif SysUtil.chance(0.3):
 				RelationshipService.add_both(rid, tid, "friendship", 1.5)
@@ -156,23 +88,21 @@ static func _meetings() -> void:
 
 # ------------------------------------------------------------------ closing time
 static func _closing() -> void:
-	var lot_id: String = Neighborhood.current_lot
-	if lot_id == Neighborhood.HOME:
-		return
-	var left: int = Venues.minutes_to_close(lot_id)
-	var here: Array = Neighborhood.folk_at(lot_id)
-	if here.is_empty():
-		return
-	if left == int(cfg().get("closing_notice_min", 20)):
-		SysUtil.notify("%s closes in %d minutes." % [Neighborhood.label_of(lot_id), left], "warn")
-	if not Venues.is_open(lot_id):
-		var ids: Array = []
-		for id in here:
-			if not Neighborhood.traveling(int(id)):
-				ids.append(int(id))
-		if not ids.is_empty():
+	for lot_id in Neighborhood.lot_ids():
+		if lot_id == Neighborhood.HOME:
+			continue
+		var here: Array = []
+		for id in Neighborhood.folk_at(lot_id):
+			if not Neighborhood.traveling(int(id)) and not SysUtil.is_away(SysUtil.folk(int(id))):
+				here.append(int(id))
+		if here.is_empty():
+			continue
+		var left: int = Venues.minutes_to_close(lot_id)
+		if left == int(cfg().get("closing_notice_min", 20)):
+			SysUtil.notify("%s closes in %d minutes." % [Neighborhood.label_of(lot_id), left], "warn")
+		if not Venues.is_open(lot_id):
 			SysUtil.notify("%s is closed. Heading home." % Neighborhood.label_of(lot_id), "warn")
-			Neighborhood.travel(ids, Neighborhood.HOME, {"quiet": true})
+			Neighborhood.travel(here, Neighborhood.HOME, {"quiet": true})
 
 # ------------------------------------------------------------------ hangouts
 ## Ask a townie to meet a folk at a venue (arrives `delay` minutes from now for `duration` minutes). Returns the record or {}.
@@ -204,8 +134,9 @@ static func _meetups() -> void:
 			"pending":
 				if now < int(m["arrive_min"]):
 					continue
-				var folk_here: bool = Neighborhood.current_lot == str(m["lot_id"]) and Neighborhood.where(int(m["folk_id"])) == Neighborhood.current_lot
-				if folk_here and Crowd.count() < Venues.crowd_cap() + 1:
+				var lot_id: String = str(m["lot_id"])
+				var folk_here: bool = Neighborhood.where(int(m["folk_id"])) == lot_id
+				if folk_here and Crowd.count(lot_id) < Venues.crowd_cap() + 1:
 					var t: Dictionary = Story.townies.get(int(m["townie_id"]), {})
 					var existing = SysUtil.folk(int(m["townie_id"]))
 					if t.is_empty() or (existing != null and not existing.has_meta("crowd")):
@@ -213,7 +144,7 @@ static func _meetups() -> void:
 						continue
 					var npc = existing
 					if npc == null:
-						npc = Crowd.spawn_npc(t, str(m["lot_id"]), Venues.type_of_lot(str(m["lot_id"])), int(m["end_min"]) - now)
+						npc = Crowd.spawn_npc(t, lot_id, Venues.type_of_lot(lot_id), int(m["end_min"]) - now)
 					else:
 						npc.set_meta("leave_min", int(m["end_min"]))      # already in the crowd: they simply stay for the hangout
 						if npc.has_meta("leaving"):
@@ -223,7 +154,7 @@ static func _meetups() -> void:
 					var greet := Interaction.create("chat", npc, int(m["folk_id"]), false)
 					if greet != null:
 						npc.enqueue(greet)
-					SysUtil.notify("%s arrived at %s to hang out with %s." % [npc.name, Neighborhood.label_of(str(m["lot_id"])), SysUtil.folk_name(int(m["folk_id"]))], "visit")
+					SysUtil.notify("%s arrived at %s to hang out with %s." % [npc.name, Neighborhood.label_of(lot_id), SysUtil.folk_name(int(m["folk_id"]))], "visit")
 				elif now > int(m["arrive_min"]) + 60:
 					m["state"] = "done"
 					RelationshipService.add_both(int(m["folk_id"]), int(m["townie_id"]), "friendship", -3.0)
@@ -245,12 +176,15 @@ static func _meetups() -> void:
 
 # ------------------------------------------------------------------ events
 static func on_interaction_finished(folk_id: int, iid: String, success: bool) -> void:
-	if not success or Neighborhood.current_lot == Neighborhood.HOME:
+	if not success:
 		return
 	var f = SysUtil.folk(folk_id)
 	if f == null or not SysUtil.is_resident(f):
 		return
-	var xp: Array = Venues.interaction_xp(Venues.type_of_lot(Neighborhood.current_lot)).get(iid, [])
+	var lot_id: String = Neighborhood.lot_of(f)
+	if lot_id == "" or lot_id == Neighborhood.HOME:
+		return
+	var xp: Array = Venues.interaction_xp(Venues.type_of_lot(lot_id)).get(iid, [])
 	if xp.size() >= 2:
 		f.add_skill_xp(str(xp[0]), float(xp[1]))
 
@@ -264,5 +198,6 @@ static func on_game_event(ev_name: String, payload: Dictionary) -> void:
 				var f = SysUtil.folk(int(payload.get("folk_id", -1)))
 				if f != null:
 					f.set_meta("amb_last", -9999)
-					if Neighborhood.where(int(f.id)) == Neighborhood.current_lot:
-						SysUtil.notify("%s arrived at %s." % [f.name, Neighborhood.label_of(Neighborhood.current_lot)], "travel")
+					var at: String = Neighborhood.lot_of(f)
+					if at != "":
+						SysUtil.notify("%s arrived at %s." % [f.name, Neighborhood.label_of(at)], "travel")

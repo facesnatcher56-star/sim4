@@ -63,6 +63,7 @@ func _build_visual() -> void:
 	_arms.clear()
 	_xray_on = false
 	var f = World.get_folk(folk_id)
+	_styled = false
 	_stage_now = stage_of(f)
 	variant = _stage_now
 	var path := variant_path(variant)
@@ -98,8 +99,13 @@ func _appearance_of(f) -> Dictionary:
 	return {}
 
 
-## Tint materials (skin/hair/eyes/shirt/pants), choose the hair style, apply height & build.
+## Show / hide / tint the model parts for the appearance (FolkRigStyle); a changed look rebuilds the model (unused parts are freed).
+var _styled: bool = false
+
 func _apply_appearance(f) -> void:
+	if _styled and not _is_placeholder:
+		_build_visual()
+		return
 	var ap := _appearance_of(f)
 	_look_sig = hash(ap) + 31 * hash(_stage_now)
 	var skin := color_of(ap.get("skin", null), Color(0.90, 0.70, 0.56))
@@ -110,7 +116,6 @@ func _apply_appearance(f) -> void:
 	var pants := color_of(ap.get("pants", null), Color(0.25, 0.28, 0.40))
 	var height := clampf(float(ap.get("height", 1.0)), 0.8, 1.2)
 	var build := clampf(float(ap.get("build", 1.0)), 0.8, 1.2)
-	var style := clampi(int(ap.get("hair_style", folk_id % 6)), 0, 5)
 	var tints := {"skin": skin, "hair": hair, "eyes": eyes, "shirt": shirt, "pants": pants}
 	var vs: Dictionary = anim_map().get("variant_scale", {})
 	_body_scale = float(vs.get(_stage_now, 1.0)) * height
@@ -120,28 +125,8 @@ func _apply_appearance(f) -> void:
 		_tint_placeholder(tints)
 		return
 	_rig.scale = Vector3(build * height, height, build * height)
-	_tint_model(_rig, tints)
-	for i in 6:
-		var hn := _rig.find_child("hair_%d" % i, true, false)
-		if hn is Node3D:
-			(hn as Node3D).visible = (i == style)
-
-
-func _tint_model(n: Node, tints: Dictionary) -> void:
-	if n is MeshInstance3D:
-		var mi := n as MeshInstance3D
-		if mi.mesh != null:
-			for s in mi.mesh.get_surface_count():
-				var m: Material = mi.mesh.surface_get_material(s)
-				if m == null:
-					continue
-				var key := str(m.resource_name)
-				if tints.has(key) and m is BaseMaterial3D:
-					var d := (m as BaseMaterial3D).duplicate() as BaseMaterial3D
-					d.albedo_color = tints[key]
-					mi.set_surface_override_material(s, d)
-	for c in n.get_children():
-		_tint_model(c, tints)
+	FolkRigStyle.apply(_rig, ap, _stage_now, shirt_d)
+	_styled = true
 
 
 func _mat(c: Color) -> StandardMaterial3D:

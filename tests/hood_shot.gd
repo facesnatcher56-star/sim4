@@ -54,32 +54,32 @@ func _run() -> void:
 	for i in 40:
 		clock.advance_minutes(1)
 	_main.lot_view.set_zoom(14.0)
-	_main.lot_view.focus_tile(Vector2i(15, 11))
+	Neighborhood.focus_lot("cafe")
 	await _secs(1.2)
 	for i in 20:
 		clock.advance_minutes(1)
 	await _secs(0.8)
-	print("crowd: ", Crowd.count(), " staff: ", Crowd.staff_folk().size())
+	print("crowd: ", Crowd.count("cafe"), " staff: ", Crowd.staff_folk("cafe").size())
 	_save("cafe")
 	# park
 	Neighborhood.travel(ids, "park", {"instant": true})
 	for i in 40:
 		clock.advance_minutes(1)
 	_main.lot_view.set_zoom(16.0)
-	_main.lot_view.focus_tile(Vector2i(15, 12))
+	Neighborhood.focus_lot("park")
 	await _secs(1.2)
 	_save("park")
 	Neighborhood.travel(ids, "gym", {"instant": true, "free": true})
 	for i in 40:
 		clock.advance_minutes(1)
 	_main.lot_view.set_zoom(14.0)
-	_main.lot_view.focus_tile(Vector2i(15, 11))
+	Neighborhood.focus_lot("gym")
 	await _secs(1.2)
 	_save("gym")
 	Neighborhood.travel(ids, "library", {"instant": true})
 	for i in 40:
 		clock.advance_minutes(1)
-	_main.lot_view.focus_tile(Vector2i(15, 11))
+	Neighborhood.focus_lot("library")
 	await _secs(1.2)
 	_save("library")
 	hud.travel_panel.open_panel()

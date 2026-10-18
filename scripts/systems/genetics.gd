@@ -13,6 +13,8 @@ extends RefCounted
 ##   height      : float 0.9..1.1   multiplier on the ADULT body height (view scales babies/children on top of it)
 ##   build       : float 0.9..1.1   body width multiplier (1.0 = default)
 ##   color       : "#rrggbb"  convenience alias of `shirt` (UIU.folk_color already understands this key)
+##   NEW (see GeneticsLook): body_type, frame, face, mouth, brows, ears, facial_hair, mark, glasses, hat, scarf, bag, top, bottom,
+##   shoes (ints), accent, shoe_color (hex). Old appearances without them are upgraded deterministically by normalize().
 ## Missing/empty appearance means "not generated yet": call Genetics.ensure(folk) (SystemsManager does it for everyone;
 ## Folk.create already assigns a random one).
 ##
@@ -25,6 +27,7 @@ extends RefCounted
 ##     neither parent has, capped to the trait slots of `cap_stage`
 ##   * height / build: parent average + gaussian noise, clamped
 
+const HAT_BLOCK := [4, 5, 6, 7, 10, 13, 14]     # tall hair styles that cannot wear a cap or beanie
 const KEYS := ["skin", "hair_style", "hair_color", "eye_color", "shirt", "pants", "height", "build"]
 
 ## Independent rng so appearance never perturbs the gameplay rng (SysUtil.rng) and tests stay deterministic.
@@ -60,9 +63,21 @@ static func blend_hex(a: String, b: String, w: float) -> String:
 	return linear_to_hex(Color(lerpf(la.r, lb.r, w), lerpf(la.g, lb.g, w), lerpf(la.b, lb.b, w)))
 
 static func _pick_hex(arr: Array, g: RandomNumberGenerator) -> String:
+	return pick_hex(arr, g)
+
+## Random palette colour; entries may be {hex, freq} (freq = relative frequency, default 1) or plain hex strings.
+static func pick_hex(arr: Array, g: RandomNumberGenerator) -> String:
 	if arr.is_empty():
 		return "#808080"
-	var v = arr[g.randi_range(0, arr.size() - 1)]
+	var total := 0.0
+	for e in arr:
+		total += float(e.get("freq", 1.0)) if e is Dictionary else 1.0
+	var x := g.randf() * total
+	for e in arr:
+		x -= float(e.get("freq", 1.0)) if e is Dictionary else 1.0
+		if x < 0.0:
+			return str(e["hex"]) if e is Dictionary else str(e)
+	var v = arr[arr.size() - 1]
 	return str(v["hex"]) if v is Dictionary else str(v)
 
 # ------------------------------------------------------------------ random appearance
@@ -77,9 +92,10 @@ static func random_appearance(r: RandomNumberGenerator = null) -> Dictionary:
 	var bmin: float = float(c.get("build", {}).get("min", 0.9))
 	var bmax: float = float(c.get("build", {}).get("max", 1.1))
 	var shirt: String = _pick_hex(c.get("shirt_colors", []), g)
-	return {
+	var look: Dictionary = GeneticsLook.random_look(g)
+	var ap := {
 		"skin": blend_hex(t1, t2, g.randf()),
-		"hair_style": g.randi_range(0, int(c.get("hair_styles", 6)) - 1),
+		"hair_style": int(look["hair_style"]),
 		"hair_color": _pick_hex(c.get("hair_colors", []), g),
 		"eye_color": _pick_hex(c.get("eye_colors", []), g),
 		"shirt": shirt,
@@ -88,6 +104,10 @@ static func random_appearance(r: RandomNumberGenerator = null) -> Dictionary:
 		"build": snappedf(g.randf_range(bmin, bmax), 0.001),
 		"color": shirt,
 	}
+	for k in look:
+		if not ap.has(k) or k in ["shirt", "pants", "color"]:
+			ap[k] = look[k]
+	return ap
 
 ## Fix types after a JSON round trip (ints become floats) and fill missing keys.
 static func normalize(ap: Dictionary) -> Dictionary:
@@ -100,6 +120,7 @@ static func normalize(ap: Dictionary) -> Dictionary:
 	for k in ["skin", "hair_color", "eye_color", "shirt", "pants"]:
 		out[k] = str(out.get(k, "#808080"))
 	out["color"] = str(out.get("color", out["shirt"]))
+	GeneticsLook.upgrade(out)
 	return out
 
 static func is_valid(ap) -> bool:
@@ -148,7 +169,7 @@ static func _ap_of(p) -> Dictionary:
 		ap = p.get("appearance", {})
 	elif p != null:
 		ap = p.appearance
-	return ap if is_valid(ap) else {}
+	return normalize(ap) if is_valid(ap) else {}
 
 static func _traits_of(p) -> Array:
 	if p is Dictionary:
@@ -212,7 +233,7 @@ static func inherit(parent_a, parent_b, r: RandomNumberGenerator = null, opts: D
 	var ns: float = float(inh.get("body_noise_sigma", 0.02))
 	var style: int = int(aa["hair_style"]) if g.randf() < 0.5 else int(ab["hair_style"])
 	if g.randf() < float(inh.get("hair_style_random_chance", 0.12)):
-		style = g.randi_range(0, int(c.get("hair_styles", 6)) - 1)
+		style = g.randi_range(0, int(GeneticsLook.counts()["hair_style"]) - 1)
 	var shirt: String = _pick_hex(c.get("shirt_colors", []), g)
 	var ap: Dictionary = {
 		"skin": inherit_skin(str(aa["skin"]), str(ab["skin"]), g),
@@ -225,6 +246,14 @@ static func inherit(parent_a, parent_b, r: RandomNumberGenerator = null, opts: D
 		"build": snappedf(clampf((float(aa["build"]) + float(ab["build"])) * 0.5 + g.randfn(0.0, ns), bmin, bmax), 0.001),
 		"color": shirt,
 	}
+	var look: Dictionary = GeneticsLook.inherit_look(aa, ab, g)
+	for k in look:
+		ap[k] = look[k]
+	ap["hair_style"] = style
+	if ap["hat"] != 0 and HAT_BLOCK.has(style):
+		ap["hat"] = 0
+	var others: Array = opts["others"] if opts.has("others") else GeneticsUnique.registry()
+	ap = GeneticsUnique.make_distinct(ap, others, g)
 	return {"appearance": ap, "traits": inherit_traits(parent_a, parent_b, g, opts)}
 
 static func inherit_traits(parent_a, parent_b, r: RandomNumberGenerator = null, opts: Dictionary = {}) -> Array:
@@ -257,3 +286,22 @@ static func inherit_traits(parent_a, parent_b, r: RandomNumberGenerator = null, 
 		cand.erase(pick)
 		out.append(pick)
 	return out
+
+# ------------------------------------------------------------------ look helpers (see GeneticsLook / GeneticsUnique)
+## Plain mid-range appearance used when a folk has none yet (rendering fallback).
+static func neutral_appearance() -> Dictionary:
+	var ap := {"skin": "#d9a47f", "hair_color": "#3d281c", "eye_color": "#5b3a22", "shirt": "#4f9ec4", "pants": "#3a4660",
+		"height": 1.0, "build": 1.0, "color": "#4f9ec4"}
+	ap.merge(GeneticsLook.NEUTRAL, true)
+	return ap
+
+static func signature(ap: Dictionary) -> String:
+	return GeneticsLook.signature(ap)
+
+## Perceptual distance of two appearances (weighted count of differing channels; see GeneticsLook.channels).
+static func distance(a: Dictionary, b: Dictionary) -> float:
+	return GeneticsLook.distance(a, b)
+
+## A random appearance that is perceptually distinct from `others` (an Array of appearance dictionaries).
+static func unique_appearance(others: Array, r: RandomNumberGenerator = null) -> Dictionary:
+	return GeneticsUnique.unique_random(others, _r(r))

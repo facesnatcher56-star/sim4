@@ -7,6 +7,7 @@ extends "res://scripts/world/lot_walls.gd"
 func _on_selection_changed(kind: String, id: int) -> void:
 	selected_kind = kind
 	selected_id = id
+	_begin_follow(kind, id)
 
 
 func _set_selected(kind: String, id: int) -> void:
@@ -76,7 +77,13 @@ func pick(mp: Vector2) -> Dictionary:
 				best_t = t
 				kind = "folk"
 				id = fid
+	var gp = ground_point(mp)       # only objects near where the ray meets the ground can be hit (hundreds of objects on the big map)
 	for o in World.all_objects():
+		if gp != null and (absf(o.tile.x + 0.5 - gp.x) > 9.0 or absf(o.tile.y + 0.5 - gp.z) > 9.0):
+			continue
+		var node = _obj_nodes.get(o.id, null)
+		if node != null and not node.visible:
+			continue          # behind a standing building shell
 		var bb := _object_aabb(o)
 		var hit = bb.intersects_ray(ro, rd)
 		if hit != null:

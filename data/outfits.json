@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "_doc": "Role outfits: indices pick from the toggleable parts (top 0 tee 1 hoodie 2 sweater 3 shirt 4 dress 5 apron 6 uniform; bottom 0 trousers 1 shorts 2 skirt; shoes 0 shoes 1 boots 2 barefoot 3 sneakers; hat 0 none 1 cap 2 beanie; glasses 0..2; bag 0 none 1 backpack 2 satchel). Colour pools replace the random clothes colours; one entry is drawn per folk.",
+  "roles": {
+    "barista":   {"top": [5], "bottom": [0, 2], "shoes": [0, 3], "hat": [0, 1], "glasses": [0, 0, 1], "bag": [0], "scarf": [0],
+                  "shirt": ["#1c1c22", "#6a1530", "#1f2f6a", "#3e2275"], "pants": ["#1c1c22", "#1b2a5c", "#4a3020"], "accent": ["#12a05a", "#e8c030", "#ff6f61", "#14a39a"]},
+    "bartender": {"top": [3], "bottom": [0], "shoes": [0], "hat": [0], "glasses": [0, 1], "bag": [0], "scarf": [0],
+                  "shirt": ["#1c1c22", "#6a1530", "#1f2f6a"], "pants": ["#1c1c22"], "accent": ["#e05050", "#e8c030"]},
+    "cashier":   {"top": [6], "bottom": [0, 2], "shoes": [0], "hat": [0, 1], "glasses": [0, 0, 2], "bag": [0], "scarf": [0],
+                  "shirt": ["#2f5fd0", "#d94a4a", "#12a05a", "#7a4ac8"], "pants": ["#1c1c22", "#1b2a5c"], "accent": ["#e8c030", "#f58ab8", "#3fd0f0"]},
+    "trainer":   {"top": [0, 1], "bottom": [1, 0], "shoes": [3], "hat": [0, 1], "glasses": [0], "bag": [0], "scarf": [0],
+                  "shirt": ["#f08a24", "#3fd0f0", "#d94a4a", "#b4e03c", "#d03098"], "pants": ["#1c1c22", "#1b2a5c"], "accent": ["#e8c030", "#ff6f61", "#12a05a"]},
+    "librarian": {"top": [2, 3], "bottom": [0, 2], "shoes": [0, 1], "hat": [0], "glasses": [1, 2], "bag": [0, 2], "scarf": [0, 1],
+                  "shirt": ["#7a4ac8", "#1f5a35", "#6a1530", "#b04a1c", "#14a39a"], "pants": ["#4a3020", "#1c1c22", "#3a1f5a"], "accent": ["#e8c030", "#d03098", "#3fd0f0"]},
+    "teacher":   {"top": [3, 2], "bottom": [0, 2], "shoes": [0], "hat": [0], "glasses": [0, 1, 2], "bag": [0, 2], "scarf": [0, 1],
+                  "shirt": ["#2f5fd0", "#12a05a", "#b04a1c", "#7a4ac8", "#d94a4a"], "pants": ["#1b2a5c", "#4a3020", "#1c1c22"], "accent": ["#e8c030", "#ff6f61"]},
+    "student":   {"top": [6], "bottom": [0, 2, 1], "shoes": [0, 3], "hat": [0], "glasses": [0, 0, 1], "bag": [1, 1, 2], "scarf": [0],
+                  "shirt": ["#1f2f6a", "#6a1530", "#1f5a35", "#3e2275"], "pants": ["#1c1c22", "#1b2a5c"], "accent": ["#e8c030", "#f58ab8", "#3fd0f0", "#ff6f61"]},
+    "office":    {"top": [3, 2], "bottom": [0, 2], "shoes": [0], "hat": [0], "glasses": [0, 0, 1, 2], "bag": [0, 2], "scarf": [0],
+                  "shirt": ["#2f5fd0", "#14a39a", "#d94a4a", "#1f2f6a", "#7a4ac8", "#ff6f61"], "pants": ["#1b2a5c", "#1c1c22", "#4a3020"], "accent": ["#e05050", "#e8c030", "#12a05a"]},
+    "creative":  {"top": [5, 1, 0], "bottom": [0, 2], "shoes": [0, 3, 1], "hat": [0, 2], "glasses": [0, 1], "bag": [0, 2], "scarf": [0, 1],
+                  "shirt": ["#d03098", "#f58ab8", "#3fd0f0", "#f2d02e", "#ff6f61"], "pants": ["#1c1c22", "#3a1f5a", "#3a62a8"], "accent": ["#12a05a", "#7a4ac8", "#e8c030"]}
+  },
+  "career_roles": {"cook": "barista", "coder": "office", "painter": "creative", "fitness_coach": "trainer", "teacher": "teacher",
+    "librarian": "librarian", "barista": "barista", "writer": "creative", "musician": "creative"},
+  "stage_roles": {"child": "student", "teen": "student"}
+}

@@ -1,0 +1,87 @@
+{
+ "version": 1,
+ "notes": "Starter neighbourhood on World.MAP_W x World.MAP_H (the only place the map size is set). Starter neighbourhood. Road grid: vertical roads start at vroads_x, horizontal at hroads_y; every road is road_w wide (outer tile of each side = sidewalk, the road_w-2 between = asphalt). Block (c,r) is the lot slot between vroads_x[c]/vroads_x[c+1] and hroads_y[r]/hroads_y[r+1]; lot rects are lot_size and the slot origin is (vroads_x[c]+road_w, hroads_y[r]+road_w). Slots hold the lots of neighborhood.json (the template/label/type come from there).",
+ "road_w": 6,
+ "vroads_x": [
+  1,
+  39,
+  77,
+  115,
+  153
+ ],
+ "hroads_y": [
+  1,
+  31,
+  61,
+  91
+ ],
+ "lot_size": [
+  32,
+  24
+ ],
+ "lots": {
+  "school": [
+   0,
+   0
+  ],
+  "library": [
+   1,
+   0
+  ],
+  "office": [
+   2,
+   0
+  ],
+  "gym": [
+   3,
+   0
+  ],
+  "cafe": [
+   0,
+   1
+  ],
+  "market": [
+   1,
+   1
+  ],
+  "park": [
+   2,
+   1
+  ],
+  "townie_c": [
+   0,
+   2
+  ],
+  "home": [
+   1,
+   2
+  ],
+  "townie_a": [
+   2,
+   2
+  ],
+  "townie_b": [
+   3,
+   2
+  ]
+ },
+ "green": {
+  "slot": [
+   3,
+   1
+  ],
+  "label": "Town Green",
+  "pond": [
+   8,
+   6,
+   23,
+   17
+  ]
+ },
+ "south_strip": {
+  "y": 97,
+  "label": "Southwoods"
+ },
+ "tree_density": 0.16,
+ "tree_seed": 20241
+}

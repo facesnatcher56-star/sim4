@@ -1,0 +1,2878 @@
+{
+ "version": 1,
+ "homes": [
+  {
+   "id": "small_01",
+   "size": "small",
+   "style": "modern",
+   "label": "Corner Studio",
+   "desc": "One bright room with a kitchen corner, a sleeping nook and a bathroom. Good for one.",
+   "public": [
+    {
+     "zones": [
+      "living",
+      "kitchen",
+      "dining",
+      "sleep"
+     ]
+    }
+   ],
+   "private": [
+    "bath"
+   ],
+   "hall": 0,
+   "seed": 101
+  },
+  {
+   "id": "small_02",
+   "size": "small",
+   "style": "cosy",
+   "label": "Garden Flat",
+   "desc": "A cosy flat: open kitchen-living room, a real bedroom and a bathroom.",
+   "public": [
+    {
+     "zones": [
+      "living",
+      "kitchen",
+      "dining"
+     ]
+    }
+   ],
+   "private": [
+    "bedroom",
+    "bath"
+   ],
+   "hall": 0,
+   "seed": 102
+  },
+  {
+   "id": "small_03",
+   "size": "small",
+   "style": "artist",
+   "label": "Painter's Loft",
+   "desc": "A studio flat with an easel corner by the big window. Paint-splattered and bright.",
+   "public": [
+    {
+     "zones": [
+      "living",
+      "kitchen",
+      "studio",
+      "sleep"
+     ]
+    }
+   ],
+   "private": [
+    "bath"
+   ],
+   "hall": 0,
+   "seed": 103,
+   "decor": 2
+  },
+  {
+   "id": "small_04",
+   "size": "small",
+   "style": "modern",
+   "label": "Work-From-Home Flat",
+   "desc": "Living room with kitchenette, a home office, a small bedroom and a bathroom.",
+   "public": [
+    {
+     "zones": [
+      "living",
+      "kitchen"
+     ]
+    },
+    "office"
+   ],
+   "private": [
+    "bedroom",
+    "bath"
+   ],
+   "hall": 0,
+   "seed": 104
+  },
+  {
+   "id": "small_05",
+   "size": "small",
+   "style": "cosy",
+   "label": "Nursery Nook",
+   "desc": "A snug flat with a bedroom, a nursery and an open kitchen-living room.",
+   "public": [
+    {
+     "zones": [
+      "living",
+      "kitchen",
+      "dining"
+     ]
+    }
+   ],
+   "private": [
+    "bedroom",
+    "nursery",
+    "bath"
+   ],
+   "hall": 0,
+   "seed": 105
+  },
+  {
+   "id": "small_06",
+   "size": "small",
+   "style": "family",
+   "label": "Duo Flat",
+   "desc": "A kitchen-diner, a living room, two small bedrooms and a bathroom.",
+   "public": [
+    "living",
+    "kitchen_diner"
+   ],
+   "private": [
+    "bedroom",
+    "kids",
+    "bath"
+   ],
+   "hall": 0,
+   "seed": 106
+  },
+  {
+   "id": "medium_01",
+   "size": "medium",
+   "style": "family",
+   "label": "Family Home",
+   "desc": "Living-dining room, a kitchen, two bedrooms and a bathroom. Fits a small family.",
+   "public": [
+    {
+     "zones": [
+      "living",
+      "dining"
+     ]
+    },
+    "kitchen"
+   ],
+   "private": [
+    "master",
+    "kids",
+    "bath"
+   ],
+   "hall": 0,
+   "seed": 201
+  },
+  {
+   "id": "medium_02",
+   "size": "medium",
+   "style": "modern",
+   "label": "Open-Plan House",
+   "desc": "An open living-kitchen-dining space, two bedrooms, a bathroom and a laundry.",
+   "public": [
+    {
+     "zones": [
+      "living",
+      "kitchen",
+      "dining"
+     ]
+    }
+   ],
+   "private": [
+    "master",
+    "bedroom",
+    "bath",
+    "laundry"
+   ],
+   "hall": 0,
+   "seed": 202
+  },
+  {
+   "id": "medium_03",
+   "size": "medium",
+   "style": "cosy",
+   "label": "Garage House",
+   "desc": "Living-dining room, kitchen, a garage workshop, two bedrooms and a bathroom.",
+   "public": [
+    {
+     "zones": [
+      "living",
+      "dining"
+     ]
+    },
+    "kitchen",
+    "garage"
+   ],
+   "private": [
+    "bedroom",
+    "bedroom",
+    "bath"
+   ],
+   "hall": 0,
+   "seed": 203
+  },
+  {
+   "id": "medium_04",
+   "size": "medium",
+   "style": "tidy",
+   "label": "Study House",
+   "desc": "Open living space, a study, a main bedroom, a spare room, a bathroom and a powder room.",
+   "public": [
+    {
+     "zones": [
+      "living",
+      "kitchen",
+      "dining"
+     ]
+    },
+    "office"
+   ],
+   "private": [
+    "master",
+    "bedroom",
+    "bath",
+    "powder"
+   ],
+   "hall": 0,
+   "seed": 204
+  },
+  {
+   "id": "medium_05",
+   "size": "medium",
+   "style": "family",
+   "label": "Nursery House",
+   "desc": "A hallway home: living-kitchen, dining room, main bedroom, nursery, kids room and bathroom.",
+   "public": [
+    {
+     "zones": [
+      "living",
+      "kitchen"
+     ]
+    },
+    "dining"
+   ],
+   "private": [
+    "master",
+    "nursery",
+    "kids",
+    "bath"
+   ],
+   "hall": 1,
+   "seed": 205
+  },
+  {
+   "id": "medium_06",
+   "size": "medium",
+   "style": "estate",
+   "label": "Hallway House",
+   "desc": "A long hallway links the living areas to two bedrooms and two bathrooms.",
+   "public": [
+    {
+     "zones": [
+      "living",
+      "dining"
+     ]
+    },
+    "kitchen"
+   ],
+   "private": [
+    "master",
+    "bedroom",
+    "bath",
+    "bath"
+   ],
+   "hall": 2,
+   "seed": 206
+  },
+  {
+   "id": "large_01",
+   "size": "large",
+   "style": "estate",
+   "label": "Grand Estate",
+   "desc": "Hall, living-dining room, big kitchen, lounge, three bedrooms, two bathrooms and a yard with hot tub.",
+   "public": [
+    {
+     "zones": [
+      "living",
+      "dining"
+     ]
+    },
+    "kitchen",
+    "lounge"
+   ],
+   "private": [
+    "master",
+    "bedroom",
+    "bedroom",
+    "bath",
+    "bath"
+   ],
+   "hall": 2,
+   "seed": 301,
+   "yard": [
+    "hot_tub",
+    "fishing_spot"
+   ]
+  },
+  {
+   "id": "large_02",
+   "size": "large",
+   "style": "artist",
+   "label": "Artist's Manor",
+   "desc": "Open living-kitchen, an art studio, a library, two bedrooms and two bathrooms.",
+   "public": [
+    {
+     "zones": [
+      "living",
+      "kitchen",
+      "dining"
+     ]
+    },
+    "studio",
+    "library"
+   ],
+   "private": [
+    "master",
+    "bedroom",
+    "bath",
+    "powder"
+   ],
+   "hall": 2,
+   "seed": 302,
+   "decor": 2
+  },
+  {
+   "id": "large_03",
+   "size": "large",
+   "style": "modern",
+   "label": "Sports House",
+   "desc": "Open living space, a home gym, a garage workshop, three bedrooms and two bathrooms.",
+   "public": [
+    {
+     "zones": [
+      "living",
+      "kitchen",
+      "dining"
+     ]
+    },
+    "gym",
+    "garage"
+   ],
+   "private": [
+    "master",
+    "bedroom",
+    "kids",
+    "bath",
+    "bath"
+   ],
+   "hall": 2,
+   "seed": 303
+  },
+  {
+   "id": "large_04",
+   "size": "large",
+   "style": "estate",
+   "label": "Music Villa",
+   "desc": "Living-dining room, kitchen, music lounge, office and three bedrooms.",
+   "public": [
+    {
+     "zones": [
+      "living",
+      "dining"
+     ]
+    },
+    "kitchen",
+    "lounge",
+    "office"
+   ],
+   "private": [
+    "master",
+    "bedroom",
+    "bedroom",
+    "bath"
+   ],
+   "hall": 0,
+   "seed": 304,
+   "yard": [
+    "hot_tub",
+    "telescope"
+   ]
+  },
+  {
+   "id": "classic_01",
+   "size": "classic",
+   "style": "cosy",
+   "label": "Fernwood Row",
+   "desc": "A classic family house: living-dining room, kitchen, two bedrooms and a bathroom.",
+   "public": [
+    {
+     "zones": [
+      "living",
+      "dining"
+     ]
+    },
+    "kitchen"
+   ],
+   "private": [
+    "bedroom",
+    "bedroom",
+    "bath"
+   ],
+   "hall": 0,
+   "seed": 401
+  },
+  {
+   "id": "classic_02",
+   "size": "classic",
+   "style": "modern",
+   "label": "Fernwood Bungalow",
+   "desc": "An open-plan bungalow with a hallway, a main bedroom, a kids room, a bathroom and a laundry.",
+   "public": [
+    {
+     "zones": [
+      "living",
+      "kitchen",
+      "dining"
+     ]
+    }
+   ],
+   "private": [
+    "master",
+    "kids",
+    "bath",
+    "laundry"
+   ],
+   "hall": 1,
+   "seed": 402
+  },
+  {
+   "id": "classic_03",
+   "size": "classic",
+   "style": "tidy",
+   "label": "Fernwood Lodge",
+   "desc": "Living-dining room, kitchen, study, a main bedroom, a spare room and a bathroom.",
+   "public": [
+    {
+     "zones": [
+      "living",
+      "dining"
+     ]
+    },
+    "kitchen",
+    "office"
+   ],
+   "private": [
+    "master",
+    "bedroom",
+    "bath"
+   ],
+   "hall": 0,
+   "seed": 403
+  },
+  {
+   "id": "townie_a",
+   "size": "medium",
+   "style": "family",
+   "label": "Maple Row 12",
+   "desc": "A busy family home: living-dining room, kitchen-diner, a main bedroom, two kids rooms, a nursery and two bathrooms.",
+   "public": [
+    {
+     "zones": [
+      "living",
+      "dining"
+     ]
+    },
+    "kitchen_diner",
+    "powder"
+   ],
+   "private": [
+    "master",
+    "kids",
+    "kids",
+    "nursery",
+    "bath"
+   ],
+   "hall": 0,
+   "seed": 501,
+   "decor": 2
+  },
+  {
+   "id": "townie_b",
+   "size": "small",
+   "style": "artist",
+   "label": "Cedar Court 4",
+   "desc": "A cluttered artist's flat: easels, books and plants everywhere, a small bedroom and a bathroom.",
+   "public": [
+    {
+     "zones": [
+      "living",
+      "kitchen",
+      "studio"
+     ]
+    }
+   ],
+   "private": [
+    "bedroom",
+    "bath"
+   ],
+   "hall": 0,
+   "seed": 502,
+   "decor": 3,
+   "extras": {
+    "living": [
+     {
+      "d": "bookcase_tall",
+      "at": "wall",
+      "n": [
+       1,
+       2
+      ]
+     },
+     {
+      "d": "easel",
+      "at": "wall",
+      "p": 0.8
+     },
+     {
+      "d": "plant",
+      "at": "corner",
+      "n": [
+       1,
+       2
+      ]
+     }
+    ],
+    "bedroom": [
+     {
+      "d": "easel",
+      "at": "wall",
+      "p": 0.7
+     },
+     {
+      "d": "bookshelf",
+      "at": "wall",
+      "p": 0.6
+     }
+    ]
+   }
+  },
+  {
+   "id": "townie_c",
+   "size": "large",
+   "style": "tidy",
+   "label": "Hillcrest Manor",
+   "desc": "A tidy retiree's manor: hall, living-dining room, kitchen, library, music lounge, two bedrooms and two bathrooms.",
+   "public": [
+    {
+     "zones": [
+      "living",
+      "dining"
+     ]
+    },
+    "kitchen",
+    "library",
+    "lounge"
+   ],
+   "private": [
+    "master",
+    "bedroom",
+    "bath",
+    "bath"
+   ],
+   "hall": 2,
+   "seed": 503,
+   "yard": [
+    "telescope",
+    "fishing_spot"
+   ]
+  }
+ ],
+ "venue_rooms": {
+  "cafe_floor": {
+   "floor": [
+    "wood"
+   ],
+   "hab": false,
+   "win": 1.0,
+   "items": [
+    {
+     "rep": [
+      4,
+      7
+     ],
+     "items": [
+      {
+       "d": "table",
+       "at": "free",
+       "pref": "spread",
+       "gap": 1
+      },
+      {
+       "d": "dining_chair",
+       "at": "seat",
+       "ref": "table",
+       "n": [
+        2,
+        4
+       ]
+      }
+     ]
+    },
+    {
+     "d": "plant",
+     "at": "corner",
+     "n": [
+      1,
+      3
+     ]
+    },
+    {
+     "d": "lamp",
+     "at": "corner",
+     "p": 0.6
+    },
+    {
+     "d": "trash_bin",
+     "at": "corner",
+     "p": 0.7
+    },
+    {
+     "d": "stereo",
+     "at": "wall",
+     "p": 0.5
+    }
+   ]
+  },
+  "cafe_bar": {
+   "floor": [
+    "tile",
+    "wood"
+   ],
+   "hab": false,
+   "win": 1.0,
+   "items": [
+    {
+     "d": "cafe_counter",
+     "at": "island",
+     "req": 1
+    },
+    {
+     "d": "cafe_counter",
+     "at": "beside",
+     "ref": "cafe_counter",
+     "wall": false,
+     "n": [
+      2,
+      3
+     ]
+    },
+    {
+     "d": "bar_stool",
+     "at": "seat",
+     "ref": "cafe_counter",
+     "all": true,
+     "slots": true,
+     "n": [
+      4,
+      8
+     ]
+    },
+    {
+     "d": "coffee_maker",
+     "at": "wall",
+     "n": [
+      1,
+      2
+     ]
+    },
+    {
+     "d": "vending_machine",
+     "at": "wall",
+     "p": 0.7
+    },
+    {
+     "d": "plant",
+     "at": "corner",
+     "p": 0.6
+    }
+   ]
+  },
+  "cafe_dance": {
+   "floor": [
+    "carpet"
+   ],
+   "hab": false,
+   "win": 1.0,
+   "items": [
+    {
+     "d": "rug",
+     "at": "grid",
+     "step": [
+      3,
+      3
+     ],
+     "off": [
+      0,
+      0
+     ],
+     "n": [
+      3,
+      5
+     ]
+    },
+    {
+     "d": "stereo",
+     "at": "wall",
+     "n": [
+      3,
+      4
+     ]
+    },
+    {
+     "d": "plant",
+     "at": "corner",
+     "n": [
+      1,
+      3
+     ]
+    },
+    {
+     "d": "lamp",
+     "at": "corner",
+     "n": [
+      1,
+      2
+     ]
+    },
+    {
+     "d": "vending_machine",
+     "at": "wall",
+     "p": 0.4
+    },
+    {
+     "rep": [
+      1,
+      2
+     ],
+     "items": [
+      {
+       "d": "table",
+       "at": "free",
+       "pref": "spread",
+       "gap": 1
+      },
+      {
+       "d": "dining_chair",
+       "at": "seat",
+       "ref": "table",
+       "n": [
+        2,
+        4
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "gym_cardio": {
+   "floor": [
+    "tile"
+   ],
+   "hab": false,
+   "win": 1.0,
+   "items": [
+    {
+     "rows": "treadmill",
+     "step_y": 3,
+     "len": [
+      3,
+      5
+     ],
+     "n_rows": [
+      1,
+      2
+     ],
+     "rot": 0,
+     "off": [
+      1,
+      1
+     ]
+    },
+    {
+     "d": "treadmill",
+     "at": "wall",
+     "n": [
+      3,
+      6
+     ]
+    },
+    {
+     "d": "mirror",
+     "at": "wall",
+     "n": [
+      1,
+      3
+     ]
+    },
+    {
+     "d": "vending_machine",
+     "at": "wall",
+     "p": 0.7
+    },
+    {
+     "d": "plant",
+     "at": "corner"
+    },
+    {
+     "d": "trash_bin",
+     "at": "corner"
+    }
+   ]
+  },
+  "gym_weights": {
+   "floor": [
+    "tile"
+   ],
+   "hab": false,
+   "win": 1.0,
+   "items": [
+    {
+     "rows": "dumbbell_rack",
+     "step_y": 3,
+     "len": [
+      2,
+      4
+     ],
+     "n_rows": [
+      1,
+      2
+     ],
+     "rot": 0,
+     "off": [
+      1,
+      1
+     ]
+    },
+    {
+     "d": "dumbbell_rack",
+     "at": "wall",
+     "n": [
+      3,
+      6
+     ]
+    },
+    {
+     "d": "mirror",
+     "at": "wall",
+     "n": [
+      1,
+      3
+     ]
+    },
+    {
+     "d": "rug",
+     "at": "grid",
+     "step": [
+      3,
+      3
+     ],
+     "off": [
+      1,
+      1
+     ],
+     "n": [
+      1,
+      3
+     ]
+    },
+    {
+     "d": "plant",
+     "at": "corner",
+     "p": 0.6
+    }
+   ]
+  },
+  "gym_mats": {
+   "floor": [
+    "wood"
+   ],
+   "hab": false,
+   "win": 1.0,
+   "items": [
+    {
+     "d": "rug",
+     "at": "grid",
+     "step": [
+      3,
+      3
+     ],
+     "off": [
+      0,
+      0
+     ],
+     "n": [
+      3,
+      6
+     ]
+    },
+    {
+     "d": "mirror",
+     "at": "wall",
+     "n": [
+      1,
+      2
+     ]
+    },
+    {
+     "d": "vending_machine",
+     "at": "wall",
+     "p": 0.6
+    },
+    {
+     "d": "plant",
+     "at": "corner",
+     "n": [
+      1,
+      2
+     ]
+    },
+    {
+     "d": "treadmill",
+     "at": "wall",
+     "n": [
+      1,
+      3
+     ],
+     "p": 0.5
+    }
+   ]
+  },
+  "library_stacks": {
+   "floor": [
+    "carpet"
+   ],
+   "hab": false,
+   "win": 1.0,
+   "items": [
+    {
+     "rows": "bookcase_tall",
+     "step_y": 3,
+     "len": [
+      4,
+      7
+     ],
+     "n_rows": [
+      3,
+      5
+     ],
+     "rot": 0,
+     "off": [
+      1,
+      0
+     ]
+    },
+    {
+     "d": "bookcase_tall",
+     "at": "wall",
+     "n": [
+      3,
+      6
+     ]
+    },
+    {
+     "d": "plant",
+     "at": "corner",
+     "n": [
+      1,
+      2
+     ]
+    },
+    {
+     "d": "lamp",
+     "at": "corner",
+     "n": [
+      1,
+      2
+     ]
+    },
+    {
+     "d": "desk",
+     "at": "wall",
+     "p": 0.5
+    }
+   ]
+  },
+  "library_reading": {
+   "floor": [
+    "wood"
+   ],
+   "hab": false,
+   "win": 1.0,
+   "items": [
+    {
+     "d": "armchair",
+     "at": "corner",
+     "n": [
+      2,
+      3
+     ]
+    },
+    {
+     "rep": [
+      1,
+      2
+     ],
+     "items": [
+      {
+       "d": "table",
+       "at": "free",
+       "pref": "spread",
+       "gap": 1
+      },
+      {
+       "d": "dining_chair",
+       "at": "seat",
+       "ref": "table",
+       "n": [
+        2,
+        4
+       ]
+      }
+     ]
+    },
+    {
+     "d": "coffee_table",
+     "at": "free",
+     "pref": "spread"
+    },
+    {
+     "d": "lamp",
+     "at": "corner",
+     "n": [
+      1,
+      2
+     ]
+    },
+    {
+     "d": "plant",
+     "at": "corner"
+    },
+    {
+     "d": "bookcase_tall",
+     "at": "wall",
+     "n": [
+      1,
+      3
+     ]
+    },
+    {
+     "d": "trash_bin",
+     "at": "corner"
+    }
+   ]
+  },
+  "library_lab": {
+   "floor": [
+    "carpet",
+    "wood"
+   ],
+   "hab": false,
+   "win": 1.0,
+   "items": [
+    {
+     "d": "computer",
+     "at": "wall",
+     "n": [
+      3,
+      5
+     ]
+    },
+    {
+     "d": "terminal",
+     "at": "wall",
+     "n": [
+      1,
+      2
+     ]
+    },
+    {
+     "d": "desk",
+     "at": "wall",
+     "n": [
+      2,
+      3
+     ]
+    },
+    {
+     "d": "plant",
+     "at": "corner"
+    }
+   ]
+  },
+  "market_aisles": {
+   "floor": [
+    "tile"
+   ],
+   "hab": false,
+   "win": 1.0,
+   "items": [
+    {
+     "rows": "grocery_cooler",
+     "step_y": 3,
+     "len": [
+      4,
+      6
+     ],
+     "n_rows": [
+      3,
+      4
+     ],
+     "rot": 0,
+     "off": [
+      1,
+      1
+     ]
+    },
+    {
+     "rows": "bookshelf",
+     "step_y": 3,
+     "len": [
+      3,
+      5
+     ],
+     "n_rows": [
+      2,
+      3
+     ],
+     "rot": 0,
+     "off": [
+      1,
+      1
+     ]
+    },
+    {
+     "d": "grocery_cooler",
+     "at": "wall",
+     "n": [
+      4,
+      7
+     ]
+    },
+    {
+     "d": "vending_machine",
+     "at": "wall",
+     "n": [
+      2,
+      3
+     ]
+    },
+    {
+     "d": "plant",
+     "at": "corner",
+     "n": [
+      1,
+      2
+     ]
+    },
+    {
+     "d": "trash_bin",
+     "at": "corner"
+    }
+   ]
+  },
+  "market_checkout": {
+   "floor": [
+    "tile"
+   ],
+   "hab": false,
+   "win": 1.0,
+   "items": [
+    {
+     "d": "counter",
+     "at": "island",
+     "req": 1
+    },
+    {
+     "d": "counter",
+     "at": "beside",
+     "ref": "counter",
+     "wall": false,
+     "n": [
+      2,
+      3
+     ]
+    },
+    {
+     "d": "vending_machine",
+     "at": "wall",
+     "n": [
+      1,
+      2
+     ]
+    },
+    {
+     "d": "plant",
+     "at": "corner"
+    }
+   ]
+  },
+  "office_pods": {
+   "floor": [
+    "carpet"
+   ],
+   "hab": false,
+   "win": 1.0,
+   "items": [
+    {
+     "rows": "computer",
+     "step_y": 3,
+     "len": [
+      3,
+      4
+     ],
+     "n_rows": [
+      3,
+      4
+     ],
+     "rot": 0,
+     "off": [
+      1,
+      1
+     ]
+    },
+    {
+     "rows": "desk",
+     "step_y": 3,
+     "len": [
+      2,
+      3
+     ],
+     "n_rows": 1,
+     "rot": 0,
+     "off": [
+      1,
+      1
+     ]
+    },
+    {
+     "d": "terminal",
+     "at": "wall",
+     "n": [
+      2,
+      3
+     ]
+    },
+    {
+     "d": "plant",
+     "at": "corner",
+     "n": [
+      1,
+      2
+     ]
+    },
+    {
+     "d": "trash_bin",
+     "at": "corner"
+    }
+   ]
+  },
+  "office_meet": {
+   "floor": [
+    "carpet",
+    "wood"
+   ],
+   "hab": false,
+   "win": 1.0,
+   "items": [
+    {
+     "d": "table",
+     "at": "free",
+     "pref": "spread"
+    },
+    {
+     "d": "dining_chair",
+     "at": "seat",
+     "ref": "table",
+     "n": [
+      4,
+      6
+     ]
+    },
+    {
+     "d": "plant",
+     "at": "corner"
+    },
+    {
+     "d": "lamp",
+     "at": "corner"
+    },
+    {
+     "d": "computer",
+     "at": "wall",
+     "p": 0.5
+    }
+   ]
+  },
+  "office_break": {
+   "floor": [
+    "tile"
+   ],
+   "hab": false,
+   "win": 1.0,
+   "items": [
+    {
+     "d": "fridge",
+     "at": "wall"
+    },
+    {
+     "d": "coffee_maker",
+     "at": "wall",
+     "n": [
+      1,
+      2
+     ]
+    },
+    {
+     "d": "vending_machine",
+     "at": "wall"
+    },
+    {
+     "d": "counter",
+     "at": "wall",
+     "n": [
+      1,
+      2
+     ]
+    },
+    {
+     "d": "sink",
+     "at": "wall"
+    },
+    {
+     "d": "table",
+     "at": "free",
+     "pref": "spread"
+    },
+    {
+     "d": "dining_chair",
+     "at": "seat",
+     "ref": "table",
+     "n": [
+      2,
+      4
+     ]
+    },
+    {
+     "d": "trash_bin",
+     "at": "corner"
+    },
+    {
+     "d": "plant",
+     "at": "corner"
+    }
+   ]
+  },
+  "school_class": {
+   "floor": [
+    "wood"
+   ],
+   "hab": false,
+   "win": 1.0,
+   "items": [
+    {
+     "rows": "desk",
+     "step_y": 3,
+     "len": [
+      4,
+      6
+     ],
+     "n_rows": [
+      3,
+      4
+     ],
+     "rot": 0,
+     "off": [
+      1,
+      2
+     ]
+    },
+    {
+     "d": "bookcase_tall",
+     "at": "wall",
+     "n": [
+      2,
+      3
+     ]
+    },
+    {
+     "d": "table",
+     "at": "wall",
+     "p": 0.8
+    },
+    {
+     "d": "dining_chair",
+     "at": "seat",
+     "ref": "table",
+     "n": [
+      1,
+      2
+     ]
+    },
+    {
+     "d": "plant",
+     "at": "corner"
+    },
+    {
+     "d": "trash_bin",
+     "at": "corner"
+    }
+   ]
+  },
+  "school_lab": {
+   "floor": [
+    "tile"
+   ],
+   "hab": false,
+   "win": 1.0,
+   "items": [
+    {
+     "d": "computer",
+     "at": "wall",
+     "n": [
+      4,
+      6
+     ]
+    },
+    {
+     "rows": "desk",
+     "step_y": 3,
+     "len": [
+      2,
+      3
+     ],
+     "n_rows": [
+      1,
+      2
+     ],
+     "rot": 0,
+     "off": [
+      1,
+      2
+     ]
+    },
+    {
+     "d": "bookcase_tall",
+     "at": "wall",
+     "n": [
+      1,
+      3
+     ]
+    },
+    {
+     "d": "plant",
+     "at": "corner"
+    }
+   ]
+  },
+  "school_hall": {
+   "floor": [
+    "carpet",
+    "tile"
+   ],
+   "hab": false,
+   "win": 1.0,
+   "items": [
+    {
+     "d": "bookcase_tall",
+     "at": "wall",
+     "n": [
+      2,
+      4
+     ]
+    },
+    {
+     "d": "plant",
+     "at": "corner",
+     "n": [
+      2,
+      3
+     ]
+    },
+    {
+     "d": "trash_bin",
+     "at": "corner",
+     "n": [
+      1,
+      2
+     ]
+    },
+    {
+     "d": "table",
+     "at": "free",
+     "pref": "spread",
+     "p": 0.7
+    },
+    {
+     "d": "dining_chair",
+     "at": "seat",
+     "ref": "table",
+     "n": 2
+    },
+    {
+     "d": "vending_machine",
+     "at": "wall",
+     "p": 0.5
+    }
+   ]
+  },
+  "park_plaza": {
+   "floor": [
+    "grass"
+   ],
+   "hab": false,
+   "win": 1.0,
+   "items": [
+    {
+     "d": "park_bench",
+     "at": "path",
+     "n": [
+      3,
+      6
+     ]
+    },
+    {
+     "d": "stereo",
+     "at": "free",
+     "pref": "spread",
+     "p": 0.4
+    },
+    {
+     "d": "trash_bin",
+     "at": "free",
+     "pref": "spread",
+     "n": [
+      1,
+      2
+     ]
+    },
+    {
+     "d": "plant",
+     "at": "free",
+     "pref": "spread",
+     "n": [
+      2,
+      4
+     ]
+    }
+   ]
+  },
+  "park_picnic": {
+   "floor": [
+    "grass"
+   ],
+   "hab": false,
+   "win": 1.0,
+   "items": [
+    {
+     "rep": [
+      2,
+      3
+     ],
+     "items": [
+      {
+       "d": "table",
+       "at": "free",
+       "pref": "spread",
+       "gap": 1
+      },
+      {
+       "d": "dining_chair",
+       "at": "seat",
+       "ref": "table",
+       "n": [
+        2,
+        4
+       ]
+      }
+     ]
+    },
+    {
+     "d": "grill",
+     "at": "free",
+     "pref": "spread",
+     "gap": 1,
+     "n": [
+      1,
+      2
+     ]
+    },
+    {
+     "d": "plant",
+     "at": "free",
+     "pref": "spread",
+     "n": [
+      3,
+      6
+     ]
+    }
+   ]
+  },
+  "park_garden": {
+   "floor": [
+    "dirt"
+   ],
+   "hab": false,
+   "win": 1.0,
+   "items": [
+    {
+     "d": "garden_plot",
+     "at": "free",
+     "pref": "spread",
+     "gap": 1,
+     "n": [
+      2,
+      3
+     ]
+    },
+    {
+     "d": "plant",
+     "at": "free",
+     "pref": "spread",
+     "n": [
+      2,
+      4
+     ]
+    },
+    {
+     "d": "trash_bin",
+     "at": "free",
+     "pref": "spread",
+     "p": 0.6
+    }
+   ]
+  },
+  "park_pond": {
+   "floor": [
+    "grass"
+   ],
+   "hab": false,
+   "win": 1.0,
+   "items": [
+    {
+     "d": "fishing_spot",
+     "at": "free",
+     "pref": "spread",
+     "gap": 1,
+     "n": [
+      2,
+      2
+     ]
+    },
+    {
+     "d": "park_bench",
+     "at": "path",
+     "n": [
+      1,
+      2
+     ]
+    },
+    {
+     "d": "plant",
+     "at": "free",
+     "pref": "spread",
+     "n": [
+      3,
+      5
+     ]
+    }
+   ]
+  },
+  "park_lawn": {
+   "floor": [
+    "grass"
+   ],
+   "hab": false,
+   "win": 1.0,
+   "items": [
+    {
+     "d": "plant",
+     "at": "free",
+     "pref": "spread",
+     "n": [
+      6,
+      10
+     ]
+    },
+    {
+     "d": "park_bench",
+     "at": "path",
+     "n": [
+      1,
+      3
+     ]
+    },
+    {
+     "d": "trash_bin",
+     "at": "free",
+     "pref": "spread",
+     "p": 0.7
+    }
+   ]
+  }
+ },
+ "venues": {
+  "cafe": {
+   "label": "Moss & Mug Cafe",
+   "description": "A warm cafe by day, a lively bar by night.",
+   "venue": "cafe",
+   "shell": [
+    5,
+    4,
+    22,
+    14
+   ],
+   "staff": [
+    {
+     "role": "barista",
+     "mode": "behind"
+    },
+    {
+     "role": "bartender",
+     "mode": "behind",
+     "hours": [
+      17,
+      24
+     ]
+    }
+   ],
+   "wants": [
+    "cafe_counter",
+    "bar_stool",
+    "stereo"
+   ],
+   "min_objects": 30,
+   "alts": [
+    {
+     "id": "cafe_v1",
+     "label": "Corner bar cafe",
+     "open_default": 1.0,
+     "rooms": [
+      {
+       "type": "cafe_bar",
+       "rect": [
+        0,
+        0,
+        5,
+        14
+       ],
+       "g": "m"
+      },
+      {
+       "type": "cafe_dance",
+       "rect": [
+        5,
+        0,
+        17,
+        4
+       ],
+       "g": "m"
+      },
+      {
+       "type": "cafe_floor",
+       "rect": [
+        5,
+        4,
+        17,
+        10
+       ],
+       "g": "m"
+      }
+     ]
+    },
+    {
+     "id": "cafe_v2",
+     "label": "Two-room cafe",
+     "open_default": 0.8,
+     "rooms": [
+      {
+       "type": "cafe_floor",
+       "rect": [
+        0,
+        5,
+        22,
+        9
+       ],
+       "g": "a"
+      },
+      {
+       "type": "cafe_bar",
+       "rect": [
+        0,
+        0,
+        12,
+        5
+       ],
+       "g": "b"
+      },
+      {
+       "type": "cafe_dance",
+       "rect": [
+        12,
+        0,
+        10,
+        5
+       ],
+       "g": "b"
+      }
+     ]
+    },
+    {
+     "id": "cafe_v3",
+     "label": "Pass-through cafe",
+     "open_default": 0.9,
+     "rooms": [
+      {
+       "type": "cafe_floor",
+       "rect": [
+        0,
+        0,
+        14,
+        14
+       ],
+       "g": "a"
+      },
+      {
+       "type": "cafe_dance",
+       "rect": [
+        14,
+        6,
+        8,
+        8
+       ],
+       "g": "a"
+      },
+      {
+       "type": "cafe_bar",
+       "rect": [
+        14,
+        0,
+        8,
+        6
+       ],
+       "g": "b"
+      }
+     ]
+    }
+   ]
+  },
+  "gym": {
+   "label": "Ironleaf Gym",
+   "description": "Treadmills, free weights, mats and mirrors.",
+   "venue": "gym",
+   "shell": [
+    5,
+    4,
+    22,
+    14
+   ],
+   "staff": [
+    {
+     "role": "trainer",
+     "mode": "free",
+     "room": "gym_mats"
+    }
+   ],
+   "wants": [
+    "treadmill",
+    "dumbbell_rack"
+   ],
+   "min_objects": 25,
+   "alts": [
+    {
+     "id": "gym_v1",
+     "label": "Open floor gym",
+     "open_default": 1.0,
+     "rooms": [
+      {
+       "type": "gym_cardio",
+       "rect": [
+        0,
+        0,
+        22,
+        4
+       ],
+       "g": "m"
+      },
+      {
+       "type": "gym_weights",
+       "rect": [
+        0,
+        4,
+        12,
+        10
+       ],
+       "g": "m"
+      },
+      {
+       "type": "gym_mats",
+       "rect": [
+        12,
+        4,
+        10,
+        10
+       ],
+       "g": "m"
+      }
+     ]
+    },
+    {
+     "id": "gym_v2",
+     "label": "Three-room gym",
+     "open_default": 0.6,
+     "rooms": [
+      {
+       "type": "gym_weights",
+       "rect": [
+        0,
+        0,
+        11,
+        8
+       ],
+       "g": "a"
+      },
+      {
+       "type": "gym_cardio",
+       "rect": [
+        11,
+        0,
+        11,
+        8
+       ],
+       "g": "b"
+      },
+      {
+       "type": "gym_mats",
+       "rect": [
+        0,
+        8,
+        22,
+        6
+       ],
+       "g": "c"
+      }
+     ]
+    },
+    {
+     "id": "gym_v3",
+     "label": "Studio gym",
+     "open_default": 1.0,
+     "rooms": [
+      {
+       "type": "gym_cardio",
+       "rect": [
+        0,
+        0,
+        6,
+        14
+       ],
+       "g": "m"
+      },
+      {
+       "type": "gym_weights",
+       "rect": [
+        16,
+        0,
+        6,
+        14
+       ],
+       "g": "m"
+      },
+      {
+       "type": "gym_weights",
+       "rect": [
+        6,
+        0,
+        10,
+        3
+       ],
+       "g": "m"
+      },
+      {
+       "type": "gym_mats",
+       "rect": [
+        6,
+        3,
+        10,
+        8
+       ],
+       "g": "m"
+      },
+      {
+       "type": "gym_cardio",
+       "rect": [
+        6,
+        11,
+        10,
+        3
+       ],
+       "g": "m"
+      }
+     ]
+    }
+   ]
+  },
+  "library": {
+   "label": "Hollow Oak Library",
+   "description": "Rows of bookcases, quiet desks, computers and a terminal.",
+   "venue": "library",
+   "shell": [
+    5,
+    4,
+    22,
+    14
+   ],
+   "staff": [
+    {
+     "role": "librarian",
+     "mode": "beside",
+     "def": "desk"
+    }
+   ],
+   "wants": [
+    "bookcase_tall",
+    "desk",
+    "computer",
+    "terminal"
+   ],
+   "min_objects": 40,
+   "alts": [
+    {
+     "id": "library_v1",
+     "label": "Stacks and lab",
+     "open_default": 0.8,
+     "rooms": [
+      {
+       "type": "library_stacks",
+       "rect": [
+        0,
+        0,
+        22,
+        7
+       ],
+       "g": "m"
+      },
+      {
+       "type": "library_reading",
+       "rect": [
+        0,
+        7,
+        12,
+        7
+       ],
+       "g": "m"
+      },
+      {
+       "type": "library_lab",
+       "rect": [
+        12,
+        7,
+        10,
+        7
+       ],
+       "g": "b"
+      }
+     ]
+    },
+    {
+     "id": "library_v2",
+     "label": "Quiet room library",
+     "open_default": 0.8,
+     "rooms": [
+      {
+       "type": "library_stacks",
+       "rect": [
+        0,
+        0,
+        12,
+        14
+       ],
+       "g": "m"
+      },
+      {
+       "type": "library_reading",
+       "rect": [
+        12,
+        0,
+        10,
+        8
+       ],
+       "g": "b"
+      },
+      {
+       "type": "library_lab",
+       "rect": [
+        12,
+        8,
+        10,
+        6
+       ],
+       "g": "m"
+      }
+     ]
+    },
+    {
+     "id": "library_v3",
+     "label": "Reading wing library",
+     "open_default": 0.7,
+     "rooms": [
+      {
+       "type": "library_stacks",
+       "rect": [
+        0,
+        0,
+        14,
+        9
+       ],
+       "g": "a"
+      },
+      {
+       "type": "library_reading",
+       "rect": [
+        14,
+        0,
+        8,
+        9
+       ],
+       "g": "b"
+      },
+      {
+       "type": "library_lab",
+       "rect": [
+        0,
+        9,
+        22,
+        5
+       ],
+       "g": "c"
+      }
+     ]
+    }
+   ]
+  },
+  "market": {
+   "label": "Greenbarrow Market",
+   "description": "Grocery coolers, vending machines and a checkout.",
+   "venue": "market",
+   "shell": [
+    5,
+    4,
+    22,
+    14
+   ],
+   "staff": [
+    {
+     "role": "cashier",
+     "mode": "behind"
+    }
+   ],
+   "wants": [
+    "vending_machine",
+    "grocery_cooler"
+   ],
+   "min_objects": 25,
+   "alts": [
+    {
+     "id": "market_v1",
+     "label": "Front checkout market",
+     "open_default": 1.0,
+     "rooms": [
+      {
+       "type": "market_aisles",
+       "rect": [
+        0,
+        0,
+        22,
+        10
+       ],
+       "g": "m"
+      },
+      {
+       "type": "market_checkout",
+       "rect": [
+        0,
+        10,
+        22,
+        4
+       ],
+       "g": "m"
+      }
+     ]
+    },
+    {
+     "id": "market_v2",
+     "label": "Side checkout market",
+     "open_default": 1.0,
+     "rooms": [
+      {
+       "type": "market_aisles",
+       "rect": [
+        0,
+        0,
+        15,
+        14
+       ],
+       "g": "m"
+      },
+      {
+       "type": "market_checkout",
+       "rect": [
+        15,
+        0,
+        7,
+        14
+       ],
+       "g": "m"
+      }
+     ]
+    },
+    {
+     "id": "market_v3",
+     "label": "Cold-room market",
+     "open_default": 0.8,
+     "rooms": [
+      {
+       "type": "market_aisles",
+       "rect": [
+        0,
+        0,
+        7,
+        14
+       ],
+       "g": "b"
+      },
+      {
+       "type": "market_aisles",
+       "rect": [
+        7,
+        0,
+        15,
+        9
+       ],
+       "g": "a"
+      },
+      {
+       "type": "market_checkout",
+       "rect": [
+        7,
+        9,
+        15,
+        5
+       ],
+       "g": "a"
+      }
+     ]
+    }
+   ]
+  },
+  "office": {
+   "label": "Brightline Offices",
+   "description": "Open-plan computers, a terminal bank, meeting tables and a coffee station.",
+   "venue": "office",
+   "shell": [
+    5,
+    4,
+    22,
+    14
+   ],
+   "staff": [],
+   "wants": [
+    "computer",
+    "terminal"
+   ],
+   "min_objects": 30,
+   "alts": [
+    {
+     "id": "office_v1",
+     "label": "Open-plan office",
+     "open_default": 0.7,
+     "rooms": [
+      {
+       "type": "office_pods",
+       "rect": [
+        0,
+        6,
+        22,
+        8
+       ],
+       "g": "m"
+      },
+      {
+       "type": "office_meet",
+       "rect": [
+        0,
+        0,
+        10,
+        6
+       ],
+       "g": "b"
+      },
+      {
+       "type": "office_break",
+       "rect": [
+        10,
+        0,
+        12,
+        6
+       ],
+       "g": "c"
+      }
+     ]
+    },
+    {
+     "id": "office_v2",
+     "label": "Wing office",
+     "open_default": 0.6,
+     "rooms": [
+      {
+       "type": "office_pods",
+       "rect": [
+        0,
+        0,
+        13,
+        14
+       ],
+       "g": "m"
+      },
+      {
+       "type": "office_meet",
+       "rect": [
+        13,
+        0,
+        9,
+        6
+       ],
+       "g": "b"
+      },
+      {
+       "type": "office_break",
+       "rect": [
+        13,
+        6,
+        9,
+        8
+       ],
+       "g": "c"
+      }
+     ]
+    },
+    {
+     "id": "office_v3",
+     "label": "Pod office",
+     "open_default": 0.6,
+     "rooms": [
+      {
+       "type": "office_pods",
+       "rect": [
+        0,
+        0,
+        11,
+        8
+       ],
+       "g": "a"
+      },
+      {
+       "type": "office_pods",
+       "rect": [
+        11,
+        0,
+        11,
+        8
+       ],
+       "g": "b"
+      },
+      {
+       "type": "office_meet",
+       "rect": [
+        0,
+        8,
+        8,
+        6
+       ],
+       "g": "d"
+      },
+      {
+       "type": "office_pods",
+       "rect": [
+        8,
+        8,
+        6,
+        6
+       ],
+       "g": "c"
+      },
+      {
+       "type": "office_break",
+       "rect": [
+        14,
+        8,
+        8,
+        6
+       ],
+       "g": "e"
+      }
+     ]
+    }
+   ]
+  },
+  "school": {
+   "label": "Larkfield School",
+   "description": "Rows of desks, bookcases and a computer lab.",
+   "venue": "school",
+   "shell": [
+    5,
+    4,
+    22,
+    14
+   ],
+   "staff": [
+    {
+     "role": "teacher",
+     "mode": "free",
+     "room": "school_class"
+    }
+   ],
+   "wants": [
+    "desk",
+    "computer"
+   ],
+   "min_objects": 40,
+   "alts": [
+    {
+     "id": "school_v1",
+     "label": "Classroom school",
+     "open_default": 0.8,
+     "rooms": [
+      {
+       "type": "school_class",
+       "rect": [
+        0,
+        0,
+        14,
+        9
+       ],
+       "g": "a"
+      },
+      {
+       "type": "school_lab",
+       "rect": [
+        14,
+        0,
+        8,
+        9
+       ],
+       "g": "b"
+      },
+      {
+       "type": "school_hall",
+       "rect": [
+        0,
+        9,
+        22,
+        5
+       ],
+       "g": "c"
+      }
+     ]
+    },
+    {
+     "id": "school_v2",
+     "label": "Hall-wing school",
+     "open_default": 0.6,
+     "door_x": 2,
+     "rooms": [
+      {
+       "type": "school_hall",
+       "rect": [
+        0,
+        0,
+        5,
+        14
+       ],
+       "g": "h"
+      },
+      {
+       "type": "school_class",
+       "rect": [
+        5,
+        0,
+        17,
+        7
+       ],
+       "g": "a"
+      },
+      {
+       "type": "school_lab",
+       "rect": [
+        5,
+        7,
+        17,
+        7
+       ],
+       "g": "b"
+      }
+     ]
+    },
+    {
+     "id": "school_v3",
+     "label": "Big classroom school",
+     "open_default": 0.8,
+     "rooms": [
+      {
+       "type": "school_class",
+       "rect": [
+        0,
+        0,
+        22,
+        10
+       ],
+       "g": "a"
+      },
+      {
+       "type": "school_hall",
+       "rect": [
+        0,
+        10,
+        12,
+        4
+       ],
+       "g": "c"
+      },
+      {
+       "type": "school_lab",
+       "rect": [
+        12,
+        10,
+        10,
+        4
+       ],
+       "g": "b"
+      }
+     ]
+    }
+   ]
+  },
+  "park": {
+   "label": "Willow Green Park",
+   "description": "Benches, a fishing pond, grills and picnic tables, garden plots and plenty of fresh air.",
+   "venue": "park",
+   "shell": [
+    0,
+    0,
+    32,
+    22
+   ],
+   "staff": [],
+   "wants": [
+    "park_bench",
+    "fishing_spot",
+    "grill"
+   ],
+   "min_objects": 25,
+   "alts": [
+    {
+     "id": "park_v1",
+     "label": "Lakeside loop",
+     "paths": [
+      [
+       15,
+       17,
+       2,
+       5
+      ],
+      [
+       6,
+       4,
+       20,
+       2
+      ],
+      [
+       6,
+       16,
+       20,
+       2
+      ],
+      [
+       6,
+       4,
+       2,
+       14
+      ],
+      [
+       24,
+       4,
+       2,
+       14
+      ]
+     ],
+     "rooms": [
+      {
+       "type": "park_pond",
+       "rect": [
+        8,
+        6,
+        8,
+        5
+       ],
+       "g": "a"
+      },
+      {
+       "type": "park_picnic",
+       "rect": [
+        17,
+        6,
+        7,
+        5
+       ],
+       "g": "b"
+      },
+      {
+       "type": "park_lawn",
+       "rect": [
+        8,
+        11,
+        16,
+        5
+       ],
+       "g": "c"
+      },
+      {
+       "type": "park_garden",
+       "rect": [
+        0,
+        0,
+        6,
+        22
+       ],
+       "g": "d"
+      },
+      {
+       "type": "park_lawn",
+       "rect": [
+        26,
+        0,
+        6,
+        22
+       ],
+       "g": "e"
+      },
+      {
+       "type": "park_plaza",
+       "rect": [
+        6,
+        0,
+        20,
+        4
+       ],
+       "g": "f"
+      },
+      {
+       "type": "park_plaza",
+       "rect": [
+        6,
+        18,
+        20,
+        4
+       ],
+       "g": "g"
+      }
+     ]
+    },
+    {
+     "id": "park_v2",
+     "label": "Cross-path green",
+     "paths": [
+      [
+       15,
+       8,
+       2,
+       14
+      ],
+      [
+       0,
+       8,
+       32,
+       2
+      ],
+      [
+       4,
+       0,
+       2,
+       8
+      ],
+      [
+       26,
+       0,
+       2,
+       8
+      ]
+     ],
+     "rooms": [
+      {
+       "type": "park_garden",
+       "rect": [
+        0,
+        10,
+        12,
+        12
+       ],
+       "g": "a"
+      },
+      {
+       "type": "park_picnic",
+       "rect": [
+        17,
+        10,
+        15,
+        12
+       ],
+       "g": "b"
+      },
+      {
+       "type": "park_pond",
+       "rect": [
+        6,
+        0,
+        20,
+        8
+       ],
+       "g": "c"
+      },
+      {
+       "type": "park_lawn",
+       "rect": [
+        0,
+        0,
+        6,
+        8
+       ],
+       "g": "d"
+      },
+      {
+       "type": "park_lawn",
+       "rect": [
+        28,
+        0,
+        4,
+        8
+       ],
+       "g": "e"
+      },
+      {
+       "type": "park_plaza",
+       "rect": [
+        12,
+        10,
+        5,
+        12
+       ],
+       "g": "f"
+      }
+     ]
+    },
+    {
+     "id": "park_v3",
+     "label": "Garden court",
+     "paths": [
+      [
+       15,
+       13,
+       2,
+       9
+      ],
+      [
+       11,
+       5,
+       10,
+       8
+      ],
+      [
+       4,
+       9,
+       7,
+       2
+      ],
+      [
+       21,
+       9,
+       7,
+       2
+      ]
+     ],
+     "rooms": [
+      {
+       "type": "park_garden",
+       "rect": [
+        0,
+        0,
+        11,
+        9
+       ],
+       "g": "a"
+      },
+      {
+       "type": "park_pond",
+       "rect": [
+        21,
+        0,
+        11,
+        9
+       ],
+       "g": "b"
+      },
+      {
+       "type": "park_picnic",
+       "rect": [
+        0,
+        11,
+        11,
+        11
+       ],
+       "g": "c"
+      },
+      {
+       "type": "park_lawn",
+       "rect": [
+        21,
+        11,
+        11,
+        11
+       ],
+       "g": "d"
+      },
+      {
+       "type": "park_plaza",
+       "rect": [
+        11,
+        0,
+        10,
+        5
+       ],
+       "g": "e"
+      },
+      {
+       "type": "park_plaza",
+       "rect": [
+        11,
+        13,
+        4,
+        9
+       ],
+       "g": "f"
+      },
+      {
+       "type": "park_plaza",
+       "rect": [
+        17,
+        13,
+        4,
+        9
+       ],
+       "g": "g"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

@@ -9,7 +9,11 @@ func _refresh_lamps() -> void:
 		return
 	var seen: Dictionary = {}
 	var count: int = 0
-	for o in w.all_objects():
+	var objs: Array = w.all_objects()
+	if "regions" in w and w.regions.has_regions() and not w.regions.home().is_empty():
+		var hr: Rect2i = w.regions.home()["rect"]      # big map: the player's own lot gets the light budget first
+		objs = objs.filter(func(o): return hr.has_point(o.tile)) + objs.filter(func(o): return not hr.has_point(o.tile))
+	for o in objs:
 		var ld: Dictionary = LIGHT_DEFS.get(str(o.def_id), {})
 		if ld.is_empty() or count >= MAX_LIGHTS:
 			continue

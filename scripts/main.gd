@@ -112,6 +112,9 @@ func start_new_game(h: Dictionary, start_id: String = "classic", opts: Dictionar
 		UIU.notify(str(scen.get("moved_in", "Welcome home!")) % str(folk[0].name), "good")
 
 func load_game(slot: int) -> void:
+	if SaveLoad.slot_is_old(slot):
+		UIU.notify(SaveLoad.OLD_SAVE_MSG, "bad")      # leave the running game / title screen alone
+		return
 	_clear_world()
 	if not SaveSlots.load_slot(slot):
 		UIU.notify("Could not load slot %d" % slot, "bad")

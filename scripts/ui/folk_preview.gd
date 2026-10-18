@@ -70,13 +70,7 @@ func _rebuild() -> void:
 	var height: float = clampf(float(_ap.get("height", 1.0)), 0.8, 1.2)
 	var build: float = clampf(float(_ap.get("build", 1.0)), 0.8, 1.2)
 	_rig.scale = Vector3(build * height, height, build * height) * vs
-	_tint(_rig, {"skin": _col("skin", "#d9a47f"), "hair": _col("hair_color", "#3d281c"), "eyes": _col("eye_color", "#5b3a22"),
-		"shirt": _col("shirt", "#4f9ec4"), "pants": _col("pants", "#3a4660")})
-	var style: int = clampi(int(_ap.get("hair_style", 0)), 0, 5)
-	for i in 6:
-		var hn := _rig.find_child("hair_%d" % i, true, false)
-		if hn is Node3D:
-			(hn as Node3D).visible = (i == style)
+	FolkRigStyle.apply(_rig, _ap, _stage)
 	var anim := _find_anim(_rig)
 	if anim != null:
 		FolkView.prepare_player(anim)
@@ -86,9 +80,6 @@ func _rebuild() -> void:
 	_cam.position = Vector3(0, h * 0.52, h * 2.35 + 0.6)
 	_cam.look_at_from_position(_cam.position, Vector3(0, h * 0.48, 0), Vector3.UP)
 
-func _col(key: String, fallback: String) -> Color:
-	return Color.html(str(_ap.get(key, fallback)))
-
 func _find_anim(n: Node) -> AnimationPlayer:
 	if n is AnimationPlayer:
 		return n
@@ -97,15 +88,3 @@ func _find_anim(n: Node) -> AnimationPlayer:
 		if r != null:
 			return r
 	return null
-
-func _tint(n: Node, tints: Dictionary) -> void:
-	if n is MeshInstance3D and (n as MeshInstance3D).mesh != null:
-		var mi := n as MeshInstance3D
-		for s in mi.mesh.get_surface_count():
-			var m: Material = mi.mesh.surface_get_material(s)
-			if m is BaseMaterial3D and tints.has(str(m.resource_name)):
-				var d := (m as BaseMaterial3D).duplicate() as BaseMaterial3D
-				d.albedo_color = tints[str(m.resource_name)]
-				mi.set_surface_override_material(s, d)
-	for c in n.get_children():
-		_tint(c, tints)

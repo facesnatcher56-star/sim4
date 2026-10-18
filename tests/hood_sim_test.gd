@@ -46,7 +46,7 @@ func _three_days() -> void:
 			var who: Array = []
 			for i in step[1]:
 				who.append(ids[i])
-			var res: Dictionary = Neighborhood.travel(who, str(step[0]), {"quiet": true})
+			var res: Dictionary = Neighborhood.travel(who, str(step[0]), {"quiet": true, "fast": true})
 			if bool(res["ok"]):
 				trips += 1
 		Kit.run(1)
@@ -56,15 +56,15 @@ func _three_days() -> void:
 	_check(worst > -85.0, "nobody starved or collapsed over three days (worst need %.1f)" % worst)
 	for f in folk:
 		_check(W.get_folk(f.id) != null, "%s still exists" % f.name)
-	_check(Crowd.count() <= Venues.crowd_cap(), "crowd cap held")
-	# consistent bookkeeping at the end: every resident either visible on the loaded lot or marked off-lot / away
+	for lid in Neighborhood.lot_ids():
+		_check(Crowd.count(lid) <= Venues.crowd_cap(), "crowd cap held in %s (%d)" % [lid, Crowd.count(lid)])
+	# consistent bookkeeping at the end: where a folk is follows from its tile, nobody is stuck hidden
 	for f in folk:
-		var at: String = Neighborhood.where(f.id)
-		if at == Neighborhood.current_lot:
-			_check(not f.has_meta("offlot") or Away.active.has(f.id), "%s is on the loaded lot but flagged off-lot" % f.name)
+		_check(not f.has_meta("away") or Away.active.has(f.id) or Away.pending.has(f.id), "%s is hidden without an away record" % f.name)
+		_check(World.is_walkable(f.tile) or f.current != null, "%s stands somewhere sane" % f.name)
 	_check(Kit.count_events("lot_changed") >= trips, "lot_changed events were emitted")
 
-## A job keeps running from wherever the folk is: at the park (lot loaded) and while off-lot at home (park loaded).
+## A job keeps running from wherever the folk is: at the park and at home.
 func _work_from_elsewhere() -> void:
 	var folk: Array = Kit.new_game("classic")
 	var mira: Folk = folk[0]
@@ -73,18 +73,18 @@ func _work_from_elsewhere() -> void:
 	Careers.hire(tobin, "coder", 1)
 	Kit.set_time(2, 7, 40)                     # Tuesday, shift starts at 09:00
 	WorldIface.coins[1] = 1000
-	var r: Dictionary = Neighborhood.travel([mira.id], "park", {"quiet": true})      # tobin stays home (off-lot)
+	var r: Dictionary = Neighborhood.travel([mira.id], "park", {"quiet": true, "fast": true})      # tobin stays home
 	_check(bool(r["ok"]), "mira heads to the park")
 	var coins_before: int = Economy.balance(1)
 	Kit.run(60)
-	_check(tobin.has_meta("offlot"), "tobin is off-lot at home")
+	_check(Neighborhood.where(tobin.id) == "home" and Neighborhood.where(mira.id) == "park", "mira at the park, tobin at home")
 	Kit.run(60 + 40)                           # 09:20
 	_check(Away.active.has(mira.id) and str(Away.info(mira.id).get("reason", "")) == "work", "mira left the park for work")
-	_check(Away.active.has(tobin.id) and str(Away.info(tobin.id).get("reason", "")) == "work", "off-lot tobin was dispatched to work too (reason %s)" % str(Away.info(tobin.id).get("reason", "")))
+	_check(Away.active.has(tobin.id) and str(Away.info(tobin.id).get("reason", "")) == "work", "tobin at home was dispatched to work too (reason %s)" % str(Away.info(tobin.id).get("reason", "")))
 	Kit.run(9 * 60)                            # past 17:00 + margin
 	_check(str(Away.info(mira.id).get("reason", "")) != "work" and str(Away.info(tobin.id).get("reason", "")) != "work", "both are back from work")
 	_check(Economy.balance(1) > coins_before + 150, "wages were paid (%d -> %d)" % [coins_before, Economy.balance(1)])
-	_check(Neighborhood.where(mira.id) == "park" and not mira.has_meta("offlot"), "mira returned to the lot she left from")
+	_check(Neighborhood.where(mira.id) == "park" and not mira.has_meta("away"), "mira returned to the lot she left from")
 	Kit.run(5)
-	_check(tobin.has_meta("offlot") and Neighborhood.where(tobin.id) == "home", "tobin returned to being off-lot at home")
+	_check(Neighborhood.where(tobin.id) == "home", "tobin is back at home")
 	_check(Careers.jobs[mira.id]["days_worked"] >= 1 and Careers.jobs[tobin.id]["days_worked"] >= 1, "both shifts were completed")

@@ -86,7 +86,7 @@ static func add_townie(age_days: float = -1.0, nm: String = "", traits: Array = 
 		age_days = SysUtil.rng.randf_range(float(Aging.stage_def("adult").get("from_day", 44)) + 2.0, float(Aging.stage_def("elder").get("from_day", 140)) - 10.0)
 	var t: Dictionary = {"id": id, "name": nm, "traits": traits.duplicate(), "age_days": age_days, "career": career, "level": level,
 		"coins": SysUtil.rng.randi_range(100, 800), "alive": true, "lot": SysUtil.rng.randi_range(1, 6), "last_visit_day": -99,
-		"appearance": Genetics.random_appearance()}
+		"appearance": Genetics.unique_appearance(GeneticsUnique.registry())}
 	townies[id] = t
 	return t
 
@@ -100,11 +100,16 @@ static func generate_townies(count: int = -1) -> void:
 		if i % 3 != 2 and not careers.is_empty():
 			tn["career"] = str(SysUtil.pick(careers))
 			tn["level"] = SysUtil.rng.randi_range(1, 3)
+			var role: String = FolkOutfits.role_for(str(tn["career"]), "adult")
+			if role != "":
+				tn["appearance"] = FolkOutfits.dress(tn["appearance"], role, GeneticsUnique.registry_without(tn["appearance"]), Genetics.rng)
 	# a teen and an elder for variety
 	if count >= 4:
 		var ids: Array = townies.keys()
 		(townies[ids[0]] as Dictionary)["age_days"] = SysUtil.rng.randf_range(float(Aging.stage_def("teen").get("from_day", 28)) + 1.0, 42.0)
 		(townies[ids[0]] as Dictionary)["career"] = ""
+		var tt: Dictionary = townies[ids[0]]
+		tt["appearance"] = FolkOutfits.dress(tt["appearance"], "student", GeneticsUnique.registry_without(tt["appearance"]), Genetics.rng)
 		(townies[ids[1]] as Dictionary)["age_days"] = float(Aging.stage_def("elder").get("from_day", 140)) + 6.0
 		(townies[ids[1]] as Dictionary)["career"] = ""
 	# starting social web: friendships, one couple, one family
@@ -259,8 +264,8 @@ static func try_burglary(force: bool = false) -> int:
 	var res: Array = SysUtil.residents()
 	if res.is_empty():
 		return 0
-	if Neighborhood.current_lot != Neighborhood.HOME:
-		return 0      # the loaded lot is not the home: no burglary while the player is out and about
+	if not Neighborhood.everyone_home():
+		return 0      # somebody is out and about: no burglary
 	for f in res:
 		if SysUtil.is_away(f):
 			continue
@@ -268,7 +273,7 @@ static func try_burglary(force: bool = false) -> int:
 		if not asleep:
 			return 0
 	for o in SysUtil.all_world_objects():
-		if str(o.def_id) == "lamp" and bool(WorldIface.state_get(o, "on", false)):
+		if str(o.def_id) == "lamp" and Neighborhood.lot_at(o.tile) == Neighborhood.HOME and bool(WorldIface.state_get(o, "on", false)):
 			return 0
 	if not force:
 		pass

@@ -129,7 +129,7 @@ static func gather(folk, closed = null) -> Array:
 			offered[def_id] = open_ids
 		for iid in offered[def_id]:
 			out.append({"id": iid, "target_id": int(o.id), "kind": "object", "obj": o, "folk": null})
-	var others: Array = WorldIface.all_folk()
+	var others: Array = WorldIface.folk_near(folk)
 	for iid in defs:
 		var d2: Dictionary = defs[iid]
 		if not bool(d2.get("autonomous", true)):

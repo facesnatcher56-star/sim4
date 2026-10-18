@@ -104,7 +104,7 @@ func _migration_and_errors(f: Array) -> void:
 	var w := K.setup()
 	K.expect(f, not SaveLoad.load(SLOT), "loading an empty slot fails cleanly")
 	K.expect(f, SaveLoad.last_error != "", "reports why")
-	# a v1 file (as written by ui/save_slots.gd) has no systems block
+	# saves from before the continuous map (any version below SaveLoad.VERSION) are refused with a clear message
 	var folk := Folk.create("Old", ["neat"])
 	folk.household_id = 1
 	var v1: Dictionary = {"version": 1, "household_name": "Legacy", "day": 3, "clock_total": 4000, "folk": [folk.to_dict()], "world": {}}
@@ -112,10 +112,10 @@ func _migration_and_errors(f: Array) -> void:
 	var fa := FileAccess.open(SaveLoad.path(SLOT), FileAccess.WRITE)
 	fa.store_string(JSON.stringify(v1))
 	fa.close()
-	K.expect(f, SaveLoad.load(SLOT), "v1 files migrate and load")
-	K.expect(f, w.all_folk().size() == 1 and SimEnv.now_min() == 4000, "v1 folk and clock restored")
-	var migrated: Dictionary = SaveLoad.migrate({"version": 1})
-	K.expect(f, int(migrated["version"]) == 2 and migrated.has("systems"), "migrate() upgrades the version")
+	K.expect(f, SaveLoad.slot_is_old(SLOT) and SaveLoad.summary(SLOT).find("Old save") >= 0, "old saves are recognised and labelled in the slot list")
+	K.expect(f, not SaveLoad.load(SLOT), "old (v1) files are refused")
+	K.expect(f, SaveLoad.last_error == SaveLoad.OLD_SAVE_MSG, "with the 'old save from an earlier version' message")
+	K.expect(f, SimEnv.now_min() != 4000, "and the clock of the old save was not applied")
 	# newer versions are refused, garbage is refused
 	var fb := FileAccess.open(SaveLoad.path(SLOT), FileAccess.WRITE)
 	fb.store_string(JSON.stringify({"format": "sim4", "version": 99, "folk": []}))

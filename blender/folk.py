@@ -15,6 +15,9 @@ Pose rotations are expressed in ARMATURE axes (X right, Y forward, Z up), relati
 """
 import bpy, bmesh, math, os, sys, json, shutil
 from mathutils import Vector, Matrix, Euler, Quaternion
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from folk_mesh import Mesher
+from folk_build import build_meshes
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, "assets", "models")
@@ -33,32 +36,6 @@ VARIANTS = {
     "folk_toddler": dict(s=0.50, hs=1.45, stoop=0.0, w=1.05),
     "folk_baby":    dict(s=0.30, hs=1.65, stoop=0.0, w=1.15),
 }
-
-# ------------------------------------------------------------------ materials
-MATS = {  # name: (rgb, roughness)
-    "skin":     ((0.90, 0.70, 0.56), 0.75),
-    "hair":     ((0.25, 0.15, 0.10), 0.85),
-    "eyes":     ((0.20, 0.30, 0.45), 0.2),
-    "eyewhite": ((0.96, 0.96, 0.95), 0.3),
-    "mouth":    ((0.62, 0.25, 0.25), 0.6),
-    "shirt":    ((0.30, 0.52, 0.82), 0.9),
-    "pants":    ((0.25, 0.26, 0.40), 0.9),
-    "shoes":    ((0.14, 0.11, 0.10), 0.8),
-}
-
-
-def get_mat(name):
-    m = bpy.data.materials.get(name)
-    if m:
-        return m
-    col, rough = MATS[name]
-    m = bpy.data.materials.new(name)
-    m.use_nodes = True
-    b = m.node_tree.nodes.get("Principled BSDF")
-    b.inputs["Base Color"].default_value = (*col, 1.0)
-    b.inputs["Roughness"].default_value = rough
-    m.diffuse_color = (*col, 1.0)
-    return m
 
 
 # ------------------------------------------------------------------ skeleton (adult units, metres, Blender axes)
@@ -87,285 +64,6 @@ BONE_ORDER = ["hips", "spine", "chest", "neck", "head",
               "shoulder_L", "upper_arm_L", "forearm_L", "hand_L", "shoulder_R", "upper_arm_R", "forearm_R", "hand_R",
               "thigh_L", "shin_L", "foot_L", "thigh_R", "shin_R", "foot_R"]
 
-
-# ------------------------------------------------------------------ mesh builder
-class Mesher:
-    def __init__(self, bones, S):
-        self.bm = bmesh.new()
-        self.dl = self.bm.verts.layers.deform.verify()
-        self.bones = bones
-        self.S = S
-        self.mats = []
-
-    def mi(self, m):
-        if m not in self.mats:
-            self.mats.append(m)
-        return self.mats.index(m)
-
-    def _w(self, v, wd):
-        for b, w in wd.items():
-            if w > 0.001:
-                v[self.dl][self.bones.index(b)] = w
-
-    def ring_mesh(self, rings, mat, wfn, seg=10, smooth=True, clip=None):
-        """rings: list of (center Vector, u Vector, v Vector, ru, rv); ru<=0 & rv<=0 -> pole.
-        Coordinates in adult units; scaled by S on creation. wfn(unit_pos)->weights dict."""
-        bm = self.bm
-        mid = self.mi(mat)
-        grid = []
-        newv = []
-        for (c, u, v, ru, rv) in rings:
-            if ru < 1e-6 and rv < 1e-6:
-                vv = bm.verts.new(c * self.S)
-                vv.co = c * self.S
-                self._w(vv, wfn(c))
-                grid.append([vv])
-                newv.append(vv)
-            else:
-                row = []
-                for k in range(seg):
-                    a = TAU * k / seg
-                    p = c + u * (ru * math.cos(a)) + v * (rv * math.sin(a))
-                    vv = bm.verts.new(p * self.S)
-                    self._w(vv, wfn(p))
-                    row.append(vv)
-                    newv.append(vv)
-                grid.append(row)
-        faces = []
-
-        def addf(vs):
-            try:
-                f = bm.faces.new(vs)
-                f.material_index = mid
-                f.smooth = smooth
-                faces.append(f)
-            except ValueError:
-                pass
-        for i in range(len(grid) - 1):
-            a, b = grid[i], grid[i + 1]
-            if len(a) == 1 and len(b) == 1:
-                continue
-            if len(a) == 1:
-                for k in range(seg):
-                    addf((a[0], b[(k + 1) % seg], b[k]))
-            elif len(b) == 1:
-                for k in range(seg):
-                    addf((a[k], a[(k + 1) % seg], b[0]))
-            else:
-                for k in range(seg):
-                    k2 = (k + 1) % seg
-                    addf((a[k], a[k2], b[k2], b[k]))
-        # caps for open ends
-        for row in (grid[0], grid[-1]):
-            if len(row) > 1:
-                cen = bm.verts.new(sum((v.co for v in row), Vector()) / len(row))
-                cen.co = sum((v.co for v in row), Vector()) / len(row)
-                # copy weights of first vertex
-                for g, w in row[0][self.dl].items():
-                    cen[self.dl][g] = w
-                for k in range(seg):
-                    if row is grid[0]:
-                        addf((cen, row[(k + 1) % seg], row[k]))
-                    else:
-                        addf((cen, row[k], row[(k + 1) % seg]))
-        if clip is not None:
-            # remove vertices rejected by clip(unit_pos) -> keep?
-            kill = [v for v in newv if v.is_valid and not clip(v.co / self.S)]
-            bmesh.ops.delete(bm, geom=kill, context='VERTS')
-        return faces
-
-    # --- primitives
-    def tube(self, p0, p1, prof, mat, wfn, seg=10):
-        a, c = Vector(p0), Vector(p1)
-        ax = (c - a).normalized()
-        u = Vector((1, 0, 0)) if abs(ax.x) < 0.9 else Vector((0, 1, 0))
-        u = (u - ax * u.dot(ax)).normalized()
-        v = ax.cross(u)
-        rings = [(a.lerp(c, t), u, v, ru, rv) for (t, ru, rv) in prof]
-        self.ring_mesh(rings, mat, wfn, seg)
-
-    def ellipsoid(self, c, r, mat, wfn, rings=7, seg=10, clip=None):
-        c = Vector(c)
-        rr = []
-        for i in range(rings + 1):
-            ph = PI * i / rings
-            z = -math.cos(ph) * r[2]
-            s = math.sin(ph)
-            ru, rv = r[0] * s, r[1] * s
-            if i in (0, rings):
-                ru = rv = 0
-            rr.append((c + Vector((0, 0, z)), Vector((1, 0, 0)), Vector((0, 1, 0)), ru, rv))
-        self.ring_mesh(rr, mat, wfn, seg, clip=clip)
-
-    def finish(self, name, arm):
-        bm = self.bm
-        bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:])
-        me = bpy.data.meshes.new(name)
-        bm.to_mesh(me)
-        bm.free()
-        ob = bpy.data.objects.new(name, me)
-        bpy.context.scene.collection.objects.link(ob)
-        for b in self.bones:
-            ob.vertex_groups.new(name=b)
-        for m in self.mats:
-            me.materials.append(get_mat(m))
-        for p in me.polygons:
-            p.use_smooth = True
-        ob.parent = arm
-        mod = ob.modifiers.new("Armature", 'ARMATURE')
-        mod.object = arm
-        return ob
-
-
-def W(b):
-    return lambda p: {b: 1.0}
-
-
-def ramp(x, a, b):
-    return max(0.0, min(1.0, (x - a) / (b - a)))
-
-
-# ------------------------------------------------------------------ body geometry
-def build_body(M, hs, wd):
-    """wd: width multiplier. Adds body parts to Mesher M. Returns head centre (adult units)."""
-    V = Vector
-    # --- weights
-    def w_torso(p):
-        z = p.z
-        a = ramp(z, 0.96, 1.04)      # hips -> spine
-        b = ramp(z, 1.10, 1.18)      # spine -> chest
-        wh = 1 - a
-        ws = a * (1 - b)
-        wc = a * b
-        d = {"hips": wh, "spine": ws, "chest": wc}
-        if z > 1.34:
-            n = ramp(z, 1.34, 1.42)
-            d = {"chest": 1 - n * 0.5, "neck": n * 0.5}
-        return d
-
-    def w_hips(p):
-        return {"hips": 1.0} if p.z < 1.0 else w_torso(p)
-
-    # pants pelvis
-    M.tube(V((0, 0, 0.84)), V((0, 0, 1.08)),
-           [(0.0, 0.07 * wd, 0.06 * wd), (0.04, 0.12 * wd, 0.09 * wd), (0.36, 0.172 * wd, 0.112 * wd),
-            (0.7, 0.158 * wd, 0.104 * wd), (1.0, 0.150 * wd, 0.100 * wd)], "pants", w_hips, seg=12)
-    # shirt torso
-    M.tube(V((0, 0, 0.99)), V((0, 0, 1.43)),
-           [(0.0, 0.172 * wd, 0.116 * wd), (0.12, 0.158 * wd, 0.108 * wd), (0.30, 0.142 * wd, 0.100 * wd),
-            (0.5, 0.163 * wd, 0.105 * wd), (0.72, 0.188 * wd, 0.112 * wd), (0.88, 0.196 * wd, 0.104 * wd),
-            (0.96, 0.130 * wd, 0.085 * wd), (1.0, 0.070, 0.060)], "shirt", w_torso, seg=14)
-    # neck
-    M.tube(V((0, 0, 1.36)), V((0, 0, 1.50)), [(0, 0.052, 0.05), (1, 0.046, 0.046)], "skin",
-           lambda p: {"neck": 1.0} if p.z > 1.40 else {"neck": 0.5, "chest": 0.5}, seg=8)
-
-    for side, sx in (("L", -1), ("R", 1)):
-        # arms
-        sh = V((sx * 0.19, 0, 1.33))
-        el = V((sx * 0.215, 0, 1.05))
-        wr = V((sx * 0.235, 0, 0.80))
-        ua, fa = "upper_arm_" + side, "forearm_" + side
-
-        def w_ua(p, ua=ua, fa=fa, side=side):
-            t = ramp(p.z, 1.05, 0.90)   # approaching elbow from above
-            top = ramp(p.z, 1.25, 1.36)
-            d = {ua: 1 - 0.5 * t, fa: 0.5 * t}
-            if top > 0:
-                d = {ua: (1 - top) * (1 - 0.5 * t) + top * 0.5, "shoulder_" + side: top * 0.25, "chest": top * 0.25}
-            return d
-
-        def w_fa(p, ua=ua, fa=fa):
-            t = ramp(p.z, 1.05, 1.0 - 0.0001) if False else ramp(1.05 - p.z, 0.0, 0.08)
-            return {fa: 0.5 + 0.5 * t, ua: 0.5 - 0.5 * t}
-        M.ellipsoid(V((sx * 0.185, 0, 1.325)), (0.07 * wd, 0.068 * wd, 0.07 * wd), "shirt", w_ua)    # deltoid
-        M.tube(sh, el, [(0, 0.062 * wd, 0.060 * wd), (0.5, 0.055 * wd, 0.054 * wd), (0.93, 0.050 * wd, 0.049 * wd),
-                        (1.0, 0.0, 0.0)], "shirt", w_ua)
-        M.tube(V((sx * 0.215, 0, 1.075)), wr, [(0, 0.0, 0.0), (0.07, 0.046 * wd, 0.046 * wd), (0.55, 0.040 * wd, 0.040 * wd),
-                                               (1.0, 0.031 * wd, 0.030 * wd)], "skin", w_fa, seg=8)
-        M.ellipsoid(el, (0.047 * wd, 0.047 * wd, 0.047 * wd), "skin", lambda p, ua=ua, fa=fa: {ua: 0.5, fa: 0.5}, rings=5, seg=8)
-        # hand (mitten + thumb)
-        hb = "hand_" + side
-        M.ellipsoid(V((sx * 0.243, 0.0, 0.725)), (0.026, 0.045, 0.062), "skin", W(hb), rings=6, seg=8)
-        M.ellipsoid(V((sx * 0.243 - sx * 0.01, 0.045, 0.745)), (0.013, 0.014, 0.03), "skin", W(hb), rings=4, seg=6)
-        # legs
-        th, sn, ft = "thigh_" + side, "shin_" + side, "foot_" + side
-        hip, kn, an = V((sx * 0.09, 0, 0.93)), V((sx * 0.09, 0, 0.50)), V((sx * 0.09, 0, 0.085))
-
-        def w_th(p, th=th, sn=sn):
-            t = ramp(0.55 - p.z, 0.0, 0.10)
-            return {th: 1 - 0.5 * t, sn: 0.5 * t}
-
-        def w_sn(p, th=th, sn=sn, ft=ft):
-            t = ramp(0.55 - p.z, 0.0, 0.10)
-            f = ramp(0.16 - p.z, 0.0, 0.07)
-            return {th: 0.5 * (1 - t) if p.z > 0.45 else 0.0, sn: (0.5 + 0.5 * t) * (1 - f), ft: f * 0.4 + 0, **({} if f == 0 else {})}
-        M.tube(hip, kn, [(0.0, 0.092 * wd, 0.092 * wd), (0.25, 0.088 * wd, 0.089 * wd), (0.75, 0.066 * wd, 0.066 * wd), (1.0, 0.058 * wd, 0.058 * wd)],
-               "pants", w_th, seg=10)
-        M.tube(kn + V((0, 0, 0.03)), an + V((0, 0, 0.02)), [(0.0, 0.058 * wd, 0.058 * wd), (0.3, 0.054 * wd, 0.054 * wd), (1.0, 0.040 * wd, 0.040 * wd)],
-               "pants", w_sn, seg=10)
-        M.ellipsoid(kn, (0.058 * wd, 0.058 * wd, 0.058 * wd), "pants", lambda p, th=th, sn=sn: {th: 0.5, sn: 0.5}, rings=5, seg=8)
-        # shoe
-        M.ellipsoid(V((sx * 0.09, 0.05, 0.048)), (0.052, 0.135, 0.050), "shoes", W(ft), rings=6, seg=10)
-        M.ellipsoid(V((sx * 0.09, -0.01, 0.07)), (0.045, 0.06, 0.06), "shoes", W(ft), rings=5, seg=8)
-
-
-def build_head(M, hs, hair_meshers):
-    """Head parts, all weighted to 'head'. Positions are head-local * hs about the head centre."""
-    V = Vector
-    hc = V((0, 0.005, 1.46 + 0.115 * hs - 0.012 * hs + 0.0))
-    # head-local -> adult-unit position
-    H = lambda x, y, z: hc + V((x, y, z)) * hs
-    hw = W("head")
-
-    def E(c, r, mat, **kw):
-        M.ellipsoid(H(*c), tuple(v * hs for v in r), mat, hw, **kw)
-    E((0, 0, 0), (0.093, 0.105, 0.115), "skin", rings=9, seg=14)            # cranium
-    E((0, 0.022, -0.065), (0.072, 0.072, 0.060), "skin", rings=6, seg=10)   # jaw / chin
-    for sx in (-1, 1):
-        E((sx * 0.094, 0.0, -0.005), (0.012, 0.02, 0.03), "skin", rings=4, seg=6)           # ears
-        E((sx * 0.037, 0.088, 0.015), (0.019, 0.012, 0.016), "eyewhite", rings=4, seg=8)    # eye white
-        E((sx * 0.037, 0.096, 0.015), (0.011, 0.006, 0.011), "eyes", rings=4, seg=8)         # iris
-        E((sx * 0.037, 0.092, 0.047), (0.025, 0.008, 0.006), "hair", rings=3, seg=6)         # brow
-    E((0, 0.104, -0.015), (0.014, 0.020, 0.022), "skin", rings=4, seg=6)                    # nose
-    E((0, 0.088, -0.05), (0.023, 0.008, 0.006), "mouth", rings=3, seg=8)                    # mouth
-
-    # ---- hair styles (separate meshers -> separate objects)
-    def cap(m, grow=0.012, back=0.0, top=0.0, low=0.06):
-        # skull cap that leaves the face/ears free
-        def keep(p):
-            q = (p - hc) / hs
-            return q.z > low or (q.y < -0.025 and q.z > -0.075) and abs(q.x) < 0.09 or (q.z > -0.02 and q.y < -0.06)
-        m.ellipsoid(H(0, -0.012 + back * 0.4, 0.016 + top * 0.3),
-                    (hs * (0.093 + grow), hs * (0.108 + grow + back), hs * (0.113 + grow + top)),
-                    "hair", W("head"), rings=9, seg=14, clip=keep)
-    hh = lambda m, c, r, **kw: m.ellipsoid(H(*c), tuple(v * hs for v in r), "hair", W("head"), **kw)
-    # 0 short crop
-    cap(hair_meshers[0], 0.012)
-    hh(hair_meshers[0], (0, 0.075, 0.075), (0.085, 0.03, 0.03), rings=4, seg=8)   # fringe
-    # 1 buzz cut (tight)
-    cap(hair_meshers[1], 0.005, low=0.02)
-    # 2 long hair
-    cap(hair_meshers[2], 0.014)
-    hh(hair_meshers[2], (0, -0.075, -0.08), (0.105, 0.06, 0.20), rings=7, seg=10)
-    hh(hair_meshers[2], (-0.085, -0.02, 0.0), (0.02, 0.05, 0.10), rings=5, seg=8)
-    hh(hair_meshers[2], (0.085, -0.02, 0.0), (0.02, 0.05, 0.10), rings=5, seg=8)
-    hh(hair_meshers[2], (0, 0.075, 0.075), (0.09, 0.03, 0.03), rings=4, seg=8)
-    # 3 ponytail
-    cap(hair_meshers[3], 0.012)
-    hh(hair_meshers[3], (0, -0.12, 0.03), (0.04, 0.04, 0.04), rings=4, seg=8)
-    hh(hair_meshers[3], (0, -0.15, -0.05), (0.032, 0.032, 0.08), rings=5, seg=8)
-    hh(hair_meshers[3], (0, -0.16, -0.14), (0.025, 0.025, 0.07), rings=5, seg=8)
-    # 4 spiky
-    cap(hair_meshers[4], 0.008)
-    import random
-    for i, (x, y, ang) in enumerate([(0, 0.0, 0.0), (-0.05, 0.03, -0.5), (0.05, 0.03, 0.5), (-0.05, -0.05, -0.6), (0.05, -0.05, 0.6),
-                                      (0, -0.07, 0.0), (0, 0.07, 0.0)]):
-        base = H(x, y, 0.1)
-        d = V((math.sin(ang) * 0.6, (0.4 if y > 0.05 else -0.4 if y < -0.06 else 0.0) * 0.6, 1.0)).normalized()
-        hair_meshers[4].tube(base, base + d * 0.11 * hs, [(0, 0.03 * hs, 0.03 * hs), (1.0, 0, 0)], "hair", W("head"), seg=6)
-    # 5 curly / afro
-    hair_meshers[5].ellipsoid(H(0, -0.01, 0.035), (0.135 * hs, 0.135 * hs, 0.125 * hs), "hair", W("head"), rings=8, seg=14,
-                              clip=lambda p: not (((p - hc) / hs).y > 0.01 and ((p - hc) / hs).z < 0.06) and ((p - hc) / hs).z > -0.065)
 
 
 # ------------------------------------------------------------------ armature
@@ -959,18 +657,7 @@ def build_variant(name, cfg, only_render=None):
     clear_scene()
     S, hs, wd = cfg["s"], cfg["hs"], cfg["w"]
     arm = build_armature(name, S, hs)
-    M = Mesher(BONE_ORDER, S)
-    build_body(M, hs, wd)
-    hair_m = [Mesher(BONE_ORDER, S) for _ in range(6)]
-    build_head(M, hs, hair_m)
-    body = M.finish("body", arm)
-    hairs = [hm.finish("hair_%d" % i, arm) for i, hm in enumerate(hair_m)]
-    for i, h in enumerate(hairs):
-        h.hide_viewport = i != 0
-        h.hide_render = i != 0
-        # keep all exported visible; Godot toggles visibility
-        h.hide_viewport = False
-        h.hide_render = False
+    build_meshes(arm, BONE_ORDER, S, hs, wd)
 
     bpy.context.view_layer.objects.active = arm
     bpy.ops.object.mode_set(mode='POSE')
@@ -1068,10 +755,10 @@ def render_strips(arm, B, cfg, outdir, clips, cols=5, tag="strip"):
     co.rotation_euler = d.to_track_quat('-Z', 'Y').to_euler()
     bpy.context.view_layer.objects.active = arm
     bpy.ops.object.mode_set(mode='POSE')
-    for i in range(1, 6):
-        h = bpy.data.objects.get("hair_%d" % i)
-        if h:
-            h.hide_render = True
+    keep = {"body", "legs_skin", "top_0", "bottom_0", "shoes_0", "hair_0", "eyes_0", "brows_0", "nose_0", "mouth_0", "ears_0"}
+    for o in bpy.data.objects:
+        if o.type == "MESH" and o.name not in keep and o.name not in os.environ.get("SHOW", "").split(","):
+            o.hide_render = True
     hair_i = int(os.environ.get("HAIR", "0"))
     files = []
     views = [((2.4, 3.0, 1.5), 0.0), ((2.4, 3.0, 1.5), 0.4), ((-2.4, 3.0, 1.5), 0.8), ((3.8, 0.0, 1.0), 0.4)]

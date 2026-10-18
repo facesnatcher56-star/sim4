@@ -15,8 +15,10 @@ extends Node
 const WorldObjectScript := preload("res://scripts/world/world_object.gd")
 const StarterHouse := preload("res://scripts/world/starter_house.gd")
 
-const DEFAULT_W := 32
+const DEFAULT_W := 32            # legacy single lot
 const DEFAULT_H := 24
+const MAP_W := 160               # the one continuous neighbourhood (MapBuilder): change the size HERE only
+const MAP_H := 120
 const BLOCKING_WALLS := ["wall", "window", "fence"]
 const WALL_TYPES := ["wall", "door", "window", "fence"]
 const WALL_PRICE := 5
@@ -33,6 +35,13 @@ const FLOOR_DEFS := {
 	"wood": {"decor": 0.6, "color": "#b8864e"},
 	"tile": {"decor": 0.5, "color": "#d9e4ea"},
 	"carpet": {"decor": 0.8, "color": "#8a6f9e"},
+	# map terrain (MapBuilder): "terrain": true = not meant for the player's paint palette
+	"asphalt": {"decor": 0.0, "color": "#4a4d55", "terrain": true, "srgb": true},   # "srgb": colour is exact (the mesher converts it to linear)
+	"sidewalk": {"decor": 0.1, "color": "#b9b6ae", "terrain": true, "srgb": true},
+	"crosswalk": {"decor": 0.0, "color": "#4a4d55", "terrain": true, "srgb": true},   # asphalt + white bars drawn by the chunk mesher
+	"lawn": {"decor": 0.3, "color": "#86c35f", "terrain": true},        # empty reserved lot ground (lighter than block grass)
+	"sand": {"decor": 0.0, "color": "#d8c690", "terrain": true, "srgb": true},
+	"water": {"decor": 0.4, "color": "#3f7fc0", "terrain": true, "srgb": true, "blocks": true},
 }
 
 signal world_reset
@@ -70,6 +79,7 @@ var objs: WorldObjects
 var rooms: WorldRooms
 var build: WorldBuild
 var saver: WorldSave
+var regions: WorldRegions
 
 
 func _init() -> void:
@@ -79,6 +89,7 @@ func _init() -> void:
 	rooms = WorldRooms.new(self)
 	build = WorldBuild.new(self)
 	saver = WorldSave.new(self)
+	regions = WorldRegions.new(self)
 
 
 func _ready() -> void:
@@ -118,8 +129,8 @@ func reset(w: int = DEFAULT_W, h: int = DEFAULT_H) -> void:
 	height = h
 	floors = PackedStringArray()
 	floors.resize(w * h)
-	for i in floors.size():
-		floors[i] = "grass"
+	floors.fill("grass")
+	regions.reset()
 	walls.clear()
 	mounts.clear()
 	objects.clear()
@@ -130,7 +141,7 @@ func reset(w: int = DEFAULT_W, h: int = DEFAULT_H) -> void:
 	build.clear_undo()
 	folk_pose.clear()
 	_next_id = 1
-	rooms.dirty = true
+	rooms.invalidate_all()
 	starter_spawn_tiles.clear()
 	_emit("world_reset")
 
@@ -313,7 +324,8 @@ func add_mess(t: Vector2i, amount: float) -> void:
 	mess[t] = clampf(float(mess.get(t, 0.0)) + amount, 0.0, 10.0)
 	if mess[t] <= 0.0:
 		mess.erase(t)
-	rooms.dirty = true
+	rooms.mark_dirty(t)
+	regions.mark_floor_dirty(t)      # mess tints the floor
 	_emit("object_state_changed", -1, "mess")
 
 
@@ -340,6 +352,7 @@ func _create_object(def_id: String, tile: Vector2i, rot: int, force_id: int) -> 
 func place_object(def_id: String, tile: Vector2i, rot: int = 0) -> int: return objs.place_object(def_id, tile, rot)
 func objects_in_radius(tile: Vector2i, r: float) -> Array: return objs.objects_in_radius(tile, r)
 func all_objects() -> Array: return objs.all_objects()
+func objects_in_lot_of(tile: Vector2i, r: float) -> Array: return objs.objects_in_lot_of(tile, r)
 func object_at(t: Vector2i): return objs.object_at(t)
 func objects_of_def(def_id: String) -> Array: return objs.objects_of_def(def_id)
 func set_object_state(object_id: int, key: String, value: Variant) -> void: objs.set_object_state(object_id, key, value)
@@ -358,6 +371,9 @@ func room_info(tile: Vector2i) -> Dictionary: return rooms.room_info(tile)
 func room_id(tile: Vector2i) -> int: return rooms.room_id(tile)
 func room_count() -> int: return rooms.room_count()
 func is_outdoor(tile: Vector2i) -> bool: return rooms.is_outdoor(tile)
+func can_build(tile: Vector2i) -> bool: return regions.can_build(tile)
+func region_at(tile: Vector2i) -> int: return regions.region_at(tile)
+func chunk_of(tile: Vector2i) -> Vector2i: return regions.chunk_of(tile)
 func room_score(tile: Vector2i) -> float: return rooms.room_score(tile)
 func load_dict(d: Dictionary) -> void: saver.load_dict(d)
 func save_dict(include_folk: bool = false) -> Dictionary: return saver.save_dict(include_folk)

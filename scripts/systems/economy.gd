@@ -100,7 +100,15 @@ static func object_price(obj) -> int:
 static func price_of_def(def_id: String) -> int:
 	return int(SimEnv.data().object_def(def_id).get("price", 0))
 
-## Register any lot object we have not seen yet (placed today, owned by the primary household).
+## Owner an unregistered object starts with: the primary household for objects in the home lot (or on a map without regions),
+## community property (-1: never in bills / repossession) for every venue and townie lot.
+static func default_owner(o) -> int:
+	var w = WorldIface.world()
+	if w != null and "regions" in w and w.regions.has_regions():
+		return primary_household() if w.regions.region_at(o.tile) == w.regions.home_id else -1
+	return primary_household()
+
+## Register any object we have not seen yet (placed today, owned per default_owner).
 static func refresh_objects() -> void:
 	var seen: Dictionary = {}
 	for o in SysUtil.all_world_objects():
@@ -108,7 +116,7 @@ static func refresh_objects() -> void:
 		if not placed_day.has(int(o.id)):
 			placed_day[int(o.id)] = SysUtil.day()
 		if not owner.has(int(o.id)):
-			owner[int(o.id)] = primary_household()
+			owner[int(o.id)] = default_owner(o)
 	for id in placed_day.keys():
 		if not seen.has(id):
 			placed_day.erase(id)
@@ -117,7 +125,8 @@ static func refresh_objects() -> void:
 static func on_object_placed(object_id: int) -> void:
 	placed_day[object_id] = SysUtil.day()
 	if not owner.has(object_id):
-		owner[object_id] = primary_household()
+		var o = WorldIface.get_object(object_id)
+		owner[object_id] = default_owner(o) if o != null else primary_household()
 
 static func on_object_removed(object_id: int) -> void:
 	placed_day.erase(object_id)
@@ -131,18 +140,11 @@ static func objects_of(hid: int) -> Array:
 			out.append(o)
 	return out
 
-## Value of everything the household owns on its home lot (also while the folk are away: the home lot is then in the
-## Neighborhood stash, and the loaded lot's objects are community property).
+## Value of everything the household owns (its home lot objects: venue and townie lot objects are community property).
 static func lot_value(hid: int) -> int:
 	var total: int = 0
 	for o in objects_of(hid):
 		total += object_price(o)
-	if Neighborhood.current_lot != Neighborhood.HOME:
-		var home: Dictionary = Neighborhood.stash.get(Neighborhood.HOME, {})
-		var owners: Dictionary = home.get("owner", {})
-		for od in (home.get("world", {}) as Dictionary).get("objects", []):
-			if int(owners.get(int(od["id"]), -1)) == hid:
-				total += price_of_def(str(od["def_id"]))
 	return total
 
 # ------------------------------------------------------------------ buy / sell
@@ -347,8 +349,14 @@ static func to_dict() -> Dictionary:
 		"bills": bills.duplicate(true), "missed": SysUtil.str_keys(missed), "ledger": SysUtil.str_keys(ledger).duplicate(true),
 		"owner": SysUtil.str_keys(owner), "placed_day": SysUtil.str_keys(placed_day), "usage": SysUtil.str_keys(usage),
 		"repossessed": repossessed.duplicate(true), "next_bill_day": next_bill_day, "auto_pay": auto_pay, "seq": _seq,
-		"funds": SysUtil.str_keys(WorldIface.coins),
+		"funds": SysUtil.str_keys(_funds_without_npcs()),
 	}
+
+## Household balances only: the pocket money of ambient NPCs (household -1) is not saved.
+static func _funds_without_npcs() -> Dictionary:
+	var out: Dictionary = WorldIface.coins.duplicate()
+	out.erase(-1)
+	return out
 
 static func from_dict(d: Dictionary) -> void:
 	reset()
