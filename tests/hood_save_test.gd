@@ -14,7 +14,7 @@ func run() -> Array:
 	fails = []
 	var folk: Array = Kit.new_game("small")
 	var W: Node = Kit.world()
-	_check(Economy.balance(1) == 8000, "small start has 8000 funds (%d)" % Economy.balance(1))
+	_check(Economy.balance(1) == 5000, "small start has 5000 funds (%d)" % Economy.balance(1))
 	var small_objs: int = W.objects.size()
 	var mira: Folk = folk[0]
 	var tobin: Folk = folk[1]

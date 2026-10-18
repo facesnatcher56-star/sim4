@@ -23,16 +23,16 @@ func _run() -> void:
 	_main = load("res://scenes/main.tscn").instantiate()
 	root.add_child(_main)
 	await _secs(0.5)
-	# 1) lot picker over the title
-	_main.picker.visible = true
+	# 1) new-game screen over the title
+	_main.start_picker.open()
 	_main.title.visible = true
 	await _secs(0.6)
 	_save("picker")
-	_main.picker.select("medium")
+	_main.start_picker.select("family")
 	await _secs(0.3)
 	_save("picker_medium")
 	# 2) start the game on the medium home
-	_main.picker.visible = false
+	_main.start_picker.visible = false
 	_main.start_new_game(_main.default_household(), "medium")
 	root.get_node("Clock").total_minutes = 1440 + 12 * 60       # Tuesday noon
 	await _secs(1.0)

@@ -22,6 +22,8 @@ var path: Array = []               # tiles to walk; UI may animate along it
 var travel_total: float = 0.0
 var travel_left: float = 0.0
 var def: Dictionary = {}
+var params: Dictionary = {}        # free-form extras (UI/systems)
+var goto_tile: Vector2i = Vector2i(-1, -1)   # "go_here" destination
 var actor: Folk = null
 var obj = null
 var target_folk: Folk = null
@@ -48,6 +50,13 @@ static func create(p_def_id: String, p_actor: Folk, p_target_id: int = -1, p_pla
 	else:
 		i.target_kind = "object"
 		i.obj = WorldIface.get_object(p_target_id)
+	return i
+
+## Player 'Go here' command: walk to a free tile (UI right-click on bare ground).
+static func create_goto(p_actor: Folk, tile: Vector2i, p_player: bool = true) -> Interaction:
+	var i := create("go_here", p_actor, -1, p_player)
+	if i != null:
+		i.goto_tile = tile
 	return i
 
 func label() -> String:
@@ -84,28 +93,37 @@ func ctx_for(folk: Folk) -> Dictionary:
 func can_run(p_folk: Folk = null, p_obj = null, check_refusal: bool = false) -> bool:
 	var f: Folk = p_folk if p_folk != null else actor
 	var o = p_obj if p_obj != null else obj
-	var ctx := {"folk": f, "object": o, "target": target_folk}
-	if target_kind == "object":
-		if o == null:
-			return false
-		var only: Array = def.get("objects", [])
-		if not only.is_empty() and not only.has(str(o.def_id)):
-			return false
-		if not bool(def.get("works_when_broken", false)) and bool(WorldIface.state_get(o, "broken", false)):
-			return false
-		if not WorldIface.has_free_slot(o, f.id):
-			return false
-	elif target_kind == "folk":
-		if target_folk == null or target_folk.id == f.id:
-			return false
-		var tctx := {"folk": target_folk, "object": null, "target": f}
-		if not Cond.check(def.get("target_tests", []), tctx):
-			return false
-	if not Cond.check(def.get("tests", []), ctx):
+	if not def_runnable(def, f, o, target_folk):
 		return false
 	if check_refusal and Autonomy.refuses(f, def_id, def, o):
 		return false
 	return true
+
+## can_run for a bare definition (no instance needed; autonomy calls this for every candidate). Enforces the target
+## kind rules, the actor's `tests`, the target's `target_tests` and the social `requires` of folk-to-folk interactions.
+static func def_runnable(d: Dictionary, f: Folk, o, target: Folk) -> bool:
+	var kind: String = str(d.get("target", "object"))
+	if kind != "self" and kind != "folk":
+		kind = "object"
+	if kind == "object":
+		if o == null:
+			return false
+		var only: Array = d.get("objects", [])
+		if not only.is_empty() and not only.has(str(o.def_id)):
+			return false
+		if not bool(d.get("works_when_broken", false)) and bool(WorldIface.state_get(o, "broken", false)):
+			return false
+		if not WorldIface.has_free_slot(o, f.id):
+			return false
+	elif kind == "folk":
+		if target == null or target.id == f.id:
+			return false
+		if not Cond.check(d.get("target_tests", []), {"folk": target, "object": null, "target": f}):
+			return false
+		var req: Array = (d.get("social", {}) as Dictionary).get("requires", [])
+		if not req.is_empty() and SocialScoring.check_requires(int(f.id), int(target.id), req) != "":
+			return false
+	return Cond.check(d.get("tests", []), {"folk": f, "object": o, "target": target})
 
 ## Reserve, plan the walk, and begin. Returns false (and leaves no reservation) when impossible.
 func start() -> bool:
@@ -123,6 +141,8 @@ func start() -> bool:
 		if target_folk == null:
 			return false
 		use_tile = target_folk.tile
+	elif goto_tile.x >= 0:
+		use_tile = goto_tile
 	var n := WorldIface.path_length(actor.tile, use_tile)
 	if n < 0:
 		_release()
@@ -148,6 +168,8 @@ func _arrive() -> void:
 		actor.tile = WorldIface.use_tile(obj, slot_idx)
 	elif target_kind == "folk" and target_folk != null:
 		actor.tile = target_folk.tile
+	elif goto_tile.x >= 0:
+		actor.tile = goto_tile
 	actor.posture = str(def.get("posture", "stand"))
 
 func tick(minutes: float) -> void:

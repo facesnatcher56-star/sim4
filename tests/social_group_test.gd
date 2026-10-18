@@ -36,8 +36,8 @@ func _circles(f: Array) -> void:
 	S.expect(f, Conversation.size_of(b.id) == 3 and Conversation.is_group(a.id), "third person joins: group of 3")
 	S.expect(f, a.has_buff("in_group") and b.has_buff("in_group") and c.has_buff("in_group"), "in_group marker for everyone in the circle")
 	# group actions become available in a group
-	S.expect(f, SocialDynamics.reason_unavailable(c, a, "toast") == "", "toast unlocked in a group")
-	S.expect(f, SocialDynamics.reason_unavailable(d, a, "toast") != "", "toast is not available outside a group (reason given)")
+	S.expect(f, SocialScoring.reason_unavailable(c, a, "toast") == "", "toast unlocked in a group")
+	S.expect(f, SocialScoring.reason_unavailable(d, a, "toast") != "", "toast is not available outside a group (reason given)")
 	# fourth joins, then people leave
 	var id4 := Interaction.create("group_chat", d, a.id, true)
 	id4.start()
@@ -53,7 +53,7 @@ func _circles(f: Array) -> void:
 		SimEnv.clock().total_minutes += 1
 	S.expect(f, RelationshipService.value(a.id, c.id, "friendship") > fr0, "group conversation warms everyone up")
 	S.expect(f, Conversation.group_score(a.id) > 1.0, "the circle accumulates a group score (%.1f)" % Conversation.group_score(a.id))
-	S.expect(f, SocialDynamics.group_score(a.id) > 1.0, "SocialDynamics.group_score exposes it")
+	S.expect(f, SocialGatherings.group_score(a.id) > 1.0, "SocialGatherings.group_score exposes it")
 	# leaving shrinks the group; below 3 the in_group marker goes away
 	Conversation.leave(d.id)
 	S.expect(f, Conversation.size_of(a.id) == 3 and not d.has_buff("in_conversation"), "leaving removes the marker and shrinks the circle")
@@ -75,7 +75,7 @@ func _circles(f: Array) -> void:
 	var anx := S.folk(w, "Anx")
 	anx.add_buff("anxious_jitters")
 	anx.refresh_mood()
-	S.expect(f, anx.get_mood()["mood"] == "anxious" and SocialDynamics.reason_unavailable(anx, many[0], "group_chat") != "", "anxious folk cannot join group chats")
+	S.expect(f, anx.get_mood()["mood"] == "anxious" and SocialScoring.reason_unavailable(anx, many[0], "group_chat") != "", "anxious folk cannot join group chats")
 	S.teardown()
 
 func _group_actions(f: Array) -> void:
@@ -124,14 +124,14 @@ func _gathering(f: Array) -> void:
 		RelationshipService.add_both(host.id, g.id, "friendship", 35.0)
 		guests.append(g)
 	var fam := S.folk(w, "Kin", [], Vector2i(10, 12))
-	RelationshipService.set_flag(host.id, fam.id, "family", true, false)
+	RelationshipBits.set_flag(host.id, fam.id, "family", true, false)
 	var stranger := S.folk(w, "Stranger", [], Vector2i(10, 14))
 	var dir = S.director()
 	dir.autonomy_enabled = false
 	S.set_time(1, 15)
 	var ir := S.run(host, null, "host_gathering")
 	S.expect(f, ir.state == "finished", "host_gathering runs")
-	var g0: Dictionary = SocialDynamics.active_gathering(host.id)
+	var g0: Dictionary = SocialGatherings.active_gathering(host.id)
 	S.expect(f, not g0.is_empty() and (g0["guests"] as Array).size() >= 4, "gathering started with guests")
 	S.expect(f, (g0["guests"] as Array).has(fam.id) and not (g0["guests"] as Array).has(stranger.id), "family and friends are invited, strangers are not")
 	S.expect(f, S.K.count_events("gathering_started") == 1 and S.K.has_note("hosting"), "gathering announced")
@@ -143,7 +143,7 @@ func _gathering(f: Array) -> void:
 	S.expect(f, S.K.count_events("gathering_done") == 1, "gathering finishes")
 	var done: Dictionary = S.K.last_event("gathering_done")
 	S.expect(f, float(done.get("score", 0.0)) > 3.0, "gathering produced a group score (%.1f)" % float(done.get("score", 0.0)))
-	S.expect(f, SocialDynamics.group_score(host.id) > 3.0, "group_score(host) reports it")
+	S.expect(f, SocialGatherings.group_score(host.id) > 3.0, "group_score(host) reports it")
 	S.expect(f, (done.get("participants", []) as Array).size() >= 3, "participants are listed")
 	S.expect(f, host.has_buff("group_warmth"), "participants feel the warmth")
 	S.expect(f, RelationshipService.value(guests[0].id, guests[1].id, "friendship") > 0.5, "guests who did not know each other bonded")
@@ -153,7 +153,7 @@ func _gathering(f: Array) -> void:
 	loner.household_id = 5
 	for gg in guests:
 		gg.household_id = 1
-	var empty := SocialDynamics.start_gathering(loner.id)
+	var empty := SocialGatherings.start_gathering(loner.id)
 	S.expect(f, empty.is_empty() or (empty["guests"] as Array).size() >= 0, "gathering handles an unpopular host")
 	S.teardown()
 
@@ -192,10 +192,10 @@ func _story_hook(f: Array) -> void:
 	var sit := {"id": 99, "state": "mingle", "roles": {str(host.id): "host", str(g.id): "guest"}, "score": 0.0, "kind": "party", "host_ids": [host.id], "spawned": [], "guest_ids": []}
 	Story.situations.append(sit)
 	S.set_time(1, 12)
-	var gat := SocialDynamics.start_gathering(host.id)
+	var gat := SocialGatherings.start_gathering(host.id)
 	gat["score"] = 10.0
 	gat["end"] = 0
-	SocialDynamics._tick_gatherings()
+	SocialGatherings._tick_gatherings()
 	S.expect(f, float(sit["score"]) > 3.0, "gathering score feeds the Story party score (%.1f)" % float(sit["score"]))
 	Story.situations.erase(sit)
 	S.teardown()

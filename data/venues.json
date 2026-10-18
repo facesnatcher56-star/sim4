@@ -78,7 +78,7 @@
   "content": {
     "objects": {
       "park_bench": {"clone": "sofa", "override": {"label": "Park Bench", "price": 220, "tags": ["outdoor", "seat", "furniture", "comfy", "park"],
-        "color": "#8a5a35", "height": 0.55, "interactions": ["sit_sofa", "nap_sofa"], "decor": 1.0, "model": "res://assets/models/coffee_table.glb"}},
+        "color": "#8a5a35", "height": 0.9, "interactions": ["sit_sofa", "nap_sofa"], "decor": 1.0, "model": "res://assets/models/park_bench.glb"}},
       "cafe_counter": {"clone": "bar_counter", "override": {"label": "Cafe Counter", "price": 900, "tags": ["kitchen", "bar", "furniture", "social", "shop", "cafe"],
         "interactions": ["order_coffee", "order_meal", "order_round", "mix_drink", "clean_object"]}},
       "grocery_cooler": {"clone": "fridge", "override": {"label": "Grocery Cooler", "price": 700, "tags": ["food", "shop", "appliance", "market"],

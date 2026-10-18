@@ -23,7 +23,7 @@ var scroll: ScrollContainer = null
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
-	set_anchors_preset(Control.PRESET_FULL_RECT)
+	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	visible = false
 	panel = PanelContainer.new()
 	add_child(panel)
@@ -50,7 +50,8 @@ func open_with_entries(f, kind: String, id: int, entries: Array, screen_pos: Vec
 	category_boxes.clear()
 	scroll = null
 	var target = UIU.get_folk(id) if kind == "folk" else null
-	var title_text := "Interact"
+	entries = PieEntries.prepare(entries)
+	var title_text := PieEntries.object_title(id) if kind == "object" else "Interact"
 	if target != null:
 		title_text = "Interact with %s" % str(UIU.prop(target, "name", "them"))
 		var bit := RelationshipService.bit_for(int(UIU.prop(f, "id", -1)), id)
@@ -59,7 +60,7 @@ func open_with_entries(f, kind: String, id: int, entries: Array, screen_pos: Vec
 	var title := UIU.make_label(title_text, 13, UITheme.MUTED)
 	box.add_child(title)
 	if entries.is_empty():
-		box.add_child(UIU.make_label("Nothing to do here.", 14))
+		box.add_child(UIU.make_label("Nothing they can do here right now.", 14))
 	if kind == "folk" and target != null and not entries.is_empty():
 		_fill_social(f, target, entries)
 	else:
@@ -77,6 +78,9 @@ func _make_button(e: Dictionary, reason: String) -> Button:
 	b.custom_minimum_size = Vector2(190, 28)
 	b.disabled = not e["enabled"]
 	if not e["enabled"]:
+		if reason != "":
+			var short := reason if reason.length() <= 30 else reason.substr(0, 28) + "..."
+			b.text = "%s  (%s)" % [e["label"], short.substr(0, 1).to_lower() + short.substr(1)]
 		b.tooltip_text = reason
 		b.mouse_filter = Control.MOUSE_FILTER_STOP   # keep tooltips on disabled buttons
 	var did: String = e["id"]
@@ -87,8 +91,16 @@ func _make_button(e: Dictionary, reason: String) -> Button:
 
 func _fill_flat(entries: Array) -> void:
 	var last_cat := ""
+	var headers := entries.size() > 7     # short menus need no group titles
+	var recent_n := 0
 	for e in entries:
-		if e["category"] != last_cat:
+		if e["enabled"] and PieEntries.recent.has(str(e["id"])):
+			recent_n += 1
+	if recent_n > 0 and headers:
+		box.add_child(UIU.make_label("RECENT", 11, UITheme.ACCENT))
+	for e in entries:
+		var is_recent: bool = recent_n > 0 and e["enabled"] and PieEntries.recent.has(str(e["id"]))
+		if headers and not is_recent and e["category"] != last_cat:
 			last_cat = e["category"]
 			var h := UIU.make_label(last_cat.to_upper(), 11, UITheme.ACCENT)
 			box.add_child(h)
@@ -103,9 +115,13 @@ func _fill_social(f, target, entries: Array) -> void:
 		var specific: String = SocialDynamics.reason_unavailable(f, target, str(e["id"]), false)
 		if specific != "":
 			e["enabled"] = false
-			reason = specific
+			reason = PieEntries.polish_reason(specific)
 		elif not e["enabled"] and str(e["reason"]) == "":
 			reason = "Unavailable right now"
+		else:
+			reason = PieEntries.polish_reason(reason)
+		if not e["enabled"] and PieEntries.is_never(reason):
+			continue
 		var c: String = str(e["category"])
 		if not cats.has(c):
 			cats[c] = []
@@ -129,6 +145,18 @@ func _fill_social(f, target, entries: Array) -> void:
 	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	list.add_theme_constant_override("separation", 2)
 	scroll.add_child(list)
+	var shown_recent := 0
+	for rid in PieEntries.recent:
+		for c4 in order:
+			for it4 in cats[c4]:
+				if str(it4["e"]["id"]) == str(rid) and it4["e"]["enabled"] and shown_recent < 3:
+					if shown_recent == 0:
+						list.add_child(UIU.make_label("RECENT", 11, UITheme.ACCENT))
+					var rb := _make_button(it4["e"], "")
+					rb.name = "recent_" + str(rid)
+					entry_buttons.pop_back()    # shortcuts, not extra entries
+					list.add_child(rb)
+					shown_recent += 1
 	for c3 in order:
 		var items: Array = cats[c3]
 		var enabled_n := 0
@@ -175,6 +203,7 @@ func set_category_open(cat: String, is_open: bool) -> void:
 		panel.reset_size()
 
 func _choose(def_id: String) -> void:
+	PieEntries.remember(def_id)
 	UIU.enqueue(folk, def_id, target_id)
 	chosen.emit(def_id, target_id)
 	close()

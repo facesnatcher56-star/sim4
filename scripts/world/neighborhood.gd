@@ -158,13 +158,16 @@ static func start_game(template_id: String = LotLoader.CLASSIC) -> bool:
 	return ok
 
 ## Call after SystemsManager.new_game (which resets this class): remember the chosen home, scale the starting funds.
-static func finish_new_game(start_id: String) -> void:
+## `funds` >= 0 overrides the start's own number (the new-game flow passes scenario funds x difficulty).
+static func finish_new_game(start_id: String, funds: int = -1) -> void:
 	var sd: Dictionary = start_def(start_id)
 	home_template = str(sd.get("template", LotLoader.CLASSIC))
-	if sd.has("funds"):
+	if funds < 0 and sd.has("funds"):
+		funds = int(sd["funds"])
+	if funds >= 0:
 		var hid: int = Economy.primary_household()
 		WorldIface.coins[hid] = 0
-		Economy.deposit(hid, int(sd["funds"]), "starting funds")
+		Economy.deposit(hid, funds, "starting funds")
 
 # ------------------------------------------------------------------ travel
 ## Which of these folk can actually be moved right now (residents that are not at work / school / a party).
@@ -223,13 +226,13 @@ static func travel(folk_ids: Array, lot_id: String, opts: Dictionary = {}) -> Di
 		minutes = maxi(minutes, m)
 	for id in ids:
 		var mf = SysUtil.folk(int(id))
-		_detach_away(mf)
+		NeighborhoodLots._detach_away(mf)
 		if mf.current != null and mf.current.def_id != Away.IID:
 			mf.cancel_current("travel")
 		mf.clear_queue()
 	if lot_id != current_lot:
-		_leave_current_lot(ids)
-		_load_lot(lot_id)
+		NeighborhoodLots._leave_current_lot(ids)
+		NeighborhoodLots._load_lot(lot_id)
 	var entries: Array = _entry_tiles()
 	var i := 0
 	for id in ids:
@@ -237,7 +240,7 @@ static func travel(folk_ids: Array, lot_id: String, opts: Dictionary = {}) -> Di
 		loc[int(id)] = lot_id
 		f.tile = entries[i % entries.size()]
 		i += 1
-		_clear_stay_marks(f)
+		NeighborhoodLots._clear_stay_marks(f)
 		var m2: int = int(per[id])
 		if m2 >= 2:
 			Away.send(f, float(m2), TRAVEL, {"label": "Travelling to %s" % label_of(lot_id), "lot_id": lot_id, "from": from_lot})
@@ -246,7 +249,7 @@ static func travel(folk_ids: Array, lot_id: String, opts: Dictionary = {}) -> Di
 	# folk who were already stored here come back out
 	for f2 in SysUtil.residents():
 		if where(int(f2.id)) == lot_id and f2.has_meta("offlot") and not ids.has(int(f2.id)):
-			appear(f2)
+			NeighborhoodLots.appear(f2)
 	visits[lot_id] = int(visits.get(lot_id, 0)) + 1
 	if lot_id == HOME:
 		apply_pantry()
@@ -291,133 +294,6 @@ static func _refresh_view(fid: int) -> void:
 	var ev = SimEnv.events()
 	ev.emit_signal("folk_removed", fid)
 	ev.emit_signal("folk_added", fid)
-
-# ------------------------------------------------------------------ lot swapping
-static func _save_current() -> void:
-	var w = WorldIface.world()
-	if w == null:
-		return
-	stash[current_lot] = {"world": w.save_dict(false), "owner": Economy.owner.duplicate(), "placed": Economy.placed_day.duplicate()}
-
-## Store the loaded lot and park every folk that is not among `moving_ids`.
-static func _leave_current_lot(moving_ids: Array) -> void:
-	_save_current()
-	Crowd.clear_npcs()
-	_end_situations()
-	for f in SysUtil.residents():
-		if moving_ids.has(int(f.id)):
-			continue
-		if not loc.has(int(f.id)):
-			loc[int(f.id)] = current_lot
-		make_stay(f)
-	# every resident that is on this lot but unrecorded
-	for f2 in SysUtil.residents():
-		if not loc.has(int(f2.id)):
-			loc[int(f2.id)] = current_lot
-
-static func _end_situations() -> void:
-	for sit in Story.situations:
-		if str(sit["state"]) in ["arrive", "mingle", "leave"]:
-			for gid in sit["spawned"]:
-				var g = SysUtil.folk(int(gid))
-				if g != null:
-					RelationshipService.sync_folk(g)
-					g.current = null
-					g.queue.clear()
-					SysUtil.world_remove_folk(int(gid))
-			sit["state"] = "done"
-
-static func _load_lot(lot_id: String) -> void:
-	var w = WorldIface.world()
-	Economy.owner.clear()
-	Economy.placed_day.clear()
-	var saved: Dictionary = stash.get(lot_id, {})
-	if not saved.is_empty():
-		w.load_dict(saved["world"])
-		Economy.owner = (saved.get("owner", {}) as Dictionary).duplicate()
-		Economy.placed_day = (saved.get("placed", {}) as Dictionary).duplicate()
-	else:
-		var tid: String = template_of(lot_id)
-		NeighborhoodContent.install()
-		var ok: bool = LotLoader.apply(tid)
-		last_report = LotLoader.report.duplicate(true)
-		if not ok:
-			push_warning("Neighborhood: lot %s built with problems: %s" % [lot_id, str(LotLoader.report.get("failed", []))])
-		if lot_id != HOME:
-			for o in w.all_objects():
-				Economy.owner[int(o.id)] = -1          # community property: never counted in household bills / repossession
-				Economy.placed_day[int(o.id)] = SysUtil.day()
-	for f3 in w.all_folk():
-		w.release_all(int(f3.id))
-	current_lot = lot_id
-	Economy.refresh_objects()
-
-# ------------------------------------------------------------------ off-lot ("stay") folk
-## Put a folk into the hidden off-lot state at its current `loc`.
-static func make_stay(f) -> void:
-	if f == null:
-		return
-	var fid: int = int(f.id)
-	var info: Dictionary = Away.info(fid)
-	var reason: String = str(info.get("reason", ""))
-	if reason == "" and Away.pending.has(fid):
-		reason = str((Away.pending[fid] as Dictionary).get("reason", ""))
-	if reason in HELD_REASONS:
-		f.set_meta("offlot", str(loc.get(fid, current_lot)))
-		return
-	if reason == STAY:
-		f.set_meta("offlot", str(loc.get(fid, current_lot)))
-		return
-	if reason == TRAVEL:
-		_detach_away(f)
-	f.cancel_current("left_lot")
-	f.clear_queue()
-	WorldIface.world().release_all(fid)
-	f.set_meta("offlot", str(loc.get(fid, current_lot)))
-	f.set_meta("away", STAY)
-	Away.send(f, 99000.0, STAY, {"label": "At %s" % label_of(str(loc.get(fid, current_lot)))})
-	# the pending request is picked up by the director on its next tick; hidden immediately via the metas
-
-## End any away interaction of a folk (stay or travel) without placing it anywhere.
-static func _detach_away(f) -> void:
-	if f == null:
-		return
-	var fid: int = int(f.id)
-	var reason: String = str(Away.info(fid).get("reason", ""))
-	if reason == "" and Away.pending.has(fid):
-		reason = str((Away.pending[fid] as Dictionary).get("reason", ""))
-	if reason in HELD_REASONS:
-		return
-	if Away.pending.has(fid):
-		for q in f.queue.duplicate():
-			if (q as Interaction).def_id == Away.IID:
-				f.queue.erase(q)
-		Away.pending.erase(fid)
-	if Away.active.has(fid):
-		if f.current != null and f.current.def_id == Away.IID:
-			f.current.cancel("detached")
-		else:
-			Away.active.erase(fid)
-	if Away.active.has(fid):
-		Away.active.erase(fid)
-	if f.has_meta("away") and str(f.get_meta("away")) in [STAY, TRAVEL]:
-		f.remove_meta("away")
-		f.remove_buff("away")
-
-static func _clear_stay_marks(f) -> void:
-	if f.has_meta("offlot"):
-		f.remove_meta("offlot")
-	if f.has_meta("away") and str(f.get_meta("away")) == STAY:
-		f.remove_meta("away")
-
-## A stored folk shows up on the loaded lot (entry tile).
-static func appear(f) -> void:
-	_detach_away(f)
-	_clear_stay_marks(f)
-	var es: Array = _entry_tiles()
-	f.tile = es[int(f.id) % es.size()]
-	loc[int(f.id)] = current_lot
-	_refresh_view(int(f.id))
 
 # ------------------------------------------------------------------ pantry (market -> home fridge)
 static func add_pantry(units: int) -> void:

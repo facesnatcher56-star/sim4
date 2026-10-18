@@ -199,7 +199,7 @@ func _style_tile(l: Dictionary) -> void:
 	var open: bool = Neighborhood.is_open(lid)
 	var here: Array = Neighborhood.folk_at(lid)
 	var mins: int = Neighborhood.travel_minutes(cur, lid)
-	var status: String = "You are here" if lid == cur else ("%d min away" % mins)
+	var status: String = "You are here" if lid == cur else ("%d min away" % mins) if mins >= 100 else ("%d min" % mins)
 	var open_txt: String = "Open" if open else "Closed"
 	var line3: String = ""
 	var parts: Array = []
@@ -210,7 +210,7 @@ func _style_tile(l: Dictionary) -> void:
 	if str(l.get("type", "")) == "townie_home":
 		var rc: int = Neighborhood.residents_of(lid).size()
 		if rc > 0:
-			parts.append("%d residents" % rc)
+			parts.append("%d resident%s" % [rc, "" if rc == 1 else "s"])
 	line3 = ", ".join(parts)
 	b.text = "%s
 %s  -  %s%s" % [str(l["label"]), open_txt, status, ("

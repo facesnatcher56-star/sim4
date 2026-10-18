@@ -42,7 +42,7 @@ func _ready() -> void:
 	root.add_child(opts)
 	wall_option = OptionButton.new()
 	for w in ["wall", "fence", "none"]:
-		wall_option.add_item(w if w != "none" else "erase")
+		wall_option.add_item({"wall": "Wall", "fence": "Fence", "none": "Erase wall"}[w])
 		wall_option.set_item_metadata(wall_option.item_count - 1, w)
 	wall_option.item_selected.connect(func(i):
 		wall_type = wall_option.get_item_metadata(i)
@@ -52,15 +52,16 @@ func _ready() -> void:
 	var fd = World.get("FLOOR_DEFS")
 	var fnames: Array = fd.keys() if fd is Dictionary else ["wood", "tile", "carpet", "stone"]
 	for fl in fnames:
-		floor_option.add_item(fl)
+		floor_option.add_item(str(fl).capitalize())
+		floor_option.set_item_metadata(floor_option.item_count - 1, fl)
 	floor_option.item_selected.connect(func(i):
-		floor_id = floor_option.get_item_text(i)
+		floor_id = str(floor_option.get_item_metadata(i))
 		if tool == "floor": set_tool("floor"))
 	opts.add_child(floor_option)
 	for i in floor_option.item_count:
-		if floor_option.get_item_text(i) == "wood":
+		if str(floor_option.get_item_metadata(i)) == "wood":
 			floor_option.select(i)
-	floor_id = floor_option.get_item_text(floor_option.selected) if floor_option.item_count > 0 else "wood"
+	floor_id = str(floor_option.get_item_metadata(floor_option.selected)) if floor_option.item_count > 0 else "wood"
 	info_label = UIU.make_label("", 12, UITheme.MUTED)
 	info_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	root.add_child(info_label)
@@ -98,7 +99,7 @@ func build_catalog(table: Dictionary = {}) -> void:
 			var b := Button.new()
 			b.text = "%s\n%d C" % [d.get("label", id), int(d.get("price", 0))]
 			b.custom_minimum_size = Vector2(88, 48)
-			b.tooltip_text = "%s - %d Coins" % [d.get("label", id), int(d.get("price", 0))]
+			b.tooltip_text = "%s: %d Coins. Click, then click on the lot to place it (R rotates)." % [d.get("label", id), int(d.get("price", 0))]
 			b.pressed.connect(select_def.bind(id))
 			fl.add_child(b)
 			catalog_buttons[id] = b
@@ -131,7 +132,7 @@ func set_tool(t: String) -> void:
 		"place": "Pick an item below, then click on the lot. R rotates.",
 		"wall": "Drag on the lot to draw a wall line (5 C per segment).",
 		"floor": "Drag a rectangle to paint floor (2 C per tile).",
-		"sell": "Click an object to sell it (50% back).",
+		"sell": "Click an object to sell it (you get part of the price back).",
 	}.get(t, "")
 	_refresh_buttons()
 

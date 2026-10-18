@@ -112,7 +112,7 @@ func _baby(f: Array) -> void:
 	RelationshipService.add_both(a.id, b.id, "friendship", 60.0)
 	res = Aging.try_for_baby(a.id, b.id)
 	K.expect(f, not res["ok"] and res["reason"] == "not_a_couple", "needs a sweetheart bond or better: %s" % str(res))
-	RelationshipService.set_flag(a.id, b.id, "sweetheart", true, false)
+	RelationshipBits.set_flag(a.id, b.id, "sweetheart", true, false)
 	res = Aging.try_for_baby(a.id, b.id)
 	K.expect(f, res["ok"] and a.has_buff("pregnant"), "pregnancy begins: %s" % str(res))
 	K.expect(f, not Aging.try_for_baby(a.id, b.id)["ok"], "no double pregnancy")
@@ -129,7 +129,7 @@ func _baby(f: Array) -> void:
 	K.expect(f, baby != null and baby.household_id == 1 and baby.name.ends_with("Rowe"), "baby joins the household with the family name")
 	if baby != null:
 		K.expect(f, baby.traits.is_empty(), "babies start with no traits")
-		K.expect(f, RelationshipService.bit_for(baby.id, a.id) == "family" and RelationshipService.bit_for(a.id, baby.id) == "family", "family bits")
+		K.expect(f, RelationshipBits.bit_for(baby.id, a.id) == "family" and RelationshipBits.bit_for(a.id, baby.id) == "family", "family bits")
 		K.expect(f, Aging.children_of(a.id).has(baby.id), "parent knows the child")
 		var inh: Array = Aging.records[baby.id]["inherited"]
 		K.expect(f, inh.size() == 2, "traits inherited from the parents: %s" % str(inh))
@@ -157,7 +157,7 @@ func _death(f: Array) -> void:
 	Aging.set_age_days(a, 160.0)
 	WorldIface.coins[1] = 1000
 	RelationshipService.add_both(a.id, b.id, "friendship", 60.0)
-	RelationshipService.set_flag(a.id, b.id, "family")
+	RelationshipBits.set_flag(a.id, b.id, "family")
 	RelationshipService.add_both(a.id, c.id, "friendship", 80.0)
 	RelationshipService.add_both(a.id, d.id, "friendship", 10.0)
 	Careers.hire(a, "painter", 2)
@@ -174,7 +174,7 @@ func _death(f: Array) -> void:
 	var g := K.make_folk(w, "Gus", [], 6)
 	WorldIface.coins[5] = 700
 	RelationshipService.add_both(e.id, g.id, "friendship", 60.0)
-	RelationshipService.set_flag(e.id, g.id, "family")
+	RelationshipBits.set_flag(e.id, g.id, "family")
 	var chair = w.add_object("chair", Vector2i(2, 2))
 	Economy.owner[chair.id] = 5
 	var lg: Dictionary = Aging.kill(e.id)

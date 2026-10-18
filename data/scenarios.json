@@ -1,0 +1,128 @@
+{
+  "version": 1,
+  "default_scenario": "solo",
+  "default_difficulty": "normal",
+  "notes": "New-game scenarios. folk[].stage = life stage; folk[].rel = relation to the FIRST member (none|partner|spouse|child|parent|sibling). funds = coins at Normal difficulty. goals[].check: {event,count,on_time?,events?} counts game events; {cond:[...]} = SysCond for any resident; {jobs:n} = n employed residents. reward {coins, points}.",
+  "difficulties": {
+    "relaxed": {"label": "Relaxed", "funds_mult": 1.5, "bill_mult": 0.8, "need_mult": 0.8,
+      "desc": "More starting coins, bills 20% cheaper, needs fall 20% slower. Good for learning."},
+    "normal": {"label": "Normal", "funds_mult": 1.0, "bill_mult": 1.0, "need_mult": 1.0,
+      "desc": "The intended balance of coins, bills and needs."},
+    "hard": {"label": "Hard", "funds_mult": 0.7, "bill_mult": 1.3, "need_mult": 1.2,
+      "desc": "30% fewer starting coins, bills 30% dearer, needs fall 20% faster."}
+  },
+  "scenarios": [
+    {
+      "id": "solo", "label": "Solo Start", "badge": "Recommended",
+      "blurb": "One Folk in a cosy flat. Find work, make a friend, pay your bills.",
+      "start_id": "small", "funds": 4000, "start_hour": 8,
+      "who": "1 Folk", "where": "Studio flat", "tone": "Easy-going",
+      "folk": [{"stage": "adult", "rel": "none"}],
+      "moved_in": "You've just moved in! Click %s to get started.",
+      "tips": [
+        "This is you. Click your Folk (the face at the bottom-left) to see their needs and mood, then click things in the world to choose what they do.",
+        "Your first goals are in 'Getting Started' at the top-left. Step one is a job: click the computer and choose Look for Jobs.",
+        "Space pauses. Keys 1, 2 and 3 set the speed. Folk look after themselves, but they do better when you steer them.",
+        "Press B to redecorate, M to visit the neighbourhood (meeting people is goal two), F1 for all controls."
+      ],
+      "goals": [
+        {"id": "job", "label": "Get a job", "hint": "Click the computer, choose Look for Jobs, then Accept the offer.",
+          "check": {"jobs": 1}, "reward": {"coins": 150, "points": 25}},
+        {"id": "friend", "label": "Make a friend", "hint": "Open the Map (M), visit the park or cafe and chat with someone, or invite a neighbour over.",
+          "check": {"cond": [{"friends_at_least": 1}]}, "reward": {"coins": 200, "points": 25}},
+        {"id": "promotion", "label": "Earn your first promotion", "hint": "Go to work every day and keep performance up. Skills help too.",
+          "check": {"cond": [{"career_level_at_least": 2}]}, "reward": {"coins": 300, "points": 50}},
+        {"id": "bill", "label": "Pay a bill on time", "hint": "Bills arrive weekly. Keep enough coins in the household (the Coins button shows what is owed).",
+          "check": {"event": "bill_paid", "on_time": true}, "reward": {"coins": 150, "points": 25}}
+      ]
+    },
+    {
+      "id": "couple", "label": "Couple", "badge": "",
+      "blurb": "Two partners move in together. Make a home and see where it goes.",
+      "start_id": "medium", "funds": 5500, "start_hour": 8,
+      "who": "2 partners", "where": "Family home", "tone": "Cosy",
+      "folk": [{"stage": "adult", "rel": "none"}, {"stage": "adult", "rel": "partner"}],
+      "moved_in": "You've just moved in together! Click %s to get started.",
+      "tips": [
+        "These two are a couple. Click either Folk (bottom-left) to see how they feel, then click things in the world to choose what they do.",
+        "'Getting Started' at the top-left lists ideas for settling in: furnish, find work, go on a date.",
+        "Space pauses. Keys 1, 2 and 3 set the speed. Press B to buy furniture, M to visit the neighbourhood.",
+        "Click your partner and choose Chat or Flirt to grow the relationship. Engaged couples can marry and try for a baby."
+      ],
+      "goals": [
+        {"id": "decorate", "label": "Make it yours: buy 2 things", "hint": "Press B for Build/Buy and add furniture or decor.",
+          "check": {"event": "object_bought", "count": 2}, "reward": {"coins": 150, "points": 25}},
+        {"id": "jobs", "label": "Both find work", "hint": "At a computer choose Look for Jobs, once for each of you.",
+          "check": {"jobs": 2}, "reward": {"coins": 250, "points": 40}},
+        {"id": "date", "label": "Go on a date", "hint": "Click your partner and choose a date, or visit the cafe or park together.",
+          "check": {"event": "date_completed"}, "reward": {"coins": 150, "points": 30}},
+        {"id": "commit", "label": "Get engaged, married or expecting", "hint": "Grow your romance, then Propose or Try for Baby.",
+          "check": {"events": ["engaged", "married", "pregnant"]}, "reward": {"coins": 300, "points": 50}}
+      ]
+    },
+    {
+      "id": "family", "label": "Young Family", "badge": "",
+      "blurb": "Two parents and a child on a tight budget. Fed, schooled, bills paid.",
+      "start_id": "medium", "funds": 4500, "start_hour": 8,
+      "who": "2 parents + child", "where": "Family home", "tone": "Tight budget",
+      "folk": [{"stage": "adult", "rel": "none"}, {"stage": "adult", "rel": "spouse"}, {"stage": "child", "rel": "child"}],
+      "moved_in": "Welcome to your new family home! Click %s to get started.",
+      "tips": [
+        "This is a family. Click a Folk (bottom-left) to see their needs. Children need more looking after, and go to school on school days.",
+        "'Getting Started' at the top-left has the first family goals: money, school and a full fridge.",
+        "Space pauses. Keys 1, 2 and 3 set the speed. Press B to buy furniture, M to open the map.",
+        "A parent needs a job soon: bills arrive weekly and money is tight."
+      ],
+      "goals": [
+        {"id": "jobs", "label": "A parent finds work", "hint": "At the computer choose Look for Jobs and Accept the offer.",
+          "check": {"jobs": 1}, "reward": {"coins": 200, "points": 30}},
+        {"id": "fridge", "label": "Stock the fridge", "hint": "Click the fridge and choose Order Groceries.",
+          "check": {"event": "groceries_bought"}, "reward": {"coins": 100, "points": 20}},
+        {"id": "school", "label": "Child goes to school", "hint": "On weekdays the child heads to school by themselves. Make sure they are rested and fed.",
+          "check": {"event": "left_for_school"}, "reward": {"coins": 150, "points": 30}},
+        {"id": "bill", "label": "Pay a bill on time", "hint": "Bills arrive weekly. The Coins button shows what is owed.",
+          "check": {"event": "bill_paid", "on_time": true}, "reward": {"coins": 200, "points": 30}}
+      ]
+    },
+    {
+      "id": "roommates", "label": "Roommates", "badge": "",
+      "blurb": "Three unrelated Folk in a big house. Friendships, clashes, chores.",
+      "start_id": "large", "funds": 7000, "start_hour": 8,
+      "who": "3 roommates", "where": "Grand estate", "tone": "Lively",
+      "folk": [{"stage": "adult", "rel": "none"}, {"stage": "adult", "rel": "none"}, {"stage": "adult", "rel": "none"}],
+      "moved_in": "Three housemates, one big house. Click %s to get started.",
+      "tips": [
+        "Three housemates. Click a Folk (bottom-left) to see their needs and mood. They will chat, clash and share chores on their own.",
+        "'Getting Started' at the top-left has ideas for the household: talk, make friends, host a get-together.",
+        "Space pauses. Keys 1, 2 and 3 set the speed. Press B to build, M to open the map, F1 for all controls.",
+        "Different traits get along differently. Watch the relationship bars when you click a housemate."
+      ],
+      "goals": [
+        {"id": "chat", "label": "Get chatting: 5 conversations", "hint": "Click a housemate and choose Chat, or let them talk on their own.",
+          "check": {"event": "social_done", "count": 5}, "reward": {"coins": 100, "points": 20}},
+        {"id": "friend", "label": "Become friends", "hint": "Keep chatting, joking and spending time together.",
+          "check": {"cond": [{"friends_at_least": 1}]}, "reward": {"coins": 200, "points": 30}},
+        {"id": "party", "label": "Host a get-together", "hint": "Click a housemate and choose a group activity to invite the others.",
+          "check": {"event": "gathering_started"}, "reward": {"coins": 200, "points": 30}},
+        {"id": "bill", "label": "Pay a bill on time", "hint": "Bills arrive weekly. The Coins button shows what is owed.",
+          "check": {"event": "bill_paid", "on_time": true}, "reward": {"coins": 150, "points": 25}}
+      ]
+    },
+    {
+      "id": "sandbox", "label": "Free Play", "badge": "Custom", "custom": true,
+      "blurb": "Design a household of 1 to 6 Folk, any age, any home. No checklist.",
+      "start_id": "classic", "funds": 5000, "start_hour": 7,
+      "who": "1 to 6 Folk", "where": "Any home", "tone": "No pressure",
+      "folk": [{"stage": "adult", "rel": "none"}],
+      "funds_options": [{"label": "Standard", "funds": 5000}, {"label": "Rich", "funds": 50000}],
+      "moved_in": "Welcome home! Click %s to get started.",
+      "tips": [
+        "Click one of your Folk (the faces at the bottom-left) to see their needs and mood. Click a thing in the world to choose what they do with it.",
+        "Chosen tasks queue up along the bottom-left. Right-click the ground to send a Folk somewhere.",
+        "Space pauses the game. Keys 1, 2 and 3 set the speed. Press B to build and buy, M for the map, F1 for all controls.",
+        "The Goals button shows each Folk's life aspiration. There is no checklist in Free Play: do what you like."
+      ],
+      "goals": []
+    }
+  ]
+}

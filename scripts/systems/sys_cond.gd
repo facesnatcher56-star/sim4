@@ -21,10 +21,10 @@ static func check_one(c: Variant, folk) -> bool:
 		var v: Variant = d[key]
 		match str(key):
 			"friends_at_least":
-				if folk == null or RelationshipService.count_bit(int(folk.id), "friend", true) < int(v):
+				if folk == null or RelationshipBits.count_bit(int(folk.id), "friend", true) < int(v):
 					return false
 			"bit_count":
-				if folk == null or RelationshipService.count_bit(int(folk.id), str(v[0]), false) < int(v[1]):
+				if folk == null or RelationshipBits.count_bit(int(folk.id), str(v[0]), false) < int(v[1]):
 					return false
 			"career_is":
 				if folk == null or Careers.career_of(int(folk.id)) != str(v):

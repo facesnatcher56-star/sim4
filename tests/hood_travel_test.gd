@@ -26,15 +26,17 @@ func _round_trip() -> void:
 	var home_objs: int = W.objects.size()
 	var fridge = W.objects_of_def("fridge")[0]
 	W.set_object_state(fridge.id, "stock", 4.0)
-	WorldIface.state_add(fridge, "stock", -1.0)          # the sim writes the Stat mirror only; the stash must still keep it
+	WorldIface.state_add(fridge, "stock", -1.0)          # the sim writes through to the object's state; the stash must keep it
 	var snap_before: Dictionary = W.save_dict(false)
 	Kit.set_time(2, 12)                       # Tuesday noon: everything is open
 	Kit.run(3)
 	var mira: Folk = folk[0]
 	var tobin: Folk = folk[1]
 	var wren: Folk = folk[2]
+	var home_value: int = Economy.lot_value(1)
 	var res: Dictionary = Neighborhood.travel([mira.id], "park")
 	_check(bool(res["ok"]), "travel to the park works: %s" % str(res.get("reason", "")))
+	_check(home_value > 0 and Economy.lot_value(1) == home_value, "home lot value (bills) is unchanged while the folk are away (%d vs %d)" % [Economy.lot_value(1), home_value])
 	_check(Neighborhood.current_lot == "park", "park is the loaded lot")
 	_check(int(res["minutes"]) >= 5 and int(res["minutes"]) <= 40, "travel time is in range: %s" % str(res["minutes"]))
 	_check(W.objects_of_def("fishing_spot").size() > 0 and W.objects_of_def("fridge").is_empty(), "the park (not the house) is in the World")
@@ -49,7 +51,7 @@ func _round_trip() -> void:
 	_check(W.is_walkable(mira.tile), "traveller stands on the park lot")
 	_check(Kit.has_note("arrived at") or Kit.count_events("returned_to_lot") > 0, "arrival announced")
 	# off-lot needs still tick but are kept sane by the statistical rules
-	Kit.run(240)
+	Kit.run(TestFixture.pick(240, 90))
 	_check(tobin.get_stat_value("hunger") > -40.0 and wren.get_stat_value("hunger") > -40.0, "stay-at-home folk do not starve (%.1f)" % tobin.get_stat_value("hunger"))
 	_check(absf(tobin.get_stat_value("hunger") - t_hunger) < 200.0, "needs of off-lot folk keep moving")
 	# bring everybody home
@@ -163,7 +165,7 @@ func _staff_and_meetings() -> void:
 	var tid: int = int(Story.alive_townies()[0]["id"])
 	Neighborhood.go_home()
 	Kit.set_time(2, 13)
-	var rec: Dictionary = Story.invite_to_venue(tid, mira.id, "park", 30, 90)
+	var rec: Dictionary = StoryVisits.invite_to_venue(tid, mira.id, "park", 30, 90)
 	_check(not rec.is_empty(), "invite_to_venue returns a record")
 	var fr_before: float = RelationshipService.value(mira.id, tid, "friendship")
 	Neighborhood.travel([mira.id], "park", {"quiet": true})

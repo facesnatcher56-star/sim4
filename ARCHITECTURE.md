@@ -4,7 +4,8 @@ Godot 4.7 (GDScript). Original life-sim inspired by the *mechanics* of The Sims.
 
 Godot exe: `C:\Users\lloyd\AppData\Local\Godot47\Godot_v4.7-stable_win64_console.exe`
 Blender: `C:\Program Files\Blender Foundation\Blender 5.1\blender.exe` (use `--background --python`)
-Headless test: `Godot --headless --path . --script res://tests/run_all.gd`
+Headless tests (details in **Tests** below): `Godot --headless --path . --script res://tests/run_all.gd` (fast tier, < 1 min); add `-- --slow` for the long simulations.
+After adding / removing a `class_name` file run `Godot --headless --path . --import` once so the global class cache is rebuilt.
 
 ## Principles
 1. **Logic is separate from rendering.** All simulation (`scripts/sim/`) is plain `RefCounted`/`Node` code with NO dependency on visuals, so it is testable headless. 3D scenes only *display* state.
@@ -66,7 +67,8 @@ World.add_folk(folk: Folk, tile) ; World.get_folk(id) ; World.all_folk() -> Arra
 World.reserve(object_id, slot_idx, folk_id) -> bool ; World.release(object_id, slot_idx, folk_id)
 World.save_dict() -> Dictionary ; World.load_dict(d)
 ```
-`WorldObject` (RefCounted): `id, def_id, tile, rot, state: Dictionary, stats: Dictionary(String->Stat), slots_reserved`.
+`WorldObject` (RefCounted): `id, def_id, tile, rot, state: Dictionary, slots_reserved`. `state` is the ONLY copy of an object's state (sim code goes through `WorldIface.state_get/state_set/state_add`, which write through `World.set_object_state`; there is no Stat mirror).
+The `World` autoload (`class_name WorldGrid`) keeps the public API above as one-line delegates to small helper classes that hold a back-reference: `WorldPaths` (A*), `WorldEdit` (walls / floors), `WorldObjects` (place / remove / queries / state), `WorldRooms`, `WorldBuild` (buy / sell / undo), `WorldSave` (starter lot, save_dict / load_dict). Add new World features to the matching helper, not to world.gd.
 
 ## Data schemas (data/*.json)
 **needs.json** `{ "hunger": {"label":"Hunger","min":-100,"max":100,"start":60,"decay_per_min":0.07, "thresholds":[{"below":-60,"buff":"starving"},{"below":-20,"buff":"hungry"}], "icon_color":"#e8a33d"} , ... }`
@@ -109,18 +111,67 @@ for each candidate (interaction, target):
   score *= (1 + memory_bias(folk,target))        # remembered good/bad experiences, in [-0.5,+0.5]
 pick weighted-random among top 3 (weights = score), reason string recorded for debug UI.
 ```
+Implementation notes: `gather()` takes an optional `closed` array; interactions that cannot run for ANY target (cooldown, trait refusal, the actor's own target-independent tests) are not expanded per target and appear as one skipped summary row in `last_debug` instead. Target-independent score parts (advertised needs, buff / trait multipliers, routine) are cached per (interaction, object kind) inside one `choose()`; the full per-candidate breakdown is only built for the best 8. `Interaction.can_run` / `def_runnable` also enforce a folk interaction's `social.requires`, so queued and autonomous paths cannot bypass it.
 
-## Folder layout & OWNERSHIP (agents edit only their own paths)
-| Path | Owner |
-|---|---|
-| `scripts/core/*`, `scripts/sim/*`, `data/needs|buffs|traits|interactions.json`, `tests/sim_*` | **sim-core agent** |
-| `scripts/world/*`, `data/objects.json`, `scenes/world/*`, `tests/world_*` | **world agent** |
-| `scenes/ui/*`, `scripts/ui/*`, `scenes/main.tscn`, `scripts/main.gd` | **ui agent** |
-| `blender/*`, `assets/models/*`, `assets/textures/*` | **assets agent** |
-| `scripts/systems/*` (social, economy, careers, goals, aging, saveload), `data/careers|goals|social.json` | **systems agent** (wave 2) |
-| `ARCHITECTURE.md`, `project.godot` | lead only (propose changes in your final report) |
+## Folder layout & OWNERSHIP
+Files stay small (aim < 400 lines). Big static classes are split by responsibility; the original class keeps its state (`static var`s, `reset`, `to_dict` / `from_dict`) and the part-classes read it through the main class name.
+
+| Path | What | Owner |
+|---|---|---|
+| `scripts/core/` | `Events`, `Data`, `Clock` autoloads | code-health |
+| `scripts/sim/` | `Stat`, `Folk`, `Interaction`, `Autonomy`, `Mood`, `Cond`, `Loot`, `Routine`, `SimDirector`; `SimEnv` (finds Events / Data / Clock without autoload identifiers so sim code runs under `--script`), `WorldIface` (the sim's only door to the World), `StubWorld` (test World) | code-health |
+| `scripts/systems/` | gameplay systems, one class per concern; see below | code-health |
+| `scripts/world/` | `world.gd` (+ `world_*.gd` helpers), `neighborhood.gd` (+ `neighborhood_lots.gd`), `lot_loader.gd`, `starter_house.gd`, `world_object.gd` | code-health |
+| `scripts/world/*view*.gd`, `lot_*.gd`, `folk_*.gd`, `weather_*.gd`, `scenes/world/`, `assets/` | rendering | visual |
+| `scripts/ui/`, `scripts/main.gd`, player-facing text in `data/*.json` | UI and wording | ux/text |
+| `data/*.json` | all content: needs, buffs, traits, objects, interactions, careers, goals, social, weather ... | structure: code-health; wording: ux/text |
+| `tests/` | see **Tests** | code-health (`ui_*`, `*_shot.gd`, `anim_*` belong to ux / visual) |
+| `ARCHITECTURE.md`, `project.godot` | | lead |
+
+### scripts/systems layout (classes split by responsibility)
+- `SystemsManager` wires Clock / Events to the systems; `SysUtil` = shared helpers (time, rng, JSON-int helpers `to_ints`, `int_keys`, `ints_in`, `has_int`); `SysCond` = Cond keys of the systems layer; `SaveLoad` = whole-game snapshots.
+- Content: JSON in `data/content_sys.json`, `data/content_family.json`, `data/weather.json`, `data/holidays.json`, `data/venues.json` ("content") is merged into the shared tables by `ContentMerge`; `SysContent` / `FamilyContent` / `WeatherContent` / `NeighborhoodContent` / `SocialContent` add only the parts computed in code. `SysContent.install_all()` installs systems + family + weather.
+- Relationships: `RelationshipService` (pair store, history, event handlers, save) + `RelationshipBits` (labels, flags, compatibility, describe) + `RelationshipRomance` (trust / tension / bond, stages, breakups) + `RelationshipKnowledge` (knowledge, secrets, gossip, reputation, topics).
+- Social engine: `SocialDynamics` (resolve, hooks, clock) + `SocialScoring` (success score, tiers, `requires` / reasons) + `SocialActions` (special actions, gossip, rumors) + `SocialConflict` (arguments, cheating) + `SocialGatherings` (gatherings, karaoke, goals / markers); `Conversation`, `Emotions`, `Crowd`.
+- Family: `Family` (people store, linking, births, events) + `FamilyTree` (graph queries, tree) + `FamilyMarriage` + `FamilyHousehold` (move out / in, adoption, death); `Aging`, `Genetics`, `BabyCare`.
+- Work: `Careers` (data, hiring, offers, upkeep) + `CareerProgress` (performance, promotion, daily tasks) + `CareerShifts` (attendance, school); `Economy`, `Goals`, `Away`.
+- Weather: `Weather` (model, forecast, multipliers, save) + `WeatherFolk` (markers, exposure, minute tick) + `WeatherWorld` (hourly / daily effects); `Seasons`, `Holidays`.
+- Town: `Story` (townies, daily life) + `StoryVisits` (visits, invites); `Venues`, `NeighborhoodService`.
+- The old class names still answer the calls the UI makes (thin delegates at the bottom of each main class, e.g. `RelationshipService.bit_label`, `Family.tree_for`, `SocialDynamics.reason_unavailable`). New code should call the part-class directly.
+
+## Tests
+```
+Godot --headless --path . --script res://tests/run_all.gd                       # FAST tier (~45 s): everything except the long simulations
+Godot --headless --path . --script res://tests/run_all.gd -- --slow             # + weather_longrun, systems_integration, hood_sim, family_integration, sim_longrun, social_autonomy (~5 min)
+Godot --headless --path . --script res://tests/run_all.gd -- --shuffle[=seed]   # random file order (prints the seed); every order must pass
+Godot --headless --path . --script res://tests/run_all.gd -- --only=sim_basic,world_test
+Godot --headless --path . --script res://tests/run_one.gd -- <test file base name>      # one file, full length
+```
+- A test file is any `tests/*_test.gd`, `sim_*.gd` or `world_*.gd` with a `run() -> Array` of failure strings. Kits (`*_kit.gd`, `sim_testkit.gd`) are helpers.
+- Isolation: `tests/fixture.gd` (`TestFixture.reset()`) runs before and after every file and from `sim_testkit.setup()`: it resets Folk ids, every system's static state, rng seeds, the World / Clock autoloads and the content hooks. Tests must not rely on state left by another file; if a new static `var` is added to a system, reset it in that system's `reset()` (called by `SystemsManager.reset_all()`).
+- Speed: long simulations read `TestFixture.fast` / `TestFixture.pick(full, quick)`; the runner sets `fast` unless `--slow`. The SLOW list lives at the top of `run_all.gd`.
+- Autonomy perf probe (3 folk, 3 game days, furnished room): ~21 s before -> ~16 s after the candidate pre-filtering / profile cache (see `Autonomy`).
 
 ## Definition of done (every agent)
 - Code runs under Godot 4.7 with no errors/warnings in `--headless --quit` import.
 - Tests under `tests/` pass via the headless runner. Report exact commands run and results.
 - Do not edit files you don't own; if a contract is wrong, say so in your report.
+
+## View layer chains (scripts/world)
+Big view classes are split as an inheritance chain of small files (each `extends` the previous by path; only the last has the `class_name`):
+`LotView` = lot_state > lot_camera > lot_models > lot_walls > lot_picking > lot_build > lot_view;
+`FolkView` = folk_data > folk_look > folk_motion > folk_view; `WeatherView` = weather_state > weather_scenery > weather_precip > weather_lamps > weather_view.
+Visual harnesses (windowed, read the PNGs): tests/visual_shot.gd (camera/hour/selection/build ghost), gallery_shot.gd (every object x 4 rotations),
+furniture_shot.gd (every age on every seat/bed), perf_shot.gd (frame time).
+
+## New-game flow & scenarios
+Title -> **New Game** (`ui/start_picker.gd`: cards from `ui/scenario_card.gd`, difficulty buttons, Customise, big Start; **Solo Start + Normal pre-selected**) ->
+optional `ui/household_creator.gd` (`folk_editor.gd` + live 3D `folk_preview.gd`; Free Play adds the home chooser) -> `main.start_new_game(h, start_id, opts)`.
+`opts` = `{scenario, difficulty, funds}`; the world is built by the UI-free `NewGame.start(mgr, household, start_id, opts)` (tests call the same code).
+- **Data** `data/scenarios.json`: `difficulties` (funds_mult / bill_mult / need_mult), `scenarios` (home `start_id`, base `funds`, `start_hour`, `folk[{stage, rel}]`, `tips`, `goals`).
+  Funds = scenario funds x difficulty, **independent of home size** (home size only changes space and bills through `lot_value_rate`). `data/neighborhood.json` `starts` keep a neutral 5000 for the `--autostart` path.
+- **Household dict** (`HouseholdSetup`): `{name, folk:[{name, stage, traits, aspiration, appearance, rel}]}`; `rel` is relative to the first member (none|partner|spouse|child|parent|sibling).
+  `validate()` returns a plain-language reason or "". `create_folk` runs BEFORE `SystemsManager.new_game` (Aging reads `age_stage`), `apply` AFTER it (aspirations, `FamilyMarriage.marry`, `Family.link_parent`, partner bits).
+- **State** `Scenario` (static, saved as `systems.scenario`, reset by `SystemsManager.reset_all`): `active_id`, `difficulty`, `done`, `progress`, `finished`. Hooks: `Scenario.bill_multiplier()` (Economy.compute_bill), `Scenario.need_drain()` (Folk.decay_mult, household members only).
+- **Goals** `ScenarioGoals` (event / events / jobs / cond checks, rewards in coins + satisfaction points, events `scenario_goal_done`, `scenario_finished`); HUD `ui/scenario_tracker.gd` ('Getting Started', collapsible, then a 'What next?' card pointing to Goals).
+- Tests: `tests/start_*_test.gd` (kit `start_kit.gd`); screenshots `tests/start_flow_shot.gd -- picker|picker_hard|creator|creator_family|game_<id>|flow|tracker|nudge out.png`.

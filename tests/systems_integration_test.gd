@@ -118,7 +118,7 @@ func _report(f: Array, stats: Dictionary, ids: Array, ms: int) -> void:
 		for other in ids:
 			if fid == other:
 				continue
-			var bit: String = RelationshipService.bit_for(fid, other)
+			var bit: String = RelationshipBits.bit_for(fid, other)
 			bit_counts[bit] = int(bit_counts.get(bit, 0)) + 1
 	print("")
 	print("  ===== systems integration: %d game days, 3 folk (+visitors), %d ms real time =====" % [DAYS, ms])
@@ -138,7 +138,7 @@ func _report(f: Array, stats: Dictionary, ids: Array, ms: int) -> void:
 	var known: int = 0
 	for fid2 in ids:
 		for other2 in ids:
-			if fid2 != other2 and RelationshipService.bit_for(fid2, other2) != "stranger":
+			if fid2 != other2 and RelationshipBits.bit_for(fid2, other2) != "stranger":
 				known += 1
 	K.expect(f, known >= 3, "relationships formed between the folk (%d directed bits)" % known)
 	var bonds: int = 0

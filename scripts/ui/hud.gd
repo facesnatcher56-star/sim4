@@ -10,7 +10,7 @@ var theme_res: Theme
 var top_bar: PanelContainer
 var time_label: Label
 var day_label: Label
-var coins_label: Label
+var coins_label: Button
 var speed_buttons: Dictionary = {}     # speed int -> Button
 var build_button: Button
 var save_button: Button
@@ -23,6 +23,19 @@ var pie: PieMenu
 var thoughts: ThoughtLayer
 var toasts: ToastFeed
 var build_panel: BuildPanel
+var goals_dialog: GoalsDialog
+var career_dialog: CareerDialog
+var household_dialog: HouseholdDialog
+var help_dialog: HelpDialog
+var pause_menu: PauseMenu
+var settings_dialog: SettingsDialog
+var confirm_dialog: ConfirmDialog
+var menu_button: Button
+var _settings_from_pause := false
+var tips: FirstRunTips
+var tracker: ScenarioTracker
+var offer_toast: OfferToast
+var help_button: Button
 var folk_row: HBoxContainer
 var save_menu: PanelContainer
 var selected_folk_id := -1
@@ -35,6 +48,7 @@ var _ctx_handled := false
 var _pending_tile := Vector2i(-1, -1)
 
 func _ready() -> void:
+	SettingsKeys.ensure_actions()
 	theme_res = UITheme.build()
 	theme = theme_res
 	set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -43,13 +57,20 @@ func _ready() -> void:
 	_build_left()
 	thoughts = ThoughtLayer.new()
 	add_child(thoughts)
+	# top-centre column under the bar: job-offer card first, then the toast stack (never overlaps the folk panel or the build panel)
+	var top_center := VBoxContainer.new()
+	top_center.anchor_left = 0.5
+	top_center.anchor_right = 0.5
+	top_center.offset_left = -170
+	top_center.offset_right = 170
+	top_center.offset_top = 60
+	top_center.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(top_center)
+	offer_toast = OfferToast.new()
+	top_center.add_child(offer_toast)
 	toasts = ToastFeed.new()
-	toasts.anchor_left = 1.0
-	toasts.anchor_right = 1.0
-	toasts.offset_left = -300
-	toasts.offset_right = -12
-	toasts.offset_top = 64
-	add_child(toasts)
+	toasts.offer = offer_toast
+	top_center.add_child(toasts)
 	build_panel = BuildPanel.new()
 	build_panel.anchor_left = 1.0
 	build_panel.anchor_right = 1.0
@@ -66,6 +87,12 @@ func _ready() -> void:
 	_build_save_menu()
 	travel_panel = TravelPanel.new()
 	add_child(travel_panel)
+	tips = FirstRunTips.new()
+	add_child(tips)
+	tracker = ScenarioTracker.new()      # 'Getting Started' checklist (top-left), only visible with a scenario
+	tracker.goals_requested.connect(func(): goals_dialog.toggle_for(selected_folk_id))
+	add_child(tracker)
+	_build_dialogs()      # added after the tips so dialogs always sit on top of them
 	UIU.connect_ev("game_event", func(n, _p): if n == "lot_changed": _update_clock())
 	UIU.connect_ev("selection_changed", _on_selection_changed)
 	UIU.connect_ev("coins_changed", _on_coins_changed)
@@ -103,7 +130,7 @@ func _build_top_bar() -> void:
 		b.text = s[1]
 		b.toggle_mode = true
 		b.custom_minimum_size = Vector2(44, 0)
-		b.tooltip_text = "Pause (Space)" if s[0] == 0 else "Speed %dx (%d)" % [s[0], s[0]]
+		b.tooltip_text = "Pause (Space)" if s[0] == 0 else ("Normal speed (1)" if s[0] == 1 else "Fast (2)" if s[0] == 2 else "Fastest (3)")
 		b.pressed.connect(set_speed.bind(s[0]))
 		h.add_child(b)
 		speed_buttons[s[0]] = b
@@ -113,7 +140,14 @@ func _build_top_bar() -> void:
 	h.add_child(sp)
 	lot_label = UIU.make_label("", 15, UITheme.ACCENT)
 	h.add_child(lot_label)
-	coins_label = UIU.make_label("0 Coins", 18, Color("#f2c94c"))
+	coins_label = Button.new()
+	coins_label.text = "0 Coins"
+	coins_label.flat = true
+	coins_label.add_theme_font_size_override("font_size", 18)
+	coins_label.add_theme_color_override("font_color", Color("#f2c94c"))
+	coins_label.add_theme_color_override("font_hover_color", Color("#ffe38a"))
+	coins_label.tooltip_text = "Household money, bills and last week's income and spending"
+	coins_label.pressed.connect(func(): household_dialog.toggle_for(selected_folk_id))
 	h.add_child(coins_label)
 	map_button = Button.new()
 	map_button.text = "Map"
@@ -128,8 +162,21 @@ func _build_top_bar() -> void:
 	h.add_child(build_button)
 	save_button = Button.new()
 	save_button.text = "Save/Load"
-	save_button.pressed.connect(func(): save_menu.visible = not save_menu.visible)
+	save_button.tooltip_text = "Save, load, or go back to the title screen"
+	save_button.pressed.connect(func():
+		_refresh_save_menu()
+		save_menu.visible = not save_menu.visible)
 	h.add_child(save_button)
+	help_button = Button.new()
+	help_button.text = "?"
+	help_button.tooltip_text = "Controls and help (F1)"
+	help_button.pressed.connect(func(): help_dialog.toggle_for(selected_folk_id))
+	h.add_child(help_button)
+	menu_button = Button.new()
+	menu_button.text = "Menu"
+	menu_button.tooltip_text = "Pause menu and settings (Esc)"
+	menu_button.pressed.connect(func(): pause_menu.toggle_for(-1))
+	h.add_child(menu_button)
 
 func _build_left() -> void:
 	var left := VBoxContainer.new()
@@ -146,6 +193,61 @@ func _build_left() -> void:
 	left.add_child(queue_bar)
 	folk_panel = FolkPanel.new()
 	left.add_child(folk_panel)
+	folk_panel.goals_requested.connect(func(id): goals_dialog.toggle_for(id))
+	folk_panel.career_requested.connect(func(id): career_dialog.toggle_for(id))
+
+func _build_dialogs() -> void:
+	goals_dialog = GoalsDialog.new()
+	career_dialog = CareerDialog.new()
+	household_dialog = HouseholdDialog.new()
+	help_dialog = HelpDialog.new()
+	help_dialog.tips_requested.connect(func(): tips.start(true))
+	pause_menu = PauseMenu.new()
+	pause_menu.chosen.connect(_on_pause_choice)
+	settings_dialog = SettingsDialog.new()
+	settings_dialog.closed.connect(func():
+		if _settings_from_pause:
+			_settings_from_pause = false
+			pause_menu.show_for(-1))
+	confirm_dialog = ConfirmDialog.new()
+	for d in [goals_dialog, career_dialog, household_dialog, help_dialog, pause_menu, settings_dialog, confirm_dialog]:
+		add_child(d)
+	save_menu.visibility_changed.connect(func(): UIDialog.track_open(save_menu.get_instance_id(), save_menu.visible))
+
+func dialogs() -> Array:
+	return [confirm_dialog, settings_dialog, pause_menu, goals_dialog, career_dialog, household_dialog, help_dialog]
+
+func _on_pause_choice(id: String) -> void:
+	pause_menu.hide_dialog()
+	match id:
+		"settings":
+			_settings_from_pause = true
+			settings_dialog.show_for(-1)
+		"save", "load":
+			_refresh_save_menu()
+			save_menu.visible = true
+		"help":
+			help_dialog.show_for(selected_folk_id)
+		"quit":
+			request_quit_to_title()
+
+## Quit to Title, asking first unless the player turned the confirmation off.
+func request_quit_to_title() -> void:
+	if not GameSettings.get_bool("confirm_quit"):
+		quit_to_title.emit()
+		return
+	confirm_dialog.ask("Quit to title?", "Unsaved progress will be lost.", "Quit to Title", func(): quit_to_title.emit(), "Stay")
+
+## Closes the topmost open dialog; returns true if one was open.
+func close_top_dialog() -> bool:
+	for d in dialogs():
+		if d.visible:
+			d.hide_dialog()
+			return true
+	if save_menu.visible:
+		save_menu.visible = false
+		return true
+	return false
 
 func _build_save_menu() -> void:
 	save_menu = PanelContainer.new()
@@ -162,6 +264,7 @@ func _build_save_menu() -> void:
 	var v := VBoxContainer.new()
 	save_menu.add_child(v)
 	v.add_child(UIU.make_label("Save / Load", 20))
+	v.add_child(UIU.make_label("Saving over a slot replaces what was there.", 12, UITheme.MUTED))
 	for i in range(1, SaveSlots.SLOTS + 1):
 		var row := HBoxContainer.new()
 		v.add_child(row)
@@ -174,6 +277,8 @@ func _build_save_menu() -> void:
 		sb.pressed.connect(func(): do_save(i, lab))
 		row.add_child(sb)
 		var lb := Button.new()
+		lb.name = "LoadBtn%d" % i
+		lb.disabled = not SaveSlots.has_slot(i)
 		lb.text = "Load"
 		lb.pressed.connect(func():
 			save_menu.visible = false
@@ -187,15 +292,26 @@ func _build_save_menu() -> void:
 	hb.add_child(close)
 	var qt := Button.new()
 	qt.text = "Quit to Title"
+	qt.tooltip_text = "Leave this game and return to the title screen. Unsaved progress is lost."
 	qt.pressed.connect(func():
 		save_menu.visible = false
-		quit_to_title.emit())
+		request_quit_to_title())
 	hb.add_child(qt)
+
+func _refresh_save_menu() -> void:
+	for i in range(1, SaveSlots.SLOTS + 1):
+		var lab: Label = save_menu.find_child("SlotLabel%d" % i, true, false)
+		var lb: Button = save_menu.find_child("LoadBtn%d" % i, true, false)
+		if lab != null:
+			lab.text = "Slot %d: %s" % [i, SaveSlots.slot_summary(i)]
+		if lb != null:
+			lb.disabled = not SaveSlots.has_slot(i)
 
 func do_save(slot: int, lab: Label = null) -> bool:
 	var ok := SaveSlots.save(slot, household_name)
 	if lab:
 		lab.text = "Slot %d: %s" % [slot, SaveSlots.slot_summary(slot)]
+	_refresh_save_menu()
 	UIU.notify("Game saved (slot %d)" % slot if ok else "Save failed", "good" if ok else "bad")
 	save_requested.emit(slot)
 	return ok
@@ -220,6 +336,9 @@ func select_folk(id: int) -> void:
 	folk_panel.show_folk(f)
 	queue_bar.set_folk(f)
 	rebuild_folk_row()
+	for d in [goals_dialog, career_dialog]:
+		if d != null and d.visible:
+			d.show_for(id)
 
 func rebuild_folk_row() -> void:
 	for c in folk_row.get_children():
@@ -302,21 +421,41 @@ func _on_build_mode(on: bool) -> void:
 
 # ------------------------------------------------------------ input
 func _unhandled_input(ev: InputEvent) -> void:
-	if ev is InputEventKey and ev.pressed and not ev.echo:
+	if not (ev is InputEventKey and ev.pressed and not ev.echo):
+		return
+	# rebindable actions (SettingsKeys); Esc, "?" and "/" stay fixed
+	if ev.is_action_pressed("sim_pause"):
+		if not build_panel.active:
+			set_speed(0 if UIU.get_speed() != 0 else maxi(prev_speed, 1))
+	elif ev.is_action_pressed("sim_speed_1"): set_speed(1)
+	elif ev.is_action_pressed("sim_speed_2"): set_speed(2)
+	elif ev.is_action_pressed("sim_speed_3"): set_speed(3)
+	elif ev.is_action_pressed("sim_build"): build_panel.set_active(not build_panel.active)
+	elif ev.is_action_pressed("sim_map"): travel_panel.toggle()
+	elif ev.is_action_pressed("sim_wall_mode"):
+		if lot_view: lot_view.call("cycle_wall_mode")
+	elif ev.is_action_pressed("sim_help"): help_dialog.toggle_for(selected_folk_id)
+	else:
 		match ev.keycode:
-			KEY_SPACE:
-				if not build_panel.active:
-					set_speed(0 if UIU.get_speed() != 0 else maxi(prev_speed, 1))
-			KEY_1: set_speed(1)
-			KEY_2: set_speed(2)
-			KEY_3: set_speed(3)
-			KEY_B: build_panel.set_active(not build_panel.active)
-			KEY_M: travel_panel.toggle()
-			KEY_TAB: if lot_view: lot_view.call("cycle_wall_mode")
+			KEY_SLASH:
+				if ev.shift_pressed:
+					help_dialog.toggle_for(selected_folk_id)
+			KEY_QUESTION:
+				help_dialog.toggle_for(selected_folk_id)
 			KEY_ESCAPE:
 				if pie.visible: pie.close()
-		if UIU.get_speed() != 0:
-			prev_speed = UIU.get_speed()
+				elif not close_top_dialog() and _can_open_pause():
+					pause_menu.show_for(-1)
+	if UIU.get_speed() != 0:
+		prev_speed = UIU.get_speed()
+
+## In Build/Buy, Esc first belongs to the build tool (back to select); only then does it open the menu.
+func _can_open_pause() -> bool:
+	if not visible:
+		return false
+	if build_panel.active and lot_view != null and str(lot_view.get("tool")) != "select":
+		return false
+	return true
 
 func _on_tile_clicked(tile: Vector2i, button: int) -> void:
 	if button == MOUSE_BUTTON_RIGHT and not build_panel.active:

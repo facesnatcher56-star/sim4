@@ -31,12 +31,14 @@ func rebuild() -> void:
 	var q = UIU.prop(folk, "queue", [])
 	for i in q.size():
 		_add_chip(q[i], i)
+	if cur == null and q.size() == 0:
+		add_child(UIU.make_label("Idle. Click an object or a person to give an order.", 13, UITheme.MUTED))
 
 func _add_chip(it, idx: int) -> void:
 	var def_id := str(UIU.prop(it, "def_id", ""))
 	var b := Button.new()
 	b.text = ("> " if idx < 0 else "") + UIU.interaction_label(def_id)
-	b.tooltip_text = "Click to cancel"
+	b.tooltip_text = "Click to cancel this task" if idx >= 0 else "Doing this now. Click to stop."
 	if idx < 0:
 		b.add_theme_stylebox_override("normal", UITheme.box(UITheme.ACCENT.darkened(0.4), 6, UITheme.ACCENT, 1))
 	b.pressed.connect(func(): cancel(idx))

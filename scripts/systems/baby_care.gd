@@ -185,7 +185,7 @@ static func remove_baby(baby, reason: String = "neglect") -> void:
 		if int(r.household_id) == int(baby.household_id) and int(r.id) != bid and str(r.age_stage) in ["adult", "elder"]:
 			grievers.append(r)
 	baby.remove_buff(str(cfg().get("cry_buff", "crying")))
-	if Family.move_out(bid, 0.0, true):
+	if FamilyHousehold.move_out(bid, 0.0, true):
 		removed.append({"day": SysUtil.day(), "baby_id": bid, "name": nm, "reason": reason})
 		for a in grievers:
 			a.add_buff("grieving")
@@ -209,7 +209,7 @@ static func on_aged_up(folk_id: int, from_stage: String, to_stage: String) -> vo
 				all_ok = false
 		if all_ok:
 			var pb: String = str(SimEnv.data().get_table("family").get("toddler", {}).get("proud_buff", "proud_parent"))
-			for p in Family.parents_of(folk_id):
+			for p in FamilyTree.parents_of(folk_id):
 				var pf = SysUtil.folk(int(p))
 				if pf != null:
 					pf.add_buff(pb)

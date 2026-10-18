@@ -38,7 +38,7 @@ func run() -> Array:
 	Aging.set_age_days(sib, 16.0)
 	RelationshipService.add_both(a.id, b.id, "romance", 85.0)
 	RelationshipService.add_both(a.id, b.id, "friendship", 80.0)
-	RelationshipService.set_flag(a.id, b.id, "partner", true, false)
+	RelationshipBits.set_flag(a.id, b.id, "partner", true, false)
 	Family.link_parent(kid.id, a.id)
 	Family.link_parent(kid.id, b.id)
 	Family.link_parent(sib.id, a.id)
@@ -70,7 +70,7 @@ func run() -> Array:
 	K.expect(f, fp.family_buttons["propose"].disabled and fp.family_buttons["adopt_child"].disabled, "children cannot propose or adopt")
 	# engagement flows into the tab
 	fp.show_folk(a)
-	Family.propose_marriage(a.id, b.id)
+	FamilyMarriage.propose_marriage(a.id, b.id)
 	Events.game_event.emit("engaged", {"folk_id": a.id, "target_id": b.id})     # the panel refreshes itself on family events
 	K.expect(f, not fp.family_buttons["have_wedding"].disabled and fp.family_buttons["propose"].disabled, "once engaged the wedding is offered")
 	K.expect(f, _texts(fp.family_box).find("Engaged") >= 0, "engagement shown")

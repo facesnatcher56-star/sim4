@@ -5,14 +5,14 @@
   "travel": {"base_min": 5, "per_block_min": 4, "max_min": 40, "toast_seconds": 1.6},
   "pantry": {"units_per_trip": 6, "fridge_max": 10},
   "starts": [
-    {"id": "classic", "label": "Fernwood Classic", "template": "classic", "funds": 6000,
+    {"id": "classic", "label": "Fernwood Classic", "template": "classic", "funds": 5000, "size": "2 bedrooms", "running_costs": "Medium",
      "description": "The original two-bedroom house with a fenced yard. Balanced and roomy."},
-    {"id": "small", "label": "Starter Studio", "template": "small", "funds": 8000,
-     "description": "A cosy one-room flat with a bathroom nook. Cheap to run, with extra starting funds."},
-    {"id": "medium", "label": "Family Home", "template": "medium", "funds": 4500,
+    {"id": "small", "label": "Starter Studio", "template": "small", "funds": 5000, "size": "Studio", "running_costs": "Low",
+     "description": "A cosy one-room flat with a bathroom nook. Little space, but the cheapest to run."},
+    {"id": "medium", "label": "Family Home", "template": "medium", "funds": 5000, "size": "2-3 bedrooms", "running_costs": "Medium",
      "description": "Two bedrooms, kitchen-diner, laundry corner and a garden. Fits a small family."},
-    {"id": "large", "label": "Grand Estate", "template": "large", "funds": 2500,
-     "description": "Three bedrooms, big kitchen with a bar, fireplace, studio, gym corner and a yard with hot tub. Starts with the leanest wallet."}
+    {"id": "large", "label": "Grand Estate", "template": "large", "funds": 5000, "size": "3 bedrooms + extras", "running_costs": "High",
+     "description": "Three bedrooms, big kitchen with a bar, fireplace, studio, gym corner and a yard with hot tub. Lots of room and the biggest bills."}
   ],
   "lots": [
     {"id": "home", "label": "Home", "type": "home", "pos": [2, 2], "color": "#3fb8af", "blurb": "Your household's lot."},

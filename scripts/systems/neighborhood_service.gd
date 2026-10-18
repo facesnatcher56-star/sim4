@@ -6,7 +6,7 @@ extends RefCounted
 ##   after_minute()   - reconciles where everybody is, simple "statistical" need satisfaction for off-lot folk,
 ##                      ambient NPC crowd + staff, venue buffs, chance meetings, hangout invitations, closing time
 ##   on_interaction_finished / on_game_event - venue skill bonuses, groceries, arrival toasts
-## Invitations: NeighborhoodService.invite_to_venue(townie_id, folk_id, lot_id) (also Story.invite_to_venue).
+## Invitations: NeighborhoodService.invite_to_venue(townie_id, folk_id, lot_id) (also StoryVisits.invite_to_venue).
 
 static func install() -> void:
 	NeighborhoodContent.install()
@@ -26,7 +26,7 @@ static func before_minute() -> void:
 		if reason != Neighborhood.STAY:
 			continue
 		if _duty_due(f):
-			Neighborhood._detach_away(f)        # Careers.on_minute (next) sends them to work / school; the metas keep them hidden
+			NeighborhoodLots._detach_away(f)        # CareerShifts.on_minute (next) sends them to work / school; the metas keep them hidden
 	_postpone_visits()
 
 static func after_minute() -> void:
@@ -45,12 +45,12 @@ static func _duty_due(f) -> bool:
 	var h: float = SysUtil.hour_f()
 	if Careers.jobs.has(fid):
 		var j: Dictionary = Careers.jobs[fid]
-		return int(j["attempt_day"]) != day and Careers.is_work_day(str(j["career"]), day, str(j.get("shift", "day"))) \
-			and Careers.in_shift_window(h, f.work_start, f.work_end)
+		return int(j["attempt_day"]) != day and CareerShifts.is_work_day(str(j["career"]), day, str(j.get("shift", "day"))) \
+			and CareerShifts.in_shift_window(h, f.work_start, f.work_end)
 	if Careers.school.has(fid):
 		var sc: Dictionary = Careers.cfg().get("school", {})
 		var st: Dictionary = Careers.school[fid]
-		return int(st["attempt_day"]) != day and Careers.is_school_day(day) and h >= float(sc.get("start", 9)) and h < float(sc.get("end", 15))
+		return int(st["attempt_day"]) != day and CareerShifts.is_school_day(day) and h >= float(sc.get("start", 9)) and h < float(sc.get("end", 15))
 	return false
 
 ## Visits scheduled for the home lot cannot start while nobody is home to receive the guests.
@@ -77,9 +77,9 @@ static func _reconcile() -> void:
 			continue
 		var at: String = Neighborhood.where(fid)
 		if at != Neighborhood.current_lot:
-			Neighborhood.make_stay(f)
+			NeighborhoodLots.make_stay(f)
 		elif f.has_meta("offlot"):
-			Neighborhood.appear(f)
+			NeighborhoodLots.appear(f)
 
 ## Cheap stand-in for autonomy: off-lot folk eat, wash, sleep and socialise on simple rules so nobody starves.
 static func _stay_needs() -> void:

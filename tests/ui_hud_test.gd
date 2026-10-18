@@ -130,14 +130,23 @@ func run() -> Array:
 		fails.append("speed buttons not disabled in build mode")
 	hud.build_panel.set_active(false)
 
-	# --- title menu validation
+	# --- new-game screen: Solo Start is the default; duplicate names fail household validation
+	var sp := StartPicker.new()
+	root.add_child(sp)
+	if sp.selected_id != "solo":
+		fails.append("new-game screen should pre-select Solo Start")
+	var two := HouseholdSetup.make_household("couple")
+	two["folk"][1]["name"] = two["folk"][0]["name"]
+	if HouseholdSetup.validate(two) == "":
+		fails.append("duplicate names should fail validation")
+	sp.queue_free()
 	var tm := TitleMenu.new()
 	root.add_child(tm)
-	if tm.rows.size() != 3:
-		fails.append("title menu should have 3 folk rows")
-	tm.rows[1]["name"].text = tm.rows[0]["name"].text
-	if tm.validate(tm.collect()) == "":
-		fails.append("duplicate names should fail validation")
+	var got: Array = []
+	tm.new_game_requested.connect(func(): got.append(1))
+	tm.main_box.get_child(2).pressed.emit()
+	if got.size() != 1:
+		fails.append("title menu New Game button should request the new-game screen")
 	tm.queue_free()
 
 	hud.queue_free()

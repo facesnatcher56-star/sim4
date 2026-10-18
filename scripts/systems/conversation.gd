@@ -235,7 +235,7 @@ static func rules() -> Dictionary:
 ## Topic ids a folk is personally interested in (traits, trained skills, career).
 static func interests_of(fid: int) -> Array:
 	var out: Array = []
-	var traits: Array = RelationshipService.traits_of(fid)
+	var traits: Array = RelationshipBits.traits_of(fid)
 	var f = SysUtil.folk(fid)
 	var tmin: int = int(SysUtil.table("social").get("knowledge", {}).get("interest_min_skill", 2))
 	var tp := topics()
@@ -306,7 +306,7 @@ static func pick_topic(a: int, b: int) -> String:
 			w += float(r.get("mood_weight", 1.0))
 		if bool(tp[tid].get("boring", false)):
 			w *= float(r.get("boring_weight", 0.5))
-		w /= 1.0 + float(r.get("repeat_decay", 0.6)) * RelationshipService.topic_count(a, b, str(tid))
+		w /= 1.0 + float(r.get("repeat_decay", 0.6)) * RelationshipKnowledge.topic_count(a, b, str(tid))
 		items.append(str(tid))
 		weights.append(w)
 	return str(SysUtil.pick_weighted(items, weights))
@@ -319,7 +319,7 @@ static func topic_effect(a: int, b: int, topic: String) -> Dictionary:
 	var w: Dictionary = SysUtil.table("social").get("outcomes", {}).get("weights", {})
 	var r := rules()
 	var t: Dictionary = topics()[topic]
-	var cnt := RelationshipService.topic_count(a, b, topic)
+	var cnt := RelationshipKnowledge.topic_count(a, b, topic)
 	out["count"] = cnt
 	var ia := interests_of(a).has(topic)
 	var ib := interests_of(b).has(topic)
@@ -330,7 +330,7 @@ static func topic_effect(a: int, b: int, topic: String) -> Dictionary:
 	if ia and ib:
 		bonus += float(w.get("topic_shared", 0.1))
 		mult *= 1.25
-		if RelationshipService.knows_interest(a, b, topic):
+		if RelationshipKnowledge.knows_interest(a, b, topic):
 			bonus += float(w.get("topic_known", 0.05))
 			out["known"] = true
 	elif ib:

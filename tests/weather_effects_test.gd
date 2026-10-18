@@ -214,14 +214,14 @@ func _fishing(f: Array) -> void:
 	WorldIface.coins[1] = 0
 	SimEnv.clock().total_minutes = W.at(3, 10)
 	Weather.force("rain")
-	Weather.on_game_event("caught_fish", {"folk_id": a.id})
+	WeatherWorld.on_game_event("caught_fish", {"folk_id": a.id})
 	var before: int = WorldIface.get_coins(1)
-	Weather.on_interaction_finished(a.id, "fish_pond", true)
+	WeatherWorld.on_interaction_finished(a.id, "fish_pond", true)
 	W.expect(f, WorldIface.get_coins(1) > before, "a catch in the rain pays a bonus")
 	Weather.force("sunny")
-	Weather.on_game_event("caught_fish", {"folk_id": a.id})
+	WeatherWorld.on_game_event("caught_fish", {"folk_id": a.id})
 	before = WorldIface.get_coins(1)
-	Weather.on_interaction_finished(a.id, "fish_pond", true)
+	WeatherWorld.on_interaction_finished(a.id, "fish_pond", true)
 	W.expect(f, WorldIface.get_coins(1) == before, "no bonus in sunshine")
 	W.teardown()
 
@@ -236,9 +236,10 @@ func _walk_and_events(f: Array) -> void:
 	# weather_changed fires as steps pass
 	SimEnv.clock().total_minutes = W.at(1, 0)
 	var before: int = K.count_events("weather_changed")
-	W.run_min(10 * 24 * 60)
+	var days: int = TestFixture.pick(10, 4)
+	W.run_min(days * 24 * 60)
 	var n: int = K.count_events("weather_changed") - before
-	W.expect(f, n >= 8, "weather_changed events over 10 days: %d" % n)
+	W.expect(f, n >= days - 2, "weather_changed events over %d days: %d" % [days, n])
 	var p: Dictionary = K.last_event("weather_changed")
 	W.expect(f, p.has("from") and p.has("to") and p.has("temp") and p.has("season") and str(p["from"]) != str(p["to"]), "weather_changed payload: %s" % str(p))
 	W.teardown()

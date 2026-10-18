@@ -216,3 +216,15 @@ def telescope(B, tube):
     tube(b, "black", (0.2, 0.97, 0.28), (0.24, 0.92, 0.33), 0.05)
     b.box("black", 0.0, 1.12, 0.0, 0.08, 0.06, 0.08)
     return [("telescope", b, (0, 0, 0))]
+
+
+def park_bench(B, tube):
+    b = B()
+    for x in (-0.8, 0.8):
+        b.box("metal_dark", x, 0.25, 0.0, 0.08, 0.5, 0.5)       # cast-iron ends
+        b.box("metal_dark", x, 0.6, 0.22, 0.08, 0.5, 0.06)
+    for i in range(4):
+        b.box("wood_light", 0, 0.52, -0.2 + i * 0.13, 1.9, 0.05, 0.1)     # seat slats (top y~0.55)
+    for i in range(3):
+        b.box("wood_light", 0, 0.62 + i * 0.12, 0.25, 1.9, 0.09, 0.04)    # back slats
+    return [("park_bench", b, (0, 0, 0))]

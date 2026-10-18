@@ -95,6 +95,33 @@ static func check_one(c: Variant, ctx: Dictionary) -> bool:
 				return false
 	return true
 
+## Does this condition look at the target folk / the object? (If not, it can be decided from the actor alone.)
+static func uses_target(c: Variant) -> bool:
+	return _mentions(c, ["relationship_above"])
+
+static func uses_object(c: Variant) -> bool:
+	return _mentions(c, ["object_state_eq", "object_state_above", "object_state_below"])
+
+static func _mentions(c: Variant, keys: Array) -> bool:
+	if c is Array:
+		for x in c:
+			if _mentions(x, keys):
+				return true
+		return false
+	if not (c is Dictionary):
+		return false
+	for key in c:
+		var k := str(key)
+		if keys.has(k):
+			return true
+		if k == "not" and _mentions(c[key], keys):
+			return true
+		if k == "any":
+			for sub in c[key]:
+				if _mentions(sub, keys):
+					return true
+	return false
+
 static func _loose_eq(a: Variant, b: Variant) -> bool:
 	if typeof(a) == TYPE_BOOL or typeof(b) == TYPE_BOOL:
 		return bool(a) == bool(b)

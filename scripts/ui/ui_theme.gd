@@ -50,4 +50,19 @@ static func build() -> Theme:
 	t.set_color("font_unselected_color", "TabContainer", MUTED)
 	t.set_constant("separation", "VBoxContainer", 6)
 	t.set_constant("separation", "HBoxContainer", 6)
+	if GameSettings.high_contrast():
+		_high_contrast(t)
 	return t
+
+## Accessibility: opaque panels, strong borders, pure-white text.
+static func _high_contrast(t: Theme) -> void:
+	var edge := Color(1, 1, 1, 0.9)
+	for c in ["PanelContainer", "Panel"]:
+		t.set_stylebox("panel", c, box(Color(BG, 1.0), 10, edge, 2, 10))
+	for c in ["Button", "OptionButton", "MenuButton"]:
+		t.set_stylebox("normal", c, box(Color("#0f1620"), 6, edge, 2))
+		t.set_stylebox("hover", c, box(Color("#26364a"), 6, Color.WHITE, 2))
+		t.set_stylebox("pressed", c, box(ACCENT.darkened(0.3), 6, Color.WHITE, 2))
+		t.set_color("font_color", c, Color.WHITE)
+	t.set_color("font_color", "Label", Color.WHITE)
+	t.set_stylebox("normal", "LineEdit", box(Color.BLACK, 6, edge, 2))

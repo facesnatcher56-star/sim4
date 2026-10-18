@@ -143,31 +143,31 @@ func _branches(f: Array) -> void:
 	var a := _skilled(w, "Ann", {"guitar": 8, "charisma": 4}, ["showoff"])
 	Careers.hire(a, "musician", 3)
 	var fid := int(a.id)
-	K.expect(f, Careers.set_branch_preference(a, "solo"), "branch preference can be set before the fork")
-	Careers.add_performance(fid, 200.0)
+	K.expect(f, CareerProgress.set_branch_preference(a, "solo"), "branch preference can be set before the fork")
+	CareerProgress.add_performance(fid, 200.0)
 	K.expect(f, Careers.level_of(fid) == 4 and Careers.branch_of(fid) == "solo", "promotion into level 4 takes the chosen branch")
 	K.expect(f, Careers.title_of(fid) == "Solo Artist", "title follows the branch (%s)" % Careers.title_of(fid))
 	K.expect(f, K.count_events("branch_chosen") == 1 and K.has_note("Solo Artist"), "branch choice is announced")
 	var info: Dictionary = Careers.info_for(fid)
 	K.expect(f, str(info["branch"]) == "solo" and int(info["max_level"]) == 6 and (info["tasks"] as Array).size() >= 1, "info_for exposes branch, max level and tasks")
-	K.expect(f, not Careers.set_branch_preference(a, "composer"), "cannot change branch after the fork")
+	K.expect(f, not CareerProgress.set_branch_preference(a, "composer"), "cannot change branch after the fork")
 	# next level inside the branch needs its own requirements
-	Careers.add_performance(fid, 200.0)
+	CareerProgress.add_performance(fid, 200.0)
 	K.expect(f, Careers.level_of(fid) == 5 and Careers.title_of(fid) == "Arena Act", "branch level 5 reached with guitar 8 (%s)" % Careers.title_of(fid))
-	Careers.add_performance(fid, 200.0)
+	CareerProgress.add_performance(fid, 200.0)
 	K.expect(f, Careers.level_of(fid) == 5, "level 6 'Living Legend' needs guitar 9 and charisma 3")
 	# auto-pick follows traits when no preference is set
 	var b := _skilled(w, "Bea", {"gardening": 8, "painting": 3, "logic": 4}, ["creative"])
 	Careers.hire(b, "gardener", 3)
-	Careers.add_performance(int(b.id), 200.0)
+	CareerProgress.add_performance(int(b.id), 200.0)
 	K.expect(f, Careers.level_of(int(b.id)) == 4 and Careers.branch_of(int(b.id)) == "landscape", "creative gardener drifts to landscape design, got '%s'" % Careers.branch_of(int(b.id)))
 	var c := _skilled(w, "Cal", {"gardening": 6}, [])
 	Careers.hire(c, "gardener", 3)
-	Careers.add_performance(int(c.id), 200.0)
+	CareerProgress.add_performance(int(c.id), 200.0)
 	K.expect(f, Careers.level_of(int(c.id)) == 4 and Careers.branch_of(int(c.id)) == "", "a folk who only meets the generalist track stays on the trunk")
 	# demotion below the fork resets the branch
-	Careers.add_performance(fid, -300.0, true)
-	Careers.add_performance(fid, -300.0, true)
+	CareerProgress.add_performance(fid, -300.0, true)
+	CareerProgress.add_performance(fid, -300.0, true)
 	K.expect(f, Careers.level_of(fid) <= 4, "demotions walk back down the branch")
 	# save/load keeps branch & shift & task state
 	var d1: Dictionary = Careers.to_dict()
@@ -183,28 +183,28 @@ func _tasks(f: Array) -> void:
 	Careers.hire(g, "gardener", 1)
 	var fid := int(g.id)
 	K.set_time(3, 12)
-	var tasks: Array = Careers.tasks_for(fid)
+	var tasks: Array = CareerProgress.tasks_for(fid)
 	K.expect(f, tasks.size() == 1 and not bool(tasks[0]["done"]), "level 1 gardener sees the tend-the-beds task only (%d)" % tasks.size())
-	var p0: float = Careers.performance_of(fid)
-	Careers.on_interaction(fid, "water_garden", true)
+	var p0: float = CareerProgress.performance_of(fid)
+	CareerProgress.on_interaction(fid, "water_garden", true)
 	K.expect(f, K.count_events("daily_task_done") == 1, "daily_task_done fires")
-	var gain: float = Careers.performance_of(fid) - p0
+	var gain: float = CareerProgress.performance_of(fid) - p0
 	K.expect(f, gain >= 2.0 + 5.0 - 0.01, "task bonus stacks on the hook gain (%.1f)" % gain)
-	var p1: float = Careers.performance_of(fid)
-	Careers.on_interaction(fid, "water_garden", true)
-	K.expect(f, K.count_events("daily_task_done") == 1 and Careers.performance_of(fid) - p1 < 3.0, "a task pays only once per day")
+	var p1: float = CareerProgress.performance_of(fid)
+	CareerProgress.on_interaction(fid, "water_garden", true)
+	K.expect(f, K.count_events("daily_task_done") == 1 and CareerProgress.performance_of(fid) - p1 < 3.0, "a task pays only once per day")
 	K.expect(f, g.has_buff("on_a_roll"), "finishing a task gives On a Roll")
 	K.set_time(4, 12)
-	Careers.on_interaction(fid, "water_garden", true)
+	CareerProgress.on_interaction(fid, "water_garden", true)
 	K.expect(f, K.count_events("daily_task_done") == 2, "tasks reset the next day")
 	# min_level gating and multi-count tasks
 	var cs := _skilled(w, "Cass", {"cooking": 2}, [])
 	Careers.hire(cs, "barista", 2)
-	K.expect(f, (Careers.tasks_for(int(cs.id)) as Array).size() == 2, "barista level 2 unlocks the conversation task")
-	Careers.on_interaction(int(cs.id), "chat", true)
-	K.expect(f, not bool(Careers.tasks_for(int(cs.id))[1]["done"]) and int(Careers.tasks_for(int(cs.id))[1]["progress"]) == 1, "multi-count task keeps progress")
-	Careers.on_interaction(int(cs.id), "tell_joke", true)
-	K.expect(f, bool(Careers.tasks_for(int(cs.id))[1]["done"]), "second conversation completes it")
+	K.expect(f, (CareerProgress.tasks_for(int(cs.id)) as Array).size() == 2, "barista level 2 unlocks the conversation task")
+	CareerProgress.on_interaction(int(cs.id), "chat", true)
+	K.expect(f, not bool(CareerProgress.tasks_for(int(cs.id))[1]["done"]) and int(CareerProgress.tasks_for(int(cs.id))[1]["progress"]) == 1, "multi-count task keeps progress")
+	CareerProgress.on_interaction(int(cs.id), "tell_joke", true)
+	K.expect(f, bool(CareerProgress.tasks_for(int(cs.id))[1]["done"]), "second conversation completes it")
 	K.teardown()
 
 func _night_shift(f: Array) -> void:
@@ -213,9 +213,9 @@ func _night_shift(f: Array) -> void:
 	Careers.hire(dr, "doctor", 2)
 	var fid := int(dr.id)
 	var nobody := K.make_folk(w, "Nobody")
-	K.expect(f, not Careers.set_shift(nobody, "er_night"), "folk without a job cannot take a shift")
-	K.expect(f, Careers.set_shift(dr, "er_night") and dr.work_start == 20.0 and dr.work_end == 6.0, "ER night shift sets overnight hours (%.0f-%.0f)" % [dr.work_start, dr.work_end])
-	K.expect(f, not Careers.set_shift(dr, "nonexistent"), "unknown shift refused")
+	K.expect(f, not CareerProgress.set_shift(nobody, "er_night"), "folk without a job cannot take a shift")
+	K.expect(f, CareerProgress.set_shift(dr, "er_night") and dr.work_start == 20.0 and dr.work_end == 6.0, "ER night shift sets overnight hours (%.0f-%.0f)" % [dr.work_start, dr.work_end])
+	K.expect(f, not CareerProgress.set_shift(dr, "nonexistent"), "unknown shift refused")
 	WorldIface.coins[1] = 0
 	var dir = K.director()
 	K.set_time(1, 19, 45)        # Monday evening
@@ -231,7 +231,7 @@ func _night_shift(f: Array) -> void:
 	K.expect(f, not SysUtil.is_away(dr) and K.count_events("returned_from_work") == 1, "back home after 06:00")
 	var r: Dictionary = K.last_event("returned_from_work")
 	var pay: int = int(r.get("pay", 0))
-	var base_pay: float = 10.0 * float(Careers.level_def("doctor", 2)["pay"]) * Careers.pay_multiplier(Careers.performance_of(fid) - float(r.get("delta", 0.0)))
+	var base_pay: float = 10.0 * float(Careers.level_def("doctor", 2)["pay"]) * CareerProgress.pay_multiplier(CareerProgress.performance_of(fid) - float(r.get("delta", 0.0)))
 	K.expect(f, float(pay) > base_pay * 1.2 and float(pay) < base_pay * 1.5, "night pay carries the 1.35x premium (%d vs %.0f base)" % [pay, base_pay])
 	K.expect(f, dr.has_buff("post_night_shift"), "night workers come home groggy")
 	K.expect(f, not bool(r.get("skipped", true)), "a full overnight shift is not 'skipped'")
@@ -239,8 +239,8 @@ func _night_shift(f: Array) -> void:
 	K.run(dir, 60)
 	K.expect(f, K.count_events("left_for_work") == 1, "one shift per working day")
 	# day variant unaffected
-	K.expect(f, Careers.set_shift(dr, "day") and dr.work_start == 8.0 and dr.work_end == 16.0, "switching back restores the day hours")
-	K.expect(f, Careers.in_shift_window(23.0, 22.0, 6.0) and not Careers.in_shift_window(3.0, 22.0, 6.0) and Careers.in_shift_window(10.0, 9.0, 17.0) and not Careers.in_shift_window(17.5, 9.0, 17.0), "in_shift_window handles day and overnight windows")
+	K.expect(f, CareerProgress.set_shift(dr, "day") and dr.work_start == 8.0 and dr.work_end == 16.0, "switching back restores the day hours")
+	K.expect(f, CareerShifts.in_shift_window(23.0, 22.0, 6.0) and not CareerShifts.in_shift_window(3.0, 22.0, 6.0) and CareerShifts.in_shift_window(10.0, 9.0, 17.0) and not CareerShifts.in_shift_window(17.5, 9.0, 17.0), "in_shift_window handles day and overnight windows")
 	K.teardown()
 
 ## Every new career: with the needed skills, promotion happens on a predictable schedule (a few shifts per level).
@@ -263,12 +263,12 @@ func _cadence(f: Array) -> void:
 			day += 1
 			K.set_time(day, 12)
 			# first task of the day done at home, then a full shift
-			var tasks: Array = Careers.tasks_for(fid)
+			var tasks: Array = CareerProgress.tasks_for(fid)
 			if not tasks.is_empty():
 				var t0: Dictionary = (Careers.career_def(cid)["tasks"] as Array)[0]
 				for n in int(t0["count"]):
-					Careers.on_interaction(fid, str((t0["interactions"] as Array)[0]), true)
-			Careers.on_returned(a, {"reason": "work", "completed": true, "worked_min": 480.0, "data": {}})
+					CareerProgress.on_interaction(fid, str((t0["interactions"] as Array)[0]), true)
+			CareerShifts.on_returned(a, {"reason": "work", "completed": true, "worked_min": 480.0, "data": {}})
 			shifts += 1
 			if Careers.level_of(fid) != last_level:
 				level_shifts.append(shifts)
@@ -300,7 +300,7 @@ func _legacy_behaviour(f: Array) -> void:
 	Aging.set_age_days(kid, 15.0)
 	Careers.on_day(5)
 	K.expect(f, Careers.school.has(int(kid.id)), "school enrolment still works")
-	var g0: float = Careers.grade_of(int(kid.id))
-	Careers.on_interaction(int(kid.id), "do_homework", true)
-	K.expect(f, Careers.grade_of(int(kid.id)) > g0, "homework raises the grade")
+	var g0: float = CareerShifts.grade_of(int(kid.id))
+	CareerProgress.on_interaction(int(kid.id), "do_homework", true)
+	K.expect(f, CareerShifts.grade_of(int(kid.id)) > g0, "homework raises the grade")
 	K.teardown()

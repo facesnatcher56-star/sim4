@@ -103,15 +103,39 @@ static func all_world_objects() -> Array:
 		return (w.objects as Dictionary).values()
 	return []
 
-static func clone_dict(d: Dictionary) -> Dictionary:
-	return d.duplicate(true)
-
 ## JSON round trip turns int keys into strings; convert a dictionary's keys back to int.
 static func int_keys(d: Dictionary) -> Dictionary:
 	var out: Dictionary = {}
 	for k in d:
 		out[int(str(k))] = d[k]
 	return out
+
+## JSON numbers load as floats: arrays of ids / days come back as ints with this.
+static func to_ints(arr: Variant) -> Array:
+	var out: Array = []
+	for x in arr:
+		out.append(int(x))
+	return out
+
+## int_keys() for a dictionary whose values are id arrays.
+static func int_array_dict(d: Dictionary) -> Dictionary:
+	var out: Dictionary = {}
+	for k in d:
+		out[int(str(k))] = to_ints(d[k])
+	return out
+
+## Is `v` in a JSON array of numbers (which load as floats)?
+static func has_int(arr: Array, v: int) -> bool:
+	for x in arr:
+		if int(x) == v:
+			return true
+	return false
+
+## Turn the listed keys of a loaded record back into ints (in place).
+static func ints_in(rec: Dictionary, keys: Array) -> void:
+	for k in keys:
+		if rec.has(k):
+			rec[k] = int(rec[k])
 
 static func str_keys(d: Dictionary) -> Dictionary:
 	var out: Dictionary = {}

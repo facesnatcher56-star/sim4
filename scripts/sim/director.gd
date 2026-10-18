@@ -54,12 +54,24 @@ func command(folk_id: int, interaction_id: String, target_id: int = -1) -> bool:
 	_fill(f)
 	return true
 
+var _emergency_src: Dictionary = {}
+var _emergency_n: int = -1
+var _emergency: Array = []        # [iid, def] of every interaction with an "emergency" condition
+
+func _emergency_defs(defs: Dictionary) -> Array:
+	if _emergency_n != defs.size() or not is_same(_emergency_src, defs):
+		_emergency_src = defs
+		_emergency_n = defs.size()
+		_emergency = []
+		for iid in defs:
+			if (defs[iid] as Dictionary).has("emergency"):
+				_emergency.append([str(iid), defs[iid]])
+	return _emergency
+
 func _check_emergencies(f: Folk) -> void:
-	var defs: Dictionary = SimEnv.data().interactions()
-	for iid in defs:
-		var d: Dictionary = defs[iid]
-		if not d.has("emergency"):
-			continue
+	for e in _emergency_defs(SimEnv.data().interactions()):
+		var iid: String = e[0]
+		var d: Dictionary = e[1]
 		if f.current != null and f.current.def_id == iid:
 			continue
 		var queued := false
@@ -69,7 +81,7 @@ func _check_emergencies(f: Folk) -> void:
 		if queued:
 			continue
 		if Cond.check(d["emergency"], {"folk": f, "object": null, "target": null}):
-			var ir := Interaction.create(str(iid), f, -1, false)
+			var ir := Interaction.create(iid, f, -1, false)
 			if ir != null:
 				f.enqueue(ir)
 

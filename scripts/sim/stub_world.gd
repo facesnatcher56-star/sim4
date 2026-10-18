@@ -10,7 +10,6 @@ class StubObject:
 	var tile: Vector2i = Vector2i.ZERO
 	var rot: int = 0
 	var state: Dictionary = {}
-	var stats: Dictionary = {}
 	var slots_reserved: Dictionary = {}
 
 var folk: Dictionary = {}      # id -> Folk

@@ -76,7 +76,7 @@ func _visit(f: Array) -> void:
 	var gname: String = Story.name_of(guest_id)
 	K.set_time(2, 12)
 	Story.spawn_tile = Vector2i(2, 2)
-	var sit: Dictionary = Story.invite_over(guest_id, host.id, 120)
+	var sit: Dictionary = StoryVisits.invite_over(guest_id, host.id, 120)
 	K.expect(f, str(sit["state"]) == "scheduled", "visit scheduled")
 	K.expect(f, w.get_folk(guest_id) == null, "guest not on the lot yet")
 	K.run(dir, 20)
@@ -85,7 +85,7 @@ func _visit(f: Array) -> void:
 	K.expect(f, str(sit["state"]) in ["arrive", "mingle"], "state machine moved on: %s" % sit["state"])
 	K.expect(f, K.count_events("visit_started") == 1 and K.has_note("arrived"), "arrival announced")
 	K.expect(f, sit["roles"][str(host.id)] == "host" and sit["roles"][str(guest_id)] == "guest", "roles assigned")
-	K.expect(f, RelationshipService.bit_for(host.id, guest_id) != "stranger", "host and guest are acquainted after the visit starts")
+	K.expect(f, RelationshipBits.bit_for(host.id, guest_id) != "stranger", "host and guest are acquainted after the visit starts")
 	K.expect(f, not SysUtil.is_resident(g) and not Aging.records.has(guest_id), "visitors are not residents")
 	K.run(dir, 30)
 	K.expect(f, str(sit["state"]) == "mingle", "mingling")
@@ -93,7 +93,7 @@ func _visit(f: Array) -> void:
 	K.expect(f, str(sit["state"]) == "done" and w.get_folk(guest_id) == null, "guest left at the end (state %s)" % sit["state"])
 	K.expect(f, K.count_events("visit_finished") == 1, "visit_finished event")
 	K.expect(f, RelationshipService.knows(host.id, guest_id), "the relationship persists after the guest left")
-	K.expect(f, RelationshipService.bit_for(host.id, guest_id) in ["acquaintance", "friend", "best_friend"], "acquaintance made: %s" % RelationshipService.bit_for(host.id, guest_id))
+	K.expect(f, RelationshipBits.bit_for(host.id, guest_id) in ["acquaintance", "friend", "best_friend"], "acquaintance made: %s" % RelationshipBits.bit_for(host.id, guest_id))
 	K.expect(f, Story.townies[guest_id]["last_visit_day"] == 2, "townie remembers the visit")
 	K.teardown()
 
@@ -107,7 +107,7 @@ func _party_score(f: Array) -> void:
 	for t in Story.alive_townies().slice(2, 5):
 		gs.append(int(t["id"]))
 	K.set_time(2, 12)
-	var sit: Dictionary = Story.start_party(host.id, gs, 120)
+	var sit: Dictionary = StoryVisits.start_party(host.id, gs, 120)
 	WorldIface.coins[1] = 0
 	K.run(dir, 45)
 	K.expect(f, (sit["spawned"] as Array).size() == 3, "three guests arrived")
@@ -132,7 +132,7 @@ func _party_score(f: Array) -> void:
 	K.expect(f, w.all_folk().size() == 1, "all guests went home")
 	# a dull visit gets no reward
 	var guest: int = int(Story.alive_townies()[8]["id"])
-	var dull: Dictionary = Story.invite_over(guest, host.id, 60)
+	var dull: Dictionary = StoryVisits.invite_over(guest, host.id, 60)
 	K.run(dir, 120)
 	K.expect(f, str(dull["state"]) == "done" and int(K.last_event("visit_finished")["reward"]) == 0, "a silent visit earns nothing")
 	K.teardown()
@@ -146,11 +146,11 @@ func _invite(f: Array) -> void:
 	RelationshipService.add_both(ann.id, tid, "friendship", 40.0)
 	Story.auto_accept_invites = false
 	K.set_time(3, 10)
-	var inv: Dictionary = Story.send_invite(tid, ann.id)
+	var inv: Dictionary = StoryVisits.send_invite(tid, ann.id)
 	K.expect(f, K.has_note("invites") and K.count_events("party_invite") == 1, "invite notification")
-	K.expect(f, Story.open_invites(ann.id).size() == 1, "open invite listed")
+	K.expect(f, StoryVisits.open_invites(ann.id).size() == 1, "open invite listed")
 	var social0: float = (ann.needs["social"] as Stat).value
-	K.expect(f, Story.respond_invite(int(inv["id"]), true), "accepting works")
+	K.expect(f, StoryVisits.respond_invite(int(inv["id"]), true), "accepting works")
 	K.run(dir, 5)
 	K.expect(f, SysUtil.is_away(ann) and ann.get_meta("away") == "party", "the folk leaves for the party")
 	K.run(dir, 190)
@@ -160,13 +160,13 @@ func _invite(f: Array) -> void:
 	K.expect(f, RelationshipService.value(ann.id, tid, "friendship") > 40.0, "friendship with the host grew")
 	# auto accept after a delay, decline path, expiry
 	Story.auto_accept_invites = true
-	var inv2: Dictionary = Story.send_invite(tid, ann.id)
+	var inv2: Dictionary = StoryVisits.send_invite(tid, ann.id)
 	K.run(dir, 40)
 	K.expect(f, str(inv2["state"]) == "accepted", "auto-accept answers invites: %s" % inv2["state"])
 	K.run(dir, 200)
 	Story.auto_accept_invites = false
-	var inv3: Dictionary = Story.send_invite(tid, ann.id)
-	Story.respond_invite(int(inv3["id"]), false)
+	var inv3: Dictionary = StoryVisits.send_invite(tid, ann.id)
+	StoryVisits.respond_invite(int(inv3["id"]), false)
 	K.expect(f, str(inv3["state"]) == "declined", "declining")
 	K.teardown()
 
@@ -203,8 +203,8 @@ func _roundtrip(f: Array) -> void:
 	var w := K.setup()
 	var host := K.make_folk(w, "Ann")
 	Story.generate_townies()
-	Story.invite_over(int(Story.alive_townies()[2]["id"]), host.id)
-	Story.send_invite(int(Story.alive_townies()[3]["id"]), host.id)
+	StoryVisits.invite_over(int(Story.alive_townies()[2]["id"]), host.id)
+	StoryVisits.send_invite(int(Story.alive_townies()[3]["id"]), host.id)
 	Story.on_day(2)
 	var d1: Dictionary = Story.to_dict()
 	var parsed: Variant = JSON.parse_string(JSON.stringify(d1))

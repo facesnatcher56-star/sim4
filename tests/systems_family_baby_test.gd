@@ -21,7 +21,7 @@ static func _couple(w: StubWorld) -> Array:
 	Aging.set_age_days(b, 60.0)
 	RelationshipService.add_both(a.id, b.id, "romance", 60.0)
 	RelationshipService.add_both(a.id, b.id, "friendship", 60.0)
-	RelationshipService.set_flag(a.id, b.id, "sweetheart", true, false)
+	RelationshipBits.set_flag(a.id, b.id, "sweetheart", true, false)
 	return [a, b]
 
 static func _make_baby(w: StubWorld, parents: Array, nm: String = "Pip Rowe", hid: int = 1) -> Folk:
@@ -91,7 +91,7 @@ func _pregnancy(f: Array) -> void:
 		K.expect(f, Genetics.is_valid(baby.appearance), "baby has an appearance")
 		K.expect(f, baby.traits.is_empty(), "no traits at birth")
 		K.expect(f, (Aging.records[baby.id]["inherited"] as Array).size() >= 1, "traits are inherited into the pool: %s" % str(Aging.records[baby.id]["inherited"]))
-		K.expect(f, Family.parents_of(baby.id).has(a.id) and Family.parents_of(baby.id).has(b.id), "family tree knows both parents")
+		K.expect(f, FamilyTree.parents_of(baby.id).has(a.id) and FamilyTree.parents_of(baby.id).has(b.id), "family tree knows both parents")
 		K.expect(f, a.has_buff("new_parent") and b.has_buff("new_parent"), "new parents get a buff")
 		K.expect(f, K.has_note("was born"), "birth notification")
 		K.expect(f, (baby.needs["hunger"] as Stat).value > 50.0, "newborn starts content")
@@ -236,13 +236,13 @@ func _neglect(f: Array) -> void:
 	K.expect(f, removed_at > 0 and removed_at >= 11 * 60 and removed_at <= 12 * 60 + 10, "baby is taken away after about 12 hours (at %d min)" % removed_at)
 	K.expect(f, w.get_folk(bid) == null and K.has_note("taken") and K.count_events("child_removed") == 1, "removal notified, baby no longer on the lot")
 	K.expect(f, Story.townies.has(bid) and bool(Story.townies[bid]["orphan"]), "the baby becomes an adoptable orphan townie")
-	K.expect(f, Family.adoptable().size() == 1 and BabyCare.removed.size() == 1, "listed as adoptable, removal logged")
+	K.expect(f, FamilyHousehold.adoptable().size() == 1 and BabyCare.removed.size() == 1, "listed as adoptable, removal logged")
 	K.expect(f, a.has_buff("grieving") and b.has_buff("grieving"), "parents grieve")
-	K.expect(f, Family.parents_of(bid).size() == 2, "family links survive the removal")
+	K.expect(f, FamilyTree.parents_of(bid).size() == 2, "family links survive the removal")
 	# adopting the baby back
 	a.remove_meta("away")
 	b.remove_meta("away")
-	var res: Dictionary = Family.adopt(bid, a.id, b.id)
+	var res: Dictionary = FamilyHousehold.adopt(bid, a.id, b.id)
 	K.expect(f, res["ok"] and w.get_folk(bid) != null and w.get_folk(bid).age_stage == "baby", "the parents can adopt the baby back: %s" % str(res))
 	K.teardown()
 

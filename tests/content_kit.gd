@@ -132,6 +132,23 @@ static func satisfy(f: Folk, obj, conds: Array, other: Folk = null) -> void:
 					if not (v2 as Array).is_empty():
 						satisfy(f, obj, [(v2 as Array)[0]], other)
 
+## Make the social `requires` of a folk-to-folk interaction true (the engine refuses to run it otherwise).
+static func satisfy_requires(f: Folk, other: Folk, req: Array) -> void:
+	for r in req:
+		match str(r):
+			"bonded":
+				RelationshipBits.set_flag(f.id, other.id, "dating", true, false)
+			"not_bonded", "not_married":
+				pass
+			"knows_career":
+				RelationshipKnowledge.reveal(f.id, other.id, "career")
+			"knows_aspiration":
+				RelationshipKnowledge.reveal(f.id, other.id, "aspiration")
+			"knows_trait":
+				if other.traits.is_empty():
+					other.traits.append("friendly")
+				RelationshipKnowledge.reveal(f.id, other.id, "trait")
+
 ## Run one interaction to its end (no director). Returns {"ok": bool, "why": String, "ir": Interaction}.
 static func run_interaction(w: StubWorld, iid: String, obj_def: String, f: Folk, other: Folk = null) -> Dictionary:
 	var d: Dictionary = SimEnv.data().interaction_def(iid)
@@ -146,6 +163,7 @@ static func run_interaction(w: StubWorld, iid: String, obj_def: String, f: Folk,
 	satisfy(f, obj, d.get("tests", []), other)
 	if other != null:
 		satisfy(other, null, d.get("target_tests", []), f)
+		satisfy_requires(f, other, (d.get("social", {}) as Dictionary).get("requires", []))
 	var ir := Interaction.create(iid, f, target_id, true)
 	if ir == null:
 		return {"ok": false, "why": "create returned null", "ir": null}

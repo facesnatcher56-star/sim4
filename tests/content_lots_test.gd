@@ -41,7 +41,7 @@ func _load_lot(W: Node, name: String, lot: Dictionary) -> int:
 	for wl in lot["walls"]:
 		var a: Array = wl["a"]
 		var b: Array = wl["b"]
-		var n: int = W._apply_wall_line(Vector2i(int(a[0]), int(a[1])), Vector2i(int(b[0]), int(b[1])), str(wl["type"]), null)
+		var n: int = W.edit._apply_wall_line(Vector2i(int(a[0]), int(a[1])), Vector2i(int(b[0]), int(b[1])), str(wl["type"]), null)
 		_check(n > 0, "%s: wall %s-%s changed nothing" % [name, str(a), str(b)])
 	var defs: Dictionary = SimEnv.data().objects()
 	var placed: Array = []

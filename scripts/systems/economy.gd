@@ -95,7 +95,10 @@ static func primary_household() -> int:
 	return int(ids[0]) if not ids.is_empty() else 1
 
 static func object_price(obj) -> int:
-	return int(SimEnv.data().object_def(str(obj.def_id)).get("price", 0))
+	return price_of_def(str(obj.def_id))
+
+static func price_of_def(def_id: String) -> int:
+	return int(SimEnv.data().object_def(def_id).get("price", 0))
 
 ## Register any lot object we have not seen yet (placed today, owned by the primary household).
 static func refresh_objects() -> void:
@@ -128,10 +131,18 @@ static func objects_of(hid: int) -> Array:
 			out.append(o)
 	return out
 
+## Value of everything the household owns on its home lot (also while the folk are away: the home lot is then in the
+## Neighborhood stash, and the loaded lot's objects are community property).
 static func lot_value(hid: int) -> int:
 	var total: int = 0
 	for o in objects_of(hid):
 		total += object_price(o)
+	if Neighborhood.current_lot != Neighborhood.HOME:
+		var home: Dictionary = Neighborhood.stash.get(Neighborhood.HOME, {})
+		var owners: Dictionary = home.get("owner", {})
+		for od in (home.get("world", {}) as Dictionary).get("objects", []):
+			if int(owners.get(int(od["id"]), -1)) == hid:
+				total += price_of_def(str(od["def_id"]))
 	return total
 
 # ------------------------------------------------------------------ buy / sell
@@ -224,6 +235,7 @@ static func compute_bill(hid: int) -> int:
 	var amount: float = float(b.get("base", 50)) + float(lot_value(hid)) * float(b.get("lot_value_rate", 0.015))
 	amount += float(usage.get(hid, 0.0)) * float(b.get("utility_rate", 0.8))
 	amount *= Weather.bill_multiplier()    # heating / cooling over the billing cycle (1.0 when mild)
+	amount *= Scenario.bill_multiplier()   # new-game difficulty (1.0 on Normal)
 	return int(round(amount))
 
 static func outstanding(hid: int) -> Array:
@@ -355,6 +367,5 @@ static func from_dict(d: Dictionary) -> void:
 		var fd: Dictionary = SysUtil.int_keys(d["funds"])
 		for k in fd:
 			WorldIface.coins[k] = int(fd[k])
-	for bl in bills:      # JSON round trip yields floats; keep ints tidy
-		for k in ["id", "hid", "amount", "base", "issued", "due", "fee"]:
-			bl[k] = int(bl[k])
+	for bl in bills:
+		SysUtil.ints_in(bl, ["id", "hid", "amount", "base", "issued", "due", "fee"])

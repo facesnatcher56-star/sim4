@@ -7,7 +7,7 @@ const Kit = preload("res://tests/sim_testkit.gd")
 
 ## interactions injected at runtime by the systems layer (SysContent) that data files may reference
 const RUNTIME_INTERACTIONS := ["sys_away", "order_groceries", "apply_for_job", "try_for_baby", "apologize", "propose"]
-const FILES := ["objects", "interactions", "buffs", "traits", "careers", "goals", "social", "content_rules", "lot_templates", "needs", "routines", "economy", "aging", "story"]
+const FILES := ["objects", "interactions", "buffs", "traits", "careers", "goals", "social", "content_rules", "lot_templates", "needs", "routines", "economy", "aging", "story", "content_sys", "content_family"]
 
 func run() -> Array:
 	var f: Array = []
@@ -18,6 +18,7 @@ func run() -> Array:
 	_objects(f, d)
 	_interactions(f, d)
 	_buffs_traits(f, d)
+	_markers_hidden(f, d)
 	_goals(f, d)
 	_social(f)
 	Kit.teardown()
@@ -34,6 +35,15 @@ func _json_and_dups(f: Array) -> void:
 		Kit.expect(f, dups.is_empty(), "%s.json has duplicate keys: %s" % [n, str(dups.slice(0, 5))])
 	var me: Variant = K.read_json("res://assets/models/manifest_extra.json")
 	Kit.expect(f, me is Dictionary, "assets/models/manifest_extra.json does not parse")
+
+## Marker buffs (not meant for the player) carry `hidden: true` so the UI can leave them out.
+func _markers_hidden(f: Array, d) -> void:
+	SysContent.install_all()
+	SocialContent.install()
+	for id in d.buffs():
+		var sid := str(id)
+		if sid == "away" or sid == "holiday_today" or sid.begins_with("wx_") or sid.begins_with("mfx_") or Aging.stage_ids().has(sid.trim_prefix("stage_")):
+			Kit.expect(f, bool((d.buffs()[id] as Dictionary).get("hidden", false)), "marker buff %s must be hidden" % sid)
 
 func _legacy(f: Array) -> void:
 	var legacy: Variant = K.read_json("res://tests/content_legacy_ids.json")

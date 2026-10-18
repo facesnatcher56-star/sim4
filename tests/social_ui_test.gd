@@ -22,9 +22,9 @@ func run() -> Array:
 	RelationshipService.add_both(a.id, b.id, "romance", 30.0)
 	RelationshipService.add_both(a.id, b.id, "trust", 20.0)
 	RelationshipService.add_both(a.id, c.id, "friendship", 15.0)
-	SocialDynamics.escalate(a.id, c.id, 35.0)
+	SocialConflict.escalate(a.id, c.id, 35.0)
 	RelationshipService.add_history(a.id, b.id, "go_on_date", 0.8, a.id)
-	RelationshipService._tag_last_history(a.id, b.id, "great", "Magical date")
+	RelationshipRomance._tag_last_history(a.id, b.id, "great", "Magical date")
 	var fp := FolkPanel.new()
 	root.add_child(fp)
 	fp.show_folk(a)
@@ -37,12 +37,12 @@ func run() -> Array:
 	S.expect(f, txt.find("?") >= 0 and txt.find("Job: ?") >= 0 and txt.find("Dream: ?") >= 0, "undiscovered info is '?': %s" % txt)
 	S.expect(f, txt.find("Magical date") >= 0, "shared history snippets shown")
 	S.expect(f, txt.find("Spark") >= 0, "spark shown for romance")
-	S.expect(f, (card as Control).tooltip_text.find("Trust") >= 0, "card tooltip is RelationshipService.describe")
+	S.expect(f, (card as Control).tooltip_text.find("Trust") >= 0, "card tooltip is RelationshipBits.describe")
 	var ccard = fp.rel_box.get_node_or_null("rel_%d" % c.id)
 	var ctxt: String = "\n".join(_labels(ccard)) if ccard != null else ""
 	S.expect(f, ctxt.find("Tense") >= 0, "tension chip on the person Ann argued with: %s" % ctxt)
 	# discovering things updates the card
-	RelationshipService.reveal(a.id, b.id, "all")
+	RelationshipKnowledge.reveal(a.id, b.id, "all")
 	fp._build_relationships()
 	var card2 = fp.rel_box.get_node_or_null("rel_%d" % b.id)
 	var txt2: String = "\n".join(_labels(card2))
@@ -60,7 +60,7 @@ func run() -> Array:
 	var tip: String = fp.mood_area.tooltip_text
 	S.expect(f, tip.find("Driven by") >= 0 and tip.find("Confident") >= 0 and tip.find("Stage Glow") >= 0, "mood tooltip lists the driving buffs: %s" % tip)
 	S.expect(f, tip.find("Effects") >= 0 and tip.find("Learning") >= 0, "mood tooltip lists the effects")
-	S.expect(f, tip.find("Mood: ") >= 0 and tip.find("mfx_") < 0 and tip.find("Mood: Confident") < 0, "hidden mood-effect buffs are not listed as buffs")
+	S.expect(f, tip.find("Mood: ") >= 0 and tip.find("mfx_") < 0 and tip.find("Mood: confident") < 0, "hidden mood-effect buffs are not listed as buffs")
 	S.expect(f, fp.mood_label.text.begins_with("Confident"), "mood label uses the display name (%s)" % fp.mood_label.text)
 	S.expect(f, fp.mood_color("confident") != UIU.MOOD_COLORS["neutral"], "new moods have their own colour")
 	# --- pie menu: add the target to the real World so the UI can resolve it
@@ -79,7 +79,7 @@ func run() -> Array:
 		var defs: Dictionary = SimEnv.data().interactions()
 		for iid in defs:
 			if str(defs[iid].get("target", "")) == "folk" and defs[iid].has("category"):
-				entries.append({"id": iid, "label": str(defs[iid]["label"]), "category": str(defs[iid]["category"]).capitalize(), "enabled": SocialDynamics.reason_unavailable(actor, fake_target, str(iid)) == "", "reason": "Unavailable"})
+				entries.append({"id": iid, "label": str(defs[iid]["label"]), "category": str(defs[iid]["category"]).capitalize(), "enabled": SocialScoring.reason_unavailable(actor, fake_target, str(iid)) == "", "reason": "Unavailable"})
 		entries.sort_custom(func(x, y): return str(x["category"]) + str(x["label"]) < str(y["category"]) + str(y["label"]))
 		pie.open_with_entries(actor, "folk", 8801, entries, Vector2(50, 50))
 		S.expect(f, pie.category_headers.size() >= 6 and pie.category_headers.has("Friendly") and pie.category_headers.has("Mean"), "pie groups socials by category: %s" % str(pie.category_headers.keys()))

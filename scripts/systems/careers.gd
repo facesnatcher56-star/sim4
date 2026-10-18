@@ -12,6 +12,8 @@ static var retired: Dictionary = {}     # folk_id -> {career, level, pension}
 static var skip_flags: Dictionary = {}  # folk_id -> day on which the player chose to skip work
 static var shift_log: Array = []        # last shifts {day, folk_id, kind, pay, delta, performance, skipped}
 static var auto_accept_offers: bool = false
+## UI hook: when true, 'Look for Jobs' only creates the offer and the player answers it (Accept / Decline pop-up, Work dialog). Not saved.
+static var confirm_offers: bool = false
 
 static func reset() -> void:
 	jobs.clear()
@@ -67,9 +69,6 @@ static func branch_ids(cid: String) -> Array:
 
 static func branch_of(folk_id: int) -> String:
 	return str((jobs.get(folk_id, {}) as Dictionary).get("branch", ""))
-
-static func shift_of(folk_id: int) -> String:
-	return str((jobs.get(folk_id, {}) as Dictionary).get("shift", "day"))
 
 ## Best of the career's primary skill and its `alt_skills`.
 static func skill_for(f, cid: String) -> int:
@@ -131,7 +130,7 @@ static func qualify(f, cid: String, level: int, branch: String = "") -> Dictiona
 	for t2 in req.get("traits_not", []):
 		if f.traits.has(str(t2)):
 			missing.append("not %s" % str(t2))
-	if req.has("friends") and RelationshipService.count_bit(int(f.id), "friend", true) < int(req["friends"]):
+	if req.has("friends") and RelationshipBits.count_bit(int(f.id), "friend", true) < int(req["friends"]):
 		missing.append("%d friends" % int(req["friends"]))
 	return {"ok": missing.is_empty(), "missing": missing}
 
@@ -245,393 +244,8 @@ static func on_job_search(folk_id: int) -> void:
 		return
 	if not offers.has(folk_id):
 		make_offer(f)
-	accept_offer(folk_id)
-
-# ------------------------------------------------------------------ performance
-static func performance_of(folk_id: int) -> float:
-	return float((jobs.get(folk_id, {}) as Dictionary).get("performance", 0.0))
-
-static func pay_multiplier(perf: float) -> float:
-	var s: Dictionary = settings()
-	return float(s.get("pay_perf_floor", 0.8)) + float(s.get("pay_perf_span", 0.4)) * clampf(perf / 100.0, 0.0, 1.0)
-
-## Performance change for one finished shift, from mood, buffs, skill and traits.
-static func shift_gain(f, cid: String, level: int) -> float:
-	var s: Dictionary = settings()
-	var gain: float = float(s.get("base_gain", 3))
-	var mg: Dictionary = s.get("mood_gain", {})
-	gain += float(mg.get(str(f.mood_name), 0.0)) * float(maxi(int(f.mood_intensity), 1)) / 2.0
-	var bg: Dictionary = s.get("buff_gain", {})
-	for b in f.buffs:
-		gain += float(bg.get(str(b["id"]), 0.0))
-	var skill: int = skill_for(f, cid)
-	var cap: float = float(s.get("skill_gain_cap", 3))
-	gain += clampf(float(skill - (level * 2 - 2)), -cap, cap)
-	gain += trait_bonus(f, cid)
-	return gain
-
-static func add_performance(folk_id: int, delta: float, allow_demote: bool = false) -> void:
-	if not jobs.has(folk_id):
-		return
-	var j: Dictionary = jobs[folk_id]
-	var s: Dictionary = settings()
-	j["performance"] = clampf(float(j["performance"]) + delta, 0.0, 100.0)
-	var f = SysUtil.folk(folk_id)
-	if f == null:
-		return
-	if float(j["performance"]) >= float(s.get("promote_at", 100)):
-		_try_promote(f)
-	elif allow_demote and float(j["performance"]) <= float(s.get("demote_at", 0)):
-		_demote(f)
-
-## Branch to enter when reaching the fork level: the player's preference if it is set, else the best-fitting
-## qualifying track (trunk "" included). Returns {"branch": String, "q": qualify result}.
-static func _pick_branch(f, cid: String, nxt: int, pref: String) -> Dictionary:
-	var brs: Dictionary = career_def(cid).get("branches", {})
-	var options: Array = [""] + brs.keys()
-	if pref != "" and brs.has(pref):
-		options = [pref]
-	var best: Dictionary = {}
-	var best_score: float = -1.0e9
-	for b in options:
-		if b == "" and nxt > max_level(cid):
-			continue
-		var q2: Dictionary = qualify(f, cid, nxt, str(b))
-		var sc: float = branch_affinity(f, cid, str(b)) + (100.0 if bool(q2["ok"]) else 0.0)
-		if sc > best_score:
-			best_score = sc
-			best = {"branch": str(b), "q": q2}
-	return best
-
-static func branch_affinity(f, cid: String, branch: String) -> float:
-	var br: Dictionary = branch_def(cid, branch)
-	if br.is_empty():
-		return 0.0
-	var aff: Dictionary = br.get("affinity", {})
-	var s: float = 0.0
-	for t in f.traits:
-		s += float((aff.get("traits", {}) as Dictionary).get(t, 0.0))
-	for sk in aff.get("skills", {}):
-		s += float(f.skill_level(str(sk))) * float(aff["skills"][sk]) * 0.25
-	return s
-
-static func _fork_level(cid: String) -> int:
-	var lvl: int = 0
-	for b in branch_ids(cid):
-		lvl = int(branch_def(cid, str(b)).get("from_level", 4))
-	return lvl
-
-## Player choice: which branch to take at the fork ("" = generalist trunk). Allowed until the fork is reached.
-static func set_branch_preference(f, branch: String) -> bool:
-	var j: Dictionary = jobs.get(int(f.id), {})
-	if j.is_empty():
-		return false
-	var cid: String = str(j["career"])
-	if branch != "" and branch_def(cid, branch).is_empty():
-		return false
-	if _fork_level(cid) == 0 or int(j["level"]) >= _fork_level(cid):
-		return false
-	j["branch_pref"] = branch
-	return true
-
-## Switch between "day" and a career shift variant (night shifts etc.).
-static func set_shift(f, shift: String) -> bool:
-	var j: Dictionary = jobs.get(int(f.id), {})
-	if j.is_empty():
-		return false
-	var cid: String = str(j["career"])
-	if shift != "day":
-		var sv: Dictionary = shift_def(cid, shift)
-		if sv.is_empty() or int(j["level"]) < int(sv.get("min_level", 1)):
-			return false
-	j["shift"] = shift
-	apply_schedule(f)
-	return true
-
-static func _try_promote(f) -> void:
-	var j: Dictionary = jobs[int(f.id)]
-	var cid: String = str(j["career"])
-	var nxt: int = int(j["level"]) + 1
-	var cur_branch: String = str(j.get("branch", ""))
-	var new_branch: String = cur_branch
-	var q: Dictionary
-	if cur_branch == "" and nxt == _fork_level(cid):
-		var pick: Dictionary = _pick_branch(f, cid, nxt, str(j.get("branch_pref", "")))
-		if pick.is_empty():
-			return
-		new_branch = str(pick["branch"])
-		q = pick["q"]
-	else:
-		if nxt > max_level(cid, cur_branch):
-			return
-		q = qualify(f, cid, nxt, cur_branch)
-	if not bool(q["ok"]):
-		if int(j.get("cap_note_day", -1)) != SysUtil.day():
-			j["cap_note_day"] = SysUtil.day()
-			SysUtil.notify("%s is ready for a promotion but needs: %s" % [f.name, ", ".join(q["missing"])], "career")
-		return
-	var old_pay: int = int(level_def(cid, int(j["level"]), cur_branch).get("pay", 0))
-	j["level"] = nxt
-	j["branch"] = new_branch
-	j["level_since"] = SysUtil.day()
-	j["performance"] = float(settings().get("after_promotion_performance", 40))
-	apply_schedule(f)
-	var ld: Dictionary = level_def(cid, nxt, new_branch)
-	var bonus: int = int(ld.get("pay", old_pay)) * 8
-	Economy.deposit(int(f.household_id), bonus, "promotion bonus")
-	SysUtil.notify("Promotion! %s is now a %s (%d coins/hour). Bonus: %d coins." % [f.name, str(ld.get("title", "")), int(ld.get("pay", 0)), bonus], "career")
-	if str(ld.get("flavor", "")) != "":
-		SysUtil.notify("\"%s\"" % str(ld["flavor"]), "career")
-	if new_branch != cur_branch:
-		SysUtil.notify("%s chose the %s track." % [f.name, str(branch_def(cid, new_branch).get("label", new_branch))], "career")
-		SysUtil.game_event("branch_chosen", {"folk_id": f.id, "career": cid, "branch": new_branch})
-	SysUtil.game_event("promoted", {"folk_id": f.id, "career": cid, "level": nxt, "title": ld.get("title", ""), "branch": new_branch})
-
-static func _demote(f) -> void:
-	var j: Dictionary = jobs[int(f.id)]
-	var cid: String = str(j["career"])
-	if int(j["level"]) <= 1:
-		fire(f)
-		return
-	j["level"] = int(j["level"]) - 1
-	if int(j["level"]) < _fork_level(cid):
-		j["branch"] = ""
-	j["level_since"] = SysUtil.day()
-	j["performance"] = float(settings().get("after_demotion_performance", 35))
-	apply_schedule(f)
-	SysUtil.notify("Demoted! %s is now a %s." % [f.name, title_of(int(f.id))], "bad")
-	SysUtil.game_event("demoted", {"folk_id": f.id, "career": cid, "level": j["level"]})
-
-## Called after a folk finishes any interaction: work-ish interactions at home move the meter.
-static func on_interaction(folk_id: int, iid: String, success: bool) -> void:
-	if not success:
-		return
-	if jobs.has(folk_id):
-		var hooks: Dictionary = career_def(str(jobs[folk_id]["career"])).get("hooks", {})
-		if hooks.has(iid):
-			add_performance(folk_id, float(hooks[iid]))
-		if jobs.has(folk_id):
-			_task_progress(folk_id, iid)
-	if school.has(folk_id):
-		var sh: Dictionary = cfg().get("school", {}).get("hooks", {})
-		if sh.has(iid):
-			school[folk_id]["grade"] = clampf(float(school[folk_id]["grade"]) + float(sh[iid]), 0.0, 100.0)
-
-# ------------------------------------------------------------------ daily tasks
-## Per-career daily tasks: finishing a matching interaction (at home) `count` times earns a one-off performance bonus.
-static func _tasks_state(j: Dictionary) -> Dictionary:
-	var ts: Dictionary = j.get("tasks", {})
-	if ts.is_empty() or int(ts.get("day", -1)) != SysUtil.day():
-		ts = {"day": SysUtil.day(), "progress": {}, "done": []}
-		j["tasks"] = ts
-	return ts
-
-static func tasks_for(folk_id: int) -> Array:
-	if not jobs.has(folk_id):
-		return []
-	var j: Dictionary = jobs[folk_id]
-	var ts: Dictionary = _tasks_state(j)
-	var out: Array = []
-	for t in career_def(str(j["career"])).get("tasks", []):
-		if int(j["level"]) < int(t.get("min_level", 1)):
-			continue
-		out.append({"id": t["id"], "label": t["label"], "count": int(t.get("count", 1)), "bonus": float(t.get("bonus", 5)),
-			"progress": int((ts["progress"] as Dictionary).get(str(t["id"]), 0)), "done": (ts["done"] as Array).has(str(t["id"]))})
-	return out
-
-static func _task_progress(folk_id: int, iid: String) -> void:
-	var j: Dictionary = jobs[folk_id]
-	var ts: Dictionary = _tasks_state(j)
-	for t in career_def(str(j["career"])).get("tasks", []):
-		var tid: String = str(t["id"])
-		if int(j["level"]) < int(t.get("min_level", 1)) or (ts["done"] as Array).has(tid):
-			continue
-		if not (t.get("interactions", []) as Array).has(iid):
-			continue
-		var n: int = int((ts["progress"] as Dictionary).get(tid, 0)) + 1
-		ts["progress"][tid] = n
-		if n >= int(t.get("count", 1)):
-			(ts["done"] as Array).append(tid)
-			var f = SysUtil.folk(folk_id)
-			if f != null:
-				SysUtil.notify("%s finished a work task: %s (+%d performance)" % [f.name, str(t["label"]), int(t.get("bonus", 5))], "career")
-				SysUtil.game_event("daily_task_done", {"folk_id": folk_id, "career": str(j["career"]), "task": tid})
-				f.add_buff("on_a_roll")
-			add_performance(folk_id, float(t.get("bonus", 5)))
-			return
-
-# ------------------------------------------------------------------ attendance
-static func _has_int(arr: Array, v: int) -> bool:
-	for x in arr:
-		if int(x) == v:
-			return true
-	return false
-
-static func is_work_day(cid: String, day: int, shift: String = "day") -> bool:
-	var sv: Dictionary = shift_def(cid, shift)
-	if sv.has("days"):
-		return _has_int(sv["days"], SysUtil.weekday(day))
-	return _has_int(career_def(cid).get("days", []), SysUtil.weekday(day))
-
-## Is hour `h` inside the window in which a shift may START? Overnight shifts (end <= start) start any time from `start`.
-static func in_shift_window(h: float, start: float, end: float) -> bool:
-	if end > start:
-		return h >= start and h < end
-	return h >= start
-
-static func is_school_day(day: int) -> bool:
-	return _has_int(cfg().get("school", {}).get("days", []), SysUtil.weekday(day))
-
-static func skip_work_today(folk_id: int) -> void:
-	skip_flags[folk_id] = SysUtil.day()
-
-static func _critical(f) -> bool:
-	var lim: float = float(settings().get("critical_need", -65))
-	for n in ["hunger", "energy", "bladder"]:
-		if f.get_stat_value(n) < lim:
-			return true
-	return false
-
-static func _player_busy(f) -> bool:
-	if f.current != null and f.current.player:
-		return true
-	for q in f.queue:
-		if (q as Interaction).player:
-			return true
-	return false
-
-static func on_minute() -> void:
-	var day: int = SysUtil.day()
-	var h: float = SysUtil.hour_f()
-	for f in WorldIface.all_folk():
-		var fid: int = int(f.id)
-		if SysUtil.is_away(f) or Away.pending.has(fid):
-			continue
-		if jobs.has(fid):
-			var j: Dictionary = jobs[fid]
-			if int(j["attempt_day"]) != day and is_work_day(str(j["career"]), day, str(j.get("shift", "day"))) and in_shift_window(h, f.work_start, f.work_end):
-				j["attempt_day"] = day
-				_start_shift(f, j, h)
-		elif school.has(fid):
-			var sc: Dictionary = cfg().get("school", {})
-			var st: Dictionary = school[fid]
-			if int(st["attempt_day"]) != day and is_school_day(day) and h >= float(sc.get("start", 9)) and h < float(sc.get("end", 15)):
-				st["attempt_day"] = day
-				_start_school(f, st, h, sc)
-
-static func _start_shift(f, j: Dictionary, h: float) -> void:
-	var fid: int = int(f.id)
-	var s: Dictionary = settings()
-	var title: String = title_of(fid)
-	if int(skip_flags.get(fid, -1)) == SysUtil.day():
-		_record_skip(f, j, float(s.get("skip_penalty", 15)), "chose to skip work")
-		return
-	if _player_busy(f):
-		_record_skip(f, j, float(s.get("skip_penalty", 15)), "was busy with something else and skipped work")
-		return
-	if _critical(f):
-		_record_skip(f, j, float(s.get("sick_penalty", 8)), "was too run down and called in sick")
-		return
-	var end_h: float = f.work_end
-	if end_h <= f.work_start:
-		end_h += 24.0
-	var minutes: float = (end_h - h) * 60.0
-	var data: Dictionary = {"kind": "work", "shift": str(j.get("shift", "day")), "career": j["career"], "level": j["level"], "title": title,
-		"label": "At work: " + title, "shift_end": f.work_end}
-	if Away.send(f, minutes, "work", data):
-		SysUtil.game_event("work_dispatched", {"folk_id": fid})
-
-static func _record_skip(f, j: Dictionary, penalty: float, why: String) -> void:
-	j["days_skipped"] = int(j["days_skipped"]) + 1
-	SysUtil.notify("%s %s (-%d performance)." % [f.name, why, int(penalty)], "warn")
-	shift_log.append({"day": SysUtil.day(), "folk_id": int(f.id), "kind": "work", "pay": 0, "delta": -penalty,
-		"performance": float(j["performance"]) - penalty, "skipped": true})
-	_trim_log()
-	add_performance(int(f.id), -penalty, true)
-	SysUtil.game_event("skipped_work", {"folk_id": f.id, "penalty": penalty})
-
-static func _trim_log() -> void:
-	while shift_log.size() > 60:
-		shift_log.pop_front()
-
-## Away started for work / school -> emit the specific event.
-static func on_left(f, rec: Dictionary) -> void:
-	var fid: int = int(f.id)
-	match str(rec["reason"]):
-		"work":
-			SysUtil.game_event("left_for_work", {"folk_id": fid, "career": rec["data"].get("career", ""), "title": rec["data"].get("title", ""),
-				"shift_end": rec["data"].get("shift_end", 0.0)})
-		"school":
-			SysUtil.game_event("left_for_school", {"folk_id": fid})
-
-## Away finished (completed shift or interrupted).
-static func on_returned(f, rec: Dictionary) -> void:
-	var fid: int = int(f.id)
-	var completed: bool = bool(rec.get("completed", false))
-	match str(rec["reason"]):
-		"work":
-			if not jobs.has(fid):
-				return
-			var j: Dictionary = jobs[fid]
-			var cid: String = str(j["career"])
-			var ld: Dictionary = level_def(cid, int(j["level"]), str(j.get("branch", "")))
-			var s: Dictionary = settings()
-			var perf: float = float(j["performance"])
-			var hours: float = float(rec["worked_min"]) / 60.0
-			var sv: Dictionary = shift_def(cid, str(j.get("shift", "day")))
-			var smult: float = float(sv.get("pay_mult", 1.0)) if (not sv.is_empty() and int(j["level"]) >= int(sv.get("min_level", 1))) else 1.0
-			var pay: int = int(round(hours * float(ld.get("pay", 0)) * pay_multiplier(perf) * smult))
-			var delta: float
-			if completed:
-				delta = shift_gain(f, cid, int(j["level"]))
-				j["days_worked"] = int(j["days_worked"]) + 1
-			else:
-				pay = int(pay * 0.5)
-				delta = -float(s.get("skip_penalty", 15))
-				j["days_skipped"] = int(j["days_skipped"]) + 1
-			Economy.deposit(int(f.household_id), pay, "wages: %s" % title_of(fid))
-			if smult != 1.0 and completed and str(sv.get("return_buff", "")) != "":
-				f.add_buff(str(sv["return_buff"]))
-			add_performance(fid, delta, true)
-			var perf_now: float = performance_of(fid) if jobs.has(fid) else 0.0
-			shift_log.append({"day": SysUtil.day(), "folk_id": fid, "kind": "work", "pay": pay, "delta": delta,
-				"performance": perf_now, "skipped": not completed})
-			_trim_log()
-			SysUtil.notify("%s earned %d coins at work%s." % [f.name, pay, "" if completed else " (left early!)"], "career")
-			SysUtil.game_event("returned_from_work", {"folk_id": fid, "pay": pay, "performance": perf_now, "delta": delta,
-				"skipped": not completed, "career": cid})
-		"school":
-			if not school.has(fid):
-				return
-			var st: Dictionary = school[fid]
-			var sc: Dictionary = cfg().get("school", {})
-			var gd: float
-			if completed:
-				gd = float(sc.get("base_gain", 1)) + float(settings().get("mood_gain", {}).get(str(f.mood_name), 0.0)) * float(sc.get("mood_scale", 0.8))
-				st["days"] = int(st["days"]) + 1
-			else:
-				gd = -float(sc.get("skip_penalty", 12))
-				st["skipped"] = int(st["skipped"]) + 1
-			st["grade"] = clampf(float(st["grade"]) + gd, 0.0, 100.0)
-			SysUtil.game_event("returned_from_school", {"folk_id": fid, "grade": st["grade"], "letter": grade_letter(float(st["grade"])), "skipped": not completed})
-
-static func grade_letter(g: float) -> String:
-	for pair in cfg().get("school", {}).get("grades", []):
-		if g >= float(pair[0]):
-			return str(pair[1])
-	return "F"
-
-static func grade_of(folk_id: int) -> float:
-	return float((school.get(folk_id, {}) as Dictionary).get("grade", 0.0))
-
-static func _start_school(f, st: Dictionary, h: float, sc: Dictionary) -> void:
-	if _player_busy(f):
-		st["skipped"] = int(st["skipped"]) + 1
-		st["grade"] = clampf(float(st["grade"]) - float(sc.get("skip_penalty", 12)), 0.0, 100.0)
-		SysUtil.notify("%s skipped school (-%d grade)." % [f.name, int(sc.get("skip_penalty", 12))], "warn")
-		return
-	var minutes: float = (float(sc.get("end", 15)) - h) * 60.0
-	Away.send(f, minutes, "school", {"label": "At school"})
+	if not confirm_offers:
+		accept_offer(folk_id)
 
 # ------------------------------------------------------------------ daily upkeep
 ## School enrolment follows the age stage (children and teens attend).
@@ -715,11 +329,11 @@ static func info_for(folk_id: int) -> Dictionary:
 			"level": j["level"], "max_level": max_level(cid, br_id), "branch": br_id,
 			"branch_label": str(branch_def(cid, br_id).get("label", "")), "blurb": str(career_def(cid).get("description", "")),
 			"flavor": str(ld.get("flavor", "")), "shift": str(j.get("shift", "day")), "shifts": (career_def(cid).get("shifts", {}) as Dictionary).keys(),
-			"tasks": tasks_for(folk_id), "performance": j["performance"], "pay_hour": ld.get("pay", 0),
+			"tasks": CareerProgress.tasks_for(folk_id), "performance": j["performance"], "pay_hour": ld.get("pay", 0),
 			"start": ld.get("start", 0), "end": ld.get("end", 0), "days_worked": j["days_worked"], "days_skipped": j["days_skipped"],
 			"next_title": nxt.get("title", ""), "next_missing": req_text, "away": Away.is_away(folk_id)}
 	if school.has(folk_id):
-		return {"employed": false, "student": true, "grade": school[folk_id]["grade"], "letter": grade_letter(float(school[folk_id]["grade"]))}
+		return {"employed": false, "student": true, "grade": school[folk_id]["grade"], "letter": CareerShifts.grade_letter(float(school[folk_id]["grade"]))}
 	if retired.has(folk_id):
 		return {"employed": false, "retired": true, "pension": retired[folk_id]["pension"]}
 	return {"employed": false, "offer": offers.get(folk_id, {})}
@@ -742,3 +356,7 @@ static func from_dict(d: Dictionary) -> void:
 		var f = SysUtil.folk(int(fid))
 		if f != null:
 			apply_schedule(f)
+
+# ---- thin delegates (called from UI / views)
+static func skip_work_today(folk_id: int) -> void:
+	CareerShifts.skip_work_today(folk_id)

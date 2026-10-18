@@ -17,9 +17,6 @@ static func world():
 			return root.get_node_or_null("World")
 	return null
 
-static func has_world() -> bool:
-	return world() != null
-
 static func all_folk() -> Array:
 	var w = world()
 	if w != null and w.has_method("all_folk"):
@@ -122,32 +119,21 @@ static func find_path(from: Vector2i, to: Vector2i) -> Array:
 		return w.find_path(from, to)
 	return []
 
-# ---- object state (supports obj.state values or obj.stats Stat objects) ----
+# ---- object state: `obj.state` is the single source of truth ----
 static func state_get(obj, key: String, default: Variant = null) -> Variant:
 	if obj == null:
 		return default
-	if obj.state is Dictionary and (obj.state as Dictionary).has(key):
-		var v: Variant = (obj.state as Dictionary)[key]
-		if v is Dictionary and (v as Dictionary).has("value"):
-			return (v as Dictionary)["value"]
-		return v
-	if "stats" in obj and obj.stats is Dictionary and (obj.stats as Dictionary).has(key):
-		var s: Variant = (obj.stats as Dictionary)[key]
-		if s is Stat:
-			return (s as Stat).value
-	return default
+	return (obj.state as Dictionary).get(key, default)
 
+## Writes through the real World when it owns the object (clamping, rooms dirty, change event), else straight into `state`.
 static func state_set(obj, key: String, value: Variant) -> void:
 	if obj == null:
 		return
-	if "stats" in obj and obj.stats is Dictionary and (obj.stats as Dictionary).has(key) and (obj.stats as Dictionary)[key] is Stat:
-		((obj.stats as Dictionary)[key] as Stat).set_value(float(value))
-	else:
-		var cur: Variant = (obj.state as Dictionary).get(key, null)
-		if cur is Dictionary and (cur as Dictionary).has("value"):
-			(cur as Dictionary)["value"] = value
-		else:
-			(obj.state as Dictionary)[key] = value
+	var w = world()
+	if w != null and w.has_method("set_object_state") and w.has_method("get_object") and w.get_object(int(obj.id)) == obj:
+		w.set_object_state(int(obj.id), key, value)
+		return
+	(obj.state as Dictionary)[key] = value
 	SimEnv.emit("object_state_changed", int(obj.id), key)
 
 static func state_add(obj, key: String, delta: float) -> void:

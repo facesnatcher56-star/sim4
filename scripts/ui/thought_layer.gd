@@ -3,17 +3,31 @@ extends Control
 ## Thought balloons above folk heads (Events.thought), positioned via LotView.screen_pos_of.
 var lot_view = null
 var balloons: Array = []     # {node, folk_id}
+const MAX_BALLOONS := 5
+var _last: Dictionary = {}   # folk_id -> {text, t}
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	set_anchors_preset(Control.PRESET_FULL_RECT)
+	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	UIU.connect_ev("thought", show_thought)
 
 func show_thought(folk_id: int, text: String) -> void:
+	if text.strip_edges() == "" or not GameSettings.get_bool("thought_bubbles"):
+		return
+	var now := Time.get_ticks_msec() / 1000.0
+	var prev: Dictionary = _last.get(folk_id, {})
+	if not prev.is_empty() and prev["text"] == text and now - float(prev["t"]) < ThoughtText.REPEAT_BLOCK_SEC:
+		return                   # same thought again and again is noise
+	_last[folk_id] = {"text": text, "t": now}
+	text = ThoughtText.vary(text)
 	for b in balloons:
 		if b["folk_id"] == folk_id and is_instance_valid(b["node"]):
 			b["node"].queue_free()
 	balloons = balloons.filter(func(b): return b["folk_id"] != folk_id)
+	while balloons.size() >= MAX_BALLOONS:
+		var old = balloons.pop_front()
+		if is_instance_valid(old["node"]):
+			old["node"].queue_free()
 	var p := PanelContainer.new()
 	p.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	p.add_theme_stylebox_override("panel", UITheme.box(Color(1, 1, 1, 0.95), 14, Color(0.2, 0.2, 0.25), 2, 10))
@@ -24,9 +38,10 @@ func show_thought(folk_id: int, text: String) -> void:
 	add_child(p)
 	balloons.append({"node": p, "folk_id": folk_id})
 	var tw := p.create_tween()
-	tw.tween_property(p, "modulate:a", 1.0, 0.25)
+	var fade := 0.0 if GameSettings.reduce_motion() else 1.0
+	tw.tween_property(p, "modulate:a", 1.0, 0.25 * fade)
 	tw.tween_interval(2.6)
-	tw.tween_property(p, "modulate:a", 0.0, 0.6)
+	tw.tween_property(p, "modulate:a", 0.0, 0.6 * fade)
 	tw.tween_callback(p.queue_free)
 
 func _process(_d: float) -> void:

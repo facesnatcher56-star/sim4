@@ -1,7 +1,25 @@
 extends SceneTree
-## Headless test runner:  Godot --headless --path . --script res://tests/run_all.gd
-## Discovers tests/*_test.gd, tests/sim_*.gd and tests/world_*.gd. Each file's script is instantiated and, if it has a
-## `run()` method, called; run() returns an Array of failure strings (empty = pass). Exit code 1 on any failure.
+## Headless test runner.
+##
+##   Godot --headless --path . --script res://tests/run_all.gd                     FAST tier (default, well under a minute)
+##   Godot --headless --path . --script res://tests/run_all.gd -- --slow           fast tier + the long simulations (~5 min)
+##   Godot --headless --path . --script res://tests/run_all.gd -- --shuffle        random file order (prints the seed)
+##   Godot --headless --path . --script res://tests/run_all.gd -- --shuffle=123    reproducible shuffled order
+##   Godot --headless --path . --script res://tests/run_all.gd -- --only=sim_basic,world_test
+##   Godot --headless --path . --script res://tests/run_all.gd -- --list           print the file list and exit
+##   Godot --headless --path . --script res://tests/run_one.gd -- <test file base name>      a single test file
+##
+## (`--all` is an alias of `--slow`; flags can be combined.)
+## Discovers tests/*_test.gd, tests/sim_*.gd and tests/world_*.gd. A file is a test when its script has a `run()` method that
+## returns an Array of failure strings (empty = pass); other files (kits, shots, helpers) are skipped. Exit code 1 on any failure.
+## Every file starts from the same state: TestFixture.reset() runs before and after it. Long tests read `TestFixture.fast`
+## (true unless --slow) and shorten their simulation in the fast tier.
+
+## Long simulations: only run with --slow / --all.
+const SLOW := [
+	"systems_family_integration_test.gd", "systems_integration_test.gd", "hood_sim_test.gd", "weather_longrun_test.gd",
+	"social_autonomy_test.gd", "sim_longrun.gd",
+]
 
 var _done := false
 
@@ -9,27 +27,67 @@ func _process(_delta: float) -> bool:
 	if _done:
 		return true
 	_done = true
-	var code := _run()
+	var code := _run(OS.get_cmdline_user_args())
 	quit(code)
 	return true
 
-func _run() -> int:
+func _arg_value(args: PackedStringArray, key: String) -> String:
+	for a in args:
+		if a == key:
+			return ""
+		if a.begins_with(key + "="):
+			return a.substr(key.length() + 1)
+	return "\u0000"
+
+func _has_flag(args: PackedStringArray, key: String) -> bool:
+	return _arg_value(args, key) != "\u0000"
+
+func _discover(slow: bool, only: Array) -> Array[String]:
 	var files: Array[String] = []
 	var d := DirAccess.open("res://tests")
 	if d == null:
-		print("FAIL: cannot open res://tests")
-		return 1
+		return files
 	for f in d.get_files():
 		if not f.ends_with(".gd") or f == "run_all.gd":
 			continue
-		if f.ends_with("_test.gd") or f.begins_with("sim_") or f.begins_with("world_"):
-			files.append(f)
+		if not (f.ends_with("_test.gd") or f.begins_with("sim_") or f.begins_with("world_")):
+			continue
+		if not only.is_empty():
+			if only.has(f.get_basename()) or only.has(f):
+				files.append(f)
+			continue
+		if SLOW.has(f) and not slow:
+			continue
+		files.append(f)
 	files.sort()
+	return files
+
+func _run(args: PackedStringArray) -> int:
+	var slow := _has_flag(args, "--slow") or _has_flag(args, "--all")
+	var only_arg := _arg_value(args, "--only")
+	var only: Array = [] if only_arg == "\u0000" or only_arg == "" else Array(only_arg.split(","))
+	var files := _discover(slow, only)
+	var shuffle_arg := _arg_value(args, "--shuffle")
+	if shuffle_arg != "\u0000":
+		var rng := RandomNumberGenerator.new()
+		rng.seed = int(shuffle_arg) if shuffle_arg != "" else int(Time.get_ticks_usec())
+		for i in range(files.size() - 1, 0, -1):
+			var j := rng.randi_range(0, i)
+			var tmp := files[i]
+			files[i] = files[j]
+			files[j] = tmp
+		print("shuffled order, seed %d  (rerun with --shuffle=%d)" % [rng.seed, rng.seed])
+	if _has_flag(args, "--list"):
+		for f in files:
+			print(f)
+		return 0
+	TestFixture.fast = not slow
+	print("tier: %s, %d test files" % ["SLOW (all)" if slow else "fast", files.size()])
 	var total_fail := 0
 	var ran := 0
+	var t_all := Time.get_ticks_msec()
 	for f in files:
-		var path := "res://tests/" + f
-		var script: Variant = load(path)
+		var script: Variant = load("res://tests/" + f)
 		if script == null or not (script is GDScript):
 			print("FAIL  %s  (could not load script)" % f)
 			total_fail += 1
@@ -38,11 +96,13 @@ func _run() -> int:
 		if inst == null or not inst.has_method("run"):
 			continue   # helper file, not a test
 		ran += 1
+		TestFixture.reset()
 		var t0 := Time.get_ticks_msec()
 		var failures: Variant = inst.run()
 		var ms := Time.get_ticks_msec() - t0
 		if inst is Node:
 			(inst as Node).free()
+		TestFixture.reset()
 		if failures is Array and (failures as Array).is_empty():
 			print("PASS  %s  (%d ms)" % [f, ms])
 		else:
@@ -51,6 +111,6 @@ func _run() -> int:
 			if failures is Array:
 				for m in failures:
 					print("      - " + str(m))
-	print("---- %d test files, %d failed ----" % [ran, total_fail])
+	print("---- %d test files, %d failed, %.1f s ----" % [ran, total_fail, float(Time.get_ticks_msec() - t_all) / 1000.0])
 	print("RESULT: " + ("PASS" if total_fail == 0 and ran > 0 else "FAIL"))
 	return 0 if (total_fail == 0 and ran > 0) else 1

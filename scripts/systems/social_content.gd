@@ -32,19 +32,10 @@ static func install() -> void:
 				table[iid] = scores[iid]
 		visits["score"] = table
 		st["visits"] = visits
-	_add_obj_interaction(data.objects(), "stereo", "karaoke")
+	ContentMerge.add_object_interaction(data.objects(), "stereo", "karaoke")
 	var w = WorldIface.world()
 	if w != null and "defs" in w and w.defs is Dictionary:
-		_add_obj_interaction(w.defs, "stereo", "karaoke")
-
-static func _add_obj_interaction(defs: Dictionary, obj_id: String, iid: String) -> void:
-	if not defs.has(obj_id):
-		return
-	var od: Dictionary = defs[obj_id]
-	var list: Array = od.get("interactions", [])
-	if not list.has(iid):
-		list.append(iid)
-		od["interactions"] = list
+		ContentMerge.add_object_interaction(w.defs, "stereo", "karaoke")
 
 static func _bind() -> void:
 	var ev = SimEnv.events()

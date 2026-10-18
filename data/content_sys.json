@@ -1,0 +1,235 @@
+{
+ "_doc": "Systems-layer content merged into the shared tables by ContentMerge (scripts/systems/content_merge.gd, sys_content.gd). object_interactions: extra interactions an object kind offers.",
+ "interactions": {
+  "sys_away": {
+   "label": "Away",
+   "kind": "super",
+   "target": "self",
+   "duration_min": 60,
+   "posture": "stand",
+   "tests": [],
+   "per_min": {
+    "hunger": 0.035,
+    "bladder": 0.06,
+    "social": 0.02
+   },
+   "on_finish": [],
+   "on_cancel": [],
+   "autonomous": false,
+   "priority": "high",
+   "interruptible": true,
+   "tags": [
+    "away"
+   ]
+  },
+  "order_groceries": {
+   "label": "Order Groceries",
+   "kind": "super",
+   "target": "object",
+   "objects": [
+    "fridge"
+   ],
+   "duration_min": 6,
+   "posture": "stand",
+   "tests": [
+    {
+     "coins_at_least": 20
+    },
+    {
+     "object_state_below": [
+      "stock",
+      4
+     ]
+    }
+   ],
+   "on_finish": [
+    {
+     "fire_event": "order_groceries"
+    }
+   ],
+   "autonomous": true,
+   "priority": "low",
+   "cooldown_min": 240,
+   "tags": [
+    "food",
+    "chore",
+    "shop"
+   ],
+   "advertises": {
+    "hunger": 0.6
+   },
+   "thought": "We're running low on food."
+  },
+  "apply_for_job": {
+   "label": "Look for Jobs",
+   "kind": "super",
+   "target": "object",
+   "objects": [
+    "computer"
+   ],
+   "duration_min": 20,
+   "posture": "sit",
+   "tests": [
+    {
+     "has_job": false
+    }
+   ],
+   "on_finish": [
+    {
+     "fire_event": "job_search"
+    }
+   ],
+   "autonomous": false,
+   "priority": "normal",
+   "tags": [
+    "skill",
+    "career"
+   ]
+  },
+  "try_for_baby": {
+   "label": "Try for Baby",
+   "kind": "social",
+   "target": "folk",
+   "duration_min": 40,
+   "posture": "stand",
+   "tests": [
+    {
+     "relationship_above": [
+      "romance",
+      44
+     ]
+    },
+    {
+     "any": [
+      {
+       "has_buff": "stage_adult"
+      },
+      {
+       "has_buff": "stage_elder"
+      }
+     ]
+    }
+   ],
+   "target_tests": [
+    {
+     "any": [
+      {
+       "has_buff": "stage_adult"
+      },
+      {
+       "has_buff": "stage_elder"
+      }
+     ]
+    }
+   ],
+   "on_finish": [
+    {
+     "relationship_add": [
+      "romance",
+      2
+     ]
+    },
+    {
+     "fire_event": "try_for_baby"
+    }
+   ],
+   "autonomous": false,
+   "priority": "normal",
+   "tags": [
+    "social",
+    "flirt",
+    "baby"
+   ]
+  },
+  "apologize": {
+   "label": "Apologize",
+   "kind": "social",
+   "target": "folk",
+   "duration_min": 5,
+   "posture": "stand",
+   "tests": [],
+   "on_finish": [
+    {
+     "relationship_add": [
+      "friendship",
+      2
+     ]
+    },
+    {
+     "fire_event": "apologize"
+    }
+   ],
+   "autonomous": false,
+   "priority": "normal",
+   "tags": [
+    "social"
+   ]
+  },
+  "propose": {
+   "label": "Propose",
+   "kind": "social",
+   "target": "folk",
+   "duration_min": 10,
+   "posture": "stand",
+   "tests": [
+    {
+     "relationship_above": [
+      "romance",
+      44
+     ]
+    }
+   ],
+   "on_finish": [
+    {
+     "fire_event": "propose"
+    }
+   ],
+   "autonomous": false,
+   "priority": "normal",
+   "tags": [
+    "social",
+    "flirt"
+   ]
+  }
+ },
+ "buffs": {
+  "away": {
+   "label": "Away",
+   "mood": {},
+   "duration_min": 0,
+   "hidden": true
+  },
+  "pregnant": {
+   "label": "Expecting",
+   "mood": {
+    "happy": 1,
+    "uncomfortable": 1
+   },
+   "duration_min": 0,
+   "need_decay_mult": {
+    "hunger": 1.2,
+    "bladder": 1.2
+   },
+   "thought": "A little one is on the way."
+  },
+  "grieving": {
+   "label": "Grieving",
+   "mood": {
+    "sad": 3
+   },
+   "duration_min": 4320,
+   "need_decay_mult": {
+    "fun": 1.2
+   },
+   "thought": "I miss them so much."
+  }
+ },
+ "object_interactions": {
+  "fridge": [
+   "order_groceries"
+  ],
+  "computer": [
+   "apply_for_job"
+  ]
+ }
+}

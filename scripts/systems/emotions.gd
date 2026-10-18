@@ -32,9 +32,6 @@ static func cfg() -> Dictionary:
 static func mood_defs() -> Dictionary:
 	return cfg().get("moods", {})
 
-static func all_moods() -> Array:
-	return Mood.MOODS.duplicate()
-
 static func def_of(mood: String) -> Dictionary:
 	return mood_defs().get(mood, {})
 
@@ -243,7 +240,7 @@ static func on_finished(folk_id: int, iid: String, success: bool) -> Dictionary:
 # ------------------------------------------------------------------ contagion
 static func _trait_mult(id: int, key: String, default_v: float = 1.0) -> float:
 	var m := default_v
-	for t in RelationshipService.traits_of(id):
+	for t in RelationshipBits.traits_of(id):
 		var td: Dictionary = SimEnv.data().trait_def(str(t))
 		var sd: Dictionary = td.get("social", {})
 		if sd.has(key):

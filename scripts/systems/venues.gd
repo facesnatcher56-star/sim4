@@ -39,14 +39,9 @@ static func is_open_type(vtype: String, at_min: int = -1) -> bool:
 	var hr: Array = hours(vtype)
 	return h >= float(hr[0]) and h < float(hr[1])
 
-## JSON numbers are floats: compare as ints. Empty list = every day.
+## Empty list = every day.
 static func _open_on(days: Array, weekday: int) -> bool:
-	if days.is_empty():
-		return true
-	for d in days:
-		if int(d) == weekday:
-			return true
-	return false
+	return days.is_empty() or SysUtil.has_int(days, weekday)
 
 static func is_open(lot_id: String, at_min: int = -1) -> bool:
 	return is_open_type(type_of_lot(lot_id), at_min)

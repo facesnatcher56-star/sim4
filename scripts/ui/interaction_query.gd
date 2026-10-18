@@ -28,22 +28,55 @@ static func build_entries(folk, ids: Array, table: Dictionary, checker: Callable
 		return a["label"] < b["label"])
 	return out
 
-static func describe_tests(def: Dictionary) -> String:
+## Player-facing group: explicit category (social actions) or the first matching tag group.
+const TAG_GROUPS := [["Food", ["food", "drink", "cook", "snack", "coffee", "tea", "meal"]], ["Rest", ["sleep", "rest", "relax", "toilet"]],
+	["Hygiene", ["hygiene", "vanity"]], ["Fun", ["fun", "game", "tv", "music", "creative", "art", "dance", "perform", "party"]],
+	["Skills", ["skill", "read", "study", "write", "science", "practice", "work", "career", "exercise", "fitness", "fish"]],
+	["Chores", ["chore", "clean", "repair", "plant", "garden", "junk"]]]
+
+static func category_for(def: Dictionary) -> String:
+	if def.has("category"):
+		return str(def["category"]).capitalize()
+	var tags: Array = def.get("tags", [])
+	for g in TAG_GROUPS:
+		for t in tags:
+			if t in g[1]:
+				return str(g[0])
+	return "Other" if str(def.get("kind", "")) == "super" else str(def.get("kind", "general")).capitalize()
+
+static func describe_tests(def: Dictionary, folk = null, target = null) -> String:
 	var parts: Array = []
+	var ctx := {}
+	if folk != null:
+		ctx = {"folk": folk, "object": target if not (target is Folk) else null, "target": target if target is Folk else null}
+		if target != null and not (target is Folk) and bool(WorldIface.state_get(target, "broken", false)) and not bool(def.get("works_when_broken", false)):
+			return "Broken. Repair it first"
+		var only: Array = def.get("objects", [])
+		if target != null and not (target is Folk) and not only.is_empty() and not only.has(str(UIU.prop(target, "def_id", ""))):
+			return "Nothing to do here"
 	for t in def.get("tests", []):
 		if not (t is Dictionary):
+			continue
+		if folk != null and Cond.check_one(t, ctx):
 			continue
 		for k in t:
 			var v = t[k]
 			match k:
-				"stat_below": parts.append("needs %s below %s" % [v[0], v[1]])
-				"stat_above": parts.append("needs %s above %s" % [v[0], v[1]])
-				"has_trait": parts.append("requires trait %s" % v)
-				"lacks_trait": parts.append("not for %s folk" % v)
+				"stat_below": parts.append(str(PieEntries.NOT_NEEDED.get(str(v[0]), "Not needed right now")))
+				"stat_above": parts.append(str(PieEntries.TOO_LOW.get(str(v[0]), "Not right now")))
+				"has_trait": parts.append("needs the %s trait" % PieEntries.label_of_trait(str(v)))
+				"lacks_trait": parts.append("not for %s Folk" % PieEntries.label_of_trait(str(v)))
 				"coins_at_least": parts.append("costs %s Coins" % v)
-				"skill_at_least": parts.append("needs %s skill %s" % [v[0], v[1]])
-				_: parts.append("%s %s" % [k, v])
-	return "Unavailable: " + ", ".join(parts) if parts.size() > 0 else "Unavailable right now"
+				"skill_at_least": parts.append("needs %s skill level %s" % [str(v[0]).capitalize(), v[1]])
+				"object_state_above": parts.append("Out of stock" if str(v[0]) == "stock" else "Nothing to do here")
+				"object_state_below", "object_state_eq": parts.append("Nothing to do here")
+				_: parts.append("not possible right now")
+	if parts.size() == 0:
+		if folk != null and target != null and not (target is Folk) and not WorldIface.has_free_slot(target, int(folk.id)):
+			return "In use right now"
+		return "Unavailable right now"
+	var txt: String = ", ".join(parts)
+	return txt.substr(0, 1).to_upper() + txt.substr(1)
 
 static func make_checker(folk, target) -> Callable:
 	var ic = UIU.cls("Interaction")
@@ -65,17 +98,17 @@ static func make_checker(folk, target) -> Callable:
 					avail[str(r)] = {"enabled": true}
 		return func(id):
 			if not avail.has(id):
-				return InteractionQuery.describe_tests(table.get(id, {}))
+				return InteractionQuery.describe_tests(table.get(id, {}), folk, target)
 			var r: Dictionary = avail[id]
 			if r.get("enabled", true):
 				return ""
-			return str(r.get("reason", InteractionQuery.describe_tests(table.get(id, {}))))
+			return str(r.get("reason", InteractionQuery.describe_tests(table.get(id, {}), folk, target)))
 	return func(id):
 		var it = ic.call("create", id, folk, int(UIU.prop(target, "id", -1)), true)
 		if it == null:
 			return "Unavailable"
 		var ok = it.call("can_run", folk, target)
-		return "" if ok else InteractionQuery.describe_tests(table.get(id, {}))
+		return "" if ok else InteractionQuery.describe_tests(table.get(id, {}), folk, target)
 
 ## target_kind: "object" | "folk"
 static func entries_for(folk, target_kind: String, target_id: int) -> Array:

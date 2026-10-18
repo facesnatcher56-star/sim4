@@ -99,7 +99,7 @@ static func apply(template_id: String, w = null) -> bool:
 	else:
 		w.starter_bedroom_tile = w.starter_spawn_tiles[0] if w.starter_spawn_tiles.size() > 0 else Vector2i.ZERO
 	w.clear_undo()
-	w._rooms_dirty = true
+	w.rooms.dirty = true
 	w.emit_signal("world_reset")
 	report["spawn"] = (w.starter_spawn_tiles as Array).duplicate()
 	report["entry"] = entry_of(template_id)

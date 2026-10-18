@@ -80,9 +80,7 @@ static func teardown() -> void:
 	W.current_household_id = 0
 	W.coin_spend = Callable()           # SystemsManager hooked the World's build-mode coins to the Economy
 	W.coin_refund = Callable()
-	Folk._next_id = 1
-	SysUtil.rng = RandomNumberGenerator.new()      # hood tests seed the shared rng; hand it back unseeded like a fresh process
-	SysUtil.rng.randomize()
+	TestFixture.reset()
 
 static func set_time(day: int, hour: int, minute: int = 0) -> void:
 	clock().total_minutes = (day - 1) * 1440 + hour * 60 + minute

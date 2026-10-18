@@ -279,8 +279,13 @@ def shower():
 
 def bathtub():
     b = Builder()
-    b.box("porcelain", 0, 0.3, 0, 1.9, 0.6, 0.9)
-    b.box("water", 0, 0.57, 0, 1.7, 0.04, 0.7)
+    # hollow tub: floor + rim walls (front long side -Z is low so a sitter's legs rest over it) + water inside
+    b.box("porcelain", 0, 0.08, 0, 1.9, 0.16, 0.9)
+    b.box("porcelain", 0, 0.30, 0.39, 1.9, 0.6, 0.12)
+    b.box("porcelain", 0, 0.15, -0.39, 1.9, 0.30, 0.12)
+    for x in (-0.89, 0.89):
+        b.box("porcelain", x, 0.30, 0, 0.12, 0.6, 0.9)
+    b.box("water", 0, 0.40, 0, 1.66, 0.03, 0.66)
     b.box("steel", 0.8, 0.7, 0.3, 0.06, 0.2, 0.06)
     b.box("steel", 0.8, 0.8, 0.2, 0.06, 0.05, 0.2)
     return [("bathtub", b, (0, 0, 0))]
@@ -696,8 +701,11 @@ def build_folk(name, s, tint=None):
 def main():
     manifest = {}
     foot = {}
+    only = [n for n in os.environ.get("ONLY", "").split(",") if n]    # ONLY=bathtub rebuilds just those glbs (manifest untouched)
     for fn in FURNITURE + STRUCTURE:
         name = fn.__name__
+        if only and name not in only:
+            continue
         path, mn, mx = build_static(fn)
         w, d = FOOT[name]
         h = round(mx[1], 2)
@@ -718,6 +726,9 @@ def main():
                           "notes": "skinned armature; bones hips,torso,head,arm_l,arm_r,leg_l,leg_r; clips Idle,Walk,Sit,Sleep,Use,Eat; faces -Z"}
         foot[name] = [1, 1, round(1.72 * s, 2)]
         print("built", name)
+    if only:
+        print("DONE (partial)", only)
+        return
     with open(os.path.join(OUT, "manifest.json"), "w") as f:
         json.dump(manifest, f, indent=2)
     with open(os.path.join(ROOT, "blender", "footprints.json"), "w") as f:

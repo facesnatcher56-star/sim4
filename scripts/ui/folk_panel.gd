@@ -1,5 +1,7 @@
 class_name FolkPanel
 extends PanelContainer
+signal goals_requested(folk_id: int)
+signal career_requested(folk_id: int)
 ## Selected-folk panel: portrait, mood, need bars, traits, skills, relationships, aspiration, "Why?" debug.
 
 var folk = null                      # current folk (Folk or duck-typed fake)
@@ -19,6 +21,8 @@ var _rel_pending := false
 var family_box: VBoxContainer          # "Family" tab: partner / parents / children / siblings + action buttons
 var family_buttons: Dictionary = {}    # action id -> Button
 var goal_label: Label
+var goals_button: Button
+var career_button: Button
 var why_label: Label
 var why_toggle: CheckButton
 var tabs: TabContainer
@@ -51,11 +55,25 @@ func _ready() -> void:
 	mood_area.mouse_filter = Control.MOUSE_FILTER_STOP
 	trait_box = HFlowContainer.new()
 	root.add_child(trait_box)
+	var goal_row := HBoxContainer.new()
+	root.add_child(goal_row)
 	goal_label = UIU.make_label("", 13, UITheme.MUTED)
 	goal_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	root.add_child(goal_label)
+	goal_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	goal_label.custom_minimum_size = Vector2(150, 0)
+	goal_row.add_child(goal_label)
+	goals_button = Button.new()
+	goals_button.text = "Goals"
+	goals_button.tooltip_text = "Aspiration, whims, satisfaction points and perks"
+	goals_button.pressed.connect(func(): goals_requested.emit(folk_id))
+	goal_row.add_child(goals_button)
+	career_button = Button.new()
+	career_button.text = "Work"
+	career_button.tooltip_text = "Job, performance, shifts and job offers"
+	career_button.pressed.connect(func(): career_requested.emit(folk_id))
+	goal_row.add_child(career_button)
 	tabs = TabContainer.new()
-	tabs.custom_minimum_size = Vector2(0, 300)
+	tabs.custom_minimum_size = Vector2(0, 250)
 	root.add_child(tabs)
 	needs_box = VBoxContainer.new()
 	needs_box.name = "Needs"
@@ -79,10 +97,10 @@ func _ready() -> void:
 	family_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	fam_scroll.add_child(family_box)
 	var why_box := VBoxContainer.new()
-	why_box.name = "Why?"
+	why_box.name = "Thinking"
 	tabs.add_child(why_box)
 	why_toggle = CheckButton.new()
-	why_toggle.text = "Show autonomy scoring"
+	why_toggle.text = "Explain their decisions"
 	why_toggle.toggled.connect(func(_on): _refresh_why())
 	why_box.add_child(why_toggle)
 	why_label = UIU.make_label("", 12, UITheme.MUTED)
@@ -146,11 +164,17 @@ func _build_needs() -> void:
 		bar.max_value = 1.0
 		bar.step = 0.001
 		bar.show_percentage = false
-		bar.custom_minimum_size = Vector2(200, 16)
+		bar.custom_minimum_size = Vector2(170, 16)
 		bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		row.add_child(bar)
+		var num := UIU.make_label("", 13)
+		num.custom_minimum_size = Vector2(44, 0)
+		num.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		num.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		num.name = "num"
+		row.add_child(num)
 		needs_box.add_child(row)
 		need_bars[nid] = bar
 		need_rows[nid] = row
@@ -166,6 +190,11 @@ func _update_need(nid: String, stat, raw_value = null) -> void:
 		var hi := float(UIU.prop(stat, "max", 100.0))
 		r = clampf((float(raw_value) - lo) / maxf(hi - lo, 0.001), 0.0, 1.0)
 	bar.value = r
+	var num: Label = need_rows[nid].get_node_or_null("num")
+	if num != null:
+		num.visible = GameSettings.get_bool("need_numbers")
+		num.text = ("! %d%%" if r < 0.2 else "%d%%") % int(r * 100.0)    # number + "!" so low needs never rely on colour alone
+		num.add_theme_color_override("font_color", Color("#ff8a80") if r < 0.2 else UITheme.TEXT)
 	var sb := UITheme.box(UIU.level_color(r), 4, Color(0, 0, 0, 0), 0, 0)
 	bar.add_theme_stylebox_override("fill", sb)
 	need_rows[nid].tooltip_text = _need_tooltip(nid, r)
@@ -203,7 +232,7 @@ func _buff_label(id: String) -> String:
 	if m is Dictionary and m.size() > 0:
 		var parts: Array = []
 		for k in m:
-			parts.append("%s %+d" % [k, int(m[k])])
+			parts.append("%s %+d" % [mood_name(str(k)), int(m[k])])
 		lab += " (" + ", ".join(parts) + ")"
 	return lab
 
@@ -228,28 +257,31 @@ func _refresh_mood() -> void:
 
 func mood_color(mood: String) -> Color:
 	if UIU.MOOD_COLORS.has(mood):
-		return UIU.MOOD_COLORS[mood]
+		return UIU.mood_color(mood)
 	if Emotions.mood_defs().has(mood):
 		return Emotions.color(mood)
 	return UIU.MOOD_COLORS["neutral"]
 
-## The procedural face only knows the original moods; richer moods borrow the closest expression (colour stays their own).
-const FACE_OF := {"confident": "happy", "embarrassed": "sad", "inspired": "happy", "playful": "happy", "dazed": "uncomfortable", "jealous": "angry",
-	"lonely": "sad", "nostalgic": "sad", "anxious": "tense", "content": "happy", "guilty": "sad", "proud": "happy"}
+## Display name of a mood id. "neutral" reads as "Calm" (nothing pulls the mood either way).
+static func mood_name(mood: String) -> String:
+	if mood == "neutral":
+		return "Calm"
+	return Emotions.label(mood) if Emotions.mood_defs().has(mood) else mood.capitalize()
+
+const INTENSITY_WORDS := ["", "mild", "strong", "intense"]
 
 func _apply_mood(mood: String, inten: int) -> void:
-	var face: String = FACE_OF.get(mood, mood)
-	mood_icon.mood = face
+	mood_icon.mood = mood
 	mood_icon.color = mood_color(mood)
-	portrait.mood = face
-	var mlabel: String = Emotions.label(mood) if Emotions.mood_defs().has(mood) else mood.capitalize()
-	mood_label.text = "%s %s" % [mlabel, "●".repeat(clampi(inten, 0, 3))]
+	portrait.mood = mood
+	mood_label.text = "%s %s" % [mood_name(mood), "●".repeat(clampi(inten, 0, 3))] if mood != "neutral" else mood_name(mood)
 	mood_area.tooltip_text = mood_tooltip(mood, inten)
 
 ## What drives the mood: strongest contributing buffs first, then what the mood does (data/emotions.json).
 func mood_tooltip(mood: String, inten: int) -> String:
-	var lines: Array = ["Mood: %s (intensity %d)" % [mood, inten]]
-	var blurb := Emotions.blurb(mood)
+	var lines: Array = ["Mood: %s" % mood_name(mood) if mood == "neutral" else "Mood: %s (%s)" % [mood_name(mood), INTENSITY_WORDS[clampi(inten, 1, 3)]]]
+	var blurb := Emotions.blurb(mood) if mood != "neutral" else "Nothing is pulling their mood either way."
+
 	if blurb != "":
 		lines.append(blurb)
 	var rows: Array = []
@@ -267,7 +299,7 @@ func mood_tooltip(mood: String, inten: int) -> String:
 		if folk is Folk:
 			var parts: Array = []
 			for k in r["weights"]:
-				parts.append("%s %+d" % [k, int(r["weights"][k])])
+				parts.append("%s %+d" % [mood_name(str(k)), int(r["weights"][k])])
 			var mark := "▶ " if float(r["toward"]) > 0.0 else "   "
 			lines.append("  %s%s  (%s)" % [mark, str(r["label"]), ", ".join(parts)])
 		else:
@@ -312,10 +344,18 @@ func _build_traits() -> void:
 		trait_box.add_child(chip)
 
 func _refresh_goal() -> void:
-	var g = UIU.prop(folk, "aspiration", null)
-	if g == null:
-		g = UIU.prop(folk, "goal", null)
-	goal_label.text = ("Aspiration: " + str(g)) if g != null and str(g) != "" else "Aspiration: (none yet)"
+	var info: Dictionary = Goals.active_for(folk_id) if folk_id >= 0 else {}
+	if info.is_empty():
+		goal_label.text = "No aspiration yet"
+		goal_label.tooltip_text = ""
+	else:
+		var ms: Dictionary = info["milestone"]
+		goal_label.text = "Dream: %s" % str(info["aspiration_label"])
+		goal_label.tooltip_text = ("Next: %s" % str(ms["label"])) if not ms.is_empty() else "Aspiration complete"
+		goal_label.mouse_filter = Control.MOUSE_FILTER_STOP
+	var young: bool = str(UIU.prop(folk, "age_stage", "adult")) in ["baby", "toddler"]
+	goals_button.disabled = info.is_empty() or young
+	career_button.disabled = young
 
 # ---------------- skills ----------------
 func _build_skills() -> void:
@@ -499,7 +539,7 @@ func _rel_card(oid: int) -> PanelContainer:
 func mood_tooltip_for(other) -> String:
 	var om: Dictionary = other.get_mood()
 	var mn := str(om.get("mood", "neutral"))
-	var lines: Array = ["%s is %s" % [str(UIU.prop(other, "name", "They")), mn]]
+	var lines: Array = ["%s is feeling %s" % [str(UIU.prop(other, "name", "They")), mood_name(mn).to_lower()]]
 	lines.append_array(Emotions.describe_effects(mn, int(om.get("intensity", 1))))
 	return "\n".join(lines)
 
@@ -598,13 +638,19 @@ func _refresh_why() -> void:
 	if why_label == null:
 		return
 	if not why_toggle.button_pressed:
-		why_label.text = "(toggle to inspect decisions)"
+		why_label.text = "Switch this on to see why they chose what they are doing."
 		return
 	var ac = UIU.cls("Autonomy")
-	var dbg = ac.get("last_debug") if ac != null else null
-	if dbg == null:
-		why_label.text = "No autonomy data yet."
-	elif dbg is Dictionary or dbg is Array:
-		why_label.text = JSON.stringify(dbg, "  ")
-	else:
-		why_label.text = str(dbg)
+	var all_dbg = ac.get("last_debug") if ac != null else null
+	var dbg = all_dbg.get(folk_id) if all_dbg is Dictionary else null
+	if not (dbg is Dictionary):
+		why_label.text = "Nothing decided yet. Folk think for themselves when they have nothing queued."
+		return
+	var lines: Array = ["Last decision (%s):" % str(dbg.get("time", "")), "  " + str(dbg.get("reason", "nothing to do"))]
+	var top: Array = dbg.get("top", [])
+	if top.size() > 1:
+		lines.append("Other options it weighed:")
+		for r in top:
+			lines.append("  %s  (score %.1f)" % [str(r.get("label", "?")), float(r.get("score", 0.0))])
+	why_label.text = "
+".join(lines)

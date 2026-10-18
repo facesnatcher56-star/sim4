@@ -189,7 +189,7 @@ static func try_for_baby(actor_id: int, partner_id: int) -> Dictionary:
 	var rom: float = minf(RelationshipService.value(actor_id, partner_id, "romance"), RelationshipService.value(partner_id, actor_id, "romance"))
 	if rom < float(pc.get("min_romance", 45)):
 		return {"ok": false, "reason": "not_romantic_enough"}
-	if not (RelationshipService.bit_for(actor_id, partner_id) in ["sweetheart", "partner", "spouse"]):
+	if not (RelationshipBits.bit_for(actor_id, partner_id) in ["sweetheart", "partner", "spouse"]):
 		return {"ok": false, "reason": "not_a_couple"}
 	cooldowns[actor_id] = SysUtil.day() + int(pc.get("cooldown_days", 4))
 	if not SysUtil.chance(float(pc.get("success_chance", 0.45))):
@@ -231,9 +231,9 @@ static func _birth(mother_id: int, father_id: int) -> void:
 	m.remove_buff("pregnant")
 	Family.on_birth(baby, mother_id, father_id)
 	for pid2 in [mother_id, father_id]:
-		RelationshipService.set_flag(int(baby.id), int(pid2), "family", true, false)
+		RelationshipBits.set_flag(int(baby.id), int(pid2), "family", true, false)
 		RelationshipService.add_both(int(baby.id), int(pid2), "friendship", 40.0)
-	RelationshipService.set_flag(mother_id, father_id, "family", true, false)
+	RelationshipBits.set_flag(mother_id, father_id, "family", true, false)
 	SysUtil.notify("%s was born to %s!" % [baby_name, m.name], "birthday")
 	SysUtil.game_event("baby_born", {"folk_id": mother_id, "baby_id": baby.id, "target_id": father_id})
 
@@ -273,13 +273,13 @@ static func kill(folk_id: int, cause: String = "old age") -> Dictionary:
 	for o in SysUtil.residents():
 		if int(o.id) == folk_id:
 			continue
-		var bit: String = RelationshipService.bit_for(int(o.id), folk_id)
+		var bit: String = RelationshipBits.bit_for(int(o.id), folk_id)
 		if bit in ["family", "spouse", "partner", "sweetheart", "best_friend"] or RelationshipService.value(int(o.id), folk_id, "friendship") >= gmin:
 			mourners.append(int(o.id))
 			o.add_buff(str(cfg().get("grief", {}).get("buff", "grieving")))
 			o.add_to_stat("fun", -15.0)
 	legacy["mourners"] = mourners
-	Family.on_death(folk_id, mourners)
+	FamilyHousehold.on_death(folk_id, mourners)
 	# inheritance
 	legacy["inheritance"] = _inherit(f, mourners)
 	RelationshipService.sync_folk(f)
@@ -306,7 +306,7 @@ static func _inherit(f, mourners: Array) -> Dictionary:
 	var heir = null
 	for rank in ["spouse", "partner", "family", "sweetheart", "best_friend"]:
 		for mid in mourners:
-			if RelationshipService.bit_for(int(mid), int(f.id)) == rank:
+			if RelationshipBits.bit_for(int(mid), int(f.id)) == rank:
 				heir = SysUtil.folk(int(mid))
 				break
 		if heir != null:
@@ -340,23 +340,20 @@ static func legacy_summary(folk_id: int) -> Dictionary:
 			if int(f.skills[s]["level"]) > best_lvl:
 				best_lvl = int(f.skills[s]["level"])
 				best_skill = str(s)
-	var friends: int = RelationshipService.count_bit(folk_id, "friend", true)
+	var friends: int = RelationshipBits.count_bit(folk_id, "friend", true)
 	var kids: int = children_of(folk_id).size()
 	var asp: String = Goals.aspiration_label(folk_id)
 	var summary: String = "%s lived %d years, %s, " % [nm, years, career_txt]
 	if best_skill != "":
 		summary += "mastered %s %d, " % [best_skill, best_lvl]
 	summary += "left %d friends and %d children." % [friends, kids]
-	var desc: int = Family.descendants_of(folk_id).size()
+	var desc: int = FamilyTree.descendants_of(folk_id).size()
 	if desc > kids:
 		summary += " %d descendants in all." % desc
 	return {"folk_id": folk_id, "name": nm, "years": years, "career": career_txt, "best_skill": best_skill, "best_skill_level": best_lvl,
 		"friends": friends, "children": kids, "aspiration": asp, "summary": summary,
 		"lifetime_points": Goals.lifetime_points(folk_id), "descendants": desc,
-		"spouse": Family.name_of(Family.spouse_of(folk_id)) if Family.spouse_of(folk_id) >= 0 else "", "traits": f.traits.duplicate() if f != null else []}
-
-static func on_try_for_baby(actor_id: int, target_id: int) -> Dictionary:
-	return try_for_baby(actor_id, target_id)
+		"spouse": Family.name_of(FamilyTree.spouse_of(folk_id)) if FamilyTree.spouse_of(folk_id) >= 0 else "", "traits": f.traits.duplicate() if f != null else []}
 
 # ------------------------------------------------------------------ save
 static func to_dict() -> Dictionary:

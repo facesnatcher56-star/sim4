@@ -111,13 +111,17 @@ SPEC = [
     ("vending_machine", Bm, 1, 1, "front (glass) faces -Z"),
     ("terminal", Bm, 1, 1, "kiosk terminal / ATM; screen faces -Z"),
     ("telescope", Bm, 1, 1, "tripod telescope pointing towards -Z"),
+    ("park_bench", Bm, 2, 1, "2x1 park bench, backrest at +Z; sitter faces -Z; seat top y~0.55"),
 ]
 
 
 def main():
     manifest = {}
     foot = {}
+    only = [n for n in os.environ.get("ONLY", "").split(",") if n]    # ONLY=park_bench rebuilds just those glbs (manifest untouched)
     for oid, mod, w, d, note in SPEC:
+        if only and oid not in only:
+            continue
         fn = mod[oid]
 
         def make(fn=fn, oid=oid):
@@ -132,6 +136,9 @@ def main():
         manifest[oid] = {"file": "res://assets/models/%s.glb" % oid, "footprint": [w, d, h], "notes": note,
                          "bounds_min": [round(v, 3) for v in mn], "bounds_max": [round(v, 3) for v in mx]}
         print("built", oid, [round(v, 2) for v in mn], [round(v, 2) for v in mx])
+    if only:
+        print("DONE (partial)", only)
+        return
     with open(os.path.join(OUT, "manifest_extra.json"), "w") as f:
         json.dump(manifest, f, indent=2)
     with open(os.path.join(HERE, "footprints_extra.json"), "w") as f:

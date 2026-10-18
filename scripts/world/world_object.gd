@@ -1,8 +1,7 @@
 class_name WorldObject
 extends RefCounted
 ## A placed object in the lot. Pure data (no rendering).
-## state: Dictionary key -> float|bool (source of truth).
-## stats: Dictionary key -> Stat mirror (only filled when the sim-core Stat class is constructible).
+## state: Dictionary key -> float|bool (the single source of truth for object state).
 ## slots_reserved: Dictionary slot_idx(int) -> folk_id(int).
 
 var id: int = -1
@@ -10,7 +9,6 @@ var def_id: String = ""
 var tile: Vector2i = Vector2i.ZERO
 var rot: int = 0
 var state: Dictionary = {}
-var stats: Dictionary = {}
 var slots_reserved: Dictionary = {}
 var def: Dictionary = {}   # shared reference to the definition dictionary
 

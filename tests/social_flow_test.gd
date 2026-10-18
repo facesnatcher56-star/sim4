@@ -12,7 +12,21 @@ func run() -> Array:
 	_topics(f)
 	_knowledge(f)
 	_trust(f)
+	_requires_enforced(f)
 	return f
+
+## social.requires is part of can_run, so queued and autonomous paths cannot bypass it.
+func _requires_enforced(f: Array) -> void:
+	var w := S.setup(31)
+	var a := S.folk(w, "Rae", ["friendly"], Vector2i(12, 12))
+	var b := S.folk(w, "Sol", ["lazy"], Vector2i(13, 12))
+	var ir := Interaction.create("talk_shop", a, b.id)
+	S.expect(f, not ir.can_run(a), "talk_shop is refused until you know their job")
+	var cand := {"id": "talk_shop", "target_id": b.id, "kind": "folk", "obj": null, "folk": b}
+	S.expect(f, Autonomy.evaluate(a, cand)["skipped"], "autonomy skips it too")
+	RelationshipKnowledge.reveal(a.id, b.id, "career")
+	S.expect(f, ir.can_run(a), "talk_shop runs once the job is known")
+	S.teardown()
 
 func _social_ids() -> Array:
 	var out: Array = []
@@ -54,9 +68,9 @@ func _every_interaction_runs(f: Array) -> void:
 		RelationshipService.add_both(a.id, b.id, "romance", 50.0)
 		RelationshipService.add_both(a.id, b.id, "trust", 40.0)
 		if iid in ["go_on_date", "make_official", "break_up"]:
-			RelationshipService.set_flag(a.id, b.id, "dating", true, false)
+			RelationshipBits.set_flag(a.id, b.id, "dating", true, false)
 		if iid == "rekindle":
-			RelationshipService.set_flag(a.id, b.id, "ex", true, false)
+			RelationshipBits.set_flag(a.id, b.id, "ex", true, false)
 		if iid in ["toast", "tell_group_story", "group_hug", "party_game", "group_chat"]:
 			var c := S.folk(w, "C_" + iid, [], Vector2i(12, 12))
 			Conversation.join(c.id, b.id)
@@ -100,8 +114,8 @@ func _tiers_follow_compatibility(f: Array) -> void:
 		var a3 := S.folk(w, "Hi%d" % j)
 		a3.add_skill_xp("charisma", Folk.xp_for_level(8) + 1.0)
 		var b3 := S.folk(w, "Hb%d" % j)
-		tot_lo += float(SocialDynamics.success_score(a2, b2, "funny_story", dd, dd["social"], {}, false)["score"])
-		tot_hi += float(SocialDynamics.success_score(a3, b3, "funny_story", dd, dd["social"], {}, false)["score"])
+		tot_lo += float(SocialScoring.success_score(a2, b2, "funny_story", dd, dd["social"], {}, false)["score"])
+		tot_hi += float(SocialScoring.success_score(a3, b3, "funny_story", dd, dd["social"], {}, false)["score"])
 	S.expect(f, tot_hi > tot_lo + 5.0, "charisma raises the success score")
 	S.teardown()
 
@@ -120,18 +134,18 @@ func _topics(f: Array) -> void:
 	S.expect(f, float(e_shared["bonus"]) > float(e_none["bonus"]) and bool(e_shared["shared"]), "shared interest raises the success bonus")
 	var m0: float = float(e_shared["mult"])
 	for i in 4:
-		RelationshipService.note_topic(a.id, b.id, "food")
+		RelationshipKnowledge.note_topic(a.id, b.id, "food")
 	var e4: Dictionary = Conversation.topic_effect(a.id, b.id, "food")
 	S.expect(f, float(e4["mult"]) < m0 * 0.6, "repeating a topic gives decreasing returns (%.2f -> %.2f)" % [m0, float(e4["mult"])])
 	S.expect(f, float(e4["bonus"]) < float(e_shared["bonus"]), "repeat also lowers the success bonus")
-	RelationshipService.pair_reset_topics_for_test(a.id, b.id)
+	RelationshipKnowledge.pair_reset_topics_for_test(a.id, b.id)
 	var food := 0
 	for i in 80:
 		if Conversation.pick_topic(a.id, b.id) == "food":
 			food += 1
 	S.expect(f, food > 15, "a fresh shared topic is picked often (%d/80)" % food)
 	for i in 8:
-		RelationshipService.note_topic(a.id, b.id, "food")
+		RelationshipKnowledge.note_topic(a.id, b.id, "food")
 	var food2 := 0
 	for i in 80:
 		if Conversation.pick_topic(a.id, b.id) == "food":
@@ -139,70 +153,70 @@ func _topics(f: Array) -> void:
 	S.expect(f, food2 < food, "an exhausted topic is picked less (%d < %d)" % [food2, food])
 	var ir := S.run(a, b, "talk_interests")
 	S.expect(f, ir.state == "finished", "talk_interests finishes")
-	RelationshipService.note_topic(a.id, b.id, "books")
-	var before: float = RelationshipService.topic_count(a.id, b.id, "books")
+	RelationshipKnowledge.note_topic(a.id, b.id, "books")
+	var before: float = RelationshipKnowledge.topic_count(a.id, b.id, "books")
 	S.set_time(5, 8)
 	SocialDynamics.on_day(5)
-	S.expect(f, RelationshipService.topic_count(a.id, b.id, "books") < before, "topics recover over days")
+	S.expect(f, RelationshipKnowledge.topic_count(a.id, b.id, "books") < before, "topics recover over days")
 	S.teardown()
 
 func _knowledge(f: Array) -> void:
 	var w := S.setup(41)
 	var a := S.folk(w, "Ann", ["social"])
 	var b := S.folk(w, "Bo", ["foodie", "neat", "romantic"])
-	S.expect(f, RelationshipService.known_traits(a.id, b.id).is_empty(), "strangers know nothing about each other")
-	var sm: Dictionary = RelationshipService.known_summary(a.id, b.id)
+	S.expect(f, RelationshipKnowledge.known_traits(a.id, b.id).is_empty(), "strangers know nothing about each other")
+	var sm: Dictionary = RelationshipKnowledge.known_summary(a.id, b.id)
 	var qs := 0
 	for t in sm["traits"]:
 		if t["label"] == "?":
 			qs += 1
 	S.expect(f, qs == 3 and sm["career"] == "?" and sm["aspiration"] == "?", "unknown things show as '?' (%d)" % qs)
-	var got: String = RelationshipService.reveal(a.id, b.id, "trait")
-	S.expect(f, got.begins_with("trait:") and RelationshipService.known_traits(a.id, b.id).size() == 1, "revealing a trait discovers one")
-	S.expect(f, RelationshipService.knows_trait(a.id, b.id, got.substr(6)), "knows_trait agrees")
-	S.expect(f, RelationshipService.reveal(a.id, b.id, "career") == "career" and RelationshipService.reveal(a.id, b.id, "career") == "", "career revealed once")
-	S.expect(f, RelationshipService.known_summary(a.id, b.id)["career"] == "Unemployed", "unemployed shown once known")
-	S.expect(f, RelationshipService.knows_trait(b.id, a.id, "social") == false, "knowledge is directional")
+	var got: String = RelationshipKnowledge.reveal(a.id, b.id, "trait")
+	S.expect(f, got.begins_with("trait:") and RelationshipKnowledge.known_traits(a.id, b.id).size() == 1, "revealing a trait discovers one")
+	S.expect(f, RelationshipKnowledge.knows_trait(a.id, b.id, got.substr(6)), "knows_trait agrees")
+	S.expect(f, RelationshipKnowledge.reveal(a.id, b.id, "career") == "career" and RelationshipKnowledge.reveal(a.id, b.id, "career") == "", "career revealed once")
+	S.expect(f, RelationshipKnowledge.known_summary(a.id, b.id)["career"] == "Unemployed", "unemployed shown once known")
+	S.expect(f, RelationshipKnowledge.knows_trait(b.id, a.id, "social") == false, "knowledge is directional")
 	# knowledge gates interactions: you cannot talk shop before you know their job
 	var q := S.folk(w, "Quincy", ["neat"])
 	a.needs["social"].set_value(30.0)
 	RelationshipService.add_both(a.id, q.id, "friendship", 40.0)
-	S.expect(f, SocialDynamics.reason_unavailable(a, q, "talk_shop") == "You don't know their job yet.", "talk_shop is gated on knowing their job: %s" % SocialDynamics.reason_unavailable(a, q, "talk_shop"))
-	S.expect(f, SocialDynamics.reason_unavailable(a, q, "tease_quirk") != "", "tease_quirk needs to know a trait")
+	S.expect(f, SocialScoring.reason_unavailable(a, q, "talk_shop") == "You don't know their job yet.", "talk_shop is gated on knowing their job: %s" % SocialScoring.reason_unavailable(a, q, "talk_shop"))
+	S.expect(f, SocialScoring.reason_unavailable(a, q, "tease_quirk") != "", "tease_quirk needs to know a trait")
 	var ir_gate := S.run(a, q, "talk_shop")
 	S.expect(f, ir_gate.state == "finished" and str(SocialDynamics.outcome_log.back()["label"]) == "Nothing came of it", "an ungated attempt achieves nothing")
-	RelationshipService.reveal(a.id, q.id, "career")
-	RelationshipService.reveal(a.id, q.id, "trait")
-	S.expect(f, SocialDynamics.reason_unavailable(a, q, "talk_shop", false) == "" and SocialDynamics.reason_unavailable(a, q, "tease_quirk", false) == "", "knowledge unlocks them (%s / %s)" % [SocialDynamics.reason_unavailable(a, q, "talk_shop"), SocialDynamics.reason_unavailable(a, q, "tease_quirk")])
+	RelationshipKnowledge.reveal(a.id, q.id, "career")
+	RelationshipKnowledge.reveal(a.id, q.id, "trait")
+	S.expect(f, SocialScoring.reason_unavailable(a, q, "talk_shop", false) == "" and SocialScoring.reason_unavailable(a, q, "tease_quirk", false) == "", "knowledge unlocks them (%s / %s)" % [SocialScoring.reason_unavailable(a, q, "talk_shop"), SocialScoring.reason_unavailable(a, q, "tease_quirk")])
 	var fr_k: float = q.get_rel(a.id, "friendship")
 	S.run(a, q, "talk_shop")
 	S.expect(f, str(SocialDynamics.outcome_log.back()["label"]) != "Nothing came of it", "knowing their job lets the conversation land")
 	RelationshipService.add_both(a.id, b.id, "friendship", 30.0)
 	var guard := 0
-	while RelationshipService.unknown_trait_count(a.id, b.id) > 0 and guard < 80:
+	while RelationshipKnowledge.unknown_trait_count(a.id, b.id) > 0 and guard < 80:
 		S.run(a, b, "get_to_know")
 		guard += 1
-	S.expect(f, RelationshipService.unknown_trait_count(a.id, b.id) == 0, "repeated get-to-know chats reveal every trait (%d rounds)" % guard)
+	S.expect(f, RelationshipKnowledge.unknown_trait_count(a.id, b.id) == 0, "repeated get-to-know chats reveal every trait (%d rounds)" % guard)
 	var c := S.folk(w, "Cy")
 	var g2 := 0
-	while not RelationshipService.knows_career(a.id, c.id) and g2 < 60:
+	while not RelationshipKnowledge.knows_career(a.id, c.id) and g2 < 60:
 		S.run(a, c, "ask_about_day")
 		g2 += 1
-	S.expect(f, RelationshipService.knows_career(a.id, c.id), "ask_about_day eventually reveals the career")
+	S.expect(f, RelationshipKnowledge.knows_career(a.id, c.id), "ask_about_day eventually reveals the career")
 	var d := S.folk(w, "Di")
 	RelationshipService.add_both(a.id, d.id, "friendship", 60.0)
 	var g3 := 0
-	while not RelationshipService.knows_aspiration(a.id, d.id) and g3 < 60:
+	while not RelationshipKnowledge.knows_aspiration(a.id, d.id) and g3 < 60:
 		S.run(a, d, "discuss_dreams")
 		g3 += 1
-	S.expect(f, RelationshipService.knows_aspiration(a.id, d.id), "discuss_dreams reveals the aspiration")
+	S.expect(f, RelationshipKnowledge.knows_aspiration(a.id, d.id), "discuss_dreams reveals the aspiration")
 	var e := S.folk(w, "Ed", ["lazy", "gamer"])
-	RelationshipService.set_flag(a.id, e.id, "sweetheart", true, false)
-	S.expect(f, RelationshipService.known_summary(a.id, e.id)["everything"] and RelationshipService.unknown_trait_count(a.id, e.id) == 0, "sweethearts know each other fully")
+	RelationshipBits.set_flag(a.id, e.id, "sweetheart", true, false)
+	S.expect(f, RelationshipKnowledge.known_summary(a.id, e.id)["everything"] and RelationshipKnowledge.unknown_trait_count(a.id, e.id) == 0, "sweethearts know each other fully")
 	var h := S.folk(w, "Hu", ["neat", "social", "creative", "gamer"])
 	for i in 40:
 		S.run(a, h, "chat")
-	S.expect(f, RelationshipService.known_traits(a.id, h.id).size() >= 1, "chatting reveals traits over time")
+	S.expect(f, RelationshipKnowledge.known_traits(a.id, h.id).size() >= 1, "chatting reveals traits over time")
 	S.teardown()
 
 func _trust(f: Array) -> void:
@@ -210,17 +224,17 @@ func _trust(f: Array) -> void:
 	var a := S.folk(w, "Ann")
 	var b := S.folk(w, "Bo")
 	RelationshipService.add_both(a.id, b.id, "friendship", 50.0)
-	S.expect(f, RelationshipService.trust(b.id, a.id) == 0.0, "trust starts at zero")
+	S.expect(f, RelationshipRomance.trust(b.id, a.id) == 0.0, "trust starts at zero")
 	for i in 6:
 		S.run(a, b, "offer_help")
-	S.expect(f, RelationshipService.trust(b.id, a.id) > 3.0, "helping builds trust (%.1f)" % RelationshipService.trust(b.id, a.id))
-	S.expect(f, a.get_rel(b.id, "trust") == RelationshipService.trust(a.id, b.id), "trust lives in Folk.relationships like the other tracks")
+	S.expect(f, RelationshipRomance.trust(b.id, a.id) > 3.0, "helping builds trust (%.1f)" % RelationshipRomance.trust(b.id, a.id))
+	S.expect(f, a.get_rel(b.id, "trust") == RelationshipRomance.trust(a.id, b.id), "trust lives in Folk.relationships like the other tracks")
 	RelationshipService.set_value(b.id, a.id, "trust", 70.0)
 	RelationshipService.set_value(b.id, a.id, "friendship", 45.0)
-	S.expect(f, RelationshipService.bit_for(b.id, a.id) == "confidant", "high trust + friendship = confidant, got %s" % RelationshipService.bit_for(b.id, a.id))
-	var t0: float = RelationshipService.trust(b.id, a.id)
+	S.expect(f, RelationshipBits.bit_for(b.id, a.id) == "confidant", "high trust + friendship = confidant, got %s" % RelationshipBits.bit_for(b.id, a.id))
+	var t0: float = RelationshipRomance.trust(b.id, a.id)
 	for d in range(2, 20):
 		S.set_time(d, 8)
 		RelationshipService.on_day(d)
-	S.expect(f, RelationshipService.trust(b.id, a.id) < t0 and RelationshipService.trust(b.id, a.id) > t0 - 12.0, "idle trust decays slowly (%.1f -> %.1f)" % [t0, RelationshipService.trust(b.id, a.id)])
+	S.expect(f, RelationshipRomance.trust(b.id, a.id) < t0 and RelationshipRomance.trust(b.id, a.id) > t0 - 12.0, "idle trust decays slowly (%.1f -> %.1f)" % [t0, RelationshipRomance.trust(b.id, a.id)])
 	S.teardown()

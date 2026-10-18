@@ -1,29 +1,25 @@
 class_name TitleMenu
 extends Control
-## Title screen + simple household creation.
-signal new_game(household: Dictionary)      # {name, folk:[{name, traits:[..], color:Color}]}
+## Title screen: New Game (opens the StartPicker), Continue, Load, Settings, Quit.
+signal new_game_requested
 signal continue_game(slot: int)
 signal quit_game
 
 var main_box: VBoxContainer
-var create_box: VBoxContainer
-var household_name: LineEdit
-var rows: Array = []     # {name: LineEdit, traits:[OptionButton x3], color: ColorPickerButton}
 var continue_btn: Button
-var error_label: Label
-
-const DEFAULT_NAMES := ["Mira", "Tobin", "Wren"]
-const DEFAULT_COLORS := [Color("#e07a5f"), Color("#3d85c6"), Color("#81b29a")]
+var load_btn: Button
+var load_box: VBoxContainer
+var settings_dialog: SettingsDialog
 
 func _ready() -> void:
-	set_anchors_preset(Control.PRESET_FULL_RECT)
+	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	var bg := ColorRect.new()
 	bg.color = Color(UITheme.BG, 0.97)
-	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
+	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(bg)
 	var center := CenterContainer.new()
-	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(center)
 	var panel := PanelContainer.new()
 	center.add_child(panel)
@@ -35,123 +31,94 @@ func _ready() -> void:
 	main_box.add_child(UIU.make_label("sim-4", 44, UITheme.ACCENT))
 	main_box.add_child(UIU.make_label("a tiny life simulation", 14, UITheme.MUTED))
 	var nb := Button.new()
-	nb.text = "New Household"
+	nb.text = "New Game"
 	nb.custom_minimum_size = Vector2(0, 40)
-	nb.pressed.connect(show_create)
+	nb.pressed.connect(func(): new_game_requested.emit())
 	main_box.add_child(nb)
 	continue_btn = Button.new()
-	continue_btn.text = "Continue / Load"
+	continue_btn.text = "Continue"
+	continue_btn.tooltip_text = "Jump back into your most recent save"
 	continue_btn.custom_minimum_size = Vector2(0, 40)
 	continue_btn.pressed.connect(_continue)
 	main_box.add_child(continue_btn)
+	load_btn = Button.new()
+	load_btn.text = "Load Game..."
+	load_btn.tooltip_text = "Pick one of your save slots"
+	load_btn.custom_minimum_size = Vector2(0, 40)
+	load_btn.pressed.connect(show_load)
+	main_box.add_child(load_btn)
+	var sb := Button.new()
+	sb.text = "Settings"
+	sb.tooltip_text = "Display, gameplay, accessibility, audio and controls"
+	sb.custom_minimum_size = Vector2(0, 40)
+	sb.pressed.connect(func(): settings_dialog.show_for(-1))
+	main_box.add_child(sb)
 	var qb := Button.new()
 	qb.text = "Quit"
 	qb.custom_minimum_size = Vector2(0, 40)
 	qb.pressed.connect(func(): quit_game.emit())
 	main_box.add_child(qb)
-	_build_create(root)
+	_build_load(root)
+	settings_dialog = SettingsDialog.new()
+	add_child(settings_dialog)
 	refresh()
 
 func refresh() -> void:
 	continue_btn.disabled = not SaveSlots.has_any()
+	load_btn.disabled = not SaveSlots.has_any()
+	if load_box != null:
+		_fill_load()
 
-func _build_create(root: VBoxContainer) -> void:
-	create_box = VBoxContainer.new()
-	create_box.visible = false
-	root.add_child(create_box)
-	create_box.add_child(UIU.make_label("Create your household", 22))
-	var hr := HBoxContainer.new()
-	create_box.add_child(hr)
-	hr.add_child(UIU.make_label("Household name", 14))
-	household_name = LineEdit.new()
-	household_name.text = "Fernwood"
-	household_name.custom_minimum_size = Vector2(220, 0)
-	hr.add_child(household_name)
-	var traits := UIU.tbl("traits")
-	var tids: Array = traits.keys()
-	tids.sort()
-	for i in 3:
-		var card := VBoxContainer.new()
-		create_box.add_child(card)
-		var top := HBoxContainer.new()
-		card.add_child(top)
-		var cp := ColorPickerButton.new()
-		cp.color = DEFAULT_COLORS[i]
-		cp.custom_minimum_size = Vector2(44, 28)
-		cp.edit_alpha = false
-		top.add_child(cp)
-		var ne := LineEdit.new()
-		ne.text = DEFAULT_NAMES[i]
-		ne.custom_minimum_size = Vector2(150, 0)
-		top.add_child(ne)
-		var tr := HBoxContainer.new()
-		card.add_child(tr)
-		var opts: Array = []
-		for k in 3:
-			var ob := OptionButton.new()
-			ob.custom_minimum_size = Vector2(120, 0)
-			for t in tids:
-				ob.add_item(str(traits[t].get("label", t)))
-				ob.set_item_metadata(ob.item_count - 1, t)
-			if tids.size() > 0:
-				ob.select((i * 3 + k) % tids.size())
-			tr.add_child(ob)
-			opts.append(ob)
-		rows.append({"name": ne, "traits": opts, "color": cp})
-	error_label = UIU.make_label("", 13, Color("#e5534b"))
-	create_box.add_child(error_label)
-	var hb := HBoxContainer.new()
-	create_box.add_child(hb)
+func show_main() -> void:
+	load_box.visible = false
+	main_box.visible = true
+
+func _build_load(root: VBoxContainer) -> void:
+	load_box = VBoxContainer.new()
+	load_box.visible = false
+	load_box.custom_minimum_size = Vector2(430, 0)
+	root.add_child(load_box)
+
+func _fill_load() -> void:
+	for c in load_box.get_children():
+		load_box.remove_child(c)
+		c.queue_free()
+	load_box.add_child(UIU.make_label("Load a game", 22))
+	for i in range(1, SaveSlots.SLOTS + 1):
+		var row := HBoxContainer.new()
+		load_box.add_child(row)
+		var lab := UIU.make_label("Slot %d: %s" % [i, SaveSlots.slot_summary(i)], 14)
+		lab.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(lab)
+		var b := Button.new()
+		b.text = "Load"
+		b.disabled = not SaveSlots.has_slot(i)
+		var slot := i
+		b.pressed.connect(func(): continue_game.emit(slot))
+		row.add_child(b)
 	var back := Button.new()
 	back.text = "Back"
-	back.pressed.connect(func():
-		create_box.visible = false
-		main_box.visible = true)
-	hb.add_child(back)
-	var go := Button.new()
-	go.text = "Start Playing"
-	go.pressed.connect(submit)
-	hb.add_child(go)
+	back.pressed.connect(show_main)
+	load_box.add_child(back)
 
-func show_create() -> void:
+func show_load() -> void:
+	_fill_load()
 	main_box.visible = false
-	create_box.visible = true
+	load_box.visible = true
 
-func collect() -> Dictionary:
-	var folk: Array = []
-	for r in rows:
-		var ts: Array = []
-		for ob in r["traits"]:
-			if ob.selected >= 0:
-				var t = ob.get_item_metadata(ob.selected)
-				if not (t in ts):
-					ts.append(t)
-		folk.append({"name": r["name"].text.strip_edges(), "traits": ts, "color": r["color"].color})
-	return {"name": household_name.text.strip_edges(), "folk": folk}
-
-func validate(h: Dictionary) -> String:
-	if h["name"] == "":
-		return "Give your household a name."
-	var seen := {}
-	for f in h["folk"]:
-		if f["name"] == "":
-			return "Every folk needs a name."
-		if seen.has(f["name"]):
-			return "Names must be distinct."
-		seen[f["name"]] = true
-		if f["traits"].size() < 3 and UIU.tbl("traits").size() >= 3:
-			return "%s needs 3 different traits." % f["name"]
-	return ""
-
-func submit() -> void:
-	var h := collect()
-	var err := validate(h)
-	error_label.text = err
-	if err == "":
-		new_game.emit(h)
+## Most recently written slot.
+func newest_slot() -> int:
+	var best := -1
+	var best_t := -1
+	for i in range(1, SaveSlots.SLOTS + 1):
+		if SaveSlots.has_slot(i):
+			var t := int(FileAccess.get_modified_time(SaveSlots.path(i)))
+			if t > best_t:
+				best_t = t
+				best = i
+	return best
 
 func _continue() -> void:
-	for i in range(SaveSlots.SLOTS, 0, -1):
-		if SaveSlots.has_slot(i):
-			continue_game.emit(i)
-			return
+	var slot := newest_slot()
+	if slot > 0:
+		continue_game.emit(slot)

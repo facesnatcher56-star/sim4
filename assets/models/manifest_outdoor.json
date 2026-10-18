@@ -1,0 +1,2533 @@
+{
+ "road_asphalt": {
+  "file": "res://assets/models/outdoor/road_asphalt.glb",
+  "footprint": [
+   1,
+   1,
+   0.0
+  ],
+  "notes": "plain asphalt tile with faint patches; the field of every road",
+  "bounds_min": [
+   -0.5,
+   -0.05,
+   -0.5
+  ],
+  "bounds_max": [
+   0.5,
+   0.003,
+   0.5
+  ],
+  "nodes": [
+   "road_asphalt"
+  ],
+  "size_kb": 3.6
+ },
+ "road_line": {
+  "file": "res://assets/models/outdoor/road_line.glb",
+  "footprint": [
+   1,
+   1,
+   0.01
+  ],
+  "notes": "solid yellow centre line along Z on the +X edge (rotate 180 for the -X edge; two tiles side by side = double line)",
+  "bounds_min": [
+   -0.5,
+   -0.05,
+   -0.5
+  ],
+  "bounds_max": [
+   0.5,
+   0.006,
+   0.5
+  ],
+  "nodes": [
+   "road_line"
+  ],
+  "size_kb": 2.8
+ },
+ "road_line_dash": {
+  "file": "res://assets/models/outdoor/road_line_dash.glb",
+  "footprint": [
+   1,
+   1,
+   0.01
+  ],
+  "notes": "dashed white lane line along Z on the +X edge (tile has one dash)",
+  "bounds_min": [
+   -0.5,
+   -0.05,
+   -0.5
+  ],
+  "bounds_max": [
+   0.5,
+   0.006,
+   0.5
+  ],
+  "nodes": [
+   "road_line_dash"
+  ],
+  "size_kb": 2.8
+ },
+ "road_edge": {
+  "file": "res://assets/models/outdoor/road_edge.glb",
+  "footprint": [
+   1,
+   1,
+   0.01
+  ],
+  "notes": "asphalt with a solid white edge line along Z near the -X side (road edge next to a curb)",
+  "bounds_min": [
+   -0.5,
+   -0.05,
+   -0.5
+  ],
+  "bounds_max": [
+   0.5,
+   0.006,
+   0.5
+  ],
+  "nodes": [
+   "road_edge"
+  ],
+  "size_kb": 2.8
+ },
+ "road_crosswalk": {
+  "file": "res://assets/models/outdoor/road_crosswalk.glb",
+  "footprint": [
+   1,
+   1,
+   0.01
+  ],
+  "notes": "zebra crossing: bars run along Z, spaced along X (pedestrians cross along X)",
+  "bounds_min": [
+   -0.5,
+   -0.05,
+   -0.5
+  ],
+  "bounds_max": [
+   0.5,
+   0.006,
+   0.5
+  ],
+  "nodes": [
+   "road_crosswalk"
+  ],
+  "size_kb": 4.3
+ },
+ "road_corner": {
+  "file": "res://assets/models/outdoor/road_corner.glb",
+  "footprint": [
+   1,
+   1,
+   0.03
+  ],
+  "notes": "intersection corner: asphalt quarter-disc, sidewalk-coloured block in the -X,-Z corner with a curb arc. Rotate in 90 degree steps",
+  "bounds_min": [
+   -0.5,
+   -0.05,
+   -0.5
+  ],
+  "bounds_max": [
+   0.5,
+   0.03,
+   0.5
+  ],
+  "nodes": [
+   "road_corner"
+  ],
+  "size_kb": 9.8
+ },
+ "road_t": {
+  "file": "res://assets/models/outdoor/road_t.glb",
+  "footprint": [
+   1,
+   1,
+   0.01
+  ],
+  "notes": "T-junction through tile: asphalt, yellow centre line on the +X edge continues (branch comes in from -X)",
+  "bounds_min": [
+   -0.5,
+   -0.05,
+   -0.5
+  ],
+  "bounds_max": [
+   0.5,
+   0.006,
+   0.5
+  ],
+  "nodes": [
+   "road_t"
+  ],
+  "size_kb": 3.9
+ },
+ "road_cross": {
+  "file": "res://assets/models/outdoor/road_cross.glb",
+  "footprint": [
+   1,
+   1,
+   0.01
+  ],
+  "notes": "4-way intersection centre tile: asphalt with four small corner ticks",
+  "bounds_min": [
+   -0.5,
+   -0.05,
+   -0.5
+  ],
+  "bounds_max": [
+   0.5,
+   0.006,
+   0.5
+  ],
+  "nodes": [
+   "road_cross"
+  ],
+  "size_kb": 7.4
+ },
+ "road_dead_end": {
+  "file": "res://assets/models/outdoor/road_dead_end.glb",
+  "footprint": [
+   1,
+   1,
+   0.2
+  ],
+  "notes": "road end cap: asphalt with a red/white barrier along the -Z edge (rotate to face the road)",
+  "bounds_min": [
+   -0.5,
+   -0.05,
+   -0.5
+  ],
+  "bounds_max": [
+   0.5,
+   0.2,
+   0.5
+  ],
+  "nodes": [
+   "road_dead_end"
+  ],
+  "size_kb": 7.1
+ },
+ "sidewalk": {
+  "file": "res://assets/models/outdoor/sidewalk.glb",
+  "footprint": [
+   1,
+   1,
+   0.0
+  ],
+  "notes": "paving slabs, top at y=0",
+  "bounds_min": [
+   -0.5,
+   -0.05,
+   -0.5
+  ],
+  "bounds_max": [
+   0.5,
+   0.004,
+   0.5
+  ],
+  "nodes": [
+   "sidewalk"
+  ],
+  "size_kb": 3.6
+ },
+ "sidewalk_curb": {
+  "file": "res://assets/models/outdoor/sidewalk_curb.glb",
+  "footprint": [
+   1,
+   1,
+   0.04
+  ],
+  "notes": "sidewalk with a raised curb stone along the -Z edge (road is on the -Z side)",
+  "bounds_min": [
+   -0.5,
+   -0.05,
+   -0.5
+  ],
+  "bounds_max": [
+   0.5,
+   0.035,
+   0.5
+  ],
+  "nodes": [
+   "sidewalk_curb"
+  ],
+  "size_kb": 3.9
+ },
+ "sidewalk_corner": {
+  "file": "res://assets/models/outdoor/sidewalk_corner.glb",
+  "footprint": [
+   1,
+   1,
+   0.04
+  ],
+  "notes": "outside sidewalk corner: curb along -Z and -X edges (road wraps round that corner)",
+  "bounds_min": [
+   -0.5,
+   -0.05,
+   -0.5
+  ],
+  "bounds_max": [
+   0.5,
+   0.035,
+   0.5
+  ],
+  "nodes": [
+   "sidewalk_corner"
+  ],
+  "size_kb": 3.6
+ },
+ "curb_ramp": {
+  "file": "res://assets/models/outdoor/curb_ramp.glb",
+  "footprint": [
+   1,
+   1,
+   0.04
+  ],
+  "notes": "sidewalk curb ramp: curb on the -Z edge with a sloped ramp + yellow tactile patch in the middle",
+  "bounds_min": [
+   -0.5,
+   -0.05,
+   -0.5
+  ],
+  "bounds_max": [
+   0.5,
+   0.035,
+   0.5
+  ],
+  "nodes": [
+   "curb_ramp"
+  ],
+  "size_kb": 5.5
+ },
+ "curb_straight": {
+  "file": "res://assets/models/outdoor/curb_straight.glb",
+  "footprint": [
+   1,
+   0.15,
+   0.06
+  ],
+  "notes": "bare curb stone 1.0 x 0.14 on the -Z edge (place along road edges); origin tile centre",
+  "bounds_min": [
+   -0.5,
+   -0.025,
+   -0.5
+  ],
+  "bounds_max": [
+   0.5,
+   0.06,
+   -0.36
+  ],
+  "nodes": [
+   "curb_straight"
+  ],
+  "size_kb": 1.7
+ },
+ "curb_corner": {
+  "file": "res://assets/models/outdoor/curb_corner.glb",
+  "footprint": [
+   1,
+   1,
+   0.06
+  ],
+  "notes": "bare L-shaped curb stone on the -Z and -X edges",
+  "bounds_min": [
+   -0.5,
+   -0.025,
+   -0.5
+  ],
+  "bounds_max": [
+   0.5,
+   0.06,
+   0.5
+  ],
+  "nodes": [
+   "curb_corner"
+  ],
+  "size_kb": 2.3
+ },
+ "ground_grass": {
+  "file": "res://assets/models/outdoor/ground_grass.glb",
+  "footprint": [
+   1,
+   1,
+   0.0
+  ],
+  "notes": "grass tile with two darker patches",
+  "bounds_min": [
+   -0.5,
+   -0.05,
+   -0.5
+  ],
+  "bounds_max": [
+   0.5,
+   0.003,
+   0.5
+  ],
+  "nodes": [
+   "ground_grass"
+  ],
+  "size_kb": 3.6
+ },
+ "ground_dirt": {
+  "file": "res://assets/models/outdoor/ground_dirt.glb",
+  "footprint": [
+   1,
+   1,
+   0.0
+  ],
+  "notes": "bare earth tile",
+  "bounds_min": [
+   -0.5,
+   -0.05,
+   -0.5
+  ],
+  "bounds_max": [
+   0.5,
+   0.003,
+   0.5
+  ],
+  "nodes": [
+   "ground_dirt"
+  ],
+  "size_kb": 3.5
+ },
+ "ground_gravel": {
+  "file": "res://assets/models/outdoor/ground_gravel.glb",
+  "footprint": [
+   1,
+   1,
+   0.02
+  ],
+  "notes": "gravel tile with pebbles",
+  "bounds_min": [
+   -0.5,
+   -0.05,
+   -0.5
+  ],
+  "bounds_max": [
+   0.5,
+   0.016,
+   0.5
+  ],
+  "nodes": [
+   "ground_gravel"
+  ],
+  "size_kb": 6.7
+ },
+ "ground_sand": {
+  "file": "res://assets/models/outdoor/ground_sand.glb",
+  "footprint": [
+   1,
+   1,
+   0.0
+  ],
+  "notes": "sand tile with ripples",
+  "bounds_min": [
+   -0.5,
+   -0.05,
+   -0.5
+  ],
+  "bounds_max": [
+   0.5,
+   0.003,
+   0.5
+  ],
+  "nodes": [
+   "ground_sand"
+  ],
+  "size_kb": 3.6
+ },
+ "car_hatchback_red": {
+  "file": "res://assets/models/outdoor/car_hatchback_red.glb",
+  "footprint": [
+   1.8,
+   3.9,
+   1.46
+  ],
+  "notes": "hatchback, 3.9 m long, front -Z; nodes body, wheel_fl/fr/rl/rr (spin about X); body paint = material 'body'",
+  "bounds_min": [
+   -0.91,
+   -0.0,
+   -2.03
+  ],
+  "bounds_max": [
+   0.91,
+   1.455,
+   2.03
+  ],
+  "nodes": [
+   "body",
+   "car_hatchback_red",
+   "wheel_fl",
+   "wheel_fr",
+   "wheel_rl",
+   "wheel_rr"
+  ],
+  "size_kb": 28.3
+ },
+ "car_hatchback_blue": {
+  "file": "res://assets/models/outdoor/car_hatchback_blue.glb",
+  "footprint": [
+   1.8,
+   3.9,
+   1.46
+  ],
+  "notes": "hatchback, 3.9 m long, front -Z; nodes body, wheel_fl/fr/rl/rr (spin about X); body paint = material 'body'",
+  "bounds_min": [
+   -0.91,
+   -0.0,
+   -2.03
+  ],
+  "bounds_max": [
+   0.91,
+   1.455,
+   2.03
+  ],
+  "nodes": [
+   "body",
+   "car_hatchback_blue",
+   "wheel_fl",
+   "wheel_fr",
+   "wheel_rl",
+   "wheel_rr"
+  ],
+  "size_kb": 28.3
+ },
+ "car_hatchback_white": {
+  "file": "res://assets/models/outdoor/car_hatchback_white.glb",
+  "footprint": [
+   1.8,
+   3.9,
+   1.46
+  ],
+  "notes": "hatchback, 3.9 m long, front -Z; nodes body, wheel_fl/fr/rl/rr (spin about X); body paint = material 'body'",
+  "bounds_min": [
+   -0.91,
+   -0.0,
+   -2.03
+  ],
+  "bounds_max": [
+   0.91,
+   1.455,
+   2.03
+  ],
+  "nodes": [
+   "body",
+   "car_hatchback_white",
+   "wheel_fl",
+   "wheel_fr",
+   "wheel_rl",
+   "wheel_rr"
+  ],
+  "size_kb": 28.3
+ },
+ "car_hatchback_yellow": {
+  "file": "res://assets/models/outdoor/car_hatchback_yellow.glb",
+  "footprint": [
+   1.8,
+   3.9,
+   1.46
+  ],
+  "notes": "hatchback, 3.9 m long, front -Z; nodes body, wheel_fl/fr/rl/rr (spin about X); body paint = material 'body'",
+  "bounds_min": [
+   -0.91,
+   -0.0,
+   -2.03
+  ],
+  "bounds_max": [
+   0.91,
+   1.455,
+   2.03
+  ],
+  "nodes": [
+   "body",
+   "car_hatchback_yellow",
+   "wheel_fl",
+   "wheel_fr",
+   "wheel_rl",
+   "wheel_rr"
+  ],
+  "size_kb": 28.3
+ },
+ "car_sedan_red": {
+  "file": "res://assets/models/outdoor/car_sedan_red.glb",
+  "footprint": [
+   1.9,
+   4.5,
+   1.43
+  ],
+  "notes": "sedan, 4.5 m long, front -Z; nodes body, wheel_fl/fr/rl/rr (spin about X); body paint = material 'body'",
+  "bounds_min": [
+   -0.96,
+   -0.0,
+   -2.33
+  ],
+  "bounds_max": [
+   0.96,
+   1.435,
+   2.33
+  ],
+  "nodes": [
+   "body",
+   "car_sedan_red",
+   "wheel_fl",
+   "wheel_fr",
+   "wheel_rl",
+   "wheel_rr"
+  ],
+  "size_kb": 28.3
+ },
+ "car_sedan_blue": {
+  "file": "res://assets/models/outdoor/car_sedan_blue.glb",
+  "footprint": [
+   1.9,
+   4.5,
+   1.43
+  ],
+  "notes": "sedan, 4.5 m long, front -Z; nodes body, wheel_fl/fr/rl/rr (spin about X); body paint = material 'body'",
+  "bounds_min": [
+   -0.96,
+   -0.0,
+   -2.33
+  ],
+  "bounds_max": [
+   0.96,
+   1.435,
+   2.33
+  ],
+  "nodes": [
+   "body",
+   "car_sedan_blue",
+   "wheel_fl",
+   "wheel_fr",
+   "wheel_rl",
+   "wheel_rr"
+  ],
+  "size_kb": 28.3
+ },
+ "car_sedan_white": {
+  "file": "res://assets/models/outdoor/car_sedan_white.glb",
+  "footprint": [
+   1.9,
+   4.5,
+   1.43
+  ],
+  "notes": "sedan, 4.5 m long, front -Z; nodes body, wheel_fl/fr/rl/rr (spin about X); body paint = material 'body'",
+  "bounds_min": [
+   -0.96,
+   -0.0,
+   -2.33
+  ],
+  "bounds_max": [
+   0.96,
+   1.435,
+   2.33
+  ],
+  "nodes": [
+   "body",
+   "car_sedan_white",
+   "wheel_fl",
+   "wheel_fr",
+   "wheel_rl",
+   "wheel_rr"
+  ],
+  "size_kb": 28.3
+ },
+ "car_sedan_yellow": {
+  "file": "res://assets/models/outdoor/car_sedan_yellow.glb",
+  "footprint": [
+   1.9,
+   4.5,
+   1.43
+  ],
+  "notes": "sedan, 4.5 m long, front -Z; nodes body, wheel_fl/fr/rl/rr (spin about X); body paint = material 'body'",
+  "bounds_min": [
+   -0.96,
+   -0.0,
+   -2.33
+  ],
+  "bounds_max": [
+   0.96,
+   1.435,
+   2.33
+  ],
+  "nodes": [
+   "body",
+   "car_sedan_yellow",
+   "wheel_fl",
+   "wheel_fr",
+   "wheel_rl",
+   "wheel_rr"
+  ],
+  "size_kb": 28.3
+ },
+ "car_van_red": {
+  "file": "res://assets/models/outdoor/car_van_red.glb",
+  "footprint": [
+   1.95,
+   4.8,
+   2.05
+  ],
+  "notes": "van, 4.8 m long, front -Z; nodes body, wheel_fl/fr/rl/rr (spin about X); body paint = material 'body'",
+  "bounds_min": [
+   -0.98,
+   -0.0,
+   -2.48
+  ],
+  "bounds_max": [
+   0.98,
+   2.05,
+   2.48
+  ],
+  "nodes": [
+   "body",
+   "car_van_red",
+   "wheel_fl",
+   "wheel_fr",
+   "wheel_rl",
+   "wheel_rr"
+  ],
+  "size_kb": 30.6
+ },
+ "car_van_blue": {
+  "file": "res://assets/models/outdoor/car_van_blue.glb",
+  "footprint": [
+   1.95,
+   4.8,
+   2.05
+  ],
+  "notes": "van, 4.8 m long, front -Z; nodes body, wheel_fl/fr/rl/rr (spin about X); body paint = material 'body'",
+  "bounds_min": [
+   -0.98,
+   -0.0,
+   -2.48
+  ],
+  "bounds_max": [
+   0.98,
+   2.05,
+   2.48
+  ],
+  "nodes": [
+   "body",
+   "car_van_blue",
+   "wheel_fl",
+   "wheel_fr",
+   "wheel_rl",
+   "wheel_rr"
+  ],
+  "size_kb": 30.6
+ },
+ "car_van_white": {
+  "file": "res://assets/models/outdoor/car_van_white.glb",
+  "footprint": [
+   1.95,
+   4.8,
+   2.05
+  ],
+  "notes": "van, 4.8 m long, front -Z; nodes body, wheel_fl/fr/rl/rr (spin about X); body paint = material 'body'",
+  "bounds_min": [
+   -0.98,
+   -0.0,
+   -2.48
+  ],
+  "bounds_max": [
+   0.98,
+   2.05,
+   2.48
+  ],
+  "nodes": [
+   "body",
+   "car_van_white",
+   "wheel_fl",
+   "wheel_fr",
+   "wheel_rl",
+   "wheel_rr"
+  ],
+  "size_kb": 30.6
+ },
+ "car_van_yellow": {
+  "file": "res://assets/models/outdoor/car_van_yellow.glb",
+  "footprint": [
+   1.95,
+   4.8,
+   2.05
+  ],
+  "notes": "van, 4.8 m long, front -Z; nodes body, wheel_fl/fr/rl/rr (spin about X); body paint = material 'body'",
+  "bounds_min": [
+   -0.98,
+   -0.0,
+   -2.48
+  ],
+  "bounds_max": [
+   0.98,
+   2.05,
+   2.48
+  ],
+  "nodes": [
+   "body",
+   "car_van_yellow",
+   "wheel_fl",
+   "wheel_fr",
+   "wheel_rl",
+   "wheel_rr"
+  ],
+  "size_kb": 30.6
+ },
+ "bus": {
+  "file": "res://assets/models/outdoor/bus.glb",
+  "footprint": [
+   2.6,
+   9.0,
+   2.88
+  ],
+  "notes": "city bus 9 m, front -Z; nodes body, wheel_fl/fr/rl/rr",
+  "bounds_min": [
+   -1.28,
+   0.0,
+   -4.6
+  ],
+  "bounds_max": [
+   1.28,
+   2.88,
+   4.6
+  ],
+  "nodes": [
+   "body",
+   "bus",
+   "wheel_fl",
+   "wheel_fr",
+   "wheel_rl",
+   "wheel_rr"
+  ],
+  "size_kb": 32.9
+ },
+ "tree_oak_l": {
+  "file": "res://assets/models/outdoor/tree_oak_l.glb",
+  "footprint": [
+   1,
+   1,
+   5.7
+  ],
+  "notes": "oak tree, large; nodes trunk, leaves (tint)",
+  "bounds_min": [
+   -2.031,
+   0.0,
+   -2.072
+  ],
+  "bounds_max": [
+   2.25,
+   5.7,
+   2.072
+  ],
+  "nodes": [
+   "leaves",
+   "tree_oak_l",
+   "trunk"
+  ],
+  "size_kb": 19.1
+ },
+ "tree_oak_s": {
+  "file": "res://assets/models/outdoor/tree_oak_s.glb",
+  "footprint": [
+   1,
+   1,
+   3.13
+  ],
+  "notes": "oak tree, small; nodes trunk, leaves (tint)",
+  "bounds_min": [
+   -1.117,
+   0.0,
+   -1.14
+  ],
+  "bounds_max": [
+   1.237,
+   3.135,
+   1.14
+  ],
+  "nodes": [
+   "leaves",
+   "tree_oak_s",
+   "trunk"
+  ],
+  "size_kb": 19.1
+ },
+ "tree_pine_l": {
+  "file": "res://assets/models/outdoor/tree_pine_l.glb",
+  "footprint": [
+   1,
+   1,
+   5.6
+  ],
+  "notes": "pine tree, large; nodes trunk, leaves (tint)",
+  "bounds_min": [
+   -1.45,
+   0.0,
+   -1.45
+  ],
+  "bounds_max": [
+   1.45,
+   5.6,
+   1.45
+  ],
+  "nodes": [
+   "leaves",
+   "tree_pine_l",
+   "trunk"
+  ],
+  "size_kb": 6.2
+ },
+ "tree_pine_s": {
+  "file": "res://assets/models/outdoor/tree_pine_s.glb",
+  "footprint": [
+   1,
+   1,
+   3.08
+  ],
+  "notes": "pine tree, small; nodes trunk, leaves (tint)",
+  "bounds_min": [
+   -0.798,
+   0.0,
+   -0.798
+  ],
+  "bounds_max": [
+   0.798,
+   3.08,
+   0.798
+  ],
+  "nodes": [
+   "leaves",
+   "tree_pine_s",
+   "trunk"
+  ],
+  "size_kb": 6.2
+ },
+ "tree_ornamental_l": {
+  "file": "res://assets/models/outdoor/tree_ornamental_l.glb",
+  "footprint": [
+   1,
+   1,
+   3.51
+  ],
+  "notes": "ornamental tree, large; nodes trunk, leaves (tint), blossom",
+  "bounds_min": [
+   -1.115,
+   0.0,
+   -1.065
+  ],
+  "bounds_max": [
+   1.173,
+   3.507,
+   1.104
+  ],
+  "nodes": [
+   "blossom",
+   "leaves",
+   "tree_ornamental_l",
+   "trunk"
+  ],
+  "size_kb": 14.4
+ },
+ "tree_ornamental_s": {
+  "file": "res://assets/models/outdoor/tree_ornamental_s.glb",
+  "footprint": [
+   1,
+   1,
+   2.13
+  ],
+  "notes": "ornamental tree, small; nodes trunk, leaves (tint), blossom",
+  "bounds_min": [
+   -0.679,
+   0.0,
+   -0.648
+  ],
+  "bounds_max": [
+   0.714,
+   2.135,
+   0.672
+  ],
+  "nodes": [
+   "blossom",
+   "leaves",
+   "tree_ornamental_s",
+   "trunk"
+  ],
+  "size_kb": 14.4
+ },
+ "bush_round": {
+  "file": "res://assets/models/outdoor/bush_round.glb",
+  "footprint": [
+   1,
+   1,
+   0.84
+  ],
+  "notes": "round shrub, node leaves",
+  "bounds_min": [
+   -0.557,
+   -0.02,
+   -0.409
+  ],
+  "bounds_max": [
+   0.56,
+   0.84,
+   0.409
+  ],
+  "nodes": [
+   "bush_round",
+   "leaves",
+   "stem"
+  ],
+  "size_kb": 8.2
+ },
+ "bush_flowering": {
+  "file": "res://assets/models/outdoor/bush_flowering.glb",
+  "footprint": [
+   1,
+   1,
+   0.84
+  ],
+  "notes": "shrub with flowers; nodes leaves, flowers",
+  "bounds_min": [
+   -0.52,
+   0.0,
+   -0.39
+  ],
+  "bounds_max": [
+   0.522,
+   0.84,
+   0.41
+  ],
+  "nodes": [
+   "bush_flowering",
+   "flowers",
+   "leaves"
+  ],
+  "size_kb": 12.3
+ },
+ "flower_bed": {
+  "file": "res://assets/models/outdoor/flower_bed.glb",
+  "footprint": [
+   2,
+   1,
+   0.54
+  ],
+  "notes": "2x1 raised flower bed with soil, leaves and flowers (nodes bed, leaves, flowers)",
+  "bounds_min": [
+   -1.0,
+   0.0,
+   -0.5
+  ],
+  "bounds_max": [
+   1.0,
+   0.54,
+   0.5
+  ],
+  "nodes": [
+   "bed",
+   "flower_bed",
+   "flowers",
+   "leaves"
+  ],
+  "size_kb": 26.2
+ },
+ "rock_small": {
+  "file": "res://assets/models/outdoor/rock_small.glb",
+  "footprint": [
+   1,
+   1,
+   0.29
+  ],
+  "notes": "small boulder",
+  "bounds_min": [
+   -0.273,
+   0.0,
+   -0.241
+  ],
+  "bounds_max": [
+   0.262,
+   0.287,
+   0.281
+  ],
+  "nodes": [
+   "rock_small"
+  ],
+  "size_kb": 2.2
+ },
+ "rock_large": {
+  "file": "res://assets/models/outdoor/rock_large.glb",
+  "footprint": [
+   1,
+   1,
+   0.61
+  ],
+  "notes": "large boulder with a smaller one beside it",
+  "bounds_min": [
+   -0.534,
+   0.0,
+   -0.462
+  ],
+  "bounds_max": [
+   0.727,
+   0.611,
+   0.591
+  ],
+  "nodes": [
+   "rock_large"
+  ],
+  "size_kb": 4.2
+ },
+ "rock_cluster": {
+  "file": "res://assets/models/outdoor/rock_cluster.glb",
+  "footprint": [
+   2,
+   1,
+   0.5
+  ],
+  "notes": "three stones of mixed sizes",
+  "bounds_min": [
+   -0.823,
+   0.0,
+   -0.638
+  ],
+  "bounds_max": [
+   0.823,
+   0.505,
+   0.39
+  ],
+  "nodes": [
+   "rock_cluster"
+  ],
+  "size_kb": 5.3
+ },
+ "grass_tuft": {
+  "file": "res://assets/models/outdoor/grass_tuft.glb",
+  "footprint": [
+   1,
+   1,
+   0.32
+  ],
+  "notes": "clump of tall grass blades (lay over ground_grass)",
+  "bounds_min": [
+   -0.346,
+   -0.011,
+   -0.33
+  ],
+  "bounds_max": [
+   0.426,
+   0.32,
+   0.34
+  ],
+  "nodes": [
+   "grass_tuft"
+  ],
+  "size_kb": 6.9
+ },
+ "pond_water": {
+  "file": "res://assets/models/outdoor/pond_water.glb",
+  "footprint": [
+   1,
+   1,
+   0.0
+  ],
+  "notes": "full water tile (surface y=-0.012, node water is translucent)",
+  "bounds_min": [
+   -0.5,
+   -0.05,
+   -0.5
+  ],
+  "bounds_max": [
+   0.5,
+   0.0,
+   0.5
+  ],
+  "nodes": [
+   "pond_water",
+   "rim",
+   "water"
+  ],
+  "size_kb": 6.0
+ },
+ "pond_edge": {
+  "file": "res://assets/models/outdoor/pond_edge.glb",
+  "footprint": [
+   1,
+   1,
+   0.0
+  ],
+  "notes": "straight shore: sand bank on the -Z side, water on the +Z side. Rotate for other sides",
+  "bounds_min": [
+   -0.5,
+   -0.05,
+   -0.5
+  ],
+  "bounds_max": [
+   0.5,
+   0.0,
+   0.5
+  ],
+  "nodes": [
+   "land",
+   "pond_edge",
+   "water"
+  ],
+  "size_kb": 5.6
+ },
+ "pond_corner_out": {
+  "file": "res://assets/models/outdoor/pond_corner_out.glb",
+  "footprint": [
+   1,
+   1,
+   0.0
+  ],
+  "notes": "convex water corner: water quarter-disc in the +X,+Z corner, sand elsewhere",
+  "bounds_min": [
+   -0.5,
+   -0.05,
+   -0.5
+  ],
+  "bounds_max": [
+   0.5,
+   0.0,
+   0.5
+  ],
+  "nodes": [
+   "land",
+   "pond_corner_out",
+   "water"
+  ],
+  "size_kb": 7.4
+ },
+ "pond_corner_in": {
+  "file": "res://assets/models/outdoor/pond_corner_in.glb",
+  "footprint": [
+   1,
+   1,
+   0.0
+  ],
+  "notes": "concave water corner: water everywhere except a sand quarter-disc in the -X,-Z corner",
+  "bounds_min": [
+   -0.5,
+   -0.05,
+   -0.5
+  ],
+  "bounds_max": [
+   0.5,
+   0.0,
+   0.5
+  ],
+  "nodes": [
+   "land",
+   "pond_corner_in",
+   "water"
+  ],
+  "size_kb": 7.6
+ },
+ "street_lamp": {
+  "file": "res://assets/models/outdoor/street_lamp.glb",
+  "footprint": [
+   1,
+   1,
+   3.62
+  ],
+  "notes": "street lamp 3.8 m; nodes pole, lamp_head (emissive material lamp_glow - toggle energy at night)",
+  "bounds_min": [
+   -0.19,
+   0.0,
+   -0.59
+  ],
+  "bounds_max": [
+   0.19,
+   3.62,
+   0.16
+  ],
+  "nodes": [
+   "lamp_head",
+   "pole",
+   "street_lamp"
+  ],
+  "size_kb": 7.0
+ },
+ "fence_picket_straight": {
+  "file": "res://assets/models/outdoor/fence_picket_straight.glb",
+  "footprint": [
+   1,
+   0.15,
+   1.0
+  ],
+  "notes": "picket straight, 1 m along X on the tile edge",
+  "bounds_min": [
+   -0.55,
+   0.0,
+   -0.05
+  ],
+  "bounds_max": [
+   0.55,
+   1.0,
+   0.05
+  ],
+  "nodes": [
+   "fence_picket_straight"
+  ],
+  "size_kb": 9.4
+ },
+ "fence_picket_corner": {
+  "file": "res://assets/models/outdoor/fence_picket_corner.glb",
+  "footprint": [
+   1,
+   0.15,
+   1.03
+  ],
+  "notes": "picket corner, 1 m along X on the tile edge; corner arms +X and +Z",
+  "bounds_min": [
+   -0.06,
+   0.0,
+   -0.06
+  ],
+  "bounds_max": [
+   0.55,
+   1.03,
+   0.55
+  ],
+  "nodes": [
+   "fence_picket_corner"
+  ],
+  "size_kb": 11.3
+ },
+ "fence_picket_gate": {
+  "file": "res://assets/models/outdoor/fence_picket_gate.glb",
+  "footprint": [
+   1,
+   0.15,
+   1.05
+  ],
+  "notes": "picket gate, 1 m along X on the tile edge; node gate_leaf hinge at x=-0.42 (rotate about Y to open)",
+  "bounds_min": [
+   -0.56,
+   0.0,
+   -0.06
+  ],
+  "bounds_max": [
+   0.56,
+   1.05,
+   0.06
+  ],
+  "nodes": [
+   "fence",
+   "fence_picket_gate",
+   "gate_leaf"
+  ],
+  "size_kb": 13.2
+ },
+ "fence_wood_straight": {
+  "file": "res://assets/models/outdoor/fence_wood_straight.glb",
+  "footprint": [
+   1,
+   0.15,
+   1.65
+  ],
+  "notes": "wood straight, 1 m along X on the tile edge",
+  "bounds_min": [
+   -0.55,
+   0.0,
+   -0.05
+  ],
+  "bounds_max": [
+   0.55,
+   1.65,
+   0.05
+  ],
+  "nodes": [
+   "fence_wood_straight"
+  ],
+  "size_kb": 9.4
+ },
+ "fence_wood_corner": {
+  "file": "res://assets/models/outdoor/fence_wood_corner.glb",
+  "footprint": [
+   1,
+   0.15,
+   1.68
+  ],
+  "notes": "wood corner, 1 m along X on the tile edge; corner arms +X and +Z",
+  "bounds_min": [
+   -0.06,
+   0.0,
+   -0.06
+  ],
+  "bounds_max": [
+   0.55,
+   1.68,
+   0.55
+  ],
+  "nodes": [
+   "fence_wood_corner"
+  ],
+  "size_kb": 11.3
+ },
+ "fence_wood_gate": {
+  "file": "res://assets/models/outdoor/fence_wood_gate.glb",
+  "footprint": [
+   1,
+   0.15,
+   1.7
+  ],
+  "notes": "wood gate, 1 m along X on the tile edge; node gate_leaf hinge at x=-0.42 (rotate about Y to open)",
+  "bounds_min": [
+   -0.56,
+   -0.08,
+   -0.06
+  ],
+  "bounds_max": [
+   0.56,
+   1.7,
+   0.06
+  ],
+  "nodes": [
+   "fence",
+   "fence_wood_gate",
+   "gate_leaf"
+  ],
+  "size_kb": 13.9
+ },
+ "fence_hedge_straight": {
+  "file": "res://assets/models/outdoor/fence_hedge_straight.glb",
+  "footprint": [
+   1,
+   0.6,
+   1.1
+  ],
+  "notes": "hedge straight, 1 m along X on the tile edge",
+  "bounds_min": [
+   -0.5,
+   0.0,
+   -0.275
+  ],
+  "bounds_max": [
+   0.5,
+   1.1,
+   0.275
+  ],
+  "nodes": [
+   "fence_hedge_straight"
+  ],
+  "size_kb": 1.6
+ },
+ "fence_hedge_corner": {
+  "file": "res://assets/models/outdoor/fence_hedge_corner.glb",
+  "footprint": [
+   1,
+   0.6,
+   1.1
+  ],
+  "notes": "hedge corner, 1 m along X on the tile edge; corner arms +X and +Z",
+  "bounds_min": [
+   -0.275,
+   0.0,
+   -0.275
+  ],
+  "bounds_max": [
+   0.5,
+   1.1,
+   0.5
+  ],
+  "nodes": [
+   "fence_hedge_corner"
+  ],
+  "size_kb": 2.3
+ },
+ "fence_hedge_gate": {
+  "file": "res://assets/models/outdoor/fence_hedge_gate.glb",
+  "footprint": [
+   1,
+   0.6,
+   1.12
+  ],
+  "notes": "hedge gate, 1 m along X on the tile edge; node gate_leaf hinge at x=-0.42 (rotate about Y to open)",
+  "bounds_min": [
+   -0.5,
+   0.0,
+   -0.275
+  ],
+  "bounds_max": [
+   0.5,
+   1.125,
+   0.275
+  ],
+  "nodes": [
+   "fence",
+   "fence_hedge_gate",
+   "gate_leaf"
+  ],
+  "size_kb": 8.8
+ },
+ "mailbox_street": {
+  "file": "res://assets/models/outdoor/mailbox_street.glb",
+  "footprint": [
+   1,
+   1,
+   1.33
+  ],
+  "notes": "kerb-side mailbox on a post, slot/flag faces -Z; node flag (rotate about X to raise)",
+  "bounds_min": [
+   -0.16,
+   0.0,
+   -0.27
+  ],
+  "bounds_max": [
+   0.215,
+   1.325,
+   0.25
+  ],
+  "nodes": [
+   "flag",
+   "mailbox",
+   "mailbox_street"
+  ],
+  "size_kb": 7.4
+ },
+ "trash_can": {
+  "file": "res://assets/models/outdoor/trash_can.glb",
+  "footprint": [
+   1,
+   1,
+   0.93
+  ],
+  "notes": "street litter bin, 0.95 m",
+  "bounds_min": [
+   -0.295,
+   -0.0,
+   -0.31
+  ],
+  "bounds_max": [
+   0.295,
+   0.93,
+   0.31
+  ],
+  "nodes": [
+   "trash_can"
+  ],
+  "size_kb": 9.6
+ },
+ "bench_street": {
+  "file": "res://assets/models/outdoor/bench_street.glb",
+  "footprint": [
+   2,
+   1,
+   1.0
+  ],
+  "notes": "2x1 street bench, backrest at +Z, sitter faces -Z, seat top y~0.47",
+  "bounds_min": [
+   -0.9,
+   0.0,
+   -0.25
+  ],
+  "bounds_max": [
+   0.9,
+   1.0,
+   0.25
+  ],
+  "nodes": [
+   "bench_street"
+  ],
+  "size_kb": 8.7
+ },
+ "picnic_table": {
+  "file": "res://assets/models/outdoor/picnic_table.glb",
+  "footprint": [
+   2,
+   2,
+   0.84
+  ],
+  "notes": "2x2 picnic table with two benches (long axis X)",
+  "bounds_min": [
+   -0.95,
+   -0.078,
+   -0.87
+  ],
+  "bounds_max": [
+   0.95,
+   0.838,
+   0.87
+  ],
+  "nodes": [
+   "picnic_table"
+  ],
+  "size_kb": 11.0
+ },
+ "bus_stop": {
+  "file": "res://assets/models/outdoor/bus_stop.glb",
+  "footprint": [
+   3,
+   2,
+   2.6
+  ],
+  "notes": "3x2 bus shelter: roof, glass back (+Z), bench, timetable sign pole; open front -Z",
+  "bounds_min": [
+   -1.5,
+   0.0,
+   -0.6
+  ],
+  "bounds_max": [
+   1.9,
+   2.6,
+   0.9
+  ],
+  "nodes": [
+   "bus_stop"
+  ],
+  "size_kb": 11.2
+ },
+ "swing_set": {
+  "file": "res://assets/models/outdoor/swing_set.glb",
+  "footprint": [
+   3,
+   2,
+   2.26
+  ],
+  "notes": "3x2 swing set; nodes frame, swing_l, swing_r (pivot at top bar: rotate about X; seats hang toward the viewer on -Z)",
+  "bounds_min": [
+   -1.4,
+   -0.06,
+   -0.743
+  ],
+  "bounds_max": [
+   1.4,
+   2.26,
+   0.743
+  ],
+  "nodes": [
+   "frame",
+   "swing_l",
+   "swing_r",
+   "swing_set"
+  ],
+  "size_kb": 10.5
+ },
+ "slide": {
+  "file": "res://assets/models/outdoor/slide.glb",
+  "footprint": [
+   1,
+   3,
+   1.4
+  ],
+  "notes": "1x3 playground slide: ladder + platform at +Z, chute down to -Z",
+  "bounds_min": [
+   -0.435,
+   -0.024,
+   -1.286
+  ],
+  "bounds_max": [
+   0.435,
+   1.4,
+   1.583
+  ],
+  "nodes": [
+   "slide"
+  ],
+  "size_kb": 10.3
+ },
+ "sandbox": {
+  "file": "res://assets/models/outdoor/sandbox.glb",
+  "footprint": [
+   2,
+   2,
+   0.3
+  ],
+  "notes": "2x2 sandbox with timber border, sand and a bucket",
+  "bounds_min": [
+   -1.0,
+   0.0,
+   -1.0
+  ],
+  "bounds_max": [
+   1.0,
+   0.3,
+   1.0
+  ],
+  "nodes": [
+   "sandbox"
+  ],
+  "size_kb": 8.3
+ },
+ "fountain": {
+  "file": "res://assets/models/outdoor/fountain.glb",
+  "footprint": [
+   3,
+   3,
+   1.7
+  ],
+  "notes": "3x3 stone fountain: basin, tier, spout; node water is translucent",
+  "bounds_min": [
+   -1.414,
+   -0.0,
+   -1.45
+  ],
+  "bounds_max": [
+   1.414,
+   1.7,
+   1.45
+  ],
+  "nodes": [
+   "fountain",
+   "fountain.001",
+   "water"
+  ],
+  "size_kb": 17.0
+ },
+ "sign_blank": {
+  "file": "res://assets/models/outdoor/sign_blank.glb",
+  "footprint": [
+   1,
+   1,
+   2.2
+  ],
+  "notes": "generic blank street sign on a post; node sign_face (replace its material/texture)",
+  "bounds_min": [
+   -0.4,
+   0.0,
+   -0.068
+  ],
+  "bounds_max": [
+   0.4,
+   2.2,
+   0.03
+  ],
+  "nodes": [
+   "post",
+   "sign_blank",
+   "sign_face"
+  ],
+  "size_kb": 4.2
+ },
+ "fire_hydrant": {
+  "file": "res://assets/models/outdoor/fire_hydrant.glb",
+  "footprint": [
+   1,
+   1,
+   0.77
+  ],
+  "notes": "fire hydrant 0.75 m",
+  "bounds_min": [
+   -0.2,
+   0.0,
+   -0.19
+  ],
+  "bounds_max": [
+   0.2,
+   0.77,
+   0.14
+  ],
+  "nodes": [
+   "fire_hydrant"
+  ],
+  "size_kb": 9.4
+ },
+ "house_small_a": {
+  "file": "res://assets/models/outdoor/house_small_a.glb",
+  "footprint": [
+   10,
+   7,
+   5.29
+  ],
+  "notes": "house_small shell 10x7 m (template small); nodes body, roof; door on -Z at x=+0.5",
+  "bounds_min": [
+   -5.35,
+   0.0,
+   -4.25
+  ],
+  "bounds_max": [
+   5.35,
+   5.29,
+   3.85
+  ],
+  "nodes": [
+   "body",
+   "house_small_a",
+   "roof"
+  ],
+  "size_kb": 31.9,
+  "entry": {
+   "side": "-Z",
+   "door_x": 0.5,
+   "template": "small"
+  }
+ },
+ "house_small_b": {
+  "file": "res://assets/models/outdoor/house_small_b.glb",
+  "footprint": [
+   10,
+   7,
+   5.29
+  ],
+  "notes": "house_small shell 10x7 m (template small); nodes body, roof; door on -Z at x=+0.5",
+  "bounds_min": [
+   -5.35,
+   0.0,
+   -4.25
+  ],
+  "bounds_max": [
+   5.35,
+   5.29,
+   3.85
+  ],
+  "nodes": [
+   "body",
+   "house_small_b",
+   "roof"
+  ],
+  "size_kb": 31.9,
+  "entry": {
+   "side": "-Z",
+   "door_x": 0.5,
+   "template": "small"
+  }
+ },
+ "house_small_c": {
+  "file": "res://assets/models/outdoor/house_small_c.glb",
+  "footprint": [
+   10,
+   7,
+   5.29
+  ],
+  "notes": "house_small shell 10x7 m (template small); nodes body, roof; door on -Z at x=+0.5",
+  "bounds_min": [
+   -5.35,
+   0.0,
+   -4.25
+  ],
+  "bounds_max": [
+   5.35,
+   5.29,
+   3.85
+  ],
+  "nodes": [
+   "body",
+   "house_small_c",
+   "roof"
+  ],
+  "size_kb": 31.9,
+  "entry": {
+   "side": "-Z",
+   "door_x": 0.5,
+   "template": "small"
+  }
+ },
+ "house_medium_a": {
+  "file": "res://assets/models/outdoor/house_medium_a.glb",
+  "footprint": [
+   14,
+   11,
+   5.49
+  ],
+  "notes": "house_medium shell 14x11 m (template medium); nodes body, roof; door on -Z at x=+0.5",
+  "bounds_min": [
+   -7.35,
+   0.0,
+   -6.95
+  ],
+  "bounds_max": [
+   7.35,
+   5.49,
+   5.85
+  ],
+  "nodes": [
+   "body",
+   "house_medium_a",
+   "roof"
+  ],
+  "size_kb": 44.0,
+  "entry": {
+   "side": "-Z",
+   "door_x": 0.5,
+   "template": "medium"
+  }
+ },
+ "house_medium_b": {
+  "file": "res://assets/models/outdoor/house_medium_b.glb",
+  "footprint": [
+   14,
+   11,
+   5.49
+  ],
+  "notes": "house_medium shell 14x11 m (template medium); nodes body, roof; door on -Z at x=+0.5",
+  "bounds_min": [
+   -7.35,
+   0.0,
+   -6.95
+  ],
+  "bounds_max": [
+   7.35,
+   5.49,
+   5.85
+  ],
+  "nodes": [
+   "body",
+   "house_medium_b",
+   "roof"
+  ],
+  "size_kb": 44.0,
+  "entry": {
+   "side": "-Z",
+   "door_x": 0.5,
+   "template": "medium"
+  }
+ },
+ "house_medium_c": {
+  "file": "res://assets/models/outdoor/house_medium_c.glb",
+  "footprint": [
+   14,
+   11,
+   5.49
+  ],
+  "notes": "house_medium shell 14x11 m (template medium); nodes body, roof; door on -Z at x=+0.5",
+  "bounds_min": [
+   -7.35,
+   0.0,
+   -6.95
+  ],
+  "bounds_max": [
+   7.35,
+   5.49,
+   5.85
+  ],
+  "nodes": [
+   "body",
+   "house_medium_c",
+   "roof"
+  ],
+  "size_kb": 44.0,
+  "entry": {
+   "side": "-Z",
+   "door_x": 0.5,
+   "template": "medium"
+  }
+ },
+ "house_large_a": {
+  "file": "res://assets/models/outdoor/house_large_a.glb",
+  "footprint": [
+   22,
+   14,
+   6.49
+  ],
+  "notes": "house_large shell 22x14 m (template large); nodes body, roof; door on -Z at x=+0.5",
+  "bounds_min": [
+   -11.35,
+   0.0,
+   -8.65
+  ],
+  "bounds_max": [
+   11.35,
+   6.49,
+   7.35
+  ],
+  "nodes": [
+   "body",
+   "house_large_a",
+   "roof"
+  ],
+  "size_kb": 55.4,
+  "entry": {
+   "side": "-Z",
+   "door_x": 0.5,
+   "template": "large"
+  }
+ },
+ "house_large_b": {
+  "file": "res://assets/models/outdoor/house_large_b.glb",
+  "footprint": [
+   22,
+   14,
+   6.49
+  ],
+  "notes": "house_large shell 22x14 m (template large); nodes body, roof; door on -Z at x=+0.5",
+  "bounds_min": [
+   -11.35,
+   0.0,
+   -8.65
+  ],
+  "bounds_max": [
+   11.35,
+   6.49,
+   7.35
+  ],
+  "nodes": [
+   "body",
+   "house_large_b",
+   "roof"
+  ],
+  "size_kb": 55.4,
+  "entry": {
+   "side": "-Z",
+   "door_x": 0.5,
+   "template": "large"
+  }
+ },
+ "house_large_c": {
+  "file": "res://assets/models/outdoor/house_large_c.glb",
+  "footprint": [
+   22,
+   14,
+   6.49
+  ],
+  "notes": "house_large shell 22x14 m (template large); nodes body, roof; door on -Z at x=+0.5",
+  "bounds_min": [
+   -11.35,
+   0.0,
+   -8.65
+  ],
+  "bounds_max": [
+   11.35,
+   6.49,
+   7.35
+  ],
+  "nodes": [
+   "body",
+   "house_large_c",
+   "roof"
+  ],
+  "size_kb": 55.4,
+  "entry": {
+   "side": "-Z",
+   "door_x": 0.5,
+   "template": "large"
+  }
+ },
+ "townhouse_a": {
+  "file": "res://assets/models/outdoor/townhouse_a.glb",
+  "footprint": [
+   7,
+   10,
+   7.89
+  ],
+  "notes": "townhouse shell 7x10 m (template None); nodes body, roof; door on -Z at x=+0.5",
+  "bounds_min": [
+   -3.85,
+   0.0,
+   -6.1
+  ],
+  "bounds_max": [
+   3.85,
+   7.89,
+   5.35
+  ],
+  "nodes": [
+   "body",
+   "roof",
+   "townhouse_a"
+  ],
+  "size_kb": 54.5,
+  "entry": {
+   "side": "-Z",
+   "door_x": 0.5,
+   "template": null
+  }
+ },
+ "townhouse_b": {
+  "file": "res://assets/models/outdoor/townhouse_b.glb",
+  "footprint": [
+   7,
+   10,
+   7.89
+  ],
+  "notes": "townhouse shell 7x10 m (template None); nodes body, roof; door on -Z at x=+0.5",
+  "bounds_min": [
+   -3.85,
+   0.0,
+   -6.1
+  ],
+  "bounds_max": [
+   3.85,
+   7.89,
+   5.35
+  ],
+  "nodes": [
+   "body",
+   "roof",
+   "townhouse_b"
+  ],
+  "size_kb": 54.5,
+  "entry": {
+   "side": "-Z",
+   "door_x": 0.5,
+   "template": null
+  }
+ },
+ "townhouse_c": {
+  "file": "res://assets/models/outdoor/townhouse_c.glb",
+  "footprint": [
+   7,
+   10,
+   7.89
+  ],
+  "notes": "townhouse shell 7x10 m (template None); nodes body, roof; door on -Z at x=+0.5",
+  "bounds_min": [
+   -3.85,
+   0.0,
+   -6.1
+  ],
+  "bounds_max": [
+   3.85,
+   7.89,
+   5.35
+  ],
+  "nodes": [
+   "body",
+   "roof",
+   "townhouse_c"
+  ],
+  "size_kb": 54.5,
+  "entry": {
+   "side": "-Z",
+   "door_x": 0.5,
+   "template": null
+  }
+ },
+ "cafe_a": {
+  "file": "res://assets/models/outdoor/cafe_a.glb",
+  "footprint": [
+   22,
+   14,
+   4.6
+  ],
+  "notes": "cafe shell 22x14 m (template cafe); nodes body, roof; door on -Z at x=+0.5",
+  "bounds_min": [
+   -11.15,
+   0.0,
+   -7.998
+  ],
+  "bounds_max": [
+   11.15,
+   4.6,
+   7.14
+  ],
+  "nodes": [
+   "body",
+   "cafe_a",
+   "roof"
+  ],
+  "size_kb": 60.0,
+  "entry": {
+   "side": "-Z",
+   "door_x": 0.5,
+   "template": "cafe"
+  }
+ },
+ "cafe_b": {
+  "file": "res://assets/models/outdoor/cafe_b.glb",
+  "footprint": [
+   22,
+   14,
+   4.6
+  ],
+  "notes": "cafe shell 22x14 m (template cafe); nodes body, roof; door on -Z at x=+0.5",
+  "bounds_min": [
+   -11.15,
+   0.0,
+   -7.998
+  ],
+  "bounds_max": [
+   11.15,
+   4.6,
+   7.14
+  ],
+  "nodes": [
+   "body",
+   "cafe_b",
+   "roof"
+  ],
+  "size_kb": 60.0,
+  "entry": {
+   "side": "-Z",
+   "door_x": 0.5,
+   "template": "cafe"
+  }
+ },
+ "gym_a": {
+  "file": "res://assets/models/outdoor/gym_a.glb",
+  "footprint": [
+   22,
+   14,
+   5.3
+  ],
+  "notes": "gym shell 22x14 m (template gym); nodes body, roof; door on -Z at x=+0.5",
+  "bounds_min": [
+   -11.15,
+   0.0,
+   -7.75
+  ],
+  "bounds_max": [
+   11.15,
+   5.3,
+   7.14
+  ],
+  "nodes": [
+   "body",
+   "gym_a",
+   "roof"
+  ],
+  "size_kb": 51.1,
+  "entry": {
+   "side": "-Z",
+   "door_x": 0.5,
+   "template": "gym"
+  }
+ },
+ "gym_b": {
+  "file": "res://assets/models/outdoor/gym_b.glb",
+  "footprint": [
+   22,
+   14,
+   5.3
+  ],
+  "notes": "gym shell 22x14 m (template gym); nodes body, roof; door on -Z at x=+0.5",
+  "bounds_min": [
+   -11.15,
+   0.0,
+   -7.75
+  ],
+  "bounds_max": [
+   11.15,
+   5.3,
+   7.14
+  ],
+  "nodes": [
+   "body",
+   "gym_b",
+   "roof"
+  ],
+  "size_kb": 51.1,
+  "entry": {
+   "side": "-Z",
+   "door_x": 0.5,
+   "template": "gym"
+  }
+ },
+ "library_a": {
+  "file": "res://assets/models/outdoor/library_a.glb",
+  "footprint": [
+   22,
+   14,
+   10.1
+  ],
+  "notes": "library shell 22x14 m (template library); nodes body, roof; door on -Z at x=+0.5",
+  "bounds_min": [
+   -11.25,
+   0.0,
+   -8.65
+  ],
+  "bounds_max": [
+   11.25,
+   10.1,
+   7.25
+  ],
+  "nodes": [
+   "body",
+   "library_a",
+   "roof"
+  ],
+  "size_kb": 50.9,
+  "entry": {
+   "side": "-Z",
+   "door_x": 0.5,
+   "template": "library"
+  }
+ },
+ "library_b": {
+  "file": "res://assets/models/outdoor/library_b.glb",
+  "footprint": [
+   22,
+   14,
+   10.1
+  ],
+  "notes": "library shell 22x14 m (template library); nodes body, roof; door on -Z at x=+0.5",
+  "bounds_min": [
+   -11.25,
+   0.0,
+   -8.65
+  ],
+  "bounds_max": [
+   11.25,
+   10.1,
+   7.25
+  ],
+  "nodes": [
+   "body",
+   "library_b",
+   "roof"
+  ],
+  "size_kb": 50.8,
+  "entry": {
+   "side": "-Z",
+   "door_x": 0.5,
+   "template": "library"
+  }
+ },
+ "market_a": {
+  "file": "res://assets/models/outdoor/market_a.glb",
+  "footprint": [
+   22,
+   14,
+   4.65
+  ],
+  "notes": "market shell 22x14 m (template market); nodes body, roof; door on -Z at x=+0.5",
+  "bounds_min": [
+   -11.15,
+   0.0,
+   -8.543
+  ],
+  "bounds_max": [
+   11.15,
+   4.65,
+   7.14
+  ],
+  "nodes": [
+   "body",
+   "market_a",
+   "roof"
+  ],
+  "size_kb": 78.0,
+  "entry": {
+   "side": "-Z",
+   "door_x": 0.5,
+   "template": "market"
+  }
+ },
+ "market_b": {
+  "file": "res://assets/models/outdoor/market_b.glb",
+  "footprint": [
+   22,
+   14,
+   4.65
+  ],
+  "notes": "market shell 22x14 m (template market); nodes body, roof; door on -Z at x=+0.5",
+  "bounds_min": [
+   -11.15,
+   0.0,
+   -8.543
+  ],
+  "bounds_max": [
+   11.15,
+   4.65,
+   7.14
+  ],
+  "nodes": [
+   "body",
+   "market_b",
+   "roof"
+  ],
+  "size_kb": 78.0,
+  "entry": {
+   "side": "-Z",
+   "door_x": 0.5,
+   "template": "market"
+  }
+ },
+ "office_a": {
+  "file": "res://assets/models/outdoor/office_a.glb",
+  "footprint": [
+   22,
+   14,
+   9.4
+  ],
+  "notes": "office shell 22x14 m (template office); nodes body, roof; door on -Z at x=+0.5",
+  "bounds_min": [
+   -11.15,
+   0.0,
+   -7.145
+  ],
+  "bounds_max": [
+   11.15,
+   9.4,
+   7.14
+  ],
+  "nodes": [
+   "body",
+   "office_a",
+   "roof"
+  ],
+  "size_kb": 172.7,
+  "entry": {
+   "side": "-Z",
+   "door_x": 0.5,
+   "template": "office"
+  }
+ },
+ "office_b": {
+  "file": "res://assets/models/outdoor/office_b.glb",
+  "footprint": [
+   22,
+   14,
+   9.4
+  ],
+  "notes": "office shell 22x14 m (template office); nodes body, roof; door on -Z at x=+0.5",
+  "bounds_min": [
+   -11.15,
+   0.0,
+   -7.145
+  ],
+  "bounds_max": [
+   11.15,
+   9.4,
+   7.14
+  ],
+  "nodes": [
+   "body",
+   "office_b",
+   "roof"
+  ],
+  "size_kb": 172.7,
+  "entry": {
+   "side": "-Z",
+   "door_x": 0.5,
+   "template": "office"
+  }
+ },
+ "school_a": {
+  "file": "res://assets/models/outdoor/school_a.glb",
+  "footprint": [
+   22,
+   14,
+   9.5
+  ],
+  "notes": "school shell 22x14 m (template school); nodes body, roof; door on -Z at x=+0.5",
+  "bounds_min": [
+   -11.35,
+   0.0,
+   -7.75
+  ],
+  "bounds_max": [
+   11.375,
+   9.5,
+   7.35
+  ],
+  "nodes": [
+   "body",
+   "roof",
+   "school_a"
+  ],
+  "size_kb": 53.3,
+  "entry": {
+   "side": "-Z",
+   "door_x": 0.5,
+   "template": "school"
+  }
+ },
+ "school_b": {
+  "file": "res://assets/models/outdoor/school_b.glb",
+  "footprint": [
+   22,
+   14,
+   9.5
+  ],
+  "notes": "school shell 22x14 m (template school); nodes body, roof; door on -Z at x=+0.5",
+  "bounds_min": [
+   -11.35,
+   0.0,
+   -7.75
+  ],
+  "bounds_max": [
+   11.375,
+   9.5,
+   7.35
+  ],
+  "nodes": [
+   "body",
+   "roof",
+   "school_b"
+  ],
+  "size_kb": 53.3,
+  "entry": {
+   "side": "-Z",
+   "door_x": 0.5,
+   "template": "school"
+  }
+ },
+ "dog": {
+  "file": "res://assets/models/outdoor/dog.glb",
+  "footprint": [
+   0.4,
+   0.9,
+   0.79
+  ],
+  "notes": "dog ~0.9 m long; nodes body head tail leg_fl leg_fr leg_bl leg_br; clips Idle, Walk",
+  "bounds_min": [
+   -0.135,
+   0.006,
+   -0.612
+  ],
+  "bounds_max": [
+   0.135,
+   0.795,
+   0.459
+  ],
+  "nodes": [
+   "body",
+   "dog",
+   "head",
+   "leg_bl",
+   "leg_br",
+   "leg_fl",
+   "leg_fr",
+   "tail"
+  ],
+  "size_kb": 24.9
+ },
+ "cat": {
+  "file": "res://assets/models/outdoor/cat.glb",
+  "footprint": [
+   0.3,
+   0.7,
+   0.65
+  ],
+  "notes": "cat ~0.7 m long; nodes body head tail leg_fl leg_fr leg_bl leg_br; clips Idle, Walk",
+  "bounds_min": [
+   -0.103,
+   -0.004,
+   -0.442
+  ],
+  "bounds_max": [
+   0.09,
+   0.653,
+   0.38
+  ],
+  "nodes": [
+   "body",
+   "cat",
+   "head",
+   "leg_bl",
+   "leg_br",
+   "leg_fl",
+   "leg_fr",
+   "tail"
+  ],
+  "size_kb": 24.4
+ },
+ "bird": {
+  "file": "res://assets/models/outdoor/bird.glb",
+  "footprint": [
+   0.25,
+   0.4,
+   0.38
+  ],
+  "notes": "small songbird; nodes body head tail wing_l wing_r leg_l leg_r; clips Idle, Walk, Fly (wing_* pivot at the shoulders)",
+  "bounds_min": [
+   -0.143,
+   -0.012,
+   -0.23
+  ],
+  "bounds_max": [
+   0.143,
+   0.385,
+   0.289
+  ],
+  "nodes": [
+   "bird",
+   "body",
+   "head",
+   "leg_l",
+   "leg_r",
+   "tail",
+   "wing_l",
+   "wing_r"
+  ],
+  "size_kb": 22.7
+ }
+}

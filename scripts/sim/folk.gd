@@ -11,6 +11,10 @@ const NEED_EMIT_STEP := 0.5
 
 static var _next_id: int = 1
 
+## Test / new-game helper: start handing out ids from 1 again.
+static func reset_ids() -> void:
+	_next_id = 1
+
 var id: int = 0
 var name: String = ""
 var age_stage: String = "adult"
@@ -108,6 +112,8 @@ func decay_mult(need: String) -> float:
 		m *= float((bd.get("need_decay_mult", {}) as Dictionary).get(need, 1.0))
 	if current != null and current.state == "running":
 		m *= current.decay_mult_for(need)
+	if household_id > 0:
+		m *= Scenario.need_drain()      # new-game difficulty (1.0 on Normal), household members only
 	return m
 
 func tick_needs(minutes: float) -> void:

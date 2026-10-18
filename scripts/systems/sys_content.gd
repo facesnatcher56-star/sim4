@@ -1,65 +1,32 @@
 class_name SysContent
 extends RefCounted
-## Runtime content injected into the shared Data tables by the systems layer (idempotent):
-## interactions (sys_away, order_groceries, apply_for_job, try_for_baby, apologize, propose), buffs (away,
-## pregnant, grieving, stage_* markers, perk buffs) and age-stage gates patched into existing interaction defs.
+## Runtime content for the systems layer (idempotent). The literal interactions / buffs live in data/content_sys.json
+## (merged by ContentMerge); this adds the derived buffs (stage_* markers, perk buffs) and patches existing interaction
+## defs: nobody socialises with someone who is away, and age stages gate interactions by tag.
 
 const GATE_MARK := "_sys_gate"
 
 static func install() -> void:
 	var data = SimEnv.data()
 	var inter: Dictionary = data.interactions()
-	var buffs: Dictionary = data.buffs()
 	if inter.is_empty() or inter.has("sys_away"):
 		_ensure_world_defs()
 		return
-	_add_interactions(inter)
-	_add_buffs(buffs)
+	var cfg: Dictionary = data.get_table("content_sys")
+	ContentMerge.install(cfg)
+	_add_marker_buffs(data.buffs())
 	_patch_targets(inter)
 	_patch_stage_gates(inter)
 	_ensure_world_defs()
 
-static func _add_interactions(inter: Dictionary) -> void:
-	inter["sys_away"] = {
-		"label": "Away", "kind": "super", "target": "self", "duration_min": 60, "posture": "stand",
-		"tests": [], "per_min": {"hunger": 0.035, "bladder": 0.06, "social": 0.02}, "on_finish": [], "on_cancel": [],
-		"autonomous": false, "priority": "high", "interruptible": true, "tags": ["away"],
-	}
-	inter["order_groceries"] = {
-		"label": "Order Groceries", "kind": "super", "target": "object", "objects": ["fridge"], "duration_min": 6,
-		"posture": "stand", "tests": [{"coins_at_least": 20}, {"object_state_below": ["stock", 4]}],
-		"on_finish": [{"fire_event": "order_groceries"}], "autonomous": true, "priority": "low", "cooldown_min": 240,
-		"tags": ["food", "chore", "shop"], "advertises": {"hunger": 0.6}, "thought": "We're running low on food.",
-	}
-	inter["apply_for_job"] = {
-		"label": "Look for Jobs", "kind": "super", "target": "object", "objects": ["computer"], "duration_min": 20,
-		"posture": "sit", "tests": [{"has_job": false}], "on_finish": [{"fire_event": "job_search"}],
-		"autonomous": false, "priority": "normal", "tags": ["skill", "career"],
-	}
-	inter["try_for_baby"] = {
-		"label": "Try for Baby", "kind": "social", "target": "folk", "duration_min": 40, "posture": "stand",
-		"tests": [{"relationship_above": ["romance", 44]}, {"any": [{"has_buff": "stage_adult"}, {"has_buff": "stage_elder"}]}],
-		"target_tests": [{"any": [{"has_buff": "stage_adult"}, {"has_buff": "stage_elder"}]}],
-		"on_finish": [{"relationship_add": ["romance", 2]}, {"fire_event": "try_for_baby"}], "autonomous": false,
-		"priority": "normal", "tags": ["social", "flirt", "baby"],
-	}
-	inter["apologize"] = {
-		"label": "Apologize", "kind": "social", "target": "folk", "duration_min": 5, "posture": "stand",
-		"tests": [], "on_finish": [{"relationship_add": ["friendship", 2]}, {"fire_event": "apologize"}],
-		"autonomous": false, "priority": "normal", "tags": ["social"],
-	}
-	inter["propose"] = {
-		"label": "Propose", "kind": "social", "target": "folk", "duration_min": 10, "posture": "stand",
-		"tests": [{"relationship_above": ["romance", 44]}], "on_finish": [{"fire_event": "propose"}],
-		"autonomous": false, "priority": "normal", "tags": ["social", "flirt"],
-	}
+## Everything the systems layer needs in one call (SysContent, then the family and weather layers built on it).
+static func install_all() -> void:
+	install()
+	FamilyContent.install()
+	WeatherContent.install()
 
-static func _add_buffs(buffs: Dictionary) -> void:
-	buffs["away"] = {"label": "Away", "mood": {}, "duration_min": 0}
-	buffs["pregnant"] = {"label": "Expecting", "mood": {"happy": 1, "uncomfortable": 1}, "duration_min": 0,
-		"need_decay_mult": {"hunger": 1.2, "bladder": 1.2}, "thought": "A little one is on the way."}
-	buffs["grieving"] = {"label": "Grieving", "mood": {"sad": 3}, "duration_min": 4320, "need_decay_mult": {"fun": 1.2},
-		"thought": "I miss them so much."}
+## Buffs derived from other tables: the hidden stage_<id> markers (data/aging.json) and the goals' perk buffs.
+static func _add_marker_buffs(buffs: Dictionary) -> void:
 	for st in Aging.stage_ids():
 		buffs["stage_" + str(st)] = {"label": str(st).capitalize(), "mood": {}, "duration_min": 0, "hidden": true}
 	var perks: Dictionary = SysUtil.table("goals").get("perk_buffs", {})
@@ -106,21 +73,14 @@ static func _patch_stage_gates(inter: Dictionary) -> void:
 					tt.append(cond)
 					d["target_tests"] = tt
 
-## Make the fridge advertise grocery ordering and the computer the job hunt (also in the World's def copy).
+## Make the fridge / computer offer the interactions of data/content_sys.json (also in the World's def copy).
 static func _ensure_world_defs() -> void:
-	var odefs: Dictionary = SimEnv.data().objects()
-	_add_obj_interaction(odefs, "fridge", "order_groceries")
-	_add_obj_interaction(odefs, "computer", "apply_for_job")
+	var extra: Dictionary = (SimEnv.data().get_table("content_sys") as Dictionary).get("object_interactions", {})
+	var worlds: Array = [SimEnv.data().objects()]
 	var w = WorldIface.world()
 	if w != null and "defs" in w and w.defs is Dictionary:
-		_add_obj_interaction(w.defs, "fridge", "order_groceries")
-		_add_obj_interaction(w.defs, "computer", "apply_for_job")
-
-static func _add_obj_interaction(defs: Dictionary, obj_id: String, iid: String) -> void:
-	if not defs.has(obj_id):
-		return
-	var od: Dictionary = defs[obj_id]
-	var list: Array = od.get("interactions", [])
-	if not list.has(iid):
-		list.append(iid)
-		od["interactions"] = list
+		worlds.append(w.defs)
+	for defs in worlds:
+		for oid in extra:
+			for iid in extra[oid]:
+				ContentMerge.add_object_interaction(defs, str(oid), str(iid))

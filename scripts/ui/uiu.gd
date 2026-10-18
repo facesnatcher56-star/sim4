@@ -47,11 +47,30 @@ static func prop(o, key: String, default = null):
 	var v = o.get(key)
 	return default if v == null else v
 
+## Colour-blind-safe mood palette (Okabe-Ito based); used instead of MOOD_COLORS when the setting is on.
+const MOOD_COLORS_CB := {
+	"happy": Color("#f0e442"), "sad": Color("#0072b2"), "angry": Color("#d55e00"),
+	"tense": Color("#cc79a7"), "bored": Color("#999999"), "energized": Color("#56b4e9"),
+	"uncomfortable": Color("#e69f00"), "focused": Color("#009e73"), "flirty": Color("#ff9ec8"),
+	"neutral": Color("#bbbbbb"),
+}
+
+static func mood_color(mood: String, fallback: Color = Color("#9aa7b4")) -> Color:
+	var t: Dictionary = MOOD_COLORS_CB if GameSettings.colorblind() else MOOD_COLORS
+	return t.get(mood, fallback)
+
 static func level_color(ratio: float) -> Color:
+	if GameSettings.colorblind():
+		# Okabe-Ito: vermillion / orange / yellow / blue stay apart for every common colour-vision type
+		if ratio < 0.2: return Color("#d55e00")
+		if ratio < 0.4: return Color("#e69f00")
+		if ratio < 0.65: return Color("#f0e442")
+		return Color("#0072b2")
+	# colour-blind friendly ramp (red -> orange -> yellow -> blue); bars also carry a number and a "!" when low
 	if ratio < 0.2: return Color("#e5534b")
 	if ratio < 0.4: return Color("#e8913d")
 	if ratio < 0.65: return Color("#e6c84a")
-	return Color("#4cc78a")
+	return Color("#3fa7d6")
 
 static func stat_ratio(s) -> float:
 	if s == null:

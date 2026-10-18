@@ -2,6 +2,7 @@ extends RefCounted
 ## Shared helpers for sim_* tests (no run() method, so the runner skips it).
 
 static func setup(seed_value: int = 12345) -> StubWorld:
+	TestFixture.reset()
 	SimEnv.use_standalone()
 	var w := StubWorld.new()
 	WorldIface.stub = w

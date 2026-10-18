@@ -34,7 +34,7 @@ func run() -> Array:
 	Aging.set_age_days(bo, 60.0)
 	RelationshipService.add_both(ann.id, bo.id, "romance", 80.0)
 	RelationshipService.add_both(ann.id, bo.id, "friendship", 80.0)
-	RelationshipService.set_flag(ann.id, bo.id, "partner", true, false)
+	RelationshipBits.set_flag(ann.id, bo.id, "partner", true, false)
 	var dir = K.director()
 	Autonomy.debug_enabled = false      # skip the per-decision debug breakdown (speed)
 	var seen: Dictionary = {"stages": [], "max_neglect": 0.0, "tri": [], "baby_id": -1, "birth_day": -1, "min_hunger": 999.0, "cries": 0}
@@ -55,7 +55,7 @@ func run() -> Array:
 				baby = w.get_folk(int(seen["baby_id"]))
 			else:
 				for fk in w.all_folk():
-					if str(fk.name).begins_with("Pip") or (Family.parents_of(fk.id).has(ann.id)):
+					if str(fk.name).begins_with("Pip") or (FamilyTree.parents_of(fk.id).has(ann.id)):
 						baby = fk
 						seen["baby_id"] = fk.id
 						seen["birth_day"] = SysUtil.day()
@@ -84,7 +84,7 @@ func run() -> Array:
 		K.expect(f, (seen["stages"] as Array).has("baby") and (seen["stages"] as Array).has("toddler"), "the baby grew to a toddler: %s" % str(seen["stages"]))
 		K.expect(f, baby2.age_stage in ["toddler", "child"], "after 20 days: %s" % baby2.age_stage)
 		K.expect(f, Genetics.is_valid(baby2.appearance) and baby2.household_id == 1, "has an appearance and lives in the household")
-		K.expect(f, Family.parents_of(baby_id) == [ann.id, bo.id] and Family.relation_label(baby_id, ann.id) == "Parent", "tree knows the parents")
+		K.expect(f, FamilyTree.parents_of(baby_id) == [ann.id, bo.id] and FamilyTree.relation_label(baby_id, ann.id) == "Parent", "tree knows the parents")
 		K.expect(f, float(baby2.skills.get("walking", {"xp": 0.0})["xp"]) > 0.0, "toddler skills grew")
 	K.expect(f, float(seen["max_neglect"]) < 6.0 * 60.0, "the parents kept the baby out of child-services range (max neglect %.0f min)" % float(seen["max_neglect"]))
 	K.expect(f, K.count_events("child_removed") == 0 and K.count_events("child_services_warning") == 0, "no child-services involvement")

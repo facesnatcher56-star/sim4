@@ -24,6 +24,7 @@ func run() -> Array:
 	_test_build_and_undo()
 	_test_radius_events()
 	_test_save_load()
+	_test_sim_state_is_saved()
 	_test_starter_house()
 	W.reset()
 	return fails
@@ -359,6 +360,25 @@ func _test_save_load() -> void:
 	# new ids continue after load
 	var nid: int = W.place_object("lamp", Vector2i(12, 9), 0)
 	_check(nid > pl and nid > tv, "id counter restored")
+
+
+## The sim writes object state through WorldIface; the World saves exactly that (state is the single source of truth).
+func _test_sim_state_is_saved() -> void:
+	W.reset()
+	var id: int = W.place_object("fridge", Vector2i(4, 4), 0)
+	var o = W.get_object(id)
+	WorldIface.state_set(o, "stock", 3.0)
+	WorldIface.state_add(o, "stock", 1.0)
+	_check(float(o.state["stock"]) == 4.0 and float(WorldIface.state_get(o, "stock", -1.0)) == 4.0, "state_set / state_add write the object's state")
+	var d: Dictionary = W.save_dict(false)
+	var saved := -1.0
+	for od in d["objects"]:
+		if int(od["id"]) == id:
+			saved = float(od["state"]["stock"])
+	_check(saved == 4.0, "save_dict stores the state the sim wrote (%f)" % saved)
+	WorldIface.state_set(o, "stock", 999.0)
+	_check(float(o.state["stock"]) <= float(W.get_def("fridge")["state"]["stock"]["max"]), "state_set clamps to the definition's max")
+	W.reset()
 
 
 func _test_starter_house() -> void:

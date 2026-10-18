@@ -4,7 +4,7 @@ extends Node
 ##     SystemsManager.install(self)           # adds the node as a child and starts listening
 ## then (for a new game)  SystemsManager.instance.new_game([household_id, ...])
 ## Everything is static-state under the hood (Economy, Careers, ...), so UI code can call e.g.
-## `Goals.active_for(id)`, `Careers.info_for(id)`, `RelationshipService.describe(a, b)` directly.
+## `Goals.active_for(id)`, `Careers.info_for(id)`, `RelationshipBits.describe(a, b)` directly.
 
 signal day_summary(day: int, lines: Array)
 
@@ -47,9 +47,7 @@ func setup() -> void:
 	_events.folk_added.connect(_on_folk_added)
 	_events.object_placed.connect(_on_object_placed)
 	_events.object_removed.connect(_on_object_removed)
-	SysContent.install()
-	FamilyContent.install()
-	WeatherContent.install()
+	SysContent.install_all()
 	NeighborhoodService.install()
 	_hook_world()
 
@@ -89,13 +87,12 @@ static func reset_all() -> void:
 	BabyCare.reset()
 	Weather.reset()
 	Neighborhood.reset()
+	Scenario.reset()
 
 ## Start a fresh game: reset systems, give every household starting funds, register all current folk, make townies.
 func new_game(household_ids: Array = [], lifespan: String = "") -> void:
 	reset_all()
-	SysContent.install()
-	FamilyContent.install()
-	WeatherContent.install()
+	SysContent.install_all()
 	NeighborhoodService.install()
 	Weather.new_game()
 	if lifespan != "":
@@ -119,18 +116,18 @@ func _on_minute(_total: int) -> void:
 	if not enabled:
 		return
 	NeighborhoodService.before_minute()
-	Careers.on_minute()
+	CareerShifts.on_minute()
 	Away.on_minute()
-	Story.on_minute()
+	StoryVisits.on_minute()
 	BabyCare.on_minute()
 	NeighborhoodService.after_minute()
-	Weather.on_minute()
+	WeatherFolk.on_minute()
 
 func _on_hour(hour: int) -> void:
 	if not enabled:
 		return
 	ensure_registered()
-	Weather.on_hour(hour)
+	WeatherWorld.on_hour(hour)
 	Holidays.on_hour()
 	Goals.on_hour()
 	Story.on_hour(hour)
@@ -144,7 +141,7 @@ func _on_day(day: int) -> void:
 	Aging.on_day(day)
 	Family.on_day(day)
 	Careers.on_day(day)
-	Weather.on_day(day)
+	WeatherWorld.on_day(day)
 	Economy.on_day(day)
 	RelationshipService.on_day(day)
 	Story.on_day(day)
@@ -161,21 +158,21 @@ func _on_interaction_started(folk_id: int, iid: String, target_id: int) -> void:
 	if not rec.is_empty():
 		var f = SysUtil.folk(folk_id)
 		if f != null and str(rec["reason"]) in ["work", "school"]:
-			Careers.on_left(f, rec)
+			CareerShifts.on_left(f, rec)
 
 func _on_interaction_finished(folk_id: int, iid: String, success: bool) -> void:
 	if not enabled:
 		return
-	Weather.on_interaction_finished(folk_id, iid, success)
+	WeatherWorld.on_interaction_finished(folk_id, iid, success)
 	var rec: Dictionary = Away.on_finished(folk_id, iid, success)
 	if not rec.is_empty():
 		var f = SysUtil.folk(folk_id)
 		if f != null:
 			match str(rec["reason"]):
 				"work", "school":
-					Careers.on_returned(f, rec)
+					CareerShifts.on_returned(f, rec)
 				"party":
-					Story.on_party_return(f, rec)
+					StoryVisits.on_party_return(f, rec)
 		return
 	var f2 = SysUtil.folk(folk_id)
 	if f2 == null:
@@ -183,9 +180,9 @@ func _on_interaction_finished(folk_id: int, iid: String, success: bool) -> void:
 	NeighborhoodService.on_interaction_finished(folk_id, iid, success)
 	if success:
 		Economy.note_usage(int(f2.household_id), iid)
-	Careers.on_interaction(folk_id, iid, success)
+	CareerProgress.on_interaction(folk_id, iid, success)
 	RelationshipService.on_interaction_finished(folk_id, iid, success)
-	Story.on_interaction(folk_id, iid, success)
+	StoryVisits.on_interaction(folk_id, iid, success)
 	if success:
 		var d: Dictionary = SimEnv.data().interaction_def(iid)
 		Goals.feed(f2, {"type": "interaction", "id": iid, "tags": d.get("tags", [])})
@@ -218,7 +215,7 @@ func _on_folk_added(folk_id: int) -> void:
 		Genetics.ensure(f)
 		Goals.ensure_profile(f)
 	if f != null:
-		Weather.on_folk_added(f)
+		WeatherFolk.on_folk_added(f)
 
 func _on_object_placed(object_id: int) -> void:
 	Economy.on_object_placed(object_id)
@@ -232,7 +229,7 @@ func _on_game_event(ev_name: String, payload: Dictionary) -> void:
 		return
 	Family.on_event(ev_name, payload)
 	NeighborhoodService.on_game_event(ev_name, payload)
-	Weather.on_game_event(ev_name, payload)
+	WeatherWorld.on_game_event(ev_name, payload)
 	match ev_name:
 		"order_groceries":
 			var f = SysUtil.folk(int(payload.get("folk_id", -1)))
@@ -247,11 +244,11 @@ func _on_game_event(ev_name: String, payload: Dictionary) -> void:
 		"apologize":
 			RelationshipService.on_apologize(int(payload.get("folk_id", -1)), int(payload.get("target_id", -1)))
 		"propose":
-			var out: String = Family.on_propose(int(payload.get("folk_id", -1)), int(payload.get("target_id", -1)))
+			var out: String = FamilyMarriage.on_propose(int(payload.get("folk_id", -1)), int(payload.get("target_id", -1)))
 			if out != "engaged":      # Family announces engagements itself
 				SysUtil.notify("%s" % {"accepted": "They said yes!", "declined": "They said no...", "too_soon": "'It's too soon,' they said.", "no_bond": "They barely know each other.", "already_engaged": "They are already engaged.", "already_married": "They are already married."}.get(out, out), "relationship")
 		"social_done":
-			Story.on_social_done(int(payload.get("folk_id", -1)), int(payload.get("target_id", -1)), str(payload.get("interaction", "")))
+			StoryVisits.on_social_done(int(payload.get("folk_id", -1)), int(payload.get("target_id", -1)), str(payload.get("interaction", "")))
 	# feed goals for the acting folk (and the other party, for relationship events)
 	var f2 = SysUtil.folk(int(payload.get("folk_id", -1)))
 	if f2 != null and SysUtil.is_resident(f2):

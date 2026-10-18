@@ -3,7 +3,7 @@
   "starting_funds": 6000,
   "bills": {
     "every_days": 7,
-    "first_day": 7,
+    "first_day": 4,
     "due_after_days": 3,
     "base": 50,
     "lot_value_rate": 0.015,

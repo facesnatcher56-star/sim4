@@ -92,10 +92,10 @@ func _goals_and_loneliness(f: Array) -> void:
 	var c := S.folk(w, "Cy")
 	# reconcile goal: tension -> wants_reconcile and a positive pull towards that person
 	RelationshipService.add_both(a.id, b.id, "friendship", 30.0)
-	SocialDynamics.escalate(a.id, b.id, 40.0)
-	SocialDynamics.update_goals(a)
+	SocialConflict.escalate(a.id, b.id, 40.0)
+	SocialGatherings.update_goals(a)
 	S.expect(f, a.has_buff("wants_reconcile") and SocialDynamics.goals[a.id]["kind"] == "reconcile", "tension creates a reconcile goal")
-	S.expect(f, SocialDynamics.goal_text(a.id).find("Bo") >= 0, "goal text names the person: %s" % SocialDynamics.goal_text(a.id))
+	S.expect(f, SocialGatherings.goal_text(a.id).find("Bo") >= 0, "goal text names the person: %s" % SocialGatherings.goal_text(a.id))
 	S.expect(f, a.memory_bias("folk:%d" % b.id) > 0.0, "reconcile goal pulls Ann towards Bo despite the avoidance memory")
 	# the reconcile interactions are boosted by the goal buff
 	var cand := {"id": "make_up", "target_id": b.id, "kind": "folk", "obj": null, "folk": b}
@@ -106,12 +106,12 @@ func _goals_and_loneliness(f: Array) -> void:
 	# grudgeholders do not set the goal
 	var g := S.folk(w, "Grudge", ["grudgeholder"])
 	RelationshipService.add_both(g.id, c.id, "friendship", 30.0)
-	SocialDynamics.escalate(g.id, c.id, 40.0)
-	SocialDynamics.update_goals(g)
+	SocialConflict.escalate(g.id, c.id, 40.0)
+	SocialGatherings.update_goals(g)
 	S.expect(f, not g.has_buff("wants_reconcile"), "grudge-holders do not want to make peace")
 	# make friends goal for people with few friends
 	var d := S.folk(w, "Dee")
-	SocialDynamics.update_goals(d)
+	SocialGatherings.update_goals(d)
 	S.expect(f, d.has_buff("wants_friends") and SocialDynamics.goals.has(d.id), "folk with few friends want friends")
 	var kind: String = str(SocialDynamics.goals[d.id]["kind"])
 	S.expect(f, kind == "make_friend" and int(SocialDynamics.goals[d.id]["target"]) >= 0, "make_friend goal has a target")
@@ -133,7 +133,7 @@ func _goals_and_loneliness(f: Array) -> void:
 	var p2 := S.folk(w, "P2")
 	RelationshipService.add_both(p1.id, p2.id, "friendship", 60.0)
 	RelationshipService.add_both(p1.id, p2.id, "romance", 60.0)
-	RelationshipService.set_flag(p1.id, p2.id, "partner", true, false)
+	RelationshipBits.set_flag(p1.id, p2.id, "partner", true, false)
 	S.set_time(2, 19)
 	var started := 0
 	for i in 60:
@@ -141,6 +141,6 @@ func _goals_and_loneliness(f: Array) -> void:
 		p1.current = null
 		p2.queue.clear()
 		p2.current = null
-		started += SocialDynamics.couples_upkeep()
+		started += SocialGatherings.couples_upkeep()
 	S.expect(f, started > 0, "couples are nudged to go on dates / show affection (%d)" % started)
 	S.teardown()

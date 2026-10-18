@@ -1,0 +1,487 @@
+{
+ "road_asphalt": [
+  1,
+  1,
+  0.0
+ ],
+ "road_line": [
+  1,
+  1,
+  0.01
+ ],
+ "road_line_dash": [
+  1,
+  1,
+  0.01
+ ],
+ "road_edge": [
+  1,
+  1,
+  0.01
+ ],
+ "road_crosswalk": [
+  1,
+  1,
+  0.01
+ ],
+ "road_corner": [
+  1,
+  1,
+  0.03
+ ],
+ "road_t": [
+  1,
+  1,
+  0.01
+ ],
+ "road_cross": [
+  1,
+  1,
+  0.01
+ ],
+ "road_dead_end": [
+  1,
+  1,
+  0.2
+ ],
+ "sidewalk": [
+  1,
+  1,
+  0.0
+ ],
+ "sidewalk_curb": [
+  1,
+  1,
+  0.04
+ ],
+ "sidewalk_corner": [
+  1,
+  1,
+  0.04
+ ],
+ "curb_ramp": [
+  1,
+  1,
+  0.04
+ ],
+ "curb_straight": [
+  1,
+  0.15,
+  0.06
+ ],
+ "curb_corner": [
+  1,
+  1,
+  0.06
+ ],
+ "ground_grass": [
+  1,
+  1,
+  0.0
+ ],
+ "ground_dirt": [
+  1,
+  1,
+  0.0
+ ],
+ "ground_gravel": [
+  1,
+  1,
+  0.02
+ ],
+ "ground_sand": [
+  1,
+  1,
+  0.0
+ ],
+ "car_hatchback_red": [
+  1.8,
+  3.9,
+  1.46
+ ],
+ "car_hatchback_blue": [
+  1.8,
+  3.9,
+  1.46
+ ],
+ "car_hatchback_white": [
+  1.8,
+  3.9,
+  1.46
+ ],
+ "car_hatchback_yellow": [
+  1.8,
+  3.9,
+  1.46
+ ],
+ "car_sedan_red": [
+  1.9,
+  4.5,
+  1.43
+ ],
+ "car_sedan_blue": [
+  1.9,
+  4.5,
+  1.43
+ ],
+ "car_sedan_white": [
+  1.9,
+  4.5,
+  1.43
+ ],
+ "car_sedan_yellow": [
+  1.9,
+  4.5,
+  1.43
+ ],
+ "car_van_red": [
+  1.95,
+  4.8,
+  2.05
+ ],
+ "car_van_blue": [
+  1.95,
+  4.8,
+  2.05
+ ],
+ "car_van_white": [
+  1.95,
+  4.8,
+  2.05
+ ],
+ "car_van_yellow": [
+  1.95,
+  4.8,
+  2.05
+ ],
+ "bus": [
+  2.6,
+  9.0,
+  2.88
+ ],
+ "tree_oak_l": [
+  1,
+  1,
+  5.7
+ ],
+ "tree_oak_s": [
+  1,
+  1,
+  3.13
+ ],
+ "tree_pine_l": [
+  1,
+  1,
+  5.6
+ ],
+ "tree_pine_s": [
+  1,
+  1,
+  3.08
+ ],
+ "tree_ornamental_l": [
+  1,
+  1,
+  3.51
+ ],
+ "tree_ornamental_s": [
+  1,
+  1,
+  2.13
+ ],
+ "bush_round": [
+  1,
+  1,
+  0.84
+ ],
+ "bush_flowering": [
+  1,
+  1,
+  0.84
+ ],
+ "flower_bed": [
+  2,
+  1,
+  0.54
+ ],
+ "rock_small": [
+  1,
+  1,
+  0.29
+ ],
+ "rock_large": [
+  1,
+  1,
+  0.61
+ ],
+ "rock_cluster": [
+  2,
+  1,
+  0.5
+ ],
+ "grass_tuft": [
+  1,
+  1,
+  0.32
+ ],
+ "pond_water": [
+  1,
+  1,
+  0.0
+ ],
+ "pond_edge": [
+  1,
+  1,
+  0.0
+ ],
+ "pond_corner_out": [
+  1,
+  1,
+  0.0
+ ],
+ "pond_corner_in": [
+  1,
+  1,
+  0.0
+ ],
+ "street_lamp": [
+  1,
+  1,
+  3.62
+ ],
+ "fence_picket_straight": [
+  1,
+  0.15,
+  1.0
+ ],
+ "fence_picket_corner": [
+  1,
+  0.15,
+  1.03
+ ],
+ "fence_picket_gate": [
+  1,
+  0.15,
+  1.05
+ ],
+ "fence_wood_straight": [
+  1,
+  0.15,
+  1.65
+ ],
+ "fence_wood_corner": [
+  1,
+  0.15,
+  1.68
+ ],
+ "fence_wood_gate": [
+  1,
+  0.15,
+  1.7
+ ],
+ "fence_hedge_straight": [
+  1,
+  0.6,
+  1.1
+ ],
+ "fence_hedge_corner": [
+  1,
+  0.6,
+  1.1
+ ],
+ "fence_hedge_gate": [
+  1,
+  0.6,
+  1.12
+ ],
+ "mailbox_street": [
+  1,
+  1,
+  1.33
+ ],
+ "trash_can": [
+  1,
+  1,
+  0.93
+ ],
+ "bench_street": [
+  2,
+  1,
+  1.0
+ ],
+ "picnic_table": [
+  2,
+  2,
+  0.84
+ ],
+ "bus_stop": [
+  3,
+  2,
+  2.6
+ ],
+ "swing_set": [
+  3,
+  2,
+  2.26
+ ],
+ "slide": [
+  1,
+  3,
+  1.4
+ ],
+ "sandbox": [
+  2,
+  2,
+  0.3
+ ],
+ "fountain": [
+  3,
+  3,
+  1.7
+ ],
+ "sign_blank": [
+  1,
+  1,
+  2.2
+ ],
+ "fire_hydrant": [
+  1,
+  1,
+  0.77
+ ],
+ "house_small_a": [
+  10,
+  7,
+  5.29
+ ],
+ "house_small_b": [
+  10,
+  7,
+  5.29
+ ],
+ "house_small_c": [
+  10,
+  7,
+  5.29
+ ],
+ "house_medium_a": [
+  14,
+  11,
+  5.49
+ ],
+ "house_medium_b": [
+  14,
+  11,
+  5.49
+ ],
+ "house_medium_c": [
+  14,
+  11,
+  5.49
+ ],
+ "house_large_a": [
+  22,
+  14,
+  6.49
+ ],
+ "house_large_b": [
+  22,
+  14,
+  6.49
+ ],
+ "house_large_c": [
+  22,
+  14,
+  6.49
+ ],
+ "townhouse_a": [
+  7,
+  10,
+  7.89
+ ],
+ "townhouse_b": [
+  7,
+  10,
+  7.89
+ ],
+ "townhouse_c": [
+  7,
+  10,
+  7.89
+ ],
+ "cafe_a": [
+  22,
+  14,
+  4.6
+ ],
+ "cafe_b": [
+  22,
+  14,
+  4.6
+ ],
+ "gym_a": [
+  22,
+  14,
+  5.3
+ ],
+ "gym_b": [
+  22,
+  14,
+  5.3
+ ],
+ "library_a": [
+  22,
+  14,
+  10.1
+ ],
+ "library_b": [
+  22,
+  14,
+  10.1
+ ],
+ "market_a": [
+  22,
+  14,
+  4.65
+ ],
+ "market_b": [
+  22,
+  14,
+  4.65
+ ],
+ "office_a": [
+  22,
+  14,
+  9.4
+ ],
+ "office_b": [
+  22,
+  14,
+  9.4
+ ],
+ "school_a": [
+  22,
+  14,
+  9.5
+ ],
+ "school_b": [
+  22,
+  14,
+  9.5
+ ],
+ "dog": [
+  0.4,
+  0.9,
+  0.79
+ ],
+ "cat": [
+  0.3,
+  0.7,
+  0.65
+ ],
+ "bird": [
+  0.25,
+  0.4,
+  0.38
+ ]
+}

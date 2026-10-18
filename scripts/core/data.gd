@@ -36,9 +36,6 @@ func load_file(path: String) -> Variant:
 func get_table(name: String) -> Dictionary:
 	return tables.get(name, {})
 
-func set_table(name: String, table: Dictionary) -> void:
-	tables[name] = table
-
 func get_entry(table: String, id: String) -> Dictionary:
 	var t: Dictionary = tables.get(table, {})
 	return t.get(id, {})

@@ -22,7 +22,7 @@ func _build(w: StubWorld) -> Dictionary:
 	w.add_object("fridge", Vector2i(3, 3))
 	WorldIface.coins[1] = 1234
 	Careers.hire(ann, "cook", 2)
-	Careers.add_performance(ann.id, 17.0)
+	CareerProgress.add_performance(ann.id, 17.0)
 	RelationshipService.add_both(ann.id, bo.id, "friendship", 42.0)
 	RelationshipService.add_both(ann.id, bo.id, "romance", 20.0)
 	RelationshipService.add_history(ann.id, bo.id, "chat", 0.3)
@@ -45,8 +45,8 @@ func _roundtrip(f: Array) -> void:
 	Story.auto_accept_invites = false
 	var tid: int = int(Story.alive_townies()[2]["id"])
 	var dir = K.director()
-	var inv: Dictionary = Story.send_invite(tid, (cast["bo"] as Folk).id)
-	Story.respond_invite(int(inv["id"]), true)
+	var inv: Dictionary = StoryVisits.send_invite(tid, (cast["bo"] as Folk).id)
+	StoryVisits.respond_invite(int(inv["id"]), true)
 	K.run(dir, 3)
 	K.expect(f, SysUtil.is_away(cast["bo"]), "precondition: Bo is away at save time")
 	var snap_before: Dictionary = SaveLoad.snapshot("test")
