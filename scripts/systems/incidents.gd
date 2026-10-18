@@ -26,6 +26,7 @@ static var counters: Dictionary = {}          # id -> {checks, exposure, trigger
 static var pending: Array = []                # [{id, kind, sid, lot_key, due_min, defused}]
 static var _history: Array = []
 static var insurance_fn: Callable = Callable()
+static var cover_kind: String = ""      # what insurance_cover is paying for: "" property (fire, disasters), "health" (hospital, doctor); read by BankInsurance (task 13)
 
 static func reset() -> void:
 	IncidentDefs.reset()
@@ -109,9 +110,12 @@ static func measured_rate(id: String) -> float:
 static func effective_rate(id: String, subject) -> float:
 	return IncidentRisk.effective_rate(IncidentDefs.get_def(id), IncidentSubject.make(subject))
 
-static func insurance_cover(amount: int, hid: int = 0) -> int:
+static func insurance_cover(amount: int, hid: int = 0, kind: String = "") -> int:
 	if insurance_fn.is_valid():
-		return clampi(int(insurance_fn.call(amount, hid)), 0, amount)
+		cover_kind = kind
+		var paid: int = clampi(int(insurance_fn.call(amount, hid)), 0, amount)
+		cover_kind = ""
+		return paid
 	return 0
 
 # ------------------------------------------------------------------ clock hooks
@@ -142,7 +146,7 @@ static func call_doctor(folk_id: int) -> Dictionary:
 	if f == null:
 		return {"ok": false, "cost": 0, "defused": 0}
 	var cost: int = int(IncidentDefs.cfg("doctor_cost", 120))
-	var net: int = maxi(cost - insurance_cover(cost, int(f.household_id)), 0)
+	var net: int = maxi(cost - insurance_cover(cost, int(f.household_id), "health"), 0)
 	if net > 0 and not Economy.spend(int(f.household_id), net, "doctor"):
 		SysUtil.notify("The household cannot afford a doctor right now.", "warn")
 		return {"ok": false, "cost": net, "defused": 0}

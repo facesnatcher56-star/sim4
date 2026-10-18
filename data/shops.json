@@ -1,0 +1,424 @@
+{
+ "version": 1,
+ "economy": {
+  "year_days": 28,
+  "phase_chance": 0.025,
+  "phase_days": [
+   12,
+   30
+  ],
+  "boom_target": 0.7,
+  "recession_target": -0.7,
+  "pull": 0.12,
+  "noise": 0.04,
+  "base_inflation": 0.03,
+  "prosperity_inflation": 0.05,
+  "price_swing": 0.1,
+  "rent_swing": 0.12,
+  "wage_swing": 0.06,
+  "price_follow": 0.25,
+  "rent_follow": 0.08,
+  "wage_follow": 0.1,
+  "level_min": 0.6,
+  "level_max": 3,
+  "layoff_below": -0.3,
+  "layoff_chance": 0.02,
+  "hire_above": 0.1,
+  "hire_chance": 0.12,
+  "report_days": 28,
+  "history_size": 12,
+  "resident_layoff_chance": 0.004,
+  "severance_days": 3
+ },
+ "stock": {
+  "sale_days": 7,
+  "sale_length": 3,
+  "sale_pct": 0.2,
+  "holiday_pct": 0.15,
+  "scarce_below": 0.2,
+  "scarce_markup": 0.1,
+  "delivery_fee": 8,
+  "delivery_days": 1,
+  "demand_noise": 0.4
+ },
+ "shops": {
+  "supermarket": {
+   "label": "Supermarket",
+   "lot": "market",
+   "hours": [
+    8,
+    21
+   ],
+   "online": true,
+   "items": {
+    "groceries_small": {
+     "label": "Grocery bag",
+     "base": 30,
+     "kind": "food",
+     "units": 5,
+     "stock": 40,
+     "restock": 14,
+     "demand": 12
+    },
+    "groceries_big": {
+     "label": "Family shop",
+     "base": 55,
+     "kind": "food",
+     "units": 10,
+     "stock": 30,
+     "restock": 9,
+     "demand": 8
+    },
+    "frozen_meals": {
+     "label": "Frozen meals",
+     "base": 24,
+     "kind": "food",
+     "units": 4,
+     "stock": 30,
+     "restock": 8,
+     "demand": 6
+    }
+   }
+  },
+  "market": {
+   "label": "Market Stalls",
+   "lot": "market",
+   "hours": [
+    8,
+    18
+   ],
+   "online": false,
+   "items": {
+    "fresh_produce": {
+     "label": "Fresh produce",
+     "base": 14,
+     "kind": "food",
+     "units": 2,
+     "stock": 24,
+     "restock": 10,
+     "demand": 9
+    },
+    "lottery_ticket": {
+     "label": "Lottery ticket",
+     "base": 5,
+     "kind": "lottery",
+     "stock": 200,
+     "restock": 200,
+     "demand": 40
+    }
+   }
+  },
+  "clothing": {
+   "label": "Clothing Shop",
+   "lot": "market",
+   "hours": [
+    10,
+    19
+   ],
+   "online": true,
+   "items": {
+    "outfit_casual": {
+     "label": "New casual outfit",
+     "base": 80,
+     "kind": "buff",
+     "buff": "new_clothes",
+     "stock": 10,
+     "restock": 3,
+     "demand": 2
+    },
+    "outfit_smart": {
+     "label": "Smart outfit",
+     "base": 160,
+     "kind": "buff",
+     "buff": "sharp_dressed",
+     "stock": 6,
+     "restock": 2,
+     "demand": 1
+    },
+    "winter_coat": {
+     "label": "Winter coat",
+     "base": 110,
+     "kind": "item",
+     "stock": 6,
+     "restock": 1,
+     "demand": 1
+    }
+   }
+  },
+  "pharmacy": {
+   "label": "Pharmacy",
+   "lot": "market",
+   "hours": [
+    9,
+    20
+   ],
+   "online": true,
+   "items": {
+    "medicine": {
+     "label": "Medicine",
+     "base": 35,
+     "kind": "item",
+     "use": "medicine",
+     "stock": 12,
+     "restock": 3,
+     "demand": 3
+    },
+    "first_aid_kit": {
+     "label": "First aid kit",
+     "base": 25,
+     "kind": "item",
+     "use": "first_aid",
+     "stock": 12,
+     "restock": 3,
+     "demand": 2
+    }
+   }
+  },
+  "hardware": {
+   "label": "Hardware Store",
+   "lot": "market",
+   "hours": [
+    8,
+    18
+   ],
+   "online": true,
+   "items": {
+    "repair_kit": {
+     "label": "Repair kit",
+     "base": 45,
+     "kind": "item",
+     "use": "repair",
+     "stock": 10,
+     "restock": 2,
+     "demand": 2
+    },
+    "smoke_alarm": {
+     "label": "Smoke alarm",
+     "base": 36,
+     "kind": "object",
+     "def": "smoke_alarm",
+     "stock": 8,
+     "restock": 2,
+     "demand": 1
+    },
+    "fire_extinguisher": {
+     "label": "Fire extinguisher",
+     "base": 50,
+     "kind": "object",
+     "def": "fire_extinguisher",
+     "stock": 8,
+     "restock": 2,
+     "demand": 1
+    },
+    "lamp": {
+     "label": "Lamp",
+     "base": 62,
+     "kind": "object",
+     "def": "lamp",
+     "stock": 8,
+     "restock": 2,
+     "demand": 1
+    }
+   }
+  },
+  "bookshop": {
+   "label": "Bookshop",
+   "lot": "library",
+   "hours": [
+    9,
+    19
+   ],
+   "online": true,
+   "items": {
+    "novel": {
+     "label": "Novel",
+     "base": 18,
+     "kind": "skill",
+     "skill": "charisma",
+     "xp": 25,
+     "stock": 14,
+     "restock": 3,
+     "demand": 3
+    },
+    "cookbook": {
+     "label": "Cookbook",
+     "base": 28,
+     "kind": "skill",
+     "skill": "cooking",
+     "xp": 40,
+     "stock": 8,
+     "restock": 2,
+     "demand": 2
+    },
+    "textbook": {
+     "label": "Textbook",
+     "base": 35,
+     "kind": "skill",
+     "skill": "logic",
+     "xp": 50,
+     "stock": 8,
+     "restock": 2,
+     "demand": 2
+    },
+    "bookcase": {
+     "label": "Bookshelf",
+     "base": 320,
+     "kind": "object",
+     "def": "bookshelf",
+     "stock": 4,
+     "restock": 1,
+     "demand": 0
+    }
+   }
+  },
+  "furniture": {
+   "label": "Furniture Showroom",
+   "lot": "office",
+   "hours": [
+    9,
+    18
+   ],
+   "online": true,
+   "items": {
+    "sofa": {
+     "label": "Sofa",
+     "base": 585,
+     "kind": "object",
+     "def": "sofa",
+     "stock": 5,
+     "restock": 1,
+     "demand": 0.4
+    },
+    "armchair": {
+     "label": "Armchair",
+     "base": 290,
+     "kind": "object",
+     "def": "armchair",
+     "stock": 6,
+     "restock": 1,
+     "demand": 0.4
+    },
+    "bed": {
+     "label": "Double bed",
+     "base": 630,
+     "kind": "object",
+     "def": "bed",
+     "stock": 4,
+     "restock": 1,
+     "demand": 0.4
+    },
+    "dresser": {
+     "label": "Dresser",
+     "base": 235,
+     "kind": "object",
+     "def": "dresser",
+     "stock": 5,
+     "restock": 1,
+     "demand": 0.3
+    },
+    "table": {
+     "label": "Dining table",
+     "base": 270,
+     "kind": "object",
+     "def": "table",
+     "stock": 5,
+     "restock": 1,
+     "demand": 0.3
+    },
+    "rug": {
+     "label": "Rug",
+     "base": 105,
+     "kind": "object",
+     "def": "rug",
+     "stock": 8,
+     "restock": 2,
+     "demand": 0.6
+    }
+   }
+  },
+  "electronics": {
+   "label": "Electronics Shop",
+   "lot": "office",
+   "hours": [
+    9,
+    18
+   ],
+   "online": true,
+   "items": {
+    "tv": {
+     "label": "Television",
+     "base": 450,
+     "kind": "object",
+     "def": "tv",
+     "stock": 5,
+     "restock": 1,
+     "demand": 0.5
+    },
+    "computer": {
+     "label": "Computer",
+     "base": 810,
+     "kind": "object",
+     "def": "computer",
+     "stock": 4,
+     "restock": 1,
+     "demand": 0.4
+    },
+    "stereo": {
+     "label": "Stereo",
+     "base": 340,
+     "kind": "object",
+     "def": "stereo",
+     "stock": 4,
+     "restock": 1,
+     "demand": 0.3
+    },
+    "coffee_maker": {
+     "label": "Coffee maker",
+     "base": 270,
+     "kind": "object",
+     "def": "coffee_maker",
+     "stock": 4,
+     "restock": 1,
+     "demand": 0.3
+    }
+   }
+  }
+ },
+ "lottery": {
+  "ticket_price": 5,
+  "draw_days": 7,
+  "jackpot_start": 400,
+  "jackpot_add_per_ticket": 3,
+  "town_tickets_per_draw": 40,
+  "odds": [
+   {
+    "id": "small",
+    "p": 0.12,
+    "prize": 12
+   },
+   {
+    "id": "medium",
+    "p": 0.012,
+    "prize": 80
+   },
+   {
+    "id": "big",
+    "p": 0.0015,
+    "prize": 600
+   },
+   {
+    "id": "jackpot",
+    "p": 0.0004,
+    "prize": -1
+   }
+  ],
+  "addiction": {
+   "gain_per_ticket": 1.2,
+   "gain_per_loss_streak": 0.2,
+   "decay_per_day": 1,
+   "hooked_at": 40,
+   "buy_urge_chance": 0.25,
+   "urge_tickets": 4
+  }
+ }
+}

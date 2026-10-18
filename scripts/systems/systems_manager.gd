@@ -1,4 +1,4 @@
-class_name SystemsManager
+﻿class_name SystemsManager
 extends Node
 ## Creates and ticks every gameplay system off Clock / Events. Install once from main.gd:
 ##     SystemsManager.install(self)           # adds the node as a child and starts listening
@@ -49,6 +49,7 @@ func setup() -> void:
 	_events.object_removed.connect(_on_object_removed)
 	SysContent.install_all()
 	NeighborhoodService.install()
+	MarketTick.install()           # task 13: BankInsurance is the Incidents.insurance_fn
 	_hook_world()
 
 func teardown() -> void:
@@ -93,6 +94,7 @@ static func reset_all() -> void:
 	CrimeFlow.reset()
 	Fire.reset()
 	ShareState.reset()
+	MarketTick.reset()
 
 ## Start a fresh game: reset systems, give every household starting funds, register all current folk, make townies.
 func new_game(household_ids: Array = [], lifespan: String = "") -> void:
@@ -108,6 +110,7 @@ func new_game(household_ids: Array = [], lifespan: String = "") -> void:
 	ensure_registered()
 	Story.generate_townies()
 	Economy.refresh_objects()
+	MarketTick.new_game()
 
 ## Make sure every folk on the lot has aging / goals records (idempotent).
 func ensure_registered() -> void:
@@ -171,6 +174,7 @@ func _on_day(day: int) -> void:
 	Incidents.on_day()
 	CrimeFlow.on_day(day)
 	DisasterClock.on_day(day)
+	MarketTick.on_day(day)
 	SysUtil.game_event("systems_day", {"day": day})
 	if autosave_enabled:
 		SaveLoad.autosave()
@@ -214,6 +218,7 @@ func _on_interaction_finished(folk_id: int, iid: String, success: bool) -> void:
 	if success:
 		Economy.note_usage(int(f2.household_id), iid)
 	CareerProgress.on_interaction(folk_id, iid, success)
+	MarketTick.on_interaction_finished(folk_id, iid, success)
 	RelationshipService.on_interaction_finished(folk_id, iid, success)
 	StoryVisits.on_interaction(folk_id, iid, success)
 	if success:
@@ -269,6 +274,7 @@ func _on_game_event(ev_name: String, payload: Dictionary) -> void:
 	CrimeFlow.on_game_event(ev_name, payload)
 	Fire.on_game_event(ev_name, payload)
 	DisasterClock.on_game_event(ev_name, payload)
+	MarketTick.on_game_event(ev_name, payload)
 	match ev_name:
 		"order_groceries":
 			var f = SysUtil.folk(int(payload.get("folk_id", -1)))

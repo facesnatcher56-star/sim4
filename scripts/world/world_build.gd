@@ -66,6 +66,8 @@ func buy_place(def_id: String, tile: Vector2i, rot: int = 0, household_id: int =
 		return -1
 	var span: int = world.objs.default_span(world.get_def(def_id), tile, level)
 	var price := object_price(def_id) * (1 + span)          # a lift is paid per floor it serves
+	if ShopStock.take_parcel(hid, def_id):                   # furniture bought in a shop (task 13) is placed free
+		price = 0
 	if not _spend(hid, price):
 		world.last_error = "not enough coins"
 		return -1

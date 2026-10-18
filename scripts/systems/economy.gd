@@ -238,7 +238,9 @@ static func compute_bill(hid: int) -> int:
 	amount += float(usage.get(hid, 0.0)) * float(b.get("utility_rate", 0.8))
 	amount *= Weather.bill_multiplier()    # heating / cooling over the billing cycle (1.0 when mild)
 	amount *= Scenario.bill_multiplier()   # new-game difficulty (1.0 on Normal)
+	amount *= MarketEconomy.price_mult()   # the town economy (task 13; 1.0 until it starts)
 	amount += float(DisasterInsurance.bill_extra(hid))   # optional home insurance premium (task 06)
+	amount += float(BankInsurance.bill_extra(hid))       # health / car / life premiums (task 13)
 	return int(round(amount))
 
 static func outstanding(hid: int) -> Array:

@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "pay_days": 7,
+  "savings": {"rate_year": 0.03, "prosperity_rate": 0.02, "min_rate": 0.005, "interest_every_days": 1},
+  "credit": {
+    "start": 600, "min": 300, "max": 850,
+    "on_time": 4, "late": -35, "default": -90, "repaid_loan": 25, "on_time_cap": 40,
+    "debt_penalty_per_1000": -6, "savings_bonus_per_1000": 5, "recover_per_week": 2
+  },
+  "loans": {
+    "base_rate_year": 0.08, "spread_low_score": 0.10, "term_payments": 20, "late_fee": 20,
+    "limit_per_point": 12, "limit_floor_score": 450, "max_loans": 2, "default_after_missed": 3, "min_amount": 200
+  },
+  "insurance": {
+    "policies": {
+      "health": {"label": "Health insurance", "weekly": 22, "cover": 0.8, "kinds": ["health"]},
+      "car": {"label": "Car insurance", "weekly": 14, "cover": 0.7, "kinds": ["car"], "payout_events": {"traffic_hit": 350}},
+      "life": {"label": "Life insurance", "weekly": 18, "payout": 4000}
+    },
+    "home_note": "Home insurance is the mailbox option from the disaster system (DisasterInsurance).",
+    "price_follows_index": true
+  },
+  "will": {"fee": 0, "share_min": 0.0, "default_to_family": true},
+  "gamble": {"cards_stake": [5, 10, 25], "cards_win_p": 0.47, "cards_payout": 2.0},
+  "work": {
+    "teen_job": {"label": "Part-time at the cafe", "hours": [15, 19], "pay_hour": 9, "days": [0, 1, 2, 3, 4, 5, 6], "stages": ["teen"]},
+    "freelance": {"base": 40, "skill_pay": 9, "skills": ["logic", "charisma", "painting", "cooking"], "daily_cap": 2},
+    "odd_job": {"base": 30, "daily_cap": 2, "needs_unemployed": false},
+    "remote": {"needs": "internet", "pay_mult": 1.0, "stub": true},
+    "benefit": {"per_day": 18, "max_days": 14, "wait_days": 1},
+    "crafts": {
+      "painting": {"label": "Painting", "price": 30, "skill": "painting", "demand": 5},
+      "book": {"label": "Book", "price": 34, "skill": "charisma", "demand": 4},
+      "produce": {"label": "Garden produce", "price": 8, "skill": "gardening", "demand": 12},
+      "fish": {"label": "Fish", "price": 7, "skill": "fishing", "demand": 12}
+    },
+    "craft_events": {"harvested_crops": "produce", "caught_fish": "fish", "caught_rare_fish": "fish"},
+    "craft_interactions": {"paint_canvas": "painting", "paint_masterpiece": "painting", "write_story": "book", "write_novel": "book"},
+    "saturation": 0.08,
+    "sell_share": 0.6,
+    "skill_bonus": 0.08
+  }
+}

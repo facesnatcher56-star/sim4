@@ -1,0 +1,199 @@
+{
+ "_doc": "Task 13 economy content only (buffs, interactions): no incidents. See docs/ECONOMY.md",
+ "content": {
+  "buffs": {
+   "new_clothes": {
+    "label": "New Clothes",
+    "mood": {
+     "happy": 1
+    },
+    "duration_min": 1440,
+    "thought": "I look good in this."
+   },
+   "sharp_dressed": {
+    "label": "Sharp Dressed",
+    "mood": {
+     "happy": 1,
+     "focused": 1
+    },
+    "duration_min": 1440,
+    "thought": "Dressed to impress."
+   },
+   "lucky_day": {
+    "label": "Lucky Day",
+    "mood": {
+     "happy": 2
+    },
+    "duration_min": 600,
+    "thought": "Today is my lucky day."
+   },
+   "gambling_urge": {
+    "label": "Gambling Urge",
+    "mood": {
+     "tense": 1
+    },
+    "duration_min": 240,
+    "thought": "Just one more ticket..."
+   },
+   "money_worries": {
+    "label": "Money Worries",
+    "mood": {
+     "tense": 1,
+     "sad": 1
+    },
+    "duration_min": 720,
+    "thought": "How will we pay for all this?"
+   }
+  },
+  "interactions": {
+   "write_will": {
+    "label": "Write a Will",
+    "kind": "super",
+    "target": "object",
+    "objects": [
+     "desk",
+     "computer"
+    ],
+    "tags": [
+     "paperwork"
+    ],
+    "duration_min": 20,
+    "posture": "sit",
+    "tests": [],
+    "per_min": {},
+    "on_finish": [
+     {
+      "fire_event": "write_will"
+     }
+    ],
+    "autonomous": false,
+    "priority": "normal"
+   },
+   "money_matters": {
+    "label": "Manage Money",
+    "kind": "super",
+    "target": "object",
+    "objects": [
+     "mailbox"
+    ],
+    "tags": [
+     "paperwork"
+    ],
+    "duration_min": 3,
+    "posture": "stand",
+    "tests": [],
+    "per_min": {},
+    "on_finish": [
+     {
+      "fire_event": "open_money"
+     }
+    ],
+    "autonomous": false,
+    "priority": "normal"
+   },
+   "sell_crafts": {
+    "label": "Sell Crafts Online",
+    "kind": "super",
+    "target": "object",
+    "objects": [
+     "computer"
+    ],
+    "tags": [
+     "paperwork",
+     "work"
+    ],
+    "duration_min": 15,
+    "posture": "sit",
+    "tests": [],
+    "per_min": {},
+    "on_finish": [
+     {
+      "fire_event": "sell_crafts"
+     }
+    ],
+    "autonomous": false,
+    "priority": "normal"
+   },
+   "freelance_gig": {
+    "label": "Freelance Work",
+    "kind": "super",
+    "target": "object",
+    "objects": [
+     "computer"
+    ],
+    "tags": [
+     "work",
+     "skill"
+    ],
+    "duration_min": 120,
+    "posture": "sit",
+    "tests": [
+     {
+      "stat_above": [
+       "energy",
+       -40
+      ]
+     }
+    ],
+    "per_min": {
+     "fun": -0.1,
+     "energy": -0.08
+    },
+    "on_finish": [
+     {
+      "fire_event": "freelance_done"
+     }
+    ],
+    "autonomous": false,
+    "priority": "normal"
+   },
+   "odd_job": {
+    "label": "Do Odd Jobs",
+    "kind": "super",
+    "target": "object",
+    "objects": [
+     "mailbox"
+    ],
+    "tags": [
+     "work",
+     "chore"
+    ],
+    "duration_min": 90,
+    "posture": "stand",
+    "tests": [
+     {
+      "stat_above": [
+       "energy",
+       -40
+      ]
+     }
+    ],
+    "per_min": {
+     "energy": -0.1,
+     "hygiene": -0.1
+    },
+    "on_finish": [
+     {
+      "fire_event": "odd_job_done"
+     }
+    ],
+    "autonomous": false,
+    "priority": "normal"
+   }
+  },
+  "object_interactions": {
+   "desk": [
+    "write_will"
+   ],
+   "computer": [
+    "write_will",
+    "sell_crafts",
+    "freelance_gig"
+   ],
+   "mailbox": [
+    "money_matters",
+    "odd_job"
+   ]
+  }
+ }
+}

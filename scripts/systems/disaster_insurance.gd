@@ -46,7 +46,7 @@ static func cover(amount: int, hid: int) -> int:
 	return int(floor(float(amount) * ratio(hid)))
 
 static func install() -> void:
-	Incidents.insurance_fn = Callable(DisasterInsurance, "cover")
+	Incidents.insurance_fn = Callable(BankInsurance, "cover")      # task 13: the bank wraps the home cover and adds health / car
 
 static func ensure() -> void:
 	if not Incidents.insurance_fn.is_valid():

@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "pay_days": 7,
+  "map_homes": {
+    "home": {"label": "Your home", "kind": "house", "base": 14000, "hood": 0.55},
+    "townie_a": {"label": "The Ashby house", "kind": "house", "base": 12500, "hood": 0.5},
+    "townie_b": {"label": "The second townhouse", "kind": "house", "base": 11000, "hood": 0.45},
+    "townie_c": {"label": "The corner house", "kind": "house", "base": 13000, "hood": 0.6}
+  },
+  "listings": {
+    "count": 5,
+    "refresh_days": 7,
+    "streets": ["Willow Row", "Mill Lane", "Harbour Road", "Chestnut Close", "Orchard Way", "Kiln Street", "Park Terrace", "Bridge Walk"],
+    "kinds": {
+      "flat": {"label": "flat", "base": [6500, 9000]},
+      "house": {"label": "house", "base": [10500, 15500]}
+    },
+    "hood": [0.25, 0.8],
+    "condition": [55, 95]
+  },
+  "value": {
+    "hood_swing": 0.5,
+    "school_bonus": 0.06,
+    "park_bonus": 0.05,
+    "condition_floor": 0.7,
+    "condition_span": 0.4,
+    "follow": 0.15,
+    "sale_spread": 0.04,
+    "agent_fee": 0.03
+  },
+  "rent": {
+    "yield": 0.012,
+    "increase_cap": 0.08,
+    "vacancy_chance": 0.1,
+    "tenant_find_chance": 0.35,
+    "tenant_default_chance": 0.015,
+    "evict_after_missed": 2,
+    "repossess_after_missed": 3
+  },
+  "mortgage": {
+    "down_min": 0.2,
+    "term_payments": 40,
+    "rate_year": 0.05,
+    "max_credit_floor": 520,
+    "late_fee": 25
+  },
+  "condition": {"decay_per_day": 0.12, "repair_cost_per_point": 8, "broken_penalty": 6},
+  "townies": {"landlord_share": 0.5, "sell_chance": 0.01, "buy_chance": 0.03, "rent_review_days": 28}
+}

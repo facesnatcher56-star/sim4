@@ -316,6 +316,9 @@ static func _inherit(f, mourners: Array) -> Dictionary:
 			survivors += 1
 	if survivors > 0:
 		return {"to": hid, "coins": 0, "note": "household keeps everything"}
+	var willed: Dictionary = BankWill.apply(f, mourners)       # task 13: a will names the heir
+	if not willed.is_empty():
+		return willed
 	# household ends: closest heir inherits funds and the lot's objects
 	var heir = null
 	for rank in ["spouse", "partner", "family", "sweetheart", "best_friend"]:

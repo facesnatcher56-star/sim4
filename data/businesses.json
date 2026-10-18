@@ -1,0 +1,222 @@
+{
+ "version": 1,
+ "slots": {
+  "cafe": 3,
+  "market": 3,
+  "gym": 1,
+  "library": 1,
+  "office": 2
+ },
+ "traffic": {
+  "cafe": 1.1,
+  "market": 1.3,
+  "gym": 0.8,
+  "library": 0.6,
+  "office": 0.7
+ },
+ "lot_rent": {
+  "cafe": 28,
+  "market": 30,
+  "gym": 25,
+  "library": 18,
+  "office": 22
+ },
+ "max_levels": 3,
+ "expand": {
+  "cost_mult": 0.8,
+  "capacity_mult": 1.4,
+  "min_reputation": 55
+ },
+ "pay_days": 7,
+ "bankrupt_after_days": 7,
+ "sweep_keep_days": 5,
+ "price_levels": [
+  0.7,
+  0.85,
+  1,
+  1.15,
+  1.3,
+  1.5
+ ],
+ "stock": {
+  "cap_per_level": 120,
+  "start_fraction": 0.5
+ },
+ "hire": {
+  "base_wage": 9,
+  "skill_wage": 1.2,
+  "max_staff_base": 2,
+  "max_staff_per_level": 2,
+  "hire_cost": 40
+ },
+ "reviews": {
+  "keep": 8,
+  "chance": 0.5
+ },
+ "sale": {
+  "fitout_fraction": 0.5,
+  "profit_days": 5
+ },
+ "townies": {
+  "max_businesses": 5,
+  "found_chance": 0.1,
+  "min_coins": 150,
+  "start_cash_days": 5,
+  "coin_share": 0.6,
+  "name_suffix": [
+   "",
+   " & Co",
+   " Place"
+  ]
+ },
+ "types": {
+  "cafe": {
+   "label": "Cafe",
+   "lots": [
+    "cafe",
+    "library",
+    "market"
+   ],
+   "fitout": 1400,
+   "demand": 1.6,
+   "avg_spend": 11,
+   "unit_cost": 4,
+   "cap_per_staff": 2,
+   "hours": [
+    7,
+    18
+   ],
+   "skill": "cooking",
+   "stock_use": 1
+  },
+  "shop": {
+   "label": "Shop",
+   "lots": [
+    "market",
+    "office"
+   ],
+   "fitout": 1100,
+   "demand": 1.3,
+   "avg_spend": 16,
+   "unit_cost": 7,
+   "cap_per_staff": 2,
+   "hours": [
+    9,
+    18
+   ],
+   "skill": "charisma",
+   "stock_use": 1
+  },
+  "restaurant": {
+   "label": "Restaurant",
+   "lots": [
+    "cafe",
+    "market"
+   ],
+   "fitout": 2400,
+   "demand": 0.9,
+   "avg_spend": 26,
+   "unit_cost": 7,
+   "cap_per_staff": 1.2,
+   "hours": [
+    11,
+    22
+   ],
+   "skill": "cooking",
+   "stock_use": 1.5
+  },
+  "salon": {
+   "label": "Hair Salon",
+   "lots": [
+    "market",
+    "office"
+   ],
+   "fitout": 1300,
+   "demand": 0.55,
+   "avg_spend": 24,
+   "unit_cost": 6,
+   "cap_per_staff": 0.9,
+   "hours": [
+    9,
+    18
+   ],
+   "skill": "charisma",
+   "stock_use": 0.5
+  },
+  "gym": {
+   "label": "Gym",
+   "lots": [
+    "gym"
+   ],
+   "fitout": 2200,
+   "demand": 0.9,
+   "avg_spend": 11,
+   "unit_cost": 2,
+   "cap_per_staff": 2.5,
+   "hours": [
+    6,
+    21
+   ],
+   "skill": "fitness",
+   "stock_use": 0.2
+  },
+  "bar": {
+   "label": "Bar",
+   "lots": [
+    "cafe"
+   ],
+   "fitout": 1800,
+   "demand": 1.5,
+   "avg_spend": 15,
+   "unit_cost": 4.5,
+   "cap_per_staff": 2,
+   "hours": [
+    16,
+    24
+   ],
+   "skill": "charisma",
+   "stock_use": 1.2
+  },
+  "bakery": {
+   "label": "Bakery",
+   "lots": [
+    "market",
+    "cafe"
+   ],
+   "fitout": 1200,
+   "demand": 1.8,
+   "avg_spend": 9,
+   "unit_cost": 2.8,
+   "cap_per_staff": 2.5,
+   "hours": [
+    6,
+    14
+   ],
+   "skill": "cooking",
+   "stock_use": 1
+  }
+ },
+ "review_text": {
+  "1": [
+   "Not a good visit at all.",
+   "Rude and out of stock."
+  ],
+  "2": [
+   "Too pricey for what it is.",
+   "A long wait and sold out of things."
+  ],
+  "3": [
+   "Fine. Nothing special.",
+   "Alright for a quick visit."
+  ],
+  "4": [
+   "Really good, a little busy.",
+   "Good value, would visit again."
+  ],
+  "5": [
+   "Wonderful place, we will be back.",
+   "The best in town.",
+   "Friendly staff and lovely things."
+  ]
+ }
+}

@@ -99,7 +99,7 @@ static func on_returned(f, _rec: Dictionary) -> void:
 
 ## Pay `amount` (minus insurance) now, or leave an ordinary bill when the household cannot afford it. Returns the net amount.
 static func charge(hid: int, amount: int, who: String = "") -> int:
-	var net: int = maxi(amount - Incidents.insurance_cover(amount, hid), 0)
+	var net: int = maxi(amount - Incidents.insurance_cover(amount, hid, "health"), 0)
 	if net <= 0 or hid <= 0:
 		return net
 	if Economy.spend(hid, net, "hospital bill"):
