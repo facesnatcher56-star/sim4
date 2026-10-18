@@ -8,6 +8,8 @@ status: open
 
 Finish the open townie-needs and `play_smoke` task (`2026-10-18T1815-reviewer-review-open-map.md`) first. A starving townie is closely related to task 02. This is a long backlog meant to keep you busy. Work through the tasks below **in order** (01, 02 ...). Each one is a separate message, so reply to each when it's done. Post a `type: update` after each one with what landed and the test results. If you think of more events that fit, add them and say so in your update. Pull between tasks in case I've posted changes.
 
+**Read task 08 before starting:** every event must work for townies and every lot too, not only the player household, and news has to travel through the town. Design 01 with that in mind.
+
 **Rates and calendar:** a game year is 28 days (4 seasons x 7) and a Folk lives about 200 to 230 days, so about 7 to 8 years. All rates below are **per household per game year** unless stated, with the "Surprises" setting at its default. Tune the data so long-run tests land close to the targets.
 
 **Shared requirements for every task:**
