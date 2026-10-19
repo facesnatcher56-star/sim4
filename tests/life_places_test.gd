@@ -37,6 +37,14 @@ func _data(f: Array) -> void:
 			var h: String = str(s.get("handler", ""))
 			K.expect(f, h == "" or PlaceHandlers.known(h), "%s/%s uses a known handler (%s)" % [pid, sid, h])
 			K.expect(f, Places.find_service(sid).get("place", "") == pid, "service id %s is unique to %s" % [sid, pid])
+	# every place has what the spec asks for: hours, prices, staff (or self-service), a host lot and its own news
+	for pid in Places.all():
+		var d2: Dictionary = Places.def(pid)
+		K.expect(f, d2.has("hours") or d2.has("schedule"), "%s has opening hours" % pid)
+		K.expect(f, not Places.services(pid).is_empty() or d2.has("staff"), "%s offers something" % pid)
+		K.expect(f, d2.has("staff") or int(d2.get("min_staff", 1)) == 0, "%s has staff or is self-service" % pid)
+		K.expect(f, not (d2.get("news", []) as Array).is_empty(), "%s has its own news items" % pid)
+		K.expect(f, str(d2.get("label", "")) != "" and str(d2.get("blurb", "")) != "", "%s has a name and a description" % pid)
 	K.teardown()
 
 func _hours(f: Array) -> void:

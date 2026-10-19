@@ -3,7 +3,7 @@ extends RefCounted
 ## The "Places" tab of LifeHub: pick a kind of place, then a place; see its hours, staff and what it offers; go there; use a service.
 ## A service button is greyed out with the reason in its tooltip (closed, too young, too poor, "go there first").
 
-const KINDS := [["", "All"], ["education", "Learning"], ["health", "Health"], ["food", "Food"], ["night", "Nightlife"], ["culture", "Culture"], ["leisure", "Leisure"], ["community", "Community"], ["family", "Events"], ["media", "Media"], ["pets", "Pets"], ["hobby", "Hobbies"]]
+const KINDS := [["", "All"], ["education", "Learning"], ["health", "Clinics and Gym"], ["food", "Food"], ["night", "Nightlife"], ["culture", "Culture"], ["leisure", "Leisure"], ["community", "Community"], ["family", "Events"], ["media", "Media"], ["pets", "Vet and Shelter"], ["hobby", "Hobbies"]]
 
 static func build(dlg: LifeHub) -> void:
 	var f = dlg.folk_obj()
