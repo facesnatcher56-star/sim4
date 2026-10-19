@@ -70,6 +70,8 @@
   "layoff": {
    "label": "Layoff", "scope": "folk", "check": "day", "base_rate_per_year": 0.04, "notify_policy": "household", "severity": 3, "public": false,
    "conditions": [{"age_stage_is": ["adult"]}, {"chaos": {"employed": true}}],
+   "risk_mults": [{"label": "Heavy industry feels a slump first", "when": [{"any": [{"career_is": "factory_worker"}, {"career_is": "construction_worker"}, {"career_is": "warehouse_worker"}]}], "mult": 1.5},
+                {"label": "The grid and the garage are steadier", "when": [{"any": [{"career_is": "utility_tech"}, {"career_is": "mechanic"}]}], "mult": 0.7}],
    "prevent": [{"label": "Doing really well at work", "when": [{"chaos": {"performing": true}}], "mult": 0.3},
                {"label": "Senior staff are safer", "when": [{"career_level_at_least": 4}], "mult": 0.5}],
    "warning": {"lead_min": 720, "thought": "There are rumours of layoffs at work...", "text": "There are rumours of layoffs at {name}'s workplace. Doing well at work may keep the job safe.", "kind": "warn",

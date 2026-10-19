@@ -20,7 +20,7 @@ func run() -> Array:
 	var panel := TravelPanel.new()
 	Kit.root().add_child(panel)
 	panel.open_panel()
-	_check(panel.is_open() and panel.tiles.size() == 18, "panel lists the 18 lots (%d)" % panel.tiles.size())
+	_check(panel.is_open() and panel.tiles.size() == 19, "panel lists the 19 lots (%d)" % panel.tiles.size())
 	var cafe_txt: String = (panel.tiles["cafe"] as Button).text
 	_check(cafe_txt.find("Open") >= 0 and cafe_txt.find("min walk") >= 0, "cafe tile: open + walking time (%s)" % cafe_txt.replace("\n", " | "))
 	_check((panel.tiles["home"] as Button).text.find("You are here") >= 0, "home tile says you are here")

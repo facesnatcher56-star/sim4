@@ -19,6 +19,8 @@ static func on_incident(ctx: Dictionary, args: Dictionary) -> Dictionary:
 		return {}
 	if int(args.get("severity", 0)) > 0:
 		hurt(f, int(args["severity"]), str(args.get("reason", "")), cause)
+		if cause == "workplace":
+			WorksEvents.note_injury(Careers.career_of(int(f.id)))      # task 31: injuries feed the strike dice
 		note_property(f, cause, false, int(args["severity"]))
 	if str(args.get("buff", "")) != "":
 		f.add_buff(str(args["buff"]))

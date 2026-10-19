@@ -48,11 +48,11 @@ func _test_legacy_mode() -> void:
 func _test_map_layout() -> void:
 	var rep: Dictionary = MapBuilder.build(W)
 	_check(W.width == W.MAP_W and W.height == W.MAP_H, "map size")
-	_check(int(rep["lots"]) == 18, "18 lots expected, got %s" % str(rep["lots"]))
+	_check(int(rep["lots"]) == 19, "19 lots expected, got %s" % str(rep["lots"]))
 	var lots: Array = []
 	for k in ["home", "venue", "townie_home"]:
 		lots.append_array(W.regions.of_kind(k))
-	_check(lots.size() == 18, "lot regions %d" % lots.size())
+	_check(lots.size() == 19, "lot regions %d" % lots.size())
 	var map_rc := Rect2i(0, 0, W.width, W.height)
 	for i in lots.size():
 		var a: Rect2i = lots[i]["rect"]

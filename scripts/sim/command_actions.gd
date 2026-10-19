@@ -9,6 +9,7 @@ const HANDLERS := {
 	"career_unskip": "_career_unskip", "set_homemaker": "_set_homemaker", "travel": "_travel", "go_home": "_go_home", "pay_bill": "_pay_bill", "set_aspiration": "_set_aspiration",
 	"invite_to_venue": "_invite", "prison_visit": "_prison_visit", "market": "_market", "vacation": "_vacation", "life": "_life",
 	"set_heir": "_set_heir", "choose_successor": "_choose_successor", "pregnancy": "_pregnancy", "crimelife": "_crimelife", "city": "_city", "crimeunder": "_crimeunder", "storyteller": "_storyteller",
+	"works": "_works",
 }
 
 static func has_action(action: String) -> bool:
@@ -151,6 +152,9 @@ static func _pregnancy(e: Dictionary) -> Dictionary:
 
 static func _crimelife(e: Dictionary) -> Dictionary:
 	return CrimeLifeCmd.run(e)
+
+static func _works(e: Dictionary) -> Dictionary:
+	return WorksCmd.run(e)
 
 static func _storyteller(e: Dictionary) -> Dictionary:
 	return StorytellerCmd.run(e)

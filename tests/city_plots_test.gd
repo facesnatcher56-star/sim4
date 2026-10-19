@@ -26,7 +26,7 @@ func run() -> Array:
 	_check(str(CityServices.station("fire")["lot"]) == "fire_station", "the fire station is its own lot, not the police lot")
 	_check(Workplace.lot_for("politician") == "city_hall" or Careers.career_def("politician").is_empty(), "the politician works at city hall")
 	var plots: Array = CityPlan.plot_ids()
-	_check(plots.size() == 5, "five reserved plots (%d)" % plots.size())
+	_check(plots.size() == 4, "four reserved plots (%d)" % plots.size())
 	var w = WorldIface.world()
 	for pid in plots:
 		var rc2: Rect2i = MapBuilder.plot_rect(str(pid))

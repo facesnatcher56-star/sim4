@@ -81,6 +81,8 @@ static func _start_shift(f, j: Dictionary, h: float) -> void:
 	var title: String = Careers.title_of(fid)
 	if PregnancyLeave.on_leave(fid):          # maternity / paternity leave or bed rest: the job is kept, nothing is recorded
 		return
+	if WorksPay.off_day(f, j):                 # task 31: a strike or a rained-off site: no work today, no penalty
+		return
 	if int(Careers.skip_flags.get(fid, -1)) == SysUtil.day():
 		_record_skip(f, j, float(s.get("skip_penalty", 15)), "chose to skip work")
 		return
@@ -176,6 +178,7 @@ static func on_returned(f, rec: Dictionary) -> void:
 				pay = int(pay * 0.5)
 				delta = -float(s.get("skip_penalty", 15))
 				j["days_skipped"] = int(j["days_skipped"]) + 1
+			pay = WorksPay.adjust_pay(f, j, pay, hours, completed)      # task 31: wage rises, overtime, union dues of the industrial careers
 			Economy.deposit(int(f.household_id), pay, "wages: %s" % Careers.title_of(fid))
 			if smult != 1.0 and completed and str(sv.get("return_buff", "")) != "":
 				f.add_buff(str(sv["return_buff"]))
