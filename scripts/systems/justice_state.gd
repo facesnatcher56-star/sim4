@@ -80,6 +80,7 @@ static func reset() -> void:
 	next_order = 1
 	enabled = true
 	seed_rng(DEFAULT_SEED)
+	CrimeLifeState.reset()
 
 static func seed_rng(s: int) -> void:
 	rng = RandomNumberGenerator.new()
@@ -125,7 +126,7 @@ static func to_dict() -> Dictionary:
 		"uneasy_until": uneasy_until, "fresh_start": SysUtil.str_keys(fresh_start), "lawyers": SysUtil.str_keys(lawyers).duplicate(true),
 		"year_log": year_log.duplicate(true), "blackmail": blackmail.duplicate(true), "revenge": revenge.duplicate(true),
 		"relief": SysUtil.str_keys(relief).duplicate(true), "watch_until": watch_until, "rate_now": rate_now, "rate_hist": rate_hist.duplicate(true),
-		"violence": violence.duplicate(true), "calm": SysUtil.str_keys(calm), "coursed": SysUtil.str_keys(coursed), "orders": orders.duplicate(true), "next_order": next_order, "courses": SysUtil.str_keys(courses).duplicate(true), "abuse": _abuse_out()}
+		"violence": violence.duplicate(true), "calm": SysUtil.str_keys(calm), "coursed": SysUtil.str_keys(coursed), "orders": orders.duplicate(true), "next_order": next_order, "courses": SysUtil.str_keys(courses).duplicate(true), "abuse": _abuse_out(), "life": CrimeLifeState.to_dict()}
 
 static func _abuse_out() -> Dictionary:
 	var out: Dictionary = {}
@@ -198,3 +199,4 @@ static func from_dict(d: Dictionary) -> void:
 	var ab: Dictionary = d.get("abuse", {}) as Dictionary
 	for k4 in ["carers", "kids", "hist", "parenting", "watched"]:
 		abuse[k4] = SysUtil.int_keys((ab.get(k4, {}) as Dictionary).duplicate(true))
+	CrimeLifeState.from_dict(d.get("life", {}) as Dictionary)

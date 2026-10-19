@@ -16,6 +16,7 @@ static func reset() -> void:
 static func install() -> void:
 	JusticeCareers.install()
 	CrimeTraits.install()
+	CrimeLifeFlow.install()
 
 ## Undo install() (new game / reset_all): the justice careers and crime traits are merged into the shared tables at the first midnight, so without
 ## this a second game in the same process would have them from minute 0 and play out differently from the first (determinism).
@@ -26,6 +27,7 @@ static func uninstall() -> void:
 	var traits: Dictionary = SimEnv.data().traits()
 	for id in CrimeTraits.IDS:
 		traits.erase(id)
+	CrimeLifeFlow.uninstall()
 
 # ------------------------------------------------------------------ per-person daily dice, sliced over the day (task 17.3)
 ## The fraud and pressure dice (one roll per adult per day, each with a risk lookup) used to run for everybody inside the midnight tick (1-5 s at 200 townies).
@@ -69,11 +71,13 @@ static func person_day(id: int, _elapsed: int = 1440) -> void:
 	CrimeFraud.person_day(id)
 	CrimePressure.person_day(id)
 	CrimeAssault.person_day(id)
+	CrimeLifeTownie.person_day(id)
 
 # ------------------------------------------------------------------ clock
 static func on_minute() -> void:
 	if not JusticeState.pending.is_empty():
 		Police.on_minute()
+	CrimeLifeFlow.on_minute()
 
 static func on_hour() -> void:
 	if not JusticeState.enabled:
@@ -81,6 +85,7 @@ static func on_hour() -> void:
 	for pid in CrimePerson.everyone():
 		CrimePlace.record_now(int(pid))
 	CaseDiscovery.on_hour()
+	CrimeLifeFlow.on_hour()
 
 static func on_day(_day: int) -> void:
 	if not JusticeState.enabled:
@@ -149,6 +154,9 @@ static func on_day(_day: int) -> void:
 	_pt = PerfProf.start()
 	JusticeCivil.on_day()
 	PerfProf.stop("crimeday/JusticeCivil.on_day", _pt)
+	_pt = PerfProf.start()
+	CrimeLifeFlow.on_day(sliced())
+	PerfProf.stop("crimeday/CrimeLifeFlow.on_day", _pt)
 
 ## Dispatch one due queued event.
 static func run_pending(p: Dictionary) -> void:
@@ -203,5 +211,7 @@ static func on_game_event(ev: String, p: Dictionary) -> void:
 			JusticeCivil.on_game_event(ev, p)
 		"visit_prison":
 			Prison.visit(int(p.get("folk_id", -1)), int(p.get("target_id", -1)))
+		"crime_pickpocket", "crime_ask_around", "crime_case_here", "crime_review_footage", "guard_round", "released":
+			CrimeLifeFlow.on_event(ev, p)
 		"appeal_case":
 			JusticeAppeal.file(int(p.get("object_id", -1)))

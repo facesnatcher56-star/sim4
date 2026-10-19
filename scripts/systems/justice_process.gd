@@ -89,6 +89,7 @@ static func file_charges(c: Dictionary) -> void:
 	c["state"] = "charged"
 	CaseStore.note(c, CaseText.charged(c, pid), "charged", 3)
 	arrange_lawyer(c)
+	CrimeLifeSnitch.on_charged(c)               # crew members may talk; the accused may be offered a deal (task 21)
 	var tday: int = SysUtil.day() + JusticeState.rng.randi_range(int(cfg().get("trial_delay", [3, 5])[0]), int(cfg().get("trial_delay", [3, 5])[1]))
 	c["trial_day"] = tday
 	JusticeState.queue({"kind": "trial", "case": int(c["id"]), "due_min": (tday - 1) * 1440 + int(cfg().get("trial_hour", 9)) * 60})
@@ -174,6 +175,8 @@ static func _hire(c: Dictionary, tier: Dictionary) -> void:
 ## Offered on the day of the trial. Returns true when the accused pleads guilty.
 static func offer_plea(c: Dictionary) -> bool:
 	var pid: int = int(c["accused"])
+	if bool(c.get("deal", false)):
+		return true                                      # named the crew for a lighter sentence (task 21)
 	var strength: float = CaseEvidence.strength(pid, c)
 	var guilty: bool = pid == int(c["culprit"])
 	var p: float = clampf((strength - 0.4) * 1.5, 0.0, 0.8) if guilty else 0.03

@@ -125,6 +125,7 @@ static func hard(p: int, c: Dictionary) -> float:
 	if bool(c.get("witnessed", false)):
 		h += float(c.get("witness_clarity", 0.0)) * float(cfg().get("witness_weight", 0.7))
 	h += float(c.get("tips", 0.0))
+	h += float(c.get("footage", 0.0)) * float(CrimeLifeState.sect("security").get("footage", {}).get("weight", 0.7))       # camera footage (task 21)
 	if bool(c.get("recovered", false)):
 		h += float(cfg().get("recovered_weight", 0.5))
 	return h

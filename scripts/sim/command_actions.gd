@@ -8,7 +8,7 @@ const HANDLERS := {
 	"build_undo": "_build_undo", "career_accept": "_career_accept", "career_decline": "_career_decline", "career_skip": "_career_skip",
 	"career_unskip": "_career_unskip", "travel": "_travel", "go_home": "_go_home", "pay_bill": "_pay_bill", "set_aspiration": "_set_aspiration",
 	"invite_to_venue": "_invite", "prison_visit": "_prison_visit", "market": "_market", "vacation": "_vacation",
-	"set_heir": "_set_heir", "choose_successor": "_choose_successor", "pregnancy": "_pregnancy",
+	"set_heir": "_set_heir", "choose_successor": "_choose_successor", "pregnancy": "_pregnancy", "crimelife": "_crimelife",
 }
 
 static func has_action(action: String) -> bool:
@@ -134,6 +134,9 @@ static func _set_heir(e: Dictionary) -> Dictionary:
 
 static func _pregnancy(e: Dictionary) -> Dictionary:
 	return PregnancyCmd.run(e)
+
+static func _crimelife(e: Dictionary) -> Dictionary:
+	return CrimeLifeCmd.run(e)
 
 static func _choose_successor(e: Dictionary) -> Dictionary:
 	return SuccessionCmd.choose_successor(e)

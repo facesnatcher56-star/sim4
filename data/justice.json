@@ -3045,6 +3045,142 @@
    "courses": [],
    "custody_loss": false,
    "consecutive": false
+  },
+  "grand_theft": {
+   "label": "Grand theft",
+   "class": "felony",
+   "grade": 2,
+   "severity": 4,
+   "bail": 600,
+   "phrase": "the raid",
+   "description": "A planned raid on a bank, a jeweller or a museum.",
+   "elements": [
+    "took a great deal of property",
+    "planned ahead"
+   ],
+   "guideline": {
+    "fine": [
+     300,
+     800
+    ],
+    "probation": [
+     14,
+     14
+    ],
+    "jail": [
+     6,
+     12
+    ],
+    "prison": [
+     16,
+     28
+    ],
+    "custody_at": 0.25,
+    "prison_at": 0.45
+   },
+   "petty": false,
+   "jury": true,
+   "aggravating": [
+    "prior_record",
+    "same_charge_prior",
+    "injury",
+    "child_victim",
+    "elder_victim",
+    "domestic",
+    "repeat_victim",
+    "order_breach",
+    "cruelty",
+    "on_probation"
+   ],
+   "mitigating": [
+    "first_offence",
+    "plea",
+    "provocation",
+    "remorse",
+    "reputation",
+    "lawyer"
+   ],
+   "record": {
+    "job_bans": [
+     "police_officer",
+     "detective",
+     "lawyer",
+     "judge"
+    ],
+    "expunge_days": 0
+   },
+   "restitution": true,
+   "family": "robbery",
+   "order": false,
+   "courses": [],
+   "custody_loss": false,
+   "consecutive": false,
+   "stub": false
+  },
+  "conspiracy": {
+   "label": "Conspiracy",
+   "class": "felony",
+   "grade": 1,
+   "severity": 3,
+   "bail": 300,
+   "phrase": "plotting the job",
+   "description": "Planning a crime together with others.",
+   "elements": [
+    "agreed with others",
+    "to commit a crime"
+   ],
+   "guideline": {
+    "fine": [
+     100,
+     300
+    ],
+    "probation": [
+     14,
+     28
+    ],
+    "jail": [
+     3,
+     8
+    ],
+    "prison": [
+     10,
+     20
+    ],
+    "custody_at": 0.35,
+    "prison_at": 0.7
+   },
+   "petty": false,
+   "jury": true,
+   "aggravating": [
+    "prior_record",
+    "same_charge_prior",
+    "on_probation",
+    "repeat_victim"
+   ],
+   "mitigating": [
+    "first_offence",
+    "plea",
+    "provocation",
+    "remorse",
+    "reputation",
+    "lawyer"
+   ],
+   "record": {
+    "job_bans": [
+     "police_officer",
+     "detective",
+     "lawyer",
+     "judge"
+    ],
+    "expunge_days": 0
+   },
+   "restitution": false,
+   "family": "conspiracy",
+   "order": false,
+   "courses": [],
+   "custody_loss": false,
+   "consecutive": false,
+   "stub": false
   }
  },
  "sentences": {

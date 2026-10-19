@@ -1,0 +1,583 @@
+{
+ "_doc": "Task 21: security objects, crime-life interactions and buffs (content only; the logic is in scripts/systems/crime_life_*.gd and crime_security_*.gd, rates in data/crimelife.json).",
+ "handlers": {},
+ "content": {
+  "buffs": {
+   "violated": {
+    "label": "Violated",
+    "mood": {
+     "tense": 2,
+     "uncomfortable": 1
+    },
+    "duration_min": 7200,
+    "thought": "Someone went through my things."
+   },
+   "easy_money": {
+    "label": "Easy Money",
+    "mood": {
+     "happy": 1
+    },
+    "duration_min": 720,
+    "thought": "That was easier than working."
+   },
+   "on_the_run": {
+    "label": "Looking Over a Shoulder",
+    "mood": {
+     "tense": 1
+    },
+    "duration_min": 2880,
+    "thought": "Every siren is for me."
+   }
+  },
+  "objects": {
+   "door_lock": {
+    "def": {
+     "label": "Door Lock",
+     "size": [
+      1,
+      1
+     ],
+     "price": 90,
+     "tags": [
+      "utility",
+      "safety",
+      "security"
+     ],
+     "model": "res://assets/models/door.glb",
+     "color": "#7a7f85",
+     "height": 1.0,
+     "slots": [
+      {
+       "offset": [
+        0,
+        1
+       ],
+       "pose": "stand"
+      }
+     ],
+     "state": {},
+     "advertises": {},
+     "decor": 0.0,
+     "interactions": [],
+     "layer": "floor",
+     "blocks": false
+    }
+   },
+   "door_lock_2": {
+    "def": {
+     "label": "Reinforced Lock",
+     "size": [
+      1,
+      1
+     ],
+     "price": 220,
+     "tags": [
+      "utility",
+      "safety",
+      "security"
+     ],
+     "model": "res://assets/models/door.glb",
+     "color": "#4b6a88",
+     "height": 1.0,
+     "slots": [
+      {
+       "offset": [
+        0,
+        1
+       ],
+       "pose": "stand"
+      }
+     ],
+     "state": {},
+     "advertises": {},
+     "decor": 0.0,
+     "interactions": [],
+     "layer": "floor",
+     "blocks": false
+    }
+   },
+   "door_lock_3": {
+    "def": {
+     "label": "High-Security Lock",
+     "size": [
+      1,
+      1
+     ],
+     "price": 520,
+     "tags": [
+      "utility",
+      "safety",
+      "security"
+     ],
+     "model": "res://assets/models/door.glb",
+     "color": "#2e3b4e",
+     "height": 1.0,
+     "slots": [
+      {
+       "offset": [
+        0,
+        1
+       ],
+       "pose": "stand"
+      }
+     ],
+     "state": {},
+     "advertises": {},
+     "decor": 0.0,
+     "interactions": [],
+     "layer": "floor",
+     "blocks": false
+    }
+   },
+   "window_lock": {
+    "def": {
+     "label": "Window Lock",
+     "size": [
+      1,
+      1
+     ],
+     "price": 40,
+     "tags": [
+      "utility",
+      "safety",
+      "security"
+     ],
+     "model": "res://assets/models/door.glb",
+     "color": "#9aa0a6",
+     "height": 1.0,
+     "slots": [
+      {
+       "offset": [
+        0,
+        1
+       ],
+       "pose": "stand"
+      }
+     ],
+     "state": {},
+     "advertises": {},
+     "decor": 0.0,
+     "interactions": [],
+     "layer": "floor",
+     "blocks": false
+    }
+   },
+   "security_camera": {
+    "def": {
+     "label": "Security Camera",
+     "size": [
+      1,
+      1
+     ],
+     "price": 160,
+     "tags": [
+      "electronics",
+      "safety",
+      "security",
+      "ceiling"
+     ],
+     "model": "res://assets/models/smoke_alarm.glb",
+     "color": "#222a33",
+     "height": 2.6,
+     "slots": [
+      {
+       "offset": [
+        0,
+        1
+       ],
+       "pose": "stand"
+      }
+     ],
+     "state": {},
+     "advertises": {},
+     "decor": 0.0,
+     "interactions": [
+      "review_footage"
+     ],
+     "layer": "floor",
+     "blocks": false
+    }
+   },
+   "motion_sensor": {
+    "def": {
+     "label": "Motion Sensor",
+     "size": [
+      1,
+      1
+     ],
+     "price": 130,
+     "tags": [
+      "electronics",
+      "safety",
+      "security",
+      "ceiling"
+     ],
+     "model": "res://assets/models/smoke_alarm.glb",
+     "color": "#d9a441",
+     "height": 2.6,
+     "slots": [
+      {
+       "offset": [
+        0,
+        1
+       ],
+       "pose": "stand"
+      }
+     ],
+     "state": {},
+     "advertises": {},
+     "decor": 0.0,
+     "interactions": [],
+     "layer": "floor",
+     "blocks": false
+    }
+   },
+   "security_light": {
+    "def": {
+     "label": "Security Light",
+     "size": [
+      1,
+      1
+     ],
+     "price": 90,
+     "tags": [
+      "utility",
+      "safety",
+      "security"
+     ],
+     "model": "res://assets/models/lamp.glb",
+     "color": "#f2e394",
+     "height": 2.2,
+     "slots": [
+      {
+       "offset": [
+        0,
+        1
+       ],
+       "pose": "stand"
+      }
+     ],
+     "state": {},
+     "advertises": {},
+     "decor": 0.0,
+     "interactions": [],
+     "layer": "floor",
+     "blocks": false
+    }
+   },
+   "safe": {
+    "def": {
+     "label": "Safe",
+     "size": [
+      1,
+      1
+     ],
+     "price": 240,
+     "tags": [
+      "furniture",
+      "safety",
+      "security"
+     ],
+     "model": "res://assets/models/dresser.glb",
+     "color": "#555b63",
+     "height": 0.9,
+     "slots": [
+      {
+       "offset": [
+        0,
+        1
+       ],
+       "pose": "stand"
+      }
+     ],
+     "state": {},
+     "advertises": {},
+     "decor": 0.0,
+     "interactions": [],
+     "layer": "floor",
+     "blocks": false
+    }
+   },
+   "vault_safe": {
+    "def": {
+     "label": "Vault Safe",
+     "size": [
+      1,
+      1
+     ],
+     "price": 700,
+     "tags": [
+      "furniture",
+      "safety",
+      "security"
+     ],
+     "model": "res://assets/models/dresser.glb",
+     "color": "#2f343a",
+     "height": 1.2,
+     "slots": [
+      {
+       "offset": [
+        0,
+        1
+       ],
+       "pose": "stand"
+      }
+     ],
+     "state": {},
+     "advertises": {},
+     "decor": 0.0,
+     "interactions": [],
+     "layer": "floor",
+     "blocks": false
+    }
+   },
+   "guard_dog_kennel": {
+    "def": {
+     "label": "Guard Dog Kennel",
+     "size": [
+      1,
+      1
+     ],
+     "price": 180,
+     "tags": [
+      "outdoor",
+      "safety",
+      "security"
+     ],
+     "model": "res://assets/models/nightstand.glb",
+     "color": "#8a5a2b",
+     "height": 0.8,
+     "slots": [
+      {
+       "offset": [
+        0,
+        1
+       ],
+       "pose": "stand"
+      }
+     ],
+     "state": {},
+     "advertises": {},
+     "decor": 0.0,
+     "interactions": [],
+     "layer": "floor",
+     "blocks": false
+    }
+   },
+   "guard_booth": {
+    "def": {
+     "label": "Guard Booth",
+     "size": [
+      1,
+      1
+     ],
+     "price": 320,
+     "tags": [
+      "structure",
+      "safety",
+      "security"
+     ],
+     "model": "res://assets/models/counter.glb",
+     "color": "#3d5a80",
+     "height": 1.9,
+     "slots": [
+      {
+       "offset": [
+        0,
+        1
+       ],
+       "pose": "stand"
+      }
+     ],
+     "state": {},
+     "advertises": {},
+     "decor": 0.0,
+     "interactions": [
+      "guard_round"
+     ],
+     "layer": "floor",
+     "blocks": false
+    }
+   }
+  },
+  "interactions": {
+   "review_footage": {
+    "label": "Review the Camera Footage",
+    "kind": "super",
+    "target": "object",
+    "objects": [
+     "security_camera"
+    ],
+    "tags": [
+     "crime"
+    ],
+    "duration_min": 15,
+    "posture": "stand",
+    "tests": [],
+    "per_min": {},
+    "on_finish": [
+     {
+      "fire_event": "crime_review_footage"
+     }
+    ],
+    "autonomous": false,
+    "priority": "normal",
+    "thought": "Let's see what the camera caught."
+   },
+   "guard_round": {
+    "label": "Walk the Round",
+    "kind": "super",
+    "target": "object",
+    "objects": [
+     "guard_booth",
+     "door",
+     "lamp"
+    ],
+    "tags": [
+     "work",
+     "skill"
+    ],
+    "duration_min": 30,
+    "posture": "stand",
+    "tests": [
+     {
+      "any": [
+       {
+        "career_is": "security_guard"
+       },
+       {
+        "career_is": "night_watchman"
+       }
+      ]
+     }
+    ],
+    "per_min": {
+     "fun": -0.02
+    },
+    "skill_xp_per_min": {
+     "fitness": 0.2
+    },
+    "on_finish": [
+     {
+      "fire_event": "guard_round"
+     }
+    ],
+    "autonomous": false,
+    "priority": "normal",
+    "thought": "Doors, windows, shadows. All quiet."
+   },
+   "practise_lockpicking": {
+    "label": "Practise Lock-picking",
+    "kind": "super",
+    "target": "object",
+    "objects": [
+     "door"
+    ],
+    "tags": [
+     "skill",
+     "crime"
+    ],
+    "duration_min": 30,
+    "posture": "stand",
+    "tests": [],
+    "per_min": {
+     "fun": 0.05
+    },
+    "skill_xp_per_min": {
+     "stealth": 0.35
+    },
+    "on_finish": [],
+    "autonomous": false,
+    "priority": "low",
+    "thought": "Click... click... almost."
+   },
+   "pickpocket": {
+    "label": "Pick Their Pocket",
+    "kind": "super",
+    "category": "mean",
+    "target": "folk",
+    "tags": [
+     "crime",
+     "social"
+    ],
+    "duration_min": 3,
+    "posture": "stand",
+    "tests": [],
+    "target_tests": [
+     {
+      "posture_not": "lie"
+     }
+    ],
+    "per_min": {},
+    "on_finish": [
+     {
+      "fire_event": "crime_pickpocket"
+     }
+    ],
+    "autonomous": false,
+    "priority": "normal",
+    "thought": "Light fingers..."
+   },
+   "ask_around": {
+    "label": "Ask Around (Underworld)",
+    "kind": "super",
+    "category": "mean",
+    "target": "folk",
+    "tags": [
+     "crime",
+     "social"
+    ],
+    "duration_min": 10,
+    "posture": "stand",
+    "tests": [],
+    "target_tests": [
+     {
+      "posture_not": "lie"
+     }
+    ],
+    "per_min": {},
+    "on_finish": [
+     {
+      "fire_event": "crime_ask_around"
+     }
+    ],
+    "autonomous": false,
+    "priority": "normal",
+    "thought": "Is this someone who knows people?"
+   },
+   "case_the_place": {
+    "label": "Case This Place",
+    "kind": "super",
+    "target": "object",
+    "objects": [
+     "door"
+    ],
+    "tags": [
+     "crime"
+    ],
+    "duration_min": 30,
+    "posture": "stand",
+    "tests": [],
+    "per_min": {},
+    "skill_xp_per_min": {
+     "stealth": 0.2
+    },
+    "on_finish": [
+     {
+      "fire_event": "crime_case_here"
+     }
+    ],
+    "autonomous": false,
+    "priority": "low",
+    "thought": "Where are the cameras? When does the guard walk by?"
+   }
+  },
+  "object_interactions": {
+   "door": [
+    "practise_lockpicking",
+    "case_the_place"
+   ]
+  }
+ },
+ "incidents": {}
+}

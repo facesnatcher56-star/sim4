@@ -40,6 +40,8 @@ static func pick_burglar(lot_key: String, exclude: Array = []) -> int:
 		if JusticeState.probation.has(pid):
 			weight *= 0.4                      # watched
 		weight *= 0.4 + 3.0 * CrimePressure.risk(pid)         # desperate and without a conscience (task 09c)
+		if CrimeLifePath.is_member(pid) and CrimeLifePath.rank_index(pid) >= 1:
+			weight *= float(CrimeLifeState.sect("townie").get("burglar_weight", 3.0))      # a working burglar (task 21)
 		if CrimePerson.has_trait(pid, "dishonest"):
 			weight *= 2.0
 		ids.append(pid)
@@ -81,8 +83,13 @@ static func _prevented(hid: int, lot_key: String, statistical: bool) -> String:
 		for o in Economy.objects_of(hid):
 			if str(o.def_id) == "burglar_alarm" and JusticeState.chance(float(k.get("alarm_abort", 0.7))):
 				return "quiet"
+		var fx: Dictionary = CrimeSecurity.effects(CrimeSecurity.home_profile(hid), true)       # locks, cameras, lights, a dog (task 21)
+		if float(fx["abort"]) > 0.0 and CrimeLifeState.chance(float(fx["abort"])):
+			return "quiet"
 	else:
 		if JusticeState.chance(float(k.get("townie_abort", 0.3))):
+			return "quiet"
+		if lot_key.begins_with("town:") and CrimeLifeState.chance(float(CrimeSecurity.effects(CrimeSecurity.profile_for(lot_key), true)["abort"])):
 			return "quiet"
 	if CrimeRate.crime_mult() < 1.0 and JusticeState.chance(1.0 - CrimeRate.crime_mult()):
 		return "quiet"                          # a safe, well-watched town puts burglars off
@@ -104,10 +111,11 @@ static func _statistical(lot_key: String, culprit: int, k: Dictionary) -> Dictio
 		if owner_pid >= 0:
 			CrimePerson.pay(owner_pid, take, "burglary")
 		CrimePerson.add_coins(culprit, take)
-	var witnessed: bool = JusticeState.chance(float(k.get("witness_far", 0.2)))
+	var witnessed: bool = JusticeState.chance(minf(float(k.get("witness_far", 0.2)) * float(CrimeSecurity.effects(CrimeSecurity.profile_for(lot_key), true)["detect"]), 0.9))
 	var c: Dictionary = CaseStore.create("burglary", culprit, owner_pid, lot_key, {"witnessed": witnessed, "witnesses": [], "witness_clarity": JusticeState.rng.randf_range(0.4, 0.8) if witnessed else 0.0,
 		"trace": JusticeState.rng.randf_range(float(k.get("trace_min", 0.15)), float(k.get("trace_max", 0.4))), "stolen_coins": take, "loot_value": take})
 	CrimePlace.place_at_scene(culprit, lot_key)
+	CrimeSecurityFootage.capture(c, lot_key, culprit)
 	if witnessed:
 		CaseDiscovery.report(c, -1, "seen")
 	return {"text": "", "case": int(c["id"])}
@@ -141,6 +149,7 @@ static func _start_scene(hid: int, culprit: int, forced: bool) -> Dictionary:
 	c["on_scene"] = true
 	c["alarm"] = alarm
 	CrimePlace.place_at_scene(culprit, "home:%d" % hid)
+	CrimeSecurityFootage.capture(c, "home:%d" % hid, culprit)
 	# residents: awake ones notice at once, sleepers may wake
 	var seen: Array = []
 	for r in CrimePlace.at_home(hid):
@@ -158,8 +167,7 @@ static func _start_scene(hid: int, culprit: int, forced: bool) -> Dictionary:
 		CaseStore.toast(c, "Someone is in the house! You can Confront them or Call the police.", "bad", true)
 	if alarm:
 		CaseStore.toast(c, "The burglar alarm is screaming!", "warn", true)
-		Police.respond(c)
-		c["called"] = true
+		CrimeSecurityAlarm.ring(c, "home:%d" % hid)      # a monitored alarm brings the police faster (task 21)
 	var d: Dictionary = {"kind": "burgle_step", "case": int(c["id"]), "stage": "take", "due_min": SysUtil.now() + int(k.get("take_after_min", 4))}
 	JusticeState.queue(d)
 	SysUtil.game_event("burglary_started", {"case": int(c["id"]), "household_id": hid, "folk_id": culprit})
@@ -175,7 +183,7 @@ static func step(p: Dictionary) -> void:
 		"take":
 			var hid: int = int(c["vhid"])
 			var vals: Array = CrimePlace.valuables(hid)
-			if not vals.is_empty() and JusticeState.chance(float(k.get("item_vs_coins", 0.8))) and b != null:
+			if not vals.is_empty() and JusticeState.chance(float(k.get("item_vs_coins", 0.8))) and b != null and not CrimeLifeState.chance(float(CrimeSecurity.effects(CrimeSecurity.home_profile(hid))["safe_share"]) * 0.5):
 				var ir := Interaction.create("burgle_item", b, int(vals[0].id), false)
 				if ir != null:
 					b.enqueue(ir)
@@ -211,7 +219,7 @@ static func _take(c: Dictionary) -> void:
 			(c["loot"] as Array).append(rec)
 			c["loot_value"] = int(c["loot_value"]) + val
 	else:
-		var bal: int = WorldIface.get_coins(hid)
+		var bal: int = int(float(WorldIface.get_coins(hid)) * (1.0 - float(CrimeSecurity.effects(CrimeSecurity.home_profile(hid))["safe_share"])))       # cash in a safe is out of reach (task 21)
 		var amt: int = mini(bal, clampi(int(float(bal) * float(k.get("coin_share", 0.15))), int(k.get("coin_min", 20)), int(k.get("coin_max", 300))))
 		if amt > 0:
 			Economy.deposit(hid, -amt, "burglary")

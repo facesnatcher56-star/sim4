@@ -35,7 +35,7 @@ static func ratio(hid: int) -> float:
 
 static func premium(hid: int) -> int:
 	var l: String = level(hid)
-	return int((levels().get(l, {}) as Dictionary).get("weekly", 0)) if l != "" else 0
+	return int(round(float((levels().get(l, {}) as Dictionary).get("weekly", 0)) * CrimeSecurityAlarm.insurance_mult(hid))) if l != "" else 0       # alarms and cameras earn a discount (task 21)
 
 ## Economy.compute_bill hook: the weekly premium.
 static func bill_extra(hid: int) -> int:

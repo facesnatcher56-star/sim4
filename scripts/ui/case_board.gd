@@ -21,6 +21,15 @@ func build() -> void:
 	law.text = "Town Law (every charge and sentence)"
 	law.pressed.connect(func(): TownLawDialog.open_from(self))
 	body.add_child(law)
+	var sec := Button.new()
+	sec.text = "Security of your home and businesses"
+	sec.pressed.connect(func(): SecurityDialog.open_from(self, folk_id))
+	body.add_child(sec)
+	var shady := Button.new()
+	shady.text = "The criminal life"
+	shady.tooltip_text = "Jobs, planned heists, fences and what they cost."
+	shady.pressed.connect(func(): UnderworldDialog.open_from(self, folk_id))
+	body.add_child(shady)
 	line("Crime in town: %s (%d)%s" % [CrimeRate.label(), int(JusticeState.rate_now), "   |   neighbourhood watch active" if CrimeRate.watch_active() else ""], 14)
 	if Police.is_uneasy():
 		line("Folk are uneasy after dark until the case is solved.", 12, UITheme.MUTED)

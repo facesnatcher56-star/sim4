@@ -279,6 +279,7 @@ static func compute_bill(hid: int) -> int:
 	amount *= MarketEconomy.price_mult()   # the town economy (task 13; 1.0 until it starts)
 	amount += float(DisasterInsurance.bill_extra(hid))   # optional home insurance premium (task 06)
 	amount += float(BankInsurance.bill_extra(hid))       # health / car / life premiums (task 13)
+	amount += float(CrimeSecurityAlarm.bill_extra(hid))  # alarm monitoring and a hired guard (task 21)
 	return int(round(amount))
 
 static func outstanding(hid: int) -> Array:

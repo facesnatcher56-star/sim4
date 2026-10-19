@@ -375,7 +375,10 @@ static func legacy_summary(folk_id: int) -> Dictionary:
 	var desc: int = FamilyTree.descendants_of(folk_id).size()
 	if desc > kids:
 		summary += " %d descendants in all." % desc
-	return {"folk_id": folk_id, "name": nm, "years": years, "stage": stage_now, "career": career_txt, "best_skill": best_skill, "best_skill_level": best_lvl,
+	var shady: String = CrimeLifeMoral.legacy_line(folk_id)
+	if shady != "":
+		summary += " They %s" % shady
+	return {"folk_id": folk_id, "notoriety": CrimeLifeMoral.notoriety(folk_id), "name": nm, "years": years, "stage": stage_now, "career": career_txt, "best_skill": best_skill, "best_skill_level": best_lvl,
 		"friends": friends, "children": kids, "aspiration": asp, "summary": summary,
 		"lifetime_points": Goals.lifetime_points(folk_id), "descendants": desc,
 		"spouse": Family.name_of(FamilyTree.spouse_of(folk_id)) if FamilyTree.spouse_of(folk_id) >= 0 else "", "traits": f.traits.duplicate() if f != null else []}
