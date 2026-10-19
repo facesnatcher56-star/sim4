@@ -122,6 +122,7 @@ old signal order. To add a system's hook: add ONE row to `systems_rows()` (name,
 | day | 310 | day/CrimeFlow.on_day | CrimeFlow | day | NORMAL | global passes and case upkeep; per-person dice are the bucketed daily job, grudges are sliced (DaySlices) |
 | day | 320 | day/DisasterClock.on_day | DisasterClock | day | NORMAL | running disasters only |
 | day | 330 | day/MarketTick.on_day | MarketTick | day | NORMAL | markets, shops, bank, rents (world-level) |
+| day | 335 | day/LifeTick.on_day | LifeTick | day | NORMAL | places (staff), school and college records of residents, townie studies, the job board: all daily, O(places + townies) |
 | day | 340 | day/StoryPacing.on_day | StoryPacing | day | NORMAL | world-level |
 | day | 350 | day/Vacation.on_day | Vacation | day | NORMAL | active trips only |
 | day | 360 | day/systems_day event | SystemsManager | day | NORMAL | event bus |
@@ -458,6 +459,19 @@ All new systems are daily or weekly and event driven; nothing runs per minute. O
 Machine: Windows, 16 logical cores, 8-9 other Godot runs from the other agents going all the time, so "quiet machine" numbers could not be
 measured; every figure below is from the loaded machine (wall time was within 2-5% of CPU time in the test runs). Other agents' edits land
 continuously (multi-floor, circadian, crime, buildings), which also changed what the same test costs; the tables say which is which.
+
+## System cadence table: life areas (task 14; details in docs/LIFE.md)
+
+Daily or event driven; nothing runs per minute. The one clock entry is `day/LifeTick.on_day`.
+
+| System | Tier | Cadence | Active set | Caps |
+|---|---|---|---|---|
+| PlaceStaff (rosters, turnover, closures) | town | daily | ~8 places x a handful of names | one closure line per place per day |
+| PlaceUse / PlaceMember (services, passes) | event | on a command / the visit's end | the person acting | one pending visit per person |
+| EduSchool (homework, report cards, events, preschool) | household | daily + events | school-age residents (ACTIVE) | 8 report cards each |
+| EduCollege / EduCourses | event | on a visit | the student | one lecture a day |
+| EduTownies | town (statistical) | daily | alive adult townies | 2 degrees each |
+| EduJobs (job board) | town | weekly refresh | one dice per career | 3 openings per career |
 
 ### Runtime (`tests/perf_probe.gd`, 2 game days, 3 folk + crowd, loaded)
 

@@ -1,0 +1,21 @@
+{
+ "_doc": "Runtime content of the life areas (task 14), merged by ContentMerge (scripts/systems/life_content.gd). place_visit: the time a person spends on a service of a place (PlaceUse); its length and label are set per visit.",
+ "interactions": {
+  "place_visit": {
+   "label": "Visit",
+   "kind": "super",
+   "target": "self",
+   "duration_min": 60,
+   "posture": "stand",
+   "tests": [],
+   "per_min": {},
+   "on_finish": [],
+   "on_cancel": [],
+   "autonomous": false,
+   "priority": "normal",
+   "interruptible": true,
+   "tags": ["visit", "town"]
+  }
+ },
+ "buffs": {}
+}

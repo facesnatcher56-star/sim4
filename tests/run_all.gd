@@ -18,7 +18,7 @@ extends SceneTree
 
 ## Long simulations: only run with --slow / --all.
 const SLOW := [
-	"systems_family_integration_test.gd", "systems_integration_test.gd", "hood_sim_test.gd", "weather_longrun_test.gd", "social_autonomy_test.gd", "sim_longrun.gd", "incidents_longrun_test.gd", "crime_longrun_test.gd", "accident_longrun_test.gd", "health_longrun_test.gd", "disaster_longrun_test.gd", "fire_longrun_test.gd", "commute_longrun_test.gd", "econ_longrun_test.gd", "crime_rates_test.gd", "crime_child_abuse_rates_test.gd", "bldg_apartments_run_test.gd", "story_pacing_longrun_test.gd", "cruise_longrun_test.gd", "romance_longrun_test.gd", "townie_growth_longrun_test.gd", "succession_longrun_test.gd",
+	"systems_family_integration_test.gd", "systems_integration_test.gd", "hood_sim_test.gd", "weather_longrun_test.gd", "social_autonomy_test.gd", "sim_longrun.gd", "incidents_longrun_test.gd", "crime_longrun_test.gd", "accident_longrun_test.gd", "health_longrun_test.gd", "disaster_longrun_test.gd", "fire_longrun_test.gd", "commute_longrun_test.gd", "econ_longrun_test.gd", "crime_rates_test.gd", "crime_child_abuse_rates_test.gd", "bldg_apartments_run_test.gd", "story_pacing_longrun_test.gd", "cruise_longrun_test.gd", "romance_longrun_test.gd", "townie_growth_longrun_test.gd", "succession_longrun_test.gd", "edu_longrun_test.gd",
 ]
 
 const Watchdog := preload("res://tests/watchdog.gd")

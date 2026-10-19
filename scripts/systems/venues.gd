@@ -33,11 +33,11 @@ static func is_open_type(vtype: String, at_min: int = -1) -> bool:
 	if td.is_empty():
 		return true
 	var day: int = at_min / 1440 + 1
-	if not _open_on(td.get("days", []), SysUtil.weekday(day)):
-		return false
 	var h: float = float(at_min % 1440) / 60.0
 	var hr: Array = hours(vtype)
-	return h >= float(hr[0]) and h < float(hr[1])
+	if _open_on(td.get("days", []), SysUtil.weekday(day)) and h >= float(hr[0]) and h < float(hr[1]):
+		return true
+	return Places.extra_open(vtype, at_min)          # task 14: a place inside the lot (evening classes, a club) keeps it open
 
 ## Empty list = every day.
 static func _open_on(days: Array, weekday: int) -> bool:

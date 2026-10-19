@@ -83,6 +83,7 @@ static func systems_rows(sm: Object) -> Array:
 		["day/CityGov.on_day", "CityGov", 1440, 317, N, "day", CityGov.on_day, null, "world-level: the weekly budget, the election campaign and the monthly council (townies are only counted)"],
 		["day/DisasterClock.on_day", "DisasterClock", 1440, 320, N, "day", DisasterClock.on_day, null, "running disasters only"],
 		["day/MarketTick.on_day", "MarketTick", 1440, 330, L, "day", MarketTick.on_day, null, "markets, shops, bank, rents (world-level)"],
+		["day/LifeTick.on_day", "LifeTick", 1440, 335, L, "day", LifeTick.on_day, null, "places (staff), school and college records of residents, townie studies, the job board: all daily, O(places + townies)"],
 		["day/StoryPacing.on_day", "StoryPacing", 1440, 340, L, "day", StoryPacing.on_day, null, "world-level"],
 		["day/Vacation.on_day", "Vacation", 1440, 350, N, "", Vacation.on_day, Callable(Vacation, "busy"), "active trips only"],
 		["day/systems_day event", "SystemsManager", 1440, 360, N, "day", Callable(sm, "emit_systems_day"), null, "event bus"],
