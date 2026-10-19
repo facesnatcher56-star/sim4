@@ -22,6 +22,13 @@ func _prof(label: String, t0: int) -> void:
 
 var _sched: SimScheduler = null
 
+## New game / test reset: the tick counter and the strangers' owed-minutes table feed the stranger cadence ((ticks + id) % STRANGER_PERIOD), so they
+## must restart with each game for the same seed to give the same game.
+func reset_state() -> void:
+	ticks = 0
+	_stranger_acc.clear()
+	last_choice.clear()
+
 func _ready() -> void:
 	connect_clock()
 

@@ -64,7 +64,7 @@ func _picker(current: String) -> void:
 		b.disabled = (str(aid) == current)
 		var id := str(aid)
 		b.pressed.connect(func():
-			Goals.set_aspiration(folk_id, id)
+			Commands.run({"folk_id": folk_id, "action": "set_aspiration", "args": {"aspiration": id}})
 			picking = false
 			refresh())
 		grid.add_child(b)

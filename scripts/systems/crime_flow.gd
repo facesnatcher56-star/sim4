@@ -12,6 +12,16 @@ static func install() -> void:
 	JusticeCareers.install()
 	CrimeTraits.install()
 
+## Undo install() (new game / reset_all): the justice careers and crime traits are merged into the shared tables at the first midnight, so without
+## this a second game in the same process would have them from minute 0 and play out differently from the first (determinism).
+static func uninstall() -> void:
+	var careers: Dictionary = Careers.cfg().get("careers", {})
+	for cid in (JusticeState.sect("careers") as Dictionary):
+		careers.erase(cid)
+	var traits: Dictionary = SimEnv.data().traits()
+	for id in CrimeTraits.IDS:
+		traits.erase(id)
+
 # ------------------------------------------------------------------ clock
 static func on_minute() -> void:
 	if not JusticeState.pending.is_empty():

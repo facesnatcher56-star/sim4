@@ -123,28 +123,13 @@ static func get_speed() -> int:
 	var s = Clock.get("speed")
 	return int(s) if s != null else 1
 
-## Push an interaction on a folk's queue with player priority. Returns false if it could not be created.
+## Push an interaction on a folk's queue with player priority (the command layer's "interact"). Returns false if it could not be created.
+## extra: {tile, level} walks to a tile; other keys merge into the interaction params.
 static func enqueue(folk, def_id: String, target_id: int, extra: Dictionary = {}) -> bool:
 	if folk == null:
 		return false
-	var ic = cls("Interaction")
-	if ic == null:
-		return false
-	var it = null
-	if extra.has("tile") and ic.has_method("create_goto"):
-		it = ic.call("create_goto", folk, extra["tile"], true, int(extra.get("level", 0)))
-	else:
-		it = ic.call("create", def_id, folk, target_id, true)
-	if it == null:
-		return false
-	if extra.size() > 0 and it.get("params") is Dictionary:
-		it.params.merge(extra, true)
-	if folk.has_method("enqueue"):
-		folk.call("enqueue", it)
-	else:
-		folk.queue.append(it)
-		Events.queue_changed.emit(int(folk.id))
-	return true
+	return bool(Commands.run({"player_id": Players.LOCAL, "folk_id": int(folk.id), "action": "interact",
+		"args": {"interaction_id": def_id, "target_id": target_id, "extra": extra}}).get("ok", false))
 
 ## Events.notification clashes with Node.notification(), so always go through emit_signal.
 static func notify(text: String, kind: String = "info") -> void:

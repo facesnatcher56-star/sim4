@@ -18,12 +18,9 @@ static func pick(full: int, quick: int) -> int:
 
 static func reset() -> void:
 	Folk.reset_ids()
-	SysUtil.seed_rng(SEED)
-	Genetics.seed_rng(SEED)
-	Autonomy.rng = null
+	SimSeed.apply(SEED)                 # global rng + SysUtil + Genetics + Autonomy + Loot: every test starts from the same random streams
 	Autonomy.last_debug.clear()
 	Autonomy.full_debug = true          # tests may inspect a row for every candidate (the game keeps only the useful ones)
-	Loot.rng = null
 	WorldIface.stub = null
 	WorldIface.coins.clear()
 	SystemsManager.reset_all()

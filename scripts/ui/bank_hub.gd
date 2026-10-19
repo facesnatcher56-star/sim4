@@ -51,7 +51,7 @@ func hid() -> int:
 
 ## Run a command for the selected folk, tell the player what happened and rebuild.
 func act(action: String, args: Dictionary = {}) -> Dictionary:
-	var r: Dictionary = MarketCommand.run(PLAYER_ID, folk_id, action, args)
+	var r: Dictionary = Commands.run({"player_id": PLAYER_ID, "folk_id": folk_id, "action": "market", "args": {"action": action, "args": args}})
 	if not bool(r.get("ok", false)) and str(r.get("reason", "")) != "":
 		UIU.notify(str(r["reason"]), "warn")
 	refresh()

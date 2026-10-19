@@ -33,7 +33,7 @@ func _bills(hid: int) -> void:
 			pay.tooltip_text = "Not enough coins yet."
 			pay.mouse_filter = Control.MOUSE_FILTER_STOP
 		pay.pressed.connect(func():
-			Economy.pay_bill(hid)
+			Commands.run({"action": "pay_bill", "args": {"household_id": hid}})
 			refresh())
 		body.add_child(pay)
 	if Economy.auto_pay:

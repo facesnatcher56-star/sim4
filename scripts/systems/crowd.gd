@@ -23,6 +23,7 @@ static var _staff_seq: int = 0
 
 static func reset() -> void:
 	_last_check.clear()
+	_staff_seq = 0                 # staff ids / names / looks restart with each game (same seed => same town)
 	CrowdDrive.reset()
 
 static func cfg() -> Dictionary:

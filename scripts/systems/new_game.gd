@@ -16,6 +16,7 @@ static func start(mgr: SystemsManager, h: Dictionary, start_id: String, opts: Di
 	var wseed: int = int(opts.get("world_seed", -1))
 	if wseed < 0:
 		wseed = randi() & 0x7fffffff          # every new game draws its own lot layouts
+	SimSeed.apply(wseed)                      # one master seed: the same world seed + the same commands replay the same game
 	var home_tpl := str(opts.get("home_template", ""))
 	if home_tpl == "" or not LotLoader.has_template(home_tpl):
 		home_tpl = LotPicker.home_for(start_id, wseed)
@@ -33,6 +34,7 @@ static func start(mgr: SystemsManager, h: Dictionary, start_id: String, opts: Di
 	var scen: Dictionary = Scenario.def(str(opts.get("scenario", "")))
 	SimEnv.clock().reset(int(scen.get("start_hour", 7)) * 60)
 	mgr.new_game([1])
+	Players.set_player(Players.LOCAL, 1, str(h.get("name", "")))      # the players table: player 1 controls household 1
 	HouseholdSetup.apply(h, folk)
 	if not scen.is_empty():
 		_gentle_first_day()

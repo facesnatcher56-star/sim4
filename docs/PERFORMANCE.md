@@ -34,7 +34,7 @@ Nothing may be O(all townies) or O(all objects) per minute, and nothing O(n^2) i
    only for visible things, cached by appearance and reused.
 
 **Rule: nothing new may run per person per minute unless that person is already ACTIVE** (a folk who is in the world and being simulated). Townies and strangers who are not
-in the world cost nothing per minute. Anything that only reacts to an event uses the event bus (`SysUtil.game_event` / Events), not `minute_passed`.
+in the world cost nothing per minute. Anything that only reacts to an event uses the event bus (`SysUtil.game_event` / Events); clock work is a `SimRegistry` row (next section), never a `minute_passed` connection.
 
 **Checklist before you say "done"** (copy it into the done message with the numbers):
 - [ ] Header declares tier behaviour, cadence, active set, caps.
@@ -45,6 +45,78 @@ in the world cost nothing per minute. Anything that only reacts to an event uses
 - [ ] Ran `powershell -File tools/run_scale.ps1` (big town, 3 game days) and compared with the last section of `docs/PERF_SCALE_RESULTS.md`: ms/game-min total and for your system,
       folk / path-query counts, nodes, memory. **A regression over 10% needs a written reason in the done message.**
 - [ ] Fast tier still under 120 s (`tests/perf_scale_small_test.gd` is the fast-tier twin: counts only).
+
+## The scheduler (task 17.2): how clock work is registered
+
+**No system connects to `Clock.minute_passed` / `hour_passed` / `day_passed`** (views like the HUD may: they are not the simulation). The only Clock listener is
+`SimScheduler` (`scripts/sim/sim_scheduler.gd`, one per Clock via `SimScheduler.of(clock)`); every clock hook is a row in the table `scripts/sim/sim_registry.gd`.
+A Clock minute runs the minute layer, then (on the hour) the hour layer, then (at midnight) the day layer, each in `order` (ties: registration order), which keeps the
+old signal order. To add a system's hook: add ONE row to `systems_rows()` (name, owner, cadence, order in steps of 10, priority, arg, Callable, optional emptiness gate, note).
+
+- **Timed**: `sched.at(minute, owner, callable, args)` fires once at an absolute game minute, ordered by (minute, seq). Not saved: re-register from your own saved state after a load.
+- **Periodic**: cadence 1 / 5 / 15 minutes, hourly (60) or daily (1440). The `active` gate (a Callable returning false when idle) makes an idle system cost one call.
+- **Bucketed**: `sched.add_bucketed(name, owner, group, cadence, order, prio, fn(id, elapsed))` + `job.track(id)` / `job.untrack(id)`: each tracked id is visited once per `cadence`
+  minutes at minute `id % cadence`; 200 townies at cadence 60 run 3-4 per minute, nothing tracked = zero cost. Use it for any per-person periodic work of people who are not ACTIVE.
+- **Priority**: CRITICAL (household-critical) and NORMAL are never deferred; LOW is postponed to a later tick when the frame's sim work passed `budget_usec` (main.gd sets 4 ms; tests and
+  probes leave 0 = unlimited so runs stay deterministic). Postponed jobs run first on the next tick (forced after `MAX_DEFER_TICKS`) and are counted in `stats()["deferred_total"]`.
+  Only mark a job LOW when running one frame late changes no outcome (hourly world-level jobs, social contagion).
+- **Stats**: `sched.profile = true` times every job; `sched.stats()` = jobs, ticks, deferred, per-owner and per-job calls / usec / idle skips / max bucket batch (tests/perf_probe.gd and
+  tests/perf_scale.gd read it). `sched.describe()` prints the registry below (`tools/sched_describe.gd` regenerates it).
+- Determinism: `SimSeed.apply(seed)` seeds every random stream; `tests/state_hash_probe.gd` plays a real game N days and prints state hashes (identical before and after the scheduler refactor).
+
+### Scheduler registry (generated)
+
+| layer | order | job | system | cadence | priority | tier behaviour / active set / caps |
+|---|---|---|---|---|---|---|
+| minute | 100 | SimDirector | SimDirector | minute | CRITICAL | ACTIVE: household folk every minute; strangers every minute for interactions, needs every STRANGER_PERIOD |
+| minute | 210 | NeighborhoodService.before | NeighborhoodService | minute | NORMAL | ACTIVE: lots with folk; far lots summarised |
+| minute | 220 | CareerShifts | CareerShifts | minute | NORMAL | ACTIVE: people with a shift today (timed wake-up candidate) |
+| minute | 230 | Away | Away | minute | NORMAL | people currently away only |
+| minute | 240 | StoryVisits | StoryVisits | minute | NORMAL | visits in progress only |
+| minute | 250 | BabyCare | BabyCare | minute | NORMAL | babies / toddlers only |
+| minute | 260 | AccidentMarks | AccidentMarks | minute | NORMAL | ACTIVE folk x hazards; per-minute odds |
+| minute | 270 | Incidents | Incidents | minute | NORMAL | open incidents / health records only |
+| minute | 280 | CrimeFlow | CrimeFlow | minute | NORMAL | police / open cases only |
+| minute | 290 | Fire | Fire | minute | NORMAL | burning cells only |
+| minute | 300 | DisasterClock | DisasterClock | minute | NORMAL | running disasters only |
+| minute | 310 | Vacation | Vacation | minute | NORMAL | trips on absolute due minutes; idle = one emptiness test |
+| minute | 320 | NeighborhoodService.after | NeighborhoodService | minute | NORMAL | crowd gating by distance (Crowd.update) |
+| minute | 330 | WeatherFolk | WeatherFolk | minute | NORMAL | ACTIVE folk outdoors; per-minute exposure |
+| minute | 340 | LevelSystems | LevelSystems | minute | NORMAL | multi-floor buildings with folk |
+| minute | 400 | SocialDynamics.on_minute | SocialDynamics | minute | LOW | folk present in the same lot; contagion is the hotspot (17.3) |
+| hour | 200 | hour/ensure_registered | SystemsManager | hour | NORMAL |  |
+| hour | 210 | hour/WeatherWorld.on_hour | WeatherWorld | hour | LOW | weather steps; world-level |
+| hour | 220 | hour/Holidays.on_hour | Holidays | hour | LOW |  |
+| hour | 230 | hour/Goals.on_hour | Goals | hour | LOW | residents only |
+| hour | 240 | hour/Story.on_hour | Story | hour | LOW | STATISTICAL townies: hourly dice |
+| hour | 250 | hour/Family.on_hour | Family | hour | LOW |  |
+| hour | 260 | hour/AccidentMarks.on_hour | AccidentMarks | hour | NORMAL | before Incidents.on_hour |
+| hour | 270 | hour/Incidents.on_hour | Incidents | hour | NORMAL | FULL near / STATISTICAL far dice per def |
+| hour | 280 | hour/AccidentMarks.after_hour | AccidentMarks | hour | NORMAL | right after Incidents.on_hour |
+| hour | 290 | hour/CrimeFlow.on_hour | CrimeFlow | hour | NORMAL |  |
+| hour | 300 | hour/DisasterClock.on_hour | DisasterClock | hour | NORMAL |  |
+| hour | 310 | hour/Vacation.on_hour | Vacation | hour | NORMAL | active trips only |
+| hour | 400 | hour/SocialDynamics.on_hour | SocialDynamics | hour | LOW |  |
+| hour | 500 | hour/ScenarioGoals.poll | ScenarioGoals | hour | NORMAL | only while a scenario is active |
+| day | 200 | day/ensure_registered | SystemsManager | day | NORMAL |  |
+| day | 210 | day/Holidays.on_day | Holidays | day | NORMAL |  |
+| day | 220 | day/Aging.on_day | Aging | day | NORMAL | residents + townies: O(people) cheap comparisons |
+| day | 230 | day/Family.on_day | Family | day | NORMAL |  |
+| day | 240 | day/Careers.on_day | Careers | day | NORMAL |  |
+| day | 250 | day/WeatherWorld.on_day | WeatherWorld | day | NORMAL |  |
+| day | 260 | day/Economy.on_day | Economy | day | NORMAL | bills per household |
+| day | 270 | day/RelationshipService.on_day | RelationshipService | day | NORMAL | decay of known pairs (bounded) |
+| day | 280 | day/Story.on_day | Story | day | NORMAL | townie daily dice (STATISTICAL tier) |
+| day | 290 | day/Fire.on_day | Fire | day | NORMAL |  |
+| day | 300 | day/Incidents.on_day | Incidents | day | NORMAL | daily dice, FULL near / STATISTICAL far |
+| day | 310 | day/CrimeFlow.on_day | CrimeFlow | day | NORMAL | all-townie pass (slice candidate, 17.3) |
+| day | 320 | day/DisasterClock.on_day | DisasterClock | day | NORMAL |  |
+| day | 330 | day/MarketTick.on_day | MarketTick | day | NORMAL | markets, shops, bank, rents |
+| day | 340 | day/StoryPacing.on_day | StoryPacing | day | NORMAL |  |
+| day | 350 | day/Vacation.on_day | Vacation | day | NORMAL | active trips only |
+| day | 360 | day/systems_day event | SystemsManager | day | NORMAL |  |
+| day | 370 | day/autosave | SaveLoad | day | NORMAL | one autosave per day (when Main is not doing it) |
+| day | 900 | day/Main.autosave | Main | day | NORMAL | player autosave interval |
 
 ## Scale benchmark
 

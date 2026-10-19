@@ -59,7 +59,7 @@ func build() -> void:
 			b.text = "Visit"
 			b.tooltip_text = "%s visits for a couple of hours." % CrimePerson.name_of(visitor)
 			b.pressed.connect(func():
-				Prison.visit(visitor, int(pid))
+				Commands.run({"folk_id": visitor, "action": "prison_visit", "args": {"inmate": int(pid)}})
 				refresh())
 			row.add_child(b)
 	if not any:

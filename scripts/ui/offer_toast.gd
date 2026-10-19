@@ -44,8 +44,8 @@ func show_offer(fid: int) -> void:
 
 func _answer(accept: bool) -> void:
 	if accept:
-		Careers.accept_offer(folk_id)
+		Commands.run({"folk_id": folk_id, "action": "career_accept"})
 	else:
-		Careers.decline_offer(folk_id)
+		Commands.run({"folk_id": folk_id, "action": "career_decline"})
 		UIU.notify("%s turned the job down." % SysUtil.folk_name(folk_id), "info")
 	visible = false

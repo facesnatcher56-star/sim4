@@ -64,13 +64,13 @@ static func offer_card(dlg: UIDialog, fid: int) -> void:
 	var ok := Button.new()
 	ok.text = "Accept"
 	ok.pressed.connect(func():
-		Careers.accept_offer(fid)
+		Commands.run({"folk_id": fid, "action": "career_accept"})
 		dlg.refresh())
 	row.add_child(ok)
 	var no := Button.new()
 	no.text = "Decline"
 	no.pressed.connect(func():
-		Careers.decline_offer(fid)
+		Commands.run({"folk_id": fid, "action": "career_decline"})
 		dlg.refresh())
 	row.add_child(no)
 
@@ -117,9 +117,9 @@ func _skip_button() -> void:
 	b.tooltip_text = "Staying home costs %d performance and the day's pay." % penalty
 	b.pressed.connect(func():
 		if skipping:
-			Careers.skip_flags.erase(folk_id)
+			Commands.run({"folk_id": folk_id, "action": "career_unskip"})
 		else:
-			Careers.skip_work_today(folk_id)
+			Commands.run({"folk_id": folk_id, "action": "career_skip"})
 		refresh())
 	body.add_child(b)
 	if not skipping:

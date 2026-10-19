@@ -3,7 +3,7 @@ extends UIDialog
 ## Holidays (task 22): plan and book a trip (destination, length, who goes, invited friends, cabin class and package for cruises, house-sitter,
 ## the price in plain lines and what it means for work and school), see the trip in progress (where, how long, ship alerts, go ashore / back on board,
 ## come home early) and the souvenirs and photos of earlier trips. Opened by the "Plan a Holiday" interaction (game event vacation_open_booking).
-## Every button goes through Vacation.command (the multiplayer-ready command door).
+## Every button goes through Commands.run (action "vacation" -> Vacation.command): the multiplayer-ready command door.
 
 var dest: String = "beach"
 var days: int = 3
@@ -181,7 +181,7 @@ func _update_price() -> void:
 	go.text = "Book it and go"
 	go.disabled = not bool(q.get("ok", false))
 	go.pressed.connect(func():
-		var res: Dictionary = Vacation.command({"player_id": 1, "folk_id": folk_id, "action": "book", "args": _book_args(), "game_minute": SysUtil.now()})
+		var res: Dictionary = Commands.run({"player_id": Players.LOCAL, "folk_id": folk_id, "action": "vacation", "args": {"action": "book", "args": _book_args()}})
 		if bool(res.get("ok", false)):
 			hide_dialog())
 	_price_box.add_child(go)
@@ -215,7 +215,7 @@ func _trip(t: Dictionary) -> void:
 	match st:
 		"booked":
 			line("Booked. Leaving in %s." % _mins(int(t["depart_min"]) - now), 14)
-			_btn("Cancel the trip (80% back)", func(): Vacation.command({"folk_id": folk_id, "action": "cancel", "args": {"trip": int(t["id"])}}))
+			_btn("Cancel the trip (80% back)", func(): Commands.run({"folk_id": folk_id, "action": "vacation", "args": {"action": "cancel", "args": {"trip": int(t["id"])}}}))
 		"outbound":
 			line("On the way. Arriving in %s." % _mins(int(t["arrive_min"]) - now), 14)
 		"inbound":
@@ -232,7 +232,7 @@ func _trip(t: Dictionary) -> void:
 func _there(t: Dictionary, now: int) -> void:
 	if str(t["dest"]) != "cruise":
 		line("%s. Weather: %s. Heading home in %s." % [str(t["label"]), str(t.get("weather", "")), _mins(int(t["end_min"]) - now)], 14)
-		_btn("Come home early", func(): Vacation.command({"folk_id": folk_id, "action": "come_home", "args": {"trip": int(t["id"])}}))
+		_btn("Come home early", func(): Commands.run({"folk_id": folk_id, "action": "vacation", "args": {"action": "come_home", "args": {"trip": int(t["id"])}}}))
 		return
 	var c: Dictionary = t["cruise"]
 	line("%s, %s. Sea: %s. Home at the quay in %s." % [str(c["name"]), str(c["phase"]), str(c["sea"]), _mins(CruiseRoute.first_min(c["timeline"], "home_dock") - now)], 14)
@@ -244,8 +244,8 @@ func _there(t: Dictionary, now: int) -> void:
 		line("Day %d: %s" % [int(r["day"]), what], 12, UITheme.MUTED)
 	if int(c["port_zone"]) >= 0 and str(c["phase"]) == "docked":
 		var here: bool = not CruiseShore.ashore_members(t).is_empty()
-		_btn("Go ashore", func(): Vacation.command({"folk_id": folk_id, "action": "go_ashore", "args": {}}))
-		_btn("Back to the ship", func(): Vacation.command({"folk_id": folk_id, "action": "board", "args": {}}))
+		_btn("Go ashore", func(): Commands.run({"folk_id": folk_id, "action": "vacation", "args": {"action": "go_ashore", "args": {}}}))
+		_btn("Back to the ship", func(): Commands.run({"folk_id": folk_id, "action": "vacation", "args": {"action": "board", "args": {}}}))
 		if here:
 			line("Be back on the ship by 16:30 or it sails without you, and the flight home is expensive.", 12, Color("#e8913d"))
 

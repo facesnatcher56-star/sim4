@@ -31,6 +31,9 @@ static func _all_objects() -> Array:
 
 static var _last_spoil_toast: int = -99
 
+static func reset() -> void:
+	_last_spoil_toast = -99
+
 static func on_day(_day: int) -> void:
 	var spoiled_total: int = 0
 	for o in _all_objects():

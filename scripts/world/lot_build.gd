@@ -103,8 +103,8 @@ func _tool_press(mp: Vector2) -> void:
 		return
 	match tool:
 		"place":
-			var id := World.buy_place(tool_arg, _ghost_origin, _ghost_rot, -1, build_level())
-			if id < 0:
+			var res := Commands.run({"action": "build_place", "args": {"def_id": tool_arg, "tile": _ghost_origin, "rot": _ghost_rot, "level": build_level()}})
+			if not bool(res.get("ok", false)):
 				_notify(World.last_error if World.last_error != "" else "Can't place here")
 		"wall", "floor":
 			_dragging_tool = true
@@ -112,11 +112,11 @@ func _tool_press(mp: Vector2) -> void:
 		"sell":
 			var p := pick(mp)
 			if p["kind"] == "object":
-				World.sell_object(p["id"])
+				Commands.run({"action": "build_sell", "args": {"object_id": int(p["id"])}})
 			elif p["kind"] == "none" and World.in_bounds(p["tile"]):
 				var so = World.object_at(p["tile"], build_level())
 				if so != null:
-					World.sell_object(so.id)
+					Commands.run({"action": "build_sell", "args": {"object_id": int(so.id)}})
 
 
 func _tool_motion(mp: Vector2) -> void:
@@ -164,13 +164,13 @@ func _tool_release(mp: Vector2) -> void:
 		var a := _vertex_at(_drag_start)
 		var b := _constrain_line(a, _vertex_at(g))
 		if a != b:
-			var n := World.set_wall_line(a, b, tool_arg if tool_arg != "" else "wall", -1, build_level())
+			var n := int(Commands.run({"action": "build_wall", "args": {"a": a, "b": b, "type": tool_arg if tool_arg != "" else "wall", "level": build_level()}}).get("n", 0))
 			if n == 0 and World.last_error != "":
 				_notify(World.last_error)
 	elif tool == "floor":
 		var a := Vector2i(floori(_drag_start.x), floori(_drag_start.z))
 		var b := Vector2i(floori(g.x), floori(g.z))
-		var n := World.paint_floor_rect(a, b, tool_arg, -1, build_level())
+		var n := int(Commands.run({"action": "build_floor", "args": {"a": a, "b": b, "type": tool_arg, "level": build_level()}}).get("n", 0))
 		if n == 0 and World.last_error != "":
 			_notify(World.last_error)
 
@@ -184,7 +184,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		elif event.is_action_pressed("sim_rotate_right"):
 			rotate_camera(1)
 		elif event.is_action_pressed("sim_undo"):
-			World.undo_last()
+			Commands.run({"action": "build_undo"})
 		elif event.is_action_pressed("sim_build_rotate"):
 			build_rot = posmod(build_rot + 1, 4)
 		elif event.keycode == KEY_ESCAPE and tool != "select":

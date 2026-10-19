@@ -108,12 +108,9 @@ static func household_ids() -> Array:
 	out.sort()
 	return out
 
+## The local player's household (Players table; falls back to the World's current household, else the first household, else 1).
 static func primary_household() -> int:
-	var w = WorldIface.world()
-	if w != null and "current_household_id" in w and int(w.current_household_id) > 0:
-		return int(w.current_household_id)
-	var ids: Array = household_ids()
-	return int(ids[0]) if not ids.is_empty() else 1
+	return Players.primary_household()
 
 static func object_price(obj) -> int:
 	return price_of_def(str(obj.def_id))

@@ -85,6 +85,14 @@ func _hook_world() -> void:
 
 ## Wipe all system state (new game / tests).
 static func reset_all() -> void:
+	CrimeFlow.uninstall()
+	Players.reset()
+	ContentRules.reset()
+	Commands.reset()
+	var ml := Engine.get_main_loop()
+	var dir = (ml as SceneTree).root.get_node_or_null("SimDirector") if ml is SceneTree else null
+	if dir != null and dir.has_method("reset_state"):
+		dir.reset_state()
 	Economy.reset()
 	Careers.reset()
 	RelationshipService.reset()

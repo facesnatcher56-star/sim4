@@ -374,8 +374,8 @@ func _on_invite() -> void:
 	var host: int = int(sel[0]) if not sel.is_empty() else (int(SysUtil.residents()[0].id) if not SysUtil.residents().is_empty() else -1)
 	if host < 0:
 		return
-	var rec: Dictionary = Story.invite_to_venue(tid, host, selected_lot)
-	if rec.is_empty():
+	var inv: Dictionary = Commands.run({"folk_id": host, "action": "invite_to_venue", "args": {"townie_id": tid, "lot_id": selected_lot}})
+	if not bool(inv.get("ok", false)):
 		return
 	refresh()
 
@@ -387,7 +387,7 @@ func _on_travel() -> void:
 ## Programmatic entry used by the button and tests.
 func do_travel(lot_id: String) -> Dictionary:
 	var ids: Array = _selected_folk()
-	var res: Dictionary = Neighborhood.travel(ids, lot_id, {"fast": fast_check.button_pressed})
+	var res: Dictionary = Commands.run({"action": "travel", "args": {"folk_ids": ids, "lot_id": lot_id, "opts": {"fast": fast_check.button_pressed}}})
 	if bool(res.get("ok", false)):
 		travelled.emit(res)
 	refresh()
@@ -397,7 +397,7 @@ func _on_home() -> void:
 	var ids: Array = []
 	for f in SysUtil.residents():
 		ids.append(int(f.id))
-	var res: Dictionary = Neighborhood.travel(ids, Neighborhood.HOME, {"fast": fast_check.button_pressed})
+	var res: Dictionary = Commands.run({"action": "go_home", "args": {"folk_ids": ids, "opts": {"fast": fast_check.button_pressed}}})
 	if bool(res.get("ok", false)):
 		close_panel()
 	refresh()

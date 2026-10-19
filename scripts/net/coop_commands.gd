@@ -2,9 +2,8 @@ class_name CoopCommands
 extends RefCounted
 ## Host-side command handling. Envelope: {player_id, folk_id, action, args, game_minute, seq} (CoopProto.CMD).
 ##
-## THE ADAPTER: `apply()` is the ONLY place in the co-op code that knows the sim API. Today it calls
-## SimDirector.command(folk_id, interaction_id, target_id). After the scheduler / command layer (17.2) lands, only the
-## body of `apply()` (and `_sim_director()`) changes; validation, acks, idempotence and the allowlist stay as they are.
+## THE ADAPTER: `apply()` is the ONLY place in the co-op code that knows the sim API: it converts an envelope into a Commands.run call
+## (scripts/sim/commands.gd, the one command layer the UI uses too). Validation, acks, idempotence and the allowlist stay here.
 ##
 ## Allowlist (stage 1): a player may command a folk only when the folk's household is in `allow[player_id]`. Stage 2 (the
 ## players table, player id -> household id) replaces `allow` with a lookup; nothing else needs to change.
@@ -41,20 +40,14 @@ static func check(env: Dictionary) -> String:
 			return "Bad target."
 	return ""
 
-## Run a validated envelope on the host's sim. Returns {"ok": bool, "msg": String}.
+## Run a validated envelope on the host's sim through the command layer (Commands.run, strict = the director's can-run check).
+## Returns {"ok": bool, "msg": String}.
 static func apply(env: Dictionary) -> Dictionary:
 	var why := check(env)
 	if why != "":
 		return {"ok": false, "msg": why}
 	var args: Dictionary = env.get("args", {})
-	var sd = _sim_director()
-	if sd == null:
-		return {"ok": false, "msg": "The host's game is not running."}
-	var ok: bool = sd.command(int(env["folk_id"]), str(args["interaction_id"]), int(args.get("target_id", -1)))
-	return {"ok": ok, "msg": "" if ok else "That can't be done right now."}
-
-static func _sim_director():
-	var ml := Engine.get_main_loop()
-	if ml is SceneTree:
-		return (ml as SceneTree).root.get_node_or_null("SimDirector")
-	return null
+	var res: Dictionary = Commands.run({"player_id": int(env.get("player_id", -1)), "folk_id": int(env["folk_id"]), "action": "interact",
+		"game_minute": int(env.get("game_minute", SimEnv.now_min())),
+		"args": {"interaction_id": str(args["interaction_id"]), "target_id": int(args.get("target_id", -1)), "strict": true}})
+	return {"ok": bool(res.get("ok", false)), "msg": str(res.get("msg", ""))}
