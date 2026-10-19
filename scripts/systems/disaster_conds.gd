@@ -38,6 +38,6 @@ static func _overdue(subj) -> bool:
 		return false
 	var day: int = SysUtil.day()
 	for bl in Economy.outstanding(hid):
-		if bool(bl.get("late", false)) or day >= int(bl.get("due", 99999)):
+		if bool(bl.get("late", false)) or day > int(bl.get("due", 99999)):      # past the due date, not ON it (the payment runs that morning)
 			return true
 	return false

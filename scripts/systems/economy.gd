@@ -11,7 +11,7 @@ static var placed_day: Dictionary = {}  # object_id -> day it entered the lot
 static var usage: Dictionary = {}       # hid -> utility units used this billing cycle
 static var repossessed: Array = []      # {day, hid, def_id, value}
 static var next_bill_day: int = 0
-static var auto_pay: bool = true
+static var auto_pay: bool = false       # the PLAYER-run households only (their choice, default off); every other household always pays by itself (autopay_for)
 static var _seq: int = 1
 
 static func reset() -> void:
@@ -23,7 +23,7 @@ static func reset() -> void:
 	usage.clear()
 	repossessed.clear()
 	next_bill_day = 0
-	auto_pay = true
+	auto_pay = false
 	_seq = 1
 
 static func cfg() -> Dictionary:
@@ -281,6 +281,11 @@ static func outstanding(hid: int) -> Array:
 			out.append(bl)
 	return out
 
+## Does this household pay its bills by itself on the due date? Always for households nobody plays (townies), and for a household whose people are all
+## away (a holiday: nobody is home to go to the mailbox); otherwise the player's setting.
+static func autopay_for(hid: int) -> bool:
+	return auto_pay or Players.player_of(hid) < 0 or Vacation.household_empty(hid)
+
 static func owed(hid: int) -> int:
 	var total: int = 0
 	for bl in outstanding(hid):
@@ -313,6 +318,7 @@ static func pay_bill(hid: int) -> int:
 	missed[hid] = 0
 	SysUtil.notify("Paid bills: %d coins." % total, "bill")
 	SysUtil.game_event("bill_paid", {"household_id": hid, "amount": total})
+	BillPaying.refresh()
 	return total
 
 static func on_day(day: int) -> void:
@@ -328,7 +334,7 @@ static func on_day(day: int) -> void:
 		var hid: int = int(bl["hid"])
 		if day < int(bl["due"]):
 			continue
-		if auto_pay and balance(hid) >= int(bl["amount"]):
+		if autopay_for(hid) and balance(hid) >= int(bl["amount"]):
 			pay_bill(hid)
 			continue
 		if not bool(bl["late"]):
@@ -349,6 +355,7 @@ static func on_day(day: int) -> void:
 		Weather.reset_bill_period()
 		next_bill_day += every * (1 + (day - next_bill_day) / every)
 	# issued bills with due == today are handled tomorrow
+	BillPaying.refresh()
 
 static func _repossess(hid: int) -> void:
 	var protected_tags: Array = bill_cfg().get("protected_tags", [])
@@ -405,7 +412,7 @@ static func from_dict(d: Dictionary) -> void:
 	usage = SysUtil.int_keys(d.get("usage", {}))
 	repossessed = (d.get("repossessed", []) as Array).duplicate(true)
 	next_bill_day = int(d.get("next_bill_day", 0))
-	auto_pay = bool(d.get("auto_pay", true))
+	auto_pay = bool(d.get("auto_pay", false))
 	_seq = int(d.get("seq", 1))
 	if d.has("funds"):
 		WorldIface.coins.clear()

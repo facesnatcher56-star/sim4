@@ -39,10 +39,10 @@ func _bills(hid: int) -> void:
 			Commands.run({"action": "pay_bill", "args": {"household_id": hid}})
 			refresh())
 		body.add_child(pay)
-	if Economy.auto_pay:
+	if Economy.autopay_for(hid):
 		line("Bills are paid automatically on the due date if you can afford them. Several missed bills lead to repossession.", 11, UITheme.MUTED)
 	else:
-		line("Auto-pay is off: pay bills here before they go overdue.", 11, UITheme.MUTED)
+		line("Auto-pay is off: someone at home will pay at the mailbox, or pay bills here before they go overdue.", 11, UITheme.MUTED)
 
 func _utilities(hid: int) -> void:
 	heading("Utilities")

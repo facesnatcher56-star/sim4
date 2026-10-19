@@ -66,6 +66,7 @@ func _bills_paid(f: Array) -> void:
 	K.make_folk(w, "Ann")
 	Kit_furnish(w)
 	WorldIface.coins[1] = 3000
+	Economy.auto_pay = true      # the player chose autopay (it is off by default)
 	K.set_time(7, 8)
 	Economy.note_usage(1, "take_shower")
 	Economy.on_day(7)

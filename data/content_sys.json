@@ -91,6 +91,23 @@
     "career"
    ]
   },
+  "pay_bills": {
+   "label": "Pay Bills",
+   "kind": "super",
+   "target": "object",
+   "objects": ["mailbox"],
+   "tags": ["chore", "paperwork"],
+   "duration_min": 10,
+   "posture": "stand",
+   "tests": [{"any": [{"has_buff": "bills_waiting"}, {"has_buff": "bills_late"}]}],
+   "per_min": {},
+   "on_finish": [{"fire_event": "pay_bills"}],
+   "autonomous": true,
+   "priority": "normal",
+   "advertises": {"tidy": 1.2},
+   "thought": "Time to pay the bills.",
+   "cooldown_min": 240
+  },
   "try_for_baby": {
    "label": "Try for Baby",
    "kind": "social",
@@ -242,6 +259,20 @@
    },
    "thought": "A little one is on the way."
   },
+  "bills_waiting": {
+   "label": "Bills to Pay",
+   "mood": {},
+   "duration_min": 0,
+   "hidden": true,
+   "autonomy_mult": {"interaction:pay_bills": 1.5}
+  },
+  "bills_late": {
+   "label": "Overdue Bills",
+   "mood": {},
+   "duration_min": 0,
+   "hidden": true,
+   "autonomy_mult": {"interaction:pay_bills": 8.0}
+  },
   "grieving": {
    "label": "Grieving",
    "mood": {
@@ -257,6 +288,9 @@
  "object_interactions": {
   "fridge": [
    "order_groceries"
+  ],
+  "mailbox": [
+   "pay_bills"
   ],
   "computer": [
    "apply_for_job"

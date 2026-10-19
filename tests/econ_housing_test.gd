@@ -127,6 +127,7 @@ func _tenant_and_eviction(f: Array) -> void:
 	K.expect(f, int(home["rent"]) > 0, "at the market rent (%d)" % int(home["rent"]))
 	# rent is billed through the Economy
 	WorldIface.coins[1] = 50000
+	Economy.auto_pay = true
 	var bills0: int = Economy.bills.size()
 	for d in range(2, 24):
 		_day(d)

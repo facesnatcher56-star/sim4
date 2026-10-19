@@ -274,6 +274,8 @@ func _on_game_event(ev_name: String, payload: Dictionary) -> void:
 			var f = SysUtil.folk(int(payload.get("folk_id", -1)))
 			if f != null:
 				Economy.restock_fridge(int(f.household_id), int(payload.get("object_id", -1)))
+		"pay_bills":
+			BillPaying.on_pay_bills(int(payload.get("folk_id", -1)))
 		"job_search":
 			Careers.on_job_search(int(payload.get("folk_id", -1)))
 		"try_for_baby":
