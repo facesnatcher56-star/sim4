@@ -5,7 +5,7 @@ extends RefCounted
 ## SCHEMAS, every field must be present with exactly the declared kind and within its size cap, no extra fields, floats
 ## must be finite, nested values may only be plain data (no Objects). Anything else is rejected with a reason string.
 
-const VERSION := 2               # bump on ANY change of a message layout or meaning
+const VERSION := 3               # bump on ANY change of a message layout or meaning
 const DEFAULT_PORT := 24680
 const MAX_PEERS := 4               # host + 3 clients
 const CHUNK_BYTES := 32768
@@ -37,6 +37,7 @@ const ACK := 16
 const EVENT := 17
 const SYNC := 18
 const DELTA := 20         # stage 2: live state since the last delta (JSON in zstd bytes), `hash` = host hash at `minute` when a check is due
+const CAMERA := 22        # task 17.4: the tile the player's camera looks at (the host simulates what any player looks at in full), a few seconds apart
 const TIME := 21          # stage 3: pace / skip / pause / vote state (plain dictionary)
 
 ## kind codes: i = int, s = String, b = bool, y = PackedByteArray, d = plain Dictionary, a = plain Array.
@@ -63,6 +64,7 @@ const SCHEMAS := {
 	ACTIVE: {"n": ["i", 0]},
 	DELTA: {"minute": ["i", 0], "hash": ["s", 64], "data": ["y", MAX_DELTA_BYTES]},
 	TIME: {"d": ["d", 16]},
+	CAMERA: {"x": ["i", 0], "y": ["i", 0]},
 }
 const MAX_DEPTH := 3
 const MAX_NODES := 200

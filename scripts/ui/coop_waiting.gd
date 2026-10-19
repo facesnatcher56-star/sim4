@@ -151,6 +151,9 @@ func _watch(pid: int, me: int) -> void:
 
 func _follow(folk_id: int) -> void:
 	_watching = folk_id
+	var wf = WorldIface.get_folk(folk_id)
+	if wf != null:
+		CameraFocus.look("cam", wf.tile)          # the spectate camera: what the watched folk are near is simulated in full at once (the camera glide catches up later)
 	var lv = hud.get("lot_view") if hud != null else null
 	if lv != null and lv.has_method("focus_on"):
 		lv.call("focus_on", "folk", folk_id)

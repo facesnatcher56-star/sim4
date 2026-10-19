@@ -27,8 +27,7 @@ static var _new: Dictionary = {}           # ids not classified yet (assigned di
 static var _below: Dictionary = {}         # id -> first minute the person qualified only for a lower tier
 static var _cand: Dictionary = {}          # id -> [tier, distance, tile.x, tile.y, anchor signature]
 static var _saved: Dictionary = {}         # tier map from a save, used by the first classification
-static var _focus: Vector2i = Vector2i.ZERO
-static var _has_focus := false
+static var _foci: Dictionary = {}          # source name -> tile: the local camera ("cam"), each remote player's camera ("p<id>"), see CameraFocus
 static var _listeners: Array = []          # Callable(id, old_tier, new_tier, folk)
 static var _anchor_sig: int = 0
 static var anchors: Array = []             # [{tile, lot}] of the last refresh
@@ -44,7 +43,7 @@ static func reset() -> void:
 	_cand.clear()
 	_period.clear()
 	_saved.clear()
-	_has_focus = false
+	_foci = {}
 	anchors = []
 	controlled_ids = []
 	_anchor_sig = 0
@@ -111,15 +110,40 @@ static func add_listener(c: Callable) -> void:
 static func remove_listener(c: Callable) -> void:
 	_listeners.erase(c)
 
+## The camera focus: an extra anchor where somebody is LOOKING, so people on a far lot the player watches are simulated in full, not statistical.
+## `set_focus` / `clear_focus` / `focus_tile` are the local camera ("cam"); co-op adds one source per remote player's camera (`set_focus_for("p2", tile)`).
 static func set_focus(tile: Vector2i) -> void:
-	_focus = tile
-	_has_focus = true
+	set_focus_for("cam", tile)
 
 static func clear_focus() -> void:
-	_has_focus = false
+	clear_focus_for("cam")
 
 static func focus_tile() -> Vector2i:
-	return _focus
+	return _foci.get("cam", Vector2i.ZERO)
+
+static func focus_of(source: String) -> Vector2i:
+	return _foci.get(source, Vector2i.ZERO)
+
+static func has_focus(source: String = "cam") -> bool:
+	return _foci.has(source)
+
+static func set_focus_for(source: String, tile: Vector2i) -> void:
+	if _foci.get(source, null) == tile:
+		return
+	_foci[source] = tile
+
+static func clear_focus_for(source: String) -> void:
+	_foci.erase(source)
+
+static func foci_count() -> int:
+	return _foci.size()
+
+## The focus anchors in a fixed (name) order, so the anchor signature and the classification never depend on insertion order.
+static func _add_focus_anchors() -> void:
+	var names: Array = _foci.keys()
+	names.sort()
+	for n in names:
+		anchors.append(InterestArea.make_anchor(_foci[n]))
 
 # ------------------------------------------------------------------ world membership (hooks from World / StubWorld add_folk / remove_folk)
 static func on_added(f) -> void:
@@ -211,8 +235,7 @@ static func refresh(_total: int = 0) -> void:
 			if hh.has(int(f.household_id)) and not f.has_meta("visitor") and not f.has_meta("away") and not f.has_meta("trip_zone"):
 				anchors.append(InterestArea.make_anchor(f.tile))
 				controlled_ids.append(int(id))
-	if _has_focus:
-		anchors.append(InterestArea.make_anchor(_focus))
+	_add_focus_anchors()
 	var sig: int = 0
 	for a in anchors:
 		sig = sig * 31 + int(a["tile"].x) * 1009 + int(a["tile"].y)
@@ -343,8 +366,7 @@ static func _quick_anchors() -> void:
 		var cf = _world.get(cid, null)
 		if cf != null and not cf.has_meta("away") and not cf.has_meta("trip_zone"):
 			anchors.append(InterestArea.make_anchor(cf.tile))
-	if _has_focus:
-		anchors.append(InterestArea.make_anchor(_focus))
+	_add_focus_anchors()
 	var sg: int = 0
 	for a in anchors:
 		sg = sg * 31 + int(a["tile"].x) * 1009 + int(a["tile"].y)
@@ -393,7 +415,8 @@ static func to_dict() -> Dictionary:
 	var below: Dictionary = {}
 	for id2 in _below:
 		below[str(id2)] = int(_below[id2])
-	return {"tiers": tiers, "below": below, "focus": [_focus.x, _focus.y] if _has_focus else []}
+	# only the local camera is saved (it decides which people are simulated, so a load must see the same anchor); remote players' cameras re-register by themselves
+	return {"tiers": tiers, "below": below, "focus": [_foci["cam"].x, _foci["cam"].y] if _foci.has("cam") else []}
 
 static func from_dict(d: Dictionary) -> void:
 	_saved.clear()
@@ -402,10 +425,10 @@ static func from_dict(d: Dictionary) -> void:
 	_below.clear()
 	for k2 in d.get("below", {}):
 		_below[int(k2)] = int(d["below"][k2])
+	_foci = {}
 	var fc: Array = d.get("focus", [])
-	_has_focus = fc.size() == 2
-	if _has_focus:
-		_focus = Vector2i(int(fc[0]), int(fc[1]))
+	if fc.size() == 2:
+		_foci["cam"] = Vector2i(int(fc[0]), int(fc[1]))
 
 ## One line for logs / the benchmark.
 static func describe() -> String:

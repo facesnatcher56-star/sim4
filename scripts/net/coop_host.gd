@@ -84,6 +84,7 @@ func on_packet(id: int, bytes: PackedByteArray, now_s: float) -> void:
 		CoopProto.ACTIVE:
 			if time != null:
 				time.note_input(int(p["pid"]), now_s)
+		CoopProto.CAMERA: _camera(p, m)
 		CoopProto.BYE: _remove(id, "left the game", false)
 		_: _bad(id, p)      # a host->client type sent to the host
 
@@ -254,6 +255,16 @@ func _cmd(id: int, p: Dictionary, m: Dictionary) -> void:
 		p["results"].erase(p["results"].keys()[0])
 	_send(id, CoopProto.ACK, ack)
 
+## A player's camera (task 17.4): an extra Tiers anchor while they are connected, so a far lot a player watches is simulated in full. Clamped to the map.
+func _camera(p: Dictionary, m: Dictionary) -> void:
+	if p["st"] != "in":
+		return
+	var w = WorldIface.world()
+	var tile := Vector2i(int(m["x"]), int(m["y"]))
+	if w != null and "width" in w:
+		tile = Vector2i(clampi(tile.x, 0, int(w.width) - 1), clampi(tile.y, 0, int(w.height) - 1))
+	CameraFocus.look(CameraFocus.source_of_player(int(p["pid"])), tile)
+
 func _snap_req(id: int, p: Dictionary) -> void:
 	if _now - float(p["snap_at"]) >= snapshot_gap_s:
 		send_snapshot(id)
@@ -414,6 +425,7 @@ func _remove(id: int, reason: String, keep_seat: bool) -> void:
 		return
 	peers.erase(id)
 	if p["st"] == "in":
+		CameraFocus.release(CameraFocus.source_of_player(int(p["pid"])))
 		if keep_seat and rejoin_s > 0.0:
 			reserved[p["token"]] = {"pid": p["pid"], "name": p["name"], "at": _now, "ls": p["last_seq"], "res": p["results"]}
 		peer_left.emit(int(p["pid"]), reason)

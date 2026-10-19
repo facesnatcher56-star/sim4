@@ -24,6 +24,8 @@ var time: CoopTime = null          # host only
 var alerts: CoopAlerts = null
 var _time_next: float = 0.0
 var _active_next: float = 0.0
+var _cam_next: float = 0.0
+var _cam_sent: Vector2i = Vector2i(-1, -1)      # the camera tile the host was last told about
 var port: int = 0
 var address_ip: String = ""
 var error_text: String = ""
@@ -51,6 +53,19 @@ func _input(event: InputEvent) -> void:
 	elif role == "client" and client != null and client.state == "synced" and _t >= _active_next:
 		_active_next = _t + 5.0
 		client.send_active(1)
+
+## Task 17.4: the host simulates what any player looks at in full, so a client tells it where its camera is (the focus moves in steps of 6+ tiles, at most every 2 s).
+func _send_camera() -> void:
+	if client.state != "synced":
+		_cam_sent = Vector2i(-1, -1)                  # after a drop the host forgot us: say it again
+		return
+	if _t < _cam_next or not Tiers.has_focus("cam"):
+		return
+	_cam_next = _t + 2.0
+	var tile: Vector2i = Tiers.focus_of("cam")
+	if tile != _cam_sent:
+		_cam_sent = tile
+		client.send_camera(tile)
 
 func is_active() -> bool:
 	return role != "none"
@@ -202,6 +217,7 @@ func pump(delta: float) -> void:
 		_client_upkeep()
 
 func _client_upkeep() -> void:
+	_send_camera()
 	if client.state == "connecting" and _connecting_since >= 0.0 and _t - _connecting_since > CONNECT_TIMEOUT_S:
 		_connection_unreachable()
 	if client.state == "lost":

@@ -26,6 +26,7 @@ func _ready() -> void:
 func _exit_tree() -> void:
 	if instance == self:
 		instance = null
+		CameraFocus.release("cam")
 
 
 func _connect_signals() -> void:

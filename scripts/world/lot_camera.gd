@@ -12,6 +12,7 @@ func _snap_camera() -> void:
 
 func _apply_camera() -> void:
 	_pivot.position = _target
+	CameraFocus.look_at("cam", _target.x, _target.z)       # where we look is simulated in full (Tiers anchor; moves only after 6 tiles)
 	var dist := maxf(CAM_DIST, _zoom * 1.1 + 5.0)      # zoomed far out (whole-map view) the camera must stay in front of the ground it sees
 	var off := Vector3(0, sin(PITCH), cos(PITCH)) * dist
 	off = off.rotated(Vector3.UP, _yaw)

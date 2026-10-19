@@ -110,6 +110,10 @@ func send_vote(kind: String, yes: bool = true) -> void:
 func send_active(n: int = 0) -> void:
 	_send(CoopProto.ACTIVE, {"n": n})
 
+## Task 17.4: tell the host which tile my camera looks at, so it simulates that place in full.
+func send_camera(tile: Vector2i) -> void:
+	_send(CoopProto.CAMERA, {"x": tile.x, "y": tile.y})
+
 func tick(now: float) -> void:
 	if state in ["idle", "connecting", "refused", "ended", "lost", "failed"]:
 		return
