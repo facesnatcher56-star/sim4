@@ -130,10 +130,4 @@ static func _has_object(subj, v: Variant) -> bool:
 static func _town_objects(subj) -> Array:
 	var key: String = subj.lot_key
 	var n: int = int(key.get_slice(":", 1)) if key.begins_with("town:") else 0
-	var out: Array = []
-	for tid in Story.townies:
-		var rec: Dictionary = Story.townies[tid]
-		if int(rec.get("lot", -1)) == n:
-			for o in rec.get("town_objects", []):
-				out.append(str(o))
-	return out
+	return IncidentSubject.town_objects_of(n)

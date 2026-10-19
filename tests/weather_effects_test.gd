@@ -200,6 +200,7 @@ func _lightning(f: Array) -> void:
 	var tv = w.add_object("tv", Vector2i(12, 12))
 	var chair = w.add_object("chair", Vector2i(14, 12))
 	SimEnv.clock().total_minutes = W.at(11, 12)
+	Storyteller.enabled = false              # the storyteller's own incidents must not break the set before the lightning does (the test is about the weather)
 	Weather.force("thunderstorm")
 	for i in 400:
 		W.run_min(60)

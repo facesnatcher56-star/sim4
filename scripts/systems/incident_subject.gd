@@ -142,11 +142,29 @@ static func household_objects(hid: int) -> Array:
 		_objs[hid] = Economy.objects_of(hid)
 	return _objs[hid]
 
+static var _tobjs: Dictionary = {}         # town lot number -> the `town_objects` of its Story records (IncidentCond._town_objects scans every townie per call)
+
+## The town_objects of the records on far lot `n` (a pass over the townies), kept for the slice while caching. Same list, same order as the plain scan.
+static func town_objects_of(n: int) -> Array:
+	if caching and _tobjs.has(n):
+		return _tobjs[n]
+	var out: Array = []
+	for tid in Story.townies:
+		var rec: Dictionary = Story.townies[tid]
+		if int(rec.get("lot", -1)) == n:
+			for o in rec.get("town_objects", []):
+				out.append(str(o))
+	if caching:
+		_tobjs[n] = out
+	return out
+
 static func refresh_on_map() -> void:
 	_on_map_ids.clear()
 	_on_map_ok = false
+	_tobjs.clear()
 
 static func clear_cache() -> void:
+	_tobjs.clear()
 	_have.clear()
 	_objs.clear()
 	_members.clear()
