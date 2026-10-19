@@ -35,6 +35,14 @@ static func set_role(f, on: bool) -> bool:
 	SysUtil.game_event("homemaker_set", {"folk_id": id, "on": on})
 	return true
 
+## Spoiled items in the household's fridges (cooking and snacks wait until it is thrown away).
+static func fridge_spoiled(hid: int) -> float:
+	var n: float = 0.0
+	for o in Economy.objects_of(hid):
+		if str(o.def_id) == "fridge":
+			n += float(WorldIface.state_get(o, "spoiled", 0.0))
+	return n
+
 ## Autonomy weight of an interaction for this folk (1.0 for everybody else).
 static func mult(folk, d: Dictionary) -> float:
 	if not Careers.homemakers.has(int(folk.id)):
