@@ -144,6 +144,8 @@ static func _found(c: Dictionary, how: String) -> void:
 ## Daily: a reported-missing victim may be found by the search (police work + volunteers).
 static func on_day() -> void:
 	for c in CaseStore.in_state(["open"]):
+		if bool(c.get("ship_hold", false)):
+			continue                       # task 22: the ship searches for its own missing
 		if c.has("found") and not bool(c["found"]):
 			var p: float = float(cfg().get("search_found_per_day", 0.3)) * (0.5 + Police.strength())
 			if JusticeState.chance(p) or SysUtil.day() - int(c["disc_day"]) > int(cfg().get("search_give_up_days", 8)):

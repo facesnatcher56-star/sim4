@@ -1,4 +1,4 @@
-﻿class_name SaveLoad
+class_name SaveLoad
 extends RefCounted
 ## Versioned save files: user://saves/slot<N>.json. Contains the clock, World.save_dict() (when a real World exists),
 ## every Folk (to_dict) and the state of all systems. Slot 0 is the daily autosave.
@@ -42,6 +42,7 @@ static func snapshot(label: String = "") -> Dictionary:
 			"goals": Goals.to_dict(), "aging": Aging.to_dict(), "story": Story.to_dict(), "away": Away.to_dict(), "commute": Commute.to_dict(),
 			"family": Family.to_dict(), "babycare": BabyCare.to_dict(), "weather": Weather.to_dict(),
 			"neighborhood": Neighborhood.to_dict(), "scenario": Scenario.to_dict(), "incidents": Incidents.to_dict(), "justice": JusticeState.to_dict(), "fire": Fire.to_dict(), "share": ShareState.to_dict(), "econ": MarketTick.to_dict(),
+			"neighborhood": Neighborhood.to_dict(), "scenario": Scenario.to_dict(), "incidents": Incidents.to_dict(), "justice": JusticeState.to_dict(), "fire": Fire.to_dict(), "vacation": Vacation.to_dict(),
 		},
 	}
 
@@ -162,5 +163,9 @@ static func restore(d: Dictionary) -> bool:
 	return true
 
 ## Autosave (slot 0) â€” SystemsManager calls this each game day.
+	Vacation.from_dict(sy.get("vacation", {}))
+	return true
+
+## Autosave (slot 0) Ã¢â‚¬â€ SystemsManager calls this each game day.
 static func autosave() -> bool:
 	return save(autosave_slot, "Autosave")

@@ -14,6 +14,8 @@ static func on_day() -> void:
 
 ## One day of work on a case. Returns the arrested person id or -1. Public so the tests can step cases.
 static func work(c: Dictionary) -> int:
+	if bool(c.get("ship_hold", false)):
+		return -1                          # task 22: a case held by a ship at sea (the ship's security works it, CruiseCrime)
 	var k: Dictionary = cfg()
 	var cold: bool = str(c["state"]) == "cold"
 	var found: bool = bool(c.get("found", true))

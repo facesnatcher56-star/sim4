@@ -80,7 +80,7 @@ static func distance_to(tile: Vector2i, lot_id: String) -> int:
 ## True when a visible resident (not away at work / school / party) is within `radius` tiles of the lot.
 static func player_near(lot_id: String, radius: int) -> bool:
 	for f in SysUtil.residents():
-		if not SysUtil.is_away(f) and distance_to(f.tile, lot_id) <= radius:
+		if not SysUtil.is_away(f) and not f.has_meta("trip_zone") and distance_to(f.tile, lot_id) <= radius:
 			return true
 	return false
 

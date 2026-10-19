@@ -100,6 +100,7 @@ static func reset_all() -> void:
 	AutonomyVariety.reset()
 	MoodSwings.reset()
 	StoryPacing.reset()
+	Vacation.reset()
 
 ## Start a fresh game: reset systems, give every household starting funds, register all current folk, make townies.
 func new_game(household_ids: Array = [], lifespan: String = "") -> void:
@@ -139,6 +140,8 @@ func _on_minute(_total: int) -> void:
 			["AccidentMarks", AccidentMarks.on_minute], ["Incidents", Incidents.on_minute], ["CrimeFlow", CrimeFlow.on_minute],
 			["Fire", Fire.on_minute], ["DisasterClock", DisasterClock.on_minute],
 			["NeighborhoodService.after", NeighborhoodService.after_minute], ["WeatherFolk", WeatherFolk.on_minute], ["LevelSystems", LevelSystems.on_minute]]
+			["Fire", Fire.on_minute], ["DisasterClock", DisasterClock.on_minute], ["Vacation", Vacation.on_minute],
+			["NeighborhoodService.after", NeighborhoodService.after_minute], ["WeatherFolk", WeatherFolk.on_minute]]
 	for s in _minute_steps:
 		var t0 := Time.get_ticks_usec() if prof_on else 0
 		(s[1] as Callable).call()
@@ -178,6 +181,7 @@ func _on_hour(hour: int) -> void:
 	t = _lap("hour/CrimeFlow.on_hour", t)
 	DisasterClock.on_hour(hour)
 	t = _lap("hour/DisasterClock.on_hour", t)
+	Vacation.on_hour()
 
 func _on_day(day: int) -> void:
 	if not enabled:
@@ -211,6 +215,7 @@ func _on_day(day: int) -> void:
 	t = _lap("day/DisasterClock.on_day", t)
 	StoryPacing.on_day(day)
 	t = _lap("day/StoryPacing.on_day", t)
+	Vacation.on_day()
 	SysUtil.game_event("systems_day", {"day": day})
 	if autosave_enabled:
 		SaveLoad.autosave()
@@ -316,6 +321,7 @@ func _on_game_event(ev_name: String, payload: Dictionary) -> void:
 	MarketTick.on_game_event(ev_name, payload)
 	MoodSwings.on_game_event(ev_name, payload)
 	StoryPacing.on_game_event(ev_name, payload)
+	Vacation.on_game_event(ev_name, payload)
 	match ev_name:
 		"order_groceries":
 			var f = SysUtil.folk(int(payload.get("folk_id", -1)))

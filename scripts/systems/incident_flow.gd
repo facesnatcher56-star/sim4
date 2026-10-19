@@ -135,7 +135,15 @@ static func record(def_id: String, def: Dictionary, subj, ctx: Dictionary, oc: D
 		"forced": forced, "statistical": statistical, "text": str(res["text"])})
 
 # ------------------------------------------------------------------ force
+static var last_force: Dictionary = {}          # the ctx of the force() call in progress (handlers read extra keys such as `ship`, task 22)
+
 static func force(def_id: String, ctx: Dictionary) -> Dictionary:
+	last_force = ctx
+	var res: Dictionary = _force(def_id, ctx)
+	last_force = {}
+	return res
+
+static func _force(def_id: String, ctx: Dictionary) -> Dictionary:
 	var def: Dictionary = IncidentDefs.get_def(def_id)
 	if def.is_empty():
 		return {"ok": false, "mode": "none", "text": "unknown incident"}

@@ -1,0 +1,55 @@
+{
+ "_doc": "Task 22: rare happenings on a cruise (storm, stomach bug, fire, overboard, cabin theft, a brawl, a killer aboard). Lot scope = per household while a member is on a cruise (buff on_cruise). One handler (CruiseIncidents.on_incident) does the work and logs with place 'cruise'. Rates are per cruise-year of exposure (28 game days), Rare level. Also: the burglary incident gets the tag burglary_odds (VacationHome: an empty house is a better target).",
+ "config": {
+  "health": {
+   "illness": {
+    "kinds": {
+     "norovirus": {"buff": "norovirus", "hours": 30, "contagious": false, "exposed_buff": "exposed_noro", "immune_buff": "immune_noro", "immune_hours": 48}
+    }
+   }
+  }
+ },
+ "handlers": {
+  "cruise_incident": {"script": "res://scripts/systems/cruise_incidents.gd", "method": "on_incident"}
+ },
+ "incidents": {
+  "burglary": {"tags": ["burglary_odds"]},
+  "cruise_storm": {
+   "label": "Storm at sea", "scope": "lot", "check": "hour", "base_rate_per_year": 0.7, "notify_policy": "household", "severity": 2, "public": true,
+   "conditions": [{"any_member": [{"has_buff": "on_cruise"}]}],
+   "outcomes": [{"weight": 1, "effects": [{"handler": "cruise_incident", "args": {"kind": "storm"}}], "text": "", "kind": "warn"}]
+  },
+  "cruise_norovirus": {
+   "label": "Stomach bug outbreak", "scope": "lot", "check": "hour", "base_rate_per_year": 0.2, "notify_policy": "household", "severity": 3, "public": true,
+   "conditions": [{"any_member": [{"has_buff": "on_cruise"}]}],
+   "prevent": [{"label": "Everyone immune", "when": [{"all_members": [{"has_buff": "immune_noro"}]}], "block": true}],
+   "outcomes": [{"weight": 1, "effects": [{"handler": "cruise_incident", "args": {"kind": "norovirus"}}], "text": "", "kind": "warn"}]
+  },
+  "cruise_fire": {
+   "label": "Fire on board", "scope": "lot", "check": "hour", "base_rate_per_year": 0.04, "notify_policy": "household", "severity": 4, "public": true,
+   "conditions": [{"any_member": [{"has_buff": "on_cruise"}]}],
+   "outcomes": [{"weight": 1, "effects": [{"handler": "cruise_incident", "args": {"kind": "fire"}}], "text": "", "kind": "bad"}]
+  },
+  "cruise_overboard": {
+   "label": "Overboard", "scope": "lot", "check": "hour", "base_rate_per_year": 0.03, "notify_policy": "household", "severity": 4, "public": true,
+   "conditions": [{"any_member": [{"has_buff": "on_cruise"}]}],
+   "outcomes": [{"weight": 1, "effects": [{"handler": "cruise_incident", "args": {"kind": "overboard"}}], "text": "", "kind": "bad"}]
+  },
+  "cruise_cabin_theft": {
+   "label": "Theft from a cabin", "scope": "lot", "check": "hour", "base_rate_per_year": 0.6, "notify_policy": "household", "severity": 3, "public": true,
+   "conditions": [{"any_member": [{"has_buff": "on_cruise"}]}, {"hour_between": [9, 18]}],
+   "outcomes": [{"weight": 1, "effects": [{"handler": "cruise_incident", "args": {"kind": "cabin_theft"}}], "text": "", "kind": "bad"}]
+  },
+  "cruise_brawl": {
+   "label": "Trouble aboard", "scope": "lot", "check": "hour", "base_rate_per_year": 0.5, "notify_policy": "household", "severity": 3, "public": true,
+   "conditions": [{"any_member": [{"has_buff": "on_cruise"}]}, {"hour_between": [20, 2]}],
+   "outcomes": [{"weight": 1, "effects": [{"handler": "cruise_incident", "args": {"kind": "onboard_crime"}}], "text": "", "kind": "warn"}]
+  },
+  "serial_killer_aboard": {
+   "label": "A killer aboard", "scope": "lot", "check": "hour", "base_rate_per_year": 0.0, "notify_policy": "household", "severity": 5, "public": true, "surprise": false,
+   "_doc": "Forced only (Incidents.force('serial_killer_aboard', {ship: <trip id or ship id>, delay_hours, killer})): the normal serial-killer track on a ship (CruiseKiller).",
+   "conditions": [{"any_member": [{"has_buff": "on_cruise"}]}],
+   "outcomes": [{"weight": 1, "effects": [{"handler": "cruise_incident", "args": {"kind": "serial_killer"}}], "text": "", "kind": "bad"}]
+  }
+ }
+}

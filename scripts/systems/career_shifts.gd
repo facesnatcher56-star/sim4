@@ -48,7 +48,7 @@ static func on_minute() -> void:
 	var h: float = SysUtil.hour_f()
 	for f in WorldIface.all_folk():
 		var fid: int = int(f.id)
-		if SysUtil.is_away(f) or Away.pending.has(fid) or Commute.active(fid) or Away.is_away(fid):
+		if SysUtil.is_away(f) or Away.pending.has(fid) or Commute.active(fid) or Away.is_away(fid) or Vacation.on_trip(fid):
 			continue
 		if Careers.jobs.has(fid):
 			var j: Dictionary = Careers.jobs[fid]
