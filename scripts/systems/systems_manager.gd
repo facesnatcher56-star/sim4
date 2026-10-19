@@ -138,10 +138,8 @@ func _on_minute(_total: int) -> void:
 		_minute_steps = [["NeighborhoodService.before", NeighborhoodService.before_minute], ["CareerShifts", CareerShifts.on_minute],
 			["Away", Away.on_minute], ["StoryVisits", StoryVisits.on_minute], ["BabyCare", BabyCare.on_minute],
 			["AccidentMarks", AccidentMarks.on_minute], ["Incidents", Incidents.on_minute], ["CrimeFlow", CrimeFlow.on_minute],
-			["Fire", Fire.on_minute], ["DisasterClock", DisasterClock.on_minute],
-			["NeighborhoodService.after", NeighborhoodService.after_minute], ["WeatherFolk", WeatherFolk.on_minute], ["LevelSystems", LevelSystems.on_minute]]
 			["Fire", Fire.on_minute], ["DisasterClock", DisasterClock.on_minute], ["Vacation", Vacation.on_minute],
-			["NeighborhoodService.after", NeighborhoodService.after_minute], ["WeatherFolk", WeatherFolk.on_minute]]
+			["NeighborhoodService.after", NeighborhoodService.after_minute], ["WeatherFolk", WeatherFolk.on_minute], ["LevelSystems", LevelSystems.on_minute]]
 	for s in _minute_steps:
 		var t0 := Time.get_ticks_usec() if prof_on else 0
 		(s[1] as Callable).call()
