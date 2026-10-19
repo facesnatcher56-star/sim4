@@ -82,7 +82,8 @@ static func quote(hid: int, dest: String, opts: Dictionary = {}) -> Dictionary:
 	var grown_home: int = stay.filter(func(x): return str(x.age_stage) in ["adult", "elder"]).size()
 	for s in stay:
 		if young.call(s) and grown_home == 0:
-			return _fail("%s would be home alone. Take them along or leave a grown-up behind." % s.name)	var guests: Array = []
+			return _fail("%s would be home alone. Take them along or leave a grown-up behind." % s.name)
+	var guests: Array = []
 	for g in opts.get("guests", []):
 		if Story.townies.has(int(g)) and bool(Story.townies[int(g)].get("alive", false)) and not CrimePerson.in_custody(int(g)) \
 				and Story.stage_of(Story.townies[int(g)]) in ["teen", "adult", "elder"]:
