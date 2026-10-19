@@ -62,7 +62,10 @@ static func use(fid: int, pid: String, sid: String, opts: Dictionary = {}) -> Di
 	var f = SysUtil.folk(fid)
 	var svc: Dictionary = Places.services(pid)[sid]
 	var cost: int = price(pid, sid, fid)
-	if cost > 0 and not Economy.spend(int(f.household_id), cost, "%s: %s" % [Places.label(pid), str(svc.get("label", sid))]):
+	var net: int = cost
+	if cost > 0 and bool(svc.get("insurable", false)):
+		net = maxi(cost - Incidents.insurance_cover(cost, int(f.household_id), "health"), 0)      # health insurance pays its share of doctors and therapy
+	if net > 0 and not Economy.spend(int(f.household_id), net, "%s: %s" % [Places.label(pid), str(svc.get("label", sid))]):
 		return {"ok": false, "reason": "That costs %d coins." % cost}
 	last_used[_key(fid, sid)] = SysUtil.day()
 	var minutes: float = float(svc.get("minutes", 0))

@@ -5,16 +5,21 @@ extends RefCounted
 ## one class that implements them; a new area adds its group here.
 
 const EDU := ["lecture", "course", "enrol_preschool", "tutor"]
+const HEALTH := ["checkup", "treat", "vaccinate", "dental_clean", "dental_fix", "counsel", "prescription"]
 
 static func known(handler: String) -> bool:
-	return EDU.has(handler)
+	return EDU.has(handler) or HEALTH.has(handler)
 
 static func check(handler: String, f, pid: String, sid: String, svc: Dictionary) -> String:
 	if EDU.has(handler):
 		return EduServices.check(handler, f, pid, sid, svc)
+	if HEALTH.has(handler):
+		return HealthServices.check(handler, f, pid, sid, svc)
 	return ""
 
 static func finish(handler: String, f, pid: String, sid: String, svc: Dictionary) -> Dictionary:
 	if EDU.has(handler):
 		return EduServices.finish(handler, f, pid, sid, svc)
+	if HEALTH.has(handler):
+		return HealthServices.finish(handler, f, pid, sid, svc)
 	return {}

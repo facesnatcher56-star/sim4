@@ -21,6 +21,7 @@ college and the night classes; at night and at weekends it is closed as before).
 |---|---|---|---|
 | Engine | `life_defs` (loads `data/life/*.json`), `places` (hours, status, host lot, stage rules), `place_staff` (rosters, turnover, closures), `place_use` (why_not / price / use / finish), `place_effects` (needs, buffs, skill xp, pass, event, text), `place_handlers` (code behind special services), `place_member` (passes), `life_note` (toast + chronicle policy), `life_content` (the `place_visit` interaction) | `life_hub` (+ `life_hub_places`, `life_hub_study`, `life_hub_jobs`) | `data/life/10_education.json` (and one file per later area), `data/content_life.json` |
 | Door | `life_tick` (reset, new game, daily order, event routing, save), `life_command` (`use`, `go`, `college_drop`, `preschool_leave`, `job_apply`) | | `systems.life` save block (also in `data/share_schema.json`) |
+| Health | `health_life` (meters, labels, score, age shift), `health_life_day` (daily pass, strain), `health_cond` (conditions), `counselling`, `health_risk` (incident multipliers), `health_services` (the handlers) | `life_hub_health` | `data/life/20_health.json`, `data/incidents/14_health.json` |
 | Education | `edu_state`, `edu_school` (homework, report cards, events, preschool, graduation), `edu_college` (majors, lectures, exams, degrees), `edu_gate` (degree gates + wage bonus), `edu_courses` (night classes, library courses, certificates), `edu_jobs` (skills job board), `edu_townies` (statistical studies), `edu_services` (the handlers) | | |
 
 Every player action goes through `Commands.run({action: "life", args: {action, args}})` (`LifeCommand`), so a co-op host or a replay sees it. All
@@ -43,6 +44,27 @@ randomness comes from the module's own seeded stream (`PlaceStaff.rng`, `EduStat
 * **Skills job board**: every week each career has 0 to 3 openings (fewer in a recession), shown best fit first with what is missing; applying takes an opening and hires.
 * **Townies** (statistical, one line each a day): adults enrol (1.5 percent a day), earn credits and graduate; the chronicle gets the line. One child townie wins at each school event.
 
+## Health
+
+* **Places inside the hospital lot**: the Family Clinic (check-up 35 coins, treatment 45, flu shot 22; Mon-Fri 8-18, Sat 9-13; the doctor is a named staff member), the dentist
+  (clean 25, fix a sore tooth 55; Mon-Fri 9-17) and the Mind and Mood Centre (counselling 40). Health insurance pays its share of the clinic and the counsellor (`insurable`).
+  At the market: the Pharmacy Counter (prescription refills). At the gym: passes (a week or four weeks; they waive the lot's entry fee through `Venues.entry_total`) and classes
+  (yoga, spinning, boxing, personal trainer) that raise fitness.
+* **Meters** (`HealthLife`, residents AND townies): fitness (exercise, weights, classes; falls 0.4 a day, never below 15), diet (meals and snacks; drifts to the middle), teeth (brushing, the
+  dentist; wear 1.1 a day, 0.7 with clean habits; below 35 a toothache buff) and work strain. The health score (45 percent fitness, 45 percent diet, 10 percent teeth) scales colds
+  and flu (x1.35 down to x0.7 for fitness, x1.2 to x0.85 for diet) and heart trouble (x2 to x0.5, x1.6 to x0.7) through the incident tags `illness` / `cardiac`
+  (`data/incidents/14_health.json`, hook `IncidentRisk.effective_rate` + the sampling bound), and moves the old-age death window by up to 14 game days either way (`HealthLife.age_shift`,
+  hooks in `Aging._check_deaths` and the townie death roll): a fit person lives about 10 percent longer than an unfit one.
+* **Long-term conditions** (rare, managed with medicine): asthma, diabetes, high blood pressure, arthritis (elders). About 0.07 new cases per adult per game year at average habits
+  (poor fitness and diet roughly double diabetes and blood pressure). A case starts hidden; the household is told about the symptoms after 4 days; a check-up (or the first flare)
+  diagnoses it; two weeks of medicine from the pharmacy counter make flares ten times rarer (1.8 a year unmanaged, 0.16 managed for asthma). Unmanaged conditions shorten life a little
+  (x1.18 old-age risk), high blood pressure raises heart trouble. Townies buy their own medicine; their serious flares are a hospital stay.
+* **Counselling and therapy** (`Counselling`): a session cuts grief by half, burnout / shock / trauma buffs (burnt out, shaken, afraid at home, worried sick ... the list is
+  `config.counselling.other`) by 60 percent, work strain by 35, and gives the `in_therapy` buff. The old home action "Talk to a Counsellor" (task 18) now also works for those buffs.
+* **Burnout**: every shift adds 2 strain (4.5 when worn out), days off ease 6 (3 without a job), a holiday glow 10 more; at 85 the person is burnt out (the existing `burnt_out` buff)
+  and the strain resets to 40. Ordinary workers: 0.1 a game year; always-tired workers: 0.85.
+* The "Health" tab of the Town window shows all of it in plain words.
+
 ## Tier / cadence / active set / caps
 
 | System | Tier | Cadence | Active set | Caps |
@@ -53,6 +75,9 @@ randomness comes from the module's own seeded stream (`PlaceStaff.rng`, `EduStat
 | EduCollege / EduCourses | event | on a visit | the student | one lecture a day |
 | EduTownies | town (statistical) | daily | alive adult townies (~12) | 2 degrees each |
 | EduJobs | town | weekly refresh, board on demand | one dice per career | 3 openings per career |
+| HealthLifeDay / HealthCond | residents ACTIVE, townies STATISTICAL | daily | all residents + alive townies (~24), a few lines each | 4 conditions, 1 flare roll per condition per day |
+| HealthRisk | event | inside the incident dice | tagged incidents only (`illness`, `cardiac`) | one empty-array test otherwise |
+| Counselling | event | on a session | the person | |
 
 Nothing polls per minute. The one clock entry is `day/LifeTick.on_day` (SimRegistry).
 
@@ -69,4 +94,5 @@ See the status list at the bottom of this file, updated as areas land.
 
 | Spec item | State |
 |---|---|
+| Health: family doctor and clinic, pharmacy counter, dentist, therapy and counsellor (grief, burnout, trauma), gym, long-term conditions, diet and fitness affecting health and lifespan | done (places inside the hospital, market and gym lots); hospital floors from task 10 |
 | Education: preschool, school grades / homework / report cards / teachers / events, college, degrees, night classes, library courses, skills job market | done (places inside existing lots, no new 3D lots) |

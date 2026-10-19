@@ -14,8 +14,21 @@
    "autonomous": false,
    "priority": "normal",
    "interruptible": true,
-   "tags": ["visit", "town"]
+   "tags": [
+    "visit",
+    "town"
+   ]
   }
  },
- "buffs": {}
+ "buffs": {
+  "toothache": {
+   "label": "Toothache",
+   "mood": {
+    "sad": 1,
+    "tense": 1
+   },
+   "duration_min": 0,
+   "thought": "My tooth is killing me. Time for the dentist."
+  }
+ }
 }

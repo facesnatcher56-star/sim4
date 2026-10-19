@@ -1,7 +1,7 @@
 class_name PlaceEffects
 extends RefCounted
 ## What a service does when the visit ends (task 14). Everything common is data on the service:
-##   needs {need: +n}   buffs [ids]   skill_xp {skill: xp}   pass {days}   event "name"   text "..{name}..{place}..{staff}.."
+##   needs {need: +n}   buffs [ids]   skill_xp {skill: xp}   meters {fitness|diet|dental: +n}   pass {days}   event "name"   text "..{name}..{place}..{staff}.."
 ## plus an optional `handler` (PlaceHandlers) for the special ones (a lecture, a check-up, a class). Returns {text, ...handler fields}.
 
 static func apply(f, pid: String, sid: String, svc: Dictionary, announce: bool = true) -> Dictionary:
@@ -12,6 +12,8 @@ static func apply(f, pid: String, sid: String, svc: Dictionary, announce: bool =
 		f.add_buff(str(b))
 	for s in (svc.get("skill_xp", {}) as Dictionary):
 		f.add_skill_xp(str(s), float(svc["skill_xp"][s]))
+	for m in (svc.get("meters", {}) as Dictionary):
+		HealthLife.add_meter(int(f.id), str(m), float(svc["meters"][m]))
 	if svc.has("pass"):
 		PlaceMember.grant(int(f.id), pid, int((svc["pass"] as Dictionary).get("days", 7)))
 	var h: String = str(svc.get("handler", ""))

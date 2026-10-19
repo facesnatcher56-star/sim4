@@ -21,6 +21,13 @@ static func grant(fid: int, pid: String, days: int) -> void:
 	var cur: int = maxi(int(passes[fid].get(pid, -1)), SysUtil.day() - 1)
 	passes[fid][pid] = cur + days
 
+## Does any pass this person holds belong to a place inside this lot (the gym pass waives the gym's entry fee)?
+static func covers_lot(fid: int, lot_id: String) -> bool:
+	for pid in (passes.get(fid, {}) as Dictionary):
+		if Places.lot_of(str(pid)) == lot_id and has_pass(fid, str(pid)):
+			return true
+	return false
+
 ## Price factor of a service for this person at this place.
 static func discount(fid: int, pid: String, svc: Dictionary) -> float:
 	if fid >= 0 and svc.has("pass_discount") and has_pass(fid, pid):

@@ -98,6 +98,17 @@ static func ambient(vtype: String) -> Dictionary:
 static func interaction_xp(vtype: String) -> Dictionary:
 	return type_def(vtype).get("interaction_xp", {})
 
+## Entry fee for these folk: a pass of a place inside the lot (task 14, the gym pass) waives it for its holder.
+static func entry_total(lot_id: String, folk_ids: Array) -> int:
+	var per: int = fee(type_of_lot(lot_id))
+	if per <= 0:
+		return 0
+	var n := 0
+	for id in folk_ids:
+		if not PlaceMember.covers_lot(int(id), lot_id):
+			n += 1
+	return per * n
+
 ## Can these folk (ids) enter lot_id now? -> {ok, reason, fee}. Does not charge.
 static func check_entry(lot_id: String, folk_ids: Array, household_id: int = -1) -> Dictionary:
 	var closed: String = CityPolicy.blocks_entry(lot_id, folk_ids)       # task 12: park hours and the curfew
@@ -106,7 +117,7 @@ static func check_entry(lot_id: String, folk_ids: Array, household_id: int = -1)
 	var vtype := type_of_lot(lot_id)
 	if not is_open_type(vtype):
 		return {"ok": false, "reason": "%s is closed. %s." % [str(Neighborhood.lot(lot_id).get("label", lot_id)), status_text(lot_id)], "fee": 0}
-	var total: int = fee(vtype) * folk_ids.size()
+	var total: int = entry_total(lot_id, folk_ids)
 	if total > 0:
 		var hid: int = household_id if household_id > 0 else Economy.primary_household()
 		if not Economy.can_afford(hid, total):
@@ -114,7 +125,7 @@ static func check_entry(lot_id: String, folk_ids: Array, household_id: int = -1)
 	return {"ok": true, "reason": "", "fee": total}
 
 static func charge_entry(lot_id: String, folk_ids: Array, household_id: int = -1) -> bool:
-	var total: int = fee(type_of_lot(lot_id)) * folk_ids.size()
+	var total: int = entry_total(lot_id, folk_ids)
 	if total <= 0:
 		return true
 	var hid: int = household_id if household_id > 0 else Economy.primary_household()

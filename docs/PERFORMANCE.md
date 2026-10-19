@@ -472,6 +472,8 @@ Daily or event driven; nothing runs per minute. The one clock entry is `day/Life
 | EduCollege / EduCourses | event | on a visit | the student | one lecture a day |
 | EduTownies | town (statistical) | daily | alive adult townies | 2 degrees each |
 | EduJobs (job board) | town | weekly refresh | one dice per career | 3 openings per career |
+| HealthLifeDay / HealthCond (meters, conditions) | residents ACTIVE, townies STATISTICAL | daily | all residents + alive townies | 4 conditions |
+| HealthRisk (incident multipliers) | event | inside the incident dice | tagged incidents only | |
 
 ### Runtime (`tests/perf_probe.gd`, 2 game days, 3 folk + crowd, loaded)
 

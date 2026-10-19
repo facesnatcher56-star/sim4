@@ -1,0 +1,8 @@
+{
+ "_doc": "Task 14 health: tags only. Incidents tagged `illness` or `cardiac` are scaled by the person's fitness and diet (HealthRisk, called from IncidentRisk.effective_rate); the flu shot and long-term conditions are read there too.",
+ "incidents": {
+  "catch_cold": {"tags": ["illness", "cold"]},
+  "catch_flu": {"tags": ["illness", "flu"]},
+  "heart_attack": {"tags": ["cardiac"]}
+ }
+}

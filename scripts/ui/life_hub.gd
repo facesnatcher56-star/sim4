@@ -1,11 +1,11 @@
 class_name LifeHub
 extends UIDialog
 ## "Town Life" (task 14): one window for the places of the town (school, college, clinic, restaurants, cinema ...), what the selected person is studying,
-## and the job board. Everything here is OPTIONAL. The tabs are small builders (LifeHubPlaces, LifeHubStudy, LifeHubJobs); every action is a
+## their health, and the job board. Everything here is OPTIONAL. The tabs are small builders (LifeHubPlaces, LifeHubStudy, LifeHubJobs); every action is a
 ## command through the command layer (Commands.run action "life"), never a change made by the UI. Opened from the top bar "Town" button.
 
 const PLAYER_ID := 1
-const TABS := [["places", "Places"], ["study", "Study"], ["jobs", "Jobs"]]
+const TABS := [["places", "Places"], ["study", "Study"], ["health", "Health"], ["jobs", "Jobs"]]
 var tab: String = "places"
 var place_id: String = ""
 var kind: String = ""
@@ -30,6 +30,7 @@ func build() -> void:
 		return
 	match tab:
 		"study": LifeHubStudy.build(self)
+		"health": LifeHubHealth.build(self)
 		"jobs": LifeHubJobs.build(self)
 		_: LifeHubPlaces.build(self)
 

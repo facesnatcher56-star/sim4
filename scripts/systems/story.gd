@@ -178,7 +178,8 @@ static func on_day(day: int) -> void:
 				if str(t["career"]) != "":
 					t["coins"] = int(t["coins"]) + int(dc.get("coins_per_level", 40)) * int(t["level"])
 		var dstart: float = float(dcfg.get("start_day", 170))
-		if float(t["age_days"]) >= dstart and SysUtil.chance(float(dcfg.get("chance_per_day", 0.03)) + float(dcfg.get("ramp_per_day", 0.004)) * (float(t["age_days"]) - dstart)):
+		var age_eff: float = float(t["age_days"]) - HealthLife.age_shift(int(t["id"]))        # task 14: health moves the old-age window
+		if age_eff >= dstart and SysUtil.chance((float(dcfg.get("chance_per_day", 0.03)) + float(dcfg.get("ramp_per_day", 0.004)) * (age_eff - dstart)) * HealthLife.death_mult(int(t["id"]))):
 			_townie_dies(t)
 	_pair_events(dc)
 	_life_events(dc)

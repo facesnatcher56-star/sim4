@@ -52,6 +52,10 @@ func run() -> Array:
 	hub._pick("study")
 	txt = "\n".join(_texts(hub.body))
 	K.expect(f, txt.find("College:") >= 0 and txt.find("[Drop out]") >= 0, "Study tab shows the college course")
+	hub._pick("health")
+	txt = "
+".join(_texts(hub.body))
+	K.expect(f, txt.find("Fitness:") >= 0 and txt.find("Overall health") >= 0 and txt.find("Stress from work") >= 0, "Health tab shows the meters")
 	hub._pick("jobs")
 	txt = "\n".join(_texts(hub.body))
 	K.expect(f, txt.find("THIS WEEK'S OPENINGS") >= 0 or txt.find("No openings") >= 0, "Jobs tab shows the board")

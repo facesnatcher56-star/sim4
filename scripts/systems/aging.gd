@@ -252,10 +252,10 @@ static func _check_deaths() -> void:
 		var f = SysUtil.folk(int(fid))
 		if f == null or not SysUtil.is_resident(f):
 			continue
-		var days: float = float(records[fid]["age_days"])
+		var days: float = float(records[fid]["age_days"]) - HealthLife.age_shift(int(fid))        # task 14: a healthy body is "younger" for old-age death
 		if days < start:
 			continue
-		var p: float = float(dc.get("chance_per_day", 0.03)) + float(dc.get("ramp_per_day", 0.004)) * (days - start)
+		var p: float = (float(dc.get("chance_per_day", 0.03)) + float(dc.get("ramp_per_day", 0.004)) * (days - start)) * HealthLife.death_mult(int(fid))      # task 14: long-term conditions
 		if days >= float(dc.get("max_day", 230)) or SysUtil.chance(p):
 			kill(int(fid), "old age")
 
