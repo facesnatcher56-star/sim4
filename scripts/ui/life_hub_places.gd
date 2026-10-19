@@ -3,7 +3,7 @@ extends RefCounted
 ## The "Places" tab of LifeHub: pick a kind of place, then a place; see its hours, staff and what it offers; go there; use a service.
 ## A service button is greyed out with the reason in its tooltip (closed, too young, too poor, "go there first").
 
-const KINDS := [["", "All"], ["education", "Learning"], ["health", "Health"], ["food", "Food"], ["night", "Nightlife"], ["culture", "Culture"], ["leisure", "Leisure"], ["community", "Community"]]
+const KINDS := [["", "All"], ["education", "Learning"], ["health", "Health"], ["food", "Food"], ["night", "Nightlife"], ["culture", "Culture"], ["leisure", "Leisure"], ["community", "Community"], ["family", "Events"], ["media", "Media"]]
 
 static func build(dlg: LifeHub) -> void:
 	var f = dlg.folk_obj()
@@ -47,7 +47,7 @@ static func build(dlg: LifeHub) -> void:
 static func _place(dlg: LifeHub, f, pid: String) -> void:
 	var d: Dictionary = Places.def(pid)
 	dlg.heading(Places.label(pid))
-	dlg.line("%s. At %s." % [Places.status_text(pid), Neighborhood.label_of(Places.lot_of(pid))], 14)
+	dlg.line("%s. At %s." % [Places.status_text(pid), Places.lot_label(pid)], 14)
 	if str(d.get("blurb", "")) != "":
 		dlg.line(str(d["blurb"]), 13, UITheme.MUTED)
 	var staff: Array = PlaceStaff.roster(pid)
@@ -55,8 +55,9 @@ static func _place(dlg: LifeHub, f, pid: String) -> void:
 		dlg.line("Staff: " + ", ".join(staff.map(func(e): return "%s (%s)" % [e["name"], str(e["role"]).to_lower()])), 13, UITheme.MUTED)
 	if not Places.is_there(f, pid):
 		var lot: String = Places.lot_of(pid)
-		dlg.row_with("You are not there. It is about %d minutes' walk." % Neighborhood.walk_minutes(dlg.folk_id, lot),
-			[dlg.button("Go there", "Walk to " + Neighborhood.label_of(lot), func(): dlg.act("go", {"place": pid}), Places.on_map(lot))])
+		var mins: int = Neighborhood.walk_minutes(dlg.folk_id, PlayerLots.home_of(f) if lot == Places.HOME else lot)
+		dlg.row_with("You are not there. It is about %d minutes' walk." % mins,
+			[dlg.button("Go there", "Walk to " + Places.lot_label(pid), func(): dlg.act("go", {"place": pid}), Places.on_map(lot))])
 	var svcs: Dictionary = Places.services(pid)
 	if svcs.is_empty():
 		dlg.line("Nothing to buy here. Just a busy place.", 13, UITheme.MUTED)

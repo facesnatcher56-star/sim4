@@ -69,6 +69,19 @@ func run() -> Array:
 	txt = "
 ".join(_texts(hub.body))
 	K.expect(f, txt.find("Fitness:") >= 0 and txt.find("Overall health") >= 0 and txt.find("Stress from work") >= 0, "Health tab shows the meters")
+	var t0: Dictionary = Story.alive_townies()[0]
+	RelationshipService.add_both(1, int(t0["id"]), "friendship", 40.0)
+	hub._pick("phone")
+	txt = "
+".join(_texts(hub.body))
+	K.expect(f, txt.find("CONTACTS") >= 0 and txt.find(str(t0["name"])) >= 0 and txt.find("[Call]") >= 0 and txt.find("SOCIAL MEDIA") >= 0 and txt.find("[Share a photo]") >= 0, "Phone tab: contacts with Call, Text, Ask out, and the social media buttons")
+	var call_btn: Button = _button(hub.body, "Call")
+	call_btn.pressed.emit()
+	K.expect(f, Commands.log.size() > 0 and str(Commands.log[Commands.log.size() - 1]["args"]["action"]) == "phone_call", "calling goes through the command layer")
+	hub._pick("news")
+	txt = "
+".join(_texts(hub.body))
+	K.expect(f, txt.find("ON NOW") >= 0 and txt.find("THE FERNWOOD COURIER") >= 0 and txt.find("Radio, Fernwood FM") >= 0, "News tab: what is on, and the Courier")
 	hub._pick("jobs")
 	txt = "\n".join(_texts(hub.body))
 	K.expect(f, txt.find("THIS WEEK'S OPENINGS") >= 0 or txt.find("No openings") >= 0, "Jobs tab shows the board")

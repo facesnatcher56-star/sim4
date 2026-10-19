@@ -27,7 +27,7 @@ func _data(f: Array) -> void:
 	K.expect(f, Places.all().size() >= 6, "places load from data/life (%d)" % Places.all().size())
 	for pid in Places.all():
 		var d: Dictionary = Places.def(pid)
-		K.expect(f, not Neighborhood.lot(str(d.get("lot", ""))).is_empty(), "%s is hosted in a lot that exists (%s)" % [pid, str(d.get("lot", ""))])
+		K.expect(f, str(d.get("lot", "")) == Places.HOME or not Neighborhood.lot(str(d.get("lot", ""))).is_empty(), "%s is hosted in a lot that exists (%s)" % [pid, str(d.get("lot", ""))])
 		K.expect(f, d.has("label") and d.has("kind"), "%s has a label and a kind" % pid)
 		var hr: Array = d.get("hours", [0, 24])
 		K.expect(f, hr.size() == 2 and float(hr[0]) < float(hr[1]), "%s has sensible hours" % pid)

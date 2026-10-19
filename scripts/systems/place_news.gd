@@ -15,7 +15,7 @@ static func on_day(day: int) -> void:
 		for h in [10, 14, 19, 23]:
 			if Places.open_at(pid, (day - 1) * 1440 + h * 60):
 				open_today = true
-		if not open_today or PlaceStaff.rng.randf() >= p:
+		if not open_today or PlaceStaff.rng.randf() >= float(Places.def(pid).get("news_chance", p)):
 			continue
 		var line: String = str(lines[PlaceStaff.rng.randi_range(0, lines.size() - 1)])
 		var special: String = ""

@@ -50,7 +50,7 @@ static func why_not(fid: int, pid: String, sid: String) -> String:
 	if not Places.exists(pid) or not Places.is_open(pid):
 		return "%s: %s." % [Places.label(pid), Places.status_text(pid)]
 	if not Places.is_there(f, pid):
-		return "Go to %s first." % Neighborhood.label_of(Places.lot_of(pid))
+		return "Go to %s first." % Places.lot_label(pid)
 	if pending.has(fid) or SysUtil.is_away(f):
 		return "Busy right now."
 	if bool(svc.get("once_per_day", false)) and int(last_used.get(_key(fid, sid), -1)) == SysUtil.day():

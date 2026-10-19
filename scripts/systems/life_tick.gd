@@ -17,6 +17,10 @@ static func reset() -> void:
 	LifeFame.reset()
 	LeagueState.reset()
 	ClubState.reset()
+	TownNews.reset()
+	PhoneState.reset()
+	SocialFeed.reset()
+	EventState.reset()
 
 ## A new game: the staff of every place is hired and this year's school events that are already past do not fire.
 static func new_game() -> void:
@@ -36,6 +40,8 @@ static func on_day(day: int) -> void:
 	LifeFame.on_day(day)
 	LeagueState.on_day(day)
 	ClubState.on_day(day)
+	PhoneDay.on_day(day)
+	SocialFeed.on_day(day)
 
 static func on_interaction_finished(folk_id: int, iid: String, success: bool) -> void:
 	PlaceUse.on_interaction_finished(folk_id, iid, success)
@@ -50,13 +56,18 @@ static func on_game_event(ev: String, payload: Dictionary) -> void:
 			EduSchool.on_returned_from_school(int(payload.get("folk_id", -1)), bool(payload.get("skipped", false)))
 		"returned_from_work":
 			HealthLifeDay.on_work(int(payload.get("folk_id", -1)), bool(payload.get("skipped", false)))
+		"chronicle":
+			TownNews.on_chronicle(payload)
+		"place_used":
+			LifeOuting.on_place_used(int(payload.get("folk_id", -1)), str(payload.get("place", "")), str(payload.get("service", "")))
 		"aged_up":
 			EduSchool.on_aged_up(int(payload.get("folk_id", -1)), str(payload.get("from", "")), str(payload.get("to", "")))
 
 # ------------------------------------------------------------------ save
 static func to_dict() -> Dictionary:
 	return {"staff": PlaceStaff.to_dict(), "use": PlaceUse.to_dict(), "member": PlaceMember.to_dict(), "edu": EduState.to_dict(), "health": HealthLife.to_dict(),
-		"culture": {"fame": LifeFame.to_dict(), "league": LeagueState.to_dict(), "clubs": ClubState.to_dict()}}
+		"culture": {"fame": LifeFame.to_dict(), "league": LeagueState.to_dict(), "clubs": ClubState.to_dict()},
+		"media": {"news": TownNews.to_dict(), "phone": PhoneState.to_dict(), "feed": SocialFeed.to_dict()}, "events": EventState.to_dict()}
 
 ## A save without the block (made before task 14) starts the life areas fresh.
 static func from_dict(d: Dictionary, has_block: bool) -> void:
@@ -73,3 +84,8 @@ static func from_dict(d: Dictionary, has_block: bool) -> void:
 	LifeFame.from_dict(cu.get("fame", {}))
 	LeagueState.from_dict(cu.get("league", {}))
 	ClubState.from_dict(cu.get("clubs", {}))
+	var md: Dictionary = d.get("media", {})
+	TownNews.from_dict(md.get("news", {}))
+	PhoneState.from_dict(md.get("phone", {}))
+	SocialFeed.from_dict(md.get("feed", {}))
+	EventState.from_dict(d.get("events", {}))

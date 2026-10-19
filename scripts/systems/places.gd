@@ -56,6 +56,14 @@ static func schedule(pid: String) -> Array:
 static func _day_ok(days: Array, wd: int) -> bool:
 	return days.is_empty() or SysUtil.has_int(days, wd)
 
+## Does this schedule row apply on game day `day`? Weekdays (`days`), days of the year (`doy`, the block party) and holidays (`holiday`, the parade).
+static func _row_day_ok(row: Dictionary, day: int) -> bool:
+	if row.has("doy") and not SysUtil.has_int(row["doy"], Aging.doy(day)):
+		return false
+	if bool(row.get("holiday", false)) and Holidays.today(day).is_empty():
+		return false
+	return _day_ok(row.get("days", []), SysUtil.weekday(day))
+
 ## Opening hours only (no staff check): is the door open at this absolute game minute?
 static func open_at(pid: String, at_min: int = -1) -> bool:
 	if at_min < 0:
@@ -71,9 +79,9 @@ static func open_at(pid: String, at_min: int = -1) -> bool:
 		var hr: Array = row.get("hours", [0, 24])
 		var o: float = float(hr[0])
 		var c: float = float(hr[1])
-		if _day_ok(row.get("days", []), SysUtil.weekday(day)) and h >= o and h < minf(c, 24.0):
+		if _row_day_ok(row, day) and h >= o and h < minf(c, 24.0):
 			return true
-		if c > 24.0 and h < c - 24.0 and _day_ok(row.get("days", []), SysUtil.weekday(day - 1)):
+		if c > 24.0 and h < c - 24.0 and _row_day_ok(row, day - 1):
 			return true
 	return false
 
@@ -109,6 +117,8 @@ static func _weekday_name(wd: int) -> String:
 	return (["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as Array)[posmod(wd, 7)]
 
 # ------------------------------------------------------------------ the lot hook (Venues.is_open_type)
+const HOME := "@home"          # a place in the person's own house (the radio, the TV)
+
 static var _hosted: Dictionary = {}          # venue type -> [place ids]
 static var _hosted_n: int = -1               # number of lots when it was built
 
@@ -140,12 +150,21 @@ static func extra_open(vtype: String, at_min: int) -> bool:
 ## Is the host lot really on the map (a test world or the classic single lot has none: then nobody has to walk anywhere)?
 static func on_map(lot: String) -> bool:
 	var rg = NeighborhoodLots._regions()
+	if lot == HOME:
+		return rg != null and rg.has_regions()
 	return lot != "" and rg != null and not rg.by_lot(lot).is_empty()
 
 ## Is this person standing in the place's lot (always true when the lot is not on the map)?
 static func is_there(f, pid: String) -> bool:
 	var lot: String = lot_of(pid)
+	if lot == HOME:
+		return not on_map(lot) or Neighborhood.lot_of(f) == PlayerLots.home_of(f)
 	return not on_map(lot) or Neighborhood.lot_of(f) == lot
+
+## Name of the place's lot for the player ("Home" for a place in the house).
+static func lot_label(pid: String) -> String:
+	var lot: String = lot_of(pid)
+	return "Home" if lot == HOME else Neighborhood.label_of(lot)
 
 # ------------------------------------------------------------------ rules
 ## The service's label with the programme title of the week filled in ("Family Film: {title}").

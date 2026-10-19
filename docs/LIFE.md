@@ -93,6 +93,28 @@ Data: `data/life/40_culture.json`. **Starlight Cinema** (office lot, 13:00 to 01
   season, a champion announced; a resident joins a team and plays on Saturdays to strengthen it (the measured title share of a team with a weekly player is 0.32 against 0.25 of a fair team).
 * **Clubs** (`ClubState`): five townie members each; a resident joins for 5 coins, goes on the club's day: skill xp, company and friendship with some members; the club's weekly line is news.
 
+## Communication and media
+
+Data: `data/life/50_media.json`. **Phone** (`PhoneState`, `PhoneCmd`, `PhoneDay`): everybody from teen up has one. Contacts are the people they know (best friends first; somebody in hospital or locked up
+does not pick up). A call (once a day per person) and texts (three a day) lift the mood and the friendship. **Ask out** picks an outing from data (cinema, lunch, burgers, a drink, dancing, bowling,
+arcade, a swim, a lake picnic, the museum, a concert, ice cream): the friend says yes with a chance that grows with friendship (35 percent + 0.6 per point, +25 for a partner or best friend) and the outing
+is a normal visit of the host (`LifeOuting`): the host pays for two, both must be allowed (stage, opening hours). When the visit ends the company counts: friendship +4, romance +4 ONLY for dating,
+sweethearts, partners, spouses or a crush AND where `RomanceRules.allowed` holds (never for minors or family), a happier mood, a `date` line in the chronicle for couples. **Friends invite you out**: each
+morning a resident from teen up has a 25 percent chance of a text from a townie friend (friendship 25 or more) for an outing both can do; answer yes or no in the Phone tab (an invitation waits two days).
+**Social media** (`SocialFeed`): post a photo, a thought, the town news or gossip (adults only); likes come from reach (friends and fame), the poster gains social, fun and fame; a post with 20 likes goes round
+town; **gossip posted tells up to four friends at once** through the existing gossip rules (subject's standing drops, it can backfire) so rumours spread faster; townies post by themselves.
+**News** (`TownNews`, `MediaServices`): every public chronicle line is kept (150, saved) for the **Fernwood Courier** newsstand, the **radio** (Fernwood FM, a programme by the hour, the top headline) and the
+**TV** (local news at noon, six and ten: a bulletin of the biggest stories of two days). The radio and TV are places at HOME (lot `@home`). Nothing is forced on anybody.
+
+## Family and social events
+
+Data: `data/life/60_events.json`, handlers in `EventServices`. **Weddings** (Willow Green Wedding Lawn in spring to autumn, 150 coins; the Hall Hire, 300): only for an ENGAGED adult, through
+`FamilyMarriage.marry` (so `RomanceRules.allowed` still guards it); guests come at the chance of their friendship, bring presents, the couple glow. **Birthday parties** (the hall or a private room at the
+restaurant) in the days around the host's birthday, once a year. **Baby showers** for an expecting parent. **Funerals** for a relative or friend who died in the last 10 days (the grave records of task 01):
+the grief of the host and of the residents who come is cut by 30 percent; a quiet chronicle line. **Family reunions** (the picnic grove or a dinner): friendship with each relative and a happy memory.
+**Neighbourhood events** are places whose schedule is a date, not a weekday: the **block party** (the 6th day of every season, 15:00 to 22:00) and the **holiday parade** (every holiday, 11:00 to 15:00); each
+announces itself in the chronicle on its day. Dates at real venues are the outings above.
+
 ## Tier / cadence / active set / caps
 
 | System | Tier | Cadence | Active set | Caps |
@@ -106,6 +128,10 @@ Data: `data/life/40_culture.json`. **Starlight Cinema** (office lot, 13:00 to 01
 | HealthLifeDay / HealthCond | residents ACTIVE, townies STATISTICAL | daily | all residents + alive townies (~24), a few lines each | 4 conditions, 1 flare roll per condition per day |
 | HealthRisk | event | inside the incident dice | tagged incidents only (`illness`, `cardiac`) | one empty-array test otherwise |
 | Counselling | event | on a session | the person | |
+| TownNews | event | one append per public chronicle line | | 150 lines |
+| PhoneState / PhoneCmd / PhoneDay | event; invitations daily | residents from teen up, one dice each | | inbox 6 each |
+| SocialFeed | event; townie posts daily | one dice per alive townie | | feed 30 |
+| EventServices / EventState | event | on a booking | the host and up to ~10 guests | one party of each kind a year |
 | PlaceNews | town | daily | places with a `news` list | about 1 chronicle line a day in total |
 | LeagueState | town (statistical) | weekly (Sunday) | 4 teams, 12 townies, residents who joined | 8 results kept |
 | ClubState | town | weekly lines; residents on their visit | 3 clubs x 5 members | |
@@ -129,4 +155,6 @@ See the status list at the bottom of this file, updated as areas land.
 | Health: family doctor and clinic, pharmacy counter, dentist, therapy and counsellor (grief, burnout, trauma), gym, long-term conditions, diet and fitness affecting health and lifespan | done (places inside the hospital, market and gym lots); hospital floors from task 10 |
 | Food and nightlife: restaurant with menu and waiters, fast food, bar, nightclub, bakery, ice cream, food trucks, farmers market | done as places inside the cafe, market and park lots |
 | Culture and leisure: cinema, theatre, concert hall, museum, gallery, bowling, arcade, pool, sports field with a league, lake, campsite, community centre with clubs | done as places inside the office, school, library, gym and park lots (no beach: the map has only the Town Green pond) |
+| Communication and media: phone (calls, texts, contacts, invitations from friends), social media (posts, fame, rumours), local radio, TV news, the newspaper | done (phone and feed are state, not a 3D item) |
+| Family and social life: weddings at a venue, birthday parties, funerals, baby showers, dates at real venues, family reunions, block party, holiday parade | done as places; clubs under culture |
 | Education: preschool, school grades / homework / report cards / teachers / events, college, degrees, night classes, library courses, skills job market | done (places inside existing lots, no new 3D lots) |
