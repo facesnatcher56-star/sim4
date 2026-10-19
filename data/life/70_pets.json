@@ -1,0 +1,274 @@
+{
+ "_doc": "Pets (task 14): dogs and cats as household records (no body on the map yet) with needs, mood, bond and training; care is done through the places 'pet_care' (at home) and 'vet_clinic' (the pet corner at the market); strays turn up around town and can be adopted. Pets cheer their owners (the pet_company buff cuts the loss of social), a well-kept adult dog counts as a guard dog for burglars (CrimeSecurity.home_profile), and neglect has consequences (illness, running away).",
+ "config": {
+  "pets": {
+   "species": {
+    "dog": {
+     "label": "dog",
+     "lifespan_days": 150,
+     "fullness_drop": 35.0,
+     "fun_drop": 22.0,
+     "walk": true,
+     "tricks": true,
+     "adult_days": 12,
+     "names": [
+      "Rex",
+      "Biscuit",
+      "Maple",
+      "Scout",
+      "Pepper",
+      "Juno",
+      "Bruno",
+      "Daisy",
+      "Otto",
+      "Nova"
+     ]
+    },
+    "cat": {
+     "label": "cat",
+     "lifespan_days": 140,
+     "fullness_drop": 28.0,
+     "fun_drop": 16.0,
+     "walk": false,
+     "tricks": false,
+     "adult_days": 10,
+     "names": [
+      "Mittens",
+      "Pip",
+      "Clover",
+      "Smokey",
+      "Willow",
+      "Tiger",
+      "Luna",
+      "Marmalade",
+      "Soot",
+      "Olive"
+     ]
+    }
+   },
+   "daily": {
+    "sick_chance": 0.012,
+    "sick_chance_hungry": 0.04,
+    "sick_days_to_worsen": 3,
+    "runaway_hungry_days": 3,
+    "bond_loss_neglect": 2.0,
+    "old_age_chance": 0.12,
+    "content_buff": "pet_company"
+   },
+   "care": {
+    "feed_fullness": 45.0,
+    "feed_cap": 3,
+    "play_fun": 30.0,
+    "play_cap": 2,
+    "walk_fun": 40.0,
+    "walk_cap": 2,
+    "train_cap": 2,
+    "train_bond_min": 20.0,
+    "tricks_max": 5,
+    "groom_cap": 1,
+    "cuddle_cap": 3,
+    "bond_play": 1.5,
+    "bond_walk": 2.0,
+    "bond_cuddle": 1.0,
+    "bond_feed": 0.5
+   },
+   "owner": {
+    "play_fun": 10.0,
+    "play_social": 6.0,
+    "walk_social": 8.0,
+    "walk_fitness": 1.2,
+    "cuddle_comfort": 8.0,
+    "cuddle_social": 8.0
+   },
+   "strays": {
+    "cap": 3,
+    "chance_per_week": 0.4,
+    "stay_days": 14,
+    "news": "A stray {species} has been seen near the park. The pet corner can find it a home."
+   },
+   "guard_dog": {
+    "min_age_days": 10,
+    "min_fullness": 25
+   }
+  }
+ },
+ "places": {
+  "pet_care": {
+   "label": "Pets at Home",
+   "lot": "@home",
+   "kind": "pets",
+   "hours": [
+    0,
+    24
+   ],
+   "min_staff": 0,
+   "blurb": "Feed, play with, walk, train and cuddle your pets. Pets need care every day.",
+   "services": {
+    "pet_feed": {
+     "label": "Feed the Pet",
+     "price": 2,
+     "minutes": 5,
+     "posture": "stand",
+     "handler": "pet",
+     "args": {
+      "act": "feed"
+     },
+     "min_stage": "child"
+    },
+    "pet_play": {
+     "label": "Play with the Pet",
+     "price": 0,
+     "minutes": 20,
+     "posture": "stand",
+     "handler": "pet",
+     "args": {
+      "act": "play"
+     },
+     "min_stage": "child"
+    },
+    "pet_walk": {
+     "label": "Take the Dog for a Walk",
+     "price": 0,
+     "minutes": 30,
+     "posture": "stand",
+     "handler": "pet",
+     "args": {
+      "act": "walk"
+     },
+     "min_stage": "child"
+    },
+    "pet_train": {
+     "label": "Train a New Trick",
+     "price": 0,
+     "minutes": 20,
+     "posture": "stand",
+     "handler": "pet",
+     "args": {
+      "act": "train"
+     },
+     "min_stage": "child"
+    },
+    "pet_groom": {
+     "label": "Groom the Pet",
+     "price": 3,
+     "minutes": 15,
+     "posture": "stand",
+     "handler": "pet",
+     "args": {
+      "act": "groom"
+     },
+     "min_stage": "child"
+    },
+    "pet_cuddle": {
+     "label": "Cuddle the Pet",
+     "price": 0,
+     "minutes": 10,
+     "posture": "sit",
+     "handler": "pet",
+     "args": {
+      "act": "cuddle"
+     },
+     "min_stage": "toddler"
+    }
+   }
+  },
+  "vet_clinic": {
+   "label": "Greenbarrow Pet Corner and Vet",
+   "lot": "market",
+   "kind": "pets",
+   "schedule": [
+    {
+     "days": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+     ],
+     "hours": [
+      9,
+      18
+     ]
+    }
+   ],
+   "blurb": "The vet, the shelter for strays and a few puppies and kittens for sale.",
+   "staff": [
+    {
+     "role": "Vet",
+     "career": "",
+     "n": 1
+    },
+    {
+     "role": "Assistant",
+     "career": "",
+     "n": 1
+    }
+   ],
+   "min_staff": 1,
+   "news": [
+    "{place} reminds everyone that dogs and cats need a check-up once a year.",
+    "{staff} has opened the shelter doors to new arrivals."
+   ],
+   "services": {
+    "vet_checkup": {
+     "label": "Vet Check-up",
+     "price": 25,
+     "minutes": 30,
+     "posture": "stand",
+     "handler": "pet",
+     "args": {
+      "act": "vet"
+     },
+     "min_stage": "teen"
+    },
+    "vet_treat": {
+     "label": "Treat a Sick Pet",
+     "price": 40,
+     "minutes": 40,
+     "posture": "stand",
+     "handler": "pet",
+     "args": {
+      "act": "treat"
+     },
+     "min_stage": "teen"
+    },
+    "adopt_stray": {
+     "label": "Adopt a Stray",
+     "price": 20,
+     "minutes": 20,
+     "posture": "stand",
+     "handler": "pet_new",
+     "args": {
+      "act": "stray"
+     },
+     "min_stage": "adult"
+    },
+    "buy_puppy": {
+     "label": "Buy a Puppy",
+     "price": 150,
+     "minutes": 20,
+     "posture": "stand",
+     "handler": "pet_new",
+     "args": {
+      "act": "buy",
+      "species": "dog"
+     },
+     "min_stage": "adult"
+    },
+    "buy_kitten": {
+     "label": "Buy a Kitten",
+     "price": 90,
+     "minutes": 20,
+     "posture": "stand",
+     "handler": "pet_new",
+     "args": {
+      "act": "buy",
+      "species": "cat"
+     },
+     "min_stage": "adult"
+    }
+   }
+  }
+ }
+}

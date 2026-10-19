@@ -21,6 +21,8 @@ static func reset() -> void:
 	PhoneState.reset()
 	SocialFeed.reset()
 	EventState.reset()
+	PetState.reset()
+	HobbyState.reset()
 
 ## A new game: the staff of every place is hired and this year's school events that are already past do not fire.
 static func new_game() -> void:
@@ -42,6 +44,7 @@ static func on_day(day: int) -> void:
 	ClubState.on_day(day)
 	PhoneDay.on_day(day)
 	SocialFeed.on_day(day)
+	PetDay.on_day(day)
 
 static func on_interaction_finished(folk_id: int, iid: String, success: bool) -> void:
 	PlaceUse.on_interaction_finished(folk_id, iid, success)
@@ -67,7 +70,7 @@ static func on_game_event(ev: String, payload: Dictionary) -> void:
 static func to_dict() -> Dictionary:
 	return {"staff": PlaceStaff.to_dict(), "use": PlaceUse.to_dict(), "member": PlaceMember.to_dict(), "edu": EduState.to_dict(), "health": HealthLife.to_dict(),
 		"culture": {"fame": LifeFame.to_dict(), "league": LeagueState.to_dict(), "clubs": ClubState.to_dict()},
-		"media": {"news": TownNews.to_dict(), "phone": PhoneState.to_dict(), "feed": SocialFeed.to_dict()}, "events": EventState.to_dict()}
+		"media": {"news": TownNews.to_dict(), "phone": PhoneState.to_dict(), "feed": SocialFeed.to_dict()}, "events": EventState.to_dict(), "pets": PetState.to_dict(), "hobby": HobbyState.to_dict()}
 
 ## A save without the block (made before task 14) starts the life areas fresh.
 static func from_dict(d: Dictionary, has_block: bool) -> void:
@@ -89,3 +92,5 @@ static func from_dict(d: Dictionary, has_block: bool) -> void:
 	PhoneState.from_dict(md.get("phone", {}))
 	SocialFeed.from_dict(md.get("feed", {}))
 	EventState.from_dict(d.get("events", {}))
+	PetState.from_dict(d.get("pets", {}))
+	HobbyState.from_dict(d.get("hobby", {}))

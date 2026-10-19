@@ -35,7 +35,7 @@ static func price(pid: String, sid: String, fid: int = -1) -> int:
 	p *= FoodMenu.price_mult(pid, sid)
 	return maxi(int(round(p)), 1)
 
-static func why_not(fid: int, pid: String, sid: String) -> String:
+static func why_not(fid: int, pid: String, sid: String, target: int = -1) -> String:
 	var svc: Dictionary = Places.services(pid).get(sid, {})
 	var f = SysUtil.folk(fid)
 	if svc.is_empty() or f == null:
@@ -58,10 +58,19 @@ static func why_not(fid: int, pid: String, sid: String) -> String:
 	var cost: int = price(pid, sid, fid)
 	if cost > 0 and not Economy.can_afford(int(f.household_id), cost):
 		return "That costs %d coins." % cost
-	return PlaceHandlers.check(str(svc.get("handler", "")), f, pid, sid, svc)
+	return PlaceHandlers.check(str(svc.get("handler", "")), f, pid, sid, _with_target(svc, target))
+
+## The service with the chosen target (a pet id ...) in `_target`, for the handlers.
+static func _with_target(svc: Dictionary, target: int) -> Dictionary:
+	if target < 0:
+		return svc
+	var s: Dictionary = svc.duplicate()
+	s["_target"] = target
+	return s
 
 static func use(fid: int, pid: String, sid: String, opts: Dictionary = {}) -> Dictionary:
-	var why: String = why_not(fid, pid, sid)
+	var target: int = int(opts.get("target", -1))
+	var why: String = why_not(fid, pid, sid, target)
 	if why != "":
 		return {"ok": false, "reason": why}
 	var f = SysUtil.folk(fid)
@@ -74,9 +83,9 @@ static func use(fid: int, pid: String, sid: String, opts: Dictionary = {}) -> Di
 		return {"ok": false, "reason": "That costs %d coins." % cost}
 	last_used[_key(fid, sid)] = SysUtil.day()
 	var minutes: float = float(svc.get("minutes", 0))
-	var rec := {"place": pid, "service": sid, "price": cost, "minute": SysUtil.now()}
+	var rec := {"place": pid, "service": sid, "price": cost, "minute": SysUtil.now(), "target": target}
 	if bool(opts.get("instant", false)) or minutes < 2.0 or not _queue(f, svc, minutes, rec):
-		var res: Dictionary = finish_now(fid, pid, sid, cost, true)
+		var res: Dictionary = finish_now(fid, pid, sid, cost, true, target)
 		res["price"] = cost
 		return res
 	pending[fid] = rec
@@ -100,7 +109,7 @@ static func on_interaction_finished(fid: int, iid: String, success: bool) -> voi
 	var rec: Dictionary = pending[fid]
 	pending.erase(fid)
 	if success:
-		finish_now(fid, str(rec["place"]), str(rec["service"]), int(rec["price"]), true)
+		finish_now(fid, str(rec["place"]), str(rec["service"]), int(rec["price"]), true, int(rec.get("target", -1)))
 		return
 	var f = SysUtil.folk(fid)
 	if f != null and int(rec["price"]) > 1:
@@ -108,13 +117,13 @@ static func on_interaction_finished(fid: int, iid: String, success: bool) -> voi
 		SysUtil.notify("%s left early. Half the price was given back." % f.name, "info")
 
 ## Apply the effects. Public so townies, tests and hidden trips can call it.
-static func finish_now(fid: int, pid: String, sid: String, paid: int = 0, announce: bool = true) -> Dictionary:
+static func finish_now(fid: int, pid: String, sid: String, paid: int = 0, announce: bool = true, target: int = -1) -> Dictionary:
 	var f = SysUtil.folk(fid)
 	var svc: Dictionary = Places.services(pid).get(sid, {})
 	if f == null or svc.is_empty():
 		return {"ok": false, "reason": "That is not available."}
 	visits[pid] = int(visits.get(pid, 0)) + 1
-	var out: Dictionary = PlaceEffects.apply(f, pid, sid, svc, announce)
+	var out: Dictionary = PlaceEffects.apply(f, pid, sid, _with_target(svc, target), announce)
 	SysUtil.game_event("place_used", {"folk_id": fid, "place": pid, "service": sid, "paid": paid})
 	out["ok"] = true
 	out["reason"] = ""

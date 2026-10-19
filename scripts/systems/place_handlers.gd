@@ -7,12 +7,14 @@ extends RefCounted
 const EDU := ["lecture", "course", "enrol_preschool", "tutor"]
 const HEALTH := ["checkup", "treat", "vaccinate", "dental_clean", "dental_fix", "counsel", "prescription"]
 const FOOD := ["drink", "pantry", "sell_crafts"]
+const PET := ["pet", "pet_new"]
+const HOBBY := ["hobby"]
 const MEDIA := ["radio", "tv_news", "paper"]
 const EVENT := ["wedding", "birthday_party", "baby_shower", "funeral", "reunion", "mingle"]
 const LEISURE := ["perform", "exhibit", "score", "league_join", "league_play", "league_watch", "club_join", "club_meet"]
 
 static func known(handler: String) -> bool:
-	return EDU.has(handler) or HEALTH.has(handler) or FOOD.has(handler) or LEISURE.has(handler) or MEDIA.has(handler) or EVENT.has(handler)
+	return EDU.has(handler) or HEALTH.has(handler) or FOOD.has(handler) or LEISURE.has(handler) or MEDIA.has(handler) or EVENT.has(handler) or PET.has(handler) or HOBBY.has(handler)
 
 static func check(handler: String, f, pid: String, sid: String, svc: Dictionary) -> String:
 	if EDU.has(handler):
@@ -27,6 +29,10 @@ static func check(handler: String, f, pid: String, sid: String, svc: Dictionary)
 		return MediaServices.check(handler, f, pid, sid, svc)
 	if EVENT.has(handler):
 		return EventServices.check(handler, f, pid, sid, svc)
+	if PET.has(handler):
+		return PetServices.check(handler, f, pid, sid, svc)
+	if HOBBY.has(handler):
+		return HobbyServices.check(handler, f, pid, sid, svc)
 	return ""
 
 static func finish(handler: String, f, pid: String, sid: String, svc: Dictionary) -> Dictionary:
@@ -42,4 +48,8 @@ static func finish(handler: String, f, pid: String, sid: String, svc: Dictionary
 		return MediaServices.finish(handler, f, pid, sid, svc)
 	if EVENT.has(handler):
 		return EventServices.finish(handler, f, pid, sid, svc)
+	if PET.has(handler):
+		return PetServices.finish(handler, f, pid, sid, svc)
+	if HOBBY.has(handler):
+		return HobbyServices.finish(handler, f, pid, sid, svc)
 	return {}

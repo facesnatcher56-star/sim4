@@ -47,10 +47,18 @@ static func _merge(d: Dictionary) -> void:
 			if not sections.has(k):
 				sections[k] = {}
 			for id in v:
-				if (sections[k] as Dictionary).has(id) and v[id] is Dictionary:
-					(sections[k][id] as Dictionary).merge(v[id], true)
+				if (sections[k] as Dictionary).has(id) and v[id] is Dictionary and sections[k][id] is Dictionary:
+					_deep(sections[k][id], v[id])
 				else:
 					sections[k][id] = v[id]
+
+## Later files add to an entry of an earlier one (a service for an existing place): dictionaries merge key by key, anything else is replaced.
+static func _deep(into: Dictionary, add: Dictionary) -> void:
+	for k in add:
+		if add[k] is Dictionary and into.get(k) is Dictionary:
+			_deep(into[k], add[k])
+		else:
+			into[k] = add[k]
 
 static func section(name: String) -> Dictionary:
 	ensure()

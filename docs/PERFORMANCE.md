@@ -474,6 +474,10 @@ Daily or event driven; nothing runs per minute. The one clock entry is `day/Life
 | EduJobs (job board) | town | weekly refresh | one dice per career | 3 openings per career |
 | HealthLifeDay / HealthCond (meters, conditions) | residents ACTIVE, townies STATISTICAL | daily | all residents + alive townies | 4 conditions |
 | HealthRisk (incident multipliers) | event | inside the incident dice | tagged incidents only | |
+| TownNews / PhoneState / SocialFeed / PhoneDay | event; invitations and townie posts daily | residents from teen up; alive townies | | news 150, inbox 6, feed 30 |
+| EventServices / EventState | event | on a booking | host + ~10 guests | |
+| PetState / PetDay | household, daily; strays weekly | households with pets | | 3 pets a home, 3 strays |
+| LeagueState / ClubState / LifeFame | town, weekly / event | 4 teams, 3 clubs, people with fame | | 8 results |
 
 ### Runtime (`tests/perf_probe.gd`, 2 game days, 3 folk + crowd, loaded)
 

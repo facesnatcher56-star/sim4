@@ -42,6 +42,17 @@
     "fun": 1.1
    },
    "thought": "Never again..."
+  },
+  "pet_company": {
+   "label": "Pet Company",
+   "mood": {
+    "happy": 1
+   },
+   "duration_min": 1440,
+   "need_decay_mult": {
+    "social": 0.8
+   },
+   "thought": "Having a pet around makes the house feel full."
   }
  }
 }

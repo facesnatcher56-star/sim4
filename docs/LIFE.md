@@ -115,6 +115,22 @@ the grief of the host and of the residents who come is cut by 30 percent; a quie
 **Neighbourhood events** are places whose schedule is a date, not a weekday: the **block party** (the 6th day of every season, 15:00 to 22:00) and the **holiday parade** (every holiday, 11:00 to 15:00); each
 announces itself in the chronicle on its day. Dates at real venues are the outings above.
 
+## Pets
+
+Data: `data/life/70_pets.json`. Dogs and cats are HOUSEHOLD RECORDS (`PetState`, no body on the map yet): fullness, fun, bond, health, tricks (dogs), a mood in plain words (happy, content, hungry, bored,
+unwell). Care is a service of the place "Pets at Home" (`pet_care`, lot `@home`): feed (2 coins, three a day), play, walk (dogs, fitness for the owner), train (dogs, up to five tricks, needs a bond of 20),
+groom, cuddle; the Pets tab picks the pet (`target`). The **pet corner and vet** at the market (Mon-Sat 9-18): check-up 25, treatment 40, **adopt a stray** 20, buy a puppy 150 or a kitten 90 (adults).
+Daily (`PetDay`): fullness falls 35 (dog) or 28 (cat), fun 22 or 16; a hungry pet may fall ill (1.2 percent a day, 4 percent when hungry); three days at zero fullness and it runs away (news);
+old age takes pets after about 150 days; **content pets keep their owners company** (buff `pet_company`: the social need falls 20 percent more slowly); a **well-kept grown dog is a guard dog** for
+burglars (`PetState.guards_home` is read by `CrimeSecurity.home_profile`: abort and detect chances of the existing kennel). **Strays** turn up about 1.8 times a game year (cap 3, they stay two weeks) with a news line.
+
+## Hobbies
+
+Data: `data/life/80_hobbies.json`, handler `hobby` (`HobbyServices`, state `HobbyState`). **Fishing** at the pier (catch 35 percent + 6 per fishing level, up to 90; rare fish from level 4, news; fish become market crafts).
+**Community garden** (spring to autumn): rent a plot for a week (12 coins), tend it (once a day), harvest after three tendings for produce (market craft) and the pantry. **Painting outdoors** (a painting craft)
+and **photography** (photographs sold at the gallery by skill) at the viewpoint. **Collecting**: rocks and bugs on the nature trail, stamps at the newsstand; eight specimens a set, rarity by weight;
+a complete set is **donated to the museum** for 120 coins, fame and a chronicle line. **Handicrafts** at the workshop (Mon-Fri 10-17, pay by handiness). Fitness and sports classes are the gym's.
+
 ## Tier / cadence / active set / caps
 
 | System | Tier | Cadence | Active set | Caps |
@@ -132,6 +148,8 @@ announces itself in the chronicle on its day. Dates at real venues are the outin
 | PhoneState / PhoneCmd / PhoneDay | event; invitations daily | residents from teen up, one dice each | | inbox 6 each |
 | SocialFeed | event; townie posts daily | one dice per alive townie | | feed 30 |
 | EventServices / EventState | event | on a booking | the host and up to ~10 guests | one party of each kind a year |
+| PetState / PetDay | household, daily; strays town, weekly | households with pets (0-3 pets) | | 3 pets a home, 3 strays |
+| HobbyState / HobbyServices | event | on a visit | the person | collections 3 x 8 |
 | PlaceNews | town | daily | places with a `news` list | about 1 chronicle line a day in total |
 | LeagueState | town (statistical) | weekly (Sunday) | 4 teams, 12 townies, residents who joined | 8 results kept |
 | ClubState | town | weekly lines; residents on their visit | 3 clubs x 5 members | |
@@ -157,4 +175,6 @@ See the status list at the bottom of this file, updated as areas land.
 | Culture and leisure: cinema, theatre, concert hall, museum, gallery, bowling, arcade, pool, sports field with a league, lake, campsite, community centre with clubs | done as places inside the office, school, library, gym and park lots (no beach: the map has only the Town Green pond) |
 | Communication and media: phone (calls, texts, contacts, invitations from friends), social media (posts, fame, rumours), local radio, TV news, the newspaper | done (phone and feed are state, not a 3D item) |
 | Family and social life: weddings at a venue, birthday parties, funerals, baby showers, dates at real venues, family reunions, block party, holiday parade | done as places; clubs under culture |
+| Pets: dogs and cats with needs, training and moods; strays and a vet; they deter burglars and help loneliness | done as household records (no 3D pet on the map yet) |
+| Hobbies: fishing spots, community garden plots, painting outdoors, photography, collecting, fitness classes, DIY/crafting at a workbench | done as places |
 | Education: preschool, school grades / homework / report cards / teachers / events, college, degrees, night classes, library courses, skills job market | done (places inside existing lots, no new 3D lots) |
