@@ -144,6 +144,8 @@ static func from_dict(d: Dictionary) -> void:
 
 ## JSON turns every number into a float: put the ids back.
 static func _fix_ints() -> void:
+	for k in counters:
+		counters[k] = int(counters[k])
 	for id in contracts:
 		SysUtil.ints_in(contracts[id], ["id", "client", "target", "posted", "deadline", "hitman", "case", "mistakes", "due_day"])
 	for pid in dealers:

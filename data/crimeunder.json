@@ -33,7 +33,7 @@
   "informant": {"per_sale": 0.012, "addict": 0.02, "loyal_bonus": -0.5, "raid_per_tip": 0.04, "raid_cap": 0.4, "raid_min_tips": 2, "tips_decay_day": 0.1, "hide_stash": 0.5},
   "rival": {"daily": 0.012, "corner_daily": 0.01, "lose_stock": 0.5, "hurt": 0.3, "muscle_skill": 0.6},
   "corner": {"hold_per_sale": 0.06, "hold_decay_day": 0.02, "contest_pull": 0.5, "claim_hold": 0.35},
-  "npc": {"join_daily": 0.0016, "sell_daily": 0.25, "sales": [1, 3], "max_share": 0.04, "traits": ["dishonest", "reckless"], "pool_min_rank": "burglar", "arrest_cut": 0.6},
+  "npc": {"join_daily": 0.0016, "sell_daily": 0.25, "sales": [1, 3], "max_share": 0.04, "traits": ["dishonest", "reckless"], "pool_min_rank": "petty_thief", "arrest_cut": 0.6},
   "crime_points": 0.2
  },
  "addict": {
