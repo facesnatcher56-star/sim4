@@ -37,6 +37,15 @@
    "memory": {"value": -0.8, "text": "the flu that took {name}"},
    "grave_style": "stone", "unexpected": true, "severity": 3
   },
+  "broken_heart": {
+   "label": "A broken heart",
+   "text": "{name} could not bear the loss of a life partner and passed away the same night, of a broken heart.",
+   "legacy_text": "{They} did not long outlive {their} partner.",
+   "grief": {"strength": 1.5, "days": 6},
+   "child_text": "{They} missed {their} partner so much.",
+   "memory": {"value": -0.8, "text": "the night {name} followed {their} partner"},
+   "grave_style": "stone", "unexpected": false, "severity": 3
+  },
  "heatstroke": {
    "label": "Heatstroke",
    "text": "{name} was out in the burning heat for too long and could not be revived.",
