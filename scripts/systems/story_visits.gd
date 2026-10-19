@@ -139,7 +139,9 @@ static func on_minute() -> void:
 	for inv in Story.invites:
 		if str(inv["state"]) == "open":
 			if Story.auto_accept_invites and now >= int(inv["created_min"]) + 30:
-				respond_invite(int(inv["id"]), true)
+				var guest = SysUtil.folk(int(inv["folk_id"]))
+				if guest == null or Circadian.party_minutes_left(guest) >= int((Story.cfg().get("invites", {}) as Dictionary).get("min_party_min", 45)):
+					respond_invite(int(inv["id"]), true)         # (at night the invite waits for the next day instead of sending them out)
 			elif now >= int(inv["expires_min"]):
 				inv["state"] = "expired"
 	while Story.situations.size() > 0 and str(Story.situations[0]["state"]) == "done":
@@ -319,7 +321,11 @@ static func respond_invite(invite_id: int, accept: bool) -> bool:
 			inv["state"] = "expired"
 			return false
 		var ic: Dictionary = Story.cfg().get("invites", {})
-		if Away.send(f, float(ic.get("away_minutes", 180)), "party", {"label": "At a party", "invite_id": invite_id, "townie_id": inv["townie_id"]}):
+		var room: int = Circadian.party_minutes_left(f)         # parties end around midnight (children and elders earlier): nobody is sent out at 23:30
+		if room < int(ic.get("min_party_min", 45)):
+			inv["state"] = "expired"
+			return false
+		if Away.send(f, float(mini(int(ic.get("away_minutes", 180)), room)), "party", {"label": "At a party", "invite_id": invite_id, "townie_id": inv["townie_id"]}):
 			inv["state"] = "accepted"
 			return true
 		return false

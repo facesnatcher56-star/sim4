@@ -57,7 +57,27 @@ static func _in(h: float, lo: float, hi: float) -> bool:
 		return h >= lo and h < hi
 	return h >= lo or h < hi
 
-## Guests leave (parties end) between 01:30 and 06:00.
+## When a party (an invite away from home) should be over for this person, in hours (24.5 = 00:30): children and elders earlier, night
+## owls and social butterflies a little later (data/circadian.json "party_end").
+static func party_end_hour(f) -> float:
+	var pe: Dictionary = cfg().get("party_end", {})
+	var e: float = float(pe.get(str(f.age_stage), pe.get("default", 24.5)))
+	for t in (pe.get("late_traits", {}) as Dictionary):
+		if f.has_trait(str(t)):
+			e += float(pe["late_traits"][t])
+	return e
+
+## Minutes from now until the party should be over for this person (daytime: no limit; 0 when it is already too late to go).
+static func party_minutes_left(f) -> int:
+	var h: float = SimEnv.hour_f()
+	if h >= 6.0 and h < 9.0:
+		return 0                  # too early to go anywhere
+	if h >= 9.0 and h < 18.0:
+		return 24 * 60
+	var late: float = h + 24.0 if h < 6.0 else h
+	return maxi(int((party_end_hour(f) - late) * 60.0), 0)
+
+## Guests leave (parties end) between 00:30 and 06:00.
 static func guests_curfew() -> bool:
 	var h: float = SimEnv.hour_f()
 	return h >= float(cfg().get("curfew_from", 1.5)) and h < float(cfg().get("curfew_until", 6.0))
