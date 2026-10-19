@@ -3,7 +3,7 @@ extends RefCounted
 ## The drama budget. Every key (household "h<id>", townie lot "l<n>", district "d<zone>", "town") gains points each day in proportion to its hidden chaos level
 ## (StorytellerChaos) and spends them on cards weighted by size (small 1, medium 3, big 7; data). There is no schedule: whether and when a key spends depends on the
 ## wandering level, a daily hesitation chance and the size it happens to draw. Soft guards (all data, per personality):
-##   max quiet days  a household or district with nothing notable for N days gets a small card (Calm 10, Classic 5, Chaotic 3), preferably a city event that ripples to it
+##   max quiet days  a household with nothing notable for N days gets a small card (Calm 10, Classic 5, Chaotic 3), preferably a city event that ripples to it
 ##   big gap         big cards are spaced out (Classic 7 days); a BAD big card needs bad_big_gap_days since the last one (the Classic pile-on cap), natural ones count
 ##   mercy           after a bad medium or big card or a natural loss, bad cards weigh less and good ones more for a while (not Chaotic)
 ## Natural events (chronicle lines of severity 2+) count as notable for the key they touch and spend a little budget too.
@@ -32,7 +32,7 @@ static func zone_of_key(key: String) -> String:
 static func entry(key: String) -> Dictionary:
 	if not Storyteller.entries.has(key):
 		var d: int = SysUtil.day()
-		Storyteller.entries[key] = {"level": 1.0, "points": 1.0, "last_notable": d, "last_big": -99, "last_bad_big": -99, "mercy_until": -1, "last_spend": -99}
+		Storyteller.entries[key] = {"level": 1.0, "points": 1.0, "last_notable": d, "last_big": -99, "last_bad_big": -99, "mercy_until": -1, "last_spend": -99, "want": ""}
 	return Storyteller.entries[key]
 
 ## Every key that exists today, sorted (deterministic order for the dice).
@@ -91,36 +91,31 @@ static func day(key: String, today: int) -> void:
 	var played_now: bool = false
 	if float(e["points"]) >= size_cost("small") and Storyteller.rng.randf() < float(b.get("spend_chance", 0.55)) * clampf(float(e["level"]), 0.3, 2.0):
 		played_now = spend(key, today)
-	if not played_now and (kind == "home" or kind == "district") and today - int(e["last_notable"]) >= int(Storyteller.param("max_quiet_days", 5)):
+	if not played_now and kind == "home" and today - int(e["last_notable"]) >= int(Storyteller.param("max_quiet_days", 5)):
 		guard(key, today)
 
 ## Draw a size by the personality's weights among those the points can pay and the spacing rules allow, then a card of that size (or smaller).
 static func spend(key: String, today: int) -> bool:
 	var e: Dictionary = entry(key)
-	var sizes: Dictionary = Storyteller.param("sizes", {})
-	var order: Array = []
-	var weights: Array = []
-	for s in Storyteller.TIERS_LOCAL:
-		if size_cost(s) > float(e["points"]):
-			continue
-		if s == "big" and today - int(e["last_big"]) < int(Storyteller.param("big_gap_days", 7)):
-			continue
-		order.append(s)
-		weights.append(float(sizes.get(s, 0.1)))
-	if order.is_empty():
+	# The size is drawn first and the key saves up for it (so medium and big cards happen); a big card also waits for the big gap.
+	var want: String = str(e.get("want", ""))
+	if want == "":
+		var sizes: Dictionary = Storyteller.param("sizes", {})
+		want = str(Storyteller.pick_weighted(Storyteller.TIERS_LOCAL, [float(sizes.get("small", 0.6)), float(sizes.get("medium", 0.3)), float(sizes.get("big", 0.1))]))
+		e["want"] = want
+	if size_cost(want) > float(e["points"]) or (want == "big" and today - int(e["last_big"]) < int(Storyteller.param("big_gap_days", 7))):
 		return false
-	var pick = Storyteller.pick_weighted(order, weights)
-	var start: int = Storyteller.TIERS_LOCAL.find(pick)
+	var start: int = Storyteller.TIERS_LOCAL.find(want)
 	for i in range(start, -1, -1):          # nothing eligible of that size: try a smaller one
 		var size: String = Storyteller.TIERS_LOCAL[i]
-		if not order.has(size):
-			continue
 		var cid: String = StorytellerDeck.pick(key, size)
 		if cid != "":
 			e["points"] = float(e["points"]) - size_cost(size)
 			e["last_spend"] = today
+			e["want"] = ""
 			StorytellerPlay.card(key, cid, {})
 			return true
+	e["want"] = ""
 	return false
 
 ## The maximum-quiet guarantee: a small card even when the points cannot pay (they may go slightly negative).

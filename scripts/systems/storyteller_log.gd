@@ -7,18 +7,21 @@ extends RefCounted
 
 static var entries: Array = []       # [{day, kind, text, why, key, hids, scope, card}]
 static var _toasts: Dictionary = {}  # hid -> [day, count]  (not saved)
+static var total: int = 0            # lines ever added (not saved): tests read the new ones after each day
 
 static func reset() -> void:
 	entries.clear()
 	_toasts.clear()
+	total = 0
 
 static func cap() -> int:
 	return int(Storyteller.cfg().get("log_cap", 120))
 
-static func add(kind: String, text: String, why: String, key: String, hids: Array, scope: String, card: String) -> void:
+static func add(kind: String, text: String, why: String, key: String, hids: Array, scope: String, card: String, size: String = "", tone: String = "") -> void:
 	if text == "":
 		return
-	entries.append({"day": SysUtil.day(), "kind": kind, "text": text, "why": why, "key": key, "hids": hids.duplicate(), "scope": scope, "card": card})
+	entries.append({"day": SysUtil.day(), "kind": kind, "text": text, "why": why, "key": key, "hids": hids.duplicate(), "scope": scope, "card": card, "size": size, "tone": tone})
+	total += 1
 	while entries.size() > cap():
 		entries.pop_front()
 
@@ -64,7 +67,7 @@ static func event(cid: String, c: Dictionary, ctx: Dictionary, res: Dictionary, 
 	if text == "":
 		text = StorytellerFx.fill(str(c.get("title", cid)), ctx)
 	var hids: Array = [int(ctx["hid"])] if int(ctx.get("hid", 0)) > 0 else []
-	add("event", text, _why(str(ctx.get("key", "")), c, extra), str(ctx.get("key", "")), hids, scope, cid)
+	add("event", text, _why(str(ctx.get("key", "")), c, extra), str(ctx.get("key", "")), hids, scope, cid, str(c.get("size", "small")), str(c.get("tone", "mixed")))
 
 # ------------------------------------------------------------------ toasts (capped per household per day)
 static func toast(hid: int, text: String, kind: String = "info") -> void:

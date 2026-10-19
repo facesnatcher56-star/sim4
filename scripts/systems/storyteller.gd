@@ -251,6 +251,7 @@ static func _entries_in(src: Dictionary) -> Dictionary:
 	for k in src:
 		var e: Dictionary = (src[k] as Dictionary).duplicate(true)
 		SysUtil.ints_in(e, ["last_notable", "last_big", "last_bad_big", "mercy_until", "last_spend"])
+		e["want"] = str(e.get("want", ""))
 		out[str(k)] = e
 	return out
 

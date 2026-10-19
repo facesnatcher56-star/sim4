@@ -42,7 +42,7 @@
   "hard_systems": ["child_abuse"],
   "crime_incidents": ["burglary", "guest_theft", "street_robbery", "assault", "vandalism", "trespassing", "public_disturbance", "identity_theft"],
   "sizes": {"small": {"cost": 1.0}, "medium": {"cost": 3.0}, "big": {"cost": 7.0}},
-  "budget": {"gain_home": 0.30, "gain_lot": 0.14, "gain_district": 0.45, "gain_town": 0.18, "cap": 14.0, "spend_chance": 0.55,
+  "budget": {"gain_home": 0.30, "gain_lot": 0.06, "gain_district": 0.25, "gain_town": 0.18, "cap": 14.0, "spend_chance": 0.55,
     "floor": -4.0, "natural_cost": {"2": 0.4, "3": 1.5, "4": 3.5, "5": 6.0}, "notable_severity": 2, "big_severity": 4, "guard_city_share": 0.6},
   "wealth": {"rich_coins": 2500, "poor_coins": 450},
   "toast_cap_per_day": 3,
