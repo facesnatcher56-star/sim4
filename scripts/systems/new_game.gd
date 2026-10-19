@@ -35,6 +35,7 @@ static func start(mgr: SystemsManager, h: Dictionary, start_id: String, opts: Di
 	SimEnv.clock().reset(int(scen.get("start_hour", 7)) * 60)
 	mgr.new_game([1])
 	Players.set_player(Players.LOCAL, 1, str(h.get("name", "")))      # the players table: player 1 controls household 1
+	StorytellerCmd.configure(opts.get("storyteller", StorytellerCmd.settings_args()))      # task 29: the personality chosen on the New Game screen (the host's choice applies)
 	HouseholdSetup.apply(h, folk)
 	if not scen.is_empty():
 		_gentle_first_day()

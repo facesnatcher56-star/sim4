@@ -84,6 +84,7 @@ static func systems_rows(sm: Object) -> Array:
 		["day/DisasterClock.on_day", "DisasterClock", 1440, 320, N, "day", DisasterClock.on_day, null, "running disasters only"],
 		["day/MarketTick.on_day", "MarketTick", 1440, 330, L, "day", MarketTick.on_day, null, "markets, shops, bank, rents (world-level)"],
 		["day/StoryPacing.on_day", "StoryPacing", 1440, 340, L, "day", StoryPacing.on_day, null, "world-level"],
+		["day/Storyteller.on_day", "Storyteller", 1440, 345, N, "day", Storyteller.on_day, null, "households (FULL), townie lots (STATISTICAL) and zones: O(keys) daily, a few comparisons each; cards are rare"],
 		["day/Vacation.on_day", "Vacation", 1440, 350, N, "", Vacation.on_day, Callable(Vacation, "busy"), "active trips only"],
 		["day/systems_day event", "SystemsManager", 1440, 360, N, "day", Callable(sm, "emit_systems_day"), null, "event bus"],
 		["day/autosave", "SaveLoad", 1440, 370, L, "", SaveLoad.autosave, autosave_on, "one autosave per day (when Main is not doing it)"],

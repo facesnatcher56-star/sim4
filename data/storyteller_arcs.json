@@ -1,0 +1,103 @@
+{
+  "_doc": "Multi-day arcs (setup, escalation, climax, resolution) run by StorytellerArcs on top of StoryThreads. At most one big arc per household at a time; the town has its own arc slot (scope town). A stage has after:[min,max] days, text, fx (see storyteller_fx.gd), or options (a player choice at the climax; townies take 'auto'). Safety rules: nothing sexual, nothing graphic; the admirer arc ends with police or a resolution.",
+  "arcs": {
+    "feud": {
+      "label": "A feud with a neighbour", "scope": "home", "needs": "neighbour", "rival": true,
+      "stages": [
+        {"after": [1, 2], "text": "{other} complained about {name}'s hedge, loudly, in front of the street.", "fx": [{"friend": -8}]},
+        {"after": [2, 4], "text": "{other} has been telling the neighbours stories about {name}.", "fx": [{"friend": -8}, {"rep": -1}]},
+        {"after": [2, 4], "choice": true, "text": "{other} and {name} are barely speaking. A neighbour offers to sit them both down.",
+          "options": [
+            {"id": "talk", "label": "Sit down and talk", "fx": [{"friend": 28}, {"rep": 1}, {"buff": "cheered_up"}], "text": "It was awkward for ten minutes. Then they found they had a lot in common."},
+            {"id": "escalate", "label": "Give as good as you get", "fx": [{"friend": -15}, {"buff": "fuming"}, {"rep": -1}], "text": "The feud became the talk of the street."},
+            {"id": "ignore", "label": "Rise above it", "fx": [{"friend": 5}, {"rep": 1}], "text": "{name} stopped rising to it, and eventually {other} ran out of steam."}],
+          "default": "talk", "auto": "talk"},
+        {"after": [3, 6], "text": "The feud with {other} is over, one way or another.", "end": true}]
+    },
+    "admirer": {
+      "label": "An unwelcome admirer", "scope": "home", "needs": "stranger", "safety": true,
+      "stages": [
+        {"after": [1, 3], "text": "Someone keeps leaving small gifts at {name}'s door without a name.", "fx": [{"buff": "uneasy_memory"}]},
+        {"after": [2, 4], "text": "{other} has been seen waiting outside the places {name} goes. {name} feels watched.", "fx": [{"buff": "anxious_jitters"}]},
+        {"after": [2, 4], "choice": true, "text": "{other} left a long, intense letter for {name}. It is time to deal with this.",
+          "options": [
+            {"id": "police", "label": "Go to the police", "fx": [{"rep": 1}, {"buff": "reassured"}, {"other_friend": -50}], "text": "The police had a firm word with {other}, who was told to keep away."},
+            {"id": "friends", "label": "Ask friends to stand with you", "fx": [{"friend": 4}, {"buff": "reassured"}], "text": "{name}'s friends made it clear {other} should stop."},
+            {"id": "ignore", "label": "Ignore it", "fx": [{"buff": "anxious_jitters"}, {"roll": 0.5, "then": [{"other_friend": -50}], "else": []}], "text": "{name} tried to ignore it, but the worry did not go away."}],
+          "default": "police", "auto": "police"},
+        {"after": [3, 6], "text": "{other} has stopped turning up. {name} can breathe again.", "end": true}]
+    },
+    "rising_criminal": {
+      "label": "A rising criminal in town", "scope": "town", "needs": "townie", "town": true,
+      "stages": [
+        {"after": [2, 4], "text": "Small thefts across {zone} are being put down to one person: {other}.", "fx": [{"heat": ["crime", 1.5]}, {"other_coins": [-50, -10]}]},
+        {"after": [3, 6], "text": "{other} has been seen with a new crowd and flashing money. Break-ins are up.", "fx": [{"heat": ["crime", 2.0]}]},
+        {"after": [3, 6], "choice": true, "text": "The police have a lead on {other}. They need someone who knows the area to speak up.",
+          "options": [
+            {"id": "tip", "label": "Pass on what you know", "fx": [{"rep": 2}, {"other_friend": -20}], "text": "Your tip helped. {other} was picked up."},
+            {"id": "quiet", "label": "Stay out of it", "fx": [], "text": "You kept out of it."}],
+          "default": "tip", "auto": "quiet"},
+        {"after": [3, 6], "text": "{other} is off the streets of {zone}, and things are calmer.", "end": true, "fx": [{"heat": ["crime", -3.0]}]}]
+    },
+    "family_secret": {
+      "label": "A family secret", "scope": "home", "needs": "stranger",
+      "stages": [
+        {"after": [1, 3], "text": "Old letters turned up in a box at {name}'s home. They mention someone called {other}.", "fx": [{"buff": "uneasy_memory"}]},
+        {"after": [2, 4], "text": "{other} got in touch. They say they know something about {name}'s family.", "fx": [{"visit": 120}]},
+        {"after": [2, 4], "choice": true, "text": "{other} wants to tell {name} the whole story, but it might upset the family.",
+          "options": [
+            {"id": "listen", "label": "Hear the whole story", "fx": [{"friend": 20}, {"buff": "nostalgic_glow"}, {"coins": [0, 150]}], "text": "It was a surprise, and a kind one. The family is bigger than {name} knew."},
+            {"id": "close", "label": "Leave the past alone", "fx": [{"friend": -5}], "text": "{name} decided the past could stay where it was."}],
+          "default": "listen", "auto": "listen"},
+        {"after": [3, 6], "text": "The family secret is out, and everyone has learned to live with it.", "end": true}]
+    },
+    "business": {
+      "label": "A business going under", "scope": "town", "needs": "townie", "town": true,
+      "stages": [
+        {"after": [2, 4], "text": "{other}'s shop on {zone} has fewer customers than it used to.", "fx": []},
+        {"after": [3, 6], "text": "{other} is behind on the rent and has put up a sign asking customers to stay loyal.", "fx": [{"other_coins": [-100, -30]}]},
+        {"after": [3, 6], "choice": true, "text": "{other}'s shop is close to shutting. A shopper could make a difference.",
+          "options": [
+            {"id": "buy", "label": "Spend 40 coins there", "fx": [{"coins": -40}, {"friend": 15}, {"rep": 1}], "text": "{other} was moved. Word got around and a few more people came."},
+            {"id": "pass", "label": "Walk past", "fx": [], "text": "You walked past."}],
+          "default": "pass", "auto": "pass"},
+        {"after": [3, 6], "text": "{other}'s shop on {zone} has closed its doors. It will be missed.", "end": true, "fx": [{"lay_off": 1}]}]
+    },
+    "town_crisis": {
+      "label": "A crisis in town", "scope": "town", "needs": "none", "town": true,
+      "stages": [
+        {"after": [2, 4], "text": "A sickness is spreading on {zone}. People are staying home.", "fx": [{"heat": ["health", 2.0]}]},
+        {"after": [3, 5], "text": "The clinic is full and shelves are bare of medicine.", "fx": [{"mood_city": -0.08}]},
+        {"after": [3, 5], "choice": true, "text": "The council asks households to chip in for the clinic.",
+          "options": [
+            {"id": "give", "label": "Give 50 coins", "fx": [{"coins": -50}, {"rep": 2}, {"mood_city": 0.05}], "text": "Your donation helped. People noticed."},
+            {"id": "keep", "label": "Keep your coins", "fx": [], "text": "You kept your coins."}],
+          "default": "give", "auto": "keep"},
+        {"after": [4, 8], "text": "The sickness has passed. The town takes a deep breath.", "end": true, "fx": [{"heat": ["health", -3.0]}, {"mood_city": 0.04}]}]
+    },
+    "triangle": {
+      "label": "A romance triangle", "scope": "home", "needs": "stranger", "mature": true,
+      "stages": [
+        {"after": [1, 3], "text": "{other} has been spending a lot of time with {name}'s friends. Everyone senses something.", "fx": [{"buff": "uneasy_memory"}]},
+        {"after": [2, 4], "text": "Two people in {name}'s circle both seem to care about {other}. Tempers are short.", "fx": [{"friend": -3}]},
+        {"after": [2, 4], "choice": true, "text": "Everyone is waiting for {name} to say something.",
+          "options": [
+            {"id": "honest", "label": "Be honest with everyone", "fx": [{"rep": 2}, {"friend": 6}], "text": "It was hard, but honest. Things calmed down."},
+            {"id": "stay_out", "label": "Stay out of it", "fx": [{"friend": -3}], "text": "{name} stayed out of it."}],
+          "default": "honest", "auto": "stay_out"},
+        {"after": [3, 6], "text": "The triangle sorted itself out in the end.", "end": true}]
+    },
+    "missing_person": {
+      "label": "A missing person", "scope": "town", "needs": "townie", "town": true,
+      "stages": [
+        {"after": [1, 2], "text": "{other} hasn't been seen on {zone} for a day. Their neighbours are worried.", "fx": [{"vanish": 4}]},
+        {"after": [2, 3], "text": "Posters for {other} are going up. The police are asking for any sighting.", "fx": [{"mood_city": -0.03}]},
+        {"after": [2, 3], "choice": true, "text": "A search is being organised for {other}. Volunteers are welcome.",
+          "options": [
+            {"id": "search", "label": "Join the search", "fx": [{"rep": 2}, {"friend": 8}], "text": "{name} spent an afternoon searching with the neighbours."},
+            {"id": "wait", "label": "Leave it to the police", "fx": [], "text": "{name} left it to the police."}],
+          "default": "search", "auto": "wait"},
+        {"after": [2, 4], "text": "{other} has been found safe and well. They had simply needed to get away for a few days.", "end": true, "fx": [{"vanish": 0}]}]
+    }
+  }
+}

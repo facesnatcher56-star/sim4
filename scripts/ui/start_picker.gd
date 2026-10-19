@@ -12,6 +12,11 @@ var start_id := "classic"
 var world_seed := 0                # drawn per picker opening; the whole map follows from it
 var homes: Dictionary = {}         # scenario id -> home template shown on its card
 var funds_base := -1               # Free Play funds option (-1 = the scenario's own funds)
+var storyteller := "classic"       # task 29: the storyteller personality (Calm / Classic / Chaotic / Custom)
+var st_custom: Dictionary = {}     # the four Custom sliders, 0..1
+var st_buttons: Dictionary = {}
+var st_desc: Label
+var st_sliders: HBoxContainer
 var cards: Dictionary = {}
 var diff_buttons: Dictionary = {}
 var diff_desc: Label
@@ -94,6 +99,7 @@ func _build_options(root: VBoxContainer) -> void:
 	diff_desc = UIU.make_label("", 13, UITheme.MUTED)
 	diff_desc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	dr.add_child(diff_desc)
+	_build_storyteller(root)
 	funds_row = HBoxContainer.new()
 	root.add_child(funds_row)
 	funds_row.add_child(UIU.make_label("Starting funds", 15))
@@ -103,11 +109,63 @@ func _build_options(root: VBoxContainer) -> void:
 		_refresh())
 	funds_row.add_child(funds_opt)
 
+## Storyteller row (task 29): pick how the unexpected plays out; Custom shows four sliders. The choice is saved as the default for the next game.
+func _build_storyteller(root: VBoxContainer) -> void:
+	var sr := HBoxContainer.new()
+	root.add_child(sr)
+	var tl := UIU.make_label("Storyteller", 15)
+	tl.tooltip_text = "How the unexpected plays out. You can change it later in Settings. In co-op the host's choice applies."
+	sr.add_child(tl)
+	var grp := ButtonGroup.new()
+	for pid in Storyteller.personality_ids():
+		var b := Button.new()
+		b.text = Storyteller.label(str(pid))
+		b.toggle_mode = true
+		b.button_group = grp
+		b.custom_minimum_size = Vector2(110, 34)
+		b.pressed.connect(set_storyteller.bind(str(pid)))
+		sr.add_child(b)
+		st_buttons[str(pid)] = b
+	st_desc = UIU.make_label("", 13, UITheme.MUTED)
+	st_desc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	st_desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	sr.add_child(st_desc)
+	st_sliders = HBoxContainer.new()
+	root.add_child(st_sliders)
+	for k in [["frequency", "How often"], ["severity", "How big"], ["balance", "Good luck"], ["mercy", "Mercy"]]:
+		st_sliders.add_child(UIU.make_label(str(k[1]), 13))
+		var s := HSlider.new()
+		s.min_value = 0.0
+		s.max_value = 1.0
+		s.step = 0.05
+		s.custom_minimum_size = Vector2(120, 24)
+		s.value = float(st_custom.get(k[0], 0.5))
+		s.value_changed.connect(func(v): st_custom[k[0]] = v)
+		st_sliders.add_child(s)
+
+func set_storyteller(p: String) -> void:
+	storyteller = p
+	if st_buttons.has(p):
+		(st_buttons[p] as Button).button_pressed = true
+	if st_desc != null:
+		st_desc.text = Storyteller.blurb(p)
+	if st_sliders != null:
+		st_sliders.visible = p == "custom"
+
 ## Reset to the defaults: Solo Start, Normal.
 func open() -> void:
 	if creator != null:
 		creator.visible = false
 	difficulty = Scenario.default_difficulty()
+	var sa: Dictionary = StorytellerCmd.settings_args()
+	st_custom = (sa["custom"] as Dictionary).duplicate()
+	set_storyteller(str(sa["personality"]))
+	var keys: Array = ["frequency", "severity", "balance", "mercy"]
+	var i := 0
+	for ch in st_sliders.get_children():
+		if ch is HSlider:
+			(ch as HSlider).set_value_no_signal(float(st_custom.get(keys[i], 0.5)))
+			i += 1
 	world_seed = randi() & 0x7fffffff
 	homes.clear()
 	for k in cards:
@@ -194,5 +252,13 @@ func _on_creator_done(h: Dictionary, sid: String) -> void:
 		_emit_chosen()
 
 func _emit_chosen() -> void:
-	chosen.emit({"scenario": selected_id, "difficulty": difficulty, "start_id": start_id, "funds": funds(), "household": household,
+	var st: Dictionary = StorytellerCmd.settings_args()
+	st["personality"] = storyteller
+	st["custom"] = st_custom.duplicate()
+	GameSettings.set_value("storyteller", storyteller)         # the next new game starts from this choice
+	GameSettings.set_value("storyteller_freq", int(round(float(st_custom.get("frequency", 0.5)) * 100.0)))
+	GameSettings.set_value("storyteller_sev", int(round(float(st_custom.get("severity", 0.5)) * 100.0)))
+	GameSettings.set_value("storyteller_good", int(round(float(st_custom.get("balance", 0.5)) * 100.0)))
+	GameSettings.set_value("storyteller_mercy", int(round(float(st_custom.get("mercy", 0.5)) * 100.0)))
+	chosen.emit({"storyteller": st, "scenario": selected_id, "difficulty": difficulty, "start_id": start_id, "funds": funds(), "household": household,
 		"home_template": str(homes.get(selected_id, "")), "world_seed": world_seed})

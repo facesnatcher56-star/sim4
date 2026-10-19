@@ -28,6 +28,10 @@ static func apply_all() -> void:
 	_hook_lights()
 
 static func apply_key(key: String) -> void:
+	if key.begins_with("storyteller") or key.begins_with("story_cat_"):
+		if not Storyteller.cfg().is_empty():
+			StorytellerCmd.apply_settings()            # task 29: the host's choice goes through the command layer
+		return
 	match key:
 		"window_mode", "resolution": apply_window()
 		"vsync": apply_vsync()

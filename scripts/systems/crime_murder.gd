@@ -97,7 +97,7 @@ static func _update(a: int, b: int, k: Dictionary) -> void:
 	if rage >= float(k.get("vow_at", 75.0)):
 		g["vow"] = true
 		if SysUtil.day() - int(g.get("since", SysUtil.day())) >= int(k.get("min_days", 6)) and not _queued(a, b):
-			if JusticeState.chance(float(k.get("daily_chance", 0.05)) * _opportunity(a, b) * Incidents.surprise_mult()):
+			if JusticeState.chance(float(k.get("daily_chance", 0.05)) * _opportunity(a, b) * Incidents.surprise_mult() * Storyteller.hard_mult()):
 				_begin(a, b)
 	elif rage < float(k.get("warn_at", 45.0)) - 15.0:
 		g["warned"] = 0

@@ -79,7 +79,7 @@ static func _roll(id: String, def: Dictionary, s) -> void:
 	var c: Dictionary = Incidents._counter(id)
 	c["checks"] = int(c["checks"]) + 1
 	c["exposure"] = float(c["exposure"]) + 1.0 / IncidentRisk.checks_per_year(check)
-	var pacing: float = StoryPacing.incident_mult(id, s)
+	var pacing: float = StoryPacing.incident_mult(id, s) * Storyteller.incident_mult(id)      # task 29: capped hard-rule / crime / era multipliers (1.0 for Classic)
 	# The draw comes first, against the best case (every risk entry at once, nothing preventing). A draw that cannot hit skips the risk and
 	# prevent conditions, which were most of the cost of the dice; the odds are unchanged, the event happens exactly when the draw is under
 	# the real chance. (One draw per rolled subject, where a prevented subject used to draw nothing: the random stream is not the old one.)

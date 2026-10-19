@@ -261,6 +261,7 @@ func _on_game_event(ev_name: String, payload: Dictionary) -> void:
 	MarketTick.on_game_event(ev_name, payload)
 	MoodSwings.on_game_event(ev_name, payload)
 	StoryPacing.on_game_event(ev_name, payload)
+	Storyteller.on_game_event(ev_name, payload)
 	Vacation.on_game_event(ev_name, payload)
 	CityState.on_game_event(ev_name, payload)
 	Pregnancy.on_game_event(ev_name, payload)

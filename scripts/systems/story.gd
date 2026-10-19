@@ -50,7 +50,7 @@ static func alive_townies() -> Array:
 static func free_townies() -> Array:
 	var out: Array = []
 	for id in townies:
-		if bool(townies[id]["alive"]) and not JusticeState.inmates.has(int(id)) and not Hospital.is_in(int(id)):
+		if bool(townies[id]["alive"]) and not JusticeState.inmates.has(int(id)) and not Hospital.is_in(int(id)) and int(townies[id].get("missing_until", 0)) <= SysUtil.day():
 			out.append(townies[id])
 	return out
 
