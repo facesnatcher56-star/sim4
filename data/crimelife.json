@@ -52,7 +52,7 @@
  "snitch": {"base": 0.38, "loyalty": 0.55, "cut_short": 0.2, "record": 0.1, "deal_cut": 0.5, "rival_daily": 0.012, "rival_cred_gap": 25, "rat_tip": 0.3, "refuse_loyalty": 0.1, "deal_cred": -30},
  "moral": {"find_out_daily": 0.01, "find_out_gossip": 0.5, "family_friendship": -18, "guilt_days": 5, "notoriety_per_cred": 0.6, "notoriety_conviction": 6, "ledger_victim_buff": "violated"},
  "townie": {"join_base": 0.002, "jobless": 1.8, "record": 2.0, "dishonest": 2.5, "kleptomaniac": 1.4, "honest": 0.08, "generous": 0.4, "pressure_mult": 3.0, "max_share": 0.12, "job_daily": 0.02, "rank_daily": [0.07, 0.08, 0.05, 0.03, 0.02],
-  "quit_after_arrest": 0.5, "quit_daily": 0.008, "skill_start": [0, 3], "job_weights": {"pickpocket": 3, "shoplift": 3, "scam": 1, "car_theft": 1, "burglary": 2, "store_robbery": 0.6}, "heist_daily": 0.004, "offer_gap_days": 14, "burglar_weight": 3.0, "pickpocket_victim_min": 40, "contact_chance": 0.02},
+  "quit_after_arrest": 0.5, "quit_daily": 0.008, "skill_start": [0, 3], "job_weights": {"pickpocket": 3, "shoplift": 3, "scam": 1, "car_theft": 1, "burglary": 2, "store_robbery": 0.6}, "heist_daily": 0.025, "offer_gap_days": 14, "burglar_weight": 3.0, "pickpocket_victim_min": 40, "contact_chance": 0.02},
  "security": {
   "home": {
    "lock": {"1": 0.06, "2": 0.14, "3": 0.24}, "window_lock": 0.04, "window_cap": 3,

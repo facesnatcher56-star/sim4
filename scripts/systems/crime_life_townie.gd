@@ -58,7 +58,7 @@ static func person_day(pid: int) -> void:
 	var ri: int = maxi(CrimeLifePath.rank_index(pid), 0)
 	var rates: Array = k.get("rank_daily", [0.02])
 	var daily: float = float(rates[mini(ri, rates.size() - 1)]) * Incidents.surprise_mult() * CrimeRate.crime_mult()
-	if ri >= CrimeLifePath.rank_index_of_id("crew_boss") and CrimeLifeState.chance(float(k.get("heist_daily", 0.004))):
+	if CrimeLifeState.chance(float(k.get("heist_daily", 0.004))):
 		heist(pid)
 		return
 	if CrimeLifeState.chance(daily):
@@ -83,13 +83,13 @@ static func work(pid: int) -> Dictionary:
 		return {}
 	return CrimeLifeJobs.run(pid, jid2, target, {"night": bool(CrimeLifeRoll.job(jid2).get("night", false)), "statistical": true})
 
-## A statistical heist: the boss pulls in up to two other members, the target is already well known.
+## A statistical heist: any member may be talked into one big job now and then (a jeweller or a bank, ~one per 3 to 6 town-years); the boss pulls in up to two other members, the target is already well known.
 static func heist(pid: int) -> Dictionary:
 	var ids: Array = CrimeLifeHeist.target_ids()
 	if ids.is_empty() or not CrimeLifeHeist.plan_of(pid).is_empty():
 		return {}
 	var t: String = str(ids[CrimeLifeState.rng.randi_range(0, ids.size() - 1)])
-	var res: Dictionary = CrimeLifeHeist.plan(pid, t)
+	var res: Dictionary = CrimeLifeHeist.plan(pid, t, true)
 	if not bool(res["ok"]):
 		return {}
 	var h: Dictionary = CrimeLifeHeist.get_heist(int(res["heist"]))

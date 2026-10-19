@@ -31,14 +31,14 @@ static func can_plan(pid: int) -> bool:
 	return CrimeLifePath.rank_index(pid) >= CrimeLifePath.rank_index_of_id(str(CrimeLifeRoll.job("heist").get("rank", "burglar")))
 
 # ------------------------------------------------------------------ planning
-static func plan(leader: int, target: String) -> Dictionary:
+static func plan(leader: int, target: String, unproven_ok: bool = false) -> Dictionary:
 	if target_def(target).is_empty():
 		return {"ok": false, "msg": "No such target."}
 	if not CrimePerson.alive(leader) or CrimePerson.in_custody(leader):
 		return {"ok": false, "msg": "Not right now."}
 	if not CrimeLifePath.is_member(leader):
 		return {"ok": false, "msg": "Start with smaller jobs."}
-	if not can_plan(leader):
+	if not unproven_ok and not can_plan(leader):
 		return {"ok": false, "msg": "Nobody will back a plan from someone unproven. Build a name as a burglar first."}
 	if not plan_of(leader).is_empty():
 		return {"ok": false, "msg": "You already have a plan going."}
