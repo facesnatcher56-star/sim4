@@ -25,6 +25,16 @@ static func uninstall() -> void:
 	for cid in CrimeLifeState.sect("careers"):
 		careers.erase(cid)
 
+## A conviction for stealing, robbery or fraud closes the guard careers (Careers.qualify through JusticeCareers.extra_missing).
+static func barred(pid: int, career: String) -> bool:
+	if not ROLES.has(career):
+		return false
+	for r in JusticeRecords.convictions(pid):
+		var fam: String = str(JusticeProcess.charge_def(str(r.get("charge", ""))).get("family", ""))
+		if fam in ["burglary", "theft", "robbery", "fraud", "car_theft", "receiving_stolen", "shoplifting", "grand_theft"]:
+			return true
+	return false
+
 # ------------------------------------------------------------------ posts
 ## Every post that wants guards: [{post "biz:bank", guards n}] from the business security table.
 static func posts() -> Array:

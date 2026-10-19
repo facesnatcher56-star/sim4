@@ -14,6 +14,7 @@ func run() -> Array:
 	_night_sleep_rate(f)
 	_rounds(f)
 	_watchman(f)
+	_record(f)
 	return f
 
 func _careers(f: Array) -> void:
@@ -149,4 +150,16 @@ func _watchman(f: Array) -> void:
 	CrimeSecurityGuards.set_asleep(int(watch[0]), true)
 	var asleep: Dictionary = CrimeLifeRoll.odds(1, "shoplift", "biz:cafe", {"night": true, "cased": 0.0})
 	K.expect(f, float(asleep["detect"]) < float(awake["detect"]), "a watchman asleep misses more (%.2f vs %.2f)" % [asleep["detect"], awake["detect"]])
+	K.teardown()
+
+func _record(f: Array) -> void:
+	var w := C.town(8)
+	var ada = w.get_folk(1)
+	ada.add_skill_xp("fitness", 700.0)
+	var q: Dictionary = Careers.qualify(ada, "security_guard", 2)
+	K.expect(f, bool(q["ok"]), "a clean folk with some fitness can be a guard (%s)" % str(q["missing"]))
+	JusticeRecords.add(1, "burglary", 1, "guilty")
+	var q2: Dictionary = Careers.qualify(ada, "security_guard", 2)
+	K.expect(f, not bool(q2["ok"]) and str(q2["missing"]).contains("clean record"), "but not a convicted burglar")
+	K.expect(f, not CrimeSecurityGuards.barred(1, "baker"), "other jobs are not affected by this rule")
 	K.teardown()

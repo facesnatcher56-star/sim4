@@ -53,6 +53,8 @@ static func staff_town() -> void:
 
 ## Careers.qualify hook: extra missing requirement text for a closed door.
 static func extra_missing(pid: int, career: String) -> Array:
+	if CrimeSecurityGuards.barred(pid, career):
+		return ["a clean record"]            # nobody hires a convicted thief to guard their shop (task 21)
 	if Prison.job_ok(pid, career):
 		return []
 	return ["a clean record"]
