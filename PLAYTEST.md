@@ -46,7 +46,7 @@ Top bar buttons: **Map**, **Money** (shops, your business, homes, bank), **Town*
 - **Stay-at-home parent**: have a parent with a small child skip work and look after the child at home.
 - **A baby**: a couple can try for a baby; pregnancy, birth, toddler care, growing up.
 - **School**: children and teens go to school; college is under **Town**.
-- **Café and nightlife**: take your Folk out in the evening (use the Map to travel).
+- **Cafe and nightlife**: take your Folk out in the evening (use the Map to travel).
 - **Pets**: adopt one (Town > Pets tab) and see how it settles in.
 - **The phone**: under **Town** > Phone tab: calls, messages, media.
 - **The criminal path**: the underworld and crime; the police and courts react. Open the **case board with F10** to follow a case.
