@@ -1,14 +1,5 @@
 {
  "_doc": "Task 22: rare happenings on a cruise (storm, stomach bug, fire, overboard, cabin theft, a brawl, a killer aboard). Lot scope = per household while a member is on a cruise (buff on_cruise). One handler (CruiseIncidents.on_incident) does the work and logs with place 'cruise'. Rates are per cruise-year of exposure (28 game days), Rare level. Also: the burglary incident gets the tag burglary_odds (VacationHome: an empty house is a better target).",
- "config": {
-  "health": {
-   "illness": {
-    "kinds": {
-     "norovirus": {"buff": "norovirus", "hours": 30, "contagious": false, "exposed_buff": "exposed_noro", "immune_buff": "immune_noro", "immune_hours": 48}
-    }
-   }
-  }
- },
  "handlers": {
   "cruise_incident": {"script": "res://scripts/systems/cruise_incidents.gd", "method": "on_incident"}
  },

@@ -14,6 +14,7 @@ static func install() -> void:
 		return
 	var cfg: Dictionary = data.get_table("content_sys")
 	ContentMerge.install(cfg)
+	VacationContent.install()               # task 22: before the tag patches, so holiday things get the stage gates and the severe-weather tests
 	_add_marker_buffs(data.buffs())
 	_patch_targets(inter)
 	_patch_stage_gates(inter)
@@ -25,7 +26,7 @@ static func install_all() -> void:
 	FamilyContent.install()
 	WeatherContent.install()
 	IncidentContent.install()
-	VacationContent.install()
+	VacationContent.install()          # idempotent; also runs inside install() before the tag patches
 
 ## Buffs derived from other tables: the hidden stage_<id> markers (data/aging.json) and the goals' perk buffs.
 static func _add_marker_buffs(buffs: Dictionary) -> void:

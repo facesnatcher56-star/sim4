@@ -279,6 +279,7 @@ static func to_dict() -> Dictionary:
 
 static func from_dict(d: Dictionary) -> void:
 	reset()
+	VacationContent.install()                    # Incidents.from_dict just reloaded the incident config (the norovirus kind lives there)
 	if d.is_empty():
 		return
 	next_id = int(d.get("next_id", 1))

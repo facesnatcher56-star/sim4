@@ -61,6 +61,7 @@ static func storm(t: Dictionary) -> void:
 
 # ------------------------------------------------------------------ stomach bug
 static func norovirus(t: Dictionary) -> void:
+	VacationContent.install()
 	var c: Dictionary = t["cruise"]
 	var r := Vacation.rng_for(t)
 	c["noro_until"] = SysUtil.now() + int(cfg().get("noro_days", 3)) * 1440
