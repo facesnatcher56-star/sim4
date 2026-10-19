@@ -8,12 +8,15 @@ static func cfg() -> Dictionary:
 	return StoryPacing.cfg().get("singles", {})
 
 static func on_day(_day: int) -> void:
+	StoryPursuit.on_day()
 	var c: Dictionary = cfg()
 	if c.is_empty() or not StoryPacing.enabled:
 		return
 	for f in SysUtil.residents():
 		if str(f.age_stage) not in RomanceRules.ADULT_STAGES or SysUtil.is_away(f) or not is_single(int(f.id)):
 			continue
+		if StoryPursuit.any_active(int(f.id)):
+			continue                             # still getting to know someone: no second nudge
 		var hid: int = int(f.household_id)
 		if SysUtil.chance(float(c.get("date_chance", 0.1)) * StoryPacing.mult("flirt", hid)):
 			if _nudge_date(c, f):
@@ -56,6 +59,7 @@ static func _nudge_date(c: Dictionary, f) -> bool:
 	RelationshipService.add_both(int(f.id), p, "romance", float(c.get("romance", 10.0)))
 	if Story.townies.has(p):
 		StoryVisits.invite_over(p, int(f.id))
+	StoryPursuit.begin(int(f.id), p)
 	SysUtil.notify("%s and %s keep finding reasons to talk." % [f.name, SysUtil.folk_name(p)], "story")
 	SysUtil.game_event("singles_nudge", {"folk_id": int(f.id), "target_id": p})
 	return true

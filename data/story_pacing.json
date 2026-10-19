@@ -29,7 +29,8 @@
   "milestones": {"min_partner_days": 3, "bond_chance": 0.25, "propose_chance": 0.15, "min_engaged_days": 2, "marry_chance": 0.2, "baby_chance": 0.04,
     "breakup_romance_below": 30, "breakup_friendship_below": 20, "breakup_chance": 0.05},
   "singles": {"date_chance": 0.1, "friendship": 8.0, "romance": 10.0, "move_in_chance": 0.03, "move_in_friendship": 40.0, "adopt_chance": 0.015,
-    "adopt_min_coins": 1500, "max_household": 4},
+    "adopt_min_coins": 1500, "max_household": 4,
+    "pursuit": {"days": 14, "meet_chance": 0.75, "friendship": 3.0, "romance": 5.0, "invite_every_days": 3}},
   "threads": [
     {"id": "cheat_aftermath", "on": "breakup", "when": {"cause": "cheating"}, "delay_days": [1, 3], "action": "revenge_or_forgive", "forgive": 0.4},
     {"id": "ex_returns", "on": "breakup", "when": {"other_is_townie": true}, "delay_days": [3, 8], "action": "visit_from_other",
