@@ -250,7 +250,8 @@ func _build_dialogs() -> void:
 			_settings_from_pause = false
 			pause_menu.show_for(-1))
 	confirm_dialog = ConfirmDialog.new()
-	IncidentDebug.ensure_action()
+	if OS.is_debug_build():      # the F9 incident panel is a developer tool: editor / debug runs only
+		IncidentDebug.ensure_action()
 	incident_debug = IncidentDebug.new()
 	CaseBoard.ensure_action()
 	case_board = CaseBoard.new()
@@ -504,7 +505,7 @@ func _unhandled_input(ev: InputEvent) -> void:
 	elif ev.is_action_pressed("sim_wall_mode"):
 		if lot_view: lot_view.call("cycle_wall_mode")
 	elif ev.is_action_pressed("sim_help"): help_dialog.toggle_for(selected_folk_id)
-	elif ev.is_action_pressed("sim_debug_incidents"): incident_debug.toggle_for(selected_folk_id)
+	elif InputMap.has_action("sim_debug_incidents") and ev.is_action_pressed("sim_debug_incidents"): incident_debug.toggle_for(selected_folk_id)
 	elif ev.is_action_pressed("sim_case_board"): case_board.toggle_for(selected_folk_id)
 	else:
 		match ev.keycode:

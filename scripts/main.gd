@@ -13,6 +13,7 @@ var playing := false
 var systems: SystemsManager
 
 func _ready() -> void:
+	FileLog.install()      # exported build only: folk.log next to the exe
 	Careers.confirm_offers = true      # the player answers job offers (Accept / Decline) instead of 'Look for Jobs' hiring instantly
 	GameSettings.load_settings()      # before anything shows: window, quality, audio, keys
 	SettingsApply.apply_all()
