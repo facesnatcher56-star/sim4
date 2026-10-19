@@ -19,6 +19,7 @@ func run() -> Array:
 	_safe(f)
 	_business(f)
 	_upgrades(f)
+	_real_businesses(f)
 	return f
 
 func _equip(w: StubWorld, ids: Array) -> void:
@@ -252,4 +253,30 @@ func _upgrades(f: Array) -> void:
 	K.expect(f, bool(ok["ok"]) and bool(CrimeSecurity.home_profile(1)["monitored"]), "monitoring can be bought once there is an alarm")
 	var g: Dictionary = Commands.run({"player_id": 1, "folk_id": 1, "action": "crimelife", "args": {"action": "home_service", "key": "guard", "value": 1}})
 	K.expect(f, bool(g["ok"]) and int(CrimeSecurity.home_profile(1)["guards"]) == 1, "a guard is hired through the command layer")
+	K.teardown()
+
+func _real_businesses(f: Array) -> void:
+	var w := C.town(12)
+	CrimeLifePath.join(1)
+	CrimeLifePath.member(1)["rank"] = "burglar"
+	CrimeLifePath.member(1)["jobs"] = 6
+	var mine: Dictionary = BusinessState.make("shop", "market", "own", "player", 1, "Ada's Shop")
+	var theirs: Dictionary = BusinessState.make("cafe", "cafe", "own", "townie", int(C.adults()[0]), "Corner Cafe")
+	var tg: Array = CrimeLifeJobs.targets(1, "store_robbery", 20)
+	var scenes: Array = tg.map(func(t): return str(t["scene"]))
+	K.expect(f, scenes.has("biz:%d" % int(mine["id"])) and scenes.has("biz:%d" % int(theirs["id"])), "real businesses are targets, with their own cover")
+	var coins: int = WorldIface.get_coins(1)
+	var t: Dictionary = {}
+	for x in tg:
+		if int(x.get("biz", -1)) == int(mine["id"]):
+			t = x
+	var res: Dictionary = CrimeLifeJobs.run(2 if false else 1, "store_robbery", t, {"force": "clean"})
+	K.expect(f, WorldIface.get_coins(1) < coins + int(res["loot"]), "robbing a player's shop takes the household's money")
+	K.expect(f, int(CrimeLifeState.biz_sec[int(mine["id"])]["robbed_day"]) == SysUtil.day() and K.has_note("was robbed") , "and the owner is told")
+	# a townie owner reacts to a robbery by buying cover
+	Story.townies[int(C.adults()[0])]["coins"] = 5000
+	CrimeLifeState.biz_sec[int(theirs["id"])] = {"robbed_day": SysUtil.day()}
+	for d in 12:
+		CrimeSecurityUpgrade.townie_owners_day()
+	K.expect(f, CrimeSecurityUpgrade.level_of_biz(int(theirs["id"]), "camera") >= 1 or CrimeSecurityUpgrade.level_of_biz(int(theirs["id"]), "alarm") >= 1, "a townie shopkeeper buys cover after a robbery")
 	K.teardown()

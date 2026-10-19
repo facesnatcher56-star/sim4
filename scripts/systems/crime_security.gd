@@ -52,6 +52,9 @@ static func business_profile(btype: String, biz_id: int = -1) -> Dictionary:
 	p["alarm"] = bool(int(base.get("alarm", 0)) > 0 or int(up.get("alarm", 0)) > 0)
 	p["monitored"] = bool(p["alarm"]) and (int(base.get("monitored", 0)) > 0 or int(up.get("monitored", 0)) > 0)
 	p["detective"] = int(base.get("detective", 0)) > 0 or int(up.get("detective", 0)) > 0
+	if int(p["guards"]) == 0 and CrimeSecurityGuards.watchman_on():
+		p["guards"] = 1                                                 # the night watchman covers a closed shop
+		p["watchman"] = true
 	return p
 
 ## A far townie's house: richer folk have better locks, alarms and cameras. Deterministic per lot number.

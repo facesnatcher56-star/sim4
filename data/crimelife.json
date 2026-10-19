@@ -12,7 +12,7 @@
  "skills": {"stealth": {"label": "Stealth", "blurb": "Sneaking, slipping locks and not being noticed."}},
  "jobs": {
   "pickpocket": {"label": "Pick a pocket", "kind": "theft", "charge": "theft", "scene": "street", "minutes": 25, "difficulty": 0.3, "skills": {"stealth": 1.0, "charisma": 0.3},
-   "loot": [8, 45], "detect": 0.32, "catch": 0.3, "trace": 0.06, "cred": 0.8, "xp": 7, "heat": 1.0, "victim": "townie", "rank": "petty_thief", "needs_target": true},
+   "loot": [8, 45], "detect": 0.32, "catch": 0.3, "trace": 0.06, "cred": 0.8, "xp": 7, "heat": 1.0, "victim": "townie", "rank": "petty_thief", "needs_target": true, "crowd_cover": true},
   "shoplift": {"label": "Shoplift", "kind": "shoplifting", "charge": "shoplifting", "scene": "venue", "minutes": 30, "difficulty": 0.28, "skills": {"stealth": 1.0, "charisma": 0.2},
    "loot": [10, 45], "goods": true, "detect": 0.38, "catch": 0.4, "trace": 0.04, "cred": 0.7, "xp": 7, "heat": 0.8, "victim": "shop", "rank": "petty_thief", "petty": true},
   "car_theft": {"label": "Steal a car", "kind": "theft", "charge": "car_theft", "scene": "street", "minutes": 70, "difficulty": 0.5, "skills": {"stealth": 0.8, "handiness": 0.7},

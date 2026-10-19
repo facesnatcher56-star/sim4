@@ -65,8 +65,29 @@ static func set_home_service(hid: int, key: String, value: int) -> Dictionary:
 	CrimeLifeState.home_sec[hid] = rec
 	return {"ok": true, "msg": ""}
 
+## Townie owners react: after a robbery they buy cover, and a prosperous shop now and then adds a camera or an alarm.
+static func townie_owners_day() -> void:
+	for id in BusinessState.list:
+		var b: Dictionary = BusinessState.list[id]
+		if str(b["owner_kind"]) != "townie":
+			continue
+		var rec: Dictionary = CrimeLifeState.biz_sec.get(int(id), {})
+		var robbed: bool = SysUtil.day() - int(rec.get("robbed_day", -999)) <= 14
+		if not CrimeLifeState.chance(0.3 if robbed else 0.004):
+			continue
+		for key in ["camera", "alarm", "lock", "guard"]:
+			var lvl: int = level_of_biz(int(id), key)
+			var price: int = next_price(key, lvl)
+			if price < 0 or CrimePerson.coins(int(b["owner"])) < price * 2:
+				continue
+			CrimePerson.pay(int(b["owner"]), price, "security")
+			rec[key] = lvl + 1
+			CrimeLifeState.biz_sec[int(id)] = rec
+			break
+
 ## Weekly wages of business guards and store detectives, taken from the player owner.
 static func on_day() -> void:
+	townie_owners_day()
 	if SysUtil.day() % 7 != 0:
 		return
 	for id in BusinessState.list:

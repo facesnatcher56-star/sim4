@@ -42,6 +42,18 @@ func _odds(f: Array) -> void:
 	var day: Dictionary = CrimeLifeRoll.odds(1, "pickpocket", "street", {"night": false})
 	var night: Dictionary = CrimeLifeRoll.odds(1, "pickpocket", "street", {"night": true})
 	K.expect(f, float(night["detect"]) < float(day["detect"]), "the dark helps")
+	var empty: Dictionary = CrimeLifeRoll.odds(1, "pickpocket", "street", {"night": false, "crowd": 0.0})
+	var crowd: Dictionary = CrimeLifeRoll.odds(1, "pickpocket", "street", {"night": false, "crowd": 1.0})
+	K.expect(f, float(crowd["detect"]) < float(empty["detect"]), "a crowd hides a pickpocket (%.2f vs %.2f)" % [crowd["detect"], empty["detect"]])
+	var rob_empty: Dictionary = CrimeLifeRoll.odds(1, "store_robbery", "biz:market", {"crowd": 0.0})
+	var rob_crowd: Dictionary = CrimeLifeRoll.odds(1, "store_robbery", "biz:market", {"crowd": 1.0})
+	K.expect(f, float(rob_crowd["detect"]) > float(rob_empty["detect"]), "but more people means more witnesses to a robbery")
+	JusticeState.rate_now = 5.0
+	var safe_town: Dictionary = CrimeLifeRoll.odds(1, "pickpocket", "street", {"night": false, "crowd": 0.0})
+	JusticeState.rate_now = 95.0
+	var lawless: Dictionary = CrimeLifeRoll.odds(1, "pickpocket", "street", {"night": false, "crowd": 0.0})
+	K.expect(f, float(safe_town["detect"]) > float(lawless["detect"]), "a safe, watchful town notices more than a lawless one (%.2f vs %.2f)" % [safe_town["detect"], lawless["detect"]])
+	JusticeState.rate_now = 0.0
 	K.teardown()
 
 func _pickpocket(f: Array) -> void:

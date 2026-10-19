@@ -49,12 +49,24 @@ static func targets(pid: int, jid: String, limit: int = 8) -> Array:
 						coins += CrimePerson.coins(t2)
 				out.append({"scene": "town:%d" % n, "case_scene": "town:%d" % n, "victim": _townie_owner(n), "label": CaseStore.house_label("town:%d" % n), "weight": coins + 50})
 		"shop", "business":
+			for bid in BusinessState.list:                         # the real businesses of the town first (task 13): their own cover and owner
+				var b: Dictionary = BusinessState.list[bid]
+				if not bool(b.get("open", true)) or (str(j.get("victim", "")) == "shop" and str(b["type"]) not in ["shop", "bakery", "cafe", "restaurant"]):
+					continue
+				var owner: int = int(b["owner"]) if str(b["owner_kind"]) == "townie" else _first_resident(int(b["owner"]))
+				out.append({"scene": "biz:%d" % int(bid), "case_scene": "street", "victim": owner, "label": str(b["name"]), "weight": 150, "biz": int(bid)})
 			for t in ["market", "cafe", "gym", "library", "office", "shop", "bar", "bakery"]:
 				if str(j.get("victim", "")) == "shop" and t not in ["market", "shop", "bakery"]:
 					continue
 				out.append({"scene": "biz:%s" % t, "case_scene": "street", "victim": _shop_victim(t), "label": "the %s" % t, "weight": 100})
 	out.sort_custom(func(a, b): return int(a["weight"]) > int(b["weight"]) or (int(a["weight"]) == int(b["weight"]) and str(a["scene"]) < str(b["scene"])))
 	return out.slice(0, limit)
+
+static func _first_resident(hid: int) -> int:
+	for r in SysUtil.residents():
+		if int(r.household_id) == hid:
+			return int(r.id)
+	return -1
 
 ## The person behind the counter (a townie with a career, else the first townie): a witness and the victim of a shop robbery.
 static func _shop_victim(_btype: String) -> int:
@@ -159,7 +171,12 @@ static func _take(pid: int, j: Dictionary, target: Dictionary, res: Dictionary) 
 		goods_share = 1.0 if bool(j.get("car", false)) or str(j.get("kind", "")) == "shoplifting" else 0.6
 	var goods: int = int(float(amount) * goods_share)
 	var coins: int = amount - goods
-	if coins > 0 and victim >= 0 and str(j.get("victim", "")) in ["townie", "house"]:
+	var biz: Dictionary = BusinessState.get_biz(int(target.get("biz", -1))) if int(target.get("biz", -1)) >= 0 else {}
+	if not biz.is_empty() and str(biz["owner_kind"]) == "player":
+		coins = mini(coins, WorldIface.get_coins(int(biz["owner"])))          # the takings come out of the owning household's money
+		if coins > 0:
+			Economy.deposit(int(biz["owner"]), -coins, "robbed: %s" % str(biz["name"]))
+	elif coins > 0 and victim >= 0 and str(j.get("victim", "")) in ["townie", "house"]:
 		coins = CrimePerson.pay(victim, coins, "stolen")
 	if coins > 0:
 		CrimePerson.add_coins(pid, coins, "ill-gotten gains")
@@ -202,6 +219,13 @@ static func _after(pid: int, j: Dictionary, res: Dictionary, outcome: String, o:
 		m["heat"] = float(m.get("heat", 0.0)) + float(j.get("heat", 1.0)) * (1.6 if seen else 0.6)
 		CrimeLifePath.add_cred(pid, float(j.get("cred", 1.0)) * (0.6 if seen else 1.0), "job")
 	CrimeLifeMoral.after_crime(pid, int(target.get("victim", -1)), kind, int(res["loot"]) + int(res["goods"]), c)
+	if int(target.get("biz", -1)) >= 0:
+		var rec: Dictionary = CrimeLifeState.biz_sec.get(int(target["biz"]), {})
+		rec["robbed_day"] = SysUtil.day()
+		CrimeLifeState.biz_sec[int(target["biz"])] = rec
+		var bz: Dictionary = BusinessState.get_biz(int(target["biz"]))
+		if not bz.is_empty() and str(bz["owner_kind"]) == "player":
+			SysUtil.notify("%s was %s." % [str(bz["name"]), "robbed" if kind == "robbery" else "targeted by a thief"], "bad")
 	var f = CrimePerson.folk(pid)
 	if f != null and CrimePerson.is_player(pid):
 		f.add_buff("on_the_run" if seen else "easy_money")

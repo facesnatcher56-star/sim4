@@ -67,12 +67,19 @@ static func odds(pid: int, jid: String, scene: String, opts: Dictionary = {}) ->
 	var inv_patrol: float = clampf(1.0 / maxf(Police.patrol_factor(), 0.01), 1.0, 1.6) if scene == "street" or scene.begins_with("venue") else 1.0
 	var detect: float = float(j.get("detect", 0.3)) * (1.0 - float(r.get("detect_cut", 0.55)) * stealth) * watch * (1.0 - float(r.get("cased_detect", 0.5)) * known) \
 		* (float(r.get("night_detect", 0.8)) if night and not scene.begins_with("biz:") else 1.0) * inv_patrol * (1.0 - gear_effect(pid, "detect")) \
-		* (1.0 + float(CrimeLifePath.member(pid).get("heat", 0.0)) * 0.02) * (1.0 + float(opts.get("crowd", 0.0)) * 0.5)
+		* (1.0 + float(CrimeLifePath.member(pid).get("heat", 0.0)) * 0.02) * crowd_mult(j, opts, h) 		* (1.0 + (1.0 - CrimeRate.crime_mult()) * 0.3)           # a safe, watchful town notices more; a lawless one less
 	detect = clampf(1.0 - exp(-detect), 0.01, 0.97)               # soft saturation keeps every extra piece of cover visible in the number
 	var fit: float = clampf(float(CrimeLifePath.skill(pid, "fitness")) / 10.0, 0.0, 1.0)
 	var catch_p: float = clampf(float(j.get("catch", 0.3)) * Police.strength() * (1.0 - float(r.get("catch_fit", 0.5)) * fit) * (1.0 + 0.5 * float(guards) * alert), 0.02, 0.95)
 	var trace: float = clampf(float(j.get("trace", 0.15)) * (1.0 - float(r.get("trace_skill", 0.07)) * float(CrimeLifePath.skill(pid, "stealth"))) * (1.0 - gear_effect(pid, "trace")), 0.01, 0.9)
 	return {"pull_off": pull, "detect": detect, "catch": catch_p, "trace": trace, "cased": known, "skill": skill, "profile": prof, "fx": fx, "night": night}
+
+## Eyes on the act: a crowd HIDES a pickpocket (busy hours of the day by default), but more people see a burglar or a robber.
+static func crowd_mult(j: Dictionary, opts: Dictionary, hour_f: float) -> float:
+	if bool(j.get("crowd_cover", false)):
+		var busy: float = float(opts["crowd"]) if opts.has("crowd") else (1.0 if (hour_f >= 11.0 and hour_f < 14.0) or (hour_f >= 17.0 and hour_f < 19.0) else (0.5 if hour_f >= 8.0 and hour_f < 21.0 else 0.1))
+		return 1.0 - 0.4 * busy
+	return 1.0 + float(opts.get("crowd", 0.0)) * 0.5
 
 # ------------------------------------------------------------------ the draw
 ## Outcome: "fail" (nothing taken, unseen), "fail_seen" (nothing taken, somebody saw), "clean" (taken, unseen), "seen" (taken, noticed), "caught" (noticed and held).

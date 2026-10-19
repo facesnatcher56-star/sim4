@@ -35,6 +35,12 @@ static func posts() -> Array:
 			out.append({"post": "biz:%s" % t, "need": int(per[t])})
 	return out
 
+## The night watchman post covers every closed shop of the town in the small hours (one watchman, nights only).
+const WATCH := "town"
+
+static func watchman_on() -> bool:
+	return is_night() and not guards_of(WATCH).is_empty()
+
 static func is_night(h: float = -1.0) -> bool:
 	var hh: float = SysUtil.hour_f() if h < 0.0 else h
 	return hh >= float(cfg().get("shift_start", 20)) or hh < float(cfg().get("shift_end", 6))
@@ -54,14 +60,16 @@ static func staff_town() -> void:
 	var pop: Array = CrimePerson.townies_only()
 	if pop.size() < int(CrimeLifeState.sect("general").get("staff_min_pop", 8)):
 		return
-	for row in posts():
+	var rows: Array = [{"post": WATCH, "need": 1}]               # the night watchman first: one person covers every closed shop
+	rows.append_array(posts())
+	for row in rows:
 		var have: Array = guards_of(str(row["post"]))
-		var need: int = int(row["need"]) * 2 - have.size()               # two shifts: a day guard and a night guard per place
+		var need: int = int(row["need"]) - have.size()             # alternating day / night shifts: a bank with 2 has one of each
 		while need > 0:
 			var pick: int = _pick_recruit()
 			if pick < 0:
 				break
-			var night: bool = (have.size() % 2) == 1
+			var night: bool = (have.size() % 2) == 1 or str(row["post"]) == WATCH
 			Story.townies[pick]["career"] = "night_watchman" if night else "security_guard"
 			Story.townies[pick]["level"] = 1
 			CrimeLifeState.guards[pick] = {"post": str(row["post"]), "shift": "night" if night else "day", "fatigue": 0.0, "asleep_until": -1}
@@ -111,6 +119,9 @@ static func alert_for(scene: String) -> float:
 	for pid in guards_of(scene):
 		if (str(CrimeLifeState.guards[pid].get("shift", "day")) == "night") == night:
 			on_shift.append(pid)
+	if on_shift.is_empty() and night and scene.begins_with("biz:"):
+		for pid3 in guards_of(WATCH):
+			on_shift.append(pid3)                              # the night watchman walks the closed shops
 	if on_shift.is_empty():
 		return clampf(float(cfg().get("base_alert", 0.8)) - (float(cfg().get("night_tired", 0.18)) * 0.5 if night else 0.0), 0.05, 1.0)
 	var total: float = 0.0

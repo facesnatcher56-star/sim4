@@ -1,6 +1,6 @@
 extends SceneTree
 ## Screenshot helper (not a test): godot --path . --resolution 1280x720 --script res://tests/crime_shot.gd -- <scenario> out.png
-## Scenarios: prompt | board | jail
+## Scenarios: prompt | board | jail | underworld | security
 var _frames := 0
 var _main: Node = null
 var _out := "user://crime.png"
@@ -42,6 +42,20 @@ func _process(_d: float) -> bool:
 				RelationshipService.add_both(f.id, int(ids[6]), "friendship", 50.0)
 				JusticeState.rate_now = 47.0
 				hud.case_board.show_for(f.id)
+			"underworld":
+				CrimeLifePath.join(f.id)
+				CrimeLifePath.member(f.id)["rank"] = "burglar"
+				CrimeLifePath.member(f.id)["jobs"] = 6
+				CrimeLifePath.member(f.id)["cred"] = 30.0
+				f.add_skill_xp("stealth", 900.0)
+				CrimeLifeFence.add_stash(f.id, "burglary", 240, -1, false)
+				CrimeLifeContacts.add(f.id, int(ids[3]), "driver", 0.5)
+				CrimeLifeHeist.plan(f.id, "jeweller")
+				CrimeLifeCasing.session(f.id, "biz:jeweller")
+				load("res://scripts/ui/underworld_dialog.gd").open_from(hud.case_board, f.id)
+			"security":
+				BusinessState.make("cafe", "cafe", "own", "player", f.household_id, "Ada's Cafe")
+				load("res://scripts/ui/security_dialog.gd").open_from(hud.case_board, f.id)
 			"jail":
 				var c2: Dictionary = CaseStore.create("assault", f.id, int(ids[2]), "street", {})
 				c2["charge"] = "assault"

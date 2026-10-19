@@ -13,6 +13,7 @@ func run() -> Array:
 	_asleep(f)
 	_night_sleep_rate(f)
 	_rounds(f)
+	_watchman(f)
 	return f
 
 func _careers(f: Array) -> void:
@@ -29,15 +30,15 @@ func _posts(f: Array) -> void:
 	var w := C.town(14)
 	CrimeSecurityGuards.staff_town()
 	var bank: Array = CrimeSecurityGuards.guards_of("biz:bank")
-	K.expect(f, bank.size() == 4, "the bank has a day and a night pair of guards (%d)" % bank.size())
+	K.expect(f, bank.size() == 2, "the bank has a day guard and a night guard (%d)" % bank.size())
 	var nights: int = 0
 	for pid in bank:
 		if str(CrimeLifeState.guards[pid]["shift"]) == "night":
 			nights += 1
-	K.expect(f, nights == 2 and CrimePerson.career(int(bank[0])) in ["security_guard", "night_watchman"], "half work nights, and they hold the careers")
+	K.expect(f, nights == 1 and CrimePerson.career(int(bank[0])) in ["security_guard", "night_watchman"], "one works nights, and they hold the careers")
 	K.expect(f, CrimeSecurityGuards.guards_of("biz:market").is_empty(), "a market has no posted guard")
 	CrimeSecurityGuards.staff_town()
-	K.expect(f, CrimeSecurityGuards.guards_of("biz:bank").size() == 4, "staffing is idempotent")
+	K.expect(f, CrimeSecurityGuards.guards_of("biz:bank").size() == 2, "staffing is idempotent")
 	K.teardown()
 
 func _alertness(f: Array) -> void:
@@ -130,4 +131,22 @@ func _rounds(f: Array) -> void:
 		CrimeSecurityGuards.on_round(1)
 	var ci: bool = CrimeLifeState.counter("guard_assists") >= 1
 	K.expect(f, ci, "walking the round now and then spots a prowler and helps a recent case (%d assists)" % CrimeLifeState.counter("guard_assists"))
+	K.teardown()
+
+func _watchman(f: Array) -> void:
+	var w := C.town(30)
+	CrimeLifePath.join(1)
+	K.set_time(3, 12, 0)
+	var shop: Dictionary = CrimeSecurity.business_profile("cafe")
+	K.expect(f, int(shop["guards"]) == 0, "a cafe has no guard")
+	CrimeSecurityGuards.staff_town()
+	var watch: Array = CrimeSecurityGuards.guards_of(CrimeSecurityGuards.WATCH)
+	K.expect(f, watch.size() == 1 and CrimePerson.career(int(watch[0])) == "night_watchman", "the town has one night watchman")
+	K.expect(f, int(CrimeSecurity.business_profile("cafe")["guards"]) == 0, "by day they are off duty")
+	K.set_time(3, 2, 0)
+	K.expect(f, int(CrimeSecurity.business_profile("cafe")["guards"]) == 1 and bool(CrimeSecurity.business_profile("cafe")["watchman"]), "at night the watchman covers the closed shops")
+	var awake: Dictionary = CrimeLifeRoll.odds(1, "shoplift", "biz:cafe", {"night": true, "cased": 0.0})
+	CrimeSecurityGuards.set_asleep(int(watch[0]), true)
+	var asleep: Dictionary = CrimeLifeRoll.odds(1, "shoplift", "biz:cafe", {"night": true, "cased": 0.0})
+	K.expect(f, float(asleep["detect"]) < float(awake["detect"]), "a watchman asleep misses more (%.2f vs %.2f)" % [asleep["detect"], awake["detect"]])
 	K.teardown()

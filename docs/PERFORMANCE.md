@@ -84,7 +84,7 @@ old signal order. To add a system's hook: add ONE row to `systems_rows()` (name,
 | minute | 280 | CrimeFlow | CrimeFlow | minute | NORMAL | police / open cases only (ACTIVE) |
 | minute | 290 | Fire | Fire | minute | NORMAL | lots with burning cells only (idle = zero) |
 | minute | 300 | DisasterClock | DisasterClock | minute | NORMAL | running disasters only |
-| minute | 305 | CrimeFlow.person_day | CrimeFlow | day (bucketed) | NORMAL | TOWN / STATISTICAL townies and residents: fraud + pressure dice once a day, bucketed by id (no midnight lump) |
+| minute | 305 | CrimeFlow.person_day | CrimeFlow | day (bucketed) | NORMAL | TOWN / STATISTICAL townies and residents: fraud + pressure dice once a day, bucketed by id (no midnight lump); also the criminal-life dice (`CrimeLifeTownie.person_day`, task 21: STATISTICAL, a handful of members, one job a month at most; guards, alarms and fences run in the daily `CrimeLifeFlow.on_day`, a few dozen records) |
 | minute | 306 | CrimeFlow.sync | CrimeFlow | minute | NORMAL | keeps the bucketed job's ids equal to the living townies and residents |
 | minute | 310 | Vacation | Vacation | minute | NORMAL | trips on absolute due minutes; idle = one emptiness test |
 | minute | 320 | NeighborhoodService.after | NeighborhoodService | minute | NORMAL | Crowd.update loops only the lots near an anchor (Tiers.lot_distances, cached); crowd checks per lot every 10 min; NEAR / TOWN crowd on their turn, they leave / arrive without walks; far lots dropped |
