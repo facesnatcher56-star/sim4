@@ -299,10 +299,29 @@ static func on_apologize(actor: int, target: int) -> void:
 		ft.remember("folk:%d" % actor, 0.25)
 
 ## Decay unused relationships toward zero. Bonded pairs (family, partner...) fade much slower.
+static func on_day_sched(_day: int) -> void:
+	if DaySlices.enabled():          # the scheduler's row: one pair per call, spread over the day (DaySlices)
+		DaySlices.begin("relationships", pairs.keys(), Callable(RelationshipService, "day_pair"))
+		SocialDynamics.day_rest(_day)
+		return
+	on_day(_day)
+
 static func on_day(_day: int) -> void:
+	for key in pairs.keys():
+		decay_pair(key)
+	SocialDynamics.on_day(_day)
+
+## The daily decay + social upkeep of ONE pair (the body of the old loops).
+static func day_pair(key) -> void:
+	if not pairs.has(key):
+		return
+	decay_pair(key)
+	SocialDynamics.pair_day(key)
+
+static func decay_pair(key) -> void:
 	var dc: Dictionary = cfg().get("decay", {})
 	var today: int = SysUtil.day()
-	for key in pairs.keys():
+	if true:
 		var p: Dictionary = pairs[key]
 		var fl: Dictionary = p["flags"]
 		var bonded: bool = fl.get("family", false) or fl.get("spouse", false) or fl.get("partner", false) or fl.get("sweetheart", false)
@@ -324,7 +343,6 @@ static func on_day(_day: int) -> void:
 				set_value(dir[0], dir[1], track, nv)
 		p["last_contact"] = last_contact   # decay itself is not "contact": idle time keeps counting
 		RelationshipBits.auto_status(int(p["lo"]), int(p["hi"]))
-	SocialDynamics.on_day(_day)
 
 # ------------------------------------------------------------------ save
 static func to_dict() -> Dictionary:

@@ -152,11 +152,20 @@ static func report(aggressor: int, victim: int, sev: int, text: String, domestic
 static func on_day() -> void:
 	if not JusticeState.enabled:
 		return
+	for a in CrimePerson.townies_only():
+		person_day(int(a))
+
+static func _far_adult(p: int) -> bool:
+	return bool(Story.townies.get(p, {}).get("alive", false)) and not CrimePerson.folk(p) and CrimePerson.is_adult(p)
+
+## One far townie's feud rolls (the body of the old loop over the far adults; CrimeFlow.person_day calls it from the bucketed daily job).
+static func person_day(a: int) -> void:
+	if not JusticeState.enabled or not _far_adult(a):
+		return
 	var k: Dictionary = cfg()
-	var ids: Array = CrimePerson.townies_only().filter(func(p): return not CrimePerson.folk(p) and CrimePerson.is_adult(p))
-	for a in ids:
+	if true:
 		for b in RelationshipBits.all_known(a):
-			if int(b) <= a or not ids.has(int(b)):
+			if int(b) <= a or not _far_adult(int(b)):
 				continue
 			var hot: float = maxf(CrimeMurder.anger(a, int(b)) * CrimeMurder.propensity(a), CrimeMurder.anger(int(b), a) * CrimeMurder.propensity(int(b)))
 			if hot >= float(k.get("far_anger", 0.5)) and JusticeState.chance(float(k.get("far_daily", 0.004)) * hot):

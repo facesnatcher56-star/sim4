@@ -54,9 +54,9 @@ static func systems_rows(sm: Object) -> Array:
 		["hour/Goals.on_hour", "Goals", 60, 230, L, "", Goals.on_hour, null, "residents only"],
 		["hour/Story.on_hour", "Story", 60, 240, L, "hour", Story.on_hour, null, "STATISTICAL townies: hourly dice"],
 		["hour/Family.on_hour", "Family", 60, 250, L, "", Family.on_hour, null, ""],
-		["hour/AccidentMarks.on_hour", "AccidentMarks", 60, 260, N, "hour", AccidentMarks.on_hour, null, "before Incidents.on_hour"],
-		["hour/Incidents.on_hour", "Incidents", 60, 270, N, "", Incidents.on_hour, null, "FULL near / STATISTICAL far dice per def"],
-		["hour/AccidentMarks.after_hour", "AccidentMarks", 60, 280, N, "", AccidentMarks.after_hour, null, "right after Incidents.on_hour"],
+		["hour/AccidentMarks.on_hour", "AccidentMarks", 60, 260, N, "hour", AccidentMarks.on_hour_sched, null, "before Incidents.on_hour"],
+		["hour/Incidents.on_hour", "Incidents", 60, 270, N, "", Incidents.on_hour_sliced, null, "FULL near / STATISTICAL far dice per def"],
+		["hour/AccidentMarks.after_hour", "AccidentMarks", 60, 280, N, "", AccidentMarks.after_hour_sched, null, "right after Incidents.on_hour"],
 		["hour/CrimeFlow.on_hour", "CrimeFlow", 60, 290, N, "", CrimeFlow.on_hour, null, ""],
 		["hour/DisasterClock.on_hour", "DisasterClock", 60, 300, N, "hour", DisasterClock.on_hour, null, ""],
 		["hour/Vacation.on_hour", "Vacation", 60, 310, N, "", Vacation.on_hour, Callable(Vacation, "busy"), "active trips only"],
@@ -66,12 +66,12 @@ static func systems_rows(sm: Object) -> Array:
 		["day/Aging.on_day", "Aging", 1440, 220, N, "day", Aging.on_day, null, "residents + townies: O(people) cheap comparisons"],
 		["day/Family.on_day", "Family", 1440, 230, N, "day", Family.on_day, null, ""],
 		["day/Careers.on_day", "Careers", 1440, 240, N, "day", Careers.on_day, null, ""],
-		["day/WeatherWorld.on_day", "WeatherWorld", 1440, 250, N, "day", WeatherWorld.on_day, null, ""],
+		["day/WeatherWorld.on_day", "WeatherWorld", 1440, 250, N, "day", WeatherWorld.on_day_sched, null, ""],
 		["day/Economy.on_day", "Economy", 1440, 260, N, "day", Economy.on_day, null, "bills per household"],
-		["day/RelationshipService.on_day", "RelationshipService", 1440, 270, N, "day", RelationshipService.on_day, null, "decay of known pairs (bounded)"],
+		["day/RelationshipService.on_day", "RelationshipService", 1440, 270, N, "day", RelationshipService.on_day_sched, null, "decay of known pairs (bounded)"],
 		["day/Story.on_day", "Story", 1440, 280, N, "day", Story.on_day, null, "townie daily dice (STATISTICAL tier)"],
 		["day/Fire.on_day", "Fire", 1440, 290, N, "day", Fire.on_day, null, ""],
-		["day/Incidents.on_day", "Incidents", 1440, 300, N, "", Incidents.on_day, null, "daily dice, FULL near / STATISTICAL far"],
+		["day/Incidents.on_day", "Incidents", 1440, 300, N, "", Incidents.on_day_sliced, null, "daily dice, FULL near / STATISTICAL far"],
 		["day/CrimeFlow.on_day", "CrimeFlow", 1440, 310, N, "day", CrimeFlow.on_day, null, "all-townie pass (slice candidate, 17.3)"],
 		["day/DisasterClock.on_day", "DisasterClock", 1440, 320, N, "day", DisasterClock.on_day, null, ""],
 		["day/MarketTick.on_day", "MarketTick", 1440, 330, N, "day", MarketTick.on_day, null, "markets, shops, bank, rents"],
@@ -108,6 +108,8 @@ static func install_systems(sched: SimScheduler, sm: Object) -> void:
 	install(sched, systems_group(sm), systems_rows(sm))
 	TownSim.install(sched, systems_group(sm))
 	CrimeFlow.install_sliced(sched, systems_group(sm))
+	IncidentSlices.install(sched, systems_group(sm))
+	DaySlices.install(sched, systems_group(sm))
 
 static func install_director(sched: SimScheduler, dir: Object) -> void:
 	install(sched, director_group(dir), director_rows(dir))

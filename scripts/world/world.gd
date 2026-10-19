@@ -69,6 +69,7 @@ var coin_refund: Callable = Callable()    # (household_id:int, amount:int) -> vo
 var last_error: String = ""
 
 var _next_id: int = 1
+var _held: Dictionary = {}               # folk id -> {object id: true} of the objects where it ever reserved a slot (release_all)
 var _occ: Dictionary = {}                 # tile -> object id (main layer)
 var _occ_floor: Dictionary = {}           # tile -> object id (floor layer, rugs)
 var _blocked: Dictionary = {}             # tile -> true (blocking objects)
@@ -148,6 +149,7 @@ func reset(w: int = DEFAULT_W, h: int = DEFAULT_H) -> void:
 	walls.clear()
 	mounts.clear()
 	objects.clear()
+	_held.clear()
 	mess.clear()
 	_occ.clear()
 	_occ_floor.clear()
@@ -265,6 +267,9 @@ func reserve(object_id: int, slot_idx: int, folk_id: int) -> bool:
 	if o.slots_reserved.has(slot_idx):
 		return o.slots_reserved[slot_idx] == folk_id
 	o.slots_reserved[slot_idx] = folk_id
+	if not _held.has(folk_id):
+		_held[folk_id] = {}
+	(_held[folk_id] as Dictionary)[object_id] = true
 	return true
 
 
@@ -276,11 +281,18 @@ func release(object_id: int, slot_idx: int, folk_id: int) -> void:
 		o.slots_reserved.erase(slot_idx)
 
 
+## Every slot the folk holds goes free again. Only the objects the folk ever reserved a slot in are visited (`_held`), not every object of the town.
 func release_all(folk_id: int) -> void:
-	for o in objects.values():
+	if not _held.has(folk_id):
+		return
+	for oid in (_held[folk_id] as Dictionary).keys():
+		var o = objects.get(oid, null)
+		if o == null:
+			continue
 		for k in o.slots_reserved.keys():
 			if o.slots_reserved[k] == folk_id:
 				o.slots_reserved.erase(k)
+	_held.erase(folk_id)
 
 
 func is_slot_free(object_id: int, slot_idx: int) -> bool:

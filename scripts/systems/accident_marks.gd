@@ -223,20 +223,39 @@ static func on_hour(hour: int) -> void:
 	var c: Dictionary = cfg()
 	if c.is_empty():
 		return
-	for f in WorldIface.all_folk():
-		if SysUtil.is_away(f) and str(Away.info(int(f.id)).get("reason", "")) == "work":
+	slice_markers(true)
+	AccidentTownies.on_hour(hour)
+
+## The scheduler's hour row: with sliced dice (IncidentSlices) the job folk are marked around each slice instead.
+static func on_hour_sched(hour: int) -> void:
+	if not IncidentSlices.enabled():
+		on_hour(hour)
+	elif not cfg().is_empty():
+		AccidentTownies.on_hour(hour)
+
+static func after_hour_sched() -> void:
+	if not IncidentSlices.enabled():
+		after_hour()
+
+## Job markers of the people away at a physical job: on = set them, off = remove them (around the hourly dice, or around one slice of them).
+static func slice_markers(on: bool) -> void:
+	var c: Dictionary = cfg()
+	if c.is_empty():
+		return
+	for f in (WorldIface.all_folk() if not IncidentSlices.enabled() else SysUtil.residents()):
+		if not on:
+			unmark(f, "acc_job_risky")
+			unmark(f, "acc_job_very_risky")
+		elif SysUtil.is_away(f) and str(Away.info(int(f.id)).get("reason", "")) == "work":
 			var tier: int = int((c.get("physical_careers", {}) as Dictionary).get(Careers.career_of(int(f.id)), 0))
 			if tier >= 1:
 				mark(f, "acc_job_risky")
 			if tier >= 2:
 				mark(f, "acc_job_very_risky")
-	AccidentTownies.on_hour(hour)
 
 ## Right after the hourly dice: the job markers go again (an away person's buff order must not change under a save).
 static func after_hour() -> void:
-	for f in WorldIface.all_folk():
-		unmark(f, "acc_job_risky")
-		unmark(f, "acc_job_very_risky")
+	slice_markers(false)
 
 # ------------------------------------------------------------------ interaction finished: a treadmill that gives way
 static func on_interaction_finished(folk_id: int, iid: String, success: bool) -> void:

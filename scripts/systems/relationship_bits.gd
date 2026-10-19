@@ -146,6 +146,8 @@ static func set_flag(a: int, b: int, flag: String, on: bool = true, announce: bo
 		(p["since"] as Dictionary)[flag] = SysUtil.day()
 	else:
 		fl.erase(flag)
+	if on and flag in ["spouse", "partner", "sweetheart", "dating"]:
+		RomanceCleanup.run()            # a new couple makes step relatives: romance that was fine before their marriage is now forbidden (self-healing guard)
 	RelationshipRomance._update_bond_tracks(a, b)
 	_refresh_bits(a, b)
 	SocialGatherings.refresh_markers(SysUtil.folk(a))

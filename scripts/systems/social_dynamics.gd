@@ -260,16 +260,22 @@ static func on_minute(_total: int = 0) -> void:
 	PerfProf.stop("social/gatherings", t)
 
 static func on_hour(_hour: int = 0) -> void:
-	for f in WorldIface.all_folk():
+	for f in Tiers.active():            # tiers (17.3): gathering markers / goals matter for the ACTIVE people (residents are always ACTIVE)
 		SocialGatherings.refresh_markers(f)
 		if SysUtil.is_resident(f):
 			SocialGatherings.update_goals(f)
 	SocialGatherings.couples_upkeep()
 
 static func on_day(day: int) -> void:
+	for key in RelationshipService.pairs.keys():
+		pair_day(key)
+	day_rest(day)
+
+## The daily social upkeep of ONE pair (tension fades, heat ends, ex status, topics recover).
+static func pair_day(key) -> void:
 	var tc: Dictionary = cfg().get("tension", {})
 	var today: int = SysUtil.day()
-	for key in RelationshipService.pairs.keys():
+	if true:
 		var p: Dictionary = RelationshipService.pairs[key]
 		var fl: Dictionary = p["flags"]
 		var bonded: bool = fl.get("family", false) or fl.get("partner", false) or fl.get("spouse", false) or fl.get("sweetheart", false)
@@ -300,6 +306,9 @@ static func on_day(day: int) -> void:
 				tcnt.erase(tk)
 			else:
 				tcnt[tk] = nv
+
+## The rest of the daily social upkeep (not per pair): reputations drift, affairs may come out, emotions.
+static func day_rest(day: int) -> void:
 	# reputation drifts back toward neutral
 	var rd: float = float(cfg().get("reputation", {}).get("decay_per_day", 1.0))
 	for k in RelationshipService.reputation_map.keys():

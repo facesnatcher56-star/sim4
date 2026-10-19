@@ -131,6 +131,10 @@ static func household_defs(hid: int) -> Array:
 		_have[hid] = out
 	return _have[hid]
 
+static func refresh_on_map() -> void:
+	_on_map_ids.clear()
+	_on_map_ok = false
+
 static func clear_cache() -> void:
 	_have.clear()
 	_members.clear()

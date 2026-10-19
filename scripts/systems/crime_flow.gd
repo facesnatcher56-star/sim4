@@ -32,9 +32,11 @@ static func uninstall() -> void:
 ## With a scheduler they are a BUCKETED daily job: every person is visited once a day at minute (id % 1440), same dice and rates, nothing at midnight.
 ## Without one (tests that call the on_day passes directly) the old all-in-one loops run.
 static var _person_job: SimJob = null
+static var _sched_id: int = 0
 static var _sync_key: Array = []
 
 static func install_sliced(sched: SimScheduler, group: String) -> void:
+	_sched_id = sched.get_instance_id()
 	_person_job = sched.add_bucketed("CrimeFlow.person_day", "CrimeFlow", group, 1440, 305, SimScheduler.NORMAL, CrimeFlow.person_day,
 		"TOWN / STATISTICAL townies and residents: fraud + pressure dice once a day, bucketed by id (no midnight lump)")
 	sched.add("CrimeFlow.sync", "CrimeFlow", group, 1, 306, SimScheduler.NORMAL, CrimeFlow.sync_persons, "", Callable(CrimeFlow, "needs_sync"),
@@ -42,7 +44,7 @@ static func install_sliced(sched: SimScheduler, group: String) -> void:
 	_sync_key = []
 
 static func sliced() -> bool:
-	return _person_job != null and not _person_job.removed and _person_job.enabled
+	return _person_job != null and not _person_job.removed and _person_job.enabled and SimScheduler.of(SimEnv.clock()).get_instance_id() == _sched_id
 
 static func needs_sync() -> bool:
 	return sliced() and _sync_key != [Story.townies.size(), Story.next_id, Economy.household_ids().size()]
@@ -66,6 +68,7 @@ static func person_day(id: int, _elapsed: int = 1440) -> void:
 		return
 	CrimeFraud.person_day(id)
 	CrimePressure.person_day(id)
+	CrimeAssault.person_day(id)
 
 # ------------------------------------------------------------------ clock
 static func on_minute() -> void:
@@ -110,10 +113,11 @@ static func on_day(_day: int) -> void:
 	CrimeRevenge.on_day()
 	PerfProf.stop("crimeday/CrimeRevenge.on_day", _pt)
 	_pt = PerfProf.start()
-	CrimeMurder.on_day()
+	CrimeMurder.on_day_sched()
 	PerfProf.stop("crimeday/CrimeMurder.on_day", _pt)
 	_pt = PerfProf.start()
-	CrimeAssault.on_day()
+	if not sliced():                    # sliced: CrimeFlow.person_day rolls the far feuds
+		CrimeAssault.on_day()
 	PerfProf.stop("crimeday/CrimeAssault.on_day", _pt)
 	_pt = PerfProf.start()
 	JusticeOrders.on_day()

@@ -37,25 +37,39 @@ static func propensity(a: int) -> float:
 	return m
 
 # ------------------------------------------------------------------ daily
-static func on_day() -> void:
+static func on_day_sched() -> void:
+	on_day(DaySlices.enabled())
+
+static func on_day(sliced: bool = false) -> void:
 	if not JusticeState.enabled or Incidents.surprise_mult() <= 0.0:
 		return
 	JusticeState.counters["exposure_hh"] = float(JusticeState.counters.get("exposure_hh", 0.0)) + float(maxi(Economy.household_ids().size(), 1)) / float(IncidentDefs.cfg("year_days", 28))
-	var k: Dictionary = cfg()
-	var people: Dictionary = {}
-	for p in CrimePerson.everyone():
-		if CrimePerson.is_adult(p) or CrimePerson.stage(p) == "teen":
-			people[p] = true
 	var keys: Array = RelationshipService.pairs.keys()
 	keys.sort()
+	if sliced:                               # one pair per call, spread over the day (DaySlices)
+		DaySlices.begin("grudges", keys, Callable(CrimeMurder, "grudge_pair"))
+		return
 	for pk in keys:
-		var pr: Dictionary = RelationshipService.pairs[pk]
-		var lo: int = int(pr["lo"])
-		var hi: int = int(pr["hi"])
-		if not (people.has(lo) and people.has(hi)):
-			continue
-		_update(lo, hi, k)
-		_update(hi, lo, k)
+		grudge_pair(pk)
+
+## Is this person in the town and old enough to hold a grudge (adult or teen)?
+static func _in_play(p: int) -> bool:
+	if SysUtil.folk(p) == null and not bool(Story.townies.get(p, {}).get("alive", false)):
+		return false
+	return CrimePerson.is_adult(p) or CrimePerson.stage(p) == "teen"
+
+## The daily grudge update of one relationship pair (both directions).
+static func grudge_pair(pk) -> void:
+	if not RelationshipService.pairs.has(pk):
+		return
+	var pr: Dictionary = RelationshipService.pairs[pk]
+	var lo: int = int(pr["lo"])
+	var hi: int = int(pr["hi"])
+	if not (_in_play(lo) and _in_play(hi)):
+		return
+	var k: Dictionary = cfg()
+	_update(lo, hi, k)
+	_update(hi, lo, k)
 
 static func _update(a: int, b: int, k: Dictionary) -> void:
 	if CrimePerson.in_custody(a) or not CrimePerson.is_adult(a):

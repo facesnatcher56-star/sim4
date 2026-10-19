@@ -40,6 +40,7 @@ static var _last_season: String = ""
 static var _marker_sig: Dictionary = {}     # folk id -> signature of the markers last applied
 static var _exposure: Dictionary = {}       # folk id -> {cold, hot, sun, wet, air}
 static var _caught: Dictionary = {}         # folk id -> true when Loot just fired caught_fish
+static var _rain_deferred: Dictionary = {}   # lot id ("" = street) -> rain hours the plants there have not been watered for yet (far lots catch up daily)
 static var _puddles: Dictionary = {}        # Vector2i -> amount we added to World.mess
 static var outdoors_fn: Callable = Callable()   # optional override (folk) -> bool, for tests
 
@@ -97,6 +98,8 @@ static func reset(new_seed: int = -1) -> void:
 	_exposure.clear()
 	_caught.clear()
 	_puddles.clear()
+	_rain_deferred.clear()
+	WeatherWorld.reset_index()
 	Seasons.reset()
 	Holidays.reset()
 
@@ -376,7 +379,7 @@ static func to_dict() -> Dictionary:
 		pud.append([t.x, t.y, _puddles[t]])
 	return {"seed": seed_value, "chain": tail, "snow": _snow, "wet": _wet, "heat_dh": _heat_dh, "cool_dh": _cool_dh, "bill_hours": _bill_hours,
 		"min_today": _min_today, "rain_hours": _rain_hours, "heat_hours": _heat_hours, "last_weather": _last_weather, "last_season": _last_season,
-		"puddles": pud, "seasons": Seasons.to_dict(), "holidays": Holidays.to_dict()}
+		"rain_deferred": _rain_deferred.duplicate(), "puddles": pud, "seasons": Seasons.to_dict(), "holidays": Holidays.to_dict()}
 
 static func from_dict(d: Dictionary) -> void:
 	reset(int(d.get("seed", int(settings().get("default_seed", 1337)))))
@@ -403,6 +406,8 @@ static func from_dict(d: Dictionary) -> void:
 	_heat_hours = float(d.get("heat_hours", 0.0))
 	_last_weather = str(d.get("last_weather", ""))
 	_last_season = str(d.get("last_season", ""))
+	for dk in d.get("rain_deferred", {}):
+		_rain_deferred[str(dk)] = int(d["rain_deferred"][dk])
 	for p in d.get("puddles", []):
 		_puddles[Vector2i(int(p[0]), int(p[1]))] = float(p[2])
 	Holidays.from_dict(d.get("holidays", {}))

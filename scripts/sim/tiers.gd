@@ -344,6 +344,16 @@ static func _quick_anchors() -> void:
 		_anchor_sig = sg
 		_due_min = -1
 
+## Is a tile within near_radius of an anchor? With no anchor at all everything counts as near (small worlds / tests keep the full behaviour).
+static func tile_near(tile: Vector2i) -> bool:
+	if anchors.is_empty():
+		return true
+	var r: int = _n("near_radius", 64)
+	for a in anchors:
+		if InterestArea.cheb(tile, a["tile"]) <= r:
+			return true
+	return false
+
 static func elapsed_of(id: int) -> int:
 	return period_of(id)
 

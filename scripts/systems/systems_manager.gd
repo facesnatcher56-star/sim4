@@ -88,6 +88,8 @@ static func reset_all() -> void:
 	CrimeFlow.uninstall()
 	Players.reset()
 	Tiers.reset()
+	DaySlices.reset()
+	IncidentSlices.reset()
 	ContentRules.reset()
 	Commands.reset()
 	var ml := Engine.get_main_loop()

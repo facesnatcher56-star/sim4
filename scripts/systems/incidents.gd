@@ -135,6 +135,22 @@ static func on_hour() -> void:
 	IncidentChecks.run("hour")
 	PerfProf.stop("incidents/checks", t)
 
+## The scheduler's versions (SimRegistry rows): same work, the dice sliced over the hour / day by IncidentSlices when its slice row is installed.
+static func on_hour_sliced() -> void:
+	if not IncidentSlices.enabled():
+		on_hour()
+		return
+	Hospital.on_hour()
+	Health.on_hour()
+	IncidentSlices.begin("hour")
+
+static func on_day_sliced() -> void:
+	if not IncidentSlices.enabled():
+		on_day()
+		return
+	Health.on_day()
+	IncidentSlices.begin("day")
+
 static func on_day() -> void:
 	Health.on_day()
 	IncidentChecks.run("day")

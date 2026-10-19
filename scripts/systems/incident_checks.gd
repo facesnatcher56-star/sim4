@@ -31,6 +31,14 @@ static func _list(kind: String) -> Array:
 		PerfProf.stop("incidents/build " + kind, tl)
 	return _cache[kind]
 
+## Slice mode (IncidentSlices): the caches live for one slice.
+static func begin_slice() -> void:
+	IncidentSubject.refresh_on_map()          # who stands on the map changes between slices; owners / members only change on a hit (_dirty) or a new pass
+	IncidentSubject.caching = true
+
+static func end_slice() -> void:
+	IncidentSubject.caching = false
+
 static func _dirty() -> void:
 	_stale = true
 	IncidentSubject.clear_cache()

@@ -184,7 +184,7 @@ func _registry() -> void:
 	SimRegistry.install_systems(s, sm)
 	var order: Array = []
 	for r in s.stats()["rows"]:
-		if int(r["cadence"]) == 1 and not (r["name"] in ["Tiers", "TownSim.sync", "CrimeFlow.sync"]):      # the tier rows (17.3) are not old steps
+		if int(r["cadence"]) == 1 and not (r["name"] in ["Tiers", "TownSim.sync", "CrimeFlow.sync", "Incidents.slice"]):      # the tier rows (17.3) are not old steps
 			order.append(r["name"])
 	var old_steps := ["NeighborhoodService.before", "CareerShifts", "Away", "StoryVisits", "BabyCare", "AccidentMarks", "Incidents", "CrimeFlow", "Fire",
 		"DisasterClock", "Vacation", "NeighborhoodService.after", "WeatherFolk", "LevelSystems"]

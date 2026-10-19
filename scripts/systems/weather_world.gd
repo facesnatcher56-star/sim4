@@ -9,7 +9,9 @@ static func _hour_rng(salt: int) -> RandomNumberGenerator:
 	return r
 
 static func on_hour(_hour: int) -> void:
+	var t0 := PerfProf.start()
 	WeatherContent.install()
+	PerfProf.stop("weather/content", t0)
 	var e: Dictionary = Weather.effects()
 	var cur: String = Weather.current()
 	var temp: float = Weather.temperature()
@@ -34,14 +36,83 @@ static func on_hour(_hour: int) -> void:
 		Weather._rain_hours += 0.5
 	if cur == "heatwave":
 		Weather._heat_hours += 1.0
+	var t := PerfProf.start()
 	_hourly_objects(cur, kind, e)
+	PerfProf.stop("weather/objects", t)
+	t = PerfProf.start()
 	_puddle_tick(kind, e)
+	PerfProf.stop("weather/puddles", t)
 	if cur == "thunderstorm":
 		_lightning(e)
+	t = PerfProf.start()
 	_cozy(kind, e)
+	PerfProf.stop("weather/cozy", t)
 
 static func _objects() -> Array:
 	return SysUtil.all_world_objects()
+
+## Object index (task 17.3 "places"): the few objects the weather touches are kept in per-kind sets that are updated only for NEW objects (ids from the
+## last indexed next id upwards); removed objects are pruned when the set is read. Nothing walks every object of the town each rainy hour.
+## kind: "rain" (garden plots + plants with water), "plot", or a comma list of tags.
+static var _ix_world = null
+static var _ix_next: int = 0
+static var _ix: Dictionary = {}           # kind -> {object id: object}
+
+static func reset_index() -> void:
+	_ix_world = null
+	_ix_next = 0
+	_ix = {}
+	_catch = {}
+
+static func _matches(kind: String, o) -> bool:
+	var d: Dictionary = _def_of(o)
+	var tags: Array = d.get("tags", [])
+	match kind:
+		"rain":
+			return str(o.def_id) == "garden_plot" or (tags.has("plant") and (d.get("state", {}) as Dictionary).has("water"))
+		"plot":
+			return str(o.def_id) == "garden_plot"
+	for t in kind.split(","):
+		if tags.has(t):
+			return true
+	return false
+
+static func _indexed(kind: String) -> Array:
+	var w = WorldIface.world()
+	if w == null or not ("objects" in w) or not ("_next_id" in w):
+		var out: Array = []
+		for o in _objects():
+			if _matches(kind, o):
+				out.append(o)
+		return out
+	if not is_same(_ix_world, w) or int(w._next_id) < _ix_next:
+		_ix_world = w
+		_ix = {}
+		_ix_next = 0
+	var objs: Dictionary = w.objects
+	if _ix_next < int(w._next_id):                       # new objects since the last call: test them against every known kind
+		for id in range(_ix_next, int(w._next_id)):
+			var o = objs.get(id, null)
+			if o == null:
+				continue
+			for k in _ix:
+				if _matches(k, o):
+					(_ix[k] as Dictionary)[id] = o
+		_ix_next = int(w._next_id)
+	if not _ix.has(kind):                                # first use of a kind: one scan of the objects that exist now
+		var found: Dictionary = {}
+		for o2 in _objects():
+			if _matches(kind, o2):
+				found[int(o2.id)] = o2
+		_ix[kind] = found
+	var set: Dictionary = _ix[kind]
+	var res: Array = []
+	for id2 in set.keys():
+		if objs.has(id2):
+			res.append(set[id2])
+		else:
+			set.erase(id2)
+	return res
 
 static func _def_of(o) -> Dictionary:
 	return SimEnv.data().object_def(str(o.def_id))
@@ -52,7 +123,8 @@ static func _hourly_objects(cur: String, kind: String, e: Dictionary) -> void:
 	var g: Dictionary = e.get("garden", {})
 	var w = WorldIface.world()
 	var can_out: bool = w != null and w.has_method("is_outdoor")
-	for o in _objects():
+	var far_lots: Dictionary = {}
+	for o in _indexed("rain"):
 		var d: Dictionary = _def_of(o)
 		var tags: Array = d.get("tags", [])
 		var key: String = ""
@@ -60,11 +132,18 @@ static func _hourly_objects(cur: String, kind: String, e: Dictionary) -> void:
 		if str(o.def_id) == "garden_plot":
 			key = "water"
 			amt = float(g.get("rain_water_per_hour", 0.6))
-		elif tags.has("plant") and can_out and bool(w.is_outdoor(o.tile, int(o.level))) and (d.get("state", {}) as Dictionary).has("water"):
+		elif tags.has("plant") and can_out and (d.get("state", {}) as Dictionary).has("water"):
+			if not Tiers.tile_near(o.tile):              # a far place: no per-plant work now, the rain is counted per lot and caught up daily (on_day)
+				far_lots[NeighborhoodLots.lot_at(o.tile)] = true
+				continue
+			if not bool(w.is_outdoor(o.tile, int(o.level))):
+				continue
 			key = "water"
 			amt = float(g.get("plant_rain_water_per_hour", 0.8))
 		if key != "":
 			WorldIface.state_add(o, key, amt)
+	for fl in far_lots:
+		Weather._rain_deferred[fl] = int(Weather._rain_deferred.get(fl, 0)) + 1
 
 static func _puddle_tick(kind: String, e: Dictionary) -> void:
 	var w = WorldIface.world()
@@ -94,12 +173,9 @@ static func _lightning(e: Dictionary) -> void:
 	if r.randf() > float(l.get("per_hour_chance", 0.1)):
 		return
 	var cands: Array = []
-	for o in _objects():
-		var tags: Array = _def_of(o).get("tags", [])
-		for t in l.get("break_tags", ["electronics"]):
-			if tags.has(t) and not bool(WorldIface.state_get(o, "broken", false)):
-				cands.append(o)
-				break
+	for o in _indexed(",".join(l.get("break_tags", ["electronics"]))):
+		if not bool(WorldIface.state_get(o, "broken", false)):
+			cands.append(o)
 	var broke: bool = false
 	var oid: int = -1
 	if not cands.is_empty():
@@ -124,15 +200,40 @@ static func _cozy(kind: String, e: Dictionary) -> void:
 			f.add_buff("cozy")
 
 # ------------------------------------------------------------------ daily tick
-static func on_day(day: int) -> void:
+## The daily catch-up of the plants in lots that were far away while it rained: the owed rain hours of their lot x the hourly amount (outdoor plants only).
+static var _catch: Dictionary = {}
+
+static func catch_up_plant(o_id: int) -> void:
+	var w = WorldIface.world()
+	var o = WorldIface.get_object(o_id)
+	if o == null or w == null or not w.has_method("is_outdoor"):
+		return
+	var hrs: int = int(_catch.get(NeighborhoodLots.lot_at(o.tile), 0))
+	if hrs > 0 and bool(w.is_outdoor(o.tile, int(o.level))):
+		WorldIface.state_add(o, "water", float(Weather.effects().get("garden", {}).get("plant_rain_water_per_hour", 0.8)) * float(hrs))
+
+static func on_day_sched(day: int) -> void:
+	on_day(day, DaySlices.enabled())
+
+static func on_day(day: int, sliced: bool = false) -> void:
+	if not Weather._rain_deferred.is_empty():
+		_catch = Weather._rain_deferred.duplicate()
+		Weather._rain_deferred.clear()
+		var ids: Array = []
+		for o0 in _indexed("rain"):
+			if str(o0.def_id) != "garden_plot" and _catch.has(NeighborhoodLots.lot_at(o0.tile)):
+				ids.append(int(o0.id))
+		if sliced:
+			DaySlices.begin("rain_catchup", ids, Callable(WeatherWorld, "catch_up_plant"))
+		else:
+			for oid in ids:
+				catch_up_plant(oid)
 	var e: Dictionary = Weather.effects()
 	var g: Dictionary = e.get("garden", {})
 	var frost: bool = Weather._min_today < float(e.get("frost_temp", 0.0)) and bool(g.get("frost_kills", true))
 	var mult: float = Weather.crop_growth_mult()
 	var killed: int = 0
-	for o in _objects():
-		if str(o.def_id) != "garden_plot":
-			continue
+	for o in _indexed("plot"):
 		var spec: Dictionary = ((_def_of(o).get("state", {}) as Dictionary).get("growth", {}) as Dictionary)
 		var growth: float = float(WorldIface.state_get(o, "growth", 0.0))
 		if Weather._heat_hours >= 4.0:
