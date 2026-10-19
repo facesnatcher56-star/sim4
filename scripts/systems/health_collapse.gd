@@ -106,6 +106,8 @@ static func _town_help(f, r: Dictionary, now: int, kind: String) -> void:
 	var wait: int = int(rc.get("town_help_min", 240))
 	if (rc.get("dependent_stages", []) as Array).has(str(f.age_stage)):
 		wait = int(rc.get("dependent_hospital_min", 360))
+	if kind == "cold" or kind == "heat":
+		wait = mini(wait, int(rc.get("exposure_help_min", 60)))      # a collapse in the open is seen long before the cold or heat can kill
 	if now - int(r.get("collapse_min", now)) < wait:
 		return
 	rescue(f, null)

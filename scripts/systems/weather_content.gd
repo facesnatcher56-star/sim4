@@ -54,6 +54,8 @@ static func _patch_outdoor(inter: Dictionary, p: Dictionary) -> void:
 		if (d.get("tags", []) as Array).has(tag):
 			var tests: Array = d.get("tests", [])
 			tests.append({"lacks_buff": marker})
+			for extra in p.get("also_block", []):      # e.g. "cold": nobody starts a garden chore or a fishing trip while already chilled through
+				tests.append({"lacks_buff": str(extra)})
 			d["tests"] = tests
 
 static func _add_whims(wc: Dictionary, hc: Dictionary) -> void:

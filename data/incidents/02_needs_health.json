@@ -60,12 +60,16 @@
      "child"
     ],
     "dependent_hospital_min": 360,
-    "town_help_min": 240
+    "town_help_min": 240,
+    "exposure_help_min": 60
    },
    "exposure": {
     "cold": {
      "below": -3,
      "hard_below": -9,
+     "shelter_min": 60,
+     "shelter_retry_min": 10,
+     "shelter_walk_tries": 3,
      "outdoor_recover": 1.0,
      "indoor_recover": 3.0,
      "coat_mult": 0.4,

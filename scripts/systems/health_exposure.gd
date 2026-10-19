@@ -23,7 +23,7 @@ static func stage_index(f, r: Dictionary, t: String) -> int:
 			idx = i + 1
 	return idx
 
-static func tick(f, r: Dictionary, _now: int) -> void:
+static func tick(f, r: Dictionary, now: int) -> void:
 	if str(f.age_stage) == "baby":
 		return
 	var outside: bool = WeatherFolk.is_outside(f)
@@ -38,8 +38,12 @@ static func tick(f, r: Dictionary, _now: int) -> void:
 		var delta: float = 0.0
 		if outside:
 			delta = _build(f, t, tc, feels)
+			if t == "cold" and delta > 0.0:
+				HealthShelter.check(f, r, now)
 		elif cur > 0.0:
 			delta = -float(tc.get("indoor_recover", 3.0))
+			if t == "cold" and cur + delta <= 0.0:
+				HealthShelter.warm(r)
 		if cur > 0.0 or delta > 0.0:
 			cur = maxf(cur + delta, 0.0)
 			r[key] = cur

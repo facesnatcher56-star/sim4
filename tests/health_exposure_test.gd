@@ -9,6 +9,7 @@ func run() -> Array:
 	_cold(f)
 	_heat(f)
 	_death(f)
+	_shelter(f)
 	return f
 
 func _winter(w: StubWorld) -> Folk:
@@ -131,4 +132,40 @@ func _death(f: Array) -> void:
 	Health.rec_of(b.id)["heat_min"] = 960.0
 	HealthExposure.hourly(b, Health.rec_of(b.id))
 	K.expect(f, w2.get_folk(b.id) == null and str(K.last_event("died").get("cause", "")) == "heatstroke", "heatstroke too, and Surprises Off does not prevent it")
+	K.teardown()
+
+## Freezing: a person who has been out in the cold for an hour is sent indoors (and a collapse in the open is helped long before the cold kills).
+func _shelter(f: Array) -> void:
+	var w := K.setup()
+	SysContent.install_all()
+	var a := _winter(w)
+	var sent: Array = []
+	HealthShelter.seek_hook = func(x): sent.append(int(x.id)); x.set_meta("outdoors", false)
+	var dir = K.director()
+	dir.autonomy_enabled = false
+	K.run(dir, 50)
+	K.expect(f, sent.is_empty(), "50 minutes out: still fine")
+	K.run(dir, 30)
+	K.expect(f, sent == [int(a.id)], "after an hour in the freezing cold they are sent indoors, before shivering (sent %s, cold %.0f)" % [str(sent), float(Health.rec_of(a.id).get("cold_min", 0.0))])
+	K.expect(f, not a.has_buff("shivering"), "and they never shiver")
+	HealthShelter.seek_hook = Callable()
+	K.teardown()
+	# the town reaches a collapsed elder in the open within the hour, well before the cold can kill them
+	var w2 := K.setup()
+	SysContent.install_all()
+	var e := _winter(w2)
+	e.age_stage = "elder"
+	var dir2 = K.director()
+	dir2.autonomy_enabled = false
+	Health.rec_of(e.id)["cold_min"] = 470.0
+	var died: bool = false
+	K.run(dir2, 20)
+	K.expect(f, Health.is_collapsed(e), "the elder collapses in the cold")
+	var t0: int = SysUtil.now()
+	for i in 90:
+		K.run(dir2, 1)
+		if not Health.is_collapsed(e):
+			break
+	K.expect(f, not Health.is_collapsed(e) and SysUtil.now() - t0 <= 75, "town help reaches them within an hour (%d min)" % (SysUtil.now() - t0))
+	K.expect(f, SysUtil.folk(int(e.id)) != null or Hospital.is_in(e), "still alive")
 	K.teardown()
