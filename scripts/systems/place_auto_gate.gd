@@ -14,7 +14,7 @@ static func eval(gate: String, f, kind: String, d: Dictionary, day: int) -> Dict
 	var stage: String = str(f.age_stage)
 	match gate:
 		"ill":
-			return {"mult": 1.0} if _sick(f) else NO
+			return {"mult": 1.0} if _sick(f) else NO          # once the doctor has seen them (medicated) they rest
 		"checkup":
 			if stage in ["baby", "toddler", "child"]:
 				return NO
@@ -68,7 +68,7 @@ static func eval(gate: String, f, kind: String, d: Dictionary, day: int) -> Dict
 	return NO
 
 static func _sick(f) -> bool:
-	return (Health.is_ill(f) or Health.is_injured(f)) and not Health.is_collapsed(f) and not Hospital.is_in(int(f.id))
+	return (Health.is_ill(f) or Health.is_injured(f)) and not Health.is_collapsed(f) and not Hospital.is_in(int(f.id)) and not f.has_buff("medicated")
 
 # ------------------------------------------------------------------ pets
 static func _vet(f, day: int) -> Dictionary:
@@ -188,7 +188,7 @@ static func _night_class(f) -> Dictionary:
 		return NO
 	var started: bool = not (EduState.peek(int(f.id)).get("courses", {}) as Dictionary).is_empty()
 	var ambitious: bool = _ambitious(f, "night_class")
-	return {"mult": 1.0 if (ambitious or started) else 0.25, "services": sv}
+	return {"mult": (1.5 if started else 1.0) if (ambitious or started) else 0.25, "services": sv}
 
 static func _library_course(f) -> Dictionary:
 	if not str(f.age_stage) in ["teen", "adult", "elder"]:

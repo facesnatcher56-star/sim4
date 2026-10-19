@@ -113,6 +113,7 @@ func _preschool(f: Array) -> void:
 func _college(f: Array) -> void:
 	var d: Dictionary = L.build()
 	var di = d["who"]["di"]
+	Aging.set_age_days(di, 66.0)                 # the last part of the teen years
 	Careers.school[int(di.id)]["grade"] = 85.0
 	var applied := ""
 	for i in 80:

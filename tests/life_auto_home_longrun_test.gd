@@ -7,6 +7,8 @@ const DAYS := 5
 const SEED := 4343
 
 func _play(auto_on: bool) -> Dictionary:
+	Kit.teardown()
+	SimSeed.apply(SEED)                     # the same dice both times: the only difference is the outings
 	var folk: Array = Kit.new_game("classic", SEED, SEED)
 	var mira = folk[0]
 	var wren = folk[2]
@@ -34,7 +36,11 @@ func _play(auto_on: bool) -> Dictionary:
 	var missed := 0
 	var shifts := 0
 	var school_missed := 0
+	var per: Dictionary = {}
 	for e in Kit.events:
+		if e[0] in ["returned_from_work", "late_for_work", "missed_shift", "arrived_at_work", "left_for_work"]:
+			var k := "%s:%s" % [SysUtil.folk_name(int(e[1].get("folk_id", -1))), e[0]]
+			per[k] = int(per.get(k, 0)) + 1
 		if e[0] == "returned_from_work":
 			shifts += 1
 			if bool(e[1].get("skipped", false)):
@@ -44,7 +50,7 @@ func _play(auto_on: bool) -> Dictionary:
 		if e[0] == "returned_from_school" and bool(e[1].get("skipped", false)):
 			school_missed += 1
 	var out := {"home": float(home_n) / maxf(float(seen_n), 1.0), "worst": worst, "missed": missed, "shifts": shifts, "school_missed": school_missed,
-		"stats": PlaceAuto.stats.duplicate(true), "used": PlaceAuto.kinds_used(1), "places": Kit.count_events("place_used")}
+		"per": per, "stats": PlaceAuto.stats.duplicate(true), "used": PlaceAuto.kinds_used(1), "places": Kit.count_events("place_used")}
 	Kit.teardown()
 	return out
 
@@ -54,6 +60,8 @@ func run() -> Array:
 	var on: Dictionary = _play(true)
 	print("life_auto_home: OFF home %.2f worst need %.0f missed %d of %d shifts, school missed %d" % [off["home"], off["worst"], off["missed"], off["shifts"], off["school_missed"]])
 	print("life_auto_home: ON  home %.2f worst need %.0f missed %d of %d shifts, school missed %d, stats %s, used %s" % [on["home"], on["worst"], on["missed"], on["shifts"], on["school_missed"], str(on["stats"]), str(on["used"])])
+	print("life_auto_home: work events OFF %s" % str(off["per"]))
+	print("life_auto_home: work events ON  %s" % str(on["per"]))
 	var s: Dictionary = on["stats"]
 	if int(s.get("started", 0)) < 1:
 		f.append("nobody went out in %d days" % DAYS)

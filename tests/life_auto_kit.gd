@@ -24,7 +24,7 @@ static func build(seed_value: int = 1414, with_pets: bool = true) -> Dictionary:
 	who["hal"] = K.make_folk(w, "Hal Park", ["bookworm", "workaholic"], 3, Vector2i(12, 18))
 	who["ida"] = K.make_folk(w, "Ida Park", ["romantic"], 3, Vector2i(14, 18))
 	Aging.set_age_days(who["cy"], 30.0)
-	Aging.set_age_days(who["di"], 66.0)
+	Aging.set_age_days(who["di"], 50.5)           # a teen for the next 25 days
 	Aging.set_age_days(who["gil"], 12.0)
 	Aging.set_age_days(who["fay"], 100.0)
 	Aging.set_age_days(who["ann"], 90.0)

@@ -4,7 +4,8 @@ extends RefCounted
 ##   why_not(fid, pid, sid)  -> "" or a plain-word reason (closed, wrong age, not there, too poor, already done today ...)
 ##   price(pid, sid, fid)    -> coins (data price x the town's price index x the service's season / weekday factors x membership discount)
 ##   use(fid, pid, sid, opts) -> {ok, reason, price, ...}   charge up front, then the person spends `minutes` on it (an interaction "place_visit"),
-##                                                            and the effects land when it ends. opts.instant = apply at once (townies, tests, hidden trips).
+##                                                            and the effects land when it ends. opts.instant = apply at once (townies, tests, hidden trips);
+##                                                            opts.quiet = no toast; opts.auto = the person's own choice (PlaceAuto), not a player order.
 ## Effects are data (needs / buffs / skill_xp / event / text, see PlaceEffects); special services name a `handler` (PlaceHandlers).
 ## Tier: event driven (player commands + the interaction end). Pending visits are saved; a visit cut short refunds half.
 
@@ -84,7 +85,7 @@ static func use(fid: int, pid: String, sid: String, opts: Dictionary = {}) -> Di
 	last_used[_key(fid, sid)] = SysUtil.day()
 	var minutes: float = float(svc.get("minutes", 0))
 	var quiet: bool = bool(opts.get("quiet", false))           # an unplayed household: no toast for what it does (the chronicle still hears)
-	var rec := {"place": pid, "service": sid, "price": cost, "minute": SysUtil.now(), "target": target, "quiet": quiet}
+	var rec := {"place": pid, "service": sid, "price": cost, "minute": SysUtil.now(), "target": target, "quiet": quiet, "auto": bool(opts.get("auto", false))}
 	if bool(opts.get("instant", false)) or minutes < 2.0 or not _queue(f, svc, minutes, rec):
 		var res: Dictionary = finish_now(fid, pid, sid, cost, not quiet, target)
 		res["price"] = cost
@@ -93,7 +94,7 @@ static func use(fid: int, pid: String, sid: String, opts: Dictionary = {}) -> Di
 	return {"ok": true, "reason": "", "price": cost, "queued": true}
 
 static func _queue(f, svc: Dictionary, minutes: float, rec: Dictionary) -> bool:
-	var ir := Interaction.create(IID, f, -1, true)
+	var ir := Interaction.create(IID, f, -1, not bool(rec.get("auto", false)))          # a visit the person chose themselves is not a player order (CareerShifts would call school or work "skipped")
 	if ir == null:
 		return false
 	ir.def = ir.def.duplicate(true)

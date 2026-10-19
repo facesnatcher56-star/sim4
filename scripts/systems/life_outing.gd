@@ -58,7 +58,7 @@ static func why_not(host: int, guest: int, o: Dictionary) -> String:
 	return ""
 
 ## Start the outing. `pay_both`: the host pays the guest's ticket too. `instant`: skip the visit's minutes (tests).
-static func go(host: int, guest: int, o: Dictionary, pay_both: bool, instant: bool = false) -> Dictionary:
+static func go(host: int, guest: int, o: Dictionary, pay_both: bool, instant: bool = false, use_opts: Dictionary = {}) -> Dictionary:
 	var why: String = why_not(host, guest, o)
 	if why != "":
 		return {"ok": false, "reason": why}
@@ -69,7 +69,9 @@ static func go(host: int, guest: int, o: Dictionary, pay_both: bool, instant: bo
 	if extra > 0 and not Economy.can_afford(int(f.household_id), PlaceUse.price(pid, sid, host) + extra):
 		return {"ok": false, "reason": "That costs %d coins for two." % (PlaceUse.price(pid, sid, host) + extra)}
 	PhoneState.companions[host] = {"other": guest, "place": pid, "service": sid, "pay_both": pay_both, "day": SysUtil.day()}
-	var r: Dictionary = PlaceUse.use(host, pid, sid, {"instant": instant})
+	var uo: Dictionary = use_opts.duplicate()
+	uo["instant"] = instant
+	var r: Dictionary = PlaceUse.use(host, pid, sid, uo)
 	if not bool(r.get("ok", false)):
 		PhoneState.companions.erase(host)
 		return r

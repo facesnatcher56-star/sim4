@@ -36,6 +36,13 @@ static func blocked(f, day: int) -> Array:
 		out.append([float(sc.get("start", 9.0)) - 1.5, float(sc.get("end", 15.0)) + 0.25])
 	return out
 
+## Is this hour (now) inside the time work or school takes today, with the walk there? Nothing is started then.
+static func in_block(f, hour: float) -> bool:
+	for b in blocked(f, SysUtil.day()):
+		if hour >= float(b[0]) and hour < float(b[1]):
+			return true
+	return false
+
 ## True when work or school takes part of this day.
 static func works_today(f, day: int) -> bool:
 	return not blocked(f, day).is_empty()

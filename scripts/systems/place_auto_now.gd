@@ -50,7 +50,7 @@ static func _pets(hour: int) -> void:
 			var who = _carer(int(hid), pc)
 			if who == null:
 				break
-			var res: Dictionary = LifeCommand.run(PlaceAutoTrip.PLAYER, int(who.id), "use", {"place": "pet_care", "service": act, "target": int(p["id"]), "quiet": PlaceAuto.quiet_for(who)})
+			var res: Dictionary = LifeCommand.run(PlaceAutoTrip.PLAYER, int(who.id), "use", {"place": "pet_care", "service": act, "target": int(p["id"]), "quiet": PlaceAuto.quiet_for(who), "auto": true})
 			if bool(res.get("ok", false)):
 				PlaceAuto.count("pet_care")
 				PlaceAuto.tick("kinds", act)

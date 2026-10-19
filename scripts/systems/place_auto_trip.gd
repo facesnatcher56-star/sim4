@@ -24,6 +24,8 @@ static func block_reason(f) -> String:
 		return "ordered"
 	if CareerShifts.is_critical(f):
 		return "critical"
+	if PlaceAutoTime.in_block(f, SysUtil.hour_f()):
+		return "work"
 	var c: Dictionary = PlaceAuto.cfg()
 	if f.get_stat_value("energy") < float(c.get("min_energy", -45)) or f.get_stat_value("bladder") < float(c.get("min_bladder", -50)):
 		return "tired"
@@ -32,6 +34,10 @@ static func block_reason(f) -> String:
 	if NeighborhoodLots.walking_to(f) != "":
 		return "walking"
 	return ""
+
+## use options of every visit autonomy starts: not a player order, no toast for an unplayed household.
+static func _opts(f) -> Dictionary:
+	return {"auto": true, "quiet": PlaceAuto.quiet_for(f)}
 
 static func on_minute() -> void:
 	var now: int = SysUtil.now()
@@ -139,15 +145,15 @@ static func _use(f, t: Dictionary, now: int) -> void:
 	var pid: String = PlaceAutoPlan.place_of(sid)
 	var res: Dictionary = {}
 	if ctx.has("invite"):
-		res = LifeCommand.run(PLAYER, fid, "phone_respond", {"id": int(ctx["invite"]), "yes": true})
+		res = LifeCommand.run(PLAYER, fid, "phone_respond", {"id": int(ctx["invite"]), "yes": true, "use_opts": _opts(f)})
 	else:
 		var buddy: Dictionary = _company(f, d, pid)
 		if not buddy.is_empty():
-			res = LifeCommand.run(PLAYER, fid, "phone_invite", {"other": int(buddy["id"]), "outing": str(buddy["outing"]), "pay_both": true})
+			res = LifeCommand.run(PLAYER, fid, "phone_invite", {"other": int(buddy["id"]), "outing": str(buddy["outing"]), "pay_both": true, "use_opts": _opts(f)})
 			if not bool(res.get("ok", false)) or not bool(res.get("accepted", false)):
 				res = {}
 		if res.is_empty():
-			res = LifeCommand.run(PLAYER, fid, "use", {"place": pid, "service": sid, "target": int(ctx.get("target", -1)), "quiet": PlaceAuto.quiet_for(f)})
+			res = LifeCommand.run(PLAYER, fid, "use", {"place": pid, "service": sid, "target": int(ctx.get("target", -1)), "quiet": PlaceAuto.quiet_for(f), "auto": true})
 	if not bool(res.get("ok", false)):
 		_finish(f, t, false, "refused")
 		PlaceAuto.tick("drops", "use:%s:%s" % [str(t["kind"]), str(res.get("reason", ""))])

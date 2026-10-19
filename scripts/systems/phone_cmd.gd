@@ -88,7 +88,7 @@ static func accept_chance(fid: int, other: int) -> float:
 		p += 0.25
 	return clampf(p, 0.05, 0.95)
 
-static func invite(fid: int, other: int, outing_id: String, pay_both: bool = true, instant: bool = false) -> Dictionary:
+static func invite(fid: int, other: int, outing_id: String, pay_both: bool = true, instant: bool = false, use_opts: Dictionary = {}) -> Dictionary:
 	var why: String = _check(fid, other)
 	if why != "":
 		return {"ok": false, "reason": why}
@@ -105,11 +105,11 @@ static func invite(fid: int, other: int, outing_id: String, pay_both: bool = tru
 		var f = SysUtil.folk(fid)
 		SysUtil.notify("%s is busy and cannot make it." % SysUtil.folk_name(other), "info")
 		return {"ok": true, "accepted": false, "reason": ""}
-	var r: Dictionary = LifeOuting.go(fid, other, o, pay_both, instant)
+	var r: Dictionary = LifeOuting.go(fid, other, o, pay_both, instant, use_opts)
 	r["accepted"] = bool(r.get("ok", false))
 	return r
 
-static func respond(fid: int, mid: int, yes: bool, instant: bool = false) -> Dictionary:
+static func respond(fid: int, mid: int, yes: bool, instant: bool = false, use_opts: Dictionary = {}) -> Dictionary:
 	var m: Dictionary = {}
 	for it in PhoneState.inbox:
 		if int(it["id"]) == mid and int(it["folk"]) == fid:
@@ -124,7 +124,7 @@ static func respond(fid: int, mid: int, yes: bool, instant: bool = false) -> Dic
 	if o.is_empty():
 		PhoneState.take(fid, mid)
 		return {"ok": false, "reason": "That plan fell through."}
-	var r: Dictionary = LifeOuting.go(fid, int(m["from"]), o, false, instant)
+	var r: Dictionary = LifeOuting.go(fid, int(m["from"]), o, false, instant, use_opts)
 	if bool(r.get("ok", false)):
 		PhoneState.take(fid, mid)
 	return r

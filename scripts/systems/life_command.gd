@@ -39,9 +39,9 @@ static func run(_player_id: int, folk_id: int, action: String, args: Dictionary 
 		"phone_text":
 			return PhoneCmd.text_person(folk_id, int(args.get("other", -1)))
 		"phone_invite":
-			return PhoneCmd.invite(folk_id, int(args.get("other", -1)), str(args.get("outing", "")), bool(args.get("pay_both", true)), bool(args.get("instant", false)))
+			return PhoneCmd.invite(folk_id, int(args.get("other", -1)), str(args.get("outing", "")), bool(args.get("pay_both", true)), bool(args.get("instant", false)), args.get("use_opts", {}))
 		"phone_respond":
-			return PhoneCmd.respond(folk_id, int(args.get("id", -1)), bool(args.get("yes", false)), bool(args.get("instant", false)))
+			return PhoneCmd.respond(folk_id, int(args.get("id", -1)), bool(args.get("yes", false)), bool(args.get("instant", false)), args.get("use_opts", {}))
 		"post":
 			return SocialFeed.post(folk_id, str(args.get("kind", "")))
 		"job_apply":
