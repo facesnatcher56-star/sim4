@@ -165,6 +165,55 @@ func _birthday(f: Array) -> void:
 	K.expect(f, ChronicleHook.recent.any(func(p): return str(p["kind"]) == "birthday_party"), "it is in the town's news")
 	K.teardown()
 
+## The other reasons to go out, each one a gate that says yes and a plan that finds an hour: a wedding, a shower, a funeral, counselling after grief, the dentist
+## for a sore tooth, a prescription refill, a club to join.
+func _events_and_care(f: Array) -> void:
+	var d: Dictionary = L.build()
+	var who: Dictionary = d["who"]
+	var ann = who["ann"]
+	var ids: Array = Story.alive_townies().filter(func(t): return Story.stage_of(t) == "adult").map(func(t): return int(t["id"]))
+	ids.sort()
+	var spring := 1
+	for dd in range(1, 200):
+		if Seasons.season_at_day(dd) == "spring":
+			spring = dd
+			break
+	# a weekday in spring
+	while SysUtil.weekday(spring) > 3:
+		spring += 1
+	K.set_time(spring, 11)
+	K.expect(f, float(PlaceAutoGate.eval("wedding", ann, "wedding", {}, spring).get("mult", 0.0)) == 0.0, "nobody plans a wedding without an engagement")
+	RelationshipBits.set_flag(int(ann.id), ids[0], "partner", true, false)
+	RelationshipService.add_both(int(ann.id), ids[0], "romance", 90.0)
+	Family.engaged[SysUtil.pair_key(int(ann.id), ids[0])] = {"a": int(ann.id), "b": ids[0], "since": 1}
+	K.expect(f, float(PlaceAutoGate.eval("wedding", ann, "wedding", {}, spring).get("mult", 0.0)) > 0.0 and PlaceAutoPlan.make_one(ann, "wedding", 10), "an engaged adult books the wedding")
+	# an expecting mother: the shower
+	K.set_time(spring, 11)
+	Aging.pregnancies[int(who["ida"].id)] = {"due_day": 20, "started": 4}
+	K.expect(f, float(PlaceAutoGate.eval("shower", who["ida"], "shower", {}, spring).get("mult", 0.0)) > 0.0 and PlaceAutoPlan.make_one(who["ida"], "shower", 10), "an expecting parent throws a baby shower")
+	# a friend died two days ago: the funeral, and counselling for the grief
+	var dead: int = 4242
+	RelationshipService.add_both(int(who["eve"].id), dead, "friendship", 60.0)
+	Graves.records[-1] = {"object_id": -1, "folk_id": dead, "name": "Old Joe", "born": 0, "died": spring - 2, "years": 6, "stage": "elder", "cause": "old age", "cause_id": "old_age", "style": "stone", "def": "grave", "park": false, "tile": [-1, -1], "visits": 0}
+	K.expect(f, float(PlaceAutoGate.eval("funeral", who["eve"], "funeral", {}, spring).get("mult", 0.0)) > 0.0 and PlaceAutoPlan.make_one(who["eve"], "funeral", 10), "a friend's funeral is held by the one who knew them")
+	who["eve"].add_buff("grieving")
+	K.expect(f, float(PlaceAutoGate.eval("help", who["eve"], "therapy", {}, spring).get("mult", 0.0)) > 0.0 and PlaceAutoPlan.make_one(who["eve"], "therapy", 9), "after a loss they go to the counsellor")
+	# a sore tooth: the dentist at once; a long-term condition: the pharmacy
+	HealthLife.rec(int(who["bo"].id))["dental"] = 20.0
+	who["bo"].add_buff("toothache")
+	var gt: Dictionary = PlaceAutoGate.eval("teeth", who["bo"], "dentist", {}, spring)
+	K.expect(f, float(gt.get("mult", 0.0)) >= 10.0 and (gt.get("services", []) as Array) == ["dental_fix"], "a sore tooth sends them to the dentist for a filling")
+	HealthCond.give(int(who["hal"].id), "asthma", true)
+	HealthCond.doses(int(who["hal"].id), "asthma")
+	var gr: Dictionary = PlaceAutoGate.eval("refill", who["hal"], "pharmacy", {}, spring)
+	K.expect(f, HealthCond.doses(int(who["hal"].id), "asthma") > 1 or (gr.get("services", []) as Array).has("refill_asthma"), "somebody who runs out of medicine goes for a refill")
+	# clubs: a new member joins the club that suits them, a member goes to the meeting
+	var gc: Dictionary = PlaceAutoGate.eval("club", who["hal"], "club", {}, spring)
+	K.expect(f, (gc.get("services", []) as Array).size() == 1 and str(gc["services"][0]).begins_with("join_"), "somebody with no club joins one (%s)" % str(gc.get("services", [])))
+	ClubState.join(int(who["hal"].id), "book_club")
+	K.expect(f, (PlaceAutoGate.eval("club", who["hal"], "club", {}, spring).get("services", []) as Array) == ["book_club_meeting"], "and then goes to its meetings")
+	K.teardown()
+
 func _homework_buff(f: Array) -> void:
 	var d: Dictionary = L.build()
 	var cy = d["who"]["cy"]

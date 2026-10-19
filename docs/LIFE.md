@@ -160,6 +160,12 @@ pets), `PlaceAutoTownies` (statistical).
   get no travel or service toasts (`opts.silent`, `opts.quiet`); the chronicle still hears about weddings, funerals and the rest.
 * **Townies** (STATISTICAL): one dice a day, a counted visit at a place. Nothing else.
 * `config.auto.enabled` false (or `PlaceAuto.off = true`) switches all of it off.
+* **Measured** (`life_auto_longrun_test`, 28 game days, 3 unplayed households, 9 people on the stub world): 80 outings = 0.36 per person per day (the target is "rare": a
+  handful a week), 85 pet jobs for two pets, every household 7-8 kinds of places (12-18 distinct places), the child at school 20 of 20 school days, the doctor seen by
+  the sick, the worst need -51 against -40 without outings, nobody's shift or school day skipped because of an outing. `life_auto_home_longrun_test` (real map, 5 days,
+  one household, switched off vs on): 79 percent of waking time at home against 74, worst need -9 in both, the same shifts and the same lateness. Big-town benchmark
+  (`tools/run_scale.ps1 -Profile big -Days 3 -NoWrite`): frame average 3.65 ms with outings, 4.16 ms with them switched off (noise), `PlaceAuto` below the 0.02 ms per
+  minute listing threshold, `LifeTick.on_day` 0.028 ms per minute; the choose and worst-frame numbers move by more than that between runs.
 * Not covered: guests that are residents do not walk to the host's party, they get the effects; pets and the phone have no body on the map; a toddler walks to the
   preschool alone; hobbies (fishing, garden plots, photography) and the campsite are not part of the autonomy yet.
 
