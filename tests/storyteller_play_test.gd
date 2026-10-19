@@ -14,6 +14,8 @@ func run() -> Array:
 	_cycles(f)
 	_quiet_guard(f)
 	_determinism(f)
+	_doorstep_pet(f)
+	_scan_cache(f)
 	return f
 
 func _town(seed_value: int = 2929) -> StubWorld:
@@ -217,3 +219,64 @@ func _determinism(f: Array) -> void:
 		runs.append(JSON.stringify(Storyteller.to_dict()))
 		K.teardown()
 	K.expect(f, runs[0] == runs[1] and runs[0].length() > 200, "same seed, same story")
+
+## The doorstep-pet card (waits on `when.pets`): a stray turns up, the player may keep it, townies decide with a seeded coin flip.
+func _doorstep_pet(f: Array) -> void:
+	_town(3131)
+	LifeTick.new_game()
+	var c: Dictionary = StorytellerDeck.card("pet_on_doorstep")
+	K.expect(f, Storyteller.pets_exist(1) and StorytellerDeck.eligible("pet_on_doorstep", c, "h1"), "the doorstep pet card is eligible once the pet system exists")
+	JusticePlayer.auto = "keep"
+	StorytellerPlay.card("h1", "pet_on_doorstep", {"from_sign": true})
+	var mine: Array = PetState.of_household(1)
+	K.expect(f, mine.size() == 1 and Storyteller.choices.is_empty(), "taking the stray in gives the household a pet")
+	var told: bool = not mine.is_empty() and K.notes.any(func(n): return str(n[0]).find(str(mine[0]["name"])) >= 0 and str(n[0]).find("{") < 0)
+	K.expect(f, told, "the player is told the pet's name in plain words")
+	JusticePlayer.auto = "shelter"
+	StorytellerPlay.card("h1", "pet_on_doorstep", {"from_sign": true})
+	K.expect(f, PetState.of_household(1).size() == 1, "taking it to the shelter adds no pet")
+	JusticePlayer.auto = ""
+	PetState.add_pet(1, "cat", "Mimi")
+	PetState.add_pet(1, "dog", "Rex")
+	K.expect(f, not Storyteller.pets_exist(1) and not StorytellerDeck.eligible("pet_on_doorstep", c, "h1"), "a home with three pets is not offered another")
+	var kept := 0
+	var sheltered := 0
+	for i in 40:
+		for t in Story.townies.values():
+			t.erase("pet")
+		var lot: int = 1 + i % 6
+		if StorytellerPlay.lot_members(lot).is_empty():
+			continue
+		var k0: int = int(Storyteller.stats.get("townie_pet_kept", 0))
+		var s0: int = int(Storyteller.stats.get("townie_pet_shelter", 0))
+		StorytellerPlay.card("l%d" % lot, "pet_on_doorstep", {})
+		kept += int(Storyteller.stats.get("townie_pet_kept", 0)) - k0
+		sheltered += int(Storyteller.stats.get("townie_pet_shelter", 0)) - s0
+	K.expect(f, kept > 5 and sheltered > 5, "townies decide statistically: some keep the stray, some take it to the shelter (%d / %d)" % [kept, sheltered])
+	K.teardown()
+
+## The per-pick lookup cache (StorytellerScan) and the early-out subject search change speed, never answers: every card, every key, cached or not.
+func _scan_cache(f: Array) -> void:
+	_town(4242)
+	Story.generate_townies(40)
+	var checked := 0
+	var same := true
+	for key in StorytellerBudget.keys():
+		for cid in StorytellerDeck.cards():
+			var c: Dictionary = StorytellerDeck.cards()[cid]
+			var plain: bool = StorytellerDeck.eligible(str(cid), c, str(key))
+			var plain_w: float = StorytellerDeck.weight_of(str(cid), c, str(key))
+			StorytellerScan.begin()
+			var cached: bool = StorytellerDeck.eligible(str(cid), c, str(key))
+			var cached_w: float = StorytellerDeck.weight_of(str(cid), c, str(key))
+			StorytellerScan.end()
+			checked += 1
+			if plain != cached or not is_equal_approx(plain_w, cached_w):
+				same = false
+				print("  scan cache differs for %s on %s: %s/%s %s/%s" % [cid, key, plain, cached, plain_w, cached_w])
+			if c.has("incident") and StorytellerPlay._incident_subjects(c, str(key), true).is_empty() != StorytellerPlay._incident_subjects(c, str(key)).is_empty():
+				same = false
+				print("  early-out subject search differs for %s on %s" % [cid, key])
+	K.expect(f, checked > 500 and same, "cached and early-out card eligibility equals the plain scan (%d card/key pairs)" % checked)
+	K.expect(f, not StorytellerScan.active(), "the cache is closed after a pick")
+	K.teardown()

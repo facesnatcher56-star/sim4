@@ -4,6 +4,8 @@
   "female_curve": [[0, 0.0], [75, 0.0], [76, 1.0], [110, 1.0], [140, 0.6], [165, 0.25], [171, 0.1]],
   "male_curve": [[0, 0.0], [75, 0.0], [76, 1.0], [120, 1.0], [171, 0.6]],
   "elder": 0.0,
+  "female_end_before_elder_days": 8.0,
+  "female_taper_days": 10.0,
   "trait_mult": {"active": 1.05, "lazy": 0.95, "workaholic": 0.95, "romantic": 1.05},
   "buff_mult": {"work_stress": 0.8, "anxious_jitters": 0.85, "exhausted": 0.7, "starving": 0.6, "hungry": 0.9, "grieving": 0.8, "grieving_heavy": 0.7, "grieving_shattered": 0.6, "flu": 0.6, "injured": 0.7, "tipsy": 0.95, "well_rested": 1.05, "treated": 1.5},
   "infertile_rate": 0.06,

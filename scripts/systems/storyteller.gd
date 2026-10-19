@@ -177,15 +177,21 @@ static func clear_mult_cache() -> void:
 static func on_day(day: int) -> void:
 	if not enabled or SysUtil.table("storyteller").is_empty():
 		return
+	var tp := PerfProf.start()
 	StorytellerChaos.decay_heat()
 	var keys: Array = StorytellerBudget.keys()
 	for k in keys:
 		StorytellerChaos.step(str(k))
+	PerfProf.stop("story/chaos+keys", tp)
+	tp = PerfProf.start()
 	StorytellerCycles.on_day(day)
 	StorytellerArcs.on_day(day)
 	StorytellerQueue.on_day(day)
+	PerfProf.stop("story/cycles+arcs+queue", tp)
+	tp = PerfProf.start()
 	for k in keys:
 		StorytellerBudget.day(str(k), day)
+	PerfProf.stop("story/budget", tp)
 
 static func on_game_event(ev: String, p: Dictionary) -> void:
 	if not enabled:
@@ -205,8 +211,11 @@ static func ripple_count(hid: int) -> int:
 	var r: Dictionary = ripples.get(hid, {})
 	return int(r.get("near", 0)) + int(r.get("know", 0))
 
-static func pets_exist() -> bool:
-	return false          # no pet system yet: the doorstep-pet card waits for it (card `when.pets`)
+## Card `when.pets`: the pet system (task 14) is there and this household has room for another pet.
+static func pets_exist(hid: int = 0) -> bool:
+	if (PetState.cfg().get("species", {}) as Dictionary).is_empty():
+		return false
+	return hid <= 0 or PetState.of_household(hid).size() < int(PetState.cfg().get("max_per_household", 3))
 
 # ------------------------------------------------------------------ save (nested in Incidents.to_dict()["storyteller"])
 static func to_dict() -> Dictionary:
@@ -260,5 +269,7 @@ static func _rows_in(rows: Array) -> Array:
 	for r in rows:
 		var q: Dictionary = (r as Dictionary).duplicate(true)
 		SysUtil.ints_in(q, ["due", "hid", "folk_id", "other", "lot", "day", "id"])
+		if q.get("ctx") is Dictionary:           # a foreshadowed card carries its ctx: ints again after JSON (floats), so a second save is identical
+			SysUtil.ints_in(q["ctx"], ["hid", "folk_id", "other", "lot", "who"])
 		out.append(q)
 	return out

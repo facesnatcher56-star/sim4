@@ -37,7 +37,7 @@ static func nobody_reminder(days_left: int) -> String:
 		return "Nobody is playing your household. Open the banner at the top and choose who to play."
 	if days_left <= 1:
 		return "Nobody is playing your household. If you do not choose today, someone will be picked for you tomorrow."
-	return "Nobody is playing your household. Choose who to play, or someone will be picked for you in %d days." % days_left
+	return "Nobody is playing your household. Choose who to play, or someone will be picked for you in %s." % SysUtil.count_text(days_left, "day")
 
 ## The line on the banner.
 static func nobody_banner(days_left: int) -> String:

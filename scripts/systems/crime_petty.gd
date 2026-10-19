@@ -51,7 +51,7 @@ static func settle(c: Dictionary) -> void:
 	var text: String
 	if use_service:
 		JusticeState.service[pid] = {"days_left": service_days, "last_day": -1}
-		text = "%s was caught (%s) and got %d days of community service." % [CrimePerson.name_of(pid), str(d.get("label", kind)).to_lower(), service_days]
+		text = "%s was caught (%s) and got %s of community service." % [CrimePerson.name_of(pid), str(d.get("label", kind)).to_lower(), SysUtil.count_text(service_days, "day")]
 		c["sentence"] = {"type": "service", "days": service_days}
 	else:
 		var fine: int = JusticeState.rng.randi_range(int(fr[0]), int(fr[1]))

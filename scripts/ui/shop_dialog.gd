@@ -77,7 +77,7 @@ static func _work(dlg: BankHub, folk_id: int, here: String) -> void:
 	for kind in MarketWork.cfg().get("crafts", {}):
 		total += MarketWork.craft_count(h, str(kind))
 	if total > 0:
-		dlg.row_with("You have %d things to sell (paintings, books, produce, fish)." % total, [
+		dlg.row_with("You have %s to sell (paintings, books, produce, fish)." % SysUtil.count_text(total, "thing"), [
 			dlg.button("At the market", "Full price; you must be at the market", func(): dlg.act("craft_sell", {"at_market": true}), here == "market"),
 			dlg.button("Online", "Sell from home, keeping a share", func(): dlg.act("craft_sell", {"at_market": false}))])
 	else:

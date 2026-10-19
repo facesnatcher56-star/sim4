@@ -20,7 +20,6 @@ static func reveal(id: int, how: String) -> void:
 		return
 	f.remove_buff("feeling_off")
 	f.add_buff("pregnant")
-	Family.update_pregnancies()
 	var txt: String = "%s is expecting a baby!" % f.name
 	if how == "test":
 		txt = "The test is positive. %s is expecting a baby!" % f.name
@@ -28,6 +27,7 @@ static func reveal(id: int, how: String) -> void:
 		txt = "The doctor confirms it: %s is expecting a baby!" % f.name
 	SysUtil.notify(txt, "birthday")
 	SysUtil.game_event("pregnancy_known", {"folk_id": id, "how": how, "target_id": int(r.get("father", -1))})
+	Family.update_pregnancies()                      # after the announcement: "is in trimester 2" never comes first
 
 ## Pay from the household. False (and a plain note) when they cannot afford it.
 static func _pay(f, amount: int) -> bool:

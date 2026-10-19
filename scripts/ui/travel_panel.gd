@@ -211,7 +211,7 @@ func _style_tile(l: Dictionary) -> void:
 	if not here.is_empty():
 		parts.append("%d of yours" % here.size())
 	if Crowd.count(lid) > 0:
-		parts.append("%d locals" % Crowd.count(lid))
+		parts.append(SysUtil.count_text(Crowd.count(lid), "local"))
 	if str(l.get("type", "")) == "townie_home":
 		var rc: int = Neighborhood.residents_of(lid).size()
 		if rc > 0:

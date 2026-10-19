@@ -384,10 +384,10 @@ static func legacy_summary(folk_id: int) -> Dictionary:
 	var summary: String = "%s passed away as %s %s, %s, " % [nm, article(stage_now), str(stage_def(stage_now).get("label", stage_now)).to_lower(), career_txt]
 	if best_skill != "":
 		summary += "mastered %s %d, " % [best_skill, best_lvl]
-	summary += "left %d friends and %d children." % [friends, kids]
+	summary += "left %s and %s." % [SysUtil.count_text(friends, "friend"), SysUtil.count_text(kids, "child", "children")]
 	var desc: int = FamilyTree.descendants_of(folk_id).size()
 	if desc > kids:
-		summary += " %d descendants in all." % desc
+		summary += " %s in all." % SysUtil.count_text(desc, "descendant")
 	var shady: String = CrimeLifeMoral.legacy_line(folk_id)
 	if shady != "":
 		summary += " They %s" % shady

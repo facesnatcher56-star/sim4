@@ -13,13 +13,13 @@
  "content": {
   "interactions": {
    "work_counter": {"label": "Work the Counter", "kind": "super", "target": "object", "objects": ["cafe_counter"], "duration_min": 14, "posture": "stand",
-    "hidden": true, "tags": ["work", "staff"], "tests": [], "per_min": {}, "on_finish": [], "on_cancel": [], "autonomous": false, "priority": "normal",
+    "hidden": true, "tags": ["work", "staff"], "tests": [{"age_stage_is": ["teen", "adult", "elder"]}], "per_min": {}, "on_finish": [], "on_cancel": [], "autonomous": false, "priority": "normal",
     "thought": "Next order, coming up."},
    "work_gym": {"label": "Coach a Session", "kind": "super", "target": "object", "objects": ["treadmill", "dumbbell_rack"], "duration_min": 18, "posture": "stand",
-    "hidden": true, "tags": ["work", "staff"], "tests": [], "per_min": {}, "on_finish": [], "on_cancel": [], "autonomous": false, "priority": "normal",
+    "hidden": true, "tags": ["work", "staff"], "tests": [{"age_stage_is": ["teen", "adult", "elder"]}], "per_min": {}, "on_finish": [], "on_cancel": [], "autonomous": false, "priority": "normal",
     "thought": "One more rep!"},
    "work_desk": {"label": "Write at the Desk", "kind": "super", "target": "object", "objects": ["desk", "computer"], "duration_min": 20, "posture": "stand",
-    "hidden": true, "tags": ["work", "staff"], "tests": [], "per_min": {}, "on_finish": [], "on_cancel": [], "autonomous": false, "priority": "normal",
+    "hidden": true, "tags": ["work", "staff"], "tests": [{"age_stage_is": ["teen", "adult", "elder"]}], "per_min": {}, "on_finish": [], "on_cancel": [], "autonomous": false, "priority": "normal",
     "thought": "The words are coming."}
   },
   "object_interactions": {

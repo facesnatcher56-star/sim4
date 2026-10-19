@@ -69,6 +69,11 @@ static func coins_of(key: String) -> int:
 	return 0
 
 static func tier_of(key: String) -> String:
+	if StorytellerScan.active():
+		return StorytellerScan.tier(key, func(): return _tier_of(key))
+	return _tier_of(key)
+
+static func _tier_of(key: String) -> String:
 	var w: Dictionary = Storyteller.cfg().get("wealth", {})
 	var c: int = coins_of(key)
 	if kind_of(key) == "lot":
@@ -113,7 +118,9 @@ static func spend(key: String, today: int) -> bool:
 			e["points"] = float(e["points"]) - size_cost(size)
 			e["last_spend"] = today
 			e["want"] = ""
+			var tc := PerfProf.start()
 			StorytellerPlay.card(key, cid, {})
+			PerfProf.stop("story/card", tc)
 			return true
 	e["want"] = ""
 	return false
