@@ -1,6 +1,6 @@
 class_name LevelAccidents
 extends RefCounted
-## Accidents that only exist in a building with floors (task 10 part B; config.levels in data/incidents/10_levels.json, defaults below).
+## Accidents that only exist in a building with floors (task 10 part B; config.level_accidents in data/incidents/10_levels.json, defaults below).
 ##   Falls on the stairs: every game minute a folk stands on a flight of stairs / a ladder it may trip. Elders, toddlers, children, the injured,
 ##   the exhausted and the soaked fall far more often. A fall hurts through Health.injure (severity 2+ goes to hospital).
 ##   A lift that gets stuck (rare): the riders wait inside (`stuck_in_lift`), help comes after a while, then the lift stays out of service
@@ -23,7 +23,7 @@ static func reset() -> void:
 
 static func cfg() -> Dictionary:
 	var c: Dictionary = DEFAULTS.duplicate(true)
-	c.merge(IncidentDefs.cfg("levels", {}), true)
+	c.merge(IncidentDefs.cfg("level_accidents", {}), true)
 	return c
 
 
