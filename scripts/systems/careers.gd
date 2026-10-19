@@ -28,6 +28,7 @@ static func reset() -> void:
 	homemakers.clear()
 	changed_day.clear()
 	seeking.clear()
+	SkipRules.reset()
 	auto_accept_offers = false
 
 # ------------------------------------------------------------------ data access
@@ -380,7 +381,8 @@ static func to_dict() -> Dictionary:
 	return {"jobs": SysUtil.str_keys(jobs).duplicate(true), "school": SysUtil.str_keys(school).duplicate(true),
 		"offers": SysUtil.str_keys(offers).duplicate(true), "retired": SysUtil.str_keys(retired).duplicate(true),
 		"skip_flags": SysUtil.str_keys(skip_flags), "shift_log": shift_log.duplicate(true), "auto_accept": auto_accept_offers,
-		"homemakers": SysUtil.str_keys(homemakers), "changed_day": SysUtil.str_keys(changed_day), "seeking": SysUtil.str_keys(seeking)}
+		"homemakers": SysUtil.str_keys(homemakers), "changed_day": SysUtil.str_keys(changed_day), "seeking": SysUtil.str_keys(seeking),
+		"skip_rules": SkipRules.to_dict()}
 
 static func from_dict(d: Dictionary) -> void:
 	reset()
@@ -394,6 +396,7 @@ static func from_dict(d: Dictionary) -> void:
 	homemakers = SysUtil.int_keys(d.get("homemakers", {}))
 	changed_day = SysUtil.int_keys(d.get("changed_day", {}))
 	seeking = SysUtil.int_keys(d.get("seeking", {}))
+	SkipRules.from_dict(d.get("skip_rules", {}))
 	for fid in jobs:
 		var f = SysUtil.folk(int(fid))
 		if f != null:

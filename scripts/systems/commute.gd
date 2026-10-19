@@ -126,7 +126,7 @@ static func _step_out(f, t: Dictionary, now: int) -> void:
 	if at_door:
 		_arrive(f, t, now)
 		return
-	if CareerShifts.player_busy(f):
+	if CareerShifts.player_busy(f) and SkipRules.chooses_to_skip(f, str(t["kind"])):
 		miss(f, t, "chose to skip %s on the way" % ("work" if str(t["kind"]) == "work" else "school"))
 		return
 	if now > int(t["due_min"]) + int(Workplace.num("miss_after_min", 90.0)) or now >= int(t["end_min"]) - 20:
