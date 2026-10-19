@@ -93,6 +93,15 @@ func _run() -> void:
 				_look(lv, Vector2(176, 50), 30.0)
 				await create_timer(1.5).timeout
 				await _shot(prefix, "east_civic")
+			"town":
+				Story.generate_townies()
+				CityGov.ensure()
+				CityPlan.projects.append({"id": 1, "zone": "east", "plot": "plot_2", "kind": "civic", "state": "scaffold", "start": 1, "scaffold_end": 5, "ready": 15, "workers": 0})
+				Utilities.begin("power", CityState.zone_of_household(1), 3.0, "fault")
+				_main.hud.visible = true
+				_main.hud.town_dialog.show_for(SysUtil.residents()[0].id)
+				await create_timer(1.0).timeout
+				await _shot(prefix, "town_panel")
 			"night":
 				clock.total_minutes = 23 * 60
 				var home2: Dictionary = VehicleRoads.frontage("home")

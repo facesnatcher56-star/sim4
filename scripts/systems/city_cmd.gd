@@ -3,7 +3,7 @@ extends RefCounted
 ## The command layer of the city track (multiplayer-ready rule 1): `Commands.run({action: "city", args: {action, args}})`. The household always comes from
 ## the folk that acts (never "household 1"); the interactions at the mailbox end in the same calls (CityCmd.on_event), so the pie menu and the command layer
 ## do the same thing. Actions: buy_car {model} | sell_car {car} | refuel {car} | repair_car {car} | collect_car {car} | buy_bike | bus_times.
-## (the government slice adds vote, run_for_mayor, ...).
+## set_tax {value} | focus {dept, amount} (the mayor's levers of the Town panel). (the government slice adds vote, run_for_mayor, ...).
 
 static func _hid(folk_id: int) -> int:
 	var f = SysUtil.folk(folk_id)
@@ -36,10 +36,25 @@ static func act(_player_id: int, folk_id: int, action: String, args: Dictionary)
 			var lot: String = NeighborhoodLots.lot_at(f.tile) if f != null else ""
 			var lines: Array = TransportBus.timetable_text(lot)
 			res = {"ok": not lines.is_empty(), "reason": "No bus stops here.", "lines": lines}
+		"set_tax", "focus":
+			res = _mayor_lever(folk_id, action, args)
 		_:
 			res = {"ok": false, "reason": "That is not possible."}
 	res["msg"] = str(res.get("reason", ""))
 	return res
+
+## The Town panel's levers (taxes, where the budget goes): only a player who is the mayor can pull them (the same rule as the mailbox interactions).
+static func _mayor_lever(folk_id: int, action: String, args: Dictionary) -> Dictionary:
+	if not (bool(CityGov.mayor.get("player", false)) and int(CityGov.mayor.get("id", -1)) == folk_id):
+		return {"ok": false, "reason": "Only the mayor can change the budget."}
+	if action == "set_tax":
+		CityGov.set_tax(float(args.get("value", CityGov.tax)))
+		return {"ok": true, "tax": CityGov.tax, "reason": ""}
+	var dept: String = str(args.get("dept", ""))
+	if not CityGov.alloc.has(dept) or dept == "reserve":
+		return {"ok": false, "reason": "That is not a part of the budget."}
+	CityGov.shift(dept, float(args.get("amount", float(CityGov.cfg().get("alloc_step", 0.03)))))
+	return {"ok": true, "reason": ""}
 
 ## The car the command means: its id, else the household's first car that fits the action.
 static func _car(hid: int, args: Dictionary) -> int:
