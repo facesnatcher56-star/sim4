@@ -182,6 +182,8 @@ static func on_game_event(ev: String, payload: Dictionary) -> void:
 		return
 	if f == null or int(f.household_id) <= 0:
 		return
+	if not counterplay_ok(f, ev):
+		return
 	var hid: int = int(f.household_id)
 	match ev:
 		"shut_off_gas":
@@ -208,6 +210,12 @@ static func on_game_event(ev: String, payload: Dictionary) -> void:
 				ChaosState.pests.erase(str(hid))
 				SysUtil.notify("The roaches are gone.", "good")
 			sync_markers(hid)
+
+## Only the stages listed in config.chaos.counterplay_stages may repair, call tradespeople or sort out paperwork (a baby never stops a leak).
+static func counterplay_ok(f, ev: String) -> bool:
+	var c: Dictionary = ChaosState.cfg("counterplay_stages")
+	var ok: Array = c.get(ev, c.get("default", ["adult", "elder"]))
+	return ok.has(str(f.age_stage))
 
 static func _diy(f, hid: int) -> void:
 	var lk: Dictionary = ChaosState.leak_of(hid)

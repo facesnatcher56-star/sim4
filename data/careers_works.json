@@ -916,7 +916,7 @@
      "work",
      "staff"
     ],
-    "tests": [],
+    "tests": [{"age_stage_is": ["teen", "adult", "elder"]}],
     "per_min": {},
     "skill_xp_per_min": {
      "handiness": 0.45,
@@ -943,7 +943,7 @@
      "work",
      "staff"
     ],
-    "tests": [],
+    "tests": [{"age_stage_is": ["teen", "adult", "elder"]}],
     "per_min": {},
     "skill_xp_per_min": {
      "fitness": 0.5,
@@ -969,7 +969,7 @@
      "work",
      "staff"
     ],
-    "tests": [],
+    "tests": [{"age_stage_is": ["teen", "adult", "elder"]}],
     "per_min": {},
     "skill_xp_per_min": {
      "fitness": 0.35,
@@ -995,7 +995,7 @@
      "work",
      "staff"
     ],
-    "tests": [],
+    "tests": [{"age_stage_is": ["teen", "adult", "elder"]}],
     "per_min": {},
     "skill_xp_per_min": {
      "handiness": 0.5,
@@ -1021,7 +1021,7 @@
      "work",
      "staff"
     ],
-    "tests": [],
+    "tests": [{"age_stage_is": ["teen", "adult", "elder"]}],
     "per_min": {},
     "skill_xp_per_min": {
      "logic": 0.4,
