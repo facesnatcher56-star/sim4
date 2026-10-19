@@ -19,6 +19,7 @@ static var _bit_cache: Dictionary = {}   # "a>b" -> bit id
 static var secrets: Dictionary = {}      # owner_id -> [{id, kind, text, severity, known_by:[ids]}]
 static var reputation_map: Dictionary = {}   # folk_id -> -100..100 standing in town
 static var gossip_items: Dictionary = {} # folk_id -> [{about, other, text, kind, sid, day, told:[ids]}]
+static var _jealous_day: Dictionary = {}    # "partner|flirter" -> day of the last jealous scene (not saved: only throttles the toast and the penalty)
 static var affairs: Array = []           # [{cheater, other, victim, day}] undiscovered cheating
 
 ## Pair keys per person (task 17.3): who a person knows is a lookup, not a scan of every pair of the town. Maintained where pairs are created / erased / loaded
@@ -62,6 +63,7 @@ static func reset() -> void:
 	reputation_map.clear()
 	gossip_items.clear()
 	affairs.clear()
+	_jealous_day.clear()
 	Conversation.reset()
 	Emotions.reset()
 	SocialDynamics.reset()
@@ -308,6 +310,10 @@ static func _check_jealousy(actor: int, target: int, iid: String) -> void:
 			continue
 		if fa != null and Vector2(fp.tile - fa.tile).length() > float(j.get("range", 14)):
 			continue
+		var jkey: String = "%d|%d" % [int(partner_id), actor]
+		if SysUtil.day() - int(_jealous_day.get(jkey, -999)) < int(SysUtil.table("straying").get("jealous_scene_gap_days", 2)):      # one jealous scene per pair every couple of days, not one per wink
+			continue
+		_jealous_day[jkey] = SysUtil.day()
 		var jm: float = SocialDynamics.trait_mult(int(partner_id), "jealousy_mult", 1.0)
 		add_value(int(partner_id), actor, "romance", -float(j.get("romance_loss", 8)) * jm)
 		add_value(int(partner_id), actor, "friendship", -float(j.get("friendship_loss", 4)) * jm)
