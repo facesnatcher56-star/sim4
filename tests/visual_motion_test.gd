@@ -38,6 +38,7 @@ func run() -> Array:
 	_urgent_runs(root.get_node("Clock"))
 	_sit_clips()
 	_data_sit_lie_clips()
+	_hand_props()
 	_holder.free()
 	W.reset()
 	root.get_node("Clock").speed = 1
@@ -153,3 +154,44 @@ func _data_sit_lie_clips() -> void:
 				_check(FolkClipRules.is_sit_clip(fit) if p == "sit" else FolkClipRules.is_lie_clip(fit), "%s on %s resolves to '%s'" % [iid, oid, fit])
 				checked += 1
 	_check(checked > 10, "only %d sit/lie interactions checked" % checked)
+
+
+## Item 3 (27b): a prop in the hand while the clip plays (book for reading, cup for a drink, game pad for a game, brush for painting), gone as soon as
+## the interaction ends or the folk walks off; the data names real clips and every rule has a definition on a bone of the skeleton.
+func _hand_props() -> void:
+	var cfg: Dictionary = FolkView.anim_map().get("props", {})
+	var defs: Dictionary = cfg.get("defs", {})
+	var clips: Array = FolkView.anim_map().get("sit_clips", []) + FolkView.anim_map().get("lie_clips", [])
+	for r in (cfg.get("rules", []) as Array):
+		_check(defs.has(str(r["prop"])), "props rule names '%s' without a definition" % str(r["prop"]))
+	for k in defs:
+		_check(not (defs[k]["parts"] as Array).is_empty() and str(defs[k]["bone"]).begins_with("hand_"), "prop '%s' has no parts or no hand bone" % k)
+	_check(FolkProps.prop_for("read_armchair", ["read"], "Sit_Read") == "book", "reading in a seat has a book")
+	_check(FolkProps.prop_for("brew_coffee", ["drink", "coffee"], "Use_Stand") == "cup", "brewing coffee has a cup")
+	_check(FolkProps.prop_for("play_computer", ["fun"], "Sit_Type") == "gamepad", "play_computer has a game pad")
+	_check(FolkProps.prop_for("paint_canvas", ["creative"], "Paint") == "brush", "painting has a brush")
+	_check(FolkProps.prop_for("study_recipes", ["read", "cook"], "Cook") == "", "no book while the clip is Cook")
+	_check(FolkProps.prop_for("read_book", ["read"], "Walk") == "", "no prop while walking")
+	var pr := _mk(Vector2i(8, 8))
+	var f: Folk = pr[0]
+	var fv: FolkView = pr[1]
+	if fv._is_placeholder:
+		fv.free()
+		W.remove_folk(f.id)
+		return                              # no glb in this run: the capsule person gets no props
+	f.current = Interaction.create("read_armchair", f)
+	f.current.state = "running"
+	W.folk_pose[f.id] = {"pose": "sit"}
+	for i in 12:
+		fv._process(0.05)
+	_check(fv._props.has("book") and (fv._props["book"] as Node3D).visible, "reading shows a book in the hand")
+	f.current = null
+	W.folk_pose.erase(f.id)
+	for i in 12:
+		fv._process(0.05)
+	var shown := 0
+	for k in fv._props:
+		shown += 1 if (fv._props[k] as Node3D).visible else 0
+	_check(shown == 0, "%d prop(s) still shown after the interaction ended" % shown)
+	fv.free()
+	W.remove_folk(f.id)

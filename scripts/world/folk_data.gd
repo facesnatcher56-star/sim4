@@ -41,6 +41,8 @@ var show_name: bool = false:
 			_name_label.visible = v
 var show_mood: bool = true
 
+var _props: Dictionary = {}           # hand props built so far (FolkProps): name -> node, shown while its rule matches
+var _prop_sig: int = 0
 var _waypoints: Array[Vector3] = []
 var _last_tile: Vector2i = Vector2i(-999, -999)
 var _last_level: int = 0
