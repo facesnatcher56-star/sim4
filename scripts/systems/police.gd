@@ -58,6 +58,10 @@ static func is_uneasy() -> bool:
 static func respond(c: Dictionary, delay: int = -1) -> void:
 	if delay < 0:
 		delay = int(cfg().get("response_min", [12, 30])[0]) + JusticeState.rng.randi_range(0, int(cfg().get("response_min", [12, 30])[1]) - int(cfg().get("response_min", [12, 30])[0]))
+		if CityServices.map_ready():                                    # task 12: a patrol car drives from the station
+			var scene: String = str(c.get("scene", ""))
+			var lot: String = PlayerLots.home_of_household(int(c.get("vhid", 0))) if scene.begins_with("home:") else Neighborhood.HOME
+			delay = int(CityServices.dispatch("police", lot)["minutes"])
 	JusticeState.queue({"kind": "police_arrive", "due_min": SysUtil.now() + delay, "case": int(c["id"])})
 	CaseStore.note(c, "The police were called.")
 

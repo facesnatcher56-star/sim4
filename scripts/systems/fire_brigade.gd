@@ -14,6 +14,11 @@ static func call_in(lot: String, caller_id: int = -1) -> void:
 		return
 	var d: Array = FireRules.cfg().get("brigade_delay", [9, 14])
 	var delay: int = Fire.rng.randi_range(int(d[0]), int(d[1])) - (int(FireRules.num("brigade_alarm_saving", 2.0)) if bool(b["alarm"]) else 0)
+	if CityServices.map_ready():                                   # task 12: the engine drives from the station (distance, traffic, staffing, other calls)
+		var caller = SysUtil.folk(caller_id)
+		var resp: Dictionary = CityServices.dispatch("fire", lot, {"no_phone": caller != null and caller.has_buff("no_signal")})
+		delay = int(resp["minutes"]) - (int(FireRules.num("brigade_alarm_saving", 2.0)) if bool(b["alarm"]) else 0)
+		b["response"] = int(resp["minutes"])
 	b["called"] = true
 	b["call_min"] = SysUtil.now()
 	b["due"] = SysUtil.now() + maxi(delay, 3)
@@ -66,7 +71,8 @@ static func _arrive(b: Dictionary, now: int) -> void:
 		f.idle_until_min = 1 << 30
 		Fire.crew.append({"id": int(f.id), "lot": lot, "leave_min": -1, "leaving": -1})
 	if FireRules.is_home(lot):
-		SysUtil.notify("The fire department has arrived.", "info")
+		var took: int = now - int(b.get("call_min", now))
+		SysUtil.notify(str(CityServices.cfg().get("text", {}).get("fire_arrived", "The fire department has arrived.")).replace("{min}", str(took)) if CityServices.map_ready() else "The fire department has arrived.", "info")
 	SysUtil.game_event("fire_brigade_arrived", {"lot": lot, "folk_id": -1})
 
 # ------------------------------------------------------------------ at work

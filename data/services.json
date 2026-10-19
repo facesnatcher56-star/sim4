@@ -1,0 +1,25 @@
+{
+ "_doc": "Emergency services as real places (task 12.3). The stations are lots of the map (the fire station shares the public-safety building with the police because every slot of the street grid is taken). Response time = call handling + turnout (crew in the station, staffing from the budget) + the drive (distance, siren speed, traffic, lights, road works) + a wait when every unit is already out. Minutes in game minutes.",
+ "version": 1,
+ "stations": {
+  "fire": {"label": "the fire station", "lot": "police", "units": 2, "turnout": [2, 4], "on_scene": 35, "unit": "engine"},
+  "ambulance": {"label": "the hospital", "lot": "hospital", "units": 3, "turnout": [1, 3], "on_scene": 40, "unit": "ambulance"},
+  "police": {"label": "the police station", "lot": "police", "units": 4, "turnout": [2, 8], "on_scene": 30, "unit": "patrol car"}
+ },
+ "siren_speed": 4.0,
+ "traffic_effect": 0.5,
+ "default_tiles": 70,
+ "dispatch_min": [1, 2],
+ "busy_wait": 8,
+ "no_phone_extra": 6,
+ "targets": {"fire": 10, "ambulance": 10, "police": 12},
+ "staffing_turnout": 0.6,
+ "ambulance": {"hold_from_severity": 2, "worsen_after": 18, "worsen_chance": 0.5, "death_mult_per_target": 0.5, "death_mult_max": 2.0},
+ "text": {
+  "on_way": "An ambulance is on its way. It should be here in about {min} minutes.",
+  "late": "The ambulance took {min} minutes. {name} got worse while waiting.",
+  "arrived": "The ambulance has arrived.",
+  "fire_arrived": "The fire engine arrived after {min} minutes.",
+  "police_arrived": "A patrol car arrived after {min} minutes."
+ }
+}

@@ -44,6 +44,8 @@ static func admit(folk_id: int, severity: int, reason: String = "") -> bool:
 	severity = clampi(severity, 1, 3)
 	if patients.has(folk_id):
 		return false
+	if CityAmbulance.hold(folk_id, severity, reason):       # task 12: an ambulance has to come first (real map, residents)
+		return true
 	var mins: float = _by_sev("stay_hours", severity, 16.0) * 60.0
 	var f = SysUtil.folk(folk_id)
 	var rec: Dictionary = {"severity": severity, "reason": reason, "admitted_min": SysUtil.now(), "until_min": SysUtil.now() + int(mins),
@@ -148,7 +150,7 @@ static func _finish_townie(tid: int) -> void:
 	if t.is_empty() or p.is_empty():
 		return
 	t.erase("in_hospital")
-	if Incidents.rng.randf() < _by_sev("townie_death_chance", int(p["severity"]), 0.0):
+	if Incidents.rng.randf() < _by_sev("townie_death_chance", int(p["severity"]), 0.0) * CityServices.death_mult():      # task 12: slow ambulances cost lives
 		Aging.kill(tid, "illness")
 	else:
 		Story._log("%s came home from hospital." % t["name"])

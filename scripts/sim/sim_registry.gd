@@ -46,6 +46,7 @@ static func systems_rows(sm: Object) -> Array:
 		["Vacation", "Vacation", 1, 310, N, "", Vacation.on_minute, Callable(Vacation, "busy"), "trips on absolute due minutes; idle = one emptiness test"],
 		["Utilities", "Utilities", 1, 315, N, "", Utilities.on_minute, Callable(Utilities, "busy"), "zone outages only (a few records); idle = one emptiness test"],
 		["Transport", "Transport", 1, 316, N, "", Transport.on_minute, Callable(Transport, "busy"), "trips in progress only (the player's households); finished at their arrival minute"],
+		["CityAmbulance", "CityServices", 1, 317, N, "", CityAmbulance.on_minute, Callable(CityAmbulance, "busy"), "ambulances on their way (residents on the real map); idle = one emptiness test"],
 		["NeighborhoodService.after", "NeighborhoodService", 1, 320, N, "", NeighborhoodService.after_minute, null, "Crowd.update loops only the lots near an anchor (Tiers.lot_distances, cached); crowd checks per lot every 10 min; NEAR / TOWN crowd on their turn, they leave / arrive without walks; far lots dropped"],
 		["WeatherFolk", "WeatherFolk", 1, 330, N, "", WeatherFolk.on_minute, null, "ACTIVE every minute, NEAR / TOWN folk on their turn with the exposure scaled to the period"],
 		["LevelSystems", "LevelSystems", 1, 340, N, "", LevelSystems.on_minute, null, "multi-floor buildings with folk (ACTIVE / NEAR)"],
