@@ -26,9 +26,6 @@ func run() -> Array:
 	K.expect(f, absf(float(res["classic"]["deaths"]) / base_d - 1.0) <= 0.2 or int(res["off"]["deaths"]) < 10, "Classic deaths within 20%% of today (%d vs %d)" % [int(res["classic"]["deaths"]), int(res["off"]["deaths"])])
 	K.expect(f, float(res["calm"]["crimes"]) <= base_c * 1.05, "Calm crimes are not above today (%.2fx)" % (float(res["calm"]["crimes"]) / base_c))
 	K.expect(f, float(res["chaotic"]["crimes"]) <= base_c * 1.9, "Chaotic crimes stay inside the capped band (%.2fx)" % (float(res["chaotic"]["crimes"]) / base_c))
-	print("  per town-year: crimes off %.2f calm %.2f classic %.2f chaotic %.2f; deaths off %.2f calm %.2f classic %.2f chaotic %.2f" % [
-		float(res["off"]["crimes"]) / years / seeds.size(), float(res["calm"]["crimes"]) / years / seeds.size(), float(res["classic"]["crimes"]) / years / seeds.size(), float(res["chaotic"]["crimes"]) / years / seeds.size(),
-		float(res["off"]["deaths"]) / years / seeds.size(), float(res["calm"]["deaths"]) / years / seeds.size(), float(res["classic"]["deaths"]) / years / seeds.size(), float(res["chaotic"]["deaths"]) / years / seeds.size()])
 	var years: float = float(days) / 28.0 * SEEDS.size()
 	print("  per town-year: crimes off %.1f calm %.1f classic %.1f chaotic %.1f; deaths off %.2f calm %.2f classic %.2f chaotic %.2f" % [
 		float(res["off"]["crimes"]) / years, float(res["calm"]["crimes"]) / years, float(res["classic"]["crimes"]) / years, float(res["chaotic"]["crimes"]) / years,
