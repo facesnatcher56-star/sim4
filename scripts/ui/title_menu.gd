@@ -47,6 +47,12 @@ func _ready() -> void:
 	load_btn.custom_minimum_size = Vector2(0, 40)
 	load_btn.pressed.connect(show_load)
 	main_box.add_child(load_btn)
+	var cb := Button.new()
+	cb.text = "Co-op"
+	cb.tooltip_text = "Host a town for friends, or join theirs (2 to 4 players)"
+	cb.custom_minimum_size = Vector2(0, 40)
+	cb.pressed.connect(_open_coop)
+	main_box.add_child(cb)
 	var sb := Button.new()
 	sb.text = "Settings"
 	sb.tooltip_text = "Display, gameplay, accessibility, audio and controls"
@@ -62,6 +68,11 @@ func _ready() -> void:
 	settings_dialog = SettingsDialog.new()
 	add_child(settings_dialog)
 	refresh()
+
+func _open_coop() -> void:
+	var lobby := CoopLobby.new()
+	lobby.theme = theme
+	get_parent().add_child(lobby)
 
 func refresh() -> void:
 	continue_btn.disabled = not SaveSlots.has_any()
