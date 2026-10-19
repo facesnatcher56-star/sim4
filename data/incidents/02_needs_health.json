@@ -1201,6 +1201,7 @@
    ],
    "warning": {
     "lead_min": 360,
+    "auto_help_min": 90,
     "thought": "It hurts to breathe...",
     "text": "{name}'s flu is getting worse. Medicine or a doctor could help.",
     "kind": "bad",
@@ -1225,7 +1226,7 @@
      ],
      "effects": [
       {
-       "kill": "illness"
+       "kill": "flu"
       }
      ]
     },
@@ -1266,10 +1267,10 @@
       ],
       "effects": [
        {
-        "kill": "illness"
+        "kill": "flu"
        }
       ],
-      "summary": "{name} died after a long illness."
+      "summary": "{name} died of the flu."
      }
     ]
    }

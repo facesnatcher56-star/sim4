@@ -204,7 +204,7 @@ func _worsens(f: Array) -> void:
 	K.expect(f, w.get_folk(e.id) != null and Incidents.stat("illness_worsens")["averted"] == 1 and Incidents.active().is_empty(), "the doctor defused it")
 	# without help the elder can be lost
 	Incidents.force("illness_worsens", {"folk_id": e.id, "outcome": 0})
-	K.expect(f, w.get_folk(e.id) == null and str(K.last_event("died").get("cause", "")) == "illness", "forced fatal outcome kills (cause illness)")
+	K.expect(f, w.get_folk(e.id) == null and str(K.last_event("died").get("cause", "")) == "flu", "forced fatal outcome kills (cause flu, not a long illness)")
 	K.teardown()
 
 func _food(f: Array) -> void:
