@@ -284,11 +284,11 @@ static func _serve(f, now: int, k: float = 1.0) -> void:
 			start_leaving(f)
 		return
 	f.remove_meta("outside_since")
-	recover(f, float(now - int(f.get_meta("arrived_min", now))) / 60.0)
+	recover(f, float(now - int(f.get_meta("arrived_min", now))) / 60.0, k)
 
 ## The host feeds, rests and lets the stranger wash up: every need below RECOVER_TO creeps back up. `hours` = how long the visit has lasted.
 ## Also used for the guests of a household visit (StoryVisits) while they are inside a lot, so a visitor never leaves in a bad state.
-static func recover(f, hours: float) -> void:
+static func recover(f, hours: float, k: float = 1.0) -> void:
 	var rate: float = minf(RECOVER_MAX, RECOVER_BASE + RECOVER_PER_HOUR * hours)
 	for n in f.needs:
 		var st: Stat = f.needs[n]
