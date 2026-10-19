@@ -251,7 +251,7 @@ static func spawn_npc(t: Dictionary, lot_id: String, vtype: String, stay_overrid
 	if arrive:
 		tile = NeighborhoodLots.gate_tile(lot_id)
 	var keep_next: int = Folk._next_id
-	var f := Folk.create(str(t["name"]), (t["traits"] as Array).duplicate(), tid)
+	var f := Folk.create(str(t["name"]), (t["traits"] as Array).duplicate(), tid, Sexes.of_townie(t))
 	Folk._next_id = keep_next
 	f.household_id = -1
 	f.age_stage = Story.stage_of(t)

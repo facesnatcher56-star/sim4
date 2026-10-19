@@ -119,7 +119,7 @@ static func _start_scene(hid: int, culprit: int, forced: bool) -> Dictionary:
 	var f = existing
 	if f == null:
 		var keep_next: int = Folk._next_id
-		f = Folk.create(str(t["name"]), (t["traits"] as Array).duplicate(), culprit)
+		f = Folk.create(str(t["name"]), (t["traits"] as Array).duplicate(), culprit, Sexes.of_townie(t))
 		Folk._next_id = keep_next
 		f.household_id = -1
 		f.age_stage = Story.stage_of(t)

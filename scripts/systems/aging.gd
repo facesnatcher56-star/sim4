@@ -263,11 +263,12 @@ static func _birth(mother_id: int, father_id: int) -> void:
 		return
 	var pc: Dictionary = cfg().get("pregnancy", {})
 	var father = SysUtil.folk(father_id)
+	var baby_sex: String = Sexes.roll()
 	var gen: Dictionary = Genetics.inherit(Family.person_info(mother_id), Family.person_info(father_id), null,
-		{"chance": float(pc.get("inherit_chance", 0.35)), "cap": int(pc.get("max_inherited", 2))})
+		{"chance": float(pc.get("inherit_chance", 0.35)), "cap": int(pc.get("max_inherited", 2)), "sex": baby_sex})
 	var inherited: Array = gen["traits"]
-	var baby_name: String = Names.pick_first([], SysUtil.rng) + " " + _surname(str(m.name))
-	var baby := Folk.create(baby_name, [])
+	var baby_name: String = Names.pick_first([], SysUtil.rng, baby_sex) + " " + _surname(str(m.name))
+	var baby := Folk.create(baby_name, [], -1, baby_sex)
 	baby.appearance = gen["appearance"]
 	baby.household_id = int(m.household_id)
 	baby.age_stage = "baby"
@@ -318,6 +319,7 @@ static func kill(folk_id: int, cause: String = "old age") -> Dictionary:
 	if f == null:
 		return DeathCauses.kill_townie(folk_id, cause) if Story.is_townie(folk_id) else {}
 	var cdef: Dictionary = DeathCauses.def(cause)
+	Family.note_person(folk_id, str(f.name))          # remembers the sex for the words that follow the death
 	var legacy: Dictionary = legacy_summary(folk_id)
 	var rec0: Dictionary = records.get(folk_id, {})
 	legacy["cause"] = str(cdef["label"])
@@ -325,7 +327,7 @@ static func kill(folk_id: int, cause: String = "old age") -> Dictionary:
 	legacy["day"] = SysUtil.day()
 	legacy["born_day"] = int(rec0.get("born_day", 0))
 	if str(cdef.get("legacy_text", "")) != "":
-		legacy["summary"] = "%s %s" % [legacy["summary"], cdef["legacy_text"]]
+		legacy["summary"] = "%s %s" % [legacy["summary"], Sexes.fill(str(cdef["legacy_text"]), folk_id)]
 	SysUtil.game_event("folk_collapsing", {"folk_id": folk_id, "cause": str(cdef["id"]), "tile": [f.tile.x, f.tile.y]})
 	# relatives and friends grieve (strength / length depend on the cause), kids included
 	var mourners: Array = []
@@ -354,7 +356,7 @@ static func kill(folk_id: int, cause: String = "old age") -> Dictionary:
 	if Story.townies.has(folk_id):
 		Story.townies[folk_id]["alive"] = false
 		Story.townies[folk_id]["died_day"] = SysUtil.day()
-	var text: String = DeathCauses.fill(str(cdef.get("text", "")), str(f.name), cdef, str(legacy["summary"]))
+	var text: String = DeathCauses.fill(str(cdef.get("text", "")), str(f.name), cdef, str(legacy["summary"]), folk_id)
 	SysUtil.notify(text, "death")
 	DeathCauses.last_notified = folk_id          # a case that finds the body later does not say it twice
 	ChronicleHook.note("death", "%s died (%s)." % [f.name, str(cdef["label"]).to_lower()], [folk_id], "home:%d" % int(f.household_id), int(cdef.get("severity", 3)), true)

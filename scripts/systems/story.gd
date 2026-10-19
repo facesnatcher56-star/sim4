@@ -62,9 +62,9 @@ static func _log(text: String) -> void:
 static func recent_news(n: int = 10) -> Array:
 	return news.slice(maxi(news.size() - n, 0))
 
-static func _new_name() -> String:
+static func _new_name(sex: String = "") -> String:
 	for _i in 40:
-		var nm: String = "%s %s" % [Names.pick_first(), Names.pick_last()]
+		var nm: String = "%s %s" % [Names.pick_first([], null, sex), Names.pick_last()]
 		var taken: bool = false
 		for id in townies:
 			if townies[id]["name"] == nm:
@@ -73,14 +73,16 @@ static func _new_name() -> String:
 			return nm
 	return "Visitor %d" % next_id
 
-static func add_townie(age_days: float = -1.0, nm: String = "", traits: Array = [], career: String = "", level: int = 1) -> Dictionary:
+static func add_townie(age_days: float = -1.0, nm: String = "", traits: Array = [], career: String = "", level: int = 1, sex: String = "") -> Dictionary:
 	var c: Dictionary = cfg()
 	if next_id <= 0:
 		next_id = int(c.get("first_id", 1000))
 	var id: int = next_id
 	next_id += 1
+	if not Sexes.valid(sex):
+		sex = Sexes.guess(nm, id) if nm != "" else Sexes.roll()
 	if nm == "":
-		nm = _new_name()
+		nm = _new_name(sex)
 	if traits.is_empty():
 		var pool: Array = (c.get("trait_pool", []) as Array).duplicate()
 		for _i in 2:
@@ -91,9 +93,9 @@ static func add_townie(age_days: float = -1.0, nm: String = "", traits: Array = 
 			traits.append(str(t))
 	if age_days < 0.0:
 		age_days = SysUtil.rng.randf_range(float(Aging.stage_def("adult").get("from_day", 44)) + 2.0, float(Aging.stage_def("elder").get("from_day", 140)) - 10.0)
-	var t: Dictionary = {"id": id, "name": nm, "traits": traits.duplicate(), "age_days": age_days, "career": career, "level": level,
+	var t: Dictionary = {"id": id, "name": nm, "sex": sex, "traits": traits.duplicate(), "age_days": age_days, "career": career, "level": level,
 		"coins": SysUtil.rng.randi_range(100, 800), "alive": true, "lot": SysUtil.rng.randi_range(1, 6), "last_visit_day": -99,
-		"appearance": Genetics.unique_appearance(GeneticsUnique.registry())}
+		"appearance": Genetics.unique_appearance(GeneticsUnique.registry(), null, sex)}
 	townies[id] = t
 	return t
 
@@ -172,7 +174,7 @@ static func on_day(day: int) -> void:
 						t["career"] = ""
 						t["level"] = 1
 						t["seeking"] = true
-						_log("%s lost their job." % t["name"])
+						_log(Sexes.fill("%s lost {their} job." % t["name"], int(t["id"])))
 				if str(t["career"]) != "":
 					t["coins"] = int(t["coins"]) + int(dc.get("coins_per_level", 40)) * int(t["level"])
 		var dstart: float = float(dcfg.get("start_day", 170))

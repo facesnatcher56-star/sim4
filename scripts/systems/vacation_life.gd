@@ -116,7 +116,7 @@ static func spawn_npc(t: Dictionary, e: Dictionary, r: RandomNumberGenerator):
 	var tid: int = int(e.get("townie", -1))
 	if tid >= 0:
 		var rec: Dictionary = Story.townies[tid]
-		f = Folk.create(str(rec["name"]), (rec["traits"] as Array).duplicate(), tid)
+		f = Folk.create(str(rec["name"]), (rec["traits"] as Array).duplicate(), tid, Sexes.of_townie(rec))
 		f.appearance = Genetics.normalize(Genetics.ensure(rec))
 		f.age_stage = Story.stage_of(rec)
 		f.set_meta("townie_id", tid)

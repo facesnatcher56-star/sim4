@@ -2,7 +2,7 @@
 extends RefCounted
 ## Builds, validates and wires up the starting household of a new game (no UI).
 ##
-## Household dictionary: {name, folk: [{name, stage, traits[], aspiration, appearance{}, rel}]}
+## Household dictionary: {name, folk: [{name, sex, stage, traits[], aspiration, appearance{}, rel}]}   sex = female | male
 ##   stage = child | teen | adult | elder;  aspiration "" = fitted to the traits;
 ##   rel = relation to the FIRST member: none | partner | spouse | child | parent | sibling.
 ## Flow: make_household / validate -> create_folk (before the systems reset, so Aging reads the stage) ->
@@ -26,8 +26,8 @@ static func rng_or_new(r: RandomNumberGenerator) -> RandomNumberGenerator:
 	n.randomize()
 	return n
 
-static func random_name(used: Array, r: RandomNumberGenerator = null) -> String:
-	return Names.pick_first(used, rng_or_new(r))
+static func random_name(used: Array, r: RandomNumberGenerator = null, sex: String = "") -> String:
+	return Names.pick_first(used, rng_or_new(r), sex)
 
 ## `count` distinct traits that do not conflict with each other.
 static func random_traits(count: int, r: RandomNumberGenerator = null) -> Array:
@@ -50,10 +50,12 @@ static func random_traits(count: int, r: RandomNumberGenerator = null) -> Array:
 			out.append(t)
 	return out
 
-static func random_folk(stage: String, rel: String, used: Array, r: RandomNumberGenerator = null, looks: Array = []) -> Dictionary:
+static func random_folk(stage: String, rel: String, used: Array, r: RandomNumberGenerator = null, looks: Array = [], sex: String = "") -> Dictionary:
 	var g := rng_or_new(r)
-	return {"name": random_name(used, g), "stage": stage, "rel": rel, "traits": random_traits(trait_count(stage), g),
-		"aspiration": "", "appearance": Genetics.unique_appearance(looks + GeneticsUnique.registry(), g)}
+	if not Sexes.valid(sex):
+		sex = Sexes.roll(g)
+	return {"name": random_name(used, g, sex), "sex": sex, "stage": stage, "rel": rel, "traits": random_traits(trait_count(stage), g),
+		"aspiration": "", "appearance": Genetics.unique_appearance(looks + GeneticsUnique.registry(), g, sex)}
 
 ## The preset household of a scenario (random names / traits / looks). Children get a look inherited from their parents.
 static func make_household(scenario_id: String, r: RandomNumberGenerator = null) -> Dictionary:
@@ -84,7 +86,7 @@ static func inherit_child_looks(h: Dictionary, r: RandomNumberGenerator = null) 
 			for j in folk.size():
 				if j != i:
 					kin.append(folk[j]["appearance"])
-			var res: Dictionary = Genetics.inherit(folk[0], pb, r, {"others": kin + GeneticsUnique.registry()})
+			var res: Dictionary = Genetics.inherit(folk[0], pb, r, {"others": kin + GeneticsUnique.registry(), "sex": str(folk[i].get("sex", ""))})
 			folk[i]["appearance"] = res["appearance"]
 
 static func _mate_index(folk: Array) -> int:
@@ -152,7 +154,8 @@ static func _rel_error(folk: Array, i: int) -> String:
 static func create_folk(h: Dictionary) -> Array:
 	var out: Array = []
 	for fd in h["folk"]:
-		var f := Folk.create(str(fd["name"]), fd.get("traits", []))
+		var f := Folk.create(str(fd["name"]), fd.get("traits", []), -1, str(fd.get("sex", "")))
+		fd["sex"] = f.sex
 		f.age_stage = str(fd.get("stage", "adult"))
 		if Genetics.is_valid(fd.get("appearance", {})):
 			f.appearance = (fd["appearance"] as Dictionary).duplicate(true)

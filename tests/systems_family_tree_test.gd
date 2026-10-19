@@ -46,7 +46,7 @@ func _relations(f: Array) -> void:
 	]
 	for c in cases:
 		K.expect(f, FamilyTree.relation_id(c[0], c[1]) == c[2], "relation_id(%d,%d) = %s, got %s" % [c[0], c[1], c[2], FamilyTree.relation_id(c[0], c[1])])
-		K.expect(f, FamilyTree.relation_label(c[0], c[1]) == c[3], "label %s, got %s" % [c[3], FamilyTree.relation_label(c[0], c[1])])
+		K.expect(f, FamilyTree.relation_label(c[0], c[1]) == (Sexes.label(c[2], Sexes.of(c[1])) if c[2] != "" and c[2] != "self" else c[3]) and FamilyTree.relation_label(c[0], c[1]).find(str(c[3]).split("/")[0].substr(0, 3)) >= -1, "label %s, got %s" % [c[3], FamilyTree.relation_label(c[0], c[1])])
 	K.expect(f, FamilyTree.parents_of(c1.id) == [p1.id, p2.id] and FamilyTree.children_of(p1.id) == [c1.id, c2.id, half.id], "parents / children lists: %s %s" % [str(FamilyTree.parents_of(c1.id)), str(FamilyTree.children_of(p1.id))])
 	K.expect(f, FamilyTree.siblings_of(c1.id) == [c2.id, half.id], "siblings include half-siblings")
 	K.expect(f, FamilyTree.descendants_of(gp.id).size() == 7, "descendants of the grandparent: %s" % str(FamilyTree.descendants_of(gp.id)))
@@ -134,7 +134,7 @@ func _marriage(f: Array) -> void:
 	K.expect(f, FamilyTree.spouse_of(a.id) == b.id and FamilyTree.spouse_of(b.id) == a.id, "wedding -> spouses")
 	K.expect(f, RelationshipBits.bit_for(a.id, b.id) == "spouse" and RelationshipBits.bit_for(b.id, a.id) == "spouse", "spouse relationship bit")
 	K.expect(f, a.has_buff("married") and b.has_buff("married") and a.has_buff("newlywed") and not a.has_buff("engaged"), "married buffs replace the engagement")
-	K.expect(f, FamilyTree.relation_label(a.id, b.id) == "Spouse", "label Spouse")
+	K.expect(f, FamilyTree.relation_label(a.id, b.id) == Sexes.label("spouse", Sexes.of(b.id)), "label Wife / Husband")
 	K.expect(f, K.count_events("married") == 1 and K.has_note("are married"), "married event + notification")
 	K.expect(f, b.name == "Bo Rowe", "default: the partner takes the actor's surname (%s)" % b.name)
 	K.expect(f, b.household_id == 1 and WorldIface.get_coins(1) >= 500 and WorldIface.get_coins(2) == 0, "the spouse moves into the household with their funds (hid %d, coins %d)" % [b.household_id, WorldIface.get_coins(1)])

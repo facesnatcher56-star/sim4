@@ -8,6 +8,18 @@
     "aunt_uncle": "Aunt/Uncle", "niece_nephew": "Niece/Nephew", "cousin": "Cousin",
     "parent_in_law": "Parent-in-law", "child_in_law": "Child-in-law", "sibling_in_law": "Sibling-in-law"
   },
+  "labels_female": {
+    "spouse": "Wife", "fiance": "Fiancee", "ex_spouse": "Ex-wife", "parent": "Mother", "adoptive_parent": "Adoptive Mother", "child": "Daughter",
+    "adopted_child": "Adopted Daughter", "sibling": "Sister", "half_sibling": "Half-sister", "grandparent": "Grandmother", "grandchild": "Granddaughter",
+    "great_grandparent": "Great-grandmother", "great_grandchild": "Great-granddaughter", "aunt_uncle": "Aunt", "niece_nephew": "Niece",
+    "parent_in_law": "Mother-in-law", "child_in_law": "Daughter-in-law", "sibling_in_law": "Sister-in-law"
+  },
+  "labels_male": {
+    "spouse": "Husband", "fiance": "Fiance", "ex_spouse": "Ex-husband", "parent": "Father", "adoptive_parent": "Adoptive Father", "child": "Son",
+    "adopted_child": "Adopted Son", "sibling": "Brother", "half_sibling": "Half-brother", "grandparent": "Grandfather", "grandchild": "Grandson",
+    "great_grandparent": "Great-grandfather", "great_grandchild": "Great-grandson", "aunt_uncle": "Uncle", "niece_nephew": "Nephew",
+    "parent_in_law": "Father-in-law", "child_in_law": "Son-in-law", "sibling_in_law": "Brother-in-law"
+  },
   "bits": {
     "parent_friendship": 40,
     "sibling_friendship": 25,

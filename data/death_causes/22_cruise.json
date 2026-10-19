@@ -1,8 +1,8 @@
 ﻿{
  "_doc": "Task 22: causes of death at sea.",
  "causes": {
-  "overboard": {"label": "Lost at sea", "text": "{name} was lost overboard and the sea gave nothing back.", "legacy_text": "Their life ended at sea.",
-   "grief": {"strength": 1.6, "days": 6}, "child_text": "I'm so scared. Where did they go?", "memory": {"value": -0.9, "text": "the night at sea"},
+  "overboard": {"label": "Lost at sea", "text": "{name} was lost overboard and the sea gave nothing back.", "legacy_text": "{Their} life ended at sea.",
+   "grief": {"strength": 1.6, "days": 6}, "child_text": "I'm so scared. Where did {they} go?", "memory": {"value": -0.9, "text": "the night at sea"},
    "grave_style": "urn", "unexpected": true, "severity": 5}
  }
 }

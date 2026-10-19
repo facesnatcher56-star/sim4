@@ -49,11 +49,11 @@ static func _born(ta: Dictionary, tb: Dictionary) -> void:
 	var a: int = int(ta["id"])
 	var b: int = int(tb["id"])
 	var baby: Dictionary = Story.add_townie(0.0, "", [])
-	baby["name"] = "%s %s" % [str(SysUtil.pick(Aging.cfg().get("name_pool", ["Pip"]))), Story.name_of(a).split(" ")[-1]]
+	baby["name"] = "%s %s" % [Names.pick_first([], null, Sexes.of_townie(baby)), Story.name_of(a).split(" ")[-1]]
 	baby["lot"] = int(ta.get("lot", 1))
 	RelationshipBits.set_flag(int(baby["id"]), a, "family", true, false)
 	RelationshipBits.set_flag(int(baby["id"]), b, "family", true, false)
-	baby["appearance"] = Genetics.inherit(Family.person_info(a), Family.person_info(b))["appearance"]
+	baby["appearance"] = Genetics.inherit(Family.person_info(a), Family.person_info(b), null, {"sex": Sexes.of_townie(baby)})["appearance"]
 	Family.note_townie_birth(int(baby["id"]), a, b)
 	var today: int = SysUtil.day()
 	for t in [ta, tb]:
@@ -97,8 +97,9 @@ static func _arrive_single() -> void:
 	SysUtil.game_event("townie_arrived", {"townie_id": int(n["id"]), "folk_id": -1})
 
 static func _arrive_group(with_child: bool) -> void:
-	var a: Dictionary = Story.add_townie(_adult_age())
-	var b: Dictionary = Story.add_townie(_adult_age())
+	var sa: String = Sexes.roll()
+	var a: Dictionary = Story.add_townie(_adult_age(), "", [], "", 1, sa)
+	var b: Dictionary = Story.add_townie(_adult_age(), "", [], "", 1, Sexes.other(sa) if SysUtil.chance(0.9) else sa)
 	var surname: String = str(a["name"]).split(" ")[-1]
 	b["name"] = "%s %s" % [str(b["name"]).split(" ")[0], surname]
 	a["career"] = _job()
@@ -119,11 +120,11 @@ static func _arrive_group(with_child: bool) -> void:
 		return
 	var kid_from: float = float(Aging.stage_def("child").get("from_day", 20))
 	var kid: Dictionary = Story.add_townie(kid_from + SysUtil.rng.randf_range(1.0, 12.0), "", [])
-	kid["name"] = "%s %s" % [str(SysUtil.pick(Aging.cfg().get("name_pool", ["Pip"]))), surname]
+	kid["name"] = "%s %s" % [Names.pick_first([], null, Sexes.of_townie(kid)), surname]
 	kid["lot"] = int(a["lot"])
 	RelationshipBits.set_flag(int(kid["id"]), ia, "family", true, false)
 	RelationshipBits.set_flag(int(kid["id"]), ib, "family", true, false)
-	kid["appearance"] = Genetics.inherit(Family.person_info(ia), Family.person_info(ib))["appearance"]
+	kid["appearance"] = Genetics.inherit(Family.person_info(ia), Family.person_info(ib), null, {"sex": Sexes.of_townie(kid)})["appearance"]
 	Family.note_townie_birth(int(kid["id"]), ia, ib)
 	for t in [a, b]:
 		t["kids"] = 1

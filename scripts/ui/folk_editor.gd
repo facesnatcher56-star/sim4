@@ -20,6 +20,7 @@ var asp_opt: OptionButton
 var preview: FolkPreview
 var tabs: FolkLookTabs
 var others_provider: Callable = Callable()   # -> Array of the other members' appearances (set by the household creator)
+var sex_opt: OptionButton
 var _prev_traits: Array = [-1, -1, -1]
 
 func _ready() -> void:
@@ -39,6 +40,13 @@ func _ready() -> void:
 	dice.tooltip_text = "Pick a random name"
 	dice.pressed.connect(_random_name)
 	nr.add_child(dice)
+	left.add_child(UIU.make_label("Sex", 13, UITheme.MUTED))
+	sex_opt = OptionButton.new()
+	sex_opt.add_item("Female")
+	sex_opt.add_item("Male")
+	sex_opt.tooltip_text = "Female or male. Only a woman can be pregnant; relationships between any two adults are open. Looks and names follow."
+	sex_opt.item_selected.connect(func(i): _set_sex(Sexes.BOTH[i]))
+	left.add_child(sex_opt)
 	left.add_child(UIU.make_label("Age group", 13, UITheme.MUTED))
 	stage_opt = OptionButton.new()
 	for s in HouseholdSetup.STAGES:
@@ -89,7 +97,7 @@ func _ready() -> void:
 	look.text = "Random look"
 	look.tooltip_text = "Roll a new random appearance that does not look like anyone else in the household or town"
 	look.pressed.connect(func():
-		fd["appearance"] = Genetics.unique_appearance(_others())
+		fd["appearance"] = Genetics.unique_appearance(_others(), null, str(fd.get("sex", "")))
 		load_folk(fd, is_first, first_name)
 		changed.emit())
 	mid.add_child(look)
@@ -120,6 +128,9 @@ func load_folk(data: Dictionary, first: bool, first_member_name: String) -> void
 	is_first = first
 	first_name = first_member_name
 	name_edit.text = str(fd.get("name", ""))
+	if not Sexes.valid(fd.get("sex", "")):
+		fd["sex"] = Sexes.guess(str(fd.get("name", "")), 0)
+	sex_opt.select(Sexes.BOTH.find(str(fd["sex"])))
 	stage_opt.select(maxi(HouseholdSetup.stage_rank(str(fd.get("stage", "adult"))), 0))
 	rel_row.visible = not first
 	rel_opt.clear()
@@ -186,8 +197,19 @@ func _set_stage(s: String) -> void:
 	preview.show_folk(s, fd["appearance"])
 	changed.emit()
 
+func _set_sex(s: String) -> void:
+	if _loading:
+		return
+	fd["sex"] = s
+	GeneticsSex.fit(fd["appearance"], s)
+	_loading = true
+	tabs.load_ap(fd["appearance"])
+	_loading = false
+	preview.show_folk(str(fd.get("stage", "adult")), fd["appearance"])
+	changed.emit()
+
 func _random_name() -> void:
-	fd["name"] = HouseholdSetup.random_name([])
+	fd["name"] = HouseholdSetup.random_name([], null, str(fd.get("sex", "")))
 	name_edit.text = str(fd["name"])
 	changed.emit()
 

@@ -19,7 +19,7 @@ static func move_out(folk_id: int, coin_share: float = 0.5, orphan: bool = false
 	f.clear_queue()
 	RelationshipService.sync_folk(f)
 	Genetics.ensure(f)
-	var t: Dictionary = {"id": folk_id, "name": str(f.name), "traits": f.traits.duplicate(), "age_days": age, "career": "", "level": 1,
+	var t: Dictionary = {"id": folk_id, "name": str(f.name), "sex": Sexes.of(folk_id), "traits": f.traits.duplicate(), "age_days": age, "career": "", "level": 1,
 		"coins": coins, "alive": true, "lot": 1, "last_visit_day": SysUtil.day(),
 		"appearance": f.appearance.duplicate(true), "moved_out": true}
 	if orphan:
@@ -65,7 +65,7 @@ static func invite_to_household(person_id: int, household_id: int) -> bool:
 	if not SleepPlaces.make_room(household_id, FamilyMarriage._given(str(t["name"])), Story.stage_of(t)):
 		return false
 	var keep_next: int = Folk._next_id
-	var nf := Folk.create(str(t["name"]), (t["traits"] as Array).duplicate(), person_id)
+	var nf := Folk.create(str(t["name"]), (t["traits"] as Array).duplicate(), person_id, Sexes.of_townie(t))
 	Folk._next_id = keep_next
 	nf.household_id = household_id
 	nf.age_stage = Story.stage_of(t)

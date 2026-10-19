@@ -86,7 +86,7 @@ static func member(id: int) -> Dictionary:
 	var info := Family.person_info(id)
 	if info.get("name", "Someone") == "Someone" and f == null and not Story.townies.has(id):
 		return {}
-	var m: Dictionary = {"name": str(info["name"]), "stage": str(info["stage"]), "age_days": float(info["age_days"]),
+	var m: Dictionary = {"name": str(info["name"]), "sex": Sexes.of(id), "stage": str(info["stage"]), "age_days": float(info["age_days"]),
 		"traits": (info["traits"] as Array).duplicate(), "appearance": (info["appearance"] as Dictionary).duplicate(true),
 		"skills": {}, "aspiration": "", "memories": [], "career": "", "level": 1}
 	var born: int = int((Family.people.get(id, {}) as Dictionary).get("born_day", 0))

@@ -170,7 +170,7 @@ static func _arrive(sit: Dictionary) -> void:
 				continue
 			Crowd.dismiss(there)          # the townie was hanging out at a venue: they leave it to come over
 		var keep_next: int = Folk._next_id      # townie ids (1000+) must not push regular folk ids up
-		var f := Folk.create(str(t["name"]), (t["traits"] as Array).duplicate(), int(gid))
+		var f := Folk.create(str(t["name"]), (t["traits"] as Array).duplicate(), int(gid), Sexes.of_townie(t))
 		Folk._next_id = keep_next
 		f.household_id = -1
 		f.age_stage = Story.stage_of(t)

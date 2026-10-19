@@ -111,6 +111,7 @@ static func _member(m: Variant) -> Dictionary:
 	var out: Dictionary = {"ref": int(d["ref"]), "name": nm,
 		"age_days": ShareClean.clampf_(d["age_days"], 0.0, float(ShareClean.cap("age_days_max", 400)))}
 	out["stage"] = Aging.stage_for_days(out["age_days"])
+	out["sex"] = str(d["sex"]) if Sexes.valid(d.get("sex", "")) else Sexes.guess(nm, int(d["ref"]))
 	var tr: Variant = d.get("traits", [])
 	if not (tr is Array) or (tr as Array).size() > int(ShareClean.cap("max_traits", 5)):
 		return fail("a member has bad traits")

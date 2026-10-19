@@ -125,7 +125,7 @@ static func _vigilantes(k: Dictionary) -> void:
 	if vig == tgt:
 		return
 	JusticeState.count("vigilante")
-	ChronicleHook.note("vigilante", "%s took the law into their own hands against %s." % [CrimePerson.name_of(vig), CrimePerson.name_of(tgt)], [vig, tgt], "", 3, true)
+	ChronicleHook.note("vigilante", Sexes.fill("%s took the law into {their} own hands against %s." % [CrimePerson.name_of(vig), CrimePerson.name_of(tgt)], vig), [vig, tgt], "", 3, true)
 	CrimeAssault.fight(vig, tgt)
 
 # ------------------------------------------------------------------ ending

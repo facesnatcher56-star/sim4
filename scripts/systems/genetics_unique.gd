@@ -57,12 +57,12 @@ static func tries() -> int:
 
 
 ## A fresh random appearance distinct from `others`; the best of `tries` candidates when none passes.
-static func unique_random(others: Array, g: RandomNumberGenerator) -> Dictionary:
+static func unique_random(others: Array, g: RandomNumberGenerator, sex: String = "") -> Dictionary:
 	var chs: Array = _channels_of(others)
 	var best: Dictionary = {}
 	var bd := -1.0
 	for _t in tries():
-		var cand: Dictionary = Genetics.random_appearance(g)
+		var cand: Dictionary = Genetics.random_appearance(g, sex)
 		var d: float = min_distance(cand, chs)
 		if d >= threshold():
 			return cand
@@ -74,7 +74,7 @@ static func unique_random(others: Array, g: RandomNumberGenerator) -> Dictionary
 
 ## Keep what makes a family look related (skin, hair / eye colour, face, height, build) and reroll the rest until the look is
 ## distinct from `others`. The first candidate is the input itself.
-static func make_distinct(ap: Dictionary, others: Array, g: RandomNumberGenerator) -> Dictionary:
+static func make_distinct(ap: Dictionary, others: Array, g: RandomNumberGenerator, sex: String = "") -> Dictionary:
 	var chs: Array = _channels_of(others)
 	var best: Dictionary = ap
 	var bd: float = min_distance(ap, chs)
@@ -94,6 +94,7 @@ static func make_distinct(ap: Dictionary, others: Array, g: RandomNumberGenerato
 			cand["mark"] = g.randi_range(0, 2)
 		if int(cand["hat"]) > 0 and Genetics.HAT_BLOCK.has(int(cand["hair_style"])):
 			cand["hat"] = 0
+		GeneticsSex.fit(cand, sex, g)
 		var d: float = min_distance(cand, chs)
 		if d >= threshold():
 			return cand

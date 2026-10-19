@@ -30,7 +30,7 @@ static func household(data: Dictionary) -> Dictionary:
 		Story.next_id += 1
 		id_of[int(m["ref"])] = id
 		var ap: Dictionary = GeneticsUnique.make_distinct(m["appearance"], GeneticsUnique.registry(), g)
-		Story.townies[id] = {"id": id, "name": _free_name(str(m["name"]), g), "traits": (m["traits"] as Array).duplicate(), "age_days": float(m["age_days"]),
+		Story.townies[id] = {"id": id, "name": _free_name(str(m["name"]), g), "sex": str(m.get("sex", "")), "traits": (m["traits"] as Array).duplicate(), "age_days": float(m["age_days"]),
 			"career": str(m["career"]), "level": int(m["level"]), "coins": 150 + 40 * int(m["level"]), "alive": true, "lot": lot, "last_visit_day": -99,
 			"appearance": ap, "shared": {"family": fkey, "skills": (m["skills"] as Dictionary).duplicate(true), "aspiration": str(m["aspiration"]),
 				"memories": (m["memories"] as Array).duplicate(true), "birth_doy": int(m["birth_doy"])}}

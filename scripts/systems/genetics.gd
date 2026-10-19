@@ -81,7 +81,7 @@ static func pick_hex(arr: Array, g: RandomNumberGenerator) -> String:
 	return str(v["hex"]) if v is Dictionary else str(v)
 
 # ------------------------------------------------------------------ random appearance
-static func random_appearance(r: RandomNumberGenerator = null) -> Dictionary:
+static func random_appearance(r: RandomNumberGenerator = null, sex: String = "") -> Dictionary:
 	var g: RandomNumberGenerator = _r(r)
 	var c: Dictionary = cfg()
 	var tones: Array = c.get("skin_tones", ["#d9a47f"])
@@ -91,8 +91,11 @@ static func random_appearance(r: RandomNumberGenerator = null) -> Dictionary:
 	var hmax: float = float(c.get("height", {}).get("max", 1.1))
 	var bmin: float = float(c.get("build", {}).get("min", 0.9))
 	var bmax: float = float(c.get("build", {}).get("max", 1.1))
+	var hr: Array = GeneticsSex.height_range(sex, hmin, hmax)
+	hmin = float(hr[0])
+	hmax = float(hr[1])
 	var shirt: String = _pick_hex(c.get("shirt_colors", []), g)
-	var look: Dictionary = GeneticsLook.random_look(g)
+	var look: Dictionary = GeneticsLook.random_look(g, sex)
 	var ap := {
 		"skin": blend_hex(t1, t2, g.randf()),
 		"hair_style": int(look["hair_style"]),
@@ -135,10 +138,10 @@ static func is_valid(ap) -> bool:
 static func ensure(f) -> Dictionary:
 	if f is Dictionary:
 		if not is_valid(f.get("appearance", {})):
-			f["appearance"] = random_appearance()
+			f["appearance"] = random_appearance(null, Sexes.of_townie(f))
 		return f["appearance"]
 	if not is_valid(f.appearance):
-		f.appearance = random_appearance()
+		f.appearance = random_appearance(null, Sexes.of(int(f.id)))
 	return f.appearance
 
 static func ensure_all() -> void:
@@ -253,7 +256,9 @@ static func inherit(parent_a, parent_b, r: RandomNumberGenerator = null, opts: D
 	if ap["hat"] != 0 and HAT_BLOCK.has(style):
 		ap["hat"] = 0
 	var others: Array = opts["others"] if opts.has("others") else GeneticsUnique.registry()
-	ap = GeneticsUnique.make_distinct(ap, others, g)
+	var sex: String = str(opts.get("sex", ""))
+	GeneticsSex.fit(ap, sex, g)
+	ap = GeneticsUnique.make_distinct(ap, others, g, sex)
 	return {"appearance": ap, "traits": inherit_traits(parent_a, parent_b, g, opts)}
 
 ## Traits a child can pick up at RANDOM (an extra at birth, a new one on growing up): everything the parents / the child do not already
@@ -318,5 +323,5 @@ static func distance(a: Dictionary, b: Dictionary) -> float:
 	return GeneticsLook.distance(a, b)
 
 ## A random appearance that is perceptually distinct from `others` (an Array of appearance dictionaries).
-static func unique_appearance(others: Array, r: RandomNumberGenerator = null) -> Dictionary:
-	return GeneticsUnique.unique_random(others, _r(r))
+static func unique_appearance(others: Array, r: RandomNumberGenerator = null, sex: String = "") -> Dictionary:
+	return GeneticsUnique.unique_random(others, _r(r), sex)

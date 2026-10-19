@@ -67,8 +67,9 @@ static func def(cause: String) -> Dictionary:
 	d["id"] = cid
 	return d
 
-static func fill(text: String, name: String, cdef: Dictionary, summary: String = "") -> String:
-	return text.replace("{name}", name).replace("{cause}", str(cdef.get("label", "")).to_lower()).replace("{summary}", summary).strip_edges()
+static func fill(text: String, name: String, cdef: Dictionary, summary: String = "", dead_id: int = -1) -> String:
+	var out: String = text.replace("{name}", name).replace("{cause}", str(cdef.get("label", "")).to_lower()).replace("{summary}", summary).strip_edges()
+	return Sexes.fill(out, dead_id) if dead_id >= 0 else out
 
 # ------------------------------------------------------------------ grief
 static func grief_buff(strength: float) -> String:
@@ -90,10 +91,10 @@ static func grieve(mourner, dead_id: int, dead_name: String, cdef: Dictionary, c
 			b["remaining"] = maxf(float(b["remaining"]), mins) if had else mins
 	mourner.add_to_stat("fun", -15.0 * float(g.get("strength", 1.0)) * closeness)
 	var mem: Dictionary = cdef.get("memory", {})
-	Emotions.imprint(mourner, "folk:%d" % dead_id, float(mem.get("value", -0.5)) * closeness, "death", "sad", fill(str(mem.get("text", "")), dead_name, cdef))
+	Emotions.imprint(mourner, "folk:%d" % dead_id, float(mem.get("value", -0.5)) * closeness, "death", "sad", fill(str(mem.get("text", "")), dead_name, cdef, "", dead_id))
 	RelationshipService.add_history(int(mourner.id), dead_id, "death", float(mem.get("value", -0.5)), dead_id)
 	if CHILD_STAGES.has(str(mourner.age_stage)) and str(cdef.get("child_text", "")) != "":
-		SimEnv.emit("thought", int(mourner.id), str(cdef["child_text"]))
+		SimEnv.emit("thought", int(mourner.id), Sexes.fill(str(cdef["child_text"]), dead_id))
 
 ## Closeness of a resident to the dead (0 = does not mourn).
 static func closeness(resident_id: int, dead_id: int) -> float:
@@ -127,13 +128,13 @@ static func kill_townie(tid: int, cause: String) -> Dictionary:
 		if c > 0.0:
 			mourners.append(int(r.id))
 			grieve(r, tid, nm, cdef, c)
-	var text: String = fill(str(cdef.get("text", "")), nm, cdef, "")
+	var text: String = fill(str(cdef.get("text", "")), nm, cdef, "", tid)
 	Story._log("%s passed away (%s)." % [nm, str(cdef.get("label", "")).to_lower()])
 	if not mourners.is_empty():
 		SysUtil.notify(text, "death")
 		last_notified = tid
 	var legacy: Dictionary = {"folk_id": tid, "name": nm, "cause": str(cdef.get("label", "")), "cause_id": str(cdef["id"]), "day": SysUtil.day(),
-		"mourners": mourners, "townie": true, "legacy_text": str(cdef.get("legacy_text", "")), "summary": text}
+		"mourners": mourners, "townie": true, "legacy_text": Sexes.fill(str(cdef.get("legacy_text", "")), tid), "summary": text}
 	Graves.place_for(legacy, null, cdef)
 	ChronicleHook.note("death", text if text != "" else "%s died." % nm, [tid], "town:%d" % int(t.get("lot", 0)), int(cdef.get("severity", 3)), true)
 	SysUtil.game_event("died", {"folk_id": tid, "cause": str(cdef["id"]), "townie": true})

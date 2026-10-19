@@ -68,9 +68,9 @@ static func rescue(f, helper = null) -> bool:
 	f.add_buff("shaky")
 	Health.count("rescue_" + kind)
 	if helper != null:
-		SysUtil.notify("%s helped %s back on their feet." % [helper.name, f.name], "good")
+		SysUtil.notify(Sexes.fill("%s helped %s back on {their} feet." % [helper.name, f.name], int(f.id)), "good")
 	else:
-		SysUtil.notify("%s is back on their feet." % f.name, "good")
+		SysUtil.notify(Sexes.fill("%s is back on {their} feet." % f.name, int(f.id)), "good")
 	SysUtil.game_event("health_rescued", {"folk_id": int(f.id), "kind": kind, "helper": int(helper.id) if helper != null else -1})
 	return true
 

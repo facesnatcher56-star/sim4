@@ -99,7 +99,7 @@ static func apply(f, _mourners: Array) -> Dictionary:
 	if Story.is_townie(heir_id):
 		(Story.townies[heir_id] as Dictionary)["coins"] = int(Story.townies[heir_id]["coins"]) + estate
 		props = HousingProps.transfer(hid, heir_id, "townie")
-		SysUtil.notify("%s left their estate to %s." % [f.name, Story.name_of(heir_id)], "death")
+		SysUtil.notify(Sexes.fill("%s left {their} estate to %s." % [f.name, Story.name_of(heir_id)], int(f.id)), "death")
 		return {"to": -1, "heir": heir_id, "coins": estate, "objects": 0, "properties": props, "will": true}
 	return {}
 

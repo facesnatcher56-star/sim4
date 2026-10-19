@@ -53,7 +53,8 @@ static func sanitize(h: Dictionary) -> Dictionary:
 		looks.append(look)
 		var rel := str(fd.get("rel", "none"))
 		var asp := str(fd.get("aspiration", ""))
-		out_folk.append({"name": nm, "stage": stage, "traits": traits, "aspiration": asp if asp.length() < 40 else "",
+		var sx := str(fd.get("sex", ""))
+		out_folk.append({"name": nm, "sex": sx if Sexes.valid(sx) else Sexes.guess(nm, 0), "stage": stage, "traits": traits, "aspiration": asp if asp.length() < 40 else "",
 			"appearance": (look as Dictionary).duplicate(true), "rel": rel if HouseholdSetup.REL_ORDER.has(rel) else "none"})
 	if not out_folk.is_empty():
 		out_folk[0]["rel"] = "none"

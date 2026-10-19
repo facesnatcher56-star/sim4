@@ -4,12 +4,12 @@
   "accident_drowning": {
    "label": "Drowning",
    "text": "{name} slipped beneath the water and could not be saved.",
-   "legacy_text": "Their life ended by the water.",
+   "legacy_text": "{Their} life ended by the water.",
    "grief": {
     "strength": 1.7,
     "days": 6
    },
-   "child_text": "The water took them. I don't want to go near it.",
+   "child_text": "The water took {them}. I don't want to go near it.",
    "memory": {
     "value": -0.9,
     "text": "the day by the water"
@@ -20,13 +20,13 @@
   },
   "accident_choking": {
    "label": "Choking",
-   "text": "{name} could not get their breath back, and no one was there in time.",
-   "legacy_text": "Their life ended suddenly at the table.",
+   "text": "{name} could not get {their} breath back, and no one was there in time.",
+   "legacy_text": "{Their} life ended suddenly at the table.",
    "grief": {
     "strength": 1.6,
     "days": 5
    },
-   "child_text": "They were just eating. I don't understand.",
+   "child_text": "{They} was just eating. I don't understand.",
    "memory": {
     "value": -0.9,
     "text": "the sudden quiet at the table"
@@ -38,7 +38,7 @@
   "accident_electric": {
    "label": "Electric shock",
    "text": "{name} was hurt by a terrible shock and could not be revived.",
-   "legacy_text": "Their life ended in a sudden accident.",
+   "legacy_text": "{Their} life ended in a sudden accident.",
    "grief": {
     "strength": 1.6,
     "days": 5
@@ -55,12 +55,12 @@
   "accident_traffic": {
    "label": "Road accident",
    "text": "{name} was struck on the road and could not be saved.",
-   "legacy_text": "Their life ended in a road accident.",
+   "legacy_text": "{Their} life ended in a road accident.",
    "grief": {
     "strength": 1.8,
     "days": 6
    },
-   "child_text": "The road took them. I'm so scared.",
+   "child_text": "The road took {them}. I'm so scared.",
    "memory": {
     "value": -0.9,
     "text": "the day on the road"
@@ -72,12 +72,12 @@
   "accident_fall": {
    "label": "A fall",
    "text": "{name} had a fall and never recovered.",
-   "legacy_text": "Their life ended after a fall.",
+   "legacy_text": "{Their} life ended after a fall.",
    "grief": {
     "strength": 1.4,
     "days": 5
    },
-   "child_text": "They only slipped. How can that be?",
+   "child_text": "{They} only slipped. How can that be?",
    "memory": {
     "value": -0.9,
     "text": "the day of the fall"
@@ -89,12 +89,12 @@
   "accident_work": {
    "label": "Accident at work",
    "text": "{name} was lost in an accident at work.",
-   "legacy_text": "Their life ended in an accident at work.",
+   "legacy_text": "{Their} life ended in an accident at work.",
    "grief": {
     "strength": 1.6,
     "days": 6
    },
-   "child_text": "They went to work and did not come home.",
+   "child_text": "{They} went to work and did not come home.",
    "memory": {
     "value": -0.9,
     "text": "the day of the accident at work"

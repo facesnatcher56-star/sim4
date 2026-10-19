@@ -80,10 +80,10 @@ static func release(pid: int, early: bool) -> void:
 		f.add_buff("fresh_start")
 		f.remove_buff("in_custody")
 	var nm: String = CrimePerson.name_of(pid)
-	var text: String = "%s was released on parole." % nm if early else "%s was released after serving their sentence." % nm
+	var text: String = "%s was released on parole." % nm if early else Sexes.fill("%s was released after serving {their} sentence." % nm, pid)
 	ChronicleHook.note("released", text, [pid], CrimePerson.home_key(pid), 2, true)
 	if CrimePerson.is_player(pid):
-		SysUtil.notify(text + " The record stays, and some jobs will not hire them, but it is a fresh start.", "story")
+		SysUtil.notify(text + Sexes.fill(" The record stays, and some jobs will not hire {them}, but it is a fresh start.", pid), "story")
 	SysUtil.game_event("released", {"folk_id": pid, "early": early})
 
 # ------------------------------------------------------------------ visits

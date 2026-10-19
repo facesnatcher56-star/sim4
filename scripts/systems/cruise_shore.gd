@@ -195,7 +195,7 @@ static func left_behind(t: Dictionary, f, day: int) -> void:
 	var days_left: int = maxi(int(t["days"]) - day, 0)
 	var cost: int = int(lb.get("flight_base", 380)) + int(lb.get("flight_per_day_left", 45)) * days_left
 	(c["flights"] as Array).append({"fid": fid, "leave_min": SysUtil.now() + int(lb.get("wait_min", 120)), "arrive_min": -1, "state": "waiting", "cost": cost})
-	SysUtil.notify("%s missed the ship! It sailed without them. The way home will cost %d coins." % [f.name, cost], "bad")
+	SysUtil.notify(Sexes.fill("%s missed the ship! It sailed without {them}. The way home will cost %d coins." % [f.name, cost], fid), "bad")
 	VacationLog.note(t, "missed", "%s missed the boarding and was left behind at %s. A flight home costs %d coins." % [f.name, str(port_def(str(c["port"])).get("label", "the port")), cost], [fid], 3, true)
 	SysUtil.game_event("left_behind", {"trip": int(t["id"]), "folk_id": fid, "household_id": int(t["hid"]), "cost": cost})
 

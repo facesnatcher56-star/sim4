@@ -33,7 +33,7 @@
   "town_top_keys": ["format", "version", "label", "day", "clock_total", "next_folk_id", "world", "folk", "systems", "household_name", "colors"],
   "town_system_keys": ["economy", "careers", "relationships", "goals", "aging", "story", "away", "commute", "family", "babycare", "weather", "neighborhood", "scenario", "incidents", "justice", "fire", "share", "econ", "vacation", "players", "tiers"],
   "household_keys": ["format", "version", "title", "day", "members", "relations", "parents", "history", "legacy"],
-  "member_keys": ["ref", "name", "stage", "age_days", "traits", "appearance", "skills", "aspiration", "memories", "career", "level", "birth_doy"],
+  "member_keys": ["ref", "name", "sex", "stage", "age_days", "traits", "appearance", "skills", "aspiration", "memories", "career", "level", "birth_doy"],
   "relation_kinds": ["spouse", "partner", "family", "friend"],
   "town_file_keys": ["format", "version", "title", "from", "day", "save", "chronicle", "inbox"],
   "card_keys": ["format", "version", "title", "lines", "stats", "members"]

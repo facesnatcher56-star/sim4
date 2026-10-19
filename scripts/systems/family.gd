@@ -4,7 +4,7 @@ extends RefCounted
 ##  * canonical parent / spouse / ex links for everybody ever seen (residents, townies, the dead) in `parents`,
 ##    `adoptive`, `spouses`, `exes`; names / ages of people who are no longer on the lot in `people`
 ##  * relation ids (parent, child, sibling, half_sibling, spouse, fiance, grandparent, grandchild, great_*,
-##    aunt_uncle, niece_nephew, cousin, *_in_law, ex_spouse) and neutral display labels (Folk have no gender)
+##    aunt_uncle, niece_nephew, cousin, *_in_law, ex_spouse) and display labels by the other person's sex (mother / father, aunt / uncle ...; Sexes.label)
 ##  * RelationshipService "family" flags + friendship floors are kept in sync (family bits auto-added on every link)
 ##  * marriage: propose -> engaged (buff `engaged`) -> wedding interaction -> spouse (buff `married`), optional
 ##    surname sharing, household merge; divorce; moving in / out; adoption of orphan child townies
@@ -40,6 +40,8 @@ static func note_person(id: int, nm: String = "", born_day: int = -99999) -> voi
 		people[id] = p
 	if nm != "":
 		p["name"] = nm
+	if SysUtil.folk(id) != null or Story.townies.has(id):
+		p["sex"] = Sexes.of(id)           # kept for when they die or leave
 	if born_day != -99999:
 		p["born_day"] = born_day
 
@@ -71,15 +73,15 @@ static func person_info(id: int) -> Dictionary:
 	var f = SysUtil.folk(id)
 	if f != null:
 		Genetics.ensure(f)
-		return {"id": id, "name": str(f.name), "traits": f.traits.duplicate(), "appearance": f.appearance, "age_days": age_days_of(id),
+		return {"id": id, "name": str(f.name), "sex": Sexes.of(id), "traits": f.traits.duplicate(), "appearance": f.appearance, "age_days": age_days_of(id),
 			"stage": str(f.age_stage), "alive": true, "on_lot": true, "household_id": int(f.household_id)}
 	if Story.townies.has(id):
 		var t: Dictionary = Story.townies[id]
 		Genetics.ensure(t)
-		return {"id": id, "name": str(t["name"]), "traits": (t["traits"] as Array).duplicate(), "appearance": t["appearance"],
+		return {"id": id, "name": str(t["name"]), "sex": Sexes.of_townie(t), "traits": (t["traits"] as Array).duplicate(), "appearance": t["appearance"],
 			"age_days": float(t["age_days"]), "stage": Story.stage_of(t), "alive": bool(t["alive"]), "on_lot": false, "household_id": -1}
 	var p: Dictionary = people.get(id, {})
-	return {"id": id, "name": str(p.get("name", "Someone")), "traits": [], "appearance": {}, "age_days": float(p.get("died_age_days", 0.0)),
+	return {"id": id, "name": str(p.get("name", "Someone")), "sex": Sexes.of(id), "traits": [], "appearance": {}, "age_days": float(p.get("died_age_days", 0.0)),
 		"stage": Aging.stage_for_days(float(p.get("died_age_days", 0.0))), "alive": false, "on_lot": false, "household_id": -1}
 
 # ------------------------------------------------------------------ linking

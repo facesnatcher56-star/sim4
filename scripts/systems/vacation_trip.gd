@@ -169,7 +169,7 @@ static func detach_to_hospital(t: Dictionary, f) -> void:
 	(t["folk"] as Array).erase(fid)
 	(t["left"] as Array).append(fid)
 	Vacation._by_folk.erase(fid)
-	SysUtil.notify("%s was taken to hospital and the holiday is over for them." % f.name, "warn")
+	SysUtil.notify(Sexes.fill("%s was taken to hospital and the holiday is over for {them}." % f.name, fid), "warn")
 	VacationLog.note(t, "incident", "%s was taken to hospital and left the trip." % f.name, [fid], 3, true)
 
 ## A traveller who got home on their own (flown home after missing the ship): the holiday is over for them.
@@ -191,7 +191,7 @@ static func send_home_early(t: Dictionary, f) -> void:
 	(t["folk"] as Array).erase(fid)
 	(t["left"] as Array).append(fid)
 	Vacation._by_folk.erase(fid)
-	VacationLog.note(t, "return", "%s got home on their own, long after the ship." % f.name, [fid], 2, true)
+	VacationLog.note(t, "return", Sexes.fill("%s got home on {their} own, long after the ship." % f.name, fid), [fid], 2, true)
 
 ## The journey is over for this folk: end the hidden Away.
 static func end_transit(f) -> void:

@@ -95,7 +95,7 @@ static func fall(f, now: int = -1, severity: int = 0) -> int:
 		f.add_buff("shaken_up")
 	SysUtil.game_event("fell_on_stairs", {"folk_id": int(f.id), "severity": sev, "level": int(f.level)})
 	if SysUtil.is_resident(f):
-		SysUtil.notify("%s lost their footing on the stairs%s." % [f.name, " and was badly hurt" if sev >= 2 else ""], "warn")
+		SysUtil.notify(Sexes.fill("%s lost {their} footing on the stairs%s." % [f.name, " and was badly hurt" if sev >= 2 else ""], int(f.id)), "warn")
 	return sev
 
 

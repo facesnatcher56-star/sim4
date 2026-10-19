@@ -41,7 +41,7 @@ func _causes(f: Array) -> void:
 		K.expect(f, str(K.last_event("died").get("cause", "")) == cause, "%s: died event carries the cause id" % cause)
 		K.expect(f, str(lg["cause"]) == str(cdef["label"]) and str(lg["cause_id"]) == cause, "%s: legacy has label + id" % cause)
 		if str(cdef.get("legacy_text", "")) != "":
-			K.expect(f, str(lg["summary"]).find(str(cdef["legacy_text"])) >= 0, "%s: legacy sentence" % cause)
+			K.expect(f, str(lg["summary"]).find(Sexes.fill(str(cdef["legacy_text"]), a.id)) >= 0, "%s: legacy sentence" % cause)
 		var gr: Array = Graves.list()
 		K.expect(f, gr.size() == 1 and gr[0]["name"] == "Tobin Rowe" and gr[0]["cause"] == cdef["label"] and int(gr[0]["died"]) == SysUtil.day(), "%s: grave record {name, born, died, cause}" % cause)
 		var want_def: String = "urn" if str(cdef["grave_style"]) == "urn" else "grave"
@@ -81,7 +81,7 @@ func _grief(f: Array) -> void:
 		K.expect(f, _near(_remaining(wife, tier), days * 1440.0, 1.0), "%s: family grieves %.0f days (%.0f min)" % [cause, days, _remaining(wife, tier)])
 		K.expect(f, _near(_remaining(pal, tier), days * 1440.0 * 0.6, 1.0), "%s: a friend grieves 60%% as long" % cause)
 		var kid_thoughts: Array = _thoughts.filter(func(t): return t[0] == kid.id)
-		K.expect(f, kid_thoughts.size() >= 1 and str(kid_thoughts[kid_thoughts.size() - 1][1]) == str(DeathCauses.def(cause)["child_text"]), "%s: child gets age-appropriate wording" % cause)
+		K.expect(f, kid_thoughts.size() >= 1 and str(kid_thoughts[kid_thoughts.size() - 1][1]) == Sexes.fill(str(DeathCauses.def(cause)["child_text"]), dead.id), "%s: child gets age-appropriate wording" % cause)
 		K.expect(f, wife.memory.size() >= 1 and Emotions.moments_of(wife.id).size() >= 1, "%s: emotional memory imprinted on the mourner" % cause)
 		K.expect(f, wife.get_stat_value("fun") < 60.0, "%s: grief costs fun" % cause)
 		results[cause] = _remaining(wife, tier)

@@ -621,7 +621,7 @@ func _build_family() -> void:
 	var partner: Dictionary = t["partner"]
 	var plines: Array = []
 	if not partner.is_empty():
-		plines.append(_family_line(partner, {"spouse": "Spouse", "fiance": "Engaged", "partner": "Partner", "sweetheart": "Sweetheart"}.get(str(partner.get("status", "")), "")))
+		plines.append(_family_line(partner, Sexes.label("spouse", Sexes.of(int(partner["id"]))) if str(partner.get("status", "")) == "spouse" else {"fiance": "Engaged", "partner": "Partner", "sweetheart": "Sweetheart"}.get(str(partner.get("status", "")), "")))
 	_family_section("PARTNER", plines)
 	var par: Array = []
 	for p in t["parents"]:

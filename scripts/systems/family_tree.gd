@@ -150,7 +150,7 @@ static func relation_label(a: int, b: int) -> String:
 	var rid: String = relation_id(a, b)
 	if rid == "":
 		return ""
-	return str(Family.cfg().get("labels", {}).get(rid, rid.capitalize()))
+	return Sexes.label(rid, Sexes.of(b))
 
 static func is_kin(a: int, b: int) -> bool:
 	var r: String = relation_id(a, b)

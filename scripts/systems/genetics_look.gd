@@ -46,18 +46,19 @@ static func _hex(arr: Array, g: RandomNumberGenerator, def: String) -> String:
 
 
 ## Random body / face / hair style / accessories / clothes (everything except the colour traits skin, hair, eyes and height).
-static func random_look(g: RandomNumberGenerator) -> Dictionary:
+static func random_look(g: RandomNumberGenerator, sex: String = "") -> Dictionary:
 	var c: Dictionary = Genetics.cfg()
 	var n: Dictionary = counts()
 	var ap := {}
 	ap["hair_style"] = g.randi_range(0, int(n["hair_style"]) - 1)
-	ap["body_type"] = pick_w([0.3, 0.4, 0.3], g)
-	ap["frame"] = pick_w([0.4, 0.3, 0.3], g)
+	ap["body_type"] = pick_w(GeneticsSex.weights(sex, "body_type", [0.3, 0.4, 0.3]), g)
+	ap["frame"] = pick_w(GeneticsSex.weights(sex, "frame", [0.4, 0.3, 0.3]), g)
 	ap["face"] = g.randi_range(0, int(n["face"]) - 1)
 	ap["mouth"] = g.randi_range(0, int(n["mouth"]) - 1)
 	ap["brows"] = g.randi_range(0, int(n["brows"]) - 1)
 	ap["ears"] = g.randi_range(0, int(n["ears"]) - 1)
 	ap["facial_hair"] = (1 + g.randi_range(0, 2)) if g.randf() < _chance("facial_hair", 0.22) else 0
+	GeneticsSex.fit(ap, sex, g)
 	ap["mark"] = (1 + g.randi_range(0, 1)) if g.randf() < _chance("mark", 0.2) else 0
 	random_outfit(ap, g, c)
 	return ap

@@ -129,7 +129,7 @@ static func fight(aggressor: int, victim: int, severity: int = -1, kind: String 
 	_record(aggressor, victim, kind)
 	JusticeState.count("shove" if shove else "hit")
 	SysUtil.game_event("assault", {"folk_id": aggressor, "target_id": victim, "kind": kind})
-	var text: String = "%s lost their temper and %s %s." % [CrimePerson.name_of(aggressor), "shoved" if shove else "hit", CrimePerson.name_of(victim)]
+	var text: String = Sexes.fill("%s lost {their} temper and %s %s." % [CrimePerson.name_of(aggressor), "shoved" if shove else "hit", CrimePerson.name_of(victim)], aggressor)
 	var out: Dictionary = {}
 	CrimeDomestic.after(aggressor, victim, kind, sev, text, out)
 	return out.get("case", {})

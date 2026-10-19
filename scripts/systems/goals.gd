@@ -149,7 +149,7 @@ static func _complete_milestone(f, p: Dictionary, ms: Dictionary) -> void:
 	SysUtil.notify("%s reached a milestone: %s (+%d satisfaction)" % [f.name, str(ms["label"]), pts], "goal")
 	SysUtil.game_event("milestone_completed", {"folk_id": f.id, "milestone": ms["id"], "points": pts})
 	if current_milestone(p).is_empty():
-		SysUtil.notify("%s fulfilled their aspiration: %s!" % [f.name, aspiration_label(int(f.id))], "goal")
+		SysUtil.notify(Sexes.fill("%s fulfilled {their} aspiration: %s!" % [f.name, aspiration_label(int(f.id))], int(f.id)), "goal")
 		SysUtil.game_event("aspiration_completed", {"folk_id": f.id, "aspiration": p["aspiration"]})
 
 static func _feed_whims(f, p: Dictionary, ev: Dictionary) -> void:

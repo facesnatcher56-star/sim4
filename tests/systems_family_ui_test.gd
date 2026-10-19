@@ -66,7 +66,7 @@ func run() -> Array:
 	fp.show_folk(kid)
 	txt = _texts(fp.family_box)
 	K.expect(f, txt.find("PARENTS") >= 0 and txt.find("Ann Rowe") >= 0 and txt.find("Bo Rowe") >= 0, "child sees parents")
-	K.expect(f, txt.find("SIBLINGS") >= 0 and txt.find("Sam Rowe") >= 0 and txt.find("Sibling") >= 0, "child sees the sibling with its relation label")
+	K.expect(f, txt.find("SIBLINGS") >= 0 and txt.find("Sam Rowe") >= 0 and (txt.find("Brother") >= 0 or txt.find("Sister") >= 0), "child sees the sibling with its relation label")
 	K.expect(f, fp.family_buttons["propose"].disabled and fp.family_buttons["adopt_child"].disabled, "children cannot propose or adopt")
 	# engagement flows into the tab
 	fp.show_folk(a)

@@ -1,13 +1,13 @@
 {
  "causes": {
   "murder": {
-   "label": "Murder", "text": "{name} is dead. The police say it was no accident.", "legacy_text": "Their life was taken from them.",
-   "grief": {"strength": 2.0, "days": 10}, "child_text": "Somebody hurt them. I don't understand why.", "memory": {"value": -1.0, "text": "the day {name} was taken"},
+   "label": "Murder", "text": "{name} is dead. The police say it was no accident.", "legacy_text": "{Their} life was taken from {them}.",
+   "grief": {"strength": 2.0, "days": 10}, "child_text": "Somebody hurt {them}. I don't understand why.", "memory": {"value": -1.0, "text": "the day {name} was taken"},
    "grave_style": "stone", "unexpected": true, "severity": 5
   },
   "killed_in_fight": {
-   "label": "Killed in a struggle", "text": "{name} died after a violent struggle.", "legacy_text": "Their life ended in a moment of violence.",
-   "grief": {"strength": 1.8, "days": 8}, "child_text": "There was a fight and they didn't come back.", "memory": {"value": -0.9, "text": "the struggle that took {name}"},
+   "label": "Killed in a struggle", "text": "{name} died after a violent struggle.", "legacy_text": "{Their} life ended in a moment of violence.",
+   "grief": {"strength": 1.8, "days": 8}, "child_text": "There was a fight and {they} didn't come back.", "memory": {"value": -0.9, "text": "the struggle that took {name}"},
    "grave_style": "stone", "unexpected": true, "severity": 5
   }
  }

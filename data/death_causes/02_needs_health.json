@@ -4,36 +4,36 @@
   "starvation": {
    "label": "Starvation",
    "text": "{name} was too weak after days without food and could not be woken.",
-   "legacy_text": "They went without food for too long.",
+   "legacy_text": "{They} went without food for too long.",
    "grief": {"strength": 1.7, "days": 7},
-   "child_text": "Why didn't anyone feed them? I don't understand.",
+   "child_text": "Why didn't anyone feed {them}? I don't understand.",
    "memory": {"value": -0.9, "text": "the days {name} went hungry"},
    "grave_style": "stone", "unexpected": false, "severity": 4
   },
   "exhaustion": {
    "label": "Exhaustion",
    "text": "{name} lay down to rest, worn out for days, and did not wake again.",
-   "legacy_text": "They were worn out and never got the rest they needed.",
+   "legacy_text": "{They} was worn out and never got the rest {they} needed.",
    "grief": {"strength": 1.4, "days": 5},
-   "child_text": "They were so tired. Why couldn't they sleep?",
+   "child_text": "{They} was so tired. Why couldn't {they} sleep?",
    "memory": {"value": -0.7, "text": "how tired {name} was at the end"},
    "grave_style": "stone", "unexpected": false, "severity": 3
   },
   "hypothermia": {
    "label": "Cold",
    "text": "{name} was out in the freezing cold for too long and could not be warmed again.",
-   "legacy_text": "They were caught out in the winter cold.",
+   "legacy_text": "{They} was caught out in the winter cold.",
    "grief": {"strength": 1.6, "days": 6},
-   "child_text": "It was so cold out. They should have come inside.",
+   "child_text": "It was so cold out. {They} should have come inside.",
    "memory": {"value": -0.9, "text": "the freezing night {name} was lost"},
    "grave_style": "stone", "unexpected": true, "severity": 4
   },
   "heatstroke": {
    "label": "Heatstroke",
    "text": "{name} was out in the burning heat for too long and could not be revived.",
-   "legacy_text": "They were caught out in a scorching heatwave.",
+   "legacy_text": "{They} was caught out in a scorching heatwave.",
    "grief": {"strength": 1.6, "days": 6},
-   "child_text": "It was so hot. Why didn't they get some water?",
+   "child_text": "It was so hot. Why didn't {they} get some water?",
    "memory": {"value": -0.9, "text": "the scorching day {name} was lost"},
    "grave_style": "stone", "unexpected": true, "severity": 4
   }

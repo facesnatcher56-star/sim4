@@ -20,6 +20,7 @@ static func reset_ids() -> void:
 var id: int = 0
 var name: String = ""
 var age_stage: String = "adult"
+var sex: String = ""            # "female" | "male" (Sexes). "" = not decided yet: Sexes.of() fills it in from the name / id
 var traits: Array[String] = []
 var needs: Dictionary = {}      # String -> Stat
 var skills: Dictionary = {}     # String -> {"xp": float, "level": int}
@@ -59,11 +60,12 @@ func _init(p_name: String = "", p_id: int = -1) -> void:
 	setup_needs()
 
 ## Convenience factory.
-static func create(p_name: String, p_traits: Array = [], p_id: int = -1) -> Folk:
+static func create(p_name: String, p_traits: Array = [], p_id: int = -1, p_sex: String = "") -> Folk:
 	var f := Folk.new(p_name, p_id)
 	for t in p_traits:
 		f.traits.append(str(t))
-	f.appearance = Genetics.random_appearance()
+	f.sex = p_sex if Sexes.valid(p_sex) else Sexes.guess(p_name, f.id)
+	f.appearance = Genetics.random_appearance(null, f.sex)
 	return f
 
 func setup_needs() -> void:
@@ -350,7 +352,7 @@ func to_dict() -> Dictionary:
 	for k in relationships:
 		rel[str(k)] = relationships[k].duplicate()
 	return {
-		"id": id, "name": name, "age_stage": age_stage, "traits": traits.duplicate(),
+		"id": id, "name": name, "sex": sex, "age_stage": age_stage, "traits": traits.duplicate(),
 		"needs": nd, "skills": skills.duplicate(true), "buffs": bl,
 		"tile": [tile.x, tile.y], "level": level, "household_id": household_id,
 		"work_start": work_start, "work_end": work_end,
@@ -362,6 +364,9 @@ func to_dict() -> Dictionary:
 static func from_dict(d: Dictionary) -> Folk:
 	var f := Folk.new(str(d.get("name", "")), int(d.get("id", -1)))
 	f.age_stage = str(d.get("age_stage", "adult"))
+	f.sex = str(d.get("sex", ""))
+	if not Sexes.valid(f.sex):
+		f.sex = Sexes.guess(f.name, f.id)           # saves from before two sexes
 	for t in d.get("traits", []):
 		f.traits.append(str(t))
 	var nd: Dictionary = d.get("needs", {})
