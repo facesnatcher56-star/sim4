@@ -13,11 +13,12 @@ static func run_audit(speed: int, game_minutes: int, seed_v: int = 101, scenario
 	var clk = root.get_node("Clock")
 	FolkView.reload_map()
 	K.new_game(scenario, "normal", {}, -1, {"world_seed": seed_v})
+	_still_tile.clear()
 	var holder := Node3D.new()
 	root.add_child(holder)
 	var views: Dictionary = {}
 	clk.set_speed(speed)
-	var m := {"frames": 0, "folk_frames": 0, "move": 0, "run": 0, "run_urgent": 0, "sit": 0, "sit_no_seat": 0, "sit_stand_clip": 0, "blocked_still": 0, "blocked_move": 0, "overlap": 0, "anoms": {}}
+	var m := {"frames": 0, "folk_frames": 0, "move": 0, "run": 0, "run_urgent": 0, "sit": 0, "sit_no_seat": 0, "sit_stand_clip": 0, "blocked_still": 0, "blocked_move": 0, "leaving": 0, "overlap": 0, "anoms": {}}
 	var sit_hold: Dictionary = {}
 	var end: int = clk.total_minutes + game_minutes
 	while clk.total_minutes < end:
@@ -49,6 +50,8 @@ static func _note(m: Dictionary, key: String) -> void:
 	var a: Dictionary = m["anoms"]
 	a[key] = int(a.get(key, 0)) + 1
 
+static var _still_tile: Dictionary = {}      # folk id -> the tile it last stood / sat still on (leaving a seat or a stall is not walking over it)
+
 static func _measure(W, vis: Array, m: Dictionary, sit_hold: Dictionary) -> void:
 	for fv in vis:
 		var f = W.get_folk(fv.folk_id)
@@ -63,6 +66,9 @@ static func _measure(W, vis: Array, m: Dictionary, sit_hold: Dictionary) -> void
 					m["run"] += 1
 					_note(m, "run %s" % [str(f.current.def_id) if f.current != null else "-"])
 		var tile: Vector2i = W.pos_to_tile(fv.position)
+		var moving_now: bool = fv._moving or not fv._waypoints.is_empty()
+		if not moving_now:
+			_still_tile[fv.folk_id] = tile
 		if str(fv.pose) == "sit":
 			sit_hold[fv.folk_id] = int(sit_hold.get(fv.folk_id, 0)) + 1
 			if int(sit_hold[fv.folk_id]) > SIT_HOLD:
@@ -85,7 +91,10 @@ static func _measure(W, vis: Array, m: Dictionary, sit_hold: Dictionary) -> void
 			var o = W.object_at(tile, int(f.level))
 			if o != null and str(o.def_id).begins_with("elevator"):
 				continue                     # a lift cabin is walkable for the lift ride
-			m["blocked_move" if (fv._moving or not fv._waypoints.is_empty()) else "blocked_still"] += 1
+			if moving_now and _still_tile.get(fv.folk_id, Vector2i(-999, -999)) == tile:
+				m["leaving"] += 1                  # stepping out of the seat / stall it was standing in: a few frames, not a crossing
+				continue
+			m["blocked_move" if moving_now else "blocked_still"] += 1
 			_note(m, "blocked %s %s moving=%s role=%s pose=%s state=%s res=%s" % [str(o.def_id) if o != null else "wall", str(f.current.def_id) if f.current != null else "-", str(fv._moving), fv._partner_role, fv.pose, str(f.current.state) if f.current != null else "-", str(rs)])
 	for i in vis.size():
 		var a = vis[i]

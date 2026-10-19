@@ -275,11 +275,31 @@ func _trim_backlog() -> void:
 	if _waypoints.size() <= keep:
 		return
 	var drop := _waypoints.size() - keep
+	while drop > 1 and _blocked_wp(_waypoints[drop - 1]):          # hop only onto a walkable route tile
+		drop -= 1
 	var hop: Vector3 = _waypoints[drop - 1]
+	if _blocked_wp(hop):
+		return
 	position.x = hop.x
 	position.z = hop.z
 	_ybase = hop.y
 	_waypoints = _waypoints.slice(drop)
+
+
+## A waypoint on a blocked tile that is not the folk's own tile (a route that starts in the shower the folk just left, a stale first step):
+## never walked to, the folk would cross the shower, a dresser or a chair. Stairs and lift cabins are walkable portal tiles.
+func _blocked_wp(w: Vector3) -> bool:
+	var t: Vector2i = World.pos_to_tile(w)
+	if t == World.pos_to_tile(position) or World.is_walkable(t, _last_level):
+		return false
+	var o = World.object_at(t, _last_level)
+	return o == null or not o.def.has("portal")
+
+
+## Drops the waypoints in front of the folk that lie on blocked tiles (the last one is the goal and stays: a slot tile is the object's own tile).
+func _skip_blocked_waypoints() -> void:
+	while _waypoints.size() > 1 and _blocked_wp(_waypoints[0]):
+		_waypoints.remove_at(0)
 
 
 ## The view is far from where it has to be and has no route (it was left behind by the sim walker, got up from a seat, or its chat partner walked on):
@@ -306,6 +326,7 @@ func _move(delta: float) -> void:
 		_moving = false
 		return
 	_trim_backlog()
+	_skip_blocked_waypoints()
 	var speed := _walk_speed() * Weather.walk_speed_mult_at(Vector2i(int(floor(position.x)), int(floor(position.z))), _last_level)
 	if _waypoints.is_empty():
 		_route_far_goal()

@@ -7,7 +7,7 @@ const VK = preload("res://tests/visual_kit.gd")
 const GAME_MINUTES := 120
 const RUN_MAX := 0.05
 const OVERLAP_MAX := 0.01
-const BLOCKED_WALK_MAX := 0.005      # a folk stepping out of a seat or stall is still inside the blocked tile for a few frames
+const BLOCKED_WALK_MAX := 0.001      # was 0.005 (speed 3 measured 0.41% before 27b); stepping out of a seat or stall is counted apart as "leaving"
 
 
 func run() -> Array:
@@ -16,9 +16,9 @@ func run() -> Array:
 		var m: Dictionary = VK.run_audit(speed, GAME_MINUTES)
 		var ff: float = maxf(float(m["folk_frames"]), 1.0)
 		var mv: float = maxf(float(m["move"]), 1.0)
-		print("VISUAL speed %d: %d frames, %d folk-frames, moving %d (run %d = %.1f%%, urgent run %d), sitting %d (no seat %d, standing clip %d), blocked still %d / walking %d (%.2f%%), overlap %d (%.2f%%)" % [
+		print("VISUAL speed %d: %d frames, %d folk-frames, moving %d (run %d = %.1f%%, urgent run %d), sitting %d (no seat %d, standing clip %d), blocked still %d / walking %d (%.2f%%, leaving a seat %d), overlap %d (%.2f%%)" % [
 			speed, m["frames"], m["folk_frames"], m["move"], m["run"], 100.0 * float(m["run"]) / mv, m["run_urgent"], m["sit"], m["sit_no_seat"], m["sit_stand_clip"],
-			m["blocked_still"], m["blocked_move"], 100.0 * float(int(m["blocked_still"]) + int(m["blocked_move"])) / ff, m["overlap"], 100.0 * float(m["overlap"]) / ff])
+			m["blocked_still"], m["blocked_move"], 100.0 * float(int(m["blocked_still"]) + int(m["blocked_move"])) / ff, m["leaving"], m["overlap"], 100.0 * float(m["overlap"]) / ff])
 		var an: Dictionary = m["anoms"]
 		var ks: Array = an.keys()
 		ks.sort_custom(func(a, b): return an[a] > an[b])

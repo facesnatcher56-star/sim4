@@ -42,6 +42,8 @@ func run() -> Array:
 	_shower_keeps_its_clip()
 	_idle_spacing()
 	_no_straight_line_through_furniture()
+	_route_hop_stays_on_walkable_tiles(3)          # a stale blocked first step (within the backlog)
+	_route_hop_stays_on_walkable_tiles(7)          # a long backlog that is hopped along the route
 	_holder.free()
 	W.reset()
 	return fails
@@ -159,5 +161,38 @@ func _no_straight_line_through_furniture() -> void:
 			through += 1
 	_check(through == 0, "the view crossed blocked tiles in %d frames" % through)
 	_check(Vector2(fv.position.x, fv.position.z).distance_to(Vector2(10.5, 14.5)) < 0.3, "the view never arrived: %s" % str(fv.position))
+	fv.free()
+	W.remove_folk(f.id)
+
+
+## Item 2 (27b): a route whose first step is a blocked tile (the shower just left) is not walked over, and the fast-forward hop only lands on walkable
+## route tiles, so a long backlog never carries the view across a dresser.
+func _route_hop_stays_on_walkable_tiles(extra: int) -> void:
+	W.reset()
+	var oid: int = W.place_object("dresser", Vector2i(12, 8), 0)
+	_check(oid >= 0, "could not place the dresser: %s" % W.last_error)
+	var pr := _mk("Hopper", Vector2i(10, 8))
+	var f: Folk = pr[0]
+	var fv: FolkView = pr[1]
+	_step(fv, 3)
+	var dresser_tile: Vector2i = W.get_object(oid).tile
+	var pos0 := Vector3(10.5, 0.0, 8.5)
+	fv.position = pos0
+	fv._waypoints.clear()
+	var route: Array = [dresser_tile, Vector2i(11, 9), Vector2i(10, 9), Vector2i(9, 9), Vector2i(8, 9), Vector2i(7, 9), Vector2i(6, 9), Vector2i(5, 9)]
+	for t in route.slice(0, extra + 1):
+		fv._waypoints.append(Vector3(float(t.x) + 0.5, 0.0, float(t.y) + 0.5))
+	var goal: Vector2i = route[extra]
+	f.tile = goal
+	fv._last_tile = goal
+	var through := 0
+	var frames := 0
+	while frames < 600 and (not fv._waypoints.is_empty() or fv._moving):
+		fv._process(0.033)
+		frames += 1
+		if not W.is_walkable(W.pos_to_tile(fv.position)):
+			through += 1
+	_check(through == 0, "the view stood on a blocked tile in %d frames (stale first step / hop, %d extra steps)" % [through, extra])
+	_check(Vector2(fv.position.x, fv.position.z).distance_to(Vector2(goal) + Vector2(0.5, 0.5)) < 0.4, "the hopper never arrived: %s" % str(fv.position))
 	fv.free()
 	W.remove_folk(f.id)
