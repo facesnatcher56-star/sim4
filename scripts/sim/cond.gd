@@ -90,6 +90,14 @@ static func check_one(c: Variant, ctx: Dictionary) -> bool:
 			"has_job":
 				if folk == null or (folk.has_job() != bool(v)):
 					return false
+			"age_stage_is":                    # a stage id or a list of them (SysCond has the same key for systems-level checks)
+				if folk == null:
+					return false
+				if v is Array:
+					if not (v as Array).has(str(folk.age_stage)):
+						return false
+				elif str(folk.age_stage) != str(v):
+					return false
 			"posture_is":
 				if folk == null or str(folk.posture) != str(v):
 					return false
