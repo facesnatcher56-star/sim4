@@ -85,6 +85,7 @@ static func dispatch(service: String, lot: String, opts: Dictionary = {}) -> Dic
 	out.append({"service": service, "back_min": SysUtil.now() + m + int(station(service).get("on_scene", 30)) + int(float(e["parts"]["drive"]))})
 	count("calls_" + service)
 	count("minutes_" + service, m)
+	VehicleFeed.post("dispatch", {"service": service, "lot": lot, "minutes": m, "drive": float(e["parts"]["drive"]), "on_scene": int(station(service).get("on_scene", 30))})      # the view layer draws the unit (read-only for the sim)
 	if m > int(round(float((c.get("targets", {}) as Dictionary).get(service, 10)))) * 2:
 		count("slow_" + service)
 	_prune()

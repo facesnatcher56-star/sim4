@@ -58,6 +58,8 @@ func reset(start_total: int = START_MINUTE) -> void:
 	total_minutes = start_total
 	_accum = 0.0
 
+## Game minutes into the current minute (0..1): smooth time for the view layer. Read-only.
+func frac() -> float: return clampf(_accum, 0.0, 0.999)
 func minute() -> int: return total_minutes % 60
 func hour() -> int: return (total_minutes / 60) % 24
 func day() -> int: return total_minutes / 1440 + 1
