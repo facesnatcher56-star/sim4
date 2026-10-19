@@ -6,9 +6,9 @@ extends RefCounted
 ## same seed (`replay`), undone or sent over a wire. Handlers live in command_actions.gd (one small function per action).
 ##
 ## Actions (args): interact {interaction_id, target_id, extra, strict} | build_place {def_id, tile, rot, level} | build_sell {object_id} |
-## build_wall {a, b, type, level} | build_floor {a, b, type, level} | build_undo | career_accept | career_decline | career_skip | career_unskip |
+## build_wall {a, b, type, level} | build_floor {a, b, type, level} | build_undo | career_accept | career_decline | career_skip | career_unskip | set_homemaker {on} |
 ## travel {folk_ids, lot_id, opts} | go_home {folk_ids, opts} | pay_bill {household_id} | set_aspiration {aspiration} | invite_to_venue {townie_id, lot_id} |
-## prison_visit {inmate} | market {action, args} (MarketCommand) | vacation {action, args} (Vacation.command) | set_heir {heir_id} | choose_successor {choice, household} (SuccessionCmd) | pregnancy {action: name_baby|labour_place|bed_rest|fertility_treatment, ...} (PregnancyCmd) | crimelife {action: join|leave|job|case|plan|abort|recruit|drop_crew|getaway|go|gear|fence|biz_upgrade|home_service, ...} (CrimeLifeCmd) | city {action, args} (CityCmd: buy_car, sell_car, refuel, repair_car, collect_car, buy_bike, bus_times) | crimeunder {action: line_join|line_leave|hit_*|deal_*|rehab|racket_*|gang_*|cop_*|intervene|redeem_*, ...} (CrimeUnderCmd).
+## prison_visit {inmate} | market {action, args} (MarketCommand) | life {action, args} (LifeCommand: places, college, job board, phone) | vacation {action, args} (Vacation.command) | set_heir {heir_id} | choose_successor {choice, household} (SuccessionCmd) | pregnancy {action: name_baby|labour_place|bed_rest|fertility_treatment, ...} (PregnancyCmd) | crimelife {action: join|leave|job|case|plan|abort|recruit|drop_crew|getaway|go|gear|fence|biz_upgrade|home_service, ...} (CrimeLifeCmd) | city {action, args} (CityCmd: buy_car, sell_car, refuel, repair_car, collect_car, buy_bike, bus_times) | crimeunder {action: line_join|line_leave|hit_*|deal_*|rehab|racket_*|gang_*|cop_*|intervene|redeem_*, ...} (CrimeUnderCmd).
 ## Not commands: speed / pause (host policy), settings, save / load slots, camera and selection (view state).
 
 const LOG_CAP := 500

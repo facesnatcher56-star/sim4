@@ -164,7 +164,7 @@ static func _update(carer: int, kids: Array, K: Dictionary) -> void:
 		rec["warned"] = SysUtil.day()
 		warn(carer, worst, score)
 	if score >= float(K.get("act_at", 0.9)) and SysUtil.day() - int(rec["last"]) >= int(K.get("incident_cooldown", 10)) \
-			and JusticeState.chance(float(K.get("daily_chance", 0.04)) * score):
+			and JusticeState.chance(float(K.get("daily_chance", 0.04)) * score * Storyteller.hard_mult()):
 		rec["last"] = SysUtil.day()
 		rec["score"] = score * float(K.get("relief_after_incident", 0.5))
 		incident(carer, worst)

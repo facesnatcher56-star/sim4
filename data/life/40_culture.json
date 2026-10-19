@@ -1,0 +1,1188 @@
+{
+ "_doc": "Culture and leisure (task 14): cinema, theatre, concert hall, museum, gallery, bowling, arcade, pool, sports field with a local league, lake, campsite, community centre with clubs. Programmes (programme.titles) rotate weekly per slot; a service with programme_slot shows the title of the week in its label ({title}). Handlers: perform (skill, base, per_level, fame), exhibit (paintings for the gallery), score (bowling, arcade high scores), league_*, club_*.",
+ "config": {
+  "culture": {
+   "fame_decay": 0.985,
+   "perform": {
+    "success_base": 0.55,
+    "success_per_level": 0.07,
+    "fail_pay": 0.4
+   },
+   "league": {
+    "win_points": 3,
+    "draw_points": 1,
+    "rounds": 3,
+    "player_bonus": 0.6
+   },
+   "club": {
+    "friend_gain": 4.0,
+    "friends_per_meeting": 2
+   },
+   "news_chance_per_day": 0.12
+  },
+  "leagues": {
+   "teams": [
+    {
+     "id": "foxes",
+     "label": "Fernwood Foxes",
+     "strength": 1.0
+    },
+    {
+     "id": "rovers",
+     "label": "Ironleaf Rovers",
+     "strength": 1.1
+    },
+    {
+     "id": "lions",
+     "label": "Larkfield Lions",
+     "strength": 0.9
+    },
+    {
+     "id": "giants",
+     "label": "Greenbarrow Giants",
+     "strength": 1.0
+    }
+   ]
+  },
+  "clubs": {
+   "book_club": {
+    "label": "Book Club",
+    "weekday": 1,
+    "members": 5,
+    "news": "The Book Club met to argue about the latest novel."
+   },
+   "chess_club": {
+    "label": "Chess Club",
+    "weekday": 3,
+    "members": 5,
+    "news": "The Chess Club held its weekly tournament."
+   },
+   "garden_club": {
+    "label": "Garden Club",
+    "weekday": 5,
+    "members": 5,
+    "news": "The Garden Club swapped seeds and tips on Saturday morning."
+   }
+  }
+ },
+ "places": {
+  "cinema": {
+   "label": "Starlight Cinema",
+   "lot": "office",
+   "kind": "culture",
+   "schedule": [
+    {
+     "days": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "hours": [
+      13,
+      25
+     ]
+    }
+   ],
+   "blurb": "Three screens: a family film, a new release and a late show for grown-ups.",
+   "staff": [
+    {
+     "role": "Projectionist",
+     "career": "",
+     "n": 1
+    },
+    {
+     "role": "Ticket seller",
+     "career": "",
+     "n": 1
+    }
+   ],
+   "min_staff": 1,
+   "programme": {
+    "slots": [
+     "family",
+     "teen",
+     "adult"
+    ],
+    "titles": {
+     "family": [
+      "The Little Lighthouse",
+      "Pip and the Paper Moon",
+      "Whiskers Save the Day",
+      "The Great Pancake Race"
+     ],
+     "teen": [
+      "Neon Summer",
+      "The Last Bus Home",
+      "Skyline Runners",
+      "Midnight at Maple High"
+     ],
+     "adult": [
+      "A Quiet Reckoning",
+      "The Salt Road",
+      "Letters from Cedar Court",
+      "The Long Winter Case"
+     ]
+    }
+   },
+   "news": [
+    "{place} is showing {title_family} this week.",
+    "{place} has a late show: {title_adult}."
+   ],
+   "services": {
+    "cinema_family": {
+     "label": "Family Film: {title}",
+     "price": 9,
+     "minutes": 110,
+     "posture": "sit",
+     "needs": {
+      "fun": 34,
+      "social": 8
+     },
+     "buffs": [
+      "entertained"
+     ],
+     "min_stage": "child",
+     "programme_slot": "family",
+     "text": "{name} watched {title}."
+    },
+    "cinema_teen": {
+     "label": "New Release: {title}",
+     "price": 11,
+     "minutes": 120,
+     "posture": "sit",
+     "needs": {
+      "fun": 38,
+      "social": 10
+     },
+     "buffs": [
+      "entertained"
+     ],
+     "min_stage": "teen",
+     "programme_slot": "teen",
+     "text": "{name} watched {title}."
+    },
+    "cinema_adult": {
+     "label": "Late Show: {title}",
+     "price": 12,
+     "minutes": 130,
+     "posture": "sit",
+     "needs": {
+      "fun": 40,
+      "social": 10
+     },
+     "buffs": [
+      "entertained"
+     ],
+     "adult_only": true,
+     "programme_slot": "adult",
+     "text": "{name} watched {title}."
+    },
+    "cinema_popcorn": {
+     "label": "Popcorn and a Drink",
+     "price": 5,
+     "minutes": 6,
+     "posture": "stand",
+     "needs": {
+      "fun": 2,
+      "hunger": 12
+     },
+     "meters": {
+      "diet": -1.0
+     }
+    }
+   }
+  },
+  "theatre": {
+   "label": "Larkfield Hall Theatre",
+   "lot": "school",
+   "kind": "culture",
+   "schedule": [
+    {
+     "days": [
+      4,
+      5,
+      6
+     ],
+     "hours": [
+      14,
+      23
+     ]
+    }
+   ],
+   "blurb": "Plays on Fridays, Saturdays and Sundays. Take a part yourself if you can act.",
+   "staff": [
+    {
+     "role": "Director",
+     "career": "",
+     "n": 1
+    },
+    {
+     "role": "Stage manager",
+     "career": "",
+     "n": 1
+    }
+   ],
+   "min_staff": 1,
+   "programme": {
+    "slots": [
+     "family",
+     "evening"
+    ],
+    "titles": {
+     "family": [
+      "The Dragon Who Was Shy",
+      "Cinderella Goes Dancing",
+      "The Magic Teapot"
+     ],
+     "evening": [
+      "An Evening with Mr Pennywhistle",
+      "The Visitor",
+      "Romeo and the Ferryman",
+      "Murder at the Mill"
+     ]
+    }
+   },
+   "news": [
+    "The theatre opens {title_evening} on Friday.",
+    "{staff} is directing the next play at {place}."
+   ],
+   "services": {
+    "play_family": {
+     "label": "Matinee: {title}",
+     "price": 12,
+     "minutes": 120,
+     "posture": "sit",
+     "needs": {
+      "fun": 36,
+      "social": 8
+     },
+     "skill_xp": {
+      "charisma": 6
+     },
+     "min_stage": "child",
+     "programme_slot": "family",
+     "text": "{name} saw {title} and clapped until the curtain fell."
+    },
+    "play_evening": {
+     "label": "Evening Play: {title}",
+     "price": 16,
+     "minutes": 140,
+     "posture": "sit",
+     "needs": {
+      "fun": 42,
+      "social": 10
+     },
+     "buffs": [
+      "inspired"
+     ],
+     "skill_xp": {
+      "charisma": 8
+     },
+     "min_stage": "teen",
+     "programme_slot": "evening",
+     "text": "{name} saw {title}."
+    },
+    "perform_acting": {
+     "label": "Take a Part in the Play",
+     "price": 0,
+     "minutes": 150,
+     "posture": "stand",
+     "needs": {
+      "fun": 22,
+      "energy": -14
+     },
+     "skill_xp": {
+      "charisma": 25
+     },
+     "handler": "perform",
+     "once_per_day": true,
+     "args": {
+      "skill": "charisma",
+      "min_level": 2,
+      "base": 20,
+      "per_level": 9,
+      "fame": 2.0,
+      "label": "the play"
+     },
+     "min_stage": "teen"
+    }
+   }
+  },
+  "concert_hall": {
+   "label": "Larkfield Hall Concerts",
+   "lot": "school",
+   "kind": "culture",
+   "schedule": [
+    {
+     "days": [
+      4,
+      5,
+      6
+     ],
+     "hours": [
+      17,
+      23
+     ]
+    }
+   ],
+   "blurb": "Live music Friday to Sunday. Players with the skill can book a set and earn.",
+   "staff": [
+    {
+     "role": "Sound engineer",
+     "career": "musician",
+     "n": 1
+    },
+    {
+     "role": "Box office",
+     "career": "",
+     "n": 1
+    }
+   ],
+   "min_staff": 1,
+   "programme": {
+    "slots": [
+     "concert"
+    ],
+    "titles": {
+     "concert": [
+      "The Moss Street Quartet",
+      "Wild Honey",
+      "Choir of the Valley",
+      "Jazz at Midnight",
+      "Bram and the Lanterns",
+      "An Evening of Piano"
+     ]
+    }
+   },
+   "news": [
+    "{place} welcomes {title_concert} this weekend."
+   ],
+   "services": {
+    "concert_ticket": {
+     "label": "Concert: {title}",
+     "price": 16,
+     "minutes": 130,
+     "posture": "sit",
+     "needs": {
+      "fun": 40,
+      "social": 8
+     },
+     "buffs": [
+      "melodic"
+     ],
+     "skill_xp": {
+      "guitar": 4,
+      "piano": 4
+     },
+     "min_stage": "child",
+     "programme_slot": "concert",
+     "text": "{name} loved the concert, {title}."
+    },
+    "perform_guitar": {
+     "label": "Play a Set on Guitar",
+     "price": 0,
+     "minutes": 120,
+     "posture": "stand",
+     "needs": {
+      "fun": 25,
+      "energy": -14
+     },
+     "skill_xp": {
+      "guitar": 30
+     },
+     "handler": "perform",
+     "once_per_day": true,
+     "min_stage": "teen",
+     "args": {
+      "skill": "guitar",
+      "min_level": 3,
+      "base": 30,
+      "per_level": 14,
+      "fame": 3.0,
+      "label": "guitar set"
+     }
+    },
+    "perform_piano": {
+     "label": "Play a Recital on Piano",
+     "price": 0,
+     "minutes": 120,
+     "posture": "sit",
+     "needs": {
+      "fun": 25,
+      "energy": -12
+     },
+     "skill_xp": {
+      "piano": 30
+     },
+     "handler": "perform",
+     "once_per_day": true,
+     "min_stage": "teen",
+     "args": {
+      "skill": "piano",
+      "min_level": 3,
+      "base": 30,
+      "per_level": 14,
+      "fame": 3.0,
+      "label": "piano recital"
+     }
+    },
+    "perform_sing": {
+     "label": "Sing a Few Songs",
+     "price": 0,
+     "minutes": 90,
+     "posture": "stand",
+     "needs": {
+      "fun": 22,
+      "energy": -10
+     },
+     "skill_xp": {
+      "charisma": 18
+     },
+     "handler": "perform",
+     "once_per_day": true,
+     "min_stage": "teen",
+     "args": {
+      "skill": "charisma",
+      "min_level": 4,
+      "base": 24,
+      "per_level": 10,
+      "fame": 2.5,
+      "label": "singing set"
+     }
+    }
+   }
+  },
+  "museum": {
+   "label": "Hollow Oak Museum",
+   "lot": "library",
+   "kind": "culture",
+   "schedule": [
+    {
+     "days": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "hours": [
+      10,
+      17
+     ]
+    }
+   ],
+   "blurb": "Local history, nature and a new exhibition every week.",
+   "staff": [
+    {
+     "role": "Curator",
+     "career": "",
+     "n": 1
+    }
+   ],
+   "min_staff": 1,
+   "programme": {
+    "slots": [
+     "exhibition"
+    ],
+    "titles": {
+     "exhibition": [
+      "Fernwood Through the Ages",
+      "Insects and Other Neighbours",
+      "The Story of the Mill",
+      "Stars and Telescopes",
+      "Old Maps",
+      "Bones and Fossils"
+     ]
+    }
+   },
+   "news": [
+    "The museum's new exhibition is {title_exhibition}."
+   ],
+   "services": {
+    "museum_visit": {
+     "label": "Visit the Museum: {title}",
+     "price": 6,
+     "minutes": 90,
+     "posture": "stand",
+     "needs": {
+      "fun": 12
+     },
+     "buffs": [
+      "inspired"
+     ],
+     "skill_xp": {
+      "logic": 15
+     },
+     "min_stage": "child",
+     "programme_slot": "exhibition",
+     "text": "{name} learned a great deal at the museum's {title} exhibition."
+    },
+    "museum_class": {
+     "label": "Museum Workshop for Children",
+     "price": 4,
+     "minutes": 60,
+     "posture": "stand",
+     "needs": {
+      "fun": 16
+     },
+     "skill_xp": {
+      "logic": 20
+     },
+     "stages": [
+      "child",
+      "teen"
+     ],
+     "text": "{name} made a clay pot at the museum workshop."
+    }
+   }
+  },
+  "gallery": {
+   "label": "Oak Street Gallery",
+   "lot": "library",
+   "kind": "culture",
+   "schedule": [
+    {
+     "days": [
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "hours": [
+      11,
+      18
+     ]
+    }
+   ],
+   "blurb": "Paintings to look at, and a wall for yours: the gallery buys at a better price than the market stall.",
+   "staff": [
+    {
+     "role": "Gallery owner",
+     "career": "painter",
+     "n": 1
+    }
+   ],
+   "min_staff": 1,
+   "programme": {
+    "slots": [
+     "show"
+    ],
+    "titles": {
+     "show": [
+      "Portraits of the Town",
+      "Water and Light",
+      "Small Works",
+      "Local Painters",
+      "Blue Season"
+     ]
+    }
+   },
+   "news": [
+    "The gallery's current show is {title_show}.",
+    "{staff} is looking for new local painters."
+   ],
+   "services": {
+    "gallery_visit": {
+     "label": "Look Around the Gallery: {title}",
+     "price": 3,
+     "minutes": 60,
+     "posture": "stand",
+     "needs": {
+      "fun": 10
+     },
+     "buffs": [
+      "inspired"
+     ],
+     "skill_xp": {
+      "painting": 12
+     },
+     "min_stage": "child",
+     "programme_slot": "show",
+     "text": "{name} studied {title} at the gallery."
+    },
+    "gallery_exhibit": {
+     "label": "Exhibit and Sell Your Paintings",
+     "price": 0,
+     "minutes": 30,
+     "posture": "stand",
+     "needs": {
+      "fun": 8
+     },
+     "handler": "exhibit",
+     "min_stage": "teen",
+     "args": {
+      "kind": "painting",
+      "mult": 1.5,
+      "fame": 2.0,
+      "max": 3
+     }
+    }
+   }
+  },
+  "bowling": {
+   "label": "Ironleaf Bowling Alley",
+   "lot": "gym",
+   "kind": "leisure",
+   "schedule": [
+    {
+     "days": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "hours": [
+      12,
+      22
+     ]
+    }
+   ],
+   "blurb": "Ten lanes, shoes included. Beat the record on the wall.",
+   "staff": [
+    {
+     "role": "Lane attendant",
+     "career": "",
+     "n": 1
+    }
+   ],
+   "min_staff": 1,
+   "news": [
+    "The bowling alley has a new record on the wall."
+   ],
+   "services": {
+    "bowl": {
+     "label": "Bowling",
+     "price": 9,
+     "minutes": 60,
+     "posture": "stand",
+     "needs": {
+      "fun": 30,
+      "social": 15,
+      "energy": -8
+     },
+     "meters": {
+      "fitness": 1.0
+     },
+     "handler": "score",
+     "min_stage": "child",
+     "args": {
+      "game": "bowling",
+      "base": 60,
+      "spread": 80,
+      "label": "bowling"
+     }
+    }
+   }
+  },
+  "arcade": {
+   "label": "Ironleaf Arcade",
+   "lot": "gym",
+   "kind": "leisure",
+   "schedule": [
+    {
+     "days": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "hours": [
+      14,
+      22
+     ]
+    }
+   ],
+   "blurb": "Flashing lights and a high-score board.",
+   "staff": [
+    {
+     "role": "Attendant",
+     "career": "",
+     "n": 1
+    }
+   ],
+   "min_staff": 1,
+   "news": [
+    "A new high score was set at the arcade."
+   ],
+   "services": {
+    "arcade": {
+     "label": "Arcade Games",
+     "price": 6,
+     "minutes": 45,
+     "posture": "stand",
+     "needs": {
+      "fun": 28,
+      "social": 6
+     },
+     "skill_xp": {
+      "logic": 4
+     },
+     "handler": "score",
+     "min_stage": "child",
+     "args": {
+      "game": "arcade",
+      "base": 1000,
+      "spread": 8000,
+      "label": "arcade"
+     }
+    }
+   }
+  },
+  "pool": {
+   "label": "Ironleaf Swimming Pool",
+   "lot": "gym",
+   "kind": "leisure",
+   "schedule": [
+    {
+     "days": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "hours": [
+      7,
+      21
+     ]
+    }
+   ],
+   "blurb": "Lengths for the fit, a shallow end for the little ones. A gym pass halves the price.",
+   "staff": [
+    {
+     "role": "Lifeguard",
+     "career": "",
+     "n": 1
+    }
+   ],
+   "min_staff": 1,
+   "services": {
+    "swim": {
+     "label": "Swim",
+     "price": 6,
+     "minutes": 60,
+     "posture": "stand",
+     "needs": {
+      "fun": 15,
+      "energy": -12,
+      "hygiene": 10
+     },
+     "skill_xp": {
+      "fitness": 10
+     },
+     "meters": {
+      "fitness": 2.5
+     },
+     "min_stage": "child",
+     "pass_discount": 0.5,
+     "text": "{name} swam lengths until the lifeguard waved."
+    },
+    "family_splash": {
+     "label": "Family Splash Session",
+     "price": 4,
+     "minutes": 45,
+     "posture": "stand",
+     "needs": {
+      "fun": 22,
+      "social": 14,
+      "energy": -6,
+      "hygiene": 6
+     },
+     "meters": {
+      "fitness": 1.0
+     },
+     "stages": [
+      "toddler",
+      "child"
+     ],
+     "text": "{name} splashed about in the shallow end."
+    }
+   }
+  },
+  "sports_field": {
+   "label": "Willow Green Sports Field",
+   "lot": "park",
+   "kind": "leisure",
+   "hours": [
+    7,
+    21
+   ],
+   "blurb": "Pick-up games every day and the local league on Saturdays.",
+   "staff": [
+    {
+     "role": "Groundskeeper",
+     "career": "gardener",
+     "n": 1
+    }
+   ],
+   "min_staff": 0,
+   "news": [
+    "The league table is tight at the top."
+   ],
+   "services": {
+    "league_join": {
+     "label": "Join a League Team",
+     "price": 10,
+     "minutes": 15,
+     "posture": "stand",
+     "handler": "league_join",
+     "min_stage": "teen",
+     "text": "{name} signed up for the {team}."
+    },
+    "league_play": {
+     "label": "Play the Saturday Match",
+     "price": 0,
+     "minutes": 100,
+     "posture": "stand",
+     "needs": {
+      "fun": 32,
+      "social": 20,
+      "energy": -24,
+      "hygiene": -18
+     },
+     "skill_xp": {
+      "fitness": 25
+     },
+     "meters": {
+      "fitness": 4.0
+     },
+     "handler": "league_play",
+     "min_stage": "teen",
+     "when": {
+      "days": [
+       5
+      ]
+     },
+     "text": "{name} played for the {team}."
+    },
+    "league_watch": {
+     "label": "Watch the Saturday Match",
+     "price": 0,
+     "minutes": 90,
+     "posture": "stand",
+     "needs": {
+      "fun": 16,
+      "social": 14
+     },
+     "min_stage": "child",
+     "when": {
+      "days": [
+       5
+      ]
+     },
+     "handler": "league_watch"
+    },
+    "pickup_game": {
+     "label": "Pick-up Game with Friends",
+     "price": 0,
+     "minutes": 60,
+     "posture": "stand",
+     "needs": {
+      "fun": 22,
+      "social": 16,
+      "energy": -16,
+      "hygiene": -10
+     },
+     "skill_xp": {
+      "fitness": 15
+     },
+     "meters": {
+      "fitness": 2.5
+     },
+     "min_stage": "child"
+    }
+   }
+  },
+  "lake": {
+   "label": "Willow Green Lake Shore",
+   "lot": "park",
+   "kind": "leisure",
+   "hours": [
+    7,
+    21
+   ],
+   "seasons": [
+    "spring",
+    "summer",
+    "autumn"
+   ],
+   "blurb": "Paddling, picnics and, in summer, a swim. Closed in winter.",
+   "staff": [
+    {
+     "role": "Ranger",
+     "career": "gardener",
+     "n": 1
+    }
+   ],
+   "min_staff": 0,
+   "services": {
+    "lake_paddle": {
+     "label": "Paddle on the Lake",
+     "price": 0,
+     "minutes": 60,
+     "posture": "stand",
+     "needs": {
+      "fun": 20,
+      "energy": -5
+     },
+     "buffs": [
+      "venue_fresh_air"
+     ],
+     "meters": {
+      "fitness": 1.5
+     },
+     "min_stage": "child"
+    },
+    "lake_swim": {
+     "label": "Swim in the Lake",
+     "price": 0,
+     "minutes": 60,
+     "posture": "stand",
+     "needs": {
+      "fun": 26,
+      "energy": -10,
+      "hygiene": 8
+     },
+     "meters": {
+      "fitness": 2.0
+     },
+     "min_stage": "child",
+     "when": {
+      "season": [
+       "summer"
+      ]
+     }
+    },
+    "picnic": {
+     "label": "Picnic by the Water",
+     "price": 8,
+     "minutes": 60,
+     "posture": "sit",
+     "needs": {
+      "fun": 18,
+      "social": 15,
+      "hunger": 30
+     },
+     "buffs": [
+      "venue_fresh_air"
+     ],
+     "meters": {
+      "diet": 0.5
+     },
+     "min_stage": "child"
+    }
+   }
+  },
+  "campsite": {
+   "label": "Southwoods Campsite",
+   "lot": "park",
+   "kind": "leisure",
+   "hours": [
+    14,
+    22
+   ],
+   "seasons": [
+    "spring",
+    "summer",
+    "autumn"
+   ],
+   "blurb": "A tent, a fire and a night under the stars. Closed in winter.",
+   "staff": [
+    {
+     "role": "Warden",
+     "career": "",
+     "n": 1
+    }
+   ],
+   "min_staff": 1,
+   "news": [
+    "The campsite is busy with families this weekend."
+   ],
+   "services": {
+    "camp_night": {
+     "label": "Camp Overnight",
+     "price": 18,
+     "minutes": 480,
+     "posture": "lie",
+     "needs": {
+      "fun": 30,
+      "social": 10,
+      "energy": 40,
+      "comfort": -8,
+      "hygiene": -15
+     },
+     "buffs": [
+      "venue_fresh_air"
+     ],
+     "min_stage": "child",
+     "once_per_day": true,
+     "text": "{name} woke up in a tent, cold and happy."
+    }
+   }
+  },
+  "community_centre": {
+   "label": "Hollow Oak Community Hall",
+   "lot": "library",
+   "kind": "community",
+   "schedule": [
+    {
+     "days": [
+      1
+     ],
+     "hours": [
+      18,
+      20
+     ]
+    },
+    {
+     "days": [
+      3
+     ],
+     "hours": [
+      18,
+      20
+     ]
+    },
+    {
+     "days": [
+      5
+     ],
+     "hours": [
+      10,
+      13
+     ]
+    }
+   ],
+   "blurb": "Clubs for grown-ups and kids: book club on Tuesdays, chess on Thursdays, gardening on Saturday mornings.",
+   "staff": [
+    {
+     "role": "Club organiser",
+     "career": "",
+     "n": 1
+    }
+   ],
+   "min_staff": 1,
+   "services": {
+    "join_book_club": {
+     "label": "Join the Book Club",
+     "price": 5,
+     "minutes": 5,
+     "posture": "stand",
+     "handler": "club_join",
+     "min_stage": "teen",
+     "args": {
+      "club": "book_club"
+     }
+    },
+    "book_club_meeting": {
+     "label": "Book Club Meeting",
+     "price": 0,
+     "minutes": 90,
+     "posture": "sit",
+     "needs": {
+      "fun": 14,
+      "social": 22
+     },
+     "skill_xp": {
+      "writing": 12
+     },
+     "handler": "club_meet",
+     "min_stage": "teen",
+     "when": {
+      "days": [
+       1
+      ]
+     },
+     "args": {
+      "club": "book_club"
+     },
+     "once_per_day": true
+    },
+    "join_chess_club": {
+     "label": "Join the Chess Club",
+     "price": 5,
+     "minutes": 5,
+     "posture": "stand",
+     "handler": "club_join",
+     "min_stage": "child",
+     "args": {
+      "club": "chess_club"
+     }
+    },
+    "chess_club_meeting": {
+     "label": "Chess Club Evening",
+     "price": 0,
+     "minutes": 90,
+     "posture": "sit",
+     "needs": {
+      "fun": 14,
+      "social": 20
+     },
+     "skill_xp": {
+      "logic": 14
+     },
+     "handler": "club_meet",
+     "min_stage": "child",
+     "when": {
+      "days": [
+       3
+      ]
+     },
+     "args": {
+      "club": "chess_club"
+     },
+     "once_per_day": true
+    },
+    "join_garden_club": {
+     "label": "Join the Garden Club",
+     "price": 5,
+     "minutes": 5,
+     "posture": "stand",
+     "handler": "club_join",
+     "min_stage": "teen",
+     "args": {
+      "club": "garden_club"
+     }
+    },
+    "garden_club_meeting": {
+     "label": "Garden Club Morning",
+     "price": 0,
+     "minutes": 90,
+     "posture": "stand",
+     "needs": {
+      "fun": 14,
+      "social": 20
+     },
+     "skill_xp": {
+      "gardening": 14
+     },
+     "handler": "club_meet",
+     "min_stage": "teen",
+     "when": {
+      "days": [
+       5
+      ]
+     },
+     "args": {
+      "club": "garden_club"
+     },
+     "once_per_day": true
+    }
+   }
+  }
+ }
+}

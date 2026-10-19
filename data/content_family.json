@@ -2,7 +2,7 @@
  "_doc": "Family-layer content merged into the shared tables by ContentMerge (scripts/systems/content_merge.gd, family_content.gd). The crib object itself is defined in objects.json; this only makes it offer sleep_crib.",
  "interactions": {
   "feed_baby": {
-   "label": "Feed Baby",
+   "label": "Feed Little One",
    "kind": "social",
    "target": "folk",
    "duration_min": 10.0,
@@ -22,7 +22,17 @@
    ],
    "target_tests": [
     {
-     "has_buff": "stage_baby"
+     "any": [
+      {
+       "has_buff": "stage_baby"
+      },
+      {
+       "has_buff": "stage_toddler"
+      },
+      {
+       "has_buff": "stage_child"
+      }
+     ]
     },
     {
      "stat_below": [
@@ -58,7 +68,7 @@
    "thought": "Time for a bottle."
   },
   "change_diaper": {
-   "label": "Change Diaper",
+   "label": "Wash and Change",
    "kind": "social",
    "target": "folk",
    "duration_min": 4.0,
@@ -78,7 +88,17 @@
    ],
    "target_tests": [
     {
-     "has_buff": "stage_baby"
+     "any": [
+      {
+       "has_buff": "stage_baby"
+      },
+      {
+       "has_buff": "stage_toddler"
+      },
+      {
+       "has_buff": "stage_child"
+      }
+     ]
     },
     {
      "any": [
@@ -125,7 +145,7 @@
    "thought": "Diaper time."
   },
   "rock_to_sleep": {
-   "label": "Rock to Sleep",
+   "label": "Put to Bed",
    "kind": "social",
    "target": "folk",
    "duration_min": 25.0,
@@ -145,7 +165,17 @@
    ],
    "target_tests": [
     {
-     "has_buff": "stage_baby"
+     "any": [
+      {
+       "has_buff": "stage_baby"
+      },
+      {
+       "has_buff": "stage_toddler"
+      },
+      {
+       "has_buff": "stage_child"
+      }
+     ]
     },
     {
      "stat_below": [

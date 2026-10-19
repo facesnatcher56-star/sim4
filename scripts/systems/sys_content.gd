@@ -25,6 +25,7 @@ static func install_all() -> void:
 	install()
 	FamilyContent.install()
 	PregnancyContent.install()
+	LifeContent.install()               # task 14: place_visit
 	WeatherContent.install()
 	IncidentContent.install()
 	CityGov.install()                  # task 12: the politician career, the mayor and election interactions

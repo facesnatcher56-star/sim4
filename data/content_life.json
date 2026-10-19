@@ -1,0 +1,58 @@
+{
+ "_doc": "Runtime content of the life areas (task 14), merged by ContentMerge (scripts/systems/life_content.gd). place_visit: the time a person spends on a service of a place (PlaceUse); its length and label are set per visit.",
+ "interactions": {
+  "place_visit": {
+   "label": "Visit",
+   "kind": "super",
+   "target": "self",
+   "duration_min": 60,
+   "posture": "stand",
+   "tests": [],
+   "per_min": {},
+   "on_finish": [],
+   "on_cancel": [],
+   "autonomous": false,
+   "priority": "normal",
+   "interruptible": true,
+   "tags": [
+    "visit",
+    "town"
+   ]
+  }
+ },
+ "buffs": {
+  "toothache": {
+   "label": "Toothache",
+   "mood": {
+    "sad": 1,
+    "tense": 1
+   },
+   "duration_min": 0,
+   "thought": "My tooth is killing me. Time for the dentist."
+  },
+  "hangover": {
+   "label": "Hangover",
+   "mood": {
+    "sad": 1,
+    "uncomfortable": 2
+   },
+   "duration_min": 480,
+   "need_decay_mult": {
+    "energy": 1.3,
+    "fun": 1.1
+   },
+   "thought": "Never again..."
+  },
+  "pet_company": {
+   "label": "Pet Company",
+   "mood": {
+    "happy": 1
+   },
+   "duration_min": 1440,
+   "need_decay_mult": {
+    "social": 0.8
+   },
+   "thought": "Having a pet around makes the house feel full."
+  }
+ }
+}

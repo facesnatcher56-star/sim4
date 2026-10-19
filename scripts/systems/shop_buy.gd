@@ -8,6 +8,10 @@ static func why_not(hid: int, folk_id: int, sid: String, iid: String, qty: int, 
 	if it.is_empty() or qty <= 0:
 		return "That is not for sale."
 	var sh: Dictionary = ShopStock.shop(sid)
+	if str(it.get("kind", "")) == "lottery" and folk_id >= 0:
+		var gf = SysUtil.folk(folk_id)
+		if gf != null and Places.stage_reason(str(gf.age_stage), {"adult_only": true}) != "":
+			return "Only adults can play the lottery."          # task 14: gambling is adult-only
 	if online:
 		if not bool(sh.get("online", false)):
 			return "This shop does not deliver."

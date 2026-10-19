@@ -1,0 +1,104 @@
+{
+  "_doc": "Task 29: the Storyteller. Personalities, the hidden chaos walk, the drama budget, districts, contagion, hard rarity caps, town cycles. The event deck is in storyteller_cards.json, the multi-day arcs in storyteller_arcs.json. Every number here is data.",
+  "default": "classic",
+  "seed_salt": 2929,
+  "personalities": {
+    "calm": {
+      "label": "Calm",
+      "blurb": "Long quiet stretches. Mostly small, good surprises, big events are rare, and a bad turn is followed by a long recovery.",
+      "walk": {"mean": 0.55, "noise": 0.10, "revert": 0.10, "jump_chance": 0.015, "jump_size": 0.5},
+      "sizes": {"small": 0.75, "medium": 0.22, "big": 0.03},
+      "good_share": 0.72, "mercy": 1.0, "mercy_days": 9, "max_quiet_days": 10,
+      "big_gap_days": 21, "bad_big_gap_days": 21, "hard_mult": 0.8, "crime_mult": 0.85, "foreshadow": 1.0
+    },
+    "classic": {
+      "label": "Classic",
+      "blurb": "The usual mix: tension comes and goes at its own pace, big events are spaced out, and nobody is hit twice in a week by something really bad.",
+      "walk": {"mean": 1.0, "noise": 0.18, "revert": 0.10, "jump_chance": 0.04, "jump_size": 0.8},
+      "sizes": {"small": 0.62, "medium": 0.30, "big": 0.08},
+      "good_share": 0.5, "mercy": 0.6, "mercy_days": 5, "max_quiet_days": 5,
+      "big_gap_days": 7, "bad_big_gap_days": 7, "hard_mult": 1.0, "crime_mult": 1.0, "foreshadow": 0.8
+    },
+    "chaotic": {
+      "label": "Chaotic",
+      "blurb": "Anything, any time, and bad luck can stack on bad luck. The really rare things (murder, disasters) stay rare.",
+      "walk": {"mean": 1.3, "noise": 0.40, "revert": 0.06, "jump_chance": 0.12, "jump_size": 1.4},
+      "sizes": {"small": 0.45, "medium": 0.35, "big": 0.20},
+      "good_share": 0.5, "mercy": 0.0, "mercy_days": 0, "max_quiet_days": 3,
+      "big_gap_days": 0, "bad_big_gap_days": 0, "hard_mult": 1.5, "crime_mult": 1.5, "foreshadow": 0.3
+    },
+    "custom": {
+      "label": "Custom",
+      "blurb": "You set how often things happen, how big they get, how much is good or bad, and how much mercy you get after a disaster."
+    }
+  },
+  "custom": {
+    "defaults": {"frequency": 0.5, "severity": 0.5, "balance": 0.5, "mercy": 0.5},
+    "mean": [0.3, 1.8], "jump_size": [0.4, 1.5], "noise": [0.08, 0.4], "good_share": [0.15, 0.9], "mercy_days": [0, 10], "max_quiet_days": [10, 3],
+    "hard_mult": [0.8, 1.5], "crime_mult": [0.85, 1.5], "big_gap_days": [21, 0], "foreshadow": [1.0, 0.3]
+  },
+  "hard_cap": 1.5,
+  "hard_incidents": ["murder", "serial_killer", "serial_killer_aboard", "tornado", "flood", "earthquake", "wildfire", "meteor_strike", "blizzard", "hailstorm", "power_outage"],
+  "hard_systems": ["child_abuse"],
+  "crime_incidents": ["burglary", "guest_theft", "street_robbery", "assault", "vandalism", "trespassing", "public_disturbance", "identity_theft"],
+  "sizes": {"small": {"cost": 1.0}, "medium": {"cost": 3.0}, "big": {"cost": 7.0}},
+  "budget": {"gain_home": 0.30, "gain_lot": 0.06, "gain_district": 0.25, "gain_town": 0.18, "cap": 14.0, "spend_chance": 0.55,
+    "floor": -4.0, "natural_cost": {"2": 0.4, "3": 1.5, "4": 3.5, "5": 6.0}, "notable_severity": 2, "big_severity": 4, "guard_city_share": 0.6},
+  "wealth": {"rich_coins": 2500, "poor_coins": 450},
+  "toast_cap_per_day": 3,
+  "choice_days": 3,
+  "log_cap": 120,
+  "heat": {"half_life_days": 4.0, "per_event": 1.0, "cap": 4.0, "weight_gain": 0.5},
+  "districts": {
+    "zones": {"north": "downtown", "east": "suburb", "south": "industrial", "west": "waterfront"},
+    "cycle": ["downtown", "suburb", "industrial", "waterfront"],
+    "kinds": {
+      "downtown": {"label": "downtown", "chaos": 1.15, "mix": {"crime": 1.8, "traffic": 1.8, "protest": 2.0, "social": 1.2, "scandal": 1.6, "fame": 1.8}},
+      "suburb": {"label": "the suburbs", "chaos": 0.9, "mix": {"domestic": 2.0, "burglary": 1.6, "fire": 1.5, "social": 1.4, "pets": 1.5}},
+      "industrial": {"label": "the industrial side", "chaos": 1.1, "mix": {"work": 2.4, "accident": 2.0, "layoff": 2.0, "pollution": 2.2}},
+      "waterfront": {"label": "the waterfront", "chaos": 1.05, "mix": {"smuggling": 2.5, "port": 2.0, "weather": 1.5, "fame": 1.2}}
+    }
+  },
+  "ripple": {"near_zones": 0, "near_buff_chance": 0.7, "know_chance": 0.9, "later_days": [1, 4], "max_later": 40},
+  "chains": [
+    {"from": "street_burglary", "to": "neighbourhood_watch", "chance": 0.35, "delay": [2, 6]},
+    {"from": "neighbourhood_watch", "to": "vigilante", "chance": 0.25, "delay": [3, 8]},
+    {"from": "vigilante", "to": "wrong_arrest", "chance": 0.4, "delay": [2, 5]},
+    {"from": "fire_nearby", "to": "insurance_probe", "chance": 0.3, "delay": [3, 8]},
+    {"from": "insurance_probe", "to": "lawsuit", "chance": 0.35, "delay": [4, 10]},
+    {"from": "factory_closure", "to": "factory_layoffs", "chance": 0.9, "delay": [1, 3]},
+    {"from": "factory_layoffs", "to": "petty_crime_spree", "chance": 0.5, "delay": [3, 7]},
+    {"from": "petty_crime_spree", "to": "city_hall_rally", "chance": 0.5, "delay": [3, 8]}
+  ],
+  "cycles": {
+    "cooldown_days": 6,
+    "types": {
+      "crime_wave": {"label": "Crime wave", "days": [8, 16], "weight": 1.0, "cat": "crime",
+        "start": "Police say crime is up across town. Lock your doors.", "end": "The crime wave has eased.",
+        "mult": {"burglary": 1.4, "street_robbery": 1.4, "vandalism": 1.4, "guest_theft": 1.3}, "heat": {"crime": 2.0}},
+      "flu_season": {"label": "Flu season", "days": [10, 18], "weight": 1.0, "cat": "health",
+        "start": "Flu season has arrived. Half the town is sniffling.", "end": "Flu season is over.",
+        "mult": {"catch_cold": 2.0, "catch_flu": 1.8, "townie_stomach_bug": 1.3}},
+      "boom": {"label": "Boom times", "days": [12, 24], "weight": 0.8, "cat": "money", "economy": "boom",
+        "start": "Business is booming. Shops are busy and jobs are easy to find.", "end": "The boom has cooled."},
+      "bust": {"label": "Hard times", "days": [12, 24], "weight": 0.8, "cat": "money", "economy": "recession",
+        "start": "Hard times: prices bite and jobs are being cut.", "end": "Hard times are easing."},
+      "heat_wave": {"label": "Heat wave", "days": [3, 6], "weight": 0.7, "cat": "town", "weather": "heatwave",
+        "start": "A heat wave has settled over the town.", "end": "The heat wave has broken."},
+      "cold_snap": {"label": "Cold snap", "days": [3, 6], "weight": 0.7, "cat": "town", "weather": "cold_snap",
+        "start": "A cold snap has arrived. Wrap up warm.", "end": "The cold snap has passed."},
+      "election_scandal": {"label": "Election scandal", "days": [6, 12], "weight": 0.6, "cat": "town", "mood": -0.25,
+        "start": "A scandal is shaking the council. People are talking about the next election.", "end": "The council scandal has been forgotten."}
+    }
+  },
+  "text": {
+    "why_quiet": "It had been quiet for a while.",
+    "why_money_low": "Money was tight.",
+    "why_money_high": "The household looked comfortable.",
+    "why_mercy": "After a rough patch, the luck turned.",
+    "why_streak": "A busy spell was on.",
+    "why_chain": "One thing led to another.",
+    "why_cycle": "It is that time of year in town.",
+    "why_default": "Just one of those things."
+  }
+}

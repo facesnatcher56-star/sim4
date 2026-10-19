@@ -24,7 +24,7 @@ static func movable(folk_ids: Array) -> Array:
 		out.append(int(id))
 	return out
 
-static func can_travel(folk_ids: Array, lot_id: String) -> Dictionary:
+static func can_travel(folk_ids: Array, lot_id: String, opts: Dictionary = {}) -> Dictionary:
 	if DisasterState.travel_blocked():
 		return {"ok": false, "reason": "The blizzard has closed the roads."}
 	if Neighborhood.lot(lot_id).is_empty():
@@ -39,6 +39,14 @@ static func can_travel(folk_ids: Array, lot_id: String) -> Dictionary:
 			all_there = false
 	if all_there:
 		return {"ok": false, "reason": "Already there."}
+	var all_on_way := true
+	for id3 in ids:
+		if Neighborhood.heading_to(int(id3)) != lot_id:
+			all_on_way = false
+	if all_on_way:
+		return {"ok": false, "reason": "", "silent": true}          # already walking there: no second plan, no second toast
+	if Venues.type_of_lot(lot_id) == "hospital" and not bool(opts.get("free", false)) and HospitalVisits.patient_for(ids).is_empty():
+		return {"ok": false, "reason": "The hospital is for patients and the people who visit them."}
 	if lot_id != Neighborhood.HOME:
 		var chk := Venues.check_entry(lot_id, ids)
 		if not bool(chk["ok"]):
@@ -54,9 +62,9 @@ static func walk_minutes(folk_id: int, lot_id: String) -> int:
 	return -1 if n < 0 else int(ceil(float(n) * Interaction.WALK_MIN_PER_TILE))
 
 static func travel(folk_ids: Array, lot_id: String, opts: Dictionary = {}) -> Dictionary:
-	var chk := can_travel(folk_ids, lot_id)
+	var chk := can_travel(folk_ids, lot_id, opts)
 	if not bool(chk["ok"]):
-		if not bool(opts.get("quiet", false)):
+		if not bool(opts.get("quiet", false)) and str(chk["reason"]) != "":
 			SysUtil.notify(str(chk["reason"]), "warn")
 		return {"ok": false, "reason": chk["reason"], "minutes": 0, "lot_id": lot_id, "moved": []}
 	var ids: Array = movable(folk_ids)
@@ -110,6 +118,9 @@ static func travel(folk_ids: Array, lot_id: String, opts: Dictionary = {}) -> Di
 	for id2 in moved:
 		names.append(SysUtil.folk_name(int(id2)))
 	var verb: String = "head home" if lot_id == Neighborhood.HOME else "head to %s" % Neighborhood.label_of(lot_id)
+	var pat: Dictionary = HospitalVisits.patient_for(moved) if Venues.type_of_lot(lot_id) == "hospital" and not bool(opts.get("free", false)) else {}
+	if not pat.is_empty():
+		verb = "go to the hospital to visit %s" % str(pat["name"])
 	SysUtil.notify("%s %s (%d min%s)." % [", ".join(names), verb, minutes, "" if not fast else ", fast travel"], "travel")
 	SysUtil.game_event("lot_changed", {"from": from_lot, "to": lot_id, "folk_ids": moved.duplicate(), "minutes": minutes, "entry": spot, "walk": not fast})
 	if fast:

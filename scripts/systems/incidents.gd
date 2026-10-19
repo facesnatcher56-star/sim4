@@ -42,6 +42,7 @@ static func reset() -> void:
 	DisasterState.reset()
 	ChaosState.reset()
 	ChronicleHook.reset()
+	Storyteller.reset()
 
 static func seed_rng(s: int) -> void:
 	rng = RandomNumberGenerator.new()
@@ -194,7 +195,7 @@ static func _timed_checkup(f) -> void:
 # ------------------------------------------------------------------ save
 static func to_dict() -> Dictionary:
 	return {"level": level_id(), "rng_seed": rng.seed, "rng_state": str(rng.state), "counters": counters.duplicate(true), "pending": pending.duplicate(true),
-		"history": _history.duplicate(true), "hospital": Hospital.to_dict(), "levels": LevelAccidents.to_dict(), "health": Health.to_dict(), "graves": Graves.to_dict(), "disasters": DisasterState.to_dict(), "chaos": ChaosState.to_dict()}
+		"history": _history.duplicate(true), "hospital": Hospital.to_dict(), "levels": LevelAccidents.to_dict(), "health": Health.to_dict(), "graves": Graves.to_dict(), "disasters": DisasterState.to_dict(), "chaos": ChaosState.to_dict(), "storyteller": Storyteller.to_dict()}
 
 static func from_dict(d: Dictionary) -> void:
 	reset()
@@ -220,6 +221,7 @@ static func from_dict(d: Dictionary) -> void:
 	Graves.from_dict(d.get("graves", {}))
 	DisasterState.from_dict(d.get("disasters", {}))
 	ChaosState.from_dict(d.get("chaos", {}))
+	Storyteller.from_dict(d.get("storyteller", {}))
 
 static func record_history(entry: Dictionary) -> void:
 	_history.append(entry)

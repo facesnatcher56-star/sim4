@@ -24,6 +24,8 @@ static func home_profile(hid: int) -> Dictionary:
 	var svc: Dictionary = CrimeLifeState.home_sec.get(hid, {})
 	p["monitored"] = bool(svc.get("monitored", false)) and bool(p["alarm"])
 	p["guards"] = int(svc.get("guard", 0))
+	if PetState.guards_home(hid):
+		p["dog"] = true                       # task 14: a well-kept grown pet dog barks like a guard dog
 	return p
 
 ## Fold one object kind into a profile (also used by the tests and the build catalog).

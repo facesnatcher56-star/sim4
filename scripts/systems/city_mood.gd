@@ -38,7 +38,7 @@ static func update() -> float:
 	for k in p:
 		total += float(p[k]) * float(w.get(k, 0.2))
 		wsum += float(w.get(k, 0.2))
-	CityGov.mood_now = clampf(total / maxf(wsum, 0.01) * 1.6, -1.0, 1.0)
+	CityGov.mood_now = clampf(total / maxf(wsum, 0.01) * 1.6 + StorytellerCycles.mood_bias(), -1.0, 1.0)      # task 29: scandals and rallies
 	return CityGov.mood_now
 
 static func complaint() -> String:

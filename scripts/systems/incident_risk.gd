@@ -51,6 +51,7 @@ static func max_rate(def: Dictionary, id: String = "") -> float:
 		var r: float = float(def.get("base_rate_per_year", 0.0))
 		for e in def.get("risk_mults", []):
 			r *= maxf(float((e as Dictionary).get("mult", 1.0)), 1.0)
+		r *= HealthRisk.max_mult(def)
 		var tags: Variant = def.get("tags", null)
 		if tags != null and (tags as Array).has("burglary_odds"):
 			r *= maxf(float(VacationHome.cfg().get("burglary_away_mult", 3.0)), 1.0)
@@ -64,6 +65,7 @@ static func effective_rate(def: Dictionary, subj, surprise: bool = true, conditi
 	if not conditions_checked and not IncidentCond.check(def.get("conditions", []), subj):
 		return 0.0
 	var r: float = float(def.get("base_rate_per_year", 0.0)) * risk_factor(def, subj, "occ" if str(def.get("scope", "")) == "town" else "")
+	r *= HealthRisk.mult(def, subj)                 # task 14: fitness, diet, flu shot and conditions
 	r *= VacationHome.rate_mult(def, subj)          # task 22: an empty house is a better target (incidents tagged "burglary_odds")
 	if surprise and bool(def.get("surprise", true)):
 		r *= Incidents.surprise_mult()
