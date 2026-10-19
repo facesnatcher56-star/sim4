@@ -10,9 +10,9 @@
     "arrive_per_missing": 0.05,
     "family_share": 0.2,
     "couple_share": 0.3,
-    "baby_chance": 0.05,
-    "baby_gap_days": 20,
-    "max_kids": 3
+    "baby_chance": 0.12,
+    "baby_gap_days": 14,
+    "max_kids": 5
   },
   "daily": {
     "promote_chance": 0.04,

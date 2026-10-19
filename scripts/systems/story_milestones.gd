@@ -25,6 +25,17 @@ static func on_day(_day: int) -> void:
 			seen[key] = true
 			_couple(c, f, o)
 
+## A house that already has little ones tries less often (each baby, toddler or child under the roof multiplies the chance by baby_young_damp;
+## none at all from baby_max_young of them), so a couple that tries every day still ends up with a family, not a crowd.
+static func _young_damp(c: Dictionary, hid: int) -> float:
+	var n: int = 0
+	for f in SysUtil.residents():
+		if int(f.household_id) == hid and str(f.age_stage) in ["baby", "toddler", "child"]:
+			n += 1
+	if n >= int(c.get("baby_max_young", 3)):
+		return 0.0
+	return pow(float(c.get("baby_young_damp", 0.4)), n)
+
 static func _days_as(a: int, b: int, flag: String) -> int:
 	var p: Dictionary = RelationshipService._pair(a, b, false)
 	if p.is_empty():
@@ -39,7 +50,7 @@ static func _couple(c: Dictionary, f, o) -> void:
 	if RelationshipBits.has_flag(a, b, "spouse") or RelationshipBits.has_flag(a, b, "partner") or FamilyMarriage.is_engaged(a, b):
 		Intimacy.daily_couple(a, b)             # quiet evenings together: an unplanned pregnancy is possible, rarely
 	if RelationshipBits.has_flag(a, b, "spouse"):
-		if FamilyTree.spouse_of(a) == b and SysUtil.chance(float(c.get("baby_chance", 0.04)) * m):
+		if FamilyTree.spouse_of(a) == b and SysUtil.chance(float(c.get("baby_chance", 0.3)) * m * _young_damp(c, hid)):
 			Aging.try_for_baby(a, b)
 		return
 	if FamilyMarriage.is_engaged(a, b):

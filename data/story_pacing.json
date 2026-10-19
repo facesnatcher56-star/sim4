@@ -26,7 +26,7 @@
   "bit_beats": ["friend", "best_friend", "enemy", "sweetheart", "partner", "spouse"],
   "chronicle": {"default_min_severity": 1, "ignore": ["spoilage", "weather_watch", "relationship", "aged_up"], "kinds": {"found_money": 1.0, "minor_fall": 1.0, "catch_cold": 0.6, "catch_flu": 1.2, "workout_injury": 1.0}},
   "opportunity": {"base": 0.15, "per_fit": 0.12, "max": 0.85, "trait_mult": {"lazy": 0.6, "workaholic": 1.4, "loner": 0.8, "social": 1.1}},
-  "milestones": {"min_partner_days": 3, "bond_chance": 0.25, "propose_chance": 0.15, "min_engaged_days": 2, "marry_chance": 0.2, "baby_chance": 0.04,
+  "milestones": {"min_partner_days": 3, "bond_chance": 0.25, "propose_chance": 0.15, "min_engaged_days": 2, "marry_chance": 0.2, "baby_chance": 0.3, "baby_young_damp": 0.4, "baby_max_young": 3,
     "breakup_romance_below": 30, "breakup_friendship_below": 20, "breakup_chance": 0.05},
   "singles": {"date_chance": 0.1, "friendship": 8.0, "romance": 10.0, "move_in_chance": 0.03, "move_in_friendship": 40.0, "adopt_chance": 0.015,
     "adopt_min_coins": 1500, "max_household": 4,
