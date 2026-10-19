@@ -78,7 +78,8 @@ func _exposed_rates(f: Array) -> void:
 					fk3.remove_buff("injured")
 					fk3.remove_buff("shaken_up")
 		var st: Dictionary = Incidents.stat(id)
-		if int(st["triggered"]) < 8:
+		# the quick tier runs 3 years x 10 people: workplace_injury expects ~12 events there, so the floor is lower (measured ~0.39/yr over 200 person-years vs 0.42)
+		if int(st["triggered"]) < TestFixture.pick(8, 5):
 			f.append("%s: too few events to measure (%d)" % [id, int(st["triggered"])])
 			K.teardown()
 			continue
