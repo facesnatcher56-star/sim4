@@ -44,6 +44,7 @@ static func systems_rows(sm: Object) -> Array:
 		["Fire", "Fire", 1, 290, N, "", Fire.on_minute, null, "lots with burning cells only (idle = zero)"],
 		["DisasterClock", "DisasterClock", 1, 300, N, "", DisasterClock.on_minute, null, "running disasters only"],
 		["Vacation", "Vacation", 1, 310, N, "", Vacation.on_minute, Callable(Vacation, "busy"), "trips on absolute due minutes; idle = one emptiness test"],
+		["PlaceAuto", "PlaceAuto", 1, 312, N, "", PlaceAuto.on_minute, Callable(PlaceAuto, "busy"), "outings of residents on autonomy: only while a plan is waiting or a trip is on (a handful of people); idle = one emptiness test"],
 		["Utilities", "Utilities", 1, 315, N, "", Utilities.on_minute, Callable(Utilities, "busy"), "zone outages only (a few records); idle = one emptiness test"],
 		["Transport", "Transport", 1, 316, N, "", Transport.on_minute, Callable(Transport, "busy"), "trips in progress only (the player's households); finished at their arrival minute"],
 		["CityAmbulance", "CityServices", 1, 317, N, "", CityAmbulance.on_minute, Callable(CityAmbulance, "busy"), "ambulances on their way (residents on the real map); idle = one emptiness test"],
@@ -64,6 +65,7 @@ static func systems_rows(sm: Object) -> Array:
 		["hour/Utilities.on_hour", "Utilities", 60, 295, N, "hour", Utilities.on_hour, null, "zones x causes (about 10 dice) + the player's homes while something is wrong; townie lots are one-line records"],
 		["hour/DisasterClock.on_hour", "DisasterClock", 60, 300, N, "hour", DisasterClock.on_hour, null, "running disasters only"],
 		["hour/Vacation.on_hour", "Vacation", 60, 310, N, "", Vacation.on_hour, Callable(Vacation, "busy"), "active trips only"],
+		["hour/PlaceAuto.on_hour", "PlaceAuto", 60, 312, N, "hour", PlaceAuto.on_hour, null, "residents ACTIVE: who is ill, which pets need care (O(residents + pets), a few comparisons each)"],
 		# --- day layer (was SystemsManager._on_day)
 		["day/ensure_registered", "SystemsManager", 1440, 200, N, "", ens, null, "residents only"],
 		["day/Holidays.on_day", "Holidays", 1440, 210, N, "day", Holidays.on_day, null, "world-level"],

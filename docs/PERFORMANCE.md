@@ -87,6 +87,7 @@ old signal order. To add a system's hook: add ONE row to `systems_rows()` (name,
 | minute | 305 | CrimeFlow.person_day | CrimeFlow | day (bucketed) | NORMAL | TOWN / STATISTICAL townies and residents: fraud + pressure dice once a day, bucketed by id (no midnight lump); also the criminal-life dice (`CrimeLifeTownie.person_day`, task 21: STATISTICAL, a handful of members, one job a month at most; guards, alarms and fences run in the daily `CrimeLifeFlow.on_day`, a few dozen records) |
 | minute | 306 | CrimeFlow.sync | CrimeFlow | minute | NORMAL | keeps the bucketed job's ids equal to the living townies and residents |
 | minute | 310 | Vacation | Vacation | minute | NORMAL | trips on absolute due minutes; idle = one emptiness test |
+| minute | 312 | PlaceAuto | PlaceAuto | minute | NORMAL | outings of residents on autonomy: only while a plan is waiting or a trip is on (a handful of people); idle = one emptiness test |
 | minute | 320 | NeighborhoodService.after | NeighborhoodService | minute | NORMAL | Crowd.update loops only the lots near an anchor (Tiers.lot_distances, cached); crowd checks per lot every 10 min; NEAR / TOWN crowd on their turn, they leave / arrive without walks; far lots dropped |
 | minute | 330 | WeatherFolk | WeatherFolk | minute | NORMAL | ACTIVE every minute, NEAR / TOWN folk on their turn with the exposure scaled to the period |
 | minute | 215 | WeatherWorld.rain | WeatherWorld | minute | NORMAL | places only: lots near an anchor catch the owed rain on their plants, 2+ lots per minute (RainSlices); idle = zero; far lots wait for the daily catch-up |
@@ -105,6 +106,7 @@ old signal order. To add a system's hook: add ONE row to `systems_rows()` (name,
 | hour | 290 | hour/CrimeFlow.on_hour | CrimeFlow | hour | NORMAL | places of everyone (O(people), a few lookups each) |
 | hour | 300 | hour/DisasterClock.on_hour | DisasterClock | hour | NORMAL | running disasters only |
 | hour | 310 | hour/Vacation.on_hour | Vacation | hour | NORMAL | active trips only |
+| hour | 312 | hour/PlaceAuto.on_hour | PlaceAuto | hour | NORMAL | residents ACTIVE: who is ill, which pets need care (O(residents + pets), a few comparisons each) |
 | hour | 400 | hour/SocialDynamics.on_hour | SocialDynamics | hour | LOW | gathering markers and goals for the ACTIVE set |
 | hour | 500 | hour/ScenarioGoals.poll | ScenarioGoals | hour | NORMAL | only while a scenario is active |
 | day | 200 | day/ensure_registered | SystemsManager | day | NORMAL | residents only |
@@ -462,7 +464,7 @@ continuously (multi-floor, circadian, crime, buildings), which also changed what
 
 ## System cadence table: life areas (task 14; details in docs/LIFE.md)
 
-Daily or event driven; nothing runs per minute. The one clock entry is `day/LifeTick.on_day`.
+Daily or event driven; nothing runs per minute. Clock entries: `day/LifeTick.on_day`, `hour/PlaceAuto.on_hour` and the minute row `PlaceAuto` (gated: runs only while a plan or a trip is on).
 
 | System | Tier | Cadence | Active set | Caps |
 |---|---|---|---|---|
@@ -477,6 +479,7 @@ Daily or event driven; nothing runs per minute. The one clock entry is `day/Life
 | TownNews / PhoneState / SocialFeed / PhoneDay | event; invitations and townie posts daily | residents from teen up; alive townies | | news 150, inbox 6, feed 30 |
 | EventServices / EventState | event | on a booking | host + ~10 guests | |
 | PetState / PetDay | household, daily; strays weekly | households with pets | | 3 pets a home, 3 strays |
+| PlaceAuto (residents' outings, task 14b) | residents ACTIVE, townies STATISTICAL | daily plan (one dice per kind per person), hourly illness and pet check, per minute only while a plan or trip is on | residents; a handful of plans | 1-2 ordinary outings a day, one trip per person |
 | LeagueState / ClubState / LifeFame | town, weekly / event | 4 teams, 3 clubs, people with fame | | 8 results |
 
 ### Runtime (`tests/perf_probe.gd`, 2 game days, 3 folk + crowd, loaded)

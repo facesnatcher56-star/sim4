@@ -131,6 +131,38 @@ Data: `data/life/80_hobbies.json`, handler `hobby` (`HobbyServices`, state `Hobb
 and **photography** (photographs sold at the gallery by skill) at the viewpoint. **Collecting**: rocks and bugs on the nature trail, stamps at the newsstand; eight specimens a set, rarity by weight;
 a complete set is **donated to the museum** for 120 coins, fame and a chronicle line. **Handicrafts** at the workshop (Mon-Fri 10-17, pay by handiness). Fitness and sports classes are the gym's.
 
+## Residents on their own (task 14b)
+
+Nothing in the Town window needs the player any more. A resident nobody plays (and the player's own folk whenever they are on autonomy: a folk with a player order
+in the queue is never pulled away) goes out by themselves, with the SAME calls the window makes: `LifeCommand` `go`, `use`, `phone_invite`, `phone_respond`,
+`college_apply`, `home`. Data: `data/life/95_auto.json` (`config.auto`, one entry per reason to go out); code: `PlaceAuto` (state, save, counters),
+`PlaceAutoPlan` (the daily decision), `PlaceAutoGate` (the code checks), `PlaceAutoTime` (free hours), `PlaceAutoTrip` (go, use, come home), `PlaceAutoNow` (hourly: illness,
+pets), `PlaceAutoTownies` (statistical).
+
+* **The day's plan** (`LifeTick.on_day`): for every resident, every kind gets a chance = `base` x `scale` x age x traits x how empty the needs behind it are x a partner
+  x money (nothing is bought without twice the price and a reserve in the household's account; a comfortable account counts 1, a thin one 0.3) x a cool-down
+  (done in the last few days: a quarter) x the gate's own factor. The seeded stream rolls it. At most `trips_per_day` ordinary outings are kept (1 on a day with work or
+  school, 2 on a free day); the essential ones (the doctor when ill, a funeral, the vet for a sick pet, the homework club, preschool, an invitation, a refill) do not count.
+  Each plan gets a start hour inside the kind's windows, the place's opening hours and the person's free hours (awake, not at work or school with the walk, back by the
+  hour they like to be home, `Circadian.party_end_hour`).
+* **What they do**: eat out (restaurant, burgers, bakery, ice cream, food truck), the cinema, plays, concerts, the museum and gallery, bowling, the arcade, the pool, the
+  lake, pick-up games, the gym, the league (join, then the Saturday match), clubs (join one that suits them, then the meetings), the bar and the nightclub (adults only, by
+  the place's own rule), the doctor when ill, a check-up or flu shot now and then, the dentist (a sore tooth at once), counselling after grief, prescription refills,
+  the vet, preschool for toddlers, the homework club, lectures and night classes for the ambitious, weddings, birthday parties, baby showers, funerals and reunions the
+  person hosts (guests come as they do for the player), phone invitations from friends they say yes to (`phone_respond`), and with company: a partner or friend is asked
+  along with `phone_invite` for the outings that have a company outing id.
+* **The pets** are looked after hourly by whoever is at home (`pet_care`: feed below a level, walk or play when bored, now and then groom, cuddle or train); a sick pet or
+  one not seen by the vet for 24 days gets a vet trip. **Homework**: a child with homework gets the buff `homework_due` (autonomy x5 for `do_homework`). **A teen**
+  in the last third of school applies to the college (`EduCollege.apply`), and the grown-up goes to that subject's lectures first; a folk with ambitions
+  (traits bookworm, workaholic, perfectionist, competitive ...) starts a degree or night classes.
+* **Trips**: due plans start only when the person is free (not away, at work, hurt, asleep, in need, steered by the player); they walk (`go`), the service is chosen
+  at the door (the first, or at random, that is open, allowed and affordable now), the visit runs as the normal interaction, and they walk home. Unplayed households
+  get no travel or service toasts (`opts.silent`, `opts.quiet`); the chronicle still hears about weddings, funerals and the rest.
+* **Townies** (STATISTICAL): one dice a day, a counted visit at a place. Nothing else.
+* `config.auto.enabled` false (or `PlaceAuto.off = true`) switches all of it off.
+* Not covered: guests that are residents do not walk to the host's party, they get the effects; pets and the phone have no body on the map; a toddler walks to the
+  preschool alone; hobbies (fishing, garden plots, photography) and the campsite are not part of the autonomy yet.
+
 ## Tier / cadence / active set / caps
 
 | System | Tier | Cadence | Active set | Caps |
@@ -154,8 +186,9 @@ a complete set is **donated to the museum** for 120 coins, fame and a chronicle 
 | LeagueState | town (statistical) | weekly (Sunday) | 4 teams, 12 townies, residents who joined | 8 results kept |
 | ClubState | town | weekly lines; residents on their visit | 3 clubs x 5 members | |
 | LifeFame / records | event + daily fade | | people with fame | fame 0..100 |
+| PlaceAuto (plans, trips, tally) | residents ACTIVE, townies STATISTICAL | daily plan; hourly illness and pet check; per minute only while a plan or trip is on | one dice per kind per person per day, ~35 kinds | 1-2 ordinary outings a day, 1 trip per person at a time |
 
-Nothing polls per minute. The one clock entry is `day/LifeTick.on_day` (SimRegistry).
+Nothing polls per minute except `PlaceAuto` while a plan or a trip is on (gated, idle = one emptiness test). Clock entries: `day/LifeTick.on_day`, `hour/PlaceAuto.on_hour`, `PlaceAuto` (minute, gated) in SimRegistry.
 
 ## Notify policy
 
@@ -177,4 +210,5 @@ See the status list at the bottom of this file, updated as areas land.
 | Family and social life: weddings at a venue, birthday parties, funerals, baby showers, dates at real venues, family reunions, block party, holiday parade | done as places; clubs under culture |
 | Pets: dogs and cats with needs, training and moods; strays and a vet; they deter burglars and help loneliness | done as household records (no 3D pet on the map yet) |
 | Hobbies: fishing spots, community garden plots, painting outdoors, photography, collecting, fitness classes, DIY/crafting at a workbench | done as places |
+| The world runs without the player (14b): unplayed households and folk on autonomy use the places by themselves | done (`PlaceAuto*`, `data/life/95_auto.json`; `life_auto_test`, `life_auto_longrun_test`) |
 | Education: preschool, school grades / homework / report cards / teachers / events, college, degrees, night classes, library courses, skills job market | done (places inside existing lots, no new 3D lots) |

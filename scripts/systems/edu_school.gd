@@ -78,12 +78,14 @@ static func on_returned_from_school(fid: int, skipped: bool) -> void:
 	if bool(hw.get("due", false)) and int(hw.get("set_day", -1)) < SysUtil.day():
 		hw["missed"] = int(hw.get("missed", 0)) + 1
 		hw["due"] = false
+		f.remove_buff("homework_due")
 		Careers.school[fid]["grade"] = clampf(float(Careers.school[fid]["grade"]) - float(hwc.get("penalty", 2.0)), 0.0, 100.0)
 		var t: String = PlaceStaff.who("school", "teacher")
 		SysUtil.notify("%s did not hand in the homework%s." % [f.name, "" if t == "" else " and %s noticed" % t], "warn")
 	if EduState.rng.randf() < float(hwc.get("set_chance", 0.8)):
 		hw["due"] = true
 		hw["set_day"] = SysUtil.day()
+		f.add_buff("homework_due")            # autonomy: a child with homework is far more likely to sit down at a desk (data/content_life.json)
 		SysUtil.notify("%s has homework to do." % f.name, "info")
 
 static func on_homework_done(fid: int) -> void:
@@ -92,6 +94,7 @@ static func on_homework_done(fid: int) -> void:
 	if f == null or not bool(hw.get("due", false)) or not is_student(fid):
 		return
 	hw["due"] = false
+	f.remove_buff("homework_due")
 	var hwc: Dictionary = c().get("homework", {})
 	Careers.school[fid]["grade"] = clampf(float(Careers.school[fid]["grade"]) + float(hwc.get("bonus", 1.0)), 0.0, 100.0)
 	f.add_skill_xp("logic", float(hwc.get("xp", 6)))

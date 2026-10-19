@@ -7,7 +7,7 @@ extends RefCounted
 ##   fast (opts.fast) the old shortcut: the folk is hidden (Away "travel") for Neighborhood.travel_minutes and appears at the
 ##                    entry tile; entry fee / hours are checked and charged up front.
 ##   instant          teleports at once (tests, screenshots).
-## opts: {fast, instant, free (no entry fee), quiet (no refusal toast)}.
+## opts: {fast, instant, free (no entry fee), quiet (no refusal toast), silent (no "head to" / "arrived" toast: residents going about their day)}.
 
 ## Which of these folk can be moved right now (residents that are not at work / school / a party).
 static func movable(folk_ids: Array) -> Array:
@@ -105,6 +105,10 @@ static func travel(folk_ids: Array, lot_id: String, opts: Dictionary = {}) -> Di
 				continue
 			minutes = maxi(minutes, int(ceil(float(n) * Interaction.WALK_MIN_PER_TILE)))
 			f.set_meta("walk_to", lot_id)
+			if bool(opts.get("silent", false)):
+				f.set_meta("silent_trip", true)
+			else:
+				f.remove_meta("silent_trip")
 			if bool(opts.get("free", false)):
 				f.set_meta("free_pass", lot_id)
 			Neighborhood.loc[int(id)] = lot_id
@@ -121,7 +125,8 @@ static func travel(folk_ids: Array, lot_id: String, opts: Dictionary = {}) -> Di
 	var pat: Dictionary = HospitalVisits.patient_for(moved) if Venues.type_of_lot(lot_id) == "hospital" and not bool(opts.get("free", false)) else {}
 	if not pat.is_empty():
 		verb = "go to the hospital to visit %s" % str(pat["name"])
-	SysUtil.notify("%s %s (%d min%s)." % [", ".join(names), verb, minutes, "" if not fast else ", fast travel"], "travel")
+	if not bool(opts.get("silent", false)):          # silent = an unplayed household's own outing (PlaceAuto): no toast
+		SysUtil.notify("%s %s (%d min%s)." % [", ".join(names), verb, minutes, "" if not fast else ", fast travel"], "travel")
 	SysUtil.game_event("lot_changed", {"from": from_lot, "to": lot_id, "folk_ids": moved.duplicate(), "minutes": minutes, "entry": spot, "walk": not fast})
 	if fast:
 		Neighborhood.focus_camera(spot)

@@ -83,9 +83,10 @@ static func use(fid: int, pid: String, sid: String, opts: Dictionary = {}) -> Di
 		return {"ok": false, "reason": "That costs %d coins." % cost}
 	last_used[_key(fid, sid)] = SysUtil.day()
 	var minutes: float = float(svc.get("minutes", 0))
-	var rec := {"place": pid, "service": sid, "price": cost, "minute": SysUtil.now(), "target": target}
+	var quiet: bool = bool(opts.get("quiet", false))           # an unplayed household: no toast for what it does (the chronicle still hears)
+	var rec := {"place": pid, "service": sid, "price": cost, "minute": SysUtil.now(), "target": target, "quiet": quiet}
 	if bool(opts.get("instant", false)) or minutes < 2.0 or not _queue(f, svc, minutes, rec):
-		var res: Dictionary = finish_now(fid, pid, sid, cost, true, target)
+		var res: Dictionary = finish_now(fid, pid, sid, cost, not quiet, target)
 		res["price"] = cost
 		return res
 	pending[fid] = rec
@@ -109,7 +110,7 @@ static func on_interaction_finished(fid: int, iid: String, success: bool) -> voi
 	var rec: Dictionary = pending[fid]
 	pending.erase(fid)
 	if success:
-		finish_now(fid, str(rec["place"]), str(rec["service"]), int(rec["price"]), true, int(rec.get("target", -1)))
+		finish_now(fid, str(rec["place"]), str(rec["service"]), int(rec["price"]), not bool(rec.get("quiet", false)), int(rec.get("target", -1)))
 		return
 	var f = SysUtil.folk(fid)
 	if f != null and int(rec["price"]) > 1:

@@ -226,7 +226,9 @@ static func _on_enter(f, lot_id: String) -> void:
 	if str(f.get_meta("walk_to", "")) == lot_id:
 		f.remove_meta("walk_to")
 		Neighborhood.loc.erase(fid)
-		SysUtil.notify("%s arrived at %s." % [f.name, Neighborhood.label_of(lot_id)], "travel")
+		if not f.has_meta("silent_trip"):
+			SysUtil.notify("%s arrived at %s." % [f.name, Neighborhood.label_of(lot_id)], "travel")
+		f.remove_meta("silent_trip")
 	if lot_id == Neighborhood.HOME:
 		Neighborhood.apply_pantry()
 		return

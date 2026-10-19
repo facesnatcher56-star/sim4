@@ -3,7 +3,7 @@ extends RefCounted
 ## The command layer of the life areas (multiplayer-ready rule 1): every player action of the Town window is
 ## `run(player_id, folk_id, action, args)` -> {ok, reason, ...}, reached through Commands.run({action: "life", args: {action, args}}). The household comes
 ## from the folk (never "household 1"). Actions:
-##   use {place, service}      go {place}      college_drop      preschool_leave      job_apply {career}
+##   use {place, service, target}      go {place, opts}      home {opts}      college_apply {major}      college_drop      preschool_leave      job_apply {career}
 ##   phone_call {other}   phone_text {other}   phone_invite {other, outing, pay_both}   phone_respond {id, yes}   post {kind}
 ## Reads (no state change) are plain static calls: Places, EduJobs.board_for, EduCollege.summary ...
 
@@ -23,6 +23,11 @@ static func run(_player_id: int, folk_id: int, action: String, args: Dictionary 
 				return {"ok": false, "reason": "That place is not on the map."}
 			var res: Dictionary = Neighborhood.travel([folk_id], lot, args.get("opts", {}))
 			return {"ok": bool(res.get("ok", false)), "reason": str(res.get("msg", res.get("reason", "")))}
+		"home":
+			var back: Dictionary = Neighborhood.go_home([folk_id], args.get("opts", {}))
+			return {"ok": bool(back.get("ok", false)), "reason": str(back.get("msg", back.get("reason", "")))}
+		"college_apply":
+			return EduCollege.apply(folk_id, str(args.get("major", "")))
 		"college_drop":
 			var dropped: bool = EduCollege.drop(folk_id)
 			return {"ok": dropped, "reason": "" if dropped else "Not studying."}

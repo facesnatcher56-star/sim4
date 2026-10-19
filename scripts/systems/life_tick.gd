@@ -3,7 +3,7 @@ extends RefCounted
 ## The one door of the life areas (task 14: education, health, food and nightlife, culture and leisure ...) into SystemsManager / SaveLoad, like
 ## MarketTick for the economy: reset, new game, the daily order, interaction and game-event routing, save / restore. Everything here is optional for
 ## the player and keeps running without them (townies study, places change staff, the job board turns over).
-## Daily order: staff -> passes -> education (school, townies, job board) -> the other areas (each adds one line). See docs/LIFE.md for tiers and caps.
+## Daily order: staff -> passes -> education (school, townies, job board) -> the other areas (each adds one line) -> PlaceAuto (the residents plan their outings). See docs/LIFE.md for tiers and caps.
 
 static func reset() -> void:
 	LifeDefs.reset()
@@ -23,6 +23,7 @@ static func reset() -> void:
 	EventState.reset()
 	PetState.reset()
 	HobbyState.reset()
+	PlaceAuto.reset()
 
 ## A new game: the staff of every place is hired and this year's school events that are already past do not fire.
 static func new_game() -> void:
@@ -45,6 +46,7 @@ static func on_day(day: int) -> void:
 	PhoneDay.on_day(day)
 	SocialFeed.on_day(day)
 	PetDay.on_day(day)
+	PlaceAuto.on_day(day)
 
 static func on_interaction_finished(folk_id: int, iid: String, success: bool) -> void:
 	PlaceUse.on_interaction_finished(folk_id, iid, success)
@@ -62,6 +64,7 @@ static func on_game_event(ev: String, payload: Dictionary) -> void:
 		"chronicle":
 			TownNews.on_chronicle(payload)
 		"place_used":
+			PlaceAuto.note_use(int(payload.get("folk_id", -1)), str(payload.get("place", "")))
 			LifeOuting.on_place_used(int(payload.get("folk_id", -1)), str(payload.get("place", "")), str(payload.get("service", "")))
 		"aged_up":
 			EduSchool.on_aged_up(int(payload.get("folk_id", -1)), str(payload.get("from", "")), str(payload.get("to", "")))
@@ -70,7 +73,7 @@ static func on_game_event(ev: String, payload: Dictionary) -> void:
 static func to_dict() -> Dictionary:
 	return {"staff": PlaceStaff.to_dict(), "use": PlaceUse.to_dict(), "member": PlaceMember.to_dict(), "edu": EduState.to_dict(), "health": HealthLife.to_dict(),
 		"culture": {"fame": LifeFame.to_dict(), "league": LeagueState.to_dict(), "clubs": ClubState.to_dict()},
-		"media": {"news": TownNews.to_dict(), "phone": PhoneState.to_dict(), "feed": SocialFeed.to_dict()}, "events": EventState.to_dict(), "pets": PetState.to_dict(), "hobby": HobbyState.to_dict()}
+		"media": {"news": TownNews.to_dict(), "phone": PhoneState.to_dict(), "feed": SocialFeed.to_dict()}, "events": EventState.to_dict(), "pets": PetState.to_dict(), "hobby": HobbyState.to_dict(), "auto": PlaceAuto.to_dict()}
 
 ## A save without the block (made before task 14) starts the life areas fresh.
 static func from_dict(d: Dictionary, has_block: bool) -> void:
@@ -94,3 +97,4 @@ static func from_dict(d: Dictionary, has_block: bool) -> void:
 	EventState.from_dict(d.get("events", {}))
 	PetState.from_dict(d.get("pets", {}))
 	HobbyState.from_dict(d.get("hobby", {}))
+	PlaceAuto.from_dict(d.get("auto", {}))

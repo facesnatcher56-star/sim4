@@ -100,6 +100,26 @@ static func graduate(f, major: String) -> Dictionary:
 	SysUtil.game_event("graduated", {"folk_id": fid, "major": major, "avg": avg})
 	return {"text": text, "degree": major}
 
+## Apply to the college for a major (a teen looking ahead, or a grown-up): kept on the education record. A later lecture of this major is what the person
+## goes to first (PlaceAutoGate), and a diploma of A or B gives a head start in credits. Returns {ok, reason}.
+static func apply(fid: int, major: String) -> Dictionary:
+	var f = SysUtil.folk(fid)
+	if f == null:
+		return {"ok": false, "reason": "Nobody is applying."}
+	if major_def(major).is_empty():
+		return {"ok": false, "reason": "That subject is not taught here."}
+	if not str(f.age_stage) in ["teen", "adult", "elder"]:
+		return {"ok": false, "reason": "%s is too young to apply." % f.name}
+	var r: Dictionary = EduState.rec(fid)
+	if EduState.has_degree(fid, major):
+		return {"ok": false, "reason": "%s already has a degree in %s." % [f.name, major_label(major)]}
+	if str(r.get("applied", "")) == major:
+		return {"ok": false, "reason": "%s has already applied for %s." % [f.name, major_label(major)]}
+	r["applied"] = major
+	LifeNote.say("college_apply", "%s applied to Fernwood College to study %s." % [f.name, major_label(major)], [fid], 1, false)
+	SysUtil.game_event("college_applied", {"folk_id": fid, "major": major})
+	return {"ok": true, "reason": ""}
+
 ## Give up the course: the credits are lost (the degrees already earned stay).
 static func drop(fid: int) -> bool:
 	var r: Dictionary = EduState.peek(fid)

@@ -53,6 +53,15 @@
     "social": 0.8
    },
    "thought": "Having a pet around makes the house feel full."
+  },
+  "homework_due": {
+   "label": "Homework To Do",
+   "mood": {},
+   "duration_min": 1200,
+   "autonomy_mult": {
+    "interaction:do_homework": 5.0
+   },
+   "thought": "I should do my homework."
   }
  }
 }
