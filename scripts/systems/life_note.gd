@@ -18,7 +18,8 @@ static func say(kind: String, text: String, subjects: Array = [], severity: int 
 	if toast and mine:
 		SysUtil.notify(text, toast_kind)
 
-static func news(place_id: String, text: String, severity: int = 1) -> void:
+## Town colour: severity 0 (trivia) so it never counts as a STORY BEAT for StoryPacing (whose default is every chronicle line of severity 1 and up).
+static func news(place_id: String, text: String, severity: int = 0) -> void:
 	ChronicleHook.note("place_news", text, [], "place:%s" % place_id, severity, true)
 
 ## A resident's pronoun-safe name for sentences.

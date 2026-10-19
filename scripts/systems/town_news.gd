@@ -21,7 +21,7 @@ static func on_chronicle(p: Dictionary) -> void:
 	while items.size() > CAP:
 		items.pop_front()
 
-static func latest(n: int = 8, min_severity: int = 1) -> Array:
+static func latest(n: int = 8, min_severity: int = 0) -> Array:
 	var out: Array = []
 	for i in range(items.size() - 1, -1, -1):
 		if int(items[i]["severity"]) >= min_severity:

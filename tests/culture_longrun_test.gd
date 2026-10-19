@@ -93,7 +93,7 @@ func _news_and_menu(f: Array) -> void:
 			if not PlaceStaff.staffed(pid):
 				unstaffed += 1
 	var per_year: float = float(news) / float(years)
-	K.expect(f, per_year > 15.0 and per_year < 90.0, "place news per game year across the town is a few a week (%.1f)" % per_year)
+	K.expect(f, per_year > 12.0 and per_year < 80.0, "place news per game year across the town is a few a week (%.1f)" % per_year)
 	var mains: Array = []
 	for k in specials:
 		if str(k).begins_with("main/"):

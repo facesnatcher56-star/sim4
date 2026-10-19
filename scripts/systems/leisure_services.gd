@@ -105,7 +105,7 @@ static func _score(f, pid: String, a: Dictionary) -> Dictionary:
 	var r: Dictionary = LifeFame.note_score(int(f.id), game, score, str(f.name))
 	var text := "%s scored %d at %s." % [f.name, score, str(a.get("label", game))]
 	if bool(r["record"]):
-		LifeNote.say("record", "%s set a new %s record: %d." % [f.name, str(a.get("label", game)), score], [int(f.id)], 1, true, "good")
+		LifeNote.say("record", "%s set a new %s record: %d." % [f.name, str(a.get("label", game)), score], [int(f.id)], 0, true, "good")
 		text += " A new record for the town!"
 	elif bool(r["personal"]):
 		text += " A personal best."

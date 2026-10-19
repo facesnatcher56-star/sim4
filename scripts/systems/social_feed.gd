@@ -82,7 +82,7 @@ static func post(fid: int, kind: String) -> Dictionary:
 	_add(str(f.name), text)
 	SysUtil.notify("%s (%d likes)" % [text, likes] if kind != "gossip" else text, "info")
 	if likes >= int(c.get("viral_likes", 20)):
-		LifeNote.say("viral_post", "A post by %s went round the whole town." % f.name, [fid], 1, false)
+		LifeNote.say("viral_post", "A post by %s went round the whole town." % f.name, [fid], 0, false)
 	SysUtil.game_event("social_post", {"folk_id": fid, "kind": kind, "likes": likes})
 	return {"ok": true, "reason": "", "likes": likes, "spread": spread, "text": text}
 
@@ -123,7 +123,7 @@ static func on_day(day: int) -> void:
 		var pl: String = Places.label(str(place_ids[PhoneState.rng.randi_range(0, place_ids.size() - 1)]))
 		_add(str(t["name"]), line.replace("{name}", str(t["name"])).replace("{place}", pl))
 		if PhoneState.rng.randf() < float(c.get("townie_viral_chance", 0.01)):
-			LifeNote.say("viral_post", "%s's post about %s got shared all over town." % [t["name"], pl], [int(t["id"])], 1, false)
+			LifeNote.say("viral_post", "%s's post about %s got shared all over town." % [t["name"], pl], [int(t["id"])], 0, false)
 			LifeFame.add(int(t["id"]), 3.0)
 
 static func to_dict() -> Dictionary:

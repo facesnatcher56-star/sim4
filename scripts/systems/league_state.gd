@@ -152,7 +152,7 @@ static func _match(a: String, b: String, day: int) -> void:
 	for m in members:
 		if [a, b].has(str(members[m])):
 			subjects.append(int(m))
-	LifeNote.say("league_result", text, subjects, 1, false)
+	LifeNote.say("league_result", text, subjects, 0, false)
 
 static func standings() -> Array:
 	var rows: Array = []

@@ -37,7 +37,7 @@ static func _pet_day(p: Dictionary, dc: Dictionary) -> void:
 	var owner_name: String = _owner(int(p["hid"]))
 	if int(p["hungry_days"]) >= int(dc.get("runaway_hungry_days", 3)):
 		PetState.pets.erase(int(p["id"]))
-		LifeNote.say("pet_left", "%s the %s ran away from %s's home. Hungry pets do not stay." % [pname, sd.get("label", "pet"), owner_name], [], 1, false)
+		LifeNote.say("pet_left", "%s the %s ran away from %s's home. Hungry pets do not stay." % [pname, sd.get("label", "pet"), owner_name], [], 0, false)
 		_tell(int(p["hid"]), "%s the %s has run away." % [pname, sd.get("label", "pet")], "bad")
 		return
 	if bool(p["sick"]):
@@ -53,7 +53,7 @@ static func _pet_day(p: Dictionary, dc: Dictionary) -> void:
 	if PetState.age_days(p) > life and PetState.rng.randf() < float(dc.get("old_age_chance", 0.12)):
 		PetState.pets.erase(int(p["id"]))
 		_tell(int(p["hid"]), "%s the %s died peacefully of old age. A good, long life." % [pname, sd.get("label", "pet")], "death")
-		LifeNote.say("pet_died", "%s the %s of %s's home died of old age." % [pname, sd.get("label", "pet"), owner_name], [], 1, false)
+		LifeNote.say("pet_died", "%s the %s of %s's home died of old age." % [pname, sd.get("label", "pet"), owner_name], [], 0, false)
 
 static func _owner(hid: int) -> String:
 	for f in SysUtil.residents():

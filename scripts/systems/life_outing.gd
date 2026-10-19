@@ -104,5 +104,5 @@ static func on_place_used(host: int, pid: String, sid: String) -> void:
 	var gname: String = SysUtil.folk_name(guest)
 	SysUtil.notify("%s and %s had a lovely time at %s." % [f.name, gname, Places.label(pid)], "good")
 	if couple:
-		LifeNote.say("date", "%s and %s went out together to %s." % [f.name, gname, Places.label(pid)], [host, guest], 1, false)
+		LifeNote.say("date", "%s and %s went out together to %s." % [f.name, gname, Places.label(pid)], [host, guest], 0, false)
 	SysUtil.game_event("outing_done", {"folk_id": host, "guest": guest, "place": pid, "service": sid})

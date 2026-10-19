@@ -10,7 +10,7 @@
     "hangover_buff": "hangover",
     "dazed_buff": "feeling_dazed"
    },
-   "news_chance_per_day": 0.06
+   "news_chance_per_day": 0.03
   }
  },
  "places": {
