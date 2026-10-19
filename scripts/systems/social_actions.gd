@@ -119,6 +119,8 @@ static func _clear_anger(a, t) -> void:
 
 # ------------------------------------------------------------------ gossip / rumors
 static func _gossip(a: int, t: int, tier: String, rumor: bool, strength: float) -> void:
+	if DeadPools.any_dead([a, t]):
+		return
 	var gc: Dictionary = SocialDynamics.cfg().get("gossip", {})
 	var pick: Dictionary = {}
 	var items: Array = RelationshipKnowledge.gossip_for(a)
@@ -166,6 +168,8 @@ static func _gossip(a: int, t: int, tier: String, rumor: bool, strength: float) 
 
 ## The subject of the gossip finds out who spread it.
 static func gossip_backfire(a: int, listener: int, subject: int, rumor: bool = false) -> void:
+	if DeadPools.any_dead([a, listener, subject]):
+		return
 	var gc: Dictionary = SocialDynamics.cfg().get("gossip", {})
 	var mult: float = 1.5 if rumor else 1.0
 	RelationshipService.add_value(subject, a, "trust", -float(gc.get("trust_loss", 30)) * mult)

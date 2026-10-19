@@ -6,6 +6,8 @@ extends RefCounted
 const QUIET_BITS := ["best_friend", "sweetheart", "partner", "spouse", "enemy"]
 
 static func announce(x: int, y: int, bit: String) -> void:
+	if DeadPools.any_dead([x, y]):
+		return
 	var text: String = "%s now sees %s as: %s" % [SysUtil.folk_name(x), SysUtil.folk_name(y), RelationshipBits.bit_label(bit)]
 	if _household_involved(x, y) or _known_well(x, y):
 		SysUtil.notify(text, "relationship")

@@ -137,6 +137,7 @@ static func kill_townie(tid: int, cause: String) -> Dictionary:
 	Graves.place_for(legacy, null, cdef)
 	ChronicleHook.note("death", text if text != "" else "%s died." % nm, [tid], "town:%d" % int(t.get("lot", 0)), int(cdef.get("severity", 3)), true)
 	SysUtil.game_event("died", {"folk_id": tid, "cause": str(cdef["id"]), "townie": true})
+	DeadPools.purge(tid)
 	return legacy
 
 # ------------------------------------------------------------------ validation

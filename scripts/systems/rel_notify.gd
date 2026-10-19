@@ -15,5 +15,7 @@ static func concerns_household(ids: Array) -> bool:
 	return false
 
 static func say(ids: Array, text: String, kind: String) -> void:
+	if DeadPools.any_dead(ids):
+		return          # the dead take no part in relationship news
 	if concerns_household(ids):
 		SysUtil.notify(text, kind)

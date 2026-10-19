@@ -359,6 +359,7 @@ static func kill(folk_id: int, cause: String = "old age") -> Dictionary:
 	SysUtil.notify(text, "death")
 	ChronicleHook.note("death", "%s died (%s)." % [f.name, str(cdef["label"]).to_lower()], [folk_id], "home:%d" % int(f.household_id), int(cdef.get("severity", 3)), true)
 	SysUtil.game_event("died", {"folk_id": folk_id, "cause": str(cdef["id"])})
+	DeadPools.purge(folk_id)
 	return legacy
 
 static func _inherit(f, mourners: Array) -> Dictionary:
