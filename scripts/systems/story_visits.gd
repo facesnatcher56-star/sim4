@@ -119,6 +119,12 @@ static func on_minute() -> void:
 			"leave":
 				if now >= int(sit["leave_done_min"]):
 					_finish_situation(sit)
+	for sit2 in Story.situations:      # guests are looked after while inside a lot (food, a bathroom, a seat): they do not go home in a bad way
+		if str(sit2["state"]) in ["arrive", "mingle", "leave"]:
+			for gid in sit2["spawned"]:
+				var g = SysUtil.folk(int(gid))
+				if g != null and g.has_meta("visitor") and NeighborhoodLots.lot_at(g.tile) != "":
+					Crowd.recover(g, float(now - int(sit2["arrive_min"])) / 60.0)
 	# open invites that nobody answered
 	for inv in Story.invites:
 		if str(inv["state"]) == "open":

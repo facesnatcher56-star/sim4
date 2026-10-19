@@ -11,10 +11,10 @@ const STAFF_ID_BASE := 5000
 const ACTIVE_RADIUS := 40
 const DROP_RADIUS := 64
 const OUTDOOR_MAX_MIN := 20     # an NPC who has been outside its venue (on the street, walking) for longer than this heads home
-const RECOVER_TO := 10.0        # inside a venue the venue serves its customers: needs below this are pulled up towards it ...
-const RECOVER_BASE := 0.12      # ... by this much per minute, plus RECOVER_PER_HOUR per hour of the visit so far (capped at RECOVER_MAX)
-const RECOVER_PER_HOUR := 0.08
-const RECOVER_MAX := 0.5
+const RECOVER_TO := 30.0        # inside a venue the venue serves its customers (eat, drink, rest, wash): needs below this are pulled up towards it ...
+const RECOVER_BASE := 0.3       # ... by this much per minute, plus RECOVER_PER_HOUR per hour of the visit so far (capped at RECOVER_MAX)
+const RECOVER_PER_HOUR := 0.15
+const RECOVER_MAX := 1.0
 const ARRIVE_MIN := -25.0       # a customer arrives with every need above this (the venue-tuned ones are low, never at the go-home floor)
 const NEED_FLOOR := -35.0      # an NPC with a need below this goes home (needs are -100..100; they are re-rolled on the next visit by spawn_npc)
 
@@ -238,7 +238,11 @@ static func _serve(f, now: int) -> void:
 			start_leaving(f)
 		return
 	f.remove_meta("outside_since")
-	var hours: float = float(now - int(f.get_meta("arrived_min", now))) / 60.0
+	recover(f, float(now - int(f.get_meta("arrived_min", now))) / 60.0)
+
+## The host feeds, rests and lets the stranger wash up: every need below RECOVER_TO creeps back up. `hours` = how long the visit has lasted.
+## Also used for the guests of a household visit (StoryVisits) while they are inside a lot, so a visitor never leaves in a bad state.
+static func recover(f, hours: float) -> void:
 	var rate: float = minf(RECOVER_MAX, RECOVER_BASE + RECOVER_PER_HOUR * hours)
 	for n in f.needs:
 		var st: Stat = f.needs[n]

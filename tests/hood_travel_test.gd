@@ -72,7 +72,7 @@ func _round_trip() -> void:
 	_check(W.objects_of_def("fishing_spot").size() > 0 and _home_fridge(W) != null, "still one world: park and home")
 	var snap_after: Dictionary = W.save_dict(false)
 	var fr = _home_fridge(W)
-	_check(int(float(WorldIface.state_get(fr, "stock", -1))) <= 3, "fridge stock only went down (%s)" % str(WorldIface.state_get(fr, "stock", -1)))
+	_check(int(float(WorldIface.state_get(fr, "stock", -1))) <= 3 or Kit.count_events("groceries_bought") > 0, "fridge stock only went down, unless somebody at home legitimately bought groceries (%s, %d purchases)" % [str(WorldIface.state_get(fr, "stock", -1)), Kit.count_events("groceries_bought")])
 	_check((snap_after["floors_rle"] as Array) == (snap_before["floors_rle"] as Array), "floors preserved")
 	_check((snap_after["walls"] as Array).size() == (snap_before["walls"] as Array).size(), "walls preserved")
 	for f in folk:
@@ -156,9 +156,17 @@ func _crowd() -> void:
 	_check(Crowd.staff_folk("cafe").size() >= 1, "the cafe has staff on duty")
 	# lots far from every resident are emptied again
 	for f in folk:
+		f.cancel_current("test teleport")      # a folk mid-walk would step back along its old path (that made this check flaky)
+		f.clear_queue()
 		f.tile = Vector2i(150, 105)
 	Kit.run(3)
-	_check(Crowd.count("cafe") == 0 and Crowd.staff_folk("cafe").is_empty(), "NPCs are removed when nobody is near the lot")
+	var left: Array = []
+	for nf in Crowd.crowd_folk("cafe") + Crowd.staff_folk("cafe"):
+		left.append("%s@%s leaving=%s" % [nf.name, str(nf.tile), str(nf.has_meta("leaving"))])
+	var near: Array = []
+	for rf in folk:
+		near.append("%s@%s away=%s trip=%s" % [rf.name, str(rf.tile), str(rf.get_meta("away", "")), str(rf.has_meta("trip_zone"))])
+	_check(Crowd.count("cafe") == 0 and Crowd.staff_folk("cafe").is_empty(), "NPCs are removed when nobody is near the lot (left %s; residents %s; now %d)" % [str(left), str(near), SimEnv.now_min()])
 	_check(Venues.crowd_target("cafe", 3.0) == 0, "no crowd target while closed")
 	_check(W.region_at(Vector2i(150, 105)) != W.regions.home_id, "(test setup) the far corner is not home")
 

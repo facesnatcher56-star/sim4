@@ -73,7 +73,10 @@ func _fee_on_arrival() -> void:
 	var wren: Folk = folk[2]
 	WorldIface.coins[1] = 15
 	var r2: Dictionary = Neighborhood.travel([wren.id], "gym", {"quiet": true})
-	_check(bool(r2["ok"]), "affordable trip starts")
+	if not bool(r2["ok"]):                              # a folk who just got a job is at work (autonomy decides): use the other one
+		wren = folk[1]
+		r2 = Neighborhood.travel([wren.id], "gym", {"quiet": true})
+	_check(bool(r2["ok"]), "affordable trip starts: %s (%s at %s doing %s)" % [str(r2.get("reason", "")), wren.name, Neighborhood.where(wren.id), wren.current.def_id if wren.current != null else "-"])
 	for _m in int(r2["minutes"]) + 12:                  # spent the money on the way (and stays broke: wages may arrive on a long walk)
 		WorldIface.coins[1] = 0
 		Kit.run(1)
