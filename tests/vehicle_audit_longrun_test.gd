@@ -16,7 +16,7 @@ func run() -> Array:
 		for k in totals:
 			totals[k] += int(r[k])
 	for k2 in totals:
-		var allowed: int = 3 if k2 == "folk_in_vehicle" else 0      # a folk that appears (arrival, spawn) on the gate tile of a car standing in the gateway: a few samples in 15 minutes
+		var allowed: int = 0
 		if int(totals[k2]) > allowed:
 			fails.append("%s: %d (allowed %d)" % [k2, int(totals[k2]), allowed])
 	K.Kit.teardown()

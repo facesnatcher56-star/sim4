@@ -45,7 +45,7 @@ func geometry(rid: String) -> Dictionary:
 				var lp: Array = leg["pts"]
 				for k in range(1, lp.size()):
 					pts.append(lp[k])
-			var path: VehiclePath = VehiclePath.make(pts, 3.6)
+			var path: VehiclePath = VehiclePath.make(pts, 2.9)
 			var stop_s: Array = []
 			var from_s: float = 0.0
 			for i2 in fr.size():

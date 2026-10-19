@@ -89,5 +89,8 @@ static func audit(seconds: float, speed: int = 1) -> Dictionary:
 					if (res["detail"] as Array).size() < 4:
 						(res["detail"] as Array).append("%s %s at %s state %s v %.1f" % [f2.name, str(v2["kind"]), str(v2["pos"]), str(v2["state"]), float(v2["v"])])
 	res["ghosted"] = vv.sim.ghosted
+	for g in vv.sim.ghost_log:
+		if (res["detail"] as Array).size() < 8:
+			(res["detail"] as Array).append("ghost " + str(g))
 	free_layer(vv)
 	return res

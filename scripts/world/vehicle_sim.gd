@@ -430,8 +430,11 @@ func _obstacle_limit(v: Dictionary, half: float) -> float:
 			var c2: Vector2 = centre(vpath2, sp2, float(v["len"]))
 			var n2: Vector2 = vpath2.at(minf(sp2 + half * 0.9, vpath2.length))
 			var hit_f: Vector2 = Vector2.INF
+			var r2: Vector2 = vpath2.at(maxf(sp2 - half * 0.9, 0.0))
+			var m1: Vector2 = vpath2.at(minf(sp2 + half * 0.45, vpath2.length))
+			var m2: Vector2 = vpath2.at(maxf(sp2 - half * 0.45, 0.0))
 			for p in folks:
-				if p.distance_squared_to(n2) < fm * fm or p.distance_squared_to(c2) < fm * fm:
+				if p.distance_squared_to(n2) < fm * fm or p.distance_squared_to(c2) < fm * fm or p.distance_squared_to(r2) < fm * fm or p.distance_squared_to(m1) < fm * fm or p.distance_squared_to(m2) < fm * fm:
 					hit_f = p
 					break
 			if hit_f != Vector2.INF:
