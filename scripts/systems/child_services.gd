@@ -163,7 +163,7 @@ static func place(child: int, carer: int, why: String) -> void:
 	var text: String = "%s was placed with %s, a relative, while the family gets help." % [nm, CrimePerson.name_of(rel)] if rel >= 0 else "%s was placed in foster care while the family gets help." % nm
 	var was_home: bool = CrimePerson.is_player(child)
 	if CrimePerson.folk(child) != null and CrimePerson.hid(child) > 0 and CrimePerson.hid(child) == CrimePerson.hid(carer):
-		FamilyHousehold.move_out(child, 0.0)
+		FamilyHousehold.move_out(child, 0.0, false, true)
 	if Story.townies.has(child):
 		Story.townies[child]["placed"] = {"kind": placed["kind"], "with": rel}
 	ChronicleHook.note("child_placed", text, [child, carer], CrimePerson.home_key(carer), 3, true)

@@ -17,6 +17,7 @@ var rel_opt: OptionButton
 var trait_opts: Array = []
 var trait_info: Label
 var asp_opt: OptionButton
+var home_check: CheckBox
 var preview: FolkPreview
 var tabs: FolkLookTabs
 var others_provider: Callable = Callable()   # -> Array of the other members' appearances (set by the household creator)
@@ -87,6 +88,11 @@ func _ready() -> void:
 		asp_opt.set_item_tooltip(asp_opt.item_count - 1, str(defs[aid].get("description", "")))
 	asp_opt.item_selected.connect(func(i): _edit("aspiration", str(asp_opt.get_item_metadata(i))))
 	left.add_child(asp_opt)
+	home_check = CheckBox.new()
+	home_check.text = "Stays at home"
+	home_check.tooltip_text = "No career: looks after the house, the cooking and the little ones. No job offers."
+	home_check.toggled.connect(func(on): _edit("homemaker", on))
+	left.add_child(home_check)
 	var mid := VBoxContainer.new()
 	mid.custom_minimum_size = Vector2(330, 0)
 	add_child(mid)
@@ -138,6 +144,8 @@ func load_folk(data: Dictionary, first: bool, first_member_name: String) -> void
 		rel_opt.add_item(_rel_label(r))
 	rel_opt.select(maxi(HouseholdSetup.REL_ORDER.find(str(fd.get("rel", "none"))), 0))
 	_show_traits()
+	home_check.button_pressed = bool(fd.get("homemaker", false)) and str(fd.get("stage", "adult")) in ["adult", "elder"]
+	home_check.disabled = not (str(fd.get("stage", "adult")) in ["adult", "elder"])
 	var asp: String = str(fd.get("aspiration", ""))
 	for i in asp_opt.item_count:
 		if str(asp_opt.get_item_metadata(i)) == asp:

@@ -38,7 +38,7 @@
     {
      "object_state_below": [
       "stock",
-      4
+      5
      ]
     }
    ],
@@ -48,7 +48,7 @@
     }
    ],
    "autonomous": true,
-   "priority": "low",
+   "priority": "normal",
    "cooldown_min": 240,
    "tags": [
     "food",
@@ -56,7 +56,7 @@
     "shop"
    ],
    "advertises": {
-    "hunger": 0.6
+    "hunger": 1.4
    },
    "thought": "We're running low on food."
   },
@@ -72,6 +72,9 @@
    "tests": [
     {
      "has_job": false
+    },
+    {
+     "homemaker": false
     }
    ],
    "on_finish": [

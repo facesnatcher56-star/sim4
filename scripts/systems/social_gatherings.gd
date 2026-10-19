@@ -7,8 +7,11 @@ extends RefCounted
 static func start_gathering(host_id: int) -> Dictionary:
 	var gc: Dictionary = SocialDynamics.cfg().get("gathering", {})
 	var host = SysUtil.folk(host_id)
-	if host == null:
-		return {}
+	if host == null or not (gc.get("host_stages", ["adult", "elder"]) as Array).has(str(host.age_stage)):
+		return {}                     # only grown-ups host; little ones get their company from a parent (BabyCare)
+	var hour: int = (SysUtil.now() % 1440) / 60
+	if hour < int(gc.get("earliest_hour", 9)) or hour >= int(gc.get("latest_hour", 22)):
+		return {}                     # gatherings are for waking hours
 	var cands: Array = []
 	for f in WorldIface.all_folk():
 		if int(f.id) == host_id or SysUtil.is_away(f) or str(f.age_stage) in ["baby", "toddler"]:

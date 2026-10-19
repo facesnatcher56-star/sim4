@@ -83,6 +83,7 @@ func _opportunity(f: Array) -> void:
 	var a := K.make_folk(w, "Pia", [], 1)
 	var b := K.make_folk(w, "Quill", [], 1, Vector2i(14, 12))
 	K.mgr.new_game([1])
+	WorldIface.coins[1] = 20          # short of money = looking for work
 	Careers.confirm_offers = true
 	Careers.make_offer(a, "coder", 1)
 	Careers.make_offer(b, "coder", 1)
@@ -178,6 +179,7 @@ func _jobless_find_work(f: Array) -> void:
 	var a := K.make_folk(w, "Una", [], 1)
 	var b := K.make_folk(w, "Vik", ["lazy"], 1, Vector2i(14, 12))
 	K.mgr.new_game([1])
+	WorldIface.coins[1] = 20
 	Careers.confirm_offers = true
 	for d in range(2, 58):
 		K.set_time(d, 6)

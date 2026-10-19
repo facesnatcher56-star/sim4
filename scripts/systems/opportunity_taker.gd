@@ -19,6 +19,8 @@ static func on_day(_day: int) -> void:
 		var f = SysUtil.folk(int(fid))
 		if f == null or not SysUtil.is_resident(f) or SysUtil.is_away(f) or Careers.jobs.has(int(fid)) or Careers.why_not_work(f, str(Careers.offers[fid]["career"]), int(Careers.offers[fid]["level"])) != "":
 			continue
+		if not JobSeeking.may_take(f):               # waits for an answer: only somebody looking for work takes it, never daily churn
+			continue
 		if not (f.queue as Array).is_empty():       # the player is directing them
 			continue
 		var o: Dictionary = Careers.offers[fid]

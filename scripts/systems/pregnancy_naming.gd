@@ -25,7 +25,7 @@ static func rename(baby_id: int, first: String) -> bool:
 	if b == null or nm == "" or str(b.age_stage) != "baby":
 		return false
 	var surname: String = Aging._surname(str(b.name))
-	b.name = nm + " " + surname if surname != str(b.name) else nm
+	b.name = nm + " " + surname if surname != "" else nm
 	Family.note_person(baby_id, str(b.name))
 	SysUtil.game_event("baby_named", {"folk_id": baby_id, "name": str(b.name)})
 	return true
