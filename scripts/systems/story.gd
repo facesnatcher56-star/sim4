@@ -228,26 +228,13 @@ static func _life_events(dc: Dictionary) -> void:
 				_log("%s and %s got married!" % [name_of(a), name_of(b)])
 				ChronicleHook.note("wedding", "%s and %s got married." % [name_of(a), name_of(b)], [a, b], "town:%d" % int(townies[a].get("lot", 0)), 2, true)
 				_tell_residents_about(a, b, "%s and %s got married!" % [name_of(a), name_of(b)])
-		elif fl.get("spouse", false) or fl.get("partner", false):
-			if alive_townies().size() < int(c.get("max_population", 20)) and SysUtil.chance(float(dc.get("baby_chance", 0.05))):
-				var baby: Dictionary = add_townie(0.0, "", [])
-				baby["name"] = "%s %s" % [str(SysUtil.pick(Aging.cfg().get("name_pool", ["Pip"]))), name_of(a).split(" ")[-1]]
-				RelationshipBits.set_flag(int(baby["id"]), a, "family", true, false)
-				RelationshipBits.set_flag(int(baby["id"]), b, "family", true, false)
-				baby["appearance"] = Genetics.inherit(Family.person_info(a), Family.person_info(b))["appearance"]
-				Family.note_townie_birth(int(baby["id"]), a, b)
-				_log("%s and %s had a baby, %s." % [name_of(a), name_of(b), baby["name"]])
-				ChronicleHook.note("birth", "%s was born to %s and %s." % [baby["name"], name_of(a), name_of(b)], [int(baby["id"]), a, b], "town:%d" % int(townies[a].get("lot", 0)), 2, true)
-	# moving away / arriving
+	# moving away
 	for t in alive_townies():
 		if SysUtil.chance(float(dc.get("move_away_chance", 0.01))) and stage_of(t) == "adult":
 			t["alive"] = false
 			t["moved"] = true
 			_log("%s moved out of town." % t["name"])
-	if alive_townies().size() < int(c.get("townie_count", 12)) and SysUtil.chance(float(dc.get("arrive_chance", 0.12))):
-		var n: Dictionary = add_townie()
-		n["career"] = str(SysUtil.pick(c.get("careers", [])))
-		_log("%s moved to town." % n["name"])
+	StoryGrowth.on_day()      # births and new arrivals keep the town steady (story_growth.gd)
 
 static func _tell_residents_about(a: int, b: int, text: String) -> void:
 	for r in SysUtil.residents():

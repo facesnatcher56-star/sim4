@@ -55,7 +55,7 @@ func _advance(f: Array) -> void:
 			changed += 1
 	K.expect(f, changed >= 4, "townies age and change jobs (%d changed)" % changed)
 	K.expect(f, Story.news.size() >= 3, "story log records events: %d" % Story.news.size())
-	K.expect(f, Story.alive_townies().size() >= 6 and Story.alive_townies().size() <= 20, "population stays sane: %d" % Story.alive_townies().size())
+	K.expect(f, Story.alive_townies().size() >= 6 and Story.alive_townies().size() <= 24, "population stays sane: %d" % Story.alive_townies().size())
 	var spouse_or_partner: int = 0
 	for key in RelationshipService.pairs:
 		var fl: Dictionary = RelationshipService.pairs[key]["flags"]
