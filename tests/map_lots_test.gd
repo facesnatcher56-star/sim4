@@ -1,5 +1,5 @@
 ﻿extends RefCounted
-## All 15 lots of data/neighborhood.json are placed on the one continuous map at their region rectangles (MapLots): every
+## All 18 lots of data/neighborhood.json are placed on the one continuous map at their region rectangles (MapLots): every
 ## object sits inside its lot, every usable object is reachable from the lot's entry tile, the venues' staff posts are
 ## standable, only the home lot is buildable, ownership is per object (home = household, everything else community).
 
@@ -29,7 +29,7 @@ func run() -> Array:
 	Kit.teardown()
 	return fails
 
-## All 15 lots pairwise distinct layouts; home from the scenario's pool; seed saved.
+## All 18 lots pairwise distinct layouts; home from the scenario's pool; seed saved.
 func _distinct(sc: String, wseed: int) -> void:
 	var seen: Dictionary = {}
 	var rg: WorldRegions = Kit.world().regions
@@ -77,7 +77,7 @@ func _whole_map(start: String) -> void:
 		var g: Dictionary = LotLoader.template(str(gid))
 		min_objects[gid] = {"small": 14, "medium": 30, "large": 50, "classic": 40}.get(str(g.get("size", "")), 10) if str(g.get("kind", "")) == "home" else int(min_objects.get(str(g.get("venue", "")), 10))
 	var lots: Array = Neighborhood.lots()
-	_check(lots.size() == 15, "%s: 15 lots (%d)" % [start, lots.size()])
+	_check(lots.size() == 18, "%s: 18 lots (%d)" % [start, lots.size()])
 	var per_lot: Dictionary = {}
 	for o in W.all_objects():
 		var l: String = Neighborhood.lot_at(o.tile)

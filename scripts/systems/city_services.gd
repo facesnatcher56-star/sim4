@@ -21,7 +21,11 @@ static func cfg() -> Dictionary:
 	return SysUtil.table("services")
 
 static func station(service: String) -> Dictionary:
-	return (cfg().get("stations", {}) as Dictionary).get(service, {})
+	var st: Dictionary = (cfg().get("stations", {}) as Dictionary).get(service, {})
+	if not st.is_empty() and Workplace.map_ready() and Neighborhood.lot(str(st.get("lot", ""))).is_empty() and not Neighborhood.lot("police").is_empty():
+		st = st.duplicate()
+		st["lot"] = "police"                      # a map without its own fire station (an old game): the engine starts from the police lot
+	return st
 
 static func count(key: String, n: int = 1) -> void:
 	stats[key] = int(stats.get(key, 0)) + n

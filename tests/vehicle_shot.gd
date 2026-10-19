@@ -79,6 +79,20 @@ func _run() -> void:
 							await create_timer(0.3).timeout
 							got += 1
 							await _shot(prefix, "fire_%d" % got)
+			"east":
+				CityPlan.projects.clear()
+				CityPlan.built_plots = {"plot_1": "residential", "plot_4": "commercial"}
+				CityPlan.projects.append({"id": 1, "zone": "east", "plot": "plot_2", "kind": "civic", "state": "scaffold", "start": 1, "scaffold_end": 5, "ready": 15, "workers": 0})
+				CityPlan.projects.append({"id": 2, "zone": "east", "plot": "plot_3", "kind": "residential", "state": "building", "start": 1, "scaffold_end": SysUtil.day() - 4, "ready": SysUtil.day() + 4, "workers": 5})
+				_look(lv, Vector2(212, 60), 56.0)
+				await create_timer(2.0).timeout
+				await _shot(prefix, "east_wide")
+				_look(lv, Vector2(212, 90), 30.0)
+				await create_timer(1.5).timeout
+				await _shot(prefix, "east_plots")
+				_look(lv, Vector2(176, 50), 30.0)
+				await create_timer(1.5).timeout
+				await _shot(prefix, "east_civic")
 			"night":
 				clock.total_minutes = 23 * 60
 				var home2: Dictionary = VehicleRoads.frontage("home")
