@@ -1,4 +1,4 @@
-﻿class_name CruiseIncidents
+class_name CruiseIncidents
 extends RefCounted
 ## The rare happenings of a cruise (task 22, data/incidents/22_cruise.json, all very rare, all with the Incidents force hook): storm at sea,
 ## stomach-bug outbreak (Health illness "norovirus", spreads aboard), a fire on board (Fire.ignite; ship rules: the crew put it out), someone
@@ -140,9 +140,12 @@ static func overboard(t: Dictionary) -> void:
 		weights.append(0.5)
 	if pool.is_empty():
 		return
-	var victim = SysUtil.pick_weighted(pool, weights)
+	var forced: Dictionary = IncidentFlow.last_force               # tests / reports: {victim: folk id, rescued: bool}
+	var victim = SysUtil.folk(int(forced["victim"])) if forced.has("victim") else SysUtil.pick_weighted(pool, weights)
+	if victim == null:
+		return
 	var hours: int = int(cfg().get("overboard_search_hours", 3))
-	var rescued: bool = r.randf() < float(cfg().get("overboard_rescue_chance", 0.92))
+	var rescued: bool = bool(forced["rescued"]) if forced.has("rescued") else r.randf() < float(cfg().get("overboard_rescue_chance", 0.92))
 	c["search"] = {"pid": int(victim.id), "name": str(victim.name), "rescued": rescued, "party": victim.household_id > 0}
 	Cruise.schedule(t, SysUtil.now() + hours * 60, "overboard_end")
 	if victim.household_id > 0:

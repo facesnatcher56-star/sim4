@@ -23,7 +23,7 @@ static func teardown() -> void:
 static func run(minutes: int) -> void:
 	Kit.run(minutes)
 
-## Fast-forward: the clock jumps in `step`-minute pieces; Vacation (due minutes) and the hourly / daily systems run at their boundaries, the
+## Fast-forward: the clock jumps in `step`-minute pieces; Vacation (due minutes, hourly) and the daily systems (bills, home upkeep...) run at their boundaries, the
 ## per-minute folk simulation (needs, autonomy, interactions) does not. This is the "town advanced cheaply" mode for long stays.
 static func warp(minutes: int, step: int = 20) -> void:
 	var clk: Node = Kit.clock()
@@ -35,7 +35,7 @@ static func warp(minutes: int, step: int = 20) -> void:
 		clk.total_minutes += n
 		Vacation.on_minute()
 		if clk.total_minutes / 60 != h0:
-			Kit.mgr._on_hour(clk.hour())
+			Vacation.on_hour()
 		if clk.total_minutes / 1440 != d0:
 			Kit.mgr._on_day(clk.day())
 		left -= n

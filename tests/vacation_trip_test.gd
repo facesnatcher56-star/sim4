@@ -17,6 +17,7 @@ func run() -> Array:
 	_beach_trip()
 	_save_mid_stay()
 	_empty_house_and_alarm()
+	_home_while_away()
 	K.teardown()
 	return fails
 
@@ -150,3 +151,66 @@ func _empty_house_and_alarm() -> void:
 	K.teardown()
 func _burglary_rate() -> float:
 	return IncidentRisk.effective_rate(IncidentDefs.get_def("burglary"), IncidentSubject.of_household(1))
+func _home_while_away() -> void:
+	K.new_game("small")
+	Kit_set_day(4)
+	Weather.force("sunny")                          # rain would water the yard plants
+	var w = WorldIface.world()
+	var plant: int = -1
+	var rect: Rect2i = NeighborhoodLots.rect_of(Neighborhood.HOME)
+	for y in range(rect.position.y + 2, rect.end.y - 2):
+		for x in range(rect.position.x + 2, rect.end.x - 2):
+			if plant < 0:
+				plant = int(w.place_object("plant", Vector2i(x, y), 0))
+	_check(plant > 0, "a plant at home")
+	Economy.owner[plant] = 1
+	var water0: float = float(WorldIface.state_get(w.objects[plant], "water", 0.0))
+	var res: Dictionary = Vacation.book_and_go(1, "camping", {"length_days": 9, "travel_min": 30, "seed": 3})
+	_check(bool(res["ok"]), "a nine day camping trip: %s" % str(res.get("reason", "")))
+	var tid: int = int(res["trip"])
+	var balance0: int = Economy.balance(1)
+	K.warp(9 * 1440 + 200)
+	_check(Vacation.trip(tid).is_empty(), "back from the long trip")
+	var paid := 0
+	for e in Economy.ledger_for(1):
+		if str(e["reason"]) == "bills":
+			paid += absi(int(e["amount"]))
+	_check(paid > 0, "the bills were paid while they were away (%d coins)" % paid)
+	var late := 0
+	for bl in Economy.bills:
+		if bool(bl["late"]):
+			late += 1
+	_check(late == 0, "no bill went overdue")
+	var water1: float = float(WorldIface.state_get(w.objects[plant], "water", 10.0))
+	_check(water1 < water0 - 5.0, "the plant dried out (%.1f -> %.1f)" % [water0, water1])
+	var hist: Dictionary = Vacation.history_list()[0] if not Vacation.history_list().is_empty() else {}
+	_check(not hist.is_empty(), "history entry")
+	var mb_mail := -1.0
+	for o in SysUtil.all_world_objects():
+		if str(o.def_id) == "mailbox" and NeighborhoodLots.lot_at(o.tile) == Neighborhood.HOME:
+			mb_mail = float(WorldIface.state_get(o, "mail", 0.0))
+	_check(mb_mail < 0.0 or mb_mail >= 3.0, "mail piled up (%.1f)" % mb_mail)
+	var notes := 0
+	for n in K.Kit.notes:
+		if str(n[0]).begins_with("Back home:"):
+			notes += 1
+	_check(notes == 1, "one 'Back home' report")
+	# a house-sitter keeps the plants
+	K.teardown()
+	K.new_game("small")
+	Kit_set_day(4)
+	Weather.force("sunny")
+	var plant2: int = -1
+	for y2 in range(rect.position.y + 2, rect.end.y - 2):
+		for x2 in range(rect.position.x + 2, rect.end.x - 2):
+			if plant2 < 0:
+				plant2 = int(w.place_object("plant", Vector2i(x2, y2), 0))
+	Economy.owner[plant2] = 1
+	var res2: Dictionary = Vacation.book_and_go(1, "camping", {"length_days": 5, "travel_min": 30, "sitter": true})
+	_check(bool(res2["ok"]) and int(Vacation.trip(int(res2["trip"]))["cost"]["sitter"]) > 0, "a sitter costs extra")
+	K.warp(5 * 1440 + 100)
+	_check(float(WorldIface.state_get(w.objects[plant2], "water", 0.0)) >= 5.9, "with a sitter the plant is fine")
+	K.teardown()
+
+func Kit_set_day(day: int) -> void:
+	K.Kit.set_time(day, 8, 0)

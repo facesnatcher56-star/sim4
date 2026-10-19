@@ -91,7 +91,7 @@ static func _kill_one(t: Dictionary, k: Dictionary) -> void:
 		w.append(pow(CrimeSerial.isolation(tid), 2.0))
 	for f in Cruise.members_aboard(t):
 		ids.append(int(f.id))
-		w.append(pow(CrimeSerial.isolation(int(f.id)), 2.0) * float(JusticeState.sect("serial").get("player_mult", 0.3)))
+		w.append(pow(CrimeSerial.isolation(int(f.id)) * float(JusticeState.sect("serial").get("player_mult", 0.3)), 2.0))
 	var victim = SysUtil.pick_weighted(ids, w)
 	if victim == null:
 		return

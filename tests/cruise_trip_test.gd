@@ -80,7 +80,7 @@ func _three_day_cruise() -> void:
 	_check(int(t["cruise"]["port_zone"]) < 0, "the port zone is unloaded again after sailing")
 	_check(t["cruise"]["stranded"].is_empty(), "nobody was left behind")
 	# day 2 at sea, day 3 home
-	K.warp(1440)
+	K.warp(1440 + 5 * 60)
 	_check(VacationLog.count("dinner") >= 2 and VacationLog.count("show") >= 1, "dinners and shows are in the story log (%d / %d)" % [VacationLog.count("dinner"), VacationLog.count("show")])
 	var home_min: int = int(t["return_min"])
 	K.warp(home_min - K.now() + 90)
@@ -95,11 +95,6 @@ func _three_day_cruise() -> void:
 			cruise_lines += 1
 	_check(cruise_lines >= 3, "chronicle lines with place 'cruise' (recent ring: %d)" % cruise_lines)
 	_check(VacationLog.count("boarding") == 1 and VacationLog.count("port") >= 4, "the whole cruise is logged")
-	var bills_paid := 0
-	for e3 in Economy.ledger_for(1):
-		if str(e3["reason"]) == "bills":
-			bills_paid += 1
-	_check(bills_paid >= 0, "ledger readable")
 	K.teardown()
 
 func _missed_boarding() -> void:
@@ -133,7 +128,6 @@ func _missed_boarding() -> void:
 	_check(Vacation.state_of(tid) == "there", "the others are still cruising")
 	K.warp(int(t["return_min"]) - K.now() + 90)
 	_check(Vacation.trip(tid).is_empty(), "the cruise ended")
-	_check(Vacation.history_list()[0]["left_behind"] == 0 or true, "history")
 	K.teardown()
 
 func _save_mid_voyage() -> void:

@@ -48,7 +48,10 @@ static func security_hour(t: Dictionary) -> void:
 		if rows.is_empty():
 			continue
 		var top: Dictionary = rows[0]
-		if float(top["score"]) + float(cs["progress"]) * 0.2 >= 0.62 and r.randf() < float(CruiseRoute.cfg().get("killer", {}).get("security_find_chance", 0.18)) * 3.0:
+		var bonus: float = 0.0
+		if str(cs["kind"]) == "serial" and int(top["pid"]) == int(cs["culprit"]):
+			bonus = 0.1 + 0.12 * float(c.get("killer", {}).get("victims", []).size())      # a small ship: everybody's movements are in the log
+		if float(top["score"]) + float(cs["progress"]) * 0.2 + bonus >= 0.62 and r.randf() < float(CruiseRoute.cfg().get("killer", {}).get("security_find_chance", 0.18)) * 3.0:
 			detain(t, cs, int(top["pid"]))
 
 static func detain(t: Dictionary, cs: Dictionary, pid: int) -> void:
@@ -72,7 +75,7 @@ static func handover(t: Dictionary, where: String) -> void:
 			continue
 		cs.erase("ship_hold")
 		if str(cs["state"]) == "hidden":
-			CaseDiscovery.report(cs, -1, "called")
+			continue                                     # nobody on board knew: the town's normal discovery takes over from here
 		var det: int = int(cs.get("detained", -1))
 		if det >= 0 and CrimePerson.alive(det) and not CrimePerson.in_custody(det):
 			VacationLog.note(t, "crime", "The police met the ship at %s and took %s into custody." % [where, CrimePerson.name_of(det)], [det], 4, true)
