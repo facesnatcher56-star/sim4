@@ -524,6 +524,7 @@
   "interactions": [
    "sit_sofa",
    "nap_sofa",
+   "sleep_sofa",
    "watch_tv"
   ]
  },
@@ -1108,6 +1109,7 @@
   "decor": 1.5,
   "interactions": [
    "sit_armchair",
+   "sleep_sofa",
    "read_armchair"
   ]
  },
@@ -1230,6 +1232,20 @@
   "interactions": [
    "sit_chair"
   ]
+ },
+ "sofa_bed": {
+  "label": "Sofa Bed",
+  "size": [2, 1],
+  "price": 120,
+  "tags": ["bedroom", "bed", "furniture", "living"],
+  "model": "res://assets/models/sofa.glb",
+  "color": "#b58a5a",
+  "height": 0.85,
+  "slots": [{"offset": [0, 1], "pose": "lie", "use": [1.0, 0.5], "y": 0.5}],
+  "state": {"made": {"start": true}},
+  "advertises": {"energy": 3.5},
+  "decor": 0.6,
+  "interactions": ["sleep_bed", "nap_bed", "make_bed"]
  },
  "single_bed": {
   "label": "Single Bed",

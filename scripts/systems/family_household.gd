@@ -41,6 +41,8 @@ static func invite_to_household(person_id: int, household_id: int) -> bool:
 	if f != null:
 		if int(f.household_id) == household_id:
 			return false
+		if not SleepPlaces.make_room(household_id, FamilyMarriage._given(str(f.name)), str(f.age_stage)):
+			return false
 		var was_visitor: bool = f.has_meta("visitor")
 		FamilyMarriage._move_household(f, household_id)
 		if was_visitor or not Aging.records.has(person_id):
@@ -56,6 +58,8 @@ static func invite_to_household(person_id: int, household_id: int) -> bool:
 		return true
 	var t: Dictionary = Story.townies.get(person_id, {})
 	if t.is_empty() or not bool(t["alive"]):
+		return false
+	if not SleepPlaces.make_room(household_id, FamilyMarriage._given(str(t["name"])), Story.stage_of(t)):
 		return false
 	var keep_next: int = Folk._next_id
 	var nf := Folk.create(str(t["name"]), (t["traits"] as Array).duplicate(), person_id)

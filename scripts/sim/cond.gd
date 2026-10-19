@@ -79,6 +79,9 @@ static func check_one(c: Variant, ctx: Dictionary) -> bool:
 			"circadian":
 				if folk == null or not Circadian.in_phase(folk, str(v)):
 					return false
+			"no_free_bed":
+				if folk == null or SleepPlaces.no_free_bed(folk) != bool(v):
+					return false
 			"coins_at_least":
 				if folk == null or WorldIface.get_coins(int(folk.household_id)) < int(v):
 					return false

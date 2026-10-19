@@ -21,6 +21,7 @@
  "meal_ready": {"label": "Meal Ready", "mood": {}, "duration_min": 120, "autonomy_mult": {"meal": 2.5}, "thought": "Food's ready!"},
  "well_rested": {"label": "Well Rested", "mood": {"happy": 0.5, "energized": 2}, "duration_min": 480, "need_decay_mult": {"energy": 0.8}, "thought": "I feel great."},
  "nap_refreshed": {"label": "Refreshed", "mood": {"energized": 1}, "duration_min": 120},
+ "slept_badly": {"label": "Slept Badly", "mood": {"uncomfortable": 1.5}, "duration_min": 480, "thought": "My back hurts. I need a proper bed."},
  "fresh": {"label": "Fresh", "mood": {"happy": 0.5, "energized": 1}, "duration_min": 360, "need_decay_mult": {"hygiene": 0.7}, "thought": "Squeaky clean."},
  "minty": {"label": "Minty Breath", "mood": {"happy": 0.5}, "duration_min": 240},
  "relaxed": {"label": "Relaxed", "mood": {"happy": 2, "content": 3}, "duration_min": 240, "need_decay_mult": {"fun": 0.8}, "thought": "Ahh, lovely."},

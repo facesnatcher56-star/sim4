@@ -134,6 +134,8 @@ static func _merge_households(a: int, b: int) -> void:
 		var hid: int = int(fa.household_id)
 		if int(fb.household_id) > 0 and not SysUtil.is_resident(fa):
 			return
+		if not SleepPlaces.make_room(hid, _given(str(fb.name)), str(fb.age_stage)):
+			return                         # no bed and no money for one: the partner keeps their own home
 		_move_household(fb, hid)
 	elif fa != null and fb == null and Story.townies.has(b):
 		FamilyHousehold.invite_to_household(b, int(fa.household_id))
