@@ -129,7 +129,11 @@ func _spawn(client_args: Array) -> void:
 	var godot_args := ["--headless", "--path", wt, "--script", "res://tests/fixtures/coop_client.gd", "--"]
 	godot_args.append_array(client_args)
 	godot_args.append("--budget=50")
-	var pid := OS.create_process("powershell", ["-NoProfile", "-File", guard, "-Seconds", "60", "-MaxSeconds", "75", "-Args", ",".join(PackedStringArray(godot_args))])
+	var pid: int
+	if OS.get_name() == "Windows" and FileAccess.file_exists(guard):
+		pid = OS.create_process("powershell", ["-NoProfile", "-File", guard, "-Seconds", "60", "-MaxSeconds", "75", "-Args", ",".join(PackedStringArray(godot_args))])
+	else:
+		pid = OS.create_process(OS.get_executable_path(), PackedStringArray(godot_args))    # no PowerShell (Linux/Mac): the in-engine --budget watchdog bounds the client
 	_check(pid > 0, "spawned a client process")
 	if pid > 0:
 		_pids.append(pid)
