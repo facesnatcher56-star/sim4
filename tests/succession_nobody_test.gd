@@ -38,17 +38,20 @@ func _prompt_flow() -> void:
 	K.townie("Quill", "adult", 10.0)
 	Aging.kill(int(head.id), "old age")
 	_check(Succession.is_pending(1) and Succession.empty_household(1), "the last member died: waiting for the player's choice")
-	_check(shown.size() == 1, "one prompt is shown")
+	_check(shown.is_empty(), "no window pops up on its own: a toast and a banner tell the player")
+	SuccessionNobody.prompt(1)                       # the banner button
+	_check(shown.size() == 1, "the choice opens from the banner")
 	var ids: Array = _ids(shown[0]["options"]) if not shown.is_empty() else []
 	_check(ids == ["town", "new", "later"], "no relatives: someone from town, a new family, decide later: %s" % str(ids))
 	var words: String = str(shown[0]["title"]) + " " + str(shown[0]["text"])
 	_check(words.find("Mira has died") >= 0 and words.find("Nobody is left") >= 0 and words.find("history") >= 0, "plain words: %s" % words)
-	# decide later: the town carries on, the prompt comes back in the morning, never two at once
+	# decide later: the town carries on and the player is reminded in the morning (no window), never two prompts at once
 	shown[0]["cb"].call("later")
 	_check(Succession.is_pending(1), "decide later keeps the question open")
 	Succession.on_day(SysUtil.day() + 1)
-	_check(shown.size() == 2, "the prompt comes back the next morning")
-	Succession.on_day(SysUtil.day() + 1)
+	_check(K.HoodKit.has_note("Nobody is playing your household") and shown.size() == 1, "the reminder comes back the next morning")
+	SuccessionNobody.prompt(1)
+	SuccessionNobody.prompt(1)
 	_check(shown.size() == 2, "never two prompts at once")
 	# pick someone from town: the list, then the choice
 	shown[1]["cb"].call("town")
@@ -91,6 +94,7 @@ func _relative_elsewhere() -> void:
 	K.child_of(int(head.id), int(rel["id"]))                  # Rhea is Mira's parent, lives elsewhere
 	Aging.kill(int(head.id), "old age")
 	_check(Succession.is_pending(1), "only a far relative, empty house: the player is asked")
+	SuccessionNobody.prompt(1)
 	var ids: Array = _ids(shown[0]["options"]) if not shown.is_empty() else []
 	_check(ids.size() == 4 and ids[0] == "relative:%d" % int(rel["id"]), "the relative is offered first: %s" % str(ids))
 	_check(str(shown[0]["options"][0]["label"]).find("Rhea") >= 0 and str(shown[0]["options"][0]["label"]).find("lives elsewhere") >= 0, "the label says who and where: %s" % str(shown[0]["options"][0]["label"]))

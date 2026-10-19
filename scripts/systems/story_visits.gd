@@ -214,7 +214,7 @@ static func _names(ids: Array) -> Array:
 static func _begin_leave(sit: Dictionary) -> void:
 	for gid in sit["spawned"]:
 		var f = SysUtil.folk(int(gid))
-		if f != null:
+		if f != null and f.has_meta("visitor"):
 			f.cancel_current("leaving")
 			f.clear_queue()
 			f.add_buff("cheered_up")
@@ -229,7 +229,7 @@ static func _finish_situation(sit: Dictionary) -> void:
 	var success: bool = score >= float(sit["target_score"]) * (1.0 if str(sit["kind"]) == "party" else 0.5)
 	for gid in sit["spawned"]:
 		var f = SysUtil.folk(int(gid))
-		if f != null:
+		if f != null and f.has_meta("visitor"):
 			RelationshipService.sync_folk(f)
 			f.cancel_current("left")
 			f.clear_queue()

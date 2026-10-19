@@ -48,6 +48,8 @@ const DEFS := [
 		"tip": "Time stops while a window (Goals, Career, Household, Help, menus) is open and goes back to your speed when it closes."},
 	{"k": "surprises", "tab": "gameplay", "t": "enum", "label": "Surprises", "def": "rare", "opts": [["off", "Off"], ["rare", "Rare"], ["normal", "Normal"], ["chaotic", "Chaotic"]],
 		"tip": "How often unexpected things happen: accidents, illness, crime, disasters and lucky finds. Off = never, Rare = a few in a lifetime, Normal = 3x, Chaotic = 10x. Old age is not affected. Saved with each game; new games start from this value."},
+	{"k": "pick_for_me", "tab": "gameplay", "t": "bool", "label": "Pick for me after 2 days", "def": true,
+		"tip": "When nobody is left in your household, someone is chosen for you after 2 days so the home is never empty for long. Off = you are only reminded each morning."},
 	{"k": "confirm_quit", "tab": "gameplay", "t": "bool", "label": "Confirm before quitting to title", "def": true,
 		"tip": "Asks 'are you sure?' before leaving the game, because unsaved progress is lost."},
 	{"k": "thought_bubbles", "tab": "gameplay", "t": "bool", "label": "Show thought bubbles", "def": true, "tip": "The little speech balloons above Folk heads."},

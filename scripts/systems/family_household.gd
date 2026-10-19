@@ -38,6 +38,9 @@ static func move_out(folk_id: int, coin_share: float = 0.5, orphan: bool = false
 ## Move a townie / visitor / folk of another household into `household_id`. Returns true when it happened.
 static func invite_to_household(person_id: int, household_id: int) -> bool:
 	var f = SysUtil.folk(person_id)
+	if f != null and _is_townie_npc(f):
+		Crowd.dismiss(f)                 # a townie out in town (crowd NPC / party guest) has no autonomy and no needs care: they come in as a fresh household member
+		f = null
 	if f != null:
 		if int(f.household_id) == household_id:
 			return false
@@ -70,7 +73,8 @@ static func invite_to_household(person_id: int, household_id: int) -> bool:
 	for n in nf.needs:
 		(nf.needs[n] as Stat).set_value(SysUtil.rng.randf_range(30.0, 70.0))
 	RelationshipService.restore_folk(nf)
-	SysUtil.world_add_folk(nf, StoryVisits.entrance())
+	var door: Vector2i = NeighborhoodLots.entry_tile(PlayerLots.home_of_household(household_id))      # the household's own lot (co-op players have theirs)
+	SysUtil.world_add_folk(nf, door if door.x >= 0 else StoryVisits.entrance())
 	Aging.register(nf, float(t["age_days"]), FamilyTree.parents_of(person_id))
 	Goals.ensure_profile(nf)
 	t["alive"] = false
@@ -78,6 +82,13 @@ static func invite_to_household(person_id: int, household_id: int) -> bool:
 	Family.note_person(person_id, str(nf.name))
 	_after_move_in(nf)
 	return true
+
+## A townie who is out in town as an ambient NPC or a guest (not staff), still waiting in the townie book.
+static func _is_townie_npc(f) -> bool:
+	if not f.has_meta("visitor") or not f.has_meta("townie_id") or f.has_meta("staff") or f.has_meta("burglar"):
+		return false
+	var t: Dictionary = Story.townies.get(int(f.get_meta("townie_id")), {})
+	return not t.is_empty() and bool(t["alive"])
 
 static func _after_move_in(f) -> void:
 	Genetics.ensure(f)

@@ -30,3 +30,17 @@ static func nobody_body(has_kin: bool) -> String:
 
 static func new_family(first_name: String) -> String:
 	return "A new family has moved into the old home. You now play %s. The town and its history carry on." % first_name
+
+## Morning reminder while nobody plays the household. `days_left` < 0 means "pick for me" is off.
+static func nobody_reminder(days_left: int) -> String:
+	if days_left < 0:
+		return "Nobody is playing your household. Open the banner at the top and choose who to play."
+	if days_left <= 1:
+		return "Nobody is playing your household. If you do not choose today, someone will be picked for you tomorrow."
+	return "Nobody is playing your household. Choose who to play, or someone will be picked for you in %d days." % days_left
+
+## The line on the banner.
+static func nobody_banner(days_left: int) -> String:
+	if days_left < 0:
+		return "Nobody is playing your household. The town is running by itself until you choose."
+	return "Nobody is playing your household. Someone is picked for you in %d day%s unless you choose." % [days_left, "" if days_left == 1 else "s"]

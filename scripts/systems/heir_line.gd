@@ -48,12 +48,16 @@ static func candidates(head_id: int, household_id: int, player_id: int) -> Array
 	for t in Story.alive_townies():
 		if FamilyTree.is_kin(head_id, int(t["id"])) and not kin.has(int(t["id"])):
 			kin.append(int(t["id"]))
-	for r in _by_age(kin):
+	for r in grown_first(kin):
 		_add(out, seen, int(r), "relative", 6, household_id, player_id)
 	for c3 in out:
 		if str(c3["stage"]) in LITTLE and str(c3["kind"]) != "picked":
 			c3["rank"] = int(c3["rank"]) + 100          # little ones last, order kept
+	for i in out.size():
+		out[i]["rank"] = int(out[i]["rank"]) * 1000 + i          # keeps the order inside a step (sort_custom is not stable)
 	out.sort_custom(func(a, b): return int(a["rank"]) < int(b["rank"]))
+	for c4 in out:
+		c4["rank"] = int(c4["rank"]) / 1000
 	return out
 
 static func first(head_id: int, household_id: int, player_id: int) -> Dictionary:
@@ -76,8 +80,8 @@ static func _by_age(ids: Array) -> Array:
 static func eligible(id: int, household_id: int, player_id: int) -> bool:
 	var f = SysUtil.folk(id)
 	if f != null:
-		if f.has_meta("visitor") or int(f.household_id) <= 0:
-			return false
+		if f.has_meta("visitor") or int(f.household_id) <= 0:       # a townie out in town (crowd) can still move in; staff and burglars cannot
+			return Story.townies.has(id) and bool(Story.townies[id]["alive"]) and not f.has_meta("staff") and not f.has_meta("burglar")
 		var owner: int = Players.player_of(int(f.household_id))
 		return int(f.household_id) == household_id or owner < 0 or owner == player_id
 	return Story.townies.has(id) and bool(Story.townies[id]["alive"])
@@ -93,3 +97,19 @@ static func _add(out: Array, seen: Dictionary, id: int, kind: String, rank: int,
 	var info: Dictionary = Family.person_info(id)
 	out.append({"id": id, "name": str(info["name"]), "kind": kind, "rank": rank, "in_household": inside, "stage": str(info["stage"]),
 		"label": SuccessionText.describe(kind, str(info["name"]), inside)})
+
+## Grown-ups for "who plays now" from town: adults first, then elders, each youngest first (little ones last); steady order by id.
+static func grown_first(ids: Array) -> Array:
+	var a: Array = ids.duplicate()
+	var tier := func(id) -> int:
+		var s: String = _stage(int(id))
+		return 0 if s == "adult" else (1 if s == "elder" else 2)
+	a.sort_custom(func(x, y):
+		var tx: int = tier.call(x)
+		var ty: int = tier.call(y)
+		if tx != ty:
+			return tx < ty
+		var ax: float = Family.age_days_of(int(x))
+		var ay: float = Family.age_days_of(int(y))
+		return ax < ay if ax != ay else int(x) < int(y))
+	return a

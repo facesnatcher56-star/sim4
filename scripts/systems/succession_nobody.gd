@@ -1,15 +1,16 @@
 class_name SuccessionNobody
 extends RefCounted
-## "Nobody left" (task 15): the head died and the house is empty (or only far relatives remain). The player is asked, in plain words, who to play:
-##   a relative (moves into the family home) | someone from town (a townie household moves in) | a new family (the town and its history stay).
-## Meanwhile the town runs on autopilot and the household is marked `pending` in the Players table. With a UI the prompt comes back every morning
-## ("Decide later" keeps the town running); WITHOUT a UI (tests, servers) the first choice is made automatically after AUTO_DAYS days, so no empty
-## household is ever simulated for long. Choices: "relative:<id>", "townie:<id>", "town" (shows the town list), "new", "later".
-
+## "Nobody left" (task 15): the head died and the house is empty (or only far relatives remain). The player is told in plain words (a toast and a banner
+##   at the top of the screen that does not block) and can choose who to play: a relative (moves into the family home) | someone from town (a townie
+##   moves in) | a new family (the town and its history stay). Meanwhile the town runs on autopilot and the household is marked `pending` in the Players table.
+## Every morning the player is reminded; with the setting "Pick for me after 2 days" on (default) the choice is made automatically after AUTO_DAYS days
+##   WITH OR WITHOUT a UI, so no empty household is simulated for long. With it off the reminders and the banner stay until the player chooses.
+## Choices: "relative:<id>", "townie:<id>", "town" (shows the town list), "new", "later". Who autopilot picks: SuccessionPick.
 const AUTO_DAYS := 2
 const MAX_RELATIVES := 4
 const MAX_TOWNIES := 6
 
+static var auto_pick: bool = true         # setting "Pick for me after 2 days" (SettingsApply); off = keep reminding, never decide
 static var _asking: Dictionary = {}       # player id -> true while a prompt is on screen
 
 static func reset() -> void:
@@ -21,8 +22,13 @@ static func begin(pid: int, hid: int, late_name: String, line: Array) -> void:
 	Players.set_field(pid, "late", late_name)
 	Players.set_field(pid, "since", SysUtil.day())
 	SysUtil.notify(SuccessionText.nobody_title(late_name), "death")
-	SysUtil.game_event("household_empty", {"player_id": pid, "household_id": hid})
-	prompt(pid)
+	SysUtil.game_event("household_empty", {"player_id": pid, "household_id": hid, "days_left": days_left(pid, SysUtil.day())})
+
+## Days until someone is picked for the player (0 = tomorrow morning at the latest), or -1 when "pick for me" is off.
+static func days_left(pid: int, day: int) -> int:
+	if not auto_pick:
+		return -1
+	return maxi(0, AUTO_DAYS - (day - int(Players.field(pid, "since", day))))
 
 # ------------------------------------------------------------------ prompts
 static func relatives(pid: int) -> Array:
@@ -49,14 +55,14 @@ static func town_options() -> Array:
 	out.append({"id": "back", "label": "Back"})
 	return out
 
-## Grown townies who could take over the home, steady order (by id).
+## Grown townies who could take over the home: adults first (youngest first), elders last, steady order.
 static func townies() -> Array:
 	var out: Array = []
 	for t in Story.alive_townies():
 		if Story.stage_of(t) in ["adult", "elder"]:
 			out.append(t)
-	out.sort_custom(func(a, b): return int(a["id"]) < int(b["id"]))
-	return out
+	var order: Array = HeirLine.grown_first(out.map(func(t): return int(t["id"])))
+	return order.map(func(id): return Story.townies[id])
 
 static func prompt(pid: int, town_list: bool = false) -> void:
 	if not JusticePlayer.ask_fn.is_valid() or bool(_asking.get(pid, false)) or not Succession.is_pending(pid):
@@ -116,19 +122,19 @@ static func new_family(pid: int, household: Dictionary = {}) -> Dictionary:
 	return {"ok": true, "msg": "", "folk_id": int(folk[0].id)}
 
 # ------------------------------------------------------------------ the day row
+## Every morning while pending: pick for the player once AUTO_DAYS passed (setting on), else a toast + the banner event. Never depends on a UI.
 static func on_day(pid: int, day: int) -> void:
-	if JusticePlayer.ask_fn.is_valid():
-		prompt(pid)
-		return
-	if day - int(Players.field(pid, "since", day)) >= AUTO_DAYS:
+	var left: int = days_left(pid, day)
+	if auto_pick and left <= 0:
 		autopilot(pid)
+		return
+	SysUtil.notify(SuccessionText.nobody_reminder(left), "death")
+	SysUtil.game_event("household_empty", {"player_id": pid, "household_id": Players.household_of(pid), "days_left": left})
 
-## Nobody chose: the closest relative, else the first grown townie, else a new family.
+## Nobody chose: the first person SuccessionPick lists who can move in, else a new family (which always works).
 static func autopilot(pid: int) -> Dictionary:
-	var rel: Array = relatives(pid)
-	if not rel.is_empty():
-		return choose(pid, "relative:%d" % int(rel[0]["id"]))
-	var tl: Array = townies()
-	if not tl.is_empty():
-		return choose(pid, "townie:%d" % int(tl[0]["id"]))
+	for c in SuccessionPick.order(pid):
+		var r: Dictionary = choose(pid, "%s:%d" % [str(c["pick"]), int(c["id"])])
+		if bool(r["ok"]) and not Succession.is_pending(pid):
+			return r
 	return choose(pid, "new")

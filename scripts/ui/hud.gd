@@ -43,6 +43,7 @@ var _settings_from_pause := false
 var tips: FirstRunTips
 var tracker: ScenarioTracker
 var offer_toast: OfferToast
+var nobody_banner: NobodyBanner
 var help_button: Button
 var folk_row: HBoxContainer
 var save_menu: PanelContainer
@@ -76,6 +77,8 @@ func _ready() -> void:
 	add_child(top_center)
 	offer_toast = OfferToast.new()
 	top_center.add_child(offer_toast)
+	nobody_banner = NobodyBanner.new()
+	top_center.add_child(nobody_banner)
 	toasts = ToastFeed.new()
 	toasts.offer = offer_toast
 	top_center.add_child(toasts)

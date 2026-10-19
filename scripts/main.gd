@@ -130,6 +130,7 @@ func _enter_game() -> void:
 	playing = true
 	title.visible = false
 	Economy.auto_pay = GameSettings.get_bool("auto_pay")      # the player's preference wins over what a save stored
+	SuccessionNobody.auto_pick = GameSettings.get_bool("pick_for_me")
 	hud.visible = true
 	hud.rebuild_folk_row()
 	if lot_view != null:
