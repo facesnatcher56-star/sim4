@@ -125,10 +125,10 @@ func _first_folk() -> int:
 func _on_result(seq: int, ok: bool, msg: String) -> void:
 	if _mode == "live":
 		if seq == _seq_foreign:
-			_write("foreign", {"ok": ok, "msg": msg})
+			_write("foreign", {"foreign_ok": ok, "foreign_msg": msg})      # own keys: the "own" stage may overwrite ok / msg before the host reads the file
 			_seq_own = _ses.client.send_command(_folk_of(Players.primary_household()), "career_skip", {}, 0.0)
 		elif seq == _seq_own:
-			_write("own", {"ok": ok, "msg": msg})
+			_write("own", {"own_ok": ok, "own_msg": msg})
 		return
 	if seq == _cmd_seq:
 		_stage = 2

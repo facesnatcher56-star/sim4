@@ -10,6 +10,19 @@ const Kit := preload("res://tests/coop_kit.gd")
 var fails: Array = []
 var _pids: Array = []
 var _ses: CoopSession
+var _scale: float = 1.0        # >= 1: every deadline and the client's budgets are multiplied by this (measured CPU contention at the start)
+
+## How much slower than an idle machine this process runs right now (a fixed arithmetic loop, 1 = idle). Under a parallel test load the client
+## process starves too, so all waits are DEADLINES (the test goes on the moment the expected state arrives) and only the deadline stretches.
+func _measure_load() -> float:
+	var best: int = 1 << 30
+	for rep in 3:
+		var t0 := Time.get_ticks_usec()
+		var acc: int = 0
+		for i in 300000:
+			acc += i % 7
+		best = mini(best, Time.get_ticks_usec() - t0)
+	return clampf(float(best) / 25000.0, 3.0, 10.0)      # ~25 ms when idle; never below 2x so a loaded start-up still has room
 
 func _check(cond: bool, msg: String) -> void:
 	if not cond:
@@ -17,6 +30,7 @@ func _check(cond: bool, msg: String) -> void:
 
 func run() -> Array:
 	fails = []
+	_scale = _measure_load()
 	_clean_files()
 	CoopProto.build_override = "test-build"
 	HoodKit.new_game("classic")
@@ -47,6 +61,7 @@ func _open_lobby() -> int:
 	for i in 12:
 		var port := rng.randi_range(20000, 58000)
 		if _ses.start_host(port, "Hosty") == "":
+			_ses.host.rejoin_s = 3600.0         # a dropped seat must outlive a slow machine, or the seat counts below depend on timing
 			return port
 	_check(false, "could not open a lobby on any random port")
 	return 0
@@ -104,13 +119,13 @@ func _scenario(port: int, cmd: Dictionary) -> void:
 	CoopProto.build_override = "old-build"
 	odd.join("127.0.0.1:%d" % port, "Old")
 	var t0 := Time.get_ticks_msec()
-	while odd.client.state == "connecting" and Time.get_ticks_msec() - t0 < 8000:
+	while odd.client.state == "connecting" and Time.get_ticks_msec() - t0 < int(8000 * _scale):
 		_pump()
 		odd.pump(0.02)
 		OS.delay_msec(5)
 	CoopProto.build_override = "test-build"           # hello was sent as old-build; the host now compares with test-build
 	t0 = Time.get_ticks_msec()
-	while odd.client.state == "handshake" and Time.get_ticks_msec() - t0 < 8000:
+	while odd.client.state == "handshake" and Time.get_ticks_msec() - t0 < int(8000 * _scale):
 		_pump()
 		odd.pump(0.02)
 		OS.delay_msec(5)
@@ -144,9 +159,9 @@ func _live_scenario(port: int) -> void:
 	_check(Players.primary_household() == host_hh, "the host's own primary household is untouched")
 	_check(PlayerLots.lot_of(pid) != "" and PlayerLots.lot_of(pid) != "home", "the client has its own lot (%s)" % PlayerLots.lot_of(pid))
 	var fr := _wait_stage(res, "foreign", 30.0)
-	_check(not fr.is_empty() and not bool(fr["ok"]), "an order for the host's folk is rejected (%s)" % str(fr.get("msg", "")))
+	_check(not fr.is_empty() and not bool(fr["foreign_ok"]), "an order for the host's folk is rejected (%s)" % (str(fr.get("foreign_msg", "")) if not fr.is_empty() else "no answer, client file: " + str(_read(res).get("stages", []))))
 	var own := _wait_stage(res, "own", 30.0)
-	_check(not own.is_empty() and bool(own["ok"]), "an order for its own folk is accepted (%s)" % str(own.get("msg", "")))
+	_check(not own.is_empty() and bool(own["own_ok"]), "an order for its own folk is accepted (%s)" % str(own.get("own_msg", "")))
 	var snaps0 := _ses.host.snapshots_sent
 	# the host plays 25 game minutes; deltas flow
 	for i in 25:
@@ -158,7 +173,7 @@ func _live_scenario(port: int) -> void:
 	var minute := SimEnv.now_min()
 	var tick := {}
 	var t1 := Time.get_ticks_msec()
-	while Time.get_ticks_msec() - t1 < 15000:
+	while Time.get_ticks_msec() - t1 < int(15000 * _scale):
 		_pump()
 		tick = _read(res)
 		if int(tick.get("minute", -1)) == minute and tick.get("stage", "") == "tick":
@@ -218,10 +233,10 @@ func _spawn(client_args: Array) -> void:
 	var guard := ProjectSettings.globalize_path("res://tools/godot_guard.ps1")
 	var godot_args := ["--headless", "--path", wt, "--script", "res://tests/fixtures/coop_client.gd", "--"]
 	godot_args.append_array(client_args)
-	godot_args.append("--budget=50")
+	godot_args.append("--budget=%d" % int(50 * _scale))
 	var pid: int
 	if OS.get_name() == "Windows" and FileAccess.file_exists(guard):
-		pid = OS.create_process("powershell", ["-NoProfile", "-File", guard, "-Seconds", "60", "-MaxSeconds", "75", "-Args", ",".join(PackedStringArray(godot_args))])
+		pid = OS.create_process("powershell", ["-NoProfile", "-File", guard, "-Seconds", str(int(60 * _scale)), "-MaxSeconds", str(int(75 * _scale)), "-Args", ",".join(PackedStringArray(godot_args))])
 	else:
 		pid = OS.create_process(OS.get_executable_path(), PackedStringArray(godot_args))    # no PowerShell (Linux/Mac): the in-engine --budget watchdog bounds the client
 	_check(pid > 0, "spawned a client process")
@@ -241,23 +256,27 @@ func _read(path: String) -> Dictionary:
 	var v: Variant = JSON.parse_string(txt)
 	return v if v is Dictionary else {}
 
-## Pump the host's network until the client's result file has reached `stage` (or the time is up). {} on timeout.
+## Pump the host's network until the client's result file has reached `stage`. The deadline is `seconds` x the measured load factor, measured
+## again at each wait (a parallel run gets busier after this test started) and it restarts every time the client's file changes (it is alive and
+## moving). {} on timeout.
 func _wait_stage(path: String, stage: String, seconds: float) -> Dictionary:
-	var t0 := Time.get_ticks_msec()
-	while Time.get_ticks_msec() - t0 < int(seconds * 1000.0):
-		_pump()
-		var d := _read(path)
-		if (d.get("stages", []) as Array).has(stage):
-			return d
-		OS.delay_msec(10)
-	return {}
+	return _wait_until(path, seconds, func(d): return (d.get("stages", []) as Array).has(stage))
 
 func _wait_flag(path: String, key: String, seconds: float) -> Dictionary:
+	return _wait_until(path, seconds, func(d): return d.get(key, false))
+
+func _wait_until(path: String, seconds: float, done: Callable) -> Dictionary:
+	_scale = maxf(_scale, _measure_load())
 	var t0 := Time.get_ticks_msec()
-	while Time.get_ticks_msec() - t0 < int(seconds * 1000.0):
+	var last := ""
+	while Time.get_ticks_msec() - t0 < int(seconds * _scale * 1000.0):
 		_pump()
 		var d := _read(path)
-		if d.get(key, false):
+		if done.call(d):
 			return d
+		var sig := str(d.get("stage", "")) + str(d.get("ms", ""))
+		if sig != last:
+			last = sig
+			t0 = Time.get_ticks_msec()
 		OS.delay_msec(10)
 	return {}
