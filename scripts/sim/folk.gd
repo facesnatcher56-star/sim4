@@ -4,6 +4,8 @@ extends RefCounted
 
 const SKILLS: Array[String] = ["cooking", "fitness", "logic", "charisma", "handiness", "painting"]
 const MAX_SKILL_LEVEL := 10
+const XP_TAPER_FROM := 3          # from this level on every further level takes longer: mastering 10 is rare
+const XP_TAPER_STEP := 0.45
 const MEMORY_HALF_LIFE_MIN := 1.5 * 1440.0
 const MEMORY_MAX_ENTRIES := 80
 const MEMORY_BIAS_LIMIT := 0.5
@@ -245,6 +247,8 @@ func add_skill_xp(skill: String, xp: float) -> void:
 	if not skills.has(skill):
 		skills[skill] = {"xp": 0.0, "level": 0}
 	var sk: Dictionary = skills[skill]
+	if xp > 0.0:
+		xp /= 1.0 + XP_TAPER_STEP * maxf(float(sk["level"]) - XP_TAPER_FROM, 0.0)
 	sk["xp"] = float(sk["xp"]) + xp
 	var lvl := int(sk["level"])
 	while lvl < MAX_SKILL_LEVEL and float(sk["xp"]) >= xp_for_level(lvl + 1):
