@@ -12,6 +12,9 @@ static var retired: Dictionary = {}     # folk_id -> {career, level, pension}
 static var skip_flags: Dictionary = {}  # folk_id -> day on which the player chose to skip work
 static var shift_log: Array = []        # last shifts {day, folk_id, kind, pay, delta, performance, skipped}
 static var auto_accept_offers: bool = false
+static var homemakers: Dictionary = {}  # folk_id -> true: "Stay at home" is a role, not a career (see Homemaker)
+static var changed_day: Dictionary = {} # folk_id -> day of the last hire / quit (offers are never taken on their own right after)
+static var seeking: Dictionary = {}     # folk_id -> day they started looking for work (JobSeeking)
 ## UI hook: when true, 'Look for Jobs' only creates the offer and the player answers it (Accept / Decline pop-up, Work dialog). Not saved.
 static var confirm_offers: bool = false
 
@@ -22,6 +25,9 @@ static func reset() -> void:
 	retired.clear()
 	skip_flags.clear()
 	shift_log.clear()
+	homemakers.clear()
+	changed_day.clear()
+	seeking.clear()
 	auto_accept_offers = false
 
 # ------------------------------------------------------------------ data access
@@ -107,6 +113,7 @@ static func qualify(f, cid: String, level: int, branch: String = "") -> Dictiona
 	if ld.is_empty():
 		return {"ok": false, "missing": ["no such level"]}
 	missing.append_array(JusticeCareers.extra_missing(int(f.id), cid))      # a criminal record closes some doors
+	missing.append_array(EduGate.extra_missing(int(f.id), cid, level))      # task 14: the better jobs want a degree
 	var req: Dictionary = ld.get("requires", {})
 	var sk: Dictionary = req.get("skills", {})
 	for s in sk:
@@ -165,6 +172,8 @@ static func why_not_work(f, cid: String = "", level: int = 1) -> String:
 		return "nobody"
 	if int(f.household_id) <= 0 or f.has_meta("visitor") or f.has_meta("staff") or f.has_meta("crowd") or f.has_meta("trip_npc"):
 		return "not one of the household"
+	if homemakers.has(int(f.id)):
+		return "stays at home"
 	var stage: String = str(f.age_stage)
 	if stage in ["adult", "elder"]:
 		return ""
@@ -184,6 +193,8 @@ static func hire(f, cid: String, level: int = 1) -> bool:
 		"days_worked": 0, "hired_day": SysUtil.day(), "level_since": SysUtil.day(), "days_skipped": 0,
 		"attempt_day": -1, "cap_note_day": -1, "branch": "", "branch_pref": "", "shift": "day", "tasks": {"day": -1, "progress": {}, "done": []}}
 	offers.erase(int(f.id))
+	seeking.erase(int(f.id))
+	changed_day[int(f.id)] = SysUtil.day()
 	apply_schedule(f)
 	SysUtil.game_event("hired", {"folk_id": f.id, "career": cid, "level": level})
 	SysUtil.notify("%s is now a %s (%s)!" % [f.name, str(career_def(cid).get("label", cid)), title_of(int(f.id))], "career")
@@ -194,6 +205,7 @@ static func quit_job(f, why: String = "quit") -> void:
 		return
 	var j: Dictionary = jobs[int(f.id)]
 	jobs.erase(int(f.id))
+	changed_day[int(f.id)] = SysUtil.day()
 	apply_schedule(f)
 	SysUtil.game_event("left_job", {"folk_id": f.id, "career": j["career"], "reason": why})
 
@@ -270,6 +282,7 @@ static func on_job_search(folk_id: int) -> void:
 	var f = SysUtil.folk(folk_id)
 	if f == null or jobs.has(folk_id) or (why_not_work(f) != "" and str(f.age_stage) != "teen"):
 		return
+	seeking[folk_id] = SysUtil.day()
 	if not offers.has(folk_id):
 		make_offer(f)
 	if not confirm_offers:
@@ -289,6 +302,7 @@ static func enroll_school() -> void:
 
 static func on_day(day: int) -> void:
 	ContentRules.on_day(day)
+	Homemaker.on_day()
 	enroll_school()
 	# expire offers
 	for fid in offers.keys():
@@ -309,7 +323,7 @@ static func on_day(day: int) -> void:
 				_retire(f)
 				continue
 		# offers
-		if not jobs.has(fid) and not offers.has(fid) and stage == min_stage and Aging.stage_index(stage) >= Aging.stage_index(min_stage):
+		if not jobs.has(fid) and not offers.has(fid) and not homemakers.has(fid) and JobSeeking.cooled_down(f) and stage == min_stage and Aging.stage_index(stage) >= Aging.stage_index(min_stage):
 			if SysUtil.chance(float(s.get("offer_chance_per_day", 0.3)) * StoryPacing.mult("job", int(f.household_id))):
 				make_offer(f)
 
@@ -369,7 +383,8 @@ static func info_for(folk_id: int) -> Dictionary:
 static func to_dict() -> Dictionary:
 	return {"jobs": SysUtil.str_keys(jobs).duplicate(true), "school": SysUtil.str_keys(school).duplicate(true),
 		"offers": SysUtil.str_keys(offers).duplicate(true), "retired": SysUtil.str_keys(retired).duplicate(true),
-		"skip_flags": SysUtil.str_keys(skip_flags), "shift_log": shift_log.duplicate(true), "auto_accept": auto_accept_offers}
+		"skip_flags": SysUtil.str_keys(skip_flags), "shift_log": shift_log.duplicate(true), "auto_accept": auto_accept_offers,
+		"homemakers": SysUtil.str_keys(homemakers), "changed_day": SysUtil.str_keys(changed_day), "seeking": SysUtil.str_keys(seeking)}
 
 static func from_dict(d: Dictionary) -> void:
 	reset()
@@ -380,6 +395,9 @@ static func from_dict(d: Dictionary) -> void:
 	skip_flags = SysUtil.int_keys(d.get("skip_flags", {}))
 	shift_log = (d.get("shift_log", []) as Array).duplicate(true)
 	auto_accept_offers = bool(d.get("auto_accept", false))
+	homemakers = SysUtil.int_keys(d.get("homemakers", {}))
+	changed_day = SysUtil.int_keys(d.get("changed_day", {}))
+	seeking = SysUtil.int_keys(d.get("seeking", {}))
 	for fid in jobs:
 		var f = SysUtil.folk(int(fid))
 		if f != null:

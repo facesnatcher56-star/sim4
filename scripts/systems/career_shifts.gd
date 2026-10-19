@@ -167,7 +167,7 @@ static func on_returned(f, rec: Dictionary) -> void:
 			var hours: float = float(rec["worked_min"]) / 60.0
 			var sv: Dictionary = Careers.shift_def(cid, str(j.get("shift", "day")))
 			var smult: float = float(sv.get("pay_mult", 1.0)) if (not sv.is_empty() and int(j["level"]) >= int(sv.get("min_level", 1))) else 1.0
-			var pay: int = int(round(hours * float(ld.get("pay", 0)) * CareerProgress.pay_multiplier(perf) * smult * MarketEconomy.wage_mult()))
+			var pay: int = int(round(hours * float(ld.get("pay", 0)) * CareerProgress.pay_multiplier(perf) * smult * MarketEconomy.wage_mult() * EduGate.pay_mult(fid, cid)))
 			var delta: float
 			if completed:
 				delta = CareerProgress.shift_gain(f, cid, int(j["level"]))

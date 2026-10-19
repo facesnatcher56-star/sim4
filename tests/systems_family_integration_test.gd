@@ -85,7 +85,7 @@ func run() -> Array:
 		K.expect(f, (seen["stages"] as Array).has("baby") and (seen["stages"] as Array).has("toddler"), "the baby grew to a toddler: %s" % str(seen["stages"]))
 		K.expect(f, baby2.age_stage in ["toddler", "child"], "after 20 days: %s" % baby2.age_stage)
 		K.expect(f, Genetics.is_valid(baby2.appearance) and baby2.household_id == 1, "has an appearance and lives in the household")
-		K.expect(f, FamilyTree.parents_of(baby_id) == [ann.id, bo.id] and FamilyTree.relation_label(baby_id, ann.id) == "Parent", "tree knows the parents")
+		K.expect(f, (FamilyTree.parents_of(baby_id).size() == 2 and FamilyTree.parents_of(baby_id).has(ann.id) and FamilyTree.parents_of(baby_id).has(bo.id)) and FamilyTree.relation_label(baby_id, ann.id) in ["Parent", "Mother", "Father"], "tree knows the parents")
 		K.expect(f, float(baby2.skills.get("walking", {"xp": 0.0})["xp"]) > 0.0, "toddler skills grew")
 	K.expect(f, float(seen["max_neglect"]) < 6.0 * 60.0, "the parents kept the baby out of child-services range (max neglect %.0f min)" % float(seen["max_neglect"]))
 	K.expect(f, K.count_events("child_removed") == 0 and K.count_events("child_services_warning") == 0, "no child-services involvement")

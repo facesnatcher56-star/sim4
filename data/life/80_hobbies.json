@@ -1,0 +1,497 @@
+{
+ "_doc": "Hobbies (task 14): fishing at the pier, the community garden plots, painting and photography at the viewpoint, collecting rocks, bugs and stamps (complete sets can be donated to the museum), handicrafts at the workshop. Handlers in HobbyServices; state in HobbyState (plots, photos, collections).",
+ "config": {
+  "hobbies": {
+   "fish": {
+    "base": 0.35,
+    "per_level": 0.06,
+    "cap": 0.9,
+    "rare_level": 4,
+    "rare_chance": 0.06,
+    "good_chance": 0.25,
+    "values": {
+     "common": 5,
+     "good": 9,
+     "rare": 35
+    }
+   },
+   "garden": {
+    "tends_to_harvest": 3,
+    "yield_base": 2,
+    "yield_per_3_levels": 1,
+    "pantry": 2
+   },
+   "photo": {
+    "sell_cap": 5,
+    "sell_base": 5,
+    "sell_per_level": 2
+   },
+   "collect": {
+    "donate_pay": 120,
+    "donate_fame": 3.0,
+    "set_size": 8
+   },
+   "handicraft": {
+    "base": 12,
+    "per_level": 5
+   }
+  },
+  "collections": {
+   "rocks": {
+    "label": "Rocks and Minerals",
+    "items": [
+     {
+      "id": "quartz",
+      "label": "Quartz",
+      "weight": 30
+     },
+     {
+      "id": "granite",
+      "label": "Granite",
+      "weight": 28
+     },
+     {
+      "id": "flint",
+      "label": "Flint",
+      "weight": 22
+     },
+     {
+      "id": "mica",
+      "label": "Mica",
+      "weight": 14
+     },
+     {
+      "id": "amber",
+      "label": "Amber",
+      "weight": 8
+     },
+     {
+      "id": "jasper",
+      "label": "Jasper",
+      "weight": 7
+     },
+     {
+      "id": "geode",
+      "label": "Geode",
+      "weight": 4
+     },
+     {
+      "id": "opal",
+      "label": "Opal",
+      "weight": 2
+     }
+    ]
+   },
+   "bugs": {
+    "label": "Bugs and Beetles",
+    "items": [
+     {
+      "id": "ladybird",
+      "label": "Ladybird",
+      "weight": 30
+     },
+     {
+      "id": "bumblebee",
+      "label": "Bumblebee",
+      "weight": 26
+     },
+     {
+      "id": "grasshopper",
+      "label": "Grasshopper",
+      "weight": 22
+     },
+     {
+      "id": "dragonfly",
+      "label": "Dragonfly",
+      "weight": 14
+     },
+     {
+      "id": "stag_beetle",
+      "label": "Stag Beetle",
+      "weight": 8
+     },
+     {
+      "id": "moth",
+      "label": "Emperor Moth",
+      "weight": 6
+     },
+     {
+      "id": "firefly",
+      "label": "Firefly",
+      "weight": 4
+     },
+     {
+      "id": "mantis",
+      "label": "Praying Mantis",
+      "weight": 3
+     }
+    ]
+   },
+   "stamps": {
+    "label": "Stamps",
+    "items": [
+     {
+      "id": "penny",
+      "label": "Penny Post",
+      "weight": 30
+     },
+     {
+      "id": "harvest",
+      "label": "Harvest Fair",
+      "weight": 26
+     },
+     {
+      "id": "lighthouse",
+      "label": "Lighthouse",
+      "weight": 20
+     },
+     {
+      "id": "river",
+      "label": "River Bridge",
+      "weight": 14
+     },
+     {
+      "id": "kite",
+      "label": "Red Kite",
+      "weight": 8
+     },
+     {
+      "id": "mill",
+      "label": "Old Mill",
+      "weight": 6
+     },
+     {
+      "id": "comet",
+      "label": "Comet Year",
+      "weight": 4
+     },
+     {
+      "id": "gold",
+      "label": "Golden Jubilee",
+      "weight": 2
+     }
+    ]
+   }
+  }
+ },
+ "places": {
+  "fishing_pier": {
+   "label": "Willow Green Fishing Pier",
+   "lot": "park",
+   "kind": "hobby",
+   "hours": [
+    5,
+    21
+   ],
+   "min_staff": 0,
+   "blurb": "Quiet water and a rod. The better the angler, the bigger the catch.",
+   "services": {
+    "fish_pier": {
+     "label": "Fish from the Pier",
+     "price": 2,
+     "minutes": 120,
+     "posture": "sit",
+     "handler": "hobby",
+     "min_stage": "child",
+     "args": {
+      "act": "fish"
+     },
+     "needs": {
+      "fun": 16,
+      "energy": -6
+     },
+     "skill_xp": {
+      "fishing": 20
+     }
+    }
+   }
+  },
+  "community_garden": {
+   "label": "Willow Green Community Garden",
+   "lot": "park",
+   "kind": "hobby",
+   "hours": [
+    7,
+    19
+   ],
+   "seasons": [
+    "spring",
+    "summer",
+    "autumn"
+   ],
+   "min_staff": 0,
+   "blurb": "Rent a plot for a week, tend it, and harvest vegetables for the pantry and the market.",
+   "services": {
+    "rent_plot": {
+     "label": "Rent a Plot for a Week",
+     "price": 12,
+     "minutes": 5,
+     "posture": "stand",
+     "handler": "",
+     "min_stage": "teen",
+     "pass": {
+      "days": 7
+     },
+     "text": "{name} rented a plot in the community garden for a week."
+    },
+    "tend_plot": {
+     "label": "Tend the Plot",
+     "price": 0,
+     "minutes": 60,
+     "posture": "stand",
+     "handler": "hobby",
+     "min_stage": "teen",
+     "args": {
+      "act": "tend"
+     },
+     "needs": {
+      "fun": 8,
+      "energy": -8
+     },
+     "skill_xp": {
+      "gardening": 25
+     },
+     "once_per_day": true
+    },
+    "harvest_plot": {
+     "label": "Harvest the Plot",
+     "price": 0,
+     "minutes": 30,
+     "posture": "stand",
+     "handler": "hobby",
+     "min_stage": "teen",
+     "args": {
+      "act": "harvest"
+     },
+     "needs": {
+      "fun": 6
+     },
+     "skill_xp": {
+      "gardening": 15
+     }
+    }
+   }
+  },
+  "viewpoint": {
+   "label": "Willow Green Viewpoint",
+   "lot": "park",
+   "kind": "hobby",
+   "hours": [
+    6,
+    21
+   ],
+   "min_staff": 0,
+   "blurb": "A bench and a view over the pond and the town: paint it, photograph it.",
+   "services": {
+    "paint_outdoors": {
+     "label": "Paint Outdoors",
+     "price": 5,
+     "minutes": 120,
+     "posture": "sit",
+     "handler": "hobby",
+     "min_stage": "child",
+     "args": {
+      "act": "paint"
+     },
+     "needs": {
+      "fun": 14
+     },
+     "skill_xp": {
+      "painting": 30
+     }
+    },
+    "take_photos": {
+     "label": "Take Photographs",
+     "price": 0,
+     "minutes": 60,
+     "posture": "stand",
+     "handler": "hobby",
+     "min_stage": "child",
+     "args": {
+      "act": "photo"
+     },
+     "needs": {
+      "fun": 14
+     },
+     "skill_xp": {
+      "photography": 25
+     }
+    }
+   }
+  },
+  "nature_trail": {
+   "label": "Willow Green Nature Trail",
+   "lot": "park",
+   "kind": "hobby",
+   "hours": [
+    6,
+    20
+   ],
+   "min_staff": 0,
+   "blurb": "Turn over stones, look under leaves. Collections of rocks and bugs, eight to a set.",
+   "services": {
+    "hunt_rocks": {
+     "label": "Hunt for Rocks",
+     "price": 0,
+     "minutes": 60,
+     "posture": "stand",
+     "handler": "hobby",
+     "min_stage": "child",
+     "args": {
+      "kind": "rocks",
+      "act": "hunt"
+     },
+     "needs": {
+      "fun": 12
+     }
+    },
+    "catch_bugs": {
+     "label": "Catch Bugs (and let them go)",
+     "price": 0,
+     "minutes": 60,
+     "posture": "stand",
+     "handler": "hobby",
+     "min_stage": "child",
+     "args": {
+      "kind": "bugs",
+      "act": "hunt"
+     },
+     "needs": {
+      "fun": 12
+     },
+     "when": {
+      "season": [
+       "spring",
+       "summer",
+       "autumn"
+      ]
+     }
+    }
+   }
+  },
+  "workshop": {
+   "label": "Hollow Oak Workshop",
+   "lot": "library",
+   "kind": "hobby",
+   "schedule": [
+    {
+     "days": [
+      1,
+      2,
+      3,
+      4,
+      5
+     ],
+     "hours": [
+      10,
+      17
+     ]
+    }
+   ],
+   "blurb": "Benches, tools and good company: make handicrafts for the craft stall.",
+   "staff": [
+    {
+     "role": "Workshop leader",
+     "career": "handyperson",
+     "n": 1
+    }
+   ],
+   "min_staff": 1,
+   "services": {
+    "craft_handicraft": {
+     "label": "Make Handicrafts",
+     "price": 6,
+     "minutes": 90,
+     "posture": "sit",
+     "handler": "hobby",
+     "min_stage": "teen",
+     "args": {
+      "act": "handicraft"
+     },
+     "needs": {
+      "fun": 12,
+      "energy": -8
+     },
+     "skill_xp": {
+      "handiness": 28
+     },
+     "once_per_day": true
+    }
+   }
+  },
+  "newsstand": {
+   "services": {
+    "buy_stamp_pack": {
+     "label": "Buy a Pack of Stamps",
+     "price": 6,
+     "minutes": 5,
+     "posture": "stand",
+     "handler": "hobby",
+     "min_stage": "child",
+     "args": {
+      "kind": "stamps",
+      "act": "stamps"
+     },
+     "needs": {
+      "fun": 4
+     }
+    }
+   }
+  },
+  "museum": {
+   "services": {
+    "donate_rocks": {
+     "label": "Donate the Rock Collection",
+     "price": 0,
+     "minutes": 20,
+     "posture": "stand",
+     "handler": "hobby",
+     "min_stage": "child",
+     "args": {
+      "kind": "rocks",
+      "act": "donate"
+     }
+    },
+    "donate_bugs": {
+     "label": "Donate the Bug Collection",
+     "price": 0,
+     "minutes": 20,
+     "posture": "stand",
+     "handler": "hobby",
+     "min_stage": "child",
+     "args": {
+      "kind": "bugs",
+      "act": "donate"
+     }
+    },
+    "donate_stamps": {
+     "label": "Donate the Stamp Collection",
+     "price": 0,
+     "minutes": 20,
+     "posture": "stand",
+     "handler": "hobby",
+     "min_stage": "child",
+     "args": {
+      "kind": "stamps",
+      "act": "donate"
+     }
+    }
+   }
+  },
+  "gallery": {
+   "services": {
+    "sell_photos": {
+     "label": "Sell Your Photographs",
+     "price": 0,
+     "minutes": 20,
+     "posture": "stand",
+     "handler": "hobby",
+     "min_stage": "teen",
+     "args": {
+      "act": "sell_photos"
+     }
+    }
+   }
+  }
+ }
+}

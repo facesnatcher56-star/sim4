@@ -52,7 +52,8 @@ static func deliver(mother_id: int, father_id: int) -> Array:
 static func _make_baby(m, mother_id: int, father_id: int, sex: String, pc: Dictionary):
 	var gen: Dictionary = Genetics.inherit(Family.person_info(mother_id), Family.person_info(father_id), null,
 		{"chance": float(pc.get("inherit_chance", 0.35)), "cap": int(pc.get("max_inherited", 2)), "sex": sex})
-	var baby_name: String = Names.pick_first([], SysUtil.rng, sex) + " " + Aging._surname(str(m.name))
+	var fam: String = Aging.family_name(m, father_id)
+	var baby_name: String = Names.pick_first([], SysUtil.rng, sex) + ((" " + fam) if fam != "" else "")
 	var baby := Folk.create(baby_name, [], -1, sex)
 	baby.appearance = gen["appearance"]
 	baby.household_id = int(m.household_id)

@@ -5,7 +5,7 @@ const Kit = preload("res://tests/sim_testkit.gd")
 
 const COND_KEYS := ["circadian", "no_free_bed", "pair_flag_absent", "stat_below", "stat_above", "has_trait", "lacks_trait", "has_buff", "lacks_buff", "mood_is", "skill_at_least",
 	"object_state_eq", "object_state_above", "object_state_below", "time_between", "coins_at_least", "relationship_above",
-	"has_job", "posture_is", "posture_not", "not", "any"]
+	"has_job", "posture_is", "posture_not", "not", "any", "age_stage_is", "homemaker", "fridge_clean"]
 const SYS_COND_KEYS := ["friends_at_least", "bit_count", "career_is", "career_level_at_least", "age_stage_is", "skill_below", "in_school", "pregnant"]
 const LOOT_KEYS := ["add_buff", "remove_buff", "target_add_buff", "target_remove_buff", "stat_add", "target_stat_add", "skill_xp",
 	"object_state_add", "object_state_set", "object_state_toggle", "coins_add", "relationship_add", "fire_event", "notify", "consume_item", "chance"]

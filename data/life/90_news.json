@@ -1,0 +1,148 @@
+{
+ "_doc": "Task 14: the small news items of the places that have none of their own elsewhere (PlaceNews picks one at random now and then; {place}, {staff}, {title_slot}, {special_main} are filled in).",
+ "places": {
+  "preschool": {
+   "news": [
+    "{place} has a waiting list for the autumn term.",
+    "{staff} has a new story corner at {place}."
+   ]
+  },
+  "homework_club": {
+   "news": [
+    "{place} has opened an extra table for homework after school."
+   ]
+  },
+  "college": {
+   "news": [
+    "{place} has opened a new evening course.",
+    "{staff} is giving a public lecture at {place}."
+   ]
+  },
+  "night_school": {
+   "news": [
+    "{place} has places left in the evening courses."
+   ]
+  },
+  "library_courses": {
+   "news": [
+    "{place} is running a free taster lesson this week."
+   ]
+  },
+  "clinic": {
+   "news": [
+    "{place} reminds everyone that a check-up now and then is cheaper than a cure.",
+    "{staff} says the flu shot is on again."
+   ]
+  },
+  "dentist": {
+   "news": [
+    "{place} offers a quick clean to anybody who brushes twice a day.",
+    "{staff} reminds children to brush their teeth."
+   ]
+  },
+  "therapy": {
+   "news": [
+    "{place} has a quiet evening for anyone who wants to talk.",
+    "{staff} says it is fine to ask for help."
+   ]
+  },
+  "pharmacy_counter": {
+   "news": [
+    "{place} has restocked the long-term medicines.",
+    "{staff} reminds everybody to take their medicine on time."
+   ]
+  },
+  "gym_desk": {
+   "news": [
+    "{place} has a new class timetable.",
+    "{staff} is offering a free first session."
+   ]
+  },
+  "pool": {
+   "news": [
+    "{place} has opened the shallow end for family splash sessions."
+   ]
+  },
+  "lake": {
+   "news": [
+    "The lake shore is lovely this week.",
+    "The ranger says the paddling is perfect."
+   ]
+  },
+  "community_centre": {
+   "news": [
+    "{place} welcomes new members to all three clubs."
+   ]
+  },
+  "radio": {
+   "news": [
+    "Fernwood FM has a new morning show host."
+   ]
+  },
+  "tv": {
+   "news": [
+    "Local TV is running a special film this weekend."
+   ]
+  },
+  "wedding_lawn": {
+   "news": [
+    "{place} has been booked for a spring wedding.",
+    "{staff} has married another happy couple."
+   ]
+  },
+  "hall_hire": {
+   "news": [
+    "{place} has dates free for parties and celebrations."
+   ]
+  },
+  "party_room": {
+   "news": [
+    "{place} can seat ten for a birthday dinner."
+   ]
+  },
+  "picnic_grove": {
+   "news": [
+    "Families are gathering at {place} this weekend."
+   ]
+  },
+  "pet_care": {
+   "news": [
+    "The town's pets had a good week."
+   ]
+  },
+  "fishing_pier": {
+   "news": [
+    "Anglers say the fish are biting at the pier.",
+    "Somebody landed a big one at the pier."
+   ]
+  },
+  "community_garden": {
+   "news": [
+    "The community garden plots are full of beans.",
+    "Gardeners are swapping tips at the plots."
+   ]
+  },
+  "viewpoint": {
+   "news": [
+    "Painters and photographers love the viewpoint this week."
+   ]
+  },
+  "nature_trail": {
+   "news": [
+    "Children are hunting for rocks and bugs on the nature trail."
+   ]
+  },
+  "workshop": {
+   "news": [
+    "{place} has a new batch of handmade goods for the craft stall.",
+    "{staff} is teaching a beginners' evening."
+   ]
+  },
+  "school": {
+   "news": [
+    "Larkfield School is collecting books for the new term.",
+    "{staff} has been voted teacher of the term."
+   ]
+  }
+ }
+}

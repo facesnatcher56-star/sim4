@@ -1,0 +1,289 @@
+{
+ "_doc": "Family and social events (task 14): weddings, birthday parties, baby showers, funerals, family reunions, the block party and the holiday parade. Each is a service of a real place; guests are the host's contacts. Handlers: wedding, birthday_party, baby_shower, funeral, reunion, mingle (EventServices). A schedule row may name days of the year (doy) or holidays.",
+ "config": {
+  "events": {
+   "funeral_days": 10,
+   "funeral_grief_cut": 0.3,
+   "birthday_before": 2,
+   "birthday_after": 3
+  }
+ },
+ "places": {
+  "wedding_lawn": {
+   "label": "Willow Green Wedding Lawn",
+   "lot": "park",
+   "kind": "family",
+   "hours": [
+    10,
+    20
+   ],
+   "seasons": [
+    "spring",
+    "summer",
+    "autumn"
+   ],
+   "blurb": "An outdoor wedding under the trees. Spring to autumn.",
+   "staff": [
+    {
+     "role": "Celebrant",
+     "career": "",
+     "n": 1
+    }
+   ],
+   "min_staff": 1,
+   "services": {
+    "wedding_lawn": {
+     "label": "Hold the Wedding Here",
+     "price": 150,
+     "minutes": 120,
+     "posture": "stand",
+     "handler": "wedding",
+     "min_stage": "adult",
+     "args": {
+      "guests": 10,
+      "per_guest": 6
+     },
+     "adult_only": true
+    }
+   }
+  },
+  "hall_hire": {
+   "label": "Hollow Oak Hall Hire",
+   "lot": "library",
+   "kind": "family",
+   "hours": [
+    10,
+    20
+   ],
+   "blurb": "The community hall for weddings, parties, showers and funerals.",
+   "staff": [
+    {
+     "role": "Hall manager",
+     "career": "",
+     "n": 1
+    }
+   ],
+   "min_staff": 1,
+   "services": {
+    "wedding_hall": {
+     "label": "Hold the Wedding in the Hall",
+     "price": 300,
+     "minutes": 150,
+     "posture": "stand",
+     "handler": "wedding",
+     "min_stage": "adult",
+     "args": {
+      "guests": 14,
+      "per_guest": 8
+     }
+    },
+    "birthday_hall": {
+     "label": "Birthday Party in the Hall",
+     "price": 80,
+     "minutes": 150,
+     "posture": "stand",
+     "handler": "birthday_party",
+     "min_stage": "child",
+     "args": {
+      "guests": 8,
+      "per_guest": 5
+     }
+    },
+    "shower_hall": {
+     "label": "Baby Shower in the Hall",
+     "price": 70,
+     "minutes": 120,
+     "posture": "stand",
+     "handler": "baby_shower",
+     "min_stage": "adult",
+     "args": {
+      "guests": 8,
+      "per_guest": 5
+     }
+    },
+    "funeral_hall": {
+     "label": "Hold a Funeral Service",
+     "price": 120,
+     "minutes": 90,
+     "posture": "stand",
+     "handler": "funeral",
+     "min_stage": "teen",
+     "args": {
+      "guests": 10,
+      "per_guest": 3
+     }
+    }
+   }
+  },
+  "party_room": {
+   "label": "Private Room at the Copper Spoon",
+   "lot": "cafe",
+   "kind": "family",
+   "hours": [
+    12,
+    22
+   ],
+   "blurb": "A private room with a table for ten and a cake on the house.",
+   "staff": [
+    {
+     "role": "Host",
+     "career": "",
+     "n": 1
+    }
+   ],
+   "min_staff": 1,
+   "services": {
+    "birthday_dinner": {
+     "label": "Birthday Dinner",
+     "price": 140,
+     "minutes": 150,
+     "posture": "stand",
+     "handler": "birthday_party",
+     "min_stage": "child",
+     "args": {
+      "guests": 8,
+      "per_guest": 12
+     }
+    },
+    "reunion_dinner": {
+     "label": "Family Reunion Dinner",
+     "price": 160,
+     "minutes": 150,
+     "posture": "stand",
+     "handler": "reunion",
+     "min_stage": "teen",
+     "args": {
+      "guests": 8,
+      "per_guest": 12
+     }
+    }
+   }
+  },
+  "picnic_grove": {
+   "label": "Willow Green Picnic Grove",
+   "lot": "park",
+   "kind": "family",
+   "hours": [
+    8,
+    20
+   ],
+   "blurb": "Tables under the trees for a family picnic.",
+   "services": {
+    "reunion_picnic": {
+     "label": "Family Reunion Picnic",
+     "price": 40,
+     "minutes": 150,
+     "posture": "stand",
+     "handler": "reunion",
+     "min_stage": "teen",
+     "args": {
+      "guests": 8,
+      "per_guest": 8
+     }
+    }
+   },
+   "min_staff": 0
+  },
+  "block_party": {
+   "label": "Willow Green Block Party",
+   "lot": "park",
+   "kind": "family",
+   "schedule": [
+    {
+     "doy": [
+      5,
+      12,
+      19,
+      26
+     ],
+     "hours": [
+      15,
+      22
+     ]
+    }
+   ],
+   "news_chance": 1.0,
+   "blurb": "The neighbours' party: food, music and a chance to meet everybody. Four times a year.",
+   "news": [
+    "The block party starts this afternoon at the park."
+   ],
+   "services": {
+    "join_block_party": {
+     "label": "Join the Block Party",
+     "price": 0,
+     "minutes": 120,
+     "posture": "stand",
+     "handler": "mingle",
+     "min_stage": "child",
+     "args": {
+      "neighbours": 3,
+      "friendship": 2.0
+     },
+     "needs": {
+      "fun": 24,
+      "social": 30,
+      "hunger": 20
+     }
+    }
+   },
+   "min_staff": 0
+  },
+  "holiday_parade": {
+   "label": "Fernwood Holiday Parade",
+   "lot": "park",
+   "kind": "family",
+   "schedule": [
+    {
+     "holiday": true,
+     "hours": [
+      11,
+      15
+     ]
+    }
+   ],
+   "news_chance": 1.0,
+   "blurb": "On every holiday: bands, floats and the whole town along the park road.",
+   "news": [
+    "The holiday parade sets off from the park at eleven."
+   ],
+   "services": {
+    "watch_parade": {
+     "label": "Watch the Parade",
+     "price": 0,
+     "minutes": 60,
+     "posture": "stand",
+     "min_stage": "baby",
+     "needs": {
+      "fun": 24,
+      "social": 10
+     },
+     "buffs": [
+      "party_buzz"
+     ],
+     "text": "{name} watched the holiday parade go by."
+    },
+    "march_parade": {
+     "label": "March in the Parade",
+     "price": 0,
+     "minutes": 90,
+     "posture": "stand",
+     "handler": "mingle",
+     "min_stage": "child",
+     "args": {
+      "neighbours": 2,
+      "friendship": 2.0
+     },
+     "needs": {
+      "fun": 32,
+      "social": 18,
+      "energy": -10
+     },
+     "buffs": [
+      "party_buzz"
+     ]
+    }
+   },
+   "min_staff": 0
+  }
+ }
+}

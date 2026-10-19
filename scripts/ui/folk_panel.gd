@@ -25,6 +25,7 @@ var family_buttons: Dictionary = {}    # action id -> Button
 var goal_label: Label
 var goals_button: Button
 var career_button: Button
+var home_button: CheckButton
 var why_label: Label
 var why_toggle: CheckButton
 var tabs: TabContainer
@@ -77,6 +78,11 @@ func _ready() -> void:
 	career_button.tooltip_text = "Job, performance, shifts and job offers"
 	career_button.pressed.connect(func(): career_requested.emit(folk_id))
 	goal_row.add_child(career_button)
+	home_button = CheckButton.new()
+	home_button.text = "Stay at home"
+	home_button.tooltip_text = "A homemaker role instead of a career: no job offers, looks after the house, the cooking and the little ones"
+	home_button.toggled.connect(func(on): if folk_id >= 0 and on != Careers.homemakers.has(folk_id): Commands.run({"folk_id": folk_id, "action": "set_homemaker", "args": {"on": on}}))
+	goal_row.add_child(home_button)
 	tabs = TabContainer.new()
 	tabs.custom_minimum_size = Vector2(0, 250)
 	root.add_child(tabs)
@@ -387,6 +393,9 @@ func _refresh_goal() -> void:
 	var young: bool = str(UIU.prop(folk, "age_stage", "adult")) in ["baby", "toddler"]
 	goals_button.disabled = info.is_empty() or young
 	career_button.disabled = young
+	var grown: bool = str(UIU.prop(folk, "age_stage", "adult")) in ["adult", "elder"]
+	home_button.visible = grown
+	home_button.set_pressed_no_signal(Careers.homemakers.has(folk_id))
 
 # ---------------- skills ----------------
 func _build_skills() -> void:

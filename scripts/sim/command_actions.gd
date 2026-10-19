@@ -6,8 +6,8 @@ extends RefCounted
 const HANDLERS := {
 	"interact": "_interact", "build_place": "_build_place", "build_sell": "_build_sell", "build_wall": "_build_wall", "build_floor": "_build_floor",
 	"build_undo": "_build_undo", "career_accept": "_career_accept", "career_decline": "_career_decline", "career_skip": "_career_skip",
-	"career_unskip": "_career_unskip", "travel": "_travel", "go_home": "_go_home", "pay_bill": "_pay_bill", "set_aspiration": "_set_aspiration",
-	"invite_to_venue": "_invite", "prison_visit": "_prison_visit", "market": "_market", "vacation": "_vacation",
+	"career_unskip": "_career_unskip", "set_homemaker": "_set_homemaker", "travel": "_travel", "go_home": "_go_home", "pay_bill": "_pay_bill", "set_aspiration": "_set_aspiration",
+	"invite_to_venue": "_invite", "prison_visit": "_prison_visit", "market": "_market", "vacation": "_vacation", "life": "_life",
 	"set_heir": "_set_heir", "choose_successor": "_choose_successor", "pregnancy": "_pregnancy", "crimelife": "_crimelife", "city": "_city", "crimeunder": "_crimeunder", "storyteller": "_storyteller",
 }
 
@@ -99,6 +99,10 @@ static func _career_skip(e: Dictionary) -> Dictionary:
 	Careers.skip_work_today(int(e["folk_id"]))
 	return {"ok": true}
 
+static func _set_homemaker(e: Dictionary) -> Dictionary:
+	var f = SysUtil.folk(int(e["folk_id"]))
+	return {"ok": Homemaker.set_role(f, bool((e.get("args", {}) as Dictionary).get("on", true)))}
+
 static func _career_unskip(e: Dictionary) -> Dictionary:
 	Careers.skip_flags.erase(int(e["folk_id"]))
 	return {"ok": true}
@@ -134,6 +138,10 @@ static func _market(e: Dictionary) -> Dictionary:
 
 static func _city(e: Dictionary) -> Dictionary:
 	return CityCmd.run(e)
+
+static func _life(e: Dictionary) -> Dictionary:
+	var a: Dictionary = e["args"]
+	return LifeCommand.run(int(e["player_id"]), int(e["folk_id"]), str(a.get("action", "")), a.get("args", {}))
 
 static func _set_heir(e: Dictionary) -> Dictionary:
 	return SuccessionCmd.set_heir(e)

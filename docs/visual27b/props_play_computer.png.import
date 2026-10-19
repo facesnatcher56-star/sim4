@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ckvf383p65d6v"
-path="res://.godot/imported/closeup_write_desk.png-83d4d1754d65802d574c9144bf3b38b2.ctex"
+uid="uid://cbod4sny6bfl"
+path="res://.godot/imported/props_play_computer.png-dc3a9657d87a497839c77cfd41ab2ff6.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://docs/visual27/closeup_write_desk.png"
-dest_files=["res://.godot/imported/closeup_write_desk.png-83d4d1754d65802d574c9144bf3b38b2.ctex"]
+source_file="res://docs/visual27b/props_play_computer.png"
+dest_files=["res://.godot/imported/props_play_computer.png-dc3a9657d87a497839c77cfd41ab2ff6.ctex"]
 
 [params]
 

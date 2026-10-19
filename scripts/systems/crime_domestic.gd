@@ -88,7 +88,7 @@ static func move_out_with_kids(victim: int, aggressor: int) -> void:
 		FamilyHousehold.move_out(victim, 0.4)
 	for kid in kids:
 		if CrimePerson.folk(int(kid)) != null:
-			FamilyHousehold.move_out(int(kid), 0.0)
+			FamilyHousehold.move_out(int(kid), 0.0, false, true)
 	JusticeState.count("victims_left")
 	ChronicleHook.note("separation", "%s left %s and took the children." % [CrimePerson.name_of(victim), CrimePerson.name_of(aggressor)] if not kids.is_empty()
 		else "%s left %s." % [CrimePerson.name_of(victim), CrimePerson.name_of(aggressor)], [victim, aggressor], CrimePerson.home_key(victim), 3, true)

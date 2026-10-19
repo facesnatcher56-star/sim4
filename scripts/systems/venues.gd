@@ -33,11 +33,11 @@ static func is_open_type(vtype: String, at_min: int = -1) -> bool:
 	if td.is_empty():
 		return true
 	var day: int = at_min / 1440 + 1
-	if not _open_on(td.get("days", []), SysUtil.weekday(day)):
-		return false
 	var h: float = float(at_min % 1440) / 60.0
 	var hr: Array = hours(vtype)
-	return h >= float(hr[0]) and h < float(hr[1])
+	if _open_on(td.get("days", []), SysUtil.weekday(day)) and h >= float(hr[0]) and h < float(hr[1]):
+		return true
+	return Places.extra_open(vtype, at_min)          # task 14: a place inside the lot (evening classes, a club) keeps it open
 
 ## Empty list = every day.
 static func _open_on(days: Array, weekday: int) -> bool:
@@ -56,7 +56,13 @@ static func minutes_to_close(lot_id: String, at_min: int = -1) -> int:
 	var hr: Array = hours(vtype)
 	if float(hr[1]) >= 24.0 and float(hr[0]) <= 0.0:
 		return 100000
-	return int(float(hr[1]) * 60.0) - at_min % 1440
+	var base: int = int(float(hr[1]) * 60.0) - at_min % 1440
+	if base >= 0 and not is_open_type(vtype, at_min + base):
+		return base
+	for step in range(1, 24 * 4 + 1):          # task 14: a place inside the lot keeps it open past the venue's own hours: look for the real closing time
+		if not is_open_type(vtype, at_min + step * 15):
+			return step * 15
+	return 100000
 
 ## Human readable status for the UI.
 static func status_text(lot_id: String) -> String:
@@ -98,6 +104,17 @@ static func ambient(vtype: String) -> Dictionary:
 static func interaction_xp(vtype: String) -> Dictionary:
 	return type_def(vtype).get("interaction_xp", {})
 
+## Entry fee for these folk: a pass of a place inside the lot (task 14, the gym pass) waives it for its holder.
+static func entry_total(lot_id: String, folk_ids: Array) -> int:
+	var per: int = fee(type_of_lot(lot_id))
+	if per <= 0:
+		return 0
+	var n := 0
+	for id in folk_ids:
+		if not PlaceMember.covers_lot(int(id), lot_id):
+			n += 1
+	return per * n
+
 ## Can these folk (ids) enter lot_id now? -> {ok, reason, fee}. Does not charge.
 static func check_entry(lot_id: String, folk_ids: Array, household_id: int = -1) -> Dictionary:
 	var closed: String = CityPolicy.blocks_entry(lot_id, folk_ids)       # task 12: park hours and the curfew
@@ -106,7 +123,7 @@ static func check_entry(lot_id: String, folk_ids: Array, household_id: int = -1)
 	var vtype := type_of_lot(lot_id)
 	if not is_open_type(vtype):
 		return {"ok": false, "reason": "%s is closed. %s." % [str(Neighborhood.lot(lot_id).get("label", lot_id)), status_text(lot_id)], "fee": 0}
-	var total: int = fee(vtype) * folk_ids.size()
+	var total: int = entry_total(lot_id, folk_ids)
 	if total > 0:
 		var hid: int = household_id if household_id > 0 else Economy.primary_household()
 		if not Economy.can_afford(hid, total):
@@ -114,7 +131,7 @@ static func check_entry(lot_id: String, folk_ids: Array, household_id: int = -1)
 	return {"ok": true, "reason": "", "fee": total}
 
 static func charge_entry(lot_id: String, folk_ids: Array, household_id: int = -1) -> bool:
-	var total: int = fee(type_of_lot(lot_id)) * folk_ids.size()
+	var total: int = entry_total(lot_id, folk_ids)
 	if total <= 0:
 		return true
 	var hid: int = household_id if household_id > 0 else Economy.primary_household()

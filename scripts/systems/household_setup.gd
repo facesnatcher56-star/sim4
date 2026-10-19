@@ -167,10 +167,14 @@ static func create_folk(h: Dictionary) -> Array:
 ## After SystemsManager.new_game: aspirations, relationships and family links between the new household members.
 static func apply(h: Dictionary, folk: Array) -> void:
 	var specs: Array = h["folk"]
+	if not folk.is_empty() and str(h.get("name", "")) != "":
+		Aging.house_names[int(folk[0].household_id)] = str(h["name"])
 	for i in folk.size():
 		var asp: String = str(specs[i].get("aspiration", ""))
 		if asp != "":
 			Goals.set_aspiration(int(folk[i].id), asp)
+		if bool(specs[i].get("homemaker", false)):
+			Homemaker.set_role(folk[i], true)
 	var mate: int = _mate_index(specs)
 	var sib_parent: int = -1
 	for i in range(1, folk.size()):

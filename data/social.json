@@ -650,6 +650,9 @@
     "idle_end_min": 45
   },
   "gathering": {
+    "host_stages": ["adult", "elder"],
+    "earliest_hour": 9,
+    "latest_hour": 22,
     "duration_min": 90,
     "max_guests": 5,
     "min_friendship": 12,

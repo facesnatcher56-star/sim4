@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bfa5eah4b08xb"
-path="res://.godot/imported/closeup_shower_talk.png-8b060cbb0a5714feebe32e0687cfd9d3.ctex"
+uid="uid://dsofxvio6b0ec"
+path="res://.godot/imported/props_read_armchair.png-24f9b147b3053e7bb3e923cdbd24cece.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://docs/visual27/closeup_shower_talk.png"
-dest_files=["res://.godot/imported/closeup_shower_talk.png-8b060cbb0a5714feebe32e0687cfd9d3.ctex"]
+source_file="res://docs/visual27b/props_read_armchair.png"
+dest_files=["res://.godot/imported/props_read_armchair.png-24f9b147b3053e7bb3e923cdbd24cece.ctex"]
 
 [params]
 

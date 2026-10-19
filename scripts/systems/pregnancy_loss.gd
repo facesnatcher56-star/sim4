@@ -131,6 +131,7 @@ static func counsel(id: int) -> Dictionary:
 		if str(b["id"]).begins_with("grieving"):
 			b["remaining"] = float(b["remaining"]) * (1.0 - float(cfg().get("counselling_cut", 0.5)))
 			eased = true
+	eased = eased or int(Counselling.session(f, false)["eased"]) > 0          # task 14: burnout, shock and strain too
 	SysUtil.notify(Sexes.fill("%s talked it through with a counsellor and feels a little lighter." % f.name, id) if eased else "%s had a good talk with a counsellor." % f.name, "good")
 	SysUtil.game_event("counselling", {"folk_id": id})
 	return {"ok": true, "eased": eased}

@@ -1,0 +1,1032 @@
+{
+ "_doc": "Food and nightlife (task 14): restaurant (menu, specials, waiters), fast food, bar, nightclub, bakery, ice cream, food truck, farmers' market. Dishes are services: needs / buffs / meters (diet) per dish. course = a menu course (one special per course per day: -20 percent and a little more fun), when {days|week_mod} = on the menu only then, adult_only / min_stage / stages = who may order, handler drink (alcohol, hangovers, refusal), pantry (units go to the home fridge), cake, sell_crafts.",
+ "config": {
+  "food": {
+   "special_mult": 0.8,
+   "special_fun": 4,
+   "drinks": {
+    "hangover_after": 4,
+    "refuse_after": 5,
+    "hangover_buff": "hangover",
+    "dazed_buff": "feeling_dazed"
+   },
+   "news_chance_per_day": 0.03
+  }
+ },
+ "places": {
+  "restaurant": {
+   "label": "The Copper Spoon Restaurant",
+   "lot": "cafe",
+   "kind": "food",
+   "schedule": [
+    {
+     "days": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "hours": [
+      11,
+      22
+     ]
+    }
+   ],
+   "blurb": "Table service, a menu with three courses and a new special every day.",
+   "staff": [
+    {
+     "role": "Waiter",
+     "career": "barista",
+     "n": 2
+    },
+    {
+     "role": "Chef",
+     "career": "chef",
+     "n": 1
+    }
+   ],
+   "min_staff": 2,
+   "news": [
+    "{place} has {special_main} as today's special.",
+    "{staff} is the new face at {place}."
+   ],
+   "services": {
+    "soup": {
+     "label": "Soup of the Day",
+     "price": 7,
+     "minutes": 12,
+     "posture": "stand",
+     "needs": {
+      "hunger": 14,
+      "fun": 2
+     },
+     "who_role": "Waiter",
+     "meters": {
+      "diet": 0.6
+     },
+     "course": "starter",
+     "text": "{name} had a warm bowl of soup."
+    },
+    "salad": {
+     "label": "Garden Salad",
+     "price": 8,
+     "minutes": 12,
+     "posture": "stand",
+     "needs": {
+      "hunger": 12,
+      "fun": 2
+     },
+     "who_role": "Waiter",
+     "meters": {
+      "diet": 1.5
+     },
+     "course": "starter",
+     "text": "{name} had a crisp garden salad."
+    },
+    "garlic_bread": {
+     "label": "Garlic Bread",
+     "price": 6,
+     "minutes": 10,
+     "posture": "stand",
+     "needs": {
+      "hunger": 12,
+      "fun": 3
+     },
+     "who_role": "Waiter",
+     "meters": {
+      "diet": -0.4
+     },
+     "course": "starter"
+    },
+    "pasta": {
+     "label": "Creamy Mushroom Pasta",
+     "price": 18,
+     "minutes": 25,
+     "posture": "sit",
+     "needs": {
+      "hunger": 42,
+      "fun": 6
+     },
+     "who_role": "Waiter",
+     "meters": {
+      "diet": 0.5
+     },
+     "course": "main",
+     "buffs": [
+      "well_fed"
+     ],
+     "text": "{name} enjoyed a plate of pasta. {staff} served it with a smile.",
+     "min_stage": "teen"
+    },
+    "steak": {
+     "label": "Pepper Steak and Chips",
+     "price": 24,
+     "minutes": 25,
+     "posture": "sit",
+     "needs": {
+      "hunger": 48,
+      "fun": 8
+     },
+     "who_role": "Waiter",
+     "meters": {
+      "diet": -0.3
+     },
+     "course": "main",
+     "buffs": [
+      "well_fed_hearty"
+     ],
+     "text": "{name} had a proper steak dinner.",
+     "min_stage": "teen"
+    },
+    "veg_curry": {
+     "label": "Vegetable Curry",
+     "price": 17,
+     "minutes": 25,
+     "posture": "sit",
+     "needs": {
+      "hunger": 40,
+      "fun": 6
+     },
+     "who_role": "Waiter",
+     "meters": {
+      "diet": 2.0
+     },
+     "course": "main",
+     "buffs": [
+      "well_fed"
+     ],
+     "text": "{name} had a fragrant vegetable curry.",
+     "min_stage": "teen"
+    },
+    "fish": {
+     "label": "Grilled Fish with Greens",
+     "price": 22,
+     "minutes": 25,
+     "posture": "sit",
+     "needs": {
+      "hunger": 42,
+      "fun": 7
+     },
+     "who_role": "Waiter",
+     "meters": {
+      "diet": 2.2
+     },
+     "course": "main",
+     "buffs": [
+      "well_fed"
+     ],
+     "text": "{name} had grilled fish with greens.",
+     "min_stage": "teen"
+    },
+    "pudding": {
+     "label": "Sticky Toffee Pudding",
+     "price": 8,
+     "minutes": 12,
+     "posture": "stand",
+     "needs": {
+      "hunger": 10,
+      "fun": 8
+     },
+     "who_role": "Waiter",
+     "meters": {
+      "diet": -1.0
+     },
+     "course": "dessert"
+    },
+    "fruit_plate": {
+     "label": "Fruit Plate",
+     "price": 7,
+     "minutes": 10,
+     "posture": "stand",
+     "needs": {
+      "hunger": 8,
+      "fun": 4
+     },
+     "who_role": "Waiter",
+     "meters": {
+      "diet": 1.2
+     },
+     "course": "dessert"
+    },
+    "kids_menu": {
+     "label": "Kids' Menu",
+     "price": 10,
+     "minutes": 20,
+     "posture": "sit",
+     "needs": {
+      "hunger": 38,
+      "fun": 8
+     },
+     "who_role": "Waiter",
+     "meters": {
+      "diet": 0.4
+     },
+     "course": "kids",
+     "buffs": [
+      "well_fed"
+     ],
+     "text": "{name} ate the whole kids' menu.",
+     "stages": [
+      "toddler",
+      "child"
+     ]
+    },
+    "tasting_dinner": {
+     "label": "Chef's Tasting Dinner",
+     "price": 48,
+     "minutes": 60,
+     "posture": "sit",
+     "needs": {
+      "hunger": 60,
+      "fun": 20
+     },
+     "who_role": "Chef",
+     "meters": {
+      "diet": 0.8
+     },
+     "course": "special",
+     "buffs": [
+      "well_fed_gourmet"
+     ],
+     "text": "{name} had the chef's tasting dinner. {staff} came out to say hello.",
+     "min_stage": "teen"
+    }
+   }
+  },
+  "fast_food": {
+   "label": "Zip Burger",
+   "lot": "cafe",
+   "kind": "food",
+   "schedule": [
+    {
+     "days": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "hours": [
+      10,
+      23
+     ]
+    }
+   ],
+   "blurb": "Quick, cheap and filling. Not what a doctor would order every day.",
+   "staff": [
+    {
+     "role": "Cashier",
+     "career": "",
+     "n": 2
+    }
+   ],
+   "min_staff": 1,
+   "news": [
+    "{place} has a two-for-one offer this week."
+   ],
+   "services": {
+    "burger_meal": {
+     "label": "Burger Meal",
+     "price": 9,
+     "minutes": 8,
+     "posture": "stand",
+     "needs": {
+      "hunger": 45,
+      "fun": 4
+     },
+     "who_role": "Cashier",
+     "meters": {
+      "diet": -2.0
+     },
+     "buffs": [
+      "well_fed"
+     ],
+     "text": "{name} wolfed down a burger meal.",
+     "min_stage": "teen"
+    },
+    "fries": {
+     "label": "Fries",
+     "price": 4,
+     "minutes": 5,
+     "posture": "stand",
+     "needs": {
+      "hunger": 18,
+      "fun": 2
+     },
+     "who_role": "Cashier",
+     "meters": {
+      "diet": -1.0
+     }
+    },
+    "shake": {
+     "label": "Milkshake",
+     "price": 5,
+     "minutes": 5,
+     "posture": "stand",
+     "needs": {
+      "hunger": 8,
+      "fun": 6,
+      "energy": 3
+     },
+     "who_role": "Cashier",
+     "meters": {
+      "diet": -1.2
+     }
+    },
+    "kids_box": {
+     "label": "Kids' Box with a Toy",
+     "price": 7,
+     "minutes": 8,
+     "posture": "stand",
+     "needs": {
+      "hunger": 32,
+      "fun": 8
+     },
+     "who_role": "Cashier",
+     "meters": {
+      "diet": -0.8
+     },
+     "buffs": [
+      "well_fed"
+     ],
+     "stages": [
+      "toddler",
+      "child"
+     ]
+    },
+    "veggie_wrap": {
+     "label": "Veggie Wrap",
+     "price": 8,
+     "minutes": 8,
+     "posture": "stand",
+     "needs": {
+      "hunger": 34,
+      "fun": 3
+     },
+     "who_role": "Cashier",
+     "meters": {
+      "diet": 0.4
+     }
+    }
+   }
+  },
+  "bar": {
+   "label": "The Gilded Barrel",
+   "lot": "cafe",
+   "kind": "night",
+   "schedule": [
+    {
+     "days": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "hours": [
+      17,
+      26
+     ]
+    }
+   ],
+   "adult_only": true,
+   "blurb": "Grown-ups only. Pints, wine, cocktails and a quiz night on Wednesdays.",
+   "staff": [
+    {
+     "role": "Barkeeper",
+     "career": "",
+     "n": 2
+    }
+   ],
+   "min_staff": 1,
+   "news": [
+    "{place} hosts a quiz night every Wednesday."
+   ],
+   "services": {
+    "beer": {
+     "label": "Pint of Beer",
+     "price": 5,
+     "minutes": 15,
+     "posture": "sit",
+     "needs": {
+      "hunger": 3,
+      "fun": 5
+     },
+     "who_role": "Barkeeper",
+     "meters": {
+      "diet": -0.8
+     },
+     "buffs": [
+      "tipsy"
+     ],
+     "text": "{name} had a cold beer.",
+     "adult_only": true,
+     "handler": "drink",
+     "alcohol": 1
+    },
+    "wine": {
+     "label": "Glass of Wine",
+     "price": 7,
+     "minutes": 15,
+     "posture": "sit",
+     "needs": {
+      "hunger": 3,
+      "fun": 6
+     },
+     "who_role": "Barkeeper",
+     "meters": {
+      "diet": -0.6
+     },
+     "buffs": [
+      "tipsy"
+     ],
+     "text": "{name} sipped a glass of wine.",
+     "adult_only": true,
+     "handler": "drink",
+     "alcohol": 1
+    },
+    "cocktail": {
+     "label": "Cocktail",
+     "price": 10,
+     "minutes": 15,
+     "posture": "sit",
+     "needs": {
+      "hunger": 2,
+      "fun": 9
+     },
+     "who_role": "Barkeeper",
+     "meters": {
+      "diet": -1.0
+     },
+     "buffs": [
+      "tipsy",
+      "social_glow"
+     ],
+     "text": "{name} had a cocktail. {staff} shook it just right.",
+     "adult_only": true,
+     "handler": "drink",
+     "alcohol": 2
+    },
+    "soft_drink": {
+     "label": "Soft Drink",
+     "price": 3,
+     "minutes": 10,
+     "posture": "stand",
+     "needs": {
+      "hunger": 2,
+      "fun": 3
+     },
+     "who_role": "Barkeeper",
+     "meters": {
+      "diet": -0.5
+     },
+     "text": "{name} had a cold drink."
+    },
+    "bar_snacks": {
+     "label": "Bar Snacks",
+     "price": 5,
+     "minutes": 10,
+     "posture": "stand",
+     "needs": {
+      "hunger": 18,
+      "fun": 2
+     },
+     "who_role": "Barkeeper",
+     "meters": {
+      "diet": -1.2
+     },
+     "adult_only": true
+    },
+    "pub_quiz": {
+     "label": "Pub Quiz Night",
+     "price": 6,
+     "minutes": 90,
+     "posture": "sit",
+     "needs": {
+      "hunger": 0,
+      "fun": 22,
+      "social": 24
+     },
+     "who_role": "Barkeeper",
+     "text": "{name} joined the pub quiz and got most of the answers right.",
+     "adult_only": true,
+     "skill_xp": {
+      "logic": 12
+     },
+     "when": {
+      "days": [
+       2
+      ]
+     }
+    }
+   }
+  },
+  "nightclub": {
+   "label": "Neon Hollow Nightclub",
+   "lot": "cafe",
+   "kind": "night",
+   "schedule": [
+    {
+     "days": [
+      3,
+      4,
+      5,
+      6
+     ],
+     "hours": [
+      22,
+      28
+     ]
+    }
+   ],
+   "adult_only": true,
+   "blurb": "Grown-ups only. Open Thursday to Sunday night until 04:00.",
+   "staff": [
+    {
+     "role": "DJ",
+     "career": "musician",
+     "n": 1
+    },
+    {
+     "role": "Barkeeper",
+     "career": "",
+     "n": 1
+    }
+   ],
+   "min_staff": 2,
+   "news": [
+    "{staff} is spinning at {place} this weekend."
+   ],
+   "services": {
+    "club_entry": {
+     "label": "Cover Charge and Dance Floor",
+     "price": 12,
+     "minutes": 120,
+     "posture": "sit",
+     "needs": {
+      "hunger": 0,
+      "fun": 40,
+      "social": 28,
+      "energy": -22,
+      "hygiene": -12
+     },
+     "who_role": "DJ",
+     "buffs": [
+      "party_buzz"
+     ],
+     "text": "{name} danced half the night away. {staff} kept the music going.",
+     "adult_only": true,
+     "skill_xp": {
+      "charisma": 10
+     }
+    },
+    "club_cocktail": {
+     "label": "Club Cocktail",
+     "price": 11,
+     "minutes": 10,
+     "posture": "stand",
+     "needs": {
+      "hunger": 1,
+      "fun": 8
+     },
+     "who_role": "Barkeeper",
+     "meters": {
+      "diet": -1.0
+     },
+     "buffs": [
+      "tipsy",
+      "flirty_buzz"
+     ],
+     "adult_only": true,
+     "handler": "drink",
+     "alcohol": 2
+    },
+    "club_vip": {
+     "label": "VIP Booth",
+     "price": 40,
+     "minutes": 120,
+     "posture": "sit",
+     "needs": {
+      "hunger": 0,
+      "fun": 55,
+      "social": 34,
+      "energy": -15
+     },
+     "who_role": "DJ",
+     "meters": {
+      "diet": -0.5
+     },
+     "buffs": [
+      "party_buzz",
+      "social_glow"
+     ],
+     "text": "{name} had the best booth in the house.",
+     "adult_only": true,
+     "skill_xp": {
+      "charisma": 16
+     }
+    }
+   }
+  },
+  "bakery": {
+   "label": "Flour and Crumb Bakery",
+   "lot": "market",
+   "kind": "food",
+   "hours": [
+    8,
+    17
+   ],
+   "blurb": "Warm bread, pastries and cakes for the birthday table.",
+   "staff": [
+    {
+     "role": "Baker",
+     "career": "cook",
+     "n": 1
+    }
+   ],
+   "min_staff": 1,
+   "news": [
+    "{place} is baking a new seasonal loaf."
+   ],
+   "services": {
+    "croissant": {
+     "label": "Butter Croissant",
+     "price": 3,
+     "minutes": 5,
+     "posture": "stand",
+     "needs": {
+      "hunger": 22,
+      "fun": 3
+     },
+     "who_role": "Baker",
+     "meters": {
+      "diet": -0.4
+     },
+     "text": "{name} bit into a warm croissant."
+    },
+    "loaf": {
+     "label": "Fresh Loaf to Take Home",
+     "price": 4,
+     "minutes": 3,
+     "posture": "stand",
+     "needs": {
+      "hunger": 0,
+      "fun": 1
+     },
+     "who_role": "Baker",
+     "meters": {
+      "diet": 0.6
+     },
+     "text": "{name} bought a fresh loaf for the pantry.",
+     "handler": "pantry",
+     "units": 2
+    },
+    "pastry_box": {
+     "label": "Box of Pastries",
+     "price": 12,
+     "minutes": 3,
+     "posture": "stand",
+     "needs": {
+      "hunger": 0,
+      "fun": 2
+     },
+     "who_role": "Baker",
+     "meters": {
+      "diet": -0.8
+     },
+     "handler": "pantry",
+     "units": 3
+    },
+    "birthday_cake": {
+     "label": "Birthday Cake",
+     "price": 24,
+     "minutes": 5,
+     "posture": "stand",
+     "needs": {
+      "hunger": 0,
+      "fun": 6
+     },
+     "who_role": "Baker",
+     "meters": {
+      "diet": -0.5
+     },
+     "text": "{name} picked up a birthday cake. Somebody is going to be happy.",
+     "handler": "pantry",
+     "units": 3
+    },
+    "coffee_bun": {
+     "label": "Coffee and a Bun",
+     "price": 6,
+     "minutes": 15,
+     "posture": "sit",
+     "needs": {
+      "hunger": 18,
+      "fun": 5
+     },
+     "who_role": "Baker",
+     "meters": {
+      "diet": -0.4
+     },
+     "buffs": [
+      "cozy"
+     ]
+    }
+   }
+  },
+  "ice_cream": {
+   "label": "Frosty's Ice Cream Cart",
+   "lot": "market",
+   "kind": "food",
+   "hours": [
+    11,
+    20
+   ],
+   "seasons": [
+    "spring",
+    "summer",
+    "autumn"
+   ],
+   "blurb": "Cones and sundaes. Closed in winter.",
+   "staff": [
+    {
+     "role": "Vendor",
+     "career": "",
+     "n": 1
+    }
+   ],
+   "min_staff": 1,
+   "news": [
+    "{place} has a new flavour of the week."
+   ],
+   "services": {
+    "cone": {
+     "label": "Ice Cream Cone",
+     "price": 4,
+     "minutes": 8,
+     "posture": "stand",
+     "needs": {
+      "hunger": 6,
+      "fun": 9
+     },
+     "who_role": "Vendor",
+     "meters": {
+      "diet": -1.0
+     },
+     "text": "{name} licked an ice cream cone.",
+     "season_mult": {
+      "summer": 1.0,
+      "spring": 0.9,
+      "autumn": 0.8
+     }
+    },
+    "sundae": {
+     "label": "Sundae",
+     "price": 7,
+     "minutes": 12,
+     "posture": "stand",
+     "needs": {
+      "hunger": 10,
+      "fun": 14
+     },
+     "who_role": "Vendor",
+     "meters": {
+      "diet": -1.5
+     },
+     "buffs": [
+      "cheered_up"
+     ],
+     "season_mult": {
+      "summer": 1.0,
+      "spring": 0.9,
+      "autumn": 0.8
+     }
+    },
+    "sorbet": {
+     "label": "Fruit Sorbet",
+     "price": 5,
+     "minutes": 8,
+     "posture": "stand",
+     "needs": {
+      "hunger": 5,
+      "fun": 8
+     },
+     "who_role": "Vendor",
+     "meters": {
+      "diet": -0.2
+     }
+    }
+   }
+  },
+  "food_truck": {
+   "label": "The Roaming Kitchen Food Truck",
+   "lot": "market",
+   "kind": "food",
+   "schedule": [
+    {
+     "days": [
+      4,
+      5,
+      6
+     ],
+     "hours": [
+      11,
+      21
+     ]
+    }
+   ],
+   "blurb": "Friday to Sunday. The kitchen changes cuisine every week.",
+   "staff": [
+    {
+     "role": "Cook",
+     "career": "cook",
+     "n": 1
+    }
+   ],
+   "min_staff": 1,
+   "news": [
+    "The Roaming Kitchen has a new cuisine this week."
+   ],
+   "services": {
+    "taco": {
+     "label": "Street Tacos",
+     "price": 8,
+     "minutes": 10,
+     "posture": "stand",
+     "needs": {
+      "hunger": 32,
+      "fun": 5
+     },
+     "who_role": "Cook",
+     "meters": {
+      "diet": -0.2
+     },
+     "buffs": [
+      "well_fed"
+     ],
+     "when": {
+      "week_mod": [
+       3,
+       0
+      ]
+     }
+    },
+    "noodles": {
+     "label": "Noodle Box",
+     "price": 8,
+     "minutes": 10,
+     "posture": "stand",
+     "needs": {
+      "hunger": 34,
+      "fun": 5
+     },
+     "who_role": "Cook",
+     "buffs": [
+      "well_fed"
+     ],
+     "when": {
+      "week_mod": [
+       3,
+       1
+      ]
+     }
+    },
+    "kebab": {
+     "label": "Kebab Wrap",
+     "price": 8,
+     "minutes": 10,
+     "posture": "stand",
+     "needs": {
+      "hunger": 34,
+      "fun": 5
+     },
+     "who_role": "Cook",
+     "meters": {
+      "diet": -0.4
+     },
+     "buffs": [
+      "well_fed"
+     ],
+     "when": {
+      "week_mod": [
+       3,
+       2
+      ]
+     }
+    },
+    "lemonade": {
+     "label": "Fresh Lemonade",
+     "price": 3,
+     "minutes": 4,
+     "posture": "stand",
+     "needs": {
+      "hunger": 3,
+      "fun": 4,
+      "energy": 3
+     },
+     "who_role": "Cook",
+     "meters": {
+      "diet": -0.3
+     }
+    }
+   }
+  },
+  "farmers_market": {
+   "label": "Willow Green Farmers' Market",
+   "lot": "park",
+   "kind": "food",
+   "schedule": [
+    {
+     "days": [
+      5,
+      6
+     ],
+     "hours": [
+      8,
+      14
+     ]
+    }
+   ],
+   "blurb": "Weekend stalls: produce, honey and flowers. Sell what you grow and make.",
+   "staff": [
+    {
+     "role": "Farmer",
+     "career": "gardener",
+     "n": 1
+    }
+   ],
+   "min_staff": 1,
+   "news": [
+    "The farmers' market is on this weekend.",
+    "The farmers' market has fresh strawberries."
+   ],
+   "services": {
+    "produce_box": {
+     "label": "Box of Fresh Produce",
+     "price": 12,
+     "minutes": 8,
+     "posture": "stand",
+     "needs": {
+      "hunger": 0,
+      "fun": 3
+     },
+     "who_role": "Farmer",
+     "meters": {
+      "diet": 2.0
+     },
+     "buffs": [
+      "fresh_produce"
+     ],
+     "text": "{name} filled a box with fresh produce.",
+     "handler": "pantry",
+     "units": 4
+    },
+    "honey": {
+     "label": "Jar of Local Honey",
+     "price": 6,
+     "minutes": 4,
+     "posture": "stand",
+     "needs": {
+      "hunger": 0,
+      "fun": 2
+     },
+     "who_role": "Farmer",
+     "meters": {
+      "diet": 0.4
+     },
+     "handler": "pantry",
+     "units": 1
+    },
+    "flowers": {
+     "label": "Bunch of Flowers",
+     "price": 5,
+     "minutes": 4,
+     "posture": "stand",
+     "needs": {
+      "hunger": 0,
+      "fun": 6
+     },
+     "who_role": "Farmer",
+     "buffs": [
+      "cheered_up"
+     ],
+     "text": "{name} picked up a bunch of flowers."
+    },
+    "sell_produce": {
+     "label": "Sell Your Crafts and Garden Produce",
+     "price": 0,
+     "minutes": 10,
+     "who_role": "Farmer",
+     "handler": "sell_crafts",
+     "kind": "good"
+    }
+   }
+  }
+ }
+}

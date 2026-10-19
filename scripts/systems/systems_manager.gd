@@ -123,6 +123,7 @@ static func reset_all() -> void:
 	Vacation.reset()
 	CityBudget.reset()
 	CityState.reset()
+	LifeTick.reset()
 
 ## Start a fresh game: reset systems, give every household starting funds, register all current folk, make townies.
 func new_game(household_ids: Array = [], lifespan: String = "") -> void:
@@ -140,6 +141,7 @@ func new_game(household_ids: Array = [], lifespan: String = "") -> void:
 	CityGov.ensure()                 # task 12: the first mayor and council come from the townies
 	Economy.refresh_objects()
 	MarketTick.new_game()
+	LifeTick.new_game()
 
 ## Make sure every folk on the lot has aging / goals records (idempotent).
 func ensure_registered() -> void:
@@ -202,6 +204,7 @@ func _on_interaction_finished(folk_id: int, iid: String, success: bool) -> void:
 		Economy.note_usage(int(f2.household_id), iid)
 	CareerProgress.on_interaction(folk_id, iid, success)
 	MarketTick.on_interaction_finished(folk_id, iid, success)
+	LifeTick.on_interaction_finished(folk_id, iid, success)
 	RelationshipService.on_interaction_finished(folk_id, iid, success)
 	StoryVisits.on_interaction(folk_id, iid, success)
 	if success:
@@ -259,6 +262,7 @@ func _on_game_event(ev_name: String, payload: Dictionary) -> void:
 	DisasterClock.on_game_event(ev_name, payload)
 	ChaosClock.on_game_event(ev_name, payload)
 	MarketTick.on_game_event(ev_name, payload)
+	LifeTick.on_game_event(ev_name, payload)
 	MoodSwings.on_game_event(ev_name, payload)
 	StoryPacing.on_game_event(ev_name, payload)
 	Storyteller.on_game_event(ev_name, payload)

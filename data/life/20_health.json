@@ -1,0 +1,88 @@
+{
+ "_doc": "Health (task 14): meters (fitness, diet, teeth, work strain), long-term conditions, the clinic / dentist / counselling / pharmacy counter / gym as places inside existing lots. Numbers are per game day unless said; a game year is 28 days. Read by scripts/systems/health_life*.gd, health_cond.gd, counselling.gd, health_risk.gd.",
+ "config": {
+  "health_life": {
+   "start": {"fitness": 40, "diet": 50, "dental": 80},
+   "fitness": {"decay": 0.4, "floor": 15, "elder_gain": 0.7},
+   "diet": {"drift": 1.2, "target": 50},
+   "dental": {"decay": 1.1, "decay_clean": 0.7, "clean_hygiene": 20, "toothache_below": 35, "toothache_buff": "toothache", "clean_to": 95, "fix_to": 80},
+   "score": {"fitness": 0.45, "diet": 0.45, "dental": 0.10},
+   "labels": {"fitness": [[70, "In good shape"], [40, "Fairly fit"], [0, "Out of shape"]], "diet": [[70, "Eats well"], [40, "Eats so-so"], [0, "Eats badly"]], "dental": [[70, "Healthy teeth"], [35, "Teeth need care"], [0, "Toothache"]]},
+   "interaction_effects": {
+    "exercise": {"fitness": 1.2}, "lift_weights": {"fitness": 1.5}, "brush_teeth": {"dental": 6},
+    "eat_meal_good": {"diet": 2.5}, "eat_meal_gourmet": {"diet": 2.5}, "eat_meal": {"diet": 1.0},
+    "microwave_meal": {"diet": -1.0}, "grab_snack": {"diet": -1.5}, "buy_snack": {"diet": -2.0}, "buy_drink": {"diet": -1.2}, "mix_drink": {"diet": -0.8}
+   },
+   "death": {"shift_days": 14, "condition_unmanaged": 1.18, "condition_managed": 1.04},
+   "risk_tags": {
+    "illness": {"fitness": [1.35, 0.7], "diet": [1.2, 0.85]},
+    "cardiac": {"fitness": [2.0, 0.5], "diet": [1.6, 0.7]}
+   },
+   "flu_shot": {"days": 28, "flu_mult": 0.25, "cold_mult": 0.8},
+   "strain": {"work": 2.0, "tired_extra": 2.5, "tired_below": -20, "rest_day": 6.0, "idle_day": 3.0, "holiday_glow": 10.0, "burnout_at": 85, "after_burnout": 40, "counsel_cut": 35},
+   "conditions_symptom_days": 4,
+   "townie_diagnosis_days": 6
+  },
+  "counselling": {
+   "grief_cut": 0.5, "other_cut": 0.6, "therapy_buff": "in_therapy",
+   "grief": ["grieving", "grieving_heavy", "grieving_shattered", "postpartum_low"],
+   "other": ["burnt_out", "shaken", "shaken_up", "storm_shaken", "afraid_at_home", "at_the_end_of_rope", "uneasy_at_night", "worried_sick", "eviction_scare", "fire_panic", "midlife_crisis", "blackmailed", "intruder_alert"]
+  }
+ },
+ "conditions": {
+  "asthma": {"label": "Asthma", "onset_per_year": 0.05, "stages": ["child", "teen", "adult", "elder"], "risk": {"fitness_low": 0.8}, "flare_per_day": 0.07, "managed_mult": 0.1,
+   "severities": [1, 1, 2], "medicine": "inhaler", "refill_price": 14, "dose_days": 14, "symptom": "keeps coughing and getting out of breath", "flare": "had an asthma attack"},
+  "diabetes": {"label": "Diabetes", "onset_per_year": 0.04, "stages": ["adult", "elder"], "risk": {"diet_low": 1.2, "fitness_low": 0.6}, "flare_per_day": 0.05, "managed_mult": 0.1,
+   "severities": [1, 2, 2], "medicine": "insulin", "refill_price": 22, "dose_days": 14, "symptom": "is always thirsty and tired", "flare": "had a dizzy spell from blood sugar"},
+  "hypertension": {"label": "High blood pressure", "onset_per_year": 0.05, "stages": ["adult", "elder"], "risk": {"diet_low": 0.8, "fitness_low": 0.8}, "flare_per_day": 0.03, "managed_mult": 0.1,
+   "severities": [1, 1, 2], "medicine": "pressure tablets", "refill_price": 16, "dose_days": 14, "symptom": "gets headaches and feels flushed", "flare": "felt faint with a pounding head", "cardiac_mult": 2.4, "managed_cardiac_mult": 1.2},
+  "arthritis": {"label": "Arthritis", "onset_per_year": 0.22, "stages": ["elder"], "risk": {"fitness_low": 0.4}, "flare_per_day": 0.06, "managed_mult": 0.15,
+   "severities": [1, 1, 1], "medicine": "joint tablets", "refill_price": 15, "dose_days": 14, "symptom": "has stiff, aching joints", "flare": "had a painful flare-up in the joints"}
+ },
+ "places": {
+  "clinic": {"label": "Fernwood Family Clinic", "lot": "hospital", "kind": "health", "schedule": [{"days": [0, 1, 2, 3, 4], "hours": [8, 18]}, {"days": [5], "hours": [9, 13]}],
+   "blurb": "Your family doctor: check-ups, treatment and jabs. Cheaper than a house call.",
+   "staff": [{"role": "Family doctor", "career": "doctor", "n": 2}, {"role": "Nurse", "career": "", "n": 1}], "min_staff": 1,
+   "services": {
+    "checkup": {"label": "Check-up", "price": 35, "minutes": 45, "posture": "sit", "insurable": true, "handler": "checkup"},
+    "treat": {"label": "See the Doctor (unwell or hurt)", "price": 45, "minutes": 40, "posture": "sit", "insurable": true, "handler": "treat"},
+    "flu_shot": {"label": "Flu Shot", "price": 22, "minutes": 15, "posture": "sit", "insurable": true, "handler": "vaccinate", "once_per_day": true}
+   }},
+  "dentist": {"label": "Bright Smile Dental", "lot": "hospital", "kind": "health", "schedule": [{"days": [0, 1, 2, 3, 4], "hours": [9, 17]}],
+   "blurb": "Cleaning and fillings. Brushing every day keeps the bill down.",
+   "staff": [{"role": "Dentist", "career": "", "n": 1}, {"role": "Dental nurse", "career": "", "n": 1}], "min_staff": 1,
+   "services": {
+    "dental_clean": {"label": "Clean and Polish", "price": 25, "minutes": 30, "posture": "sit", "handler": "dental_clean", "once_per_day": true},
+    "dental_fix": {"label": "Fix a Sore Tooth", "price": 55, "minutes": 45, "posture": "sit", "handler": "dental_fix", "once_per_day": true}
+   }},
+  "therapy": {"label": "Willow Mind and Mood Centre", "lot": "hospital", "kind": "health", "schedule": [{"days": [0, 1, 2, 3, 4], "hours": [9, 18]}, {"days": [5], "hours": [9, 13]}],
+   "blurb": "A counsellor to talk to about loss, stress, burnout and bad times.",
+   "staff": [{"role": "Counsellor", "career": "", "n": 1}, {"role": "Therapist", "career": "", "n": 1}], "min_staff": 1,
+   "services": {
+    "counselling": {"label": "Counselling Session", "price": 40, "minutes": 60, "posture": "sit", "insurable": true, "handler": "counsel", "once_per_day": true,
+     "text": "{name} talked it through with {staff} and feels a little lighter."}
+   }},
+  "pharmacy_counter": {"label": "Greenbarrow Pharmacy Counter", "lot": "market", "kind": "health", "hours": [9, 20], "blurb": "Prescription medicine for long-term conditions. Ordinary medicine is on the shop shelves.",
+   "staff": [{"role": "Pharmacist", "career": "", "n": 1}], "min_staff": 1,
+   "services": {
+    "refill_asthma": {"label": "Refill: Asthma inhaler", "price": 14, "minutes": 5, "handler": "prescription", "args": {"condition": "asthma"}},
+    "refill_diabetes": {"label": "Refill: Diabetes insulin", "price": 22, "minutes": 5, "handler": "prescription", "args": {"condition": "diabetes"}},
+    "refill_hypertension": {"label": "Refill: Blood pressure tablets", "price": 16, "minutes": 5, "handler": "prescription", "args": {"condition": "hypertension"}},
+    "refill_arthritis": {"label": "Refill: Joint tablets", "price": 15, "minutes": 5, "handler": "prescription", "args": {"condition": "arthritis"}}
+   }},
+  "gym_desk": {"label": "Ironleaf Gym Classes", "lot": "gym", "kind": "health", "hours": [6, 22], "blurb": "A pass makes the entry fee and the classes cheaper. Fitness helps you feel good and live longer.",
+   "staff": [{"role": "Front desk", "career": "", "n": 1}, {"role": "Coach", "career": "fitness_coach", "n": 1}], "min_staff": 1,
+   "services": {
+    "gym_pass_week": {"label": "Gym Pass: one week", "price": 50, "minutes": 3, "pass": {"days": 7}, "text": "{name} has a gym pass for a week. No entry fee."},
+    "gym_pass_month": {"label": "Gym Pass: four weeks", "price": 160, "minutes": 3, "pass": {"days": 28}, "text": "{name} has a gym pass for four weeks. No entry fee."},
+    "class_yoga": {"label": "Yoga Class", "price": 14, "minutes": 60, "pass_discount": 0.5, "stages": ["teen", "adult", "elder"], "needs": {"energy": -8, "fun": 8, "comfort": 12}, "meters": {"fitness": 3},
+     "skill_xp": {"fitness": 15}, "buffs": ["venue_gym_rush"], "text": "{name} stretched and breathed through a yoga class."},
+    "class_spin": {"label": "Spinning Class", "price": 14, "minutes": 50, "pass_discount": 0.5, "stages": ["teen", "adult"], "needs": {"energy": -22, "fun": 6, "hygiene": -20}, "meters": {"fitness": 4.5},
+     "skill_xp": {"fitness": 25}, "buffs": ["venue_gym_rush"], "text": "{name} sweated through a spinning class."},
+    "class_boxing": {"label": "Boxing Class", "price": 16, "minutes": 60, "pass_discount": 0.5, "stages": ["adult"], "needs": {"energy": -25, "fun": 10, "hygiene": -25}, "meters": {"fitness": 5},
+     "skill_xp": {"fitness": 30}, "buffs": ["venue_gym_rush"], "text": "{name} hit the pads in a boxing class."},
+    "personal_trainer": {"label": "Personal Trainer", "price": 40, "minutes": 60, "pass_discount": 0.8, "stages": ["teen", "adult", "elder"], "needs": {"energy": -18, "fun": 4}, "meters": {"fitness": 8},
+     "skill_xp": {"fitness": 45}, "text": "{name} had a hard hour with {staff}."}
+   }}
+ }
+}

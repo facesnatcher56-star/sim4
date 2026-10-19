@@ -12,7 +12,7 @@ extends RefCounted
 static var allow: Dictionary = {}
 ## action -> what the first check looks at: "folk" (folk_id must be yours), "folks" (args.folk_ids all yours), "build" (needs a household), "bill"
 const ACTIONS := {
-	"interact": "folk", "career_accept": "folk", "career_decline": "folk", "career_skip": "folk", "career_unskip": "folk", "set_aspiration": "folk",
+	"interact": "folk", "career_accept": "folk", "career_decline": "folk", "career_skip": "folk", "career_unskip": "folk", "set_homemaker": "folk", "set_aspiration": "folk",
 	"travel": "folks", "go_home": "folks", "build_place": "build", "build_sell": "build", "build_wall": "build", "build_floor": "build",
 	"pay_bill": "bill",
 }

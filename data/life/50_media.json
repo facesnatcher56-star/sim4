@@ -1,0 +1,368 @@
+{
+ "_doc": "Communication and media (task 14): the phone (contacts, calls, texts, invitations, outings), the social media app, local radio, TV news and the newspaper stand. Radio and TV are places at HOME (lot @home). Outings: services tried in order; both people must be allowed (stage, opening hours).",
+ "config": {
+  "phone": {
+   "inbox_cap": 6,
+   "invite_days": 2,
+   "invite_base": 0.35,
+   "invite_per_friendship": 0.006,
+   "incoming_per_day": 0.25,
+   "incoming_min_friendship": 25,
+   "call": {
+    "social": 10,
+    "fun": 3,
+    "friendship": 2.0,
+    "resident_social": 6
+   },
+   "text": {
+    "social": 3,
+    "friendship": 0.8,
+    "daily_cap": 3
+   },
+   "outing": {
+    "friendship": 4.0,
+    "romance": 4.0,
+    "social": 10
+   },
+   "outings": [
+    {
+     "id": "cinema",
+     "label": "a film at the cinema",
+     "place": "cinema",
+     "services": [
+      "cinema_adult",
+      "cinema_teen",
+      "cinema_family"
+     ]
+    },
+    {
+     "id": "lunch",
+     "label": "lunch at the restaurant",
+     "place": "restaurant",
+     "services": [
+      "pasta",
+      "veg_curry",
+      "kids_menu"
+     ]
+    },
+    {
+     "id": "burgers",
+     "label": "burgers",
+     "place": "fast_food",
+     "services": [
+      "burger_meal",
+      "kids_box",
+      "fries"
+     ]
+    },
+    {
+     "id": "drink",
+     "label": "a drink at the bar",
+     "place": "bar",
+     "services": [
+      "wine",
+      "beer",
+      "soft_drink"
+     ]
+    },
+    {
+     "id": "dancing",
+     "label": "a night of dancing",
+     "place": "nightclub",
+     "services": [
+      "club_entry"
+     ]
+    },
+    {
+     "id": "bowling",
+     "label": "a game of bowling",
+     "place": "bowling",
+     "services": [
+      "bowl"
+     ]
+    },
+    {
+     "id": "arcade",
+     "label": "the arcade",
+     "place": "arcade",
+     "services": [
+      "arcade"
+     ]
+    },
+    {
+     "id": "swim",
+     "label": "a swim",
+     "place": "pool",
+     "services": [
+      "swim",
+      "family_splash"
+     ]
+    },
+    {
+     "id": "picnic",
+     "label": "a picnic by the lake",
+     "place": "lake",
+     "services": [
+      "picnic"
+     ]
+    },
+    {
+     "id": "museum",
+     "label": "the museum",
+     "place": "museum",
+     "services": [
+      "museum_visit"
+     ]
+    },
+    {
+     "id": "concert",
+     "label": "a concert",
+     "place": "concert_hall",
+     "services": [
+      "concert_ticket"
+     ]
+    },
+    {
+     "id": "ice_cream",
+     "label": "an ice cream",
+     "place": "ice_cream",
+     "services": [
+      "sundae",
+      "cone"
+     ]
+    }
+   ]
+  },
+  "social_feed": {
+   "feed_cap": 30,
+   "reach_base": 3.0,
+   "reach_per_friend": 1.5,
+   "reach_per_fame": 0.4,
+   "social_cap": 14,
+   "viral_likes": 20,
+   "gossip_spread": 4,
+   "gossip_poster_reputation": 0.5,
+   "townie_post_chance": 0.25,
+   "townie_viral_chance": 0.01,
+   "kinds": {
+    "photo": {
+     "label": "Share a photo",
+     "social": 4,
+     "fun": 2,
+     "fame": 0.0
+    },
+    "thought": {
+     "label": "Post a thought",
+     "social": 3,
+     "fun": 2,
+     "fame": 0.0
+    },
+    "news": {
+     "label": "Share the town news",
+     "social": 3,
+     "fun": 1,
+     "fame": 0.2
+    },
+    "gossip": {
+     "label": "Pass on some gossip",
+     "social": 2,
+     "fun": 3,
+     "fame": 0.0,
+     "adult_only": true
+    }
+   },
+   "thoughts": [
+    "Coffee first, then the world.",
+    "Rain again. Good for the garden, I suppose.",
+    "Anyone up for a game of bowling?",
+    "Cooked something new tonight. It was edible.",
+    "The park looks lovely today.",
+    "Three cheers for the weekend.",
+    "Why is Monday always so loud?",
+    "Found a quiet corner in the library."
+   ],
+   "townie_posts": [
+    "{name} posted a photo from {place}.",
+    "{name} is having a lovely day at {place}.",
+    "{name} recommends {place}.",
+    "{name} was at {place} and has opinions."
+   ]
+  },
+  "media": {
+   "radio": {
+    "label": "Fernwood FM",
+    "by_hour": [
+     [
+      0,
+      "Night Music"
+     ],
+     [
+      6,
+      "The Morning Show"
+     ],
+     [
+      10,
+      "Midday Music"
+     ],
+     [
+      15,
+      "Drive Time"
+     ],
+     [
+      19,
+      "Evening Talk"
+     ],
+     [
+      22,
+      "Late Night Jazz"
+     ]
+    ]
+   },
+   "tv": {
+    "label": "Fernwood Local TV",
+    "by_hour": [
+     [
+      0,
+      "Late Night Talk"
+     ],
+     [
+      6,
+      "Breakfast Show"
+     ],
+     [
+      9,
+      "Daytime Quiz"
+     ],
+     [
+      12,
+      "Local News at Noon"
+     ],
+     [
+      13,
+      "Afternoon Film"
+     ],
+     [
+      17,
+      "Cartoon Corner"
+     ],
+     [
+      18,
+      "Fernwood Local News"
+     ],
+     [
+      19,
+      "The Game Show"
+     ],
+     [
+      20,
+      "Evening Film"
+     ],
+     [
+      22,
+      "Late News"
+     ],
+     [
+      23,
+      "Late Night Talk"
+     ]
+    ]
+   }
+  }
+ },
+ "places": {
+  "radio": {
+   "label": "The Radio at Home",
+   "lot": "@home",
+   "kind": "media",
+   "hours": [
+    0,
+    24
+   ],
+   "min_staff": 0,
+   "blurb": "Fernwood FM: morning show, music, drive time and evening talk.",
+   "services": {
+    "listen_radio": {
+     "label": "Listen to the Radio",
+     "price": 0,
+     "minutes": 30,
+     "posture": "sit",
+     "handler": "radio",
+     "needs": {
+      "fun": 8,
+      "social": 3
+     }
+    }
+   }
+  },
+  "tv": {
+   "label": "The TV at Home",
+   "lot": "@home",
+   "kind": "media",
+   "hours": [
+    0,
+    24
+   ],
+   "min_staff": 0,
+   "blurb": "Local TV: news at noon, six and ten, and shows between.",
+   "services": {
+    "watch_news": {
+     "label": "Watch the TV News",
+     "price": 0,
+     "minutes": 20,
+     "posture": "sit",
+     "handler": "tv_news",
+     "needs": {
+      "fun": 3
+     },
+     "min_stage": "child"
+    },
+    "watch_show": {
+     "label": "Watch a TV Show",
+     "price": 0,
+     "minutes": 60,
+     "posture": "sit",
+     "needs": {
+      "fun": 16,
+      "comfort": 4
+     },
+     "min_stage": "toddler",
+     "text": "{name} watched TV for a while."
+    }
+   }
+  },
+  "newsstand": {
+   "label": "Fernwood Courier Newsstand",
+   "lot": "market",
+   "kind": "media",
+   "hours": [
+    8,
+    19
+   ],
+   "blurb": "The town paper: every public happening of the last days.",
+   "staff": [
+    {
+     "role": "Newsagent",
+     "career": "",
+     "n": 1
+    }
+   ],
+   "min_staff": 1,
+   "news": [
+    "The Courier is out with a bumper weekend edition."
+   ],
+   "services": {
+    "buy_courier": {
+     "label": "Buy the Courier",
+     "price": 2,
+     "minutes": 10,
+     "posture": "stand",
+     "handler": "paper",
+     "needs": {
+      "fun": 2
+     },
+     "min_stage": "teen"
+    }
+   }
+  }
+ }
+}

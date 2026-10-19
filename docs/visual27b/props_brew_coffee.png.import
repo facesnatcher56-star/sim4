@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bwxb7r5te4iaf"
-path="res://.godot/imported/closeup_type_computer.png-0f06300e5089ab124123bcd8478b1355.ctex"
+uid="uid://cuokad6dn620a"
+path="res://.godot/imported/props_brew_coffee.png-4c470916aa4329ed44a9edd4f7323b28.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://docs/visual27/closeup_type_computer.png"
-dest_files=["res://.godot/imported/closeup_type_computer.png-0f06300e5089ab124123bcd8478b1355.ctex"]
+source_file="res://docs/visual27b/props_brew_coffee.png"
+dest_files=["res://.godot/imported/props_brew_coffee.png-4c470916aa4329ed44a9edd4f7323b28.ctex"]
 
 [params]
 
