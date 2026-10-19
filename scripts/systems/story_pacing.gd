@@ -162,6 +162,7 @@ static func _chronicle_beat(c: Dictionary, p: Dictionary) -> void:
 static func on_day(day: int) -> void:
 	OpportunityTaker.on_day(day)
 	StoryMilestones.on_day(day)
+	StorySingles.on_day(day)
 	StoryThreads.on_day(day)
 	if day - last_week_day >= 7:
 		if last_week_day > 0:
