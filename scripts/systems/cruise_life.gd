@@ -161,4 +161,7 @@ static func surface_secrets(t: Dictionary) -> void:
 			continue
 		for p in RelationshipBits.romantic_partners(int(af["owner"])):
 			RelationshipKnowledge.learn_secret(int(p), int(af["owner"]), int(af["sid"]))
-			RelNotify.say([int(p), int(af["owner"])], "%s found out about %s
+			var txt: String = "%s found out about %s's shipboard fling." % [SysUtil.folk_name(int(p)), SysUtil.folk_name(int(af["owner"]))]
+			RelNotify.say([int(p), int(af["owner"])], txt, "warn")
+			VacationLog.note(t, "romance", txt, [int(p), int(af["owner"])], 3, true)
+	c["affairs"] = []

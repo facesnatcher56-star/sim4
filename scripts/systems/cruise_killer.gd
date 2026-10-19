@@ -47,7 +47,7 @@ static func begin(t: Dictionary, ctx: Dictionary = {}) -> Dictionary:
 		return {}
 	var delay_h: float = float(forced.get("delay_hours", ctx.get("delay_hours", cfg().get("start_delay_hours", 18))))
 	c["killer"] = {"pid": pid, "name": CrimePerson.name_of(pid), "victims": [], "cases": [], "next_kill": SysUtil.now() + int(delay_h * 60.0), "detained": -1,
-		"phase": "hunting", "restricted_at": -1, "started": SysUtil.now(), "reported": []}
+		"phase": "hunting", "restricted_at": -1, "started": SysUtil.now(), "reported": [], "spare_party": bool(forced.get("spare_party", ctx.get("spare_party", false)))}
 	if not CrimeSerial.active():
 		CrimeSerial.start(pid)
 	elif int(JusticeState.serial.get("pid", -1)) != pid:
@@ -90,6 +90,8 @@ static func _kill_one(t: Dictionary, k: Dictionary) -> void:
 		ids.append(tid)
 		w.append(pow(CrimeSerial.isolation(tid), 2.0))
 	for f in Cruise.members_aboard(t):
+		if bool(k.get("spare_party", false)):
+			break                                            # a report run can spare the household
 		ids.append(int(f.id))
 		w.append(pow(CrimeSerial.isolation(int(f.id)) * float(JusticeState.sect("serial").get("player_mult", 0.3)), 2.0))
 	var victim = SysUtil.pick_weighted(ids, w)
