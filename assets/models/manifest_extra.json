@@ -151,6 +151,15 @@
       0.2
     ]
   },
+  "sofa_bed": {
+    "file": "res://assets/models/sofa.glb",
+    "footprint": [
+      2,
+      1,
+      0.85
+    ],
+    "notes": "reuses the sofa model; a pull-out bed for studios"
+  },
   "single_bed": {
     "file": "res://assets/models/single_bed.glb",
     "footprint": [

@@ -3,7 +3,7 @@
 
 const Kit = preload("res://tests/sim_testkit.gd")
 
-const COND_KEYS := ["circadian", "pair_flag_absent", "stat_below", "stat_above", "has_trait", "lacks_trait", "has_buff", "lacks_buff", "mood_is", "skill_at_least",
+const COND_KEYS := ["circadian", "no_free_bed", "pair_flag_absent", "stat_below", "stat_above", "has_trait", "lacks_trait", "has_buff", "lacks_buff", "mood_is", "skill_at_least",
 	"object_state_eq", "object_state_above", "object_state_below", "time_between", "coins_at_least", "relationship_above",
 	"has_job", "posture_is", "posture_not", "not", "any"]
 const SYS_COND_KEYS := ["friends_at_least", "bit_count", "career_is", "career_level_at_least", "age_stage_is", "skill_below", "in_school", "pregnant"]
