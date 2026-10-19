@@ -106,6 +106,7 @@ static func on_hour() -> void:
 		if not known(int(mid)) and p >= float(st.get("auto_known_at", 0.5)):
 			PregnancyStage.reveal(int(mid), "showing")
 		PregnancyTell.on_hour(int(mid), r)
+		PregnancyLabour.on_hour(int(mid), r)
 		if bool(r.get("symptoms", false)) and not known(int(mid)) and not CrimePerson.is_player(int(mid)) and rng.randf() < 0.25:
 			PregnancyStage.take_test(int(mid))             # townspeople and housemates the player does not steer find out by themselves
 
@@ -122,8 +123,7 @@ static func on_day() -> void:
 		PregnancyChoice.on_day(int(mid), r)
 		PregnancyLoss.on_day(int(mid), r)
 		if Aging.pregnancies.has(mid) and SysUtil.day() >= int(r["due_day"]):
-			PregnancyBirth.deliver(int(mid), int(r["father"]))
-			Aging.pregnancies.erase(mid)
+			PregnancyLabour.finish(int(mid))              # normally labour finished hours ago; this catches day-only clocks
 
 ## Folk the player does not steer go to a prenatal check-up now and then.
 static func _ai_care(id: int, r: Dictionary) -> void:
@@ -149,6 +149,11 @@ static func normalize_loaded(r: Dictionary) -> void:
 			r[k] = int(r[k])
 	if r.has("told"):
 		r["told"] = SysUtil.to_ints(r["told"])
+	if r.has("labour"):
+		for k in ["start", "end"]:
+			r["labour"][k] = int(r["labour"][k])
+	if r.has("assumed_father"):
+		r["assumed_father"] = int(r["assumed_father"])
 	for e in r.get("events", []):
 		e["day"] = int(e["day"])
 

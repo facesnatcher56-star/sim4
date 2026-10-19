@@ -1,0 +1,14 @@
+{
+ "_doc": "Task 18 death cause: the mother's death at birth, extremely rare and far rarer at the hospital. Non-graphic.",
+ "causes": {
+  "childbirth": {
+   "label": "Complications of childbirth",
+   "text": "{name} died after giving birth. The baby is safe. {summary}",
+   "legacy_text": "{Their} last act was bringing a new life into the world.",
+   "grief": {"strength": 2.0, "days": 10},
+   "child_text": "Where is {they}? I want {them} back.",
+   "memory": {"value": -1.0, "text": "the day {name} gave life and was lost"},
+   "grave_style": "stone", "unexpected": true, "severity": 5
+  }
+ }
+}

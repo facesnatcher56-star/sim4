@@ -117,6 +117,40 @@
   },
   "memory": {"planned": -0.5, "unplanned": -0.15, "later_days": 6, "later_value": 0.1}
  },
+ "labour": {
+  "lead_hours": 6,
+  "minutes_min": 180,
+  "minutes_max": 360,
+  "travel_minutes": 30,
+  "present_bonus": 0.8,
+  "absent_penalty": -0.5,
+  "home_birth_chance_when_no_ward": 1.0
+ },
+ "birth": {
+  "complication": 0.05,
+  "hospital_mult": 0.5,
+  "caesarean_share": 0.6,
+  "caesarean_days": 6,
+  "premature_days": 2,
+  "mother_death_home": 0.0006,
+  "mother_death_hospital": 0.0001,
+  "name_suggestions": 3,
+  "gift_coins": 25,
+  "gift_max": 3
+ },
+ "postpartum": {
+  "recovery_days": 3,
+  "depression": 0.06,
+  "depression_days": 4,
+  "support_cut": 0.25,
+  "partner_help": 0.3
+ },
+ "paternity": {
+  "doubt_chance": 0.5,
+  "test_cost": 80,
+  "doubt_days": 6,
+  "reveal_romance_loss": 40.0
+ },
  "townie": {
   "daily_chance": 0.012,
   "max_kids": 3,

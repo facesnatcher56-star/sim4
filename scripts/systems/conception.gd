@@ -97,5 +97,6 @@ static func pick_protection(a: int, b: int) -> String:
 	return "protected" if Pregnancy.rng.randf() < share else "none"
 
 static func _conceive(carrier: int, other: int, planned: bool) -> Dictionary:
-	Pregnancy.start(carrier, other, planned)
+	var r: Dictionary = Pregnancy.start(carrier, other, planned)
+	Paternity.at_conception(carrier, other, r)
 	return {"ok": true, "reason": "pregnant", "carrier": carrier}

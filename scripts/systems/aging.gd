@@ -233,7 +233,9 @@ static func _check_births() -> void:
 
 ## Deliver now (tests and the old call sites): PregnancyBirth makes the baby or babies from the record, or one baby without a record.
 static func _birth(mother_id: int, father_id: int) -> void:
-	PregnancyBirth.deliver(mother_id, father_id)
+	if not pregnancies.has(mother_id):
+		pregnancies[mother_id] = {"father": father_id, "due_day": SysUtil.day(), "started": SysUtil.day(), "known": true, "kids": 1, "kid_sexes": [Sexes.roll()]}
+	PregnancyLabour.finish(mother_id)
 
 static func _surname(full: String) -> String:
 	var parts: PackedStringArray = full.split(" ")
