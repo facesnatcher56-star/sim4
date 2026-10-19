@@ -11,9 +11,12 @@ func _process(delta: float) -> void:
 	var f = World.get_folk(folk_id)
 	if f == null:
 		return
-	visible = not f.has_meta("away") and not has_meta("occluded") and not has_meta("level_hidden")    # away (work, school, party, fast travel) or behind a building shell: not drawn
+	visible = not f.has_meta("away") and not has_meta("occluded") and not has_meta("level_hidden") and not has_meta("in_vehicle")    # away (work, school, party, fast travel), behind a building shell or riding in a vehicle (VehicleView): not drawn
 	if not visible:
 		_last_tile = Vector2i(-999, -999)      # not animated while hidden: it reappears on its tile
+		return
+	if has_meta("vehicle_goto"):
+		_vehicle_walk(f, delta)          # walking to the door of a vehicle or bus stop (VehicleView)
 		return
 	_check_tick += 1
 	if _check_tick % 20 == 0:
@@ -30,6 +33,46 @@ func _process(delta: float) -> void:
 	_apply_avoid(delta)
 	_apply_pose(f, delta)
 	_update_mood_icon(f, delta)
+
+
+# ------------------------------------------------------------------ vehicles (the view layer VehicleView)
+
+var _veh_goal: Vector2i = Vector2i(-9999, -9999)
+
+
+## Walk along a real path to the tile in meta "vehicle_goto" (a vehicle door, a bus stop) and stand there; the sim's own walk is ignored meanwhile.
+func _vehicle_walk(f, delta: float) -> void:
+	var goal: Vector2i = get_meta("vehicle_goto")
+	if goal != _veh_goal:
+		_veh_goal = goal
+		_waypoints.clear()
+		var from_t: Vector2i = World.pos_to_tile(position)
+		var seg: Array = World.find_path(from_t, goal) if from_t != goal else []
+		if seg.size() > 60:
+			seg = []
+			position = World.tile_to_pos(goal)
+		for t in seg:
+			_waypoints.append(_wp(t, 0))
+	_last_tile = f.tile
+	_last_level = f.level
+	_level_y = World.walk_y(goal, 0)
+	_target = World.tile_to_pos(goal)
+	_target_pose = "idle"
+	_urgent = false
+	_move(delta)
+	_apply_pose(f, delta)
+
+
+## The folk has just been put at a vehicle door: no old walk to catch up on, it walks from here to where the sim has it.
+func vehicle_landed() -> void:
+	_veh_goal = Vector2i(-9999, -9999)
+	_waypoints.clear()
+	_last_tile = Vector2i(-999, -999)
+	var f = World.get_folk(folk_id)
+	if f != null:
+		_last_tile = f.tile
+		_last_level = f.level
+	_ybase = 0.0
 
 
 # ------------------------------------------------------------------ clip selection

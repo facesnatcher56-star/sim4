@@ -1,7 +1,8 @@
 class_name FolkPreview
 extends SubViewportContainer
 ## Small live 3D preview of a Folk for the household creator: the real folk model of the age group, tinted with the
-## Genetics appearance dictionary (skin, hair style + colour, eyes, shirt, pants, height, build). Slowly turns.
+## Genetics appearance dictionary (skin, hair style + colour, eyes, shirt, pants, height, build). It FACES THE CAMERA, sways a little left and right (a slow turn that
+## never shows the back) and can be dragged round with the mouse; the body shows the sex's shoulder / hip width and height (body_type, frame, height, build).
 
 const SIZE := Vector2i(230, 320)
 
@@ -12,10 +13,39 @@ var _rig: Node = null
 var _stage := "adult"
 var _ap: Dictionary = {}
 
+const FACING := PI                    # the model's front is -Z and the camera stands on +Z: turn it round
+const SWAY := 0.5
+const HOLD_AFTER_DRAG := 2.5
+
+var yaw_offset: float = 0.0           # set by dragging
+var _t: float = 0.0
+var _hold_until: float = 0.0
+
+
 func _init() -> void:
 	custom_minimum_size = Vector2(SIZE)
 	stretch = true
-	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	mouse_filter = Control.MOUSE_FILTER_STOP
+	mouse_default_cursor_shape = Control.CURSOR_HSIZE
+	tooltip_text = "Drag to turn"
+
+
+func _gui_input(ev: InputEvent) -> void:
+	if ev is InputEventMouseMotion and (ev.button_mask & MOUSE_BUTTON_MASK_LEFT) != 0:
+		yaw_offset = fmod(yaw_offset + (ev as InputEventMouseMotion).relative.x * 0.015, TAU)
+		_hold_until = _t + HOLD_AFTER_DRAG
+		_apply_yaw()
+
+
+func _apply_yaw() -> void:
+	if _pivot != null:
+		var sway: float = sin(_t * 0.6) * SWAY if _t >= _hold_until and absf(wrapf(yaw_offset, -PI, PI)) < 0.01 else 0.0
+		_pivot.rotation.y = FACING + yaw_offset + sway
+
+
+## The yaw the model is turned to now (radians; PI = looking straight at the camera).
+func yaw() -> float:
+	return _pivot.rotation.y if _pivot != null else FACING
 
 func _ready() -> void:
 	_vp = SubViewport.new()
@@ -45,14 +75,19 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	if _pivot != null and is_visible_in_tree():
-		_pivot.rotation.y = fmod(_pivot.rotation.y + delta * 0.5, TAU)
+		_t += delta
+		if _t >= _hold_until and absf(wrapf(yaw_offset, -PI, PI)) >= 0.01:
+			yaw_offset = lerp_angle(yaw_offset, 0.0, clampf(delta * 1.2, 0.0, 1.0))      # after a drag it slowly comes back to face you
+		_apply_yaw()
 
 ## Show a Folk of this age group with this appearance (Genetics appearance contract).
 func show_folk(stage: String, appearance: Dictionary) -> void:
 	_stage = stage
 	_ap = appearance
+	yaw_offset = 0.0
 	if _pivot != null:
 		_rebuild()
+		_apply_yaw()
 
 func _rebuild() -> void:
 	if _rig != null:

@@ -153,8 +153,8 @@ def main():
         cx, cz, ext = grid(ids, 8, 4.4, 0.25)
         scale = 42
     elif sheet == "vehicles":
-        cx, cz, ext = grid(ids_by(("car_",), ("bus",)), 5, 6.5, 0.4)
-        scale = 36
+        cx, cz, ext = grid(ids_by(("car_", "taxi", "police_car", "ambulance", "fire_engine", "tow_truck", "bike"), ("bus",)), 5, 9.0, 0.4)
+        scale = 50
     elif sheet == "buildings":
         cx, cz, ext = grid(ids_by(("house_", "townhouse", "cafe", "gym", "library", "market", "office", "school")), 6, 28, 1.2)
         scale = 190

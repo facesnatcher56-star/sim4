@@ -30,7 +30,7 @@ func _ports(W) -> Dictionary:
 
 func _connectivity(W) -> void:
 	var ports: Dictionary = _ports(W)
-	_check(ports.size() == 15, "every lot has a street gate on the sidewalk (%d)" % ports.size())
+	_check(ports.size() == 19, "every lot has a street gate on the sidewalk (%d)" % ports.size())
 	var ids: Array = ports.keys()
 	var bad := 0
 	for a in ids:
@@ -40,7 +40,7 @@ func _connectivity(W) -> void:
 				if n < 0.0:
 					bad += 1
 					fails.append("no way from the %s door to the %s door" % [a, b])
-	_check(bad == 0, "all 15 lot doors reach each other")
+	_check(bad == 0, "all 16 lot doors reach each other")
 	# the park and the woods are reachable too
 	var green: Dictionary = W.regions.by_lot("green")
 	var gt: Vector2i = (green["rect"] as Rect2i).position + Vector2i(2, 2)

@@ -35,7 +35,7 @@ static func defs() -> Dictionary:
 	var base: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://data/objects.json"))
 	if base is Dictionary:
 		_defs = (base as Dictionary).duplicate(true)
-	for path in ["res://data/venues.json", "res://data/building_rules.json"]:        # cloned objects of the venues and of the multi-floor buildings
+	for path in ["res://data/venues.json", "res://data/building_rules.json", "res://data/careers_works.json"]:        # cloned objects of the venues and of the multi-floor buildings
 		var ven: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
 		if ven is Dictionary:
 			var objs: Dictionary = (ven.get("content", {}) as Dictionary).get("objects", {})

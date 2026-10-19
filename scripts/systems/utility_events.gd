@@ -46,7 +46,7 @@ static func start(util: String, zone: String, cause: String, opts: Dictionary = 
 	var spec: Dictionary = ((Utilities.cfg().get("causes", {}) as Dictionary).get(util, {}) as Dictionary).get(cause, {})
 	var hrs: Array = spec.get("hours", [2, 6])
 	var hours: float = float(CityState.rng.randi_range(int(hrs[0]) * 4, int(hrs[1]) * 4)) / 4.0
-	hours /= CityBudget.repair_speed("utilities")
+	hours /= CityBudget.repair_speed("utilities") * WorksUtility.crew_mult()      # task 31: utility techs in town
 	if opts.has("hours"):
 		hours = float(opts["hours"])
 	return Utilities.begin(util, zone, hours, cause, opts)

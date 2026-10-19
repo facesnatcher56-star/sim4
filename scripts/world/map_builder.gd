@@ -92,6 +92,19 @@ static func _paint_lots(w) -> void:
 	for slot in (layout()["lots"] as Dictionary).values():
 		var o := slot_origin(slot)
 		w.set_floor_rect_raw(o, o + lot_size() - Vector2i.ONE, "lawn")
+	for slot2 in plots().values():
+		var o2 := slot_origin(slot2)
+		w.set_floor_rect_raw(o2, o2 + lot_size() - Vector2i.ONE, "lawn")
+
+
+## Reserved empty blocks where town-planning projects build (task 12b): plot id -> slot [col, row].
+static func plots() -> Dictionary:
+	return layout().get("plots", {})
+
+
+static func plot_rect(plot_id: String) -> Rect2i:
+	var slot: Variant = plots().get(plot_id, null)
+	return Rect2i() if slot == null else Rect2i(slot_origin(slot), lot_size())
 
 
 static func _paint_green(w, lay: Dictionary) -> void:
@@ -210,6 +223,8 @@ static func _add_regions(w, lay: Dictionary, roads: Array) -> void:
 	var g: Dictionary = lay.get("green", {})
 	if not g.is_empty():
 		w.regions.add_region({"rect": Rect2i(slot_origin(g["slot"]), size), "kind": "park", "owner": "public", "label": str(g.get("label", "Green")), "lot": "green"})
+	for pid in plots():
+		w.regions.add_region({"rect": plot_rect(str(pid)), "kind": "park", "owner": "public", "label": "Empty plot", "lot": str(pid)})
 	var ss: Dictionary = lay.get("south_strip", {})
 	if not ss.is_empty():
 		var sy := int(ss["y"])

@@ -269,12 +269,15 @@ static func slice_markers(on: bool) -> void:
 		if not on:
 			unmark(f, "acc_job_risky")
 			unmark(f, "acc_job_very_risky")
+			unmark(f, "acc_job_hazard")
 		elif SysUtil.is_away(f) and str(Away.info(int(f.id)).get("reason", "")) == "work":
-			var tier: int = int((c.get("physical_careers", {}) as Dictionary).get(Careers.career_of(int(f.id)), 0))
+			var tier: int = Works.injury_tier(Careers.career_of(int(f.id)))      # the accident table plus the industrial careers (task 31)
 			if tier >= 1:
 				mark(f, "acc_job_risky")
 			if tier >= 2:
 				mark(f, "acc_job_very_risky")
+			if tier >= 3:
+				mark(f, "acc_job_hazard")
 
 ## Right after the hourly dice: the job markers go again (an away person's buff order must not change under a save).
 static func after_hour() -> void:

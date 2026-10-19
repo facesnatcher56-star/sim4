@@ -1,0 +1,1038 @@
+{
+ "_doc": "Industrial careers (task 31): factory, warehouse, construction, mechanic, utility tech. Merged into the careers table at data load (scripts/core/data.gd). Numbers for the works lot, overtime, unions, strikes and closures live in `works`; see docs/WORKS.md.",
+ "version": 1,
+ "careers": {
+  "factory_worker": {
+   "label": "Factory Worker",
+   "primary_skill": "handiness",
+   "alt_skills": [
+    "logic"
+   ],
+   "workplace": "works",
+   "visible_work": "work_line",
+   "days": [
+    0,
+    1,
+    2,
+    3,
+    4
+   ],
+   "injury_tier": 2,
+   "layoff_mult": 1.5,
+   "sector": "plant",
+   "hooks": {
+    "repair_object": 3,
+    "tinker": 2,
+    "build_gadget": 3,
+    "lift_weights": 1.5,
+    "exercise": 1,
+    "clean_object": 0.5
+   },
+   "trait_bonus": {
+    "handy": 3,
+    "workaholic": 2,
+    "perfectionist": 1,
+    "clumsy": -3,
+    "lazy": -2
+   },
+   "levels": [
+    {
+     "title": "Line Hand",
+     "start": 7,
+     "end": 15,
+     "pay": 15,
+     "requires": {},
+     "flavor": "Same bolt, same belt, good company."
+    },
+    {
+     "title": "Machine Operator",
+     "start": 7,
+     "end": 15,
+     "pay": 21,
+     "requires": {
+      "skills": {
+       "handiness": 2
+      }
+     }
+    },
+    {
+     "title": "Line Lead",
+     "start": 7,
+     "end": 16,
+     "pay": 30,
+     "requires": {
+      "skills": {
+       "handiness": 4,
+       "logic": 2
+      }
+     },
+     "flavor": "Now the line is your line."
+    },
+    {
+     "title": "Plant Supervisor",
+     "start": 8,
+     "end": 17,
+     "pay": 42,
+     "requires": {
+      "skills": {
+       "handiness": 6,
+       "logic": 3,
+       "fitness": 2
+      }
+     }
+    },
+    {
+     "title": "Plant Manager",
+     "start": 8,
+     "end": 17,
+     "pay": 58,
+     "requires": {
+      "skills": {
+       "handiness": 7,
+       "logic": 5,
+       "charisma": 3
+      }
+     },
+     "flavor": "Every siren in the plant answers to you."
+    }
+   ],
+   "description": "Shift after shift on the line. The belt never stops, and neither does the pay cheque.",
+   "tasks": [
+    {
+     "id": "fix_a_jam",
+     "label": "Clear a jam on the line",
+     "interactions": [
+      "repair_object"
+     ],
+     "count": 1,
+     "bonus": 8,
+     "min_level": 1
+    },
+    {
+     "id": "stay_fit",
+     "label": "Keep fit for the floor",
+     "interactions": [
+      "lift_weights",
+      "exercise"
+     ],
+     "count": 1,
+     "bonus": 5,
+     "min_level": 1
+    }
+   ],
+   "shifts": {
+    "swing": {
+     "label": "Swing Shift",
+     "start": 14,
+     "end": 22,
+     "pay_mult": 1.12,
+     "min_level": 1,
+     "return_buff": "post_night_shift",
+     "days": [
+      0,
+      1,
+      2,
+      3,
+      4
+     ]
+    },
+    "night_line": {
+     "label": "Night Line",
+     "start": 22,
+     "end": 6,
+     "pay_mult": 1.3,
+     "min_level": 1,
+     "return_buff": "post_night_shift",
+     "days": [
+      0,
+      1,
+      2,
+      3,
+      4
+     ]
+    }
+   }
+  },
+  "warehouse_worker": {
+   "label": "Warehouse and Logistics",
+   "primary_skill": "fitness",
+   "alt_skills": [
+    "handiness"
+   ],
+   "workplace": "works",
+   "visible_work": "work_pallets",
+   "days": [
+    0,
+    1,
+    2,
+    3,
+    4
+   ],
+   "injury_tier": 1,
+   "layoff_mult": 1.2,
+   "sector": "depot",
+   "hooks": {
+    "lift_weights": 3,
+    "exercise": 2,
+    "repair_object": 1.5,
+    "clean_object": 1,
+    "tinker": 1
+   },
+   "trait_bonus": {
+    "active": 3,
+    "workaholic": 2,
+    "lazy": -3,
+    "clumsy": -2
+   },
+   "levels": [
+    {
+     "title": "Picker and Packer",
+     "start": 6,
+     "end": 14,
+     "pay": 14,
+     "requires": {},
+     "flavor": "Eleven thousand boxes. You counted."
+    },
+    {
+     "title": "Forklift Driver",
+     "start": 6,
+     "end": 14,
+     "pay": 20,
+     "requires": {
+      "skills": {
+       "fitness": 2,
+       "handiness": 1
+      }
+     }
+    },
+    {
+     "title": "Dispatcher",
+     "start": 7,
+     "end": 15,
+     "pay": 28,
+     "requires": {
+      "skills": {
+       "fitness": 3,
+       "logic": 2
+      }
+     }
+    },
+    {
+     "title": "Shift Leader",
+     "start": 7,
+     "end": 16,
+     "pay": 38,
+     "requires": {
+      "skills": {
+       "fitness": 4,
+       "logic": 3,
+       "handiness": 3
+      }
+     }
+    },
+    {
+     "title": "Logistics Manager",
+     "start": 8,
+     "end": 17,
+     "pay": 52,
+     "requires": {
+      "skills": {
+       "logic": 5,
+       "fitness": 4,
+       "charisma": 3
+      }
+     },
+     "flavor": "Trucks arrive when you say they do."
+    }
+   ],
+   "description": "Pallets in, pallets out. Night crews keep the town's shelves full.",
+   "tasks": [
+    {
+     "id": "move_stock",
+     "label": "Shift some heavy stock",
+     "interactions": [
+      "lift_weights",
+      "exercise"
+     ],
+     "count": 1,
+     "bonus": 7,
+     "min_level": 1
+    },
+    {
+     "id": "tidy_the_bay",
+     "label": "Keep the bay tidy",
+     "interactions": [
+      "clean_object",
+      "repair_object"
+     ],
+     "count": 1,
+     "bonus": 5,
+     "min_level": 2
+    }
+   ],
+   "shifts": {
+    "evening_run": {
+     "label": "Evening Run",
+     "start": 15,
+     "end": 23,
+     "pay_mult": 1.1,
+     "min_level": 1,
+     "return_buff": "post_night_shift",
+     "days": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+     ]
+    },
+    "night_dock": {
+     "label": "Night Dock",
+     "start": 22,
+     "end": 6,
+     "pay_mult": 1.3,
+     "min_level": 1,
+     "return_buff": "post_night_shift",
+     "days": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ]
+    }
+   }
+  },
+  "construction_worker": {
+   "label": "Construction",
+   "primary_skill": "handiness",
+   "alt_skills": [
+    "fitness"
+   ],
+   "workplace": "works",
+   "visible_work": "work_site",
+   "days": [
+    0,
+    1,
+    2,
+    3,
+    4
+   ],
+   "injury_tier": 3,
+   "layoff_mult": 1.6,
+   "sector": "site",
+   "outdoor": true,
+   "weather_off": [
+    "thunderstorm",
+    "snow"
+   ],
+   "hooks": {
+    "repair_object": 3,
+    "build_gadget": 3,
+    "tinker": 2,
+    "lift_weights": 2,
+    "exercise": 1.5,
+    "clean_object": 0.5
+   },
+   "trait_bonus": {
+    "handy": 3,
+    "outdoorsy": 2,
+    "active": 2,
+    "clumsy": -3,
+    "lazy": -2
+   },
+   "levels": [
+    {
+     "title": "Labourer",
+     "start": 6,
+     "end": 14,
+     "pay": 16,
+     "requires": {},
+     "flavor": "Dust, mud and a very early start."
+    },
+    {
+     "title": "Bricklayer",
+     "start": 6,
+     "end": 15,
+     "pay": 23,
+     "requires": {
+      "skills": {
+       "handiness": 2,
+       "fitness": 1
+      }
+     }
+    },
+    {
+     "title": "Crane and Plant Operator",
+     "start": 6,
+     "end": 15,
+     "pay": 32,
+     "requires": {
+      "skills": {
+       "handiness": 4,
+       "fitness": 2
+      }
+     }
+    },
+    {
+     "title": "Foreman",
+     "start": 7,
+     "end": 16,
+     "pay": 44,
+     "requires": {
+      "skills": {
+       "handiness": 6,
+       "fitness": 3,
+       "logic": 2
+      }
+     },
+     "flavor": "The crew looks to you when it rains."
+    },
+    {
+     "title": "Site Manager",
+     "start": 7,
+     "end": 17,
+     "pay": 60,
+     "requires": {
+      "skills": {
+       "handiness": 7,
+       "logic": 5,
+       "charisma": 3
+      }
+     }
+    }
+   ],
+   "description": "Outdoor work on whatever the town is building next. Bad weather means a day off the site.",
+   "tasks": [
+    {
+     "id": "lay_a_course",
+     "label": "Fix or build something solid",
+     "interactions": [
+      "repair_object",
+      "build_gadget"
+     ],
+     "count": 1,
+     "bonus": 8,
+     "min_level": 1
+    },
+    {
+     "id": "carry_load",
+     "label": "Carry a load",
+     "interactions": [
+      "lift_weights",
+      "exercise"
+     ],
+     "count": 1,
+     "bonus": 5,
+     "min_level": 1
+    }
+   ],
+   "shifts": {
+    "early_start": {
+     "label": "Dawn Crew",
+     "start": 5,
+     "end": 13,
+     "pay_mult": 1.1,
+     "min_level": 1,
+     "return_buff": "post_night_shift",
+     "days": [
+      0,
+      1,
+      2,
+      3,
+      4
+     ]
+    }
+   }
+  },
+  "mechanic": {
+   "label": "Mechanic",
+   "primary_skill": "handiness",
+   "alt_skills": [
+    "logic"
+   ],
+   "workplace": "works",
+   "visible_work": "work_bay",
+   "days": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+   ],
+   "injury_tier": 1,
+   "layoff_mult": 0.8,
+   "sector": "garage",
+   "hooks": {
+    "repair_object": 4,
+    "tinker": 3,
+    "build_gadget": 3,
+    "clean_object": 0.5
+   },
+   "trait_bonus": {
+    "handy": 3,
+    "perfectionist": 2,
+    "clumsy": -3,
+    "lazy": -1
+   },
+   "levels": [
+    {
+     "title": "Garage Hand",
+     "start": 8,
+     "end": 16,
+     "pay": 15,
+     "requires": {},
+     "flavor": "Oil on the overalls, tea on the bench."
+    },
+    {
+     "title": "Apprentice Mechanic",
+     "start": 8,
+     "end": 16,
+     "pay": 21,
+     "requires": {
+      "skills": {
+       "handiness": 2
+      }
+     }
+    },
+    {
+     "title": "Mechanic",
+     "start": 8,
+     "end": 17,
+     "pay": 30,
+     "requires": {
+      "skills": {
+       "handiness": 4,
+       "logic": 2
+      }
+     }
+    },
+    {
+     "title": "Workshop Foreman",
+     "start": 8,
+     "end": 17,
+     "pay": 41,
+     "requires": {
+      "skills": {
+       "handiness": 6,
+       "logic": 3
+      }
+     }
+    },
+    {
+     "title": "Garage Owner",
+     "start": 9,
+     "end": 17,
+     "pay": 56,
+     "requires": {
+      "skills": {
+       "handiness": 7,
+       "logic": 5,
+       "charisma": 3
+      }
+     },
+     "flavor": "Your name is on the sign."
+    }
+   ],
+   "description": "Engines, brakes and the occasional miracle. Every car in town ends up at your door.",
+   "tasks": [
+    {
+     "id": "fix_something",
+     "label": "Fix something broken",
+     "interactions": [
+      "repair_object"
+     ],
+     "count": 1,
+     "bonus": 9,
+     "min_level": 1
+    },
+    {
+     "id": "bench_time",
+     "label": "Tinker at the bench",
+     "interactions": [
+      "tinker",
+      "build_gadget"
+     ],
+     "count": 1,
+     "bonus": 5,
+     "min_level": 1
+    }
+   ],
+   "shifts": {
+    "late_garage": {
+     "label": "Late Garage",
+     "start": 13,
+     "end": 21,
+     "pay_mult": 1.1,
+     "min_level": 2,
+     "return_buff": "post_night_shift",
+     "days": [
+      0,
+      1,
+      2,
+      3,
+      4
+     ]
+    }
+   }
+  },
+  "utility_tech": {
+   "label": "Power and Utility Tech",
+   "primary_skill": "handiness",
+   "alt_skills": [
+    "logic"
+   ],
+   "workplace": "works",
+   "visible_work": "work_panel",
+   "days": [
+    0,
+    1,
+    2,
+    3,
+    4
+   ],
+   "injury_tier": 2,
+   "layoff_mult": 0.6,
+   "sector": "grid",
+   "utility_crew": true,
+   "hooks": {
+    "repair_object": 4,
+    "tinker": 2,
+    "build_gadget": 3,
+    "research_online": 2,
+    "work_computer": 2
+   },
+   "trait_bonus": {
+    "handy": 2,
+    "perfectionist": 2,
+    "workaholic": 1,
+    "clumsy": -3,
+    "lazy": -2
+   },
+   "levels": [
+    {
+     "title": "Meter Reader",
+     "start": 8,
+     "end": 16,
+     "pay": 16,
+     "requires": {
+      "skills": {
+       "handiness": 1
+      }
+     },
+     "flavor": "Door to door with a clipboard and a torch."
+    },
+    {
+     "title": "Line Fitter",
+     "start": 8,
+     "end": 16,
+     "pay": 23,
+     "requires": {
+      "skills": {
+       "handiness": 3,
+       "logic": 1
+      }
+     }
+    },
+    {
+     "title": "Plant Operator",
+     "start": 8,
+     "end": 16,
+     "pay": 33,
+     "requires": {
+      "skills": {
+       "handiness": 4,
+       "logic": 3
+      }
+     }
+    },
+    {
+     "title": "Grid Controller",
+     "start": 8,
+     "end": 17,
+     "pay": 45,
+     "requires": {
+      "skills": {
+       "handiness": 5,
+       "logic": 5
+      }
+     }
+    },
+    {
+     "title": "Chief Engineer",
+     "start": 9,
+     "end": 17,
+     "pay": 62,
+     "requires": {
+      "skills": {
+       "handiness": 6,
+       "logic": 7,
+       "charisma": 2
+      }
+     },
+     "flavor": "When the lights go out, they call you."
+    }
+   ],
+   "description": "Keep the power, water and phone lines running. A tech on the books means outages are fixed sooner.",
+   "tasks": [
+    {
+     "id": "fix_a_fault",
+     "label": "Fix a fault",
+     "interactions": [
+      "repair_object"
+     ],
+     "count": 1,
+     "bonus": 9,
+     "min_level": 1
+    },
+    {
+     "id": "read_the_dials",
+     "label": "Study the network",
+     "interactions": [
+      "research_online",
+      "work_computer"
+     ],
+     "count": 1,
+     "bonus": 5,
+     "min_level": 2
+    }
+   ],
+   "shifts": {
+    "night_watch": {
+     "label": "Night Control Room",
+     "start": 22,
+     "end": 6,
+     "pay_mult": 1.3,
+     "min_level": 2,
+     "return_buff": "post_night_shift",
+     "days": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ]
+    }
+   }
+  }
+ },
+ "works": {
+  "lot": "works",
+  "overtime": {
+   "hours": 2,
+   "pay_mult": 1.5,
+   "energy": -22,
+   "perf": 3,
+   "buff": "overtime_worn",
+   "busy_chance": 0.25,
+   "min_level": 1,
+   "townie_coins": 30
+  },
+  "townie_night_share": 0.25,
+  "union": {
+   "dues_share": 0.02,
+   "strike_pay_share": 0.4,
+   "wage_bump": [
+    0.03,
+    0.08
+   ],
+   "townie_share": 0.35
+  },
+  "strike": {
+   "daily_chance": 0.006,
+   "slump_mult": 3,
+   "injury_mult": 0.5,
+   "days": [
+    2,
+    5
+   ],
+   "min_workers": 3,
+   "cooldown_days": 20,
+   "win_chance": 0.6
+  },
+  "closure": {
+   "daily_chance": 0.0015,
+   "slump_mult": 6,
+   "min_workers": 3,
+   "cooldown_days": 40,
+   "severance_hours": 40
+  },
+  "utility": {
+   "crew_per_tech": 0.06,
+   "crew_cap": 0.3
+  },
+  "texts": {
+   "strike_called": "The {sector} union has called a strike from tomorrow. Work stops until a deal is made.",
+   "strike_picket": "{name} joined the picket line instead of going in ({pay} coins strike pay).",
+   "strike_picket_nopay": "{name} stayed out with the strike. No work, no wages.",
+   "strike_end_win": "The {sector} strike is over. The workers won a raise.",
+   "strike_end_loss": "The {sector} strike ended with no deal. Everyone is back at work.",
+   "closure": "The {sector} firm shut down for good. Everyone who worked there is out of a job.",
+   "closure_resident": "{name} lost the job when the {sector} business closed, with {pay} coins of severance. Check the job board for something new.",
+   "rained_off": "{name} was sent home: too wet and stormy to work on the site today.",
+   "overtime_done": "{name} stayed late and earned {pay} extra coins.",
+   "union_join": "{name} joined the {sector} union.",
+   "union_leave": "{name} left the union.",
+   "sectors": {
+    "plant": "factory",
+    "depot": "warehouse",
+    "site": "construction",
+    "garage": "garage",
+    "grid": "utility"
+   }
+  }
+ },
+ "content": {
+  "buffs": {
+   "overtime_worn": {
+    "label": "Worn Out From Overtime",
+    "mood": {
+     "uncomfortable": 1,
+     "tense": 1
+    },
+    "duration_min": 480,
+    "need_decay_mult": {
+     "energy": 1.15
+    },
+    "autonomy_mult": {
+     "sleep": 1.3
+    },
+    "thought": "Too many hours on my feet."
+   }
+  },
+  "objects": {
+   "assembly_line": {
+    "clone": "workbench",
+    "override": {
+     "label": "Assembly Line",
+     "price": 2400,
+     "tags": [
+      "work",
+      "industrial"
+     ],
+     "interactions": [
+      "work_line"
+     ],
+     "advertises": {}
+    }
+   },
+   "pallet_rack": {
+    "clone": "bookcase_tall",
+    "override": {
+     "label": "Pallet Rack",
+     "price": 900,
+     "tags": [
+      "work",
+      "industrial"
+     ],
+     "height": 2.4,
+     "interactions": [
+      "work_pallets"
+     ],
+     "advertises": {}
+    }
+   },
+   "forklift": {
+    "clone": "workbench",
+    "override": {
+     "label": "Forklift",
+     "price": 3200,
+     "tags": [
+      "work",
+      "industrial"
+     ],
+     "interactions": [
+      "work_pallets"
+     ],
+     "advertises": {}
+    }
+   },
+   "site_materials": {
+    "clone": "workbench",
+    "override": {
+     "label": "Site Materials",
+     "price": 600,
+     "tags": [
+      "work",
+      "industrial"
+     ],
+     "interactions": [
+      "work_site"
+     ],
+     "advertises": {}
+    }
+   },
+   "vehicle_lift": {
+    "clone": "workbench",
+    "override": {
+     "label": "Vehicle Lift",
+     "price": 2800,
+     "tags": [
+      "work",
+      "industrial"
+     ],
+     "interactions": [
+      "work_bay"
+     ],
+     "advertises": {}
+    }
+   },
+   "control_panel": {
+    "clone": "terminal",
+    "override": {
+     "label": "Control Panel",
+     "price": 1800,
+     "tags": [
+      "work",
+      "industrial",
+      "electronics"
+     ],
+     "interactions": [
+      "work_panel",
+      "repair_object"
+     ],
+     "advertises": {}
+    }
+   }
+  },
+  "interactions": {
+   "work_line": {
+    "label": "Run the Line",
+    "kind": "super",
+    "target": "object",
+    "objects": [
+     "assembly_line"
+    ],
+    "duration_min": 16,
+    "posture": "stand",
+    "hidden": true,
+    "tags": [
+     "work",
+     "staff"
+    ],
+    "tests": [],
+    "per_min": {},
+    "skill_xp_per_min": {
+     "handiness": 0.45,
+     "logic": 0.1
+    },
+    "on_finish": [],
+    "on_cancel": [],
+    "autonomous": false,
+    "priority": "normal",
+    "thought": "Keep the belt moving."
+   },
+   "work_pallets": {
+    "label": "Move Pallets",
+    "kind": "super",
+    "target": "object",
+    "objects": [
+     "pallet_rack",
+     "forklift"
+    ],
+    "duration_min": 15,
+    "posture": "stand",
+    "hidden": true,
+    "tags": [
+     "work",
+     "staff"
+    ],
+    "tests": [],
+    "per_min": {},
+    "skill_xp_per_min": {
+     "fitness": 0.5,
+     "handiness": 0.15
+    },
+    "on_finish": [],
+    "on_cancel": [],
+    "autonomous": false,
+    "priority": "normal",
+    "thought": "One more pallet."
+   },
+   "work_site": {
+    "label": "Work the Site",
+    "kind": "super",
+    "target": "object",
+    "objects": [
+     "site_materials"
+    ],
+    "duration_min": 18,
+    "posture": "stand",
+    "hidden": true,
+    "tags": [
+     "work",
+     "staff"
+    ],
+    "tests": [],
+    "per_min": {},
+    "skill_xp_per_min": {
+     "fitness": 0.35,
+     "handiness": 0.35
+    },
+    "on_finish": [],
+    "on_cancel": [],
+    "autonomous": false,
+    "priority": "normal",
+    "thought": "Mind the edge."
+   },
+   "work_bay": {
+    "label": "Work the Bay",
+    "kind": "super",
+    "target": "object",
+    "objects": [
+     "vehicle_lift"
+    ],
+    "duration_min": 18,
+    "posture": "stand",
+    "hidden": true,
+    "tags": [
+     "work",
+     "staff"
+    ],
+    "tests": [],
+    "per_min": {},
+    "skill_xp_per_min": {
+     "handiness": 0.5,
+     "logic": 0.15
+    },
+    "on_finish": [],
+    "on_cancel": [],
+    "autonomous": false,
+    "priority": "normal",
+    "thought": "Pass me the spanner."
+   },
+   "work_panel": {
+    "label": "Watch the Panel",
+    "kind": "super",
+    "target": "object",
+    "objects": [
+     "control_panel"
+    ],
+    "duration_min": 16,
+    "posture": "stand",
+    "hidden": true,
+    "tags": [
+     "work",
+     "staff"
+    ],
+    "tests": [],
+    "per_min": {},
+    "skill_xp_per_min": {
+     "logic": 0.4,
+     "handiness": 0.2
+    },
+    "on_finish": [],
+    "on_cancel": [],
+    "autonomous": false,
+    "priority": "normal",
+    "thought": "All dials in the green."
+   }
+  }
+ }
+}

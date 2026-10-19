@@ -48,11 +48,11 @@ func _test_legacy_mode() -> void:
 func _test_map_layout() -> void:
 	var rep: Dictionary = MapBuilder.build(W)
 	_check(W.width == W.MAP_W and W.height == W.MAP_H, "map size")
-	_check(int(rep["lots"]) == 15, "15 lots expected, got %s" % str(rep["lots"]))
+	_check(int(rep["lots"]) == 19, "19 lots expected, got %s" % str(rep["lots"]))
 	var lots: Array = []
 	for k in ["home", "venue", "townie_home"]:
 		lots.append_array(W.regions.of_kind(k))
-	_check(lots.size() == 15, "lot regions %d" % lots.size())
+	_check(lots.size() == 19, "lot regions %d" % lots.size())
 	var map_rc := Rect2i(0, 0, W.width, W.height)
 	for i in lots.size():
 		var a: Rect2i = lots[i]["rect"]
@@ -69,7 +69,7 @@ func _test_map_layout() -> void:
 		_check(W.region_at(a.position) == lots[i]["id"] and W.region_at(a.end - Vector2i.ONE) == lots[i]["id"], "%s region lookup" % lots[i]["lot"])
 	_check(W.regions.home_id != -1 and str(W.regions.home()["owner"]) == "player", "home region")
 	var hrc: Rect2i = W.regions.home()["rect"]
-	_check(hrc.position.y > W.height * 4 / 10 and absi(hrc.get_center().x - W.width / 2) < 40, "home should sit centre-south, got %s" % str(hrc))
+	_check(hrc.position.y > W.height * 4 / 10 and absi(hrc.get_center().x - W.width / 2) < 80, "home should sit centre-south (the east columns widened the map), got %s" % str(hrc))
 	_check(W.get_floor(Vector2i(0, 0)) == "grass", "map margin is grass")
 	var counts := {}
 	for t in W.floors:
@@ -131,7 +131,7 @@ func _test_chunks() -> void:
 	W.paint_floor(t + Vector2i(1, 0), "wood", 0)
 	var dirty: Array = W.regions.take_dirty_floor_chunks()
 	_check(dirty.size() == 1 and dirty[0] == W.chunk_of(t + Vector2i(1, 0)), "dirty floor chunk set %s" % str(dirty))
-	_check(W.regions.chunk_count() == Vector2i(W.MAP_W / 16, (W.MAP_H + 15) / 16), "chunk count %s" % str(W.regions.chunk_count()))
+	_check(W.regions.chunk_count() == Vector2i((W.MAP_W + 15) / 16, (W.MAP_H + 15) / 16), "chunk count %s" % str(W.regions.chunk_count()))
 
 
 func _test_rooms_at_scale() -> void:

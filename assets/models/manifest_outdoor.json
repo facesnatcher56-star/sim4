@@ -443,10 +443,10 @@
    3.9,
    1.46
   ],
-  "notes": "hatchback, 3.9 m long, front -Z; nodes body, wheel_fl/fr/rl/rr (spin about X); body paint = material 'body'",
+  "notes": "hatchback, 3.9 m long, front -Z; nodes body, wheel_fl/fr/rl/rr (spin about X), hazard lamps haz_fl/fr/rl/rr (hidden by Godot until a crash); body paint = material 'body'",
   "bounds_min": [
    -0.91,
-   -0.0,
+   -0.07,
    -2.03
   ],
   "bounds_max": [
@@ -457,12 +457,16 @@
   "nodes": [
    "body",
    "car_hatchback_red",
+   "haz_fl",
+   "haz_fr",
+   "haz_rl",
+   "haz_rr",
    "wheel_fl",
    "wheel_fr",
    "wheel_rl",
    "wheel_rr"
   ],
-  "size_kb": 28.3
+  "size_kb": 33.5
  },
  "car_hatchback_blue": {
   "file": "res://assets/models/outdoor/car_hatchback_blue.glb",
@@ -471,10 +475,10 @@
    3.9,
    1.46
   ],
-  "notes": "hatchback, 3.9 m long, front -Z; nodes body, wheel_fl/fr/rl/rr (spin about X); body paint = material 'body'",
+  "notes": "hatchback, 3.9 m long, front -Z; nodes body, wheel_fl/fr/rl/rr (spin about X), hazard lamps haz_fl/fr/rl/rr (hidden by Godot until a crash); body paint = material 'body'",
   "bounds_min": [
    -0.91,
-   -0.0,
+   -0.07,
    -2.03
   ],
   "bounds_max": [
@@ -485,12 +489,16 @@
   "nodes": [
    "body",
    "car_hatchback_blue",
+   "haz_fl",
+   "haz_fr",
+   "haz_rl",
+   "haz_rr",
    "wheel_fl",
    "wheel_fr",
    "wheel_rl",
    "wheel_rr"
   ],
-  "size_kb": 28.3
+  "size_kb": 33.4
  },
  "car_hatchback_white": {
   "file": "res://assets/models/outdoor/car_hatchback_white.glb",
@@ -499,10 +507,10 @@
    3.9,
    1.46
   ],
-  "notes": "hatchback, 3.9 m long, front -Z; nodes body, wheel_fl/fr/rl/rr (spin about X); body paint = material 'body'",
+  "notes": "hatchback, 3.9 m long, front -Z; nodes body, wheel_fl/fr/rl/rr (spin about X), hazard lamps haz_fl/fr/rl/rr (hidden by Godot until a crash); body paint = material 'body'",
   "bounds_min": [
    -0.91,
-   -0.0,
+   -0.07,
    -2.03
   ],
   "bounds_max": [
@@ -513,12 +521,16 @@
   "nodes": [
    "body",
    "car_hatchback_white",
+   "haz_fl",
+   "haz_fr",
+   "haz_rl",
+   "haz_rr",
    "wheel_fl",
    "wheel_fr",
    "wheel_rl",
    "wheel_rr"
   ],
-  "size_kb": 28.3
+  "size_kb": 33.5
  },
  "car_hatchback_yellow": {
   "file": "res://assets/models/outdoor/car_hatchback_yellow.glb",
@@ -527,10 +539,10 @@
    3.9,
    1.46
   ],
-  "notes": "hatchback, 3.9 m long, front -Z; nodes body, wheel_fl/fr/rl/rr (spin about X); body paint = material 'body'",
+  "notes": "hatchback, 3.9 m long, front -Z; nodes body, wheel_fl/fr/rl/rr (spin about X), hazard lamps haz_fl/fr/rl/rr (hidden by Godot until a crash); body paint = material 'body'",
   "bounds_min": [
    -0.91,
-   -0.0,
+   -0.07,
    -2.03
   ],
   "bounds_max": [
@@ -541,12 +553,16 @@
   "nodes": [
    "body",
    "car_hatchback_yellow",
+   "haz_fl",
+   "haz_fr",
+   "haz_rl",
+   "haz_rr",
    "wheel_fl",
    "wheel_fr",
    "wheel_rl",
    "wheel_rr"
   ],
-  "size_kb": 28.3
+  "size_kb": 33.5
  },
  "car_sedan_red": {
   "file": "res://assets/models/outdoor/car_sedan_red.glb",
@@ -555,10 +571,10 @@
    4.5,
    1.43
   ],
-  "notes": "sedan, 4.5 m long, front -Z; nodes body, wheel_fl/fr/rl/rr (spin about X); body paint = material 'body'",
+  "notes": "sedan, 4.5 m long, front -Z; nodes body, wheel_fl/fr/rl/rr (spin about X), hazard lamps haz_fl/fr/rl/rr (hidden by Godot until a crash); body paint = material 'body'",
   "bounds_min": [
    -0.96,
-   -0.0,
+   -0.07,
    -2.33
   ],
   "bounds_max": [
@@ -569,12 +585,16 @@
   "nodes": [
    "body",
    "car_sedan_red",
+   "haz_fl",
+   "haz_fr",
+   "haz_rl",
+   "haz_rr",
    "wheel_fl",
    "wheel_fr",
    "wheel_rl",
    "wheel_rr"
   ],
-  "size_kb": 28.3
+  "size_kb": 33.4
  },
  "car_sedan_blue": {
   "file": "res://assets/models/outdoor/car_sedan_blue.glb",
@@ -583,10 +603,10 @@
    4.5,
    1.43
   ],
-  "notes": "sedan, 4.5 m long, front -Z; nodes body, wheel_fl/fr/rl/rr (spin about X); body paint = material 'body'",
+  "notes": "sedan, 4.5 m long, front -Z; nodes body, wheel_fl/fr/rl/rr (spin about X), hazard lamps haz_fl/fr/rl/rr (hidden by Godot until a crash); body paint = material 'body'",
   "bounds_min": [
    -0.96,
-   -0.0,
+   -0.07,
    -2.33
   ],
   "bounds_max": [
@@ -597,12 +617,16 @@
   "nodes": [
    "body",
    "car_sedan_blue",
+   "haz_fl",
+   "haz_fr",
+   "haz_rl",
+   "haz_rr",
    "wheel_fl",
    "wheel_fr",
    "wheel_rl",
    "wheel_rr"
   ],
-  "size_kb": 28.3
+  "size_kb": 33.4
  },
  "car_sedan_white": {
   "file": "res://assets/models/outdoor/car_sedan_white.glb",
@@ -611,10 +635,10 @@
    4.5,
    1.43
   ],
-  "notes": "sedan, 4.5 m long, front -Z; nodes body, wheel_fl/fr/rl/rr (spin about X); body paint = material 'body'",
+  "notes": "sedan, 4.5 m long, front -Z; nodes body, wheel_fl/fr/rl/rr (spin about X), hazard lamps haz_fl/fr/rl/rr (hidden by Godot until a crash); body paint = material 'body'",
   "bounds_min": [
    -0.96,
-   -0.0,
+   -0.07,
    -2.33
   ],
   "bounds_max": [
@@ -625,12 +649,16 @@
   "nodes": [
    "body",
    "car_sedan_white",
+   "haz_fl",
+   "haz_fr",
+   "haz_rl",
+   "haz_rr",
    "wheel_fl",
    "wheel_fr",
    "wheel_rl",
    "wheel_rr"
   ],
-  "size_kb": 28.3
+  "size_kb": 33.4
  },
  "car_sedan_yellow": {
   "file": "res://assets/models/outdoor/car_sedan_yellow.glb",
@@ -639,10 +667,10 @@
    4.5,
    1.43
   ],
-  "notes": "sedan, 4.5 m long, front -Z; nodes body, wheel_fl/fr/rl/rr (spin about X); body paint = material 'body'",
+  "notes": "sedan, 4.5 m long, front -Z; nodes body, wheel_fl/fr/rl/rr (spin about X), hazard lamps haz_fl/fr/rl/rr (hidden by Godot until a crash); body paint = material 'body'",
   "bounds_min": [
    -0.96,
-   -0.0,
+   -0.07,
    -2.33
   ],
   "bounds_max": [
@@ -653,12 +681,16 @@
   "nodes": [
    "body",
    "car_sedan_yellow",
+   "haz_fl",
+   "haz_fr",
+   "haz_rl",
+   "haz_rr",
    "wheel_fl",
    "wheel_fr",
    "wheel_rl",
    "wheel_rr"
   ],
-  "size_kb": 28.3
+  "size_kb": 33.4
  },
  "car_van_red": {
   "file": "res://assets/models/outdoor/car_van_red.glb",
@@ -667,10 +699,10 @@
    4.8,
    2.05
   ],
-  "notes": "van, 4.8 m long, front -Z; nodes body, wheel_fl/fr/rl/rr (spin about X); body paint = material 'body'",
+  "notes": "van, 4.8 m long, front -Z; nodes body, wheel_fl/fr/rl/rr (spin about X), hazard lamps haz_fl/fr/rl/rr (hidden by Godot until a crash); body paint = material 'body'",
   "bounds_min": [
    -0.98,
-   -0.0,
+   -0.07,
    -2.48
   ],
   "bounds_max": [
@@ -681,12 +713,16 @@
   "nodes": [
    "body",
    "car_van_red",
+   "haz_fl",
+   "haz_fr",
+   "haz_rl",
+   "haz_rr",
    "wheel_fl",
    "wheel_fr",
    "wheel_rl",
    "wheel_rr"
   ],
-  "size_kb": 30.6
+  "size_kb": 35.7
  },
  "car_van_blue": {
   "file": "res://assets/models/outdoor/car_van_blue.glb",
@@ -695,10 +731,10 @@
    4.8,
    2.05
   ],
-  "notes": "van, 4.8 m long, front -Z; nodes body, wheel_fl/fr/rl/rr (spin about X); body paint = material 'body'",
+  "notes": "van, 4.8 m long, front -Z; nodes body, wheel_fl/fr/rl/rr (spin about X), hazard lamps haz_fl/fr/rl/rr (hidden by Godot until a crash); body paint = material 'body'",
   "bounds_min": [
    -0.98,
-   -0.0,
+   -0.07,
    -2.48
   ],
   "bounds_max": [
@@ -709,12 +745,16 @@
   "nodes": [
    "body",
    "car_van_blue",
+   "haz_fl",
+   "haz_fr",
+   "haz_rl",
+   "haz_rr",
    "wheel_fl",
    "wheel_fr",
    "wheel_rl",
    "wheel_rr"
   ],
-  "size_kb": 30.6
+  "size_kb": 35.7
  },
  "car_van_white": {
   "file": "res://assets/models/outdoor/car_van_white.glb",
@@ -723,10 +763,10 @@
    4.8,
    2.05
   ],
-  "notes": "van, 4.8 m long, front -Z; nodes body, wheel_fl/fr/rl/rr (spin about X); body paint = material 'body'",
+  "notes": "van, 4.8 m long, front -Z; nodes body, wheel_fl/fr/rl/rr (spin about X), hazard lamps haz_fl/fr/rl/rr (hidden by Godot until a crash); body paint = material 'body'",
   "bounds_min": [
    -0.98,
-   -0.0,
+   -0.07,
    -2.48
   ],
   "bounds_max": [
@@ -737,12 +777,16 @@
   "nodes": [
    "body",
    "car_van_white",
+   "haz_fl",
+   "haz_fr",
+   "haz_rl",
+   "haz_rr",
    "wheel_fl",
    "wheel_fr",
    "wheel_rl",
    "wheel_rr"
   ],
-  "size_kb": 30.6
+  "size_kb": 35.7
  },
  "car_van_yellow": {
   "file": "res://assets/models/outdoor/car_van_yellow.glb",
@@ -751,10 +795,10 @@
    4.8,
    2.05
   ],
-  "notes": "van, 4.8 m long, front -Z; nodes body, wheel_fl/fr/rl/rr (spin about X); body paint = material 'body'",
+  "notes": "van, 4.8 m long, front -Z; nodes body, wheel_fl/fr/rl/rr (spin about X), hazard lamps haz_fl/fr/rl/rr (hidden by Godot until a crash); body paint = material 'body'",
   "bounds_min": [
    -0.98,
-   -0.0,
+   -0.07,
    -2.48
   ],
   "bounds_max": [
@@ -765,30 +809,34 @@
   "nodes": [
    "body",
    "car_van_yellow",
+   "haz_fl",
+   "haz_fr",
+   "haz_rl",
+   "haz_rr",
    "wheel_fl",
    "wheel_fr",
    "wheel_rl",
    "wheel_rr"
   ],
-  "size_kb": 30.6
+  "size_kb": 35.7
  },
  "bus": {
   "file": "res://assets/models/outdoor/bus.glb",
   "footprint": [
-   2.6,
-   9.0,
-   2.88
+   2.1,
+   8.4,
+   2.8
   ],
-  "notes": "city bus 9 m, front -Z; nodes body, wheel_fl/fr/rl/rr",
+  "notes": "city bus 8.4 m x 2.0 m, front -Z; nodes body, wheel_fl/fr/rl/rr",
   "bounds_min": [
-   -1.28,
-   0.0,
-   -4.6
+   -1.06,
+   -0.0,
+   -4.3
   ],
   "bounds_max": [
-   1.28,
-   2.88,
-   4.6
+   1.06,
+   2.8,
+   4.3
   ],
   "nodes": [
    "body",
@@ -798,7 +846,7 @@
    "wheel_rl",
    "wheel_rr"
   ],
-  "size_kb": 32.9
+  "size_kb": 33.0
  },
  "tree_oak_l": {
   "file": "res://assets/models/outdoor/tree_oak_l.glb",
@@ -2529,5 +2577,201 @@
    "wing_r"
   ],
   "size_kb": 22.7
+ },
+ "taxi": {
+  "file": "res://assets/models/outdoor/taxi.glb",
+  "footprint": [
+   1.9,
+   4.5,
+   1.65
+  ],
+  "notes": "taxi: yellow sedan, roof sign, hazard lamp nodes haz_fl/fr/rl/rr (hide them in Godot until needed)",
+  "bounds_min": [
+   -0.96,
+   -0.07,
+   -2.33
+  ],
+  "bounds_max": [
+   0.96,
+   1.65,
+   2.33
+  ],
+  "nodes": [
+   "body",
+   "haz_fl",
+   "haz_fr",
+   "haz_rl",
+   "haz_rr",
+   "taxi",
+   "wheel_fl",
+   "wheel_fr",
+   "wheel_rl",
+   "wheel_rr"
+  ],
+  "size_kb": 35.7
+ },
+ "police_car": {
+  "file": "res://assets/models/outdoor/police_car.glb",
+  "footprint": [
+   1.9,
+   4.5,
+   1.43
+  ],
+  "notes": "patrol car: white sedan, blue stripe, roof bar nodes bar_red / bar_blue (flash them)",
+  "bounds_min": [
+   -0.96,
+   -0.07,
+   -2.33
+  ],
+  "bounds_max": [
+   0.96,
+   1.435,
+   2.33
+  ],
+  "nodes": [
+   "bar_base",
+   "bar_blue",
+   "bar_red",
+   "body",
+   "haz_fl",
+   "haz_fr",
+   "haz_rl",
+   "haz_rr",
+   "police_car",
+   "wheel_fl",
+   "wheel_fr",
+   "wheel_rl",
+   "wheel_rr"
+  ],
+  "size_kb": 39.2
+ },
+ "ambulance": {
+  "file": "res://assets/models/outdoor/ambulance.glb",
+  "footprint": [
+   1.95,
+   4.8,
+   2.05
+  ],
+  "notes": "ambulance: white van, red stripe and cross, roof bar nodes bar_red / bar_blue",
+  "bounds_min": [
+   -0.98,
+   -0.07,
+   -2.48
+  ],
+  "bounds_max": [
+   0.98,
+   2.05,
+   2.48
+  ],
+  "nodes": [
+   "ambulance",
+   "bar_base",
+   "bar_blue",
+   "bar_red",
+   "body",
+   "haz_fl",
+   "haz_fr",
+   "haz_rl",
+   "haz_rr",
+   "wheel_fl",
+   "wheel_fr",
+   "wheel_rl",
+   "wheel_rr"
+  ],
+  "size_kb": 43.2
+ },
+ "fire_engine": {
+  "file": "res://assets/models/outdoor/fire_engine.glb",
+  "footprint": [
+   2.0,
+   6.8,
+   1.95
+  ],
+  "notes": "fire engine 6.8 m: red, ladder on the roof, bar nodes bar_red / bar_blue",
+  "bounds_min": [
+   -1.0,
+   -0.07,
+   -3.26
+  ],
+  "bounds_max": [
+   1.0,
+   1.95,
+   3.46
+  ],
+  "nodes": [
+   "bar_base",
+   "bar_blue",
+   "bar_red",
+   "body",
+   "fire_engine",
+   "haz_fl",
+   "haz_fr",
+   "haz_rl",
+   "haz_rr",
+   "wheel_fl",
+   "wheel_fr",
+   "wheel_rl",
+   "wheel_rr"
+  ],
+  "size_kb": 43.0
+ },
+ "tow_truck": {
+  "file": "res://assets/models/outdoor/tow_truck.glb",
+  "footprint": [
+   2.0,
+   5.8,
+   2.11
+  ],
+  "notes": "tow truck: orange cab and flat bed, amber light node bar_amber",
+  "bounds_min": [
+   -0.99,
+   -0.07,
+   -2.75
+  ],
+  "bounds_max": [
+   0.99,
+   2.11,
+   3.025
+  ],
+  "nodes": [
+   "bar_amber",
+   "body",
+   "haz_fl",
+   "haz_fr",
+   "haz_rl",
+   "haz_rr",
+   "tow_truck",
+   "wheel_fl",
+   "wheel_fr",
+   "wheel_rl",
+   "wheel_rr"
+  ],
+  "size_kb": 33.9
+ },
+ "bike": {
+  "file": "res://assets/models/outdoor/bike.glb",
+  "footprint": [
+   0.7,
+   1.8,
+   1.97
+  ],
+  "notes": "bicycle with a rider; torso = material 'body' (tint with the shirt); nodes wheel_f / wheel_r (spin about X)",
+  "bounds_min": [
+   -0.25,
+   -0.0,
+   -0.88
+  ],
+  "bounds_max": [
+   0.25,
+   1.97,
+   0.88
+  ],
+  "nodes": [
+   "bike",
+   "body",
+   "wheel_f",
+   "wheel_r"
+  ],
+  "size_kb": 19.9
  }
 }
