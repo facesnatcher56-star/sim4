@@ -130,7 +130,24 @@ static func default_owner(o) -> int:
 	return primary_household()
 
 ## Register any object we have not seen yet (placed today, owned per default_owner).
+static var _refresh_stamp: Array = []
+
+## A cheap fingerprint of "which objects exist and which the books know": the real World numbers every object it ever placed (_next_id), so a new, removed or
+## replaced object changes it. Without a stamp (stub worlds) every call scans.
+static func _books_stamp() -> Array:
+	var w = WorldIface.world()
+	if w == null or not ("objects" in w) or not ("_next_id" in w):
+		return []
+	return [w.get_instance_id(), (w.objects as Dictionary).size(), int(w._next_id), owner.size(), placed_day.size()]
+
 static func refresh_objects() -> void:
+	var stamp: Array = _books_stamp()
+	if not stamp.is_empty() and stamp == _refresh_stamp:
+		return                                  # nothing was added or removed since the last full pass (it scanned every object of the town, twice, per objects_of call)
+	_refresh_scan()
+	_refresh_stamp = _books_stamp()
+
+static func _refresh_scan() -> void:
 	var seen: Dictionary = {}
 	for o in SysUtil.all_world_objects():
 		seen[int(o.id)] = true

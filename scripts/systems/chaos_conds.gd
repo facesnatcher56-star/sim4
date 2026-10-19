@@ -46,7 +46,7 @@ static func appliances(hid: int) -> Array:
 
 static func _objs(hid: int, ids: Array, working_only: bool) -> Array:
 	var out: Array = []
-	for o in Economy.objects_of(hid):
+	for o in IncidentSubject.household_objects(hid):
 		if ids.has(str(o.def_id)) and not (working_only and bool(WorldIface.state_get(o, "broken", false))):
 			out.append(o)
 	out.sort_custom(func(a, b): return int(a.id) < int(b.id))
@@ -56,7 +56,7 @@ static func _objs(hid: int, ids: Array, working_only: bool) -> Array:
 static func mess_score(hid: int) -> int:
 	var c: Dictionary = ChaosState.cfg("pests")
 	var n := 0
-	for o in Economy.objects_of(hid):
+	for o in IncidentSubject.household_objects(hid):
 		var id: String = str(o.def_id)
 		if id == "trash_bin":
 			n += 1 if float(WorldIface.state_get(o, "fullness", 0.0)) >= float(c.get("bin_full", 7.0)) else 0

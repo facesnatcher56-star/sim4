@@ -131,12 +131,23 @@ static func household_defs(hid: int) -> Array:
 		_have[hid] = out
 	return _have[hid]
 
+static var _objs: Dictionary = {}          # household id -> its objects (same cache rules as _have)
+
+## The household's objects: one scan per pass while caching (the chaos conditions ask for them several times per roll), a fresh scan otherwise.
+static func household_objects(hid: int) -> Array:
+	if not caching:
+		return Economy.objects_of(hid)
+	if not _objs.has(hid):
+		_objs[hid] = Economy.objects_of(hid)
+	return _objs[hid]
+
 static func refresh_on_map() -> void:
 	_on_map_ids.clear()
 	_on_map_ok = false
 
 static func clear_cache() -> void:
 	_have.clear()
+	_objs.clear()
 	_members.clear()
 	_on_map_ids.clear()
 	_on_map_ok = false
