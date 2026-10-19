@@ -35,6 +35,7 @@ func run() -> Array:
 	var gen = w.add_object("generator", Vector2i(34, 34))
 	Economy.refresh_objects()
 	WorldIface.state_set(lamp, "on", true)
+	DisasterState.cfg("outage")["hours"] = [6, 8]          # long enough for the fuel to run out (the shipped range starts at 3 hours: seed luck)
 	D.force_home("power_outage")
 	K.expect(f, not ada.has_buff("power_out") and bool(WorldIface.state_get(lamp, "on", false)), "a generator keeps the lights on")
 	D.run_hours(3)
