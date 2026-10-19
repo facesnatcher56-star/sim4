@@ -92,3 +92,31 @@ Appended by `tests/perf_scale.gd` (tools/run_scale.ps1). One section per run; co
 ## 2026-10-18 18:35:54  VIEWS today  (15 lots, 12 townies, map (160, 136), 1 day(s), main scene + LotView + FolkView, headless)
 
 - 16.90 ms/frame avg wall, NET of the 6.90 ms empty-frame floor 10.00 ms (p99 34.6, worst 242.6 ms wall); nodes max 9409 end 9333 (day 1: 9333), orphans 1556, objects 19170, static mem 174 MB, folk avg 11.3 max 18
+
+## 2026-10-18 17.2 scheduler refactor: before (origin/main 597cb66) vs after (agent/scheduler), 3 game days, same machine under load (9+ other Godot runs)
+
+The refactor moves every Clock listener into the SimScheduler without changing what runs or in which order (a real 3-day game gives the identical state hash before and
+after: `tests/state_hash_probe.gd`). It adds no savings by itself (those come from the tiers, 17.3); the point is the cost of the scheduler layer itself and the new knobs
+(frame budget with LOW deferral, bucketing, timed wake-ups, emptiness gates). Counts are load independent; ms are not.
+
+| profile | ms/game-min before -> after | frame avg (speed 3) before -> after | town-level per frame before -> after | worst minute before -> after | deferred |
+|---|---|---|---|---|---|
+| mini | 7.40 -> 6.76 | 1.48 -> 1.35 ms | 0.83 -> 0.78 ms | 311 -> 370 ms | 0 |
+| today | 5.92 -> 6.03 | 1.18 -> 1.21 ms | 0.70 -> 0.73 ms | 196 -> 180 ms | 0 |
+| big | 38.20 -> 39.86 | 7.64 -> 7.97 ms | 6.12 -> 6.37 ms | 6168 -> 5049 ms | 0 |
+
+Per system, big town, ms per game minute (before -> after; the old "listener" rows are now per-job rows of the scheduler):
+
+| system | before | after |
+|---|---|---|
+| all minute jobs except the director (SystemsManager steps + SocialDynamics) | 11.01 + 6.00 = 17.0 | 18.96 |
+| hour jobs (SystemsManager._on_hour + SocialDynamics.on_hour) | 10.22 + 0.79 = 11.0 | 10.59 |
+| SimDirector (folk ticking) | 7.59 | 8.01 |
+| NeighborhoodService.after (Crowd.update) | 6.83 | 7.44 |
+| SocialDynamics.on_minute | 6.00 | 6.90 |
+| AccidentMarks | 2.72 | 2.98 |
+| day jobs | 2.58 | 2.29 |
+| WeatherFolk / Incidents / CareerShifts / LevelSystems | 0.61 / 0.32 / 0.31 / 0.16 | 0.63 / 0.32 / 0.43 / 0.17 |
+
+Deferred counts are 0 because the benchmark runs with `budget_usec = 0` (unlimited, deterministic); the game sets 4 ms in main.gd and marks only the hourly world jobs and
+SocialDynamics as LOW. The overhead of the scheduler layer is within the noise of the machine (about +4% on the big town, one list walk and one `is_valid` per job per tick).
