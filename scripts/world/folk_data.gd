@@ -73,10 +73,15 @@ var _cur_ref: Variant = null
 var _inter_t0: float = 0.0
 var _hold_clip: String = ""
 var _hold_until: float = 0.0
+var _urgent: bool = false             # the current walk is urgent (fire, emergency, late for work): the only time Run is played
+var _sep_off: Vector2 = Vector2.ZERO        # idle spacing: view-only drift away from another idle folk on the same spot
+var _avoid: Vector2 = Vector2.ZERO          # overlap nudge away from folk standing too close (view only)
 var _partner_id: int = -1
 var _partner_role: String = ""        # "actor" | "target" | ""
 var _partner_inter: Variant = null
 var _social_dir: Vector2 = Vector2.ZERO
+var _social_len: float = 0.0                 # 0 = the usual stand distance; boxed-in partners (on a sofa) are met on the nearest open tile
+var _social_pt: Vector2i = Vector2i(-999, -999)   # the partner tile the social side was chosen for
 var _last_dir: Vector2 = Vector2(0, 1)
 
 

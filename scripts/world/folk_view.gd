@@ -22,8 +22,12 @@ func _process(delta: float) -> void:
 		elif hash(_appearance_of(f)) + 31 * hash(_stage_now) + 977 * bump_of(f) != _look_sig:
 			_apply_appearance(f)
 	_update_waypoints(f)
+	_urgent = FolkClipRules.urgent_move(f)
 	_resolve_target(f)
 	_move(delta)
+	if _res_tick % 3 == 0:
+		_update_avoid(f)
+	_apply_avoid(delta)
 	_apply_pose(f, delta)
 	_update_mood_icon(f, delta)
 
@@ -61,33 +65,34 @@ func _social_clip(entry: Dictionary, role: String) -> String:
 	return str(arr[int(t) % arr.size()])
 
 
+## Somebody is talking to this folk and it has nothing of its own going on (a folk in the shower, at the stove or reading keeps its own clip).
+func _social_target(f) -> bool:
+	return _partner_role == "target" and not (_is_running(f) and str(f.current.target_kind) != "folk")
+
+
 func _interaction_entry(f) -> Variant:
-	var m := anim_map()
-	var inter = f.current if _partner_role != "target" else _partner_inter
+	var inter = _partner_inter if _social_target(f) else f.current
 	if inter == null:
 		return null
-	var id := str(inter.def_id)
-	var ints: Dictionary = m.get("interactions", {})
-	if ints.has(id):
-		return ints[id]
 	var tags: Array = inter.def.get("tags", []) if inter.def is Dictionary else []
-	var tmap: Dictionary = m.get("tags", {})
-	for t in m.get("tag_order", []):
-		if str(t) in tags and tmap.has(str(t)):
-			return tmap[str(t)]
-	for t in tags:
-		if tmap.has(str(t)):
-			return tmap[str(t)]
-	return null
+	return FolkClipRules.entry_for(str(inter.def_id), tags)
 
 
+## A sitting or lying body only ever plays a sitting or lying clip (a standing clip becomes its seated twin, see FolkClipRules.fit_pose).
 func _desired_clip(f) -> String:
+	var c := _raw_clip(f)
+	if _moving or not _waypoints.is_empty():
+		return c
+	return FolkClipRules.fit_pose(c, _pose_key())
+
+
+func _raw_clip(f) -> String:
 	var m := anim_map()
 	var loco: Dictionary = m.get("locomotion", {})
 	var key := _pose_key()
 	# 1. locomotion
 	if _moving or not _waypoints.is_empty():
-		if _speed_now >= float(loco.get("run_above_speed", 3.6)):
+		if _urgent:
 			return str(loco.get("run_clip", "Run"))
 		return str(loco.get("walk_clip", "Walk"))
 	# 2. one-shot "enter" clip held for its duration
@@ -96,11 +101,11 @@ func _desired_clip(f) -> String:
 		return _hold_clip
 	# 3. interaction / partner
 	var running := _is_running(f)
-	if running or _partner_role == "target":
+	if running or _social_target(f):
 		var entry: Variant = _interaction_entry(f)
 		if entry is Dictionary and ((entry as Dictionary).has("actor") or (entry as Dictionary).has("target")):
 			var role := "actor"
-			if _partner_role == "target":
+			if _social_target(f):
 				role = "target"
 			var c := _social_clip(entry, role)
 			if c != "":
@@ -142,6 +147,7 @@ func _apply_pose(f, delta: float) -> void:
 		_inter_t0 = Time.get_ticks_msec() / 1000.0
 		_hold_clip = ""
 		_social_dir = Vector2.ZERO
+		_social_len = 0.0
 		if cur != null:
 			var entry: Variant = _interaction_entry(f)
 			if entry is Dictionary and (entry as Dictionary).has("enter"):

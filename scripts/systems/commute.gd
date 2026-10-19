@@ -58,7 +58,7 @@ static func begin(f, kind: String, ctx: Dictionary) -> bool:
 		"level": int(ctx.get("level", 1)), "shift_end": float(ctx.get("shift_end", 0.0))}
 	trips[fid] = t
 	f.set_meta(NeighborhoodLots.IN_LOT, NeighborhoodLots.lot_at(f.tile))
-	_walk(f, dest)
+	_walk(f, dest, now + plan + Workplace.traffic_delay(f, dest) > int(t["due_min"]) + Workplace.num("grace_min", 5.0))
 	var where: String = "work" if kind == "work" else "school"
 	SysUtil.game_event("left_for_" + where, {"folk_id": fid, "career": t["career"], "title": t["title"], "shift_end": t["shift_end"], "lot": lot, "plan_min": plan})
 	if now + plan + Workplace.traffic_delay(f, dest) > int(t["due_min"]) + Workplace.num("grace_min", 5.0):
@@ -66,13 +66,15 @@ static func begin(f, kind: String, ctx: Dictionary) -> bool:
 	return true
 
 ## A high-priority walk (it preempts the sofa, not the player's commands), not part of the lot travel bookkeeping.
-static func _walk(f, dest: Vector2i) -> bool:
+static func _walk(f, dest: Vector2i, hurry: bool = false) -> bool:
 	var ir := Interaction.create_goto(f, dest, false)
 	if ir == null:
 		return false
 	ir.def = ir.def.duplicate(true)
 	ir.def["priority"] = "high"
 	ir.params["commute"] = true
+	if hurry:
+		ir.params["hurry"] = true                        # late for work or school: the only commute that runs (view: FolkClipRules.urgent_move)
 	ir.params["delay_min"] = Workplace.traffic_delay(f, dest)
 	var ride: Dictionary = TransportTrip.start(f, dest, {"commute": true})      # task 12: bike / bus / taxi / own car, decided by time, cost and weather
 	if str(ride["mode"]) != "walk" and float(ride["total_minutes"]) >= 0.0:

@@ -245,6 +245,25 @@ def sit_watch(t):
     return p
 
 
+def sit_read(t):
+    p = sit_base(t, lean=0.05, hands=None)
+    flip = pos(sn(t, 1, 1.0)) ** 8
+    p.rot("head", 0.30 + 0.02 * sn(t), 0.0, 0.0)
+    p.arm("L", 0.55, 0.10, 1.45, 0.35)
+    p.arm("R", 0.55 + 0.1 * flip, 0.10, 1.45 + 0.15 * flip, 0.35 - 0.3 * flip)
+    return p
+
+
+def sit_type(t):
+    p = sit_base(t, lean=0.12, hands=None)
+    p.rot("head", 0.06 + 0.015 * sn(t, 2), 0.0, 0.0)
+    p.arm("L", 0.50, 0.15, 1.20, 0.18)
+    p.arm("R", 0.50, 0.15, 1.20, 0.18)
+    p.rot("hand_L", -0.20 + 0.15 * sn(t, 6), 0)
+    p.rot("hand_R", -0.20 + 0.15 * sn(t, 5, 1.3), 0)
+    return p
+
+
 def sleep_pose(t):
     p = Pose().lie()
     p.rot("chest", 0.02 * sn(t))
@@ -604,6 +623,7 @@ def fall_keys():
 CYCLIC = {  # name: (frames, fn)
     "Idle": (96, idle_pose), "Walk": (20, walk_pose), "Run": (16, run_pose),
     "Sit_Idle": (96, sit_idle), "Sit_Eat": (72, sit_eat), "Sit_Watch": (96, sit_watch),
+    "Sit_Read": (96, sit_read), "Sit_Type": (48, sit_type),
     "Sleep": (96, sleep_pose), "Use_Stand": (48, use_stand), "Cook": (48, cook), "Wash": (48, wash),
     "Read": (96, read), "Exercise_Treadmill": (18, treadmill), "Paint": (72, paint), "Type": (48, typing),
     "Dance": (48, dance), "Talk": (72, talk), "Laugh": (24, laugh), "Wave": (36, wave), "Cry": (48, cry),

@@ -6,6 +6,8 @@
   "Sit_Idle",
   "Sit_Eat",
   "Sit_Watch",
+  "Sit_Read",
+  "Sit_Type",
   "Sleep",
   "Use_Stand",
   "Cook",
