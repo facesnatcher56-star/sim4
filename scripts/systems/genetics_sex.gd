@@ -25,3 +25,43 @@ static func fit(ap: Dictionary, sex: String, _g: RandomNumberGenerator = null) -
 	var h = cfg(sex).get("height", null)
 	if h is Array and (h as Array).size() == 2 and ap.has("height"):
 		ap["height"] = clampf(float(ap["height"]), float(h[0]), float(h[1]))
+
+
+## The usual hair styles of a sex (data/genetics.json sex.<s>.hair_pool). Any style stays selectable; this is only where a NEW look starts in the creator.
+static func hair_pool(sex: String) -> Array:
+	var p = cfg(sex).get("hair_pool", null)
+	return p if p is Array else []
+
+
+static func in_hair_pool(sex: String, style: int) -> bool:
+	for h in hair_pool(sex):
+		if int(h) == style:
+			return true
+	return false
+
+
+static func _argmax(w: Array, default: int) -> int:
+	var best: int = default
+	var bv: float = -1.0
+	for i in w.size():
+		if float(w[i]) > bv:
+			bv = float(w[i])
+			best = i
+	return best
+
+
+## The creator's starting look for a sex: the most usual body type and frame (shoulder and hip width), a height and build inside the sex's bands and a hair style from its usual
+## pool (kept when the current one is already in it). Deterministic from `key` (the name). Creator only: the sim's looks (random_look / fit) are unchanged.
+static func creator_fit(ap: Dictionary, sex: String, key: String = "") -> void:
+	if not Sexes.valid(sex):
+		return
+	fit(ap, sex)
+	var cr: Dictionary = cfg(sex).get("creator", {})
+	ap["body_type"] = int(cr["body_type"]) if cr.has("body_type") else _argmax(weights(sex, "body_type", [0.3, 0.4, 0.3]), 1)      # women: slimmer shoulders, softer frame; men: broad shoulders, angular frame
+	ap["frame"] = int(cr["frame"]) if cr.has("frame") else _argmax(weights(sex, "frame", [0.4, 0.3, 0.3]), 0)
+	var b = cfg(sex).get("build", null)
+	if b is Array and (b as Array).size() == 2:
+		ap["build"] = clampf(float(ap.get("build", 1.0)), float(b[0]), float(b[1]))
+	var pool: Array = hair_pool(sex)
+	if not pool.is_empty() and not in_hair_pool(sex, int(ap.get("hair_style", 0))):
+		ap["hair_style"] = int(pool[absi(hash(key + sex)) % pool.size()])

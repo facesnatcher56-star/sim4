@@ -92,7 +92,10 @@ static func world_add_folk(f, tile: Vector2i) -> void:
 	if w == null:
 		return
 	if w.has_method("add_folk"):
+		var lv: int = int(f.level) if "level" in f else 0       # World.add_folk defaults to the ground floor: a folk loaded from a save or a co-op snapshot keeps its floor
 		w.add_folk(f, tile)
+		if "level" in f:
+			f.level = lv
 
 static func all_world_objects() -> Array:
 	var w = WorldIface.world()

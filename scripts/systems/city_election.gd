@@ -28,7 +28,7 @@ static func cfg() -> Dictionary:
 ## The career a player politician follows (merged into the careers table by CityGov.install).
 static func career_def() -> Dictionary:
 	var cc: Dictionary = CityGov.cfg().get("career", {})
-	return {"label": str(cc.get("label", "Politician")), "primary_skill": "charisma", "workplace": "courthouse", "days": [0, 1, 2, 3, 4],
+	return {"label": str(cc.get("label", "Politician")), "primary_skill": "charisma", "workplace": "city_hall", "days": [0, 1, 2, 3, 4],
 		"hooks": {"practice_speech": 2.0, "give_campaign_speech": 3.0, "chat": 0.3}, "trait_bonus": {"charmer": 2, "shy": -2, "honest": 1},
 		"levels": [
 			{"title": "Party Volunteer", "start": 10, "end": 16, "pay": 12, "requires": {}},

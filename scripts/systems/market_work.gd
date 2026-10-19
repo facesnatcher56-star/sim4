@@ -212,7 +212,7 @@ static func _layoffs() -> void:
 	for f in SysUtil.residents():
 		if f.age_stage != "adult" or not Careers.has_job(int(f.id)):
 			continue
-		if MarketEconomy.rng.randf() >= float(e.get("resident_layoff_chance", 0.004)) * (-MarketEconomy.prosperity):
+		if MarketEconomy.rng.randf() >= float(e.get("resident_layoff_chance", 0.004)) * (-MarketEconomy.prosperity) * Works.layoff_mult(Careers.career_of(int(f.id))):      # task 31: heavy industry first
 			continue
 		var cid: String = Careers.career_of(int(f.id))
 		var pay: int = int(Careers.level_def(cid, Careers.level_of(int(f.id))).get("pay", 10))

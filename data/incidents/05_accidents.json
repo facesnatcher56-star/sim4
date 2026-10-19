@@ -261,6 +261,12 @@
     "duration_min": 45,
     "hidden": true
    },
+   "acc_job_hazard": {
+    "label": "Hazardous site",
+    "mood": {},
+    "duration_min": 45,
+    "hidden": true
+   },
    "acc_near_water": {
     "label": "Beside water",
     "mood": {},
@@ -2311,6 +2317,15 @@
       }
      ],
      "mult": 2.0
+    },
+    {
+     "label": "Hazardous site (heights, heavy plant)",
+     "when": [
+      {
+       "has_buff": "acc_job_hazard"
+      }
+     ],
+     "mult": 1.5
     },
     {
      "label": "Clumsy",

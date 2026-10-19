@@ -11,7 +11,7 @@ const OPEN_RADIUS := 2              # tiles around the building footprint that o
 const SHELL_PERIOD := 0.25          # seconds between occupancy checks
 const SHELL_NAMES := {"small": "house_small_%s", "medium": "house_medium_%s", "classic": "house_medium_%s", "large": "house_large_%s",
 	"cafe": "cafe_%s", "gym": "gym_%s", "library": "library_%s", "market": "market_%s", "school": "school_%s", "office": "office_%s",
-	"tower": "office_%s", "hospital": "office_%s", "apartments": "office_%s", "courthouse": "library_%s", "police": "library_%s", "garage": "gym_%s"}
+	"tower": "office_%s", "hospital": "office_%s", "apartments": "office_%s", "courthouse": "library_%s", "police": "library_%s", "garage": "gym_%s", "works": "market_%s"}
 
 const OVERVIEW_ZOOM := 28.0        # zoomed out at least this far, a click on a lot flies the camera to it
 const LOT_FRAME_ZOOM := 22.0

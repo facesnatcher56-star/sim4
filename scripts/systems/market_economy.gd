@@ -106,7 +106,7 @@ static func _townie_jobs(c: Dictionary) -> void:
 			continue
 		var job: String = str(t.get("career", ""))
 		if job != "" and prosperity < float(c.get("layoff_below", -0.3)):
-			if rng.randf() < float(c.get("layoff_chance", 0.02)) * (-prosperity):
+			if rng.randf() < float(c.get("layoff_chance", 0.02)) * (-prosperity) * Works.layoff_mult(job):      # task 31: heavy industry first
 				t["career"] = ""
 				t["level"] = 1
 				t["seeking"] = true

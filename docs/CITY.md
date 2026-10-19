@@ -30,7 +30,7 @@ Data: `data/transport.json`. Code: `Transport` (state + API), `TransportCars`, `
 
 ## 12.3 Emergency services as real places
 Data: `data/services.json`. Code: `CityServices` (stations, response time, units out), `CityAmbulance` (the ambulance hold).
-- **Stations are lots of the map**: fire and police share the public-safety building (lot `police`, every slot of the street grid is taken), ambulances start at the hospital lot. A dedicated fire station lot needs a new column of slots in `map_layout.json`.
+- **Stations are lots of the map**: the fire station is its own lot (`fire_station`, east side), police have the public-safety building, ambulances start at the hospital lot. Units are drawn driving to the call by the vehicle layer (task 12b).
 - **Response time** = call handling (1-2 min) + turnout (crew in the station; staffing follows `CityBudget.funding(dept)`) + the drive (Manhattan distance between the lots, siren speed 4, traffic eased by `traffic_effect`, dark lights and road works through `TransportTraffic.speed_mult`) + 8 minutes when every unit is already out + 6 when the caller has no phone line. `CityServices.dispatch` rolls the dice (seeded) and sends a unit out until it is back.
 - **Fire**: `FireBrigade.call_in` takes the delay from the engine's response (a smoke alarm still saves 2 minutes); the arrival toast says how long it took. **Police**: `Police.respond` uses the patrol car's response for crimes in progress. **Ambulance**: `Hospital.admit` for severity 2+ on the real map first waits for the ambulance (`CityAmbulance.hold`: toast with the expected minutes, then the admission); a wait of more than 18 minutes can make the condition one step worse. Without a map (test worlds) and for townies nothing changes.
 - **Far people**: statistical hospital stays of townies get their death chance times `CityServices.death_mult()` (1.0 at the standard budget, up to x2 when the ambulance service is starved).
@@ -58,6 +58,9 @@ Data: `data/city.json` `plan`. Code: `CityPlan`.
 - **Zoning** (residential 55 / commercial 30 / civic 15 percent by default); the mayor shifts it (`Rezone: more ... land`).
 - **Growth**: weekly, a town that is 90 percent full starts a project (a block of flats, a row of shops or a community centre) in a zone chosen by the zoning shares, if the savings pay for it. **Construction takes days**: scaffolding (2-4 days), then 3-8 workers build (8-14 days), then it opens (toast for the player's zone, chronicle).
 - **Effects**: flats raise the population cap (+4: `StoryGrowth` arrivals and births use `max_population + CityPlan.extra_capacity()`), shops raise the town's revenue, a community centre adds to the parks and schools budgets.
-- **Not done**: the map itself does not grow (no new blocks, roads or buildings in the 3D world: every slot of the street grid is taken); a finished project is a record and a chronicle line.
+- **Land** (task 12b): every project takes one of five reserved plots on the east side (`map_layout.json` `plots`); scaffolding, a rising building site and the finished building are drawn (`PlotView`); no free plot, no new project. City hall (`city_hall`) and the car park (`car_park`) are real lots too.
 - The town notice (mailbox: `Read the Town Notice`, `CityGov.status_lines`) shows mayor, mood, taxes, where the money goes, laws, elections, projects and dark lamps in plain words.
 - Tests: `tests/city_town_test.gd`, `tests/city_town_longrun_test.gd` (slow).
+
+## Seeing the traffic (task 12b)
+`VehicleView` (view only, docs in ARCHITECTURE.md "Vehicles, the east side and the Town panel"): parked and passing cars, timetable buses at marked stops, taxis, the players' car and bike trips with the folk getting in and out at the kerb, emergency units with lights, a crash with hazard lights and a tow truck. The Town panel (top bar) shows mayor, budget sliders, election, projects, outages and bus times.

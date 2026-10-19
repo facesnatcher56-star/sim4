@@ -607,3 +607,6 @@ spans from their owners (still in flux, so I did not touch them).
 Failures in that run (all in other agents' areas): aging_life, bldg_apartments_run, commute_longrun, commute, crime_longrun (stat edge, see above),
 incidents_ui, story_pacing_longrun ("weekly story beats 39 inside the 6-25 band"), systems_family_integration ("one pregnancy, one birth (6 / 5)":
 passes at HEAD; fails identically with HEAD's `autonomy.gd`, director, social_dynamics and weather_folk swapped back in, so it is not from this pass).
+
+### Vehicle layer (task 12b) - tier declaration
+View only. Vehicles (at most `max_vehicles` = 46) exist only within `view_radius` of the camera focus or a player's folk; far vehicles are only timings (Transport.active, the bus timetable). Cadence: a 0.4 s bookkeeping pass (`VehicleView.sync`) and a per-frame move of the live vehicles (O(n^2) obstacle checks over at most 46, probe discs along each path). Hidden above game speed 2. The east side adds 76 tiles of map width (236 x 154); the big-town benchmark uses its own generated map (`MapBuilder.size_override`) and is unaffected.

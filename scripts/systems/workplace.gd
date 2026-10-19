@@ -30,6 +30,8 @@ static func map_ready() -> bool:
 ## Lot of a career ("" = none / not on this map).
 static func lot_for(career_id: String) -> String:
 	var lot: String = str(Careers.career_def(career_id).get("workplace", ""))
+	if lot == "city_hall" and map_ready() and Neighborhood.lot(lot).is_empty():
+		lot = "courthouse"                     # a map without a city hall (an old game): the politician works at the courthouse
 	if lot == "" or not map_ready() or Neighborhood.lot(lot).is_empty():
 		return ""
 	return lot
