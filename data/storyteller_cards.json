@@ -67,7 +67,7 @@
         {"id": "investigate", "label": "Look into it first (100 coins)", "fx": [{"coins": -100}, {"roll": 0.6, "then": [{"coins": [1200, 2600]}], "else": [{"coins": [200, 500]}]}], "text": "The solicitor dug further. The estate was not what it seemed."}],
       "default": "accept", "auto": "accept", "lot_text": "{name} received an unexpected inheritance."},
     "pet_on_doorstep": {"title": "A pet at the door", "size": "small", "tone": "good", "cat": "home", "scope": "home", "weight": 1.5, "when": {"pets": true},
-      "text": "A friendly stray turned up on the doorstep.", "options": [{"id": "keep", "label": "Take them in", "fx": [{"buff": "cheered_up"}], "text": "They have a new friend."}, {"id": "shelter", "label": "Take them to the shelter", "fx": [{"rep": 1}], "text": "The shelter will find them a home."}],
+      "text": "A friendly stray turned up on the doorstep.", "lot_text": "A friendly stray turned up on {name}'s doorstep.", "options": [{"id": "keep", "label": "Take them in", "fx": [{"pet": true}, {"buff": "cheered_up"}], "text": "{name} took {pet} in. They have a new friend."}, {"id": "shelter", "label": "Take them to the shelter", "fx": [{"rep": 1}], "text": "The shelter will find them a home."}],
       "default": "keep", "auto": "keep"},
     "headhunter": {"title": "A job headhunter", "size": "medium", "tone": "good", "cat": "work", "scope": "home", "weight": 1.2, "wealth": {"poor": 1.8}, "tags": ["work"], "when": {"adult": true},
       "arrive": "headhunter", "text": "{other}, a recruiter, rang {name} with an offer that sounds too good to ignore.",

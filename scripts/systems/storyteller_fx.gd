@@ -10,6 +10,7 @@ extends RefCounted
 ##   roll p, then, else     a seeded coin flip with two effect lists        visit minutes | visit_days n   the other person calls round
 ##   job_offer true         a job offer for the person                      jealous_if_partnered true   the partner is a little jealous
 ##   mood_city x            the town's mood about the council (decays)      heat [tag, n]   makes related events likelier in the zone
+##   pet true               a stray turns up and stays: a pet record for a played household (PetState), a flag on the townie for a far lot (townies take it half the time)
 ##   lay_off n              n townies of the zone lose their job             power_cut [lo,hi] hours   road_works days   vanish days (a townie is away)
 
 static func fill(text: String, ctx: Dictionary) -> String:
@@ -17,6 +18,7 @@ static func fill(text: String, ctx: Dictionary) -> String:
 	var who: int = int(ctx.get("who", -1))
 	return text.replace("{name}", SysUtil.folk_name(int(ctx.get("folk_id", -1))) if int(ctx.get("folk_id", -1)) >= 0 else "someone") \
 		.replace("{other}", SysUtil.folk_name(int(ctx.get("other", -1))) if int(ctx.get("other", -1)) >= 0 else "someone") \
+		.replace("{pet}", str(ctx.get("pet_name", "the stray"))) \
 		.replace("{who}", SysUtil.folk_name(who) if who >= 0 else "someone") \
 		.replace("{zone}", CityState.zone_label(zone) if zone != "" else "town")
 
@@ -96,6 +98,8 @@ static func _one(e: Dictionary, ctx: Dictionary) -> void:
 				StorytellerCycles.add_mood(float(e[k]))
 			"heat":
 				StorytellerChaos.add_heat(str(ctx.get("zone", "")), str((e[k] as Array)[0]), float((e[k] as Array)[1]))
+			"pet":
+				_pet(ctx)
 			"lay_off":
 				_lay_off(ctx, int(e[k]))
 			"power_cut":
@@ -105,6 +109,29 @@ static func _one(e: Dictionary, ctx: Dictionary) -> void:
 			"vanish":
 				if Story.townies.has(other if other >= 0 else int(ctx.get("who", -1))):
 					Story.townies[other if other >= 0 else int(ctx.get("who", -1))]["missing_until"] = SysUtil.day() + int(e[k])
+
+## A stray settles in. Household: a new dog or cat (Storyteller.rng picks which, PetState names it). Townie lot: statistical, a seeded coin flip, kept as a flag.
+static func _pet(ctx: Dictionary) -> void:
+	var sp: String = "dog" if Storyteller.rng.randf() < 0.5 else "cat"
+	var hid: int = int(ctx.get("hid", 0))
+	if hid > 0:
+		if not Storyteller.pets_exist(hid):
+			return
+		var p: Dictionary = PetState.add_pet(hid, sp, "", 40.0)
+		if p.is_empty():
+			return
+		p["bond"] = 15.0
+		p["fullness"] = 40.0
+		ctx["pet_name"] = str(p["name"])
+		return
+	var mem: Array = StorytellerPlay.lot_members(int(ctx.get("lot", 0)))
+	if mem.is_empty() or Story.townies[mem[0]].has("pet"):
+		return
+	if Storyteller.rng.randf() < 0.5:
+		Story.townies[mem[0]]["pet"] = sp
+		Storyteller.bump("townie_pet_kept")
+	else:
+		Storyteller.bump("townie_pet_shelter")
 
 static func _coins(ctx: Dictionary, n: int) -> void:
 	var hid: int = int(ctx.get("hid", 0))

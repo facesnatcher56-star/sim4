@@ -363,3 +363,26 @@ Incidents slice (300-500 ms), midnight Careers / Story / CaseInvestigation (abou
 | leaf | crowd/lot commute | 0.352 | 1520 | 3690 |
 | systems | systems/WeatherWorld.rain | 0.349 | 1508 | 3727 |
 | leaf | p1/_profile | 0.342 | 1476 | 26213 |
+
+## 2026-10-19 perf5: which merge raised the big-town cost? (0e878a8 before storyteller, c29e9be before life areas, 966b6ab current main), 3 runs each, medians
+
+Method: three detached worktrees, `tools/run_scale.ps1`-equivalent (`perf_scale --profile=big --days=3 --no-write`) run three at a time on a loaded machine (other agents running Godot), 3 rounds. The same machine later ran quieter, so absolute numbers differ between the two tables; compare within a table.
+
+| tree | frame avg per run (ms) | median | ms/game-min median |
+|---|---|---|---|
+| 0e878a8 (before 29) | 7.14, 5.65, 5.84 | 5.84 | 29.2 |
+| c29e9be (before 14) | 5.64, 5.93, 6.30 | 5.93 | 29.7 |
+| 966b6ab (main) | 5.55, 5.70, 5.90 | 5.70 | 28.5 |
+
+No merge moved the average: every row of the three trees agrees within the run-to-run spread (minute jobs 19.0 / 19.2 / 18.4 ms per game minute, SimDirector 9.4 / 9.7 / 9.3, Crowd.update 4.1 / 3.8 / 3.8, AccidentMarks 3.7 / 3.9 / 3.6, Incidents.slice 3.5 / 3.4 / 3.6). The reported 5.47 ms was machine load. The only rows that exist because of 14 and 29 are daily lumps: `day/Storyteller.on_day` 0 -> 0.042 ms/game-min (112-139 ms at the first midnight, the worst slow minute of the run), `day/Story.on_day` 0.023, `day scheduler day jobs` 0 -> 0.055 (LifeTick rows are below 0.02 each). Inside the storyteller day the time was in card picks (eligibility of incident cards: a pass over the district's townies per card) and in playing the chosen cards.
+
+Optimization (no behaviour change; the coop hash only changes for the doorstep-pet card): `StorytellerScan` (per-pick memo of residents / lot members / zone lots / wealth tier), early-out incident-subject search for eligibility, `IncidentSubject.town_objects_of` cached per slice. Same machine state, 3 rounds of before/after run side by side (quieter machine):
+
+| row | main before | perf5 after |
+|---|---|---|
+| frame avg median (runs) | 4.12 (3.98, 4.92, 4.12) | 3.93 (4.18, 3.93, 3.14) |
+| day/Storyteller.on_day ms/game-min median | 0.042 | 0.032 |
+| first midnight Storyteller.on_day | 130-132 ms | 97-99 ms |
+| `StorytellerDeck.pick` x 30 keys x 3 sizes (probe, 200-town) | 365.6 ms | 195.2 ms |
+
+The frame-average difference is inside the noise (the storyteller is 0.03 ms of a 20 ms game minute); the pick probe is the reliable number. Remaining top rows (unchanged, not storyteller): Crowd.update 3.0, AccidentMarks 2.6, Incidents.slice 2.6 (burst_pipe 0.29, catch_cold 0.27), SimDirector others 1.9 + 1.4 + 1.2.

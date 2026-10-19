@@ -71,6 +71,8 @@ static func eligible(cid: String, c: Dictionary, key: String, size: String = "")
 	return StorytellerPlay.can_play(cid, c, key)
 
 static func pick(key: String, size: String, opts: Dictionary = {}) -> String:
+	var tp := PerfProf.start()
+	StorytellerScan.begin()
 	var ids: Array = []
 	var ws: Array = []
 	var all: Dictionary = cards()
@@ -86,5 +88,7 @@ static func pick(key: String, size: String, opts: Dictionary = {}) -> String:
 		if w > 0.0:
 			ids.append(str(cid))
 			ws.append(w)
+	StorytellerScan.end()
 	var pick = Storyteller.pick_weighted(ids, ws)
+	PerfProf.stop("story/pick", tp)
 	return str(pick) if pick != null else ""
