@@ -6,13 +6,13 @@ extends RefCounted
 ## Extra keys: has_object / lacks_object (def id or list; objects of the subject's household, townie lots use `town_objects` of
 ## the record), weather_is [ids], season_is [ids], any_member [conds] / all_members [conds] (lot subjects), hour_between [h1,h2].
 
-const OWN_KEYS := ["has_object", "lacks_object", "weather_is", "season_is", "any_member", "all_members", "hour_between", "not", "any", "disaster"]
+const OWN_KEYS := ["has_object", "lacks_object", "weather_is", "season_is", "any_member", "all_members", "hour_between", "not", "any", "disaster", "chaos"]
 const TOWNIE_KEYS := ["age_stage_is", "has_trait", "lacks_trait", "has_buff", "lacks_buff", "skill_at_least", "skill_below", "coins_at_least",
 	"stat_below", "stat_above", "has_job", "time_between"]
 ## Every key a data file may use (validation).
 const VALID_KEYS := ["stat_below", "stat_above", "has_trait", "lacks_trait", "has_buff", "lacks_buff", "mood_is", "skill_at_least", "skill_below",
 	"time_between", "coins_at_least", "has_job", "posture_is", "posture_not", "friends_at_least", "bit_count", "career_is", "career_level_at_least",
-	"age_stage_is", "in_school", "pregnant", "has_object", "lacks_object", "weather_is", "season_is", "any_member", "all_members", "hour_between", "not", "any", "disaster"]
+	"age_stage_is", "in_school", "pregnant", "has_object", "lacks_object", "weather_is", "season_is", "any_member", "all_members", "hour_between", "not", "any", "disaster", "chaos"]
 
 static func check(conds: Array, subj) -> bool:
 	for c in conds:
@@ -55,6 +55,8 @@ static func _key(key: String, v: Variant, subj) -> bool:
 			return Cond._time_between(float(v[0]), float(v[1]))
 		"disaster":
 			return DisasterConds.check(v, subj)
+		"chaos":
+			return ChaosConds.check(v, subj)
 		"has_object":
 			return _has_object(subj, v)
 		"lacks_object":

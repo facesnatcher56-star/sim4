@@ -1,0 +1,105 @@
+{
+ "_doc": "Task 07: household chaos (home trouble). Burst pipe, overflowing toilet, a broken appliance, roaches. Handler: ChaosEvents.on_incident (scripts/systems/chaos_*.gd). Water damage and mould reuse the disaster lot records (DisasterState), so Scrub Mould and Call the Repairers also work here. Rates are per household per game year (28 days), Rare level; the roach rate is per MESSY household-year (exposure only counts messy homes). Far lots use the `statistical` blocks only.",
+ "config": {
+  "chaos": {
+   "pipe": {"burst_cost": 40, "flow_cost_per_hour": 14, "flood_start": 0.15, "flood_per_hour": 0.06, "mould_after_hours": 10, "mould_start": 0.35,
+            "mess_radius": 2, "mess": 2.5, "plumber_fee": 90, "diy_base": 0.3, "diy_per_level": 0.1, "diy_max": 0.95, "diy_fail_cost": 12},
+   "overflow": {"burst_cost": 10, "flow_cost_per_hour": 4, "flood_start": 0.05, "flood_per_hour": 0.03, "mould_after_hours": 0, "stops_after_hours": 3,
+                "mess_radius": 1, "mess": 1.5, "plumber_fee": 55, "diy_base": 0.4, "diy_per_level": 0.1, "diy_max": 0.95, "diy_fail_cost": 6},
+   "appliance": {"objects": ["fridge", "stove", "washing_machine", "tv", "computer", "stereo", "microwave_cart", "coffee_maker"],
+                 "fridge_spoil": 3.0, "visit_fee": 15, "fee_share": 0.2, "min_fee": 12},
+   "pests": {"start": 0.25, "seen": 0.01, "infested": 0.5, "swarm": 0.85, "grow_per_day": 0.1, "decay_per_day": 0.06, "messy_at": 2, "dirty_at": 6.0, "bin_full": 7.0,
+             "fridge_spoil": 1.0, "sick_chance": 0.15, "exterminator_fee": 80, "free_days": 14, "trap_effect": 0.3, "far_messy_pct": 25},
+   "jobs": {"plumber": [40, 90], "exterminator": [60, 120], "handy": [30, 70]},
+   "targets": {"burst_pipe": 0.18, "toilet_overflow": 0.35, "appliance_breakdown": 0.9, "roach_infestation": 1.2}
+  }
+ },
+ "handlers": {
+  "chaos_trouble": {"script": "res://scripts/systems/chaos_events.gd", "method": "on_incident"}
+ },
+ "content": {
+  "buffs": {
+   "plumbing_trouble": {"label": "Water Everywhere", "mood": {"tense": 2, "uncomfortable": 1}, "duration_min": 0, "hidden": false, "thought": "Water is pouring out. I have to stop it!",
+                        "autonomy_mult": {"interaction:fix_leak": 8.0}},
+   "roaches_seen": {"label": "Roaches About", "mood": {"uncomfortable": 1}, "duration_min": 0, "thought": "Was that a roach?"},
+   "pest_trouble": {"label": "Infested", "mood": {"uncomfortable": 3}, "duration_min": 0, "need_decay_mult": {"hygiene": 1.2},
+                    "thought": "Roaches everywhere. This place is disgusting.", "autonomy_mult": {"interaction:set_roach_traps": 6.0}},
+   "broken_things": {"label": "Things Broken", "mood": {"uncomfortable": 1}, "duration_min": 0, "thought": "Half the house is broken."},
+   "pipes_checked": {"label": "Pipes Checked", "mood": {}, "duration_min": 7200, "hidden": true, "thought": "The pipes are in good shape."}
+  },
+  "interactions": {
+   "fix_leak": {"label": "Stop the Leak", "kind": "super", "target": "object", "objects": ["sink", "toilet", "bathtub", "shower", "washing_machine"], "tags": ["chore", "repair", "skill"],
+    "duration_min": 25, "posture": "stand", "tests": [{"has_buff": "plumbing_trouble"}], "per_min": {"energy": -0.1, "hygiene": -0.2}, "skill_xp_per_min": {"handiness": 1.0},
+    "works_when_broken": true, "on_finish": [{"fire_event": "fix_leak"}], "autonomous": true, "priority": "urgent", "advertises": {"tidy": 4.0}, "thought": "Shut the water off and fix the pipe."},
+   "check_pipes": {"label": "Check the Pipes", "kind": "super", "target": "object", "objects": ["sink", "bathtub", "shower"], "tags": ["chore", "repair", "safety"],
+    "duration_min": 10, "posture": "stand", "tests": [{"lacks_buff": "pipes_checked"}], "per_min": {}, "skill_xp_per_min": {"handiness": 0.5},
+    "on_finish": [{"add_buff": "pipes_checked"}, {"fire_event": "check_pipes"}], "autonomous": false, "priority": "normal", "advertises": {}, "thought": "Better check these pipes.", "cooldown_min": 2880},
+   "call_plumber": {"label": "Call a Plumber", "kind": "super", "target": "object", "objects": ["mailbox"], "tags": ["repair", "chore"],
+    "duration_min": 5, "posture": "stand", "tests": [{"has_buff": "plumbing_trouble"}], "per_min": {}, "on_finish": [{"fire_event": "call_plumber"}],
+    "autonomous": false, "priority": "normal", "advertises": {}, "thought": "We need a plumber."},
+   "call_handyperson": {"label": "Call a Handyperson", "kind": "super", "target": "object", "objects": ["mailbox"], "tags": ["repair", "chore"],
+    "duration_min": 5, "posture": "stand", "tests": [{"has_buff": "broken_things"}], "per_min": {}, "on_finish": [{"fire_event": "call_handyperson"}],
+    "autonomous": false, "priority": "normal", "advertises": {}, "thought": "Somebody needs to fix all this."},
+   "call_exterminator": {"label": "Call the Exterminator", "kind": "super", "target": "object", "objects": ["mailbox"], "tags": ["repair", "chore"],
+    "duration_min": 5, "posture": "stand", "tests": [{"has_buff": "roaches_seen"}], "per_min": {}, "on_finish": [{"fire_event": "call_exterminator"}],
+    "autonomous": false, "priority": "normal", "advertises": {}, "thought": "Time to call pest control."},
+   "set_roach_traps": {"label": "Set Roach Traps", "kind": "super", "target": "object", "objects": ["trash_bin"], "tags": ["chore", "clean"],
+    "duration_min": 6, "posture": "stand", "tests": [{"has_buff": "roaches_seen"}, {"coins_at_least": 5}], "per_min": {}, "skill_xp_per_min": {"handiness": 0.3},
+    "on_finish": [{"coins_add": -5}, {"fire_event": "set_roach_traps"}], "autonomous": true, "priority": "normal", "advertises": {"tidy": 2.5}, "thought": "I'll set some traps.", "cooldown_min": 480}
+  },
+  "object_interactions": {
+   "mailbox": ["call_plumber", "call_handyperson", "call_exterminator"],
+   "sink": ["fix_leak", "check_pipes"], "toilet": ["fix_leak"], "bathtub": ["fix_leak", "check_pipes"], "shower": ["fix_leak", "check_pipes"], "washing_machine": ["fix_leak"],
+   "trash_bin": ["set_roach_traps"]
+  }
+ },
+ "incidents": {
+  "burst_pipe": {
+   "label": "Burst pipe", "scope": "lot", "check": "hour", "base_rate_per_year": 0.18, "notify_policy": "household", "severity": 3, "public": false,
+   "conditions": [{"any_member": [{"age_stage_is": ["teen", "adult", "elder"]}]}, {"chaos": {"plumbing": true, "leaking": false}}],
+   "risk_mults": [{"label": "Freezing weather", "when": [{"weather_is": ["snow"]}], "mult": 2.5}],
+   "prevent": [
+    {"label": "Pipes checked lately", "when": [{"any_member": [{"has_buff": "pipes_checked"}]}], "mult": 0.15},
+    {"label": "Someone handy keeps the plumbing in shape", "when": [{"any_member": [{"skill_at_least": ["handiness", 4]}]}], "mult": 0.6}
+   ],
+   "warning": {"lead_min": 60, "thought": "The pipes are knocking...", "text": "The pipes in your home are knocking and the taps are spitting. A pipe may burst soon: check the pipes at a sink.", "kind": "warn",
+               "averted": "Your pipes held. Good thing someone looked at them."},
+   "defuse": [{"any_member": [{"has_buff": "pipes_checked"}]}],
+   "outcomes": [{"weight": 1, "effects": [{"handler": "chaos_trouble", "args": {"kind": "pipe"}}], "text": "A pipe burst.", "kind": "bad"}],
+   "statistical": {"outcomes": [
+    {"weight": 3, "when": [{"coins_at_least": 150}], "effects": [{"coins_add": -90}], "summary": "{house} had a burst pipe and paid a plumber."},
+    {"weight": 1, "effects": [], "summary": "{house} had a burst pipe and mopped up for days."}
+   ]}
+  },
+  "toilet_overflow": {
+   "label": "Overflowing toilet", "scope": "lot", "check": "hour", "base_rate_per_year": 0.35, "notify_policy": "household", "severity": 2, "public": false,
+   "conditions": [{"any_member": [{"age_stage_is": ["teen", "adult", "elder"]}]}, {"chaos": {"plumbing": true, "leaking": false}}],
+   "prevent": [{"label": "Someone handy keeps the plumbing in shape", "when": [{"any_member": [{"skill_at_least": ["handiness", 4]}]}], "mult": 0.6}],
+   "outcomes": [{"weight": 1, "effects": [{"handler": "chaos_trouble", "args": {"kind": "overflow"}}], "text": "A toilet overflowed.", "kind": "warn"}],
+   "statistical": {"outcomes": [
+    {"weight": 1, "effects": [], "summary": "{house} had an overflowing toilet and a very bad afternoon."}
+   ]}
+  },
+  "appliance_breakdown": {
+   "label": "Broken appliance", "scope": "lot", "check": "day", "base_rate_per_year": 0.9, "notify_policy": "household", "severity": 2, "public": false,
+   "conditions": [{"any_member": [{"age_stage_is": ["teen", "adult", "elder"]}]}, {"chaos": {"appliance": true}}],
+   "prevent": [{"label": "Someone handy looks after the appliances", "when": [{"any_member": [{"skill_at_least": ["handiness", 4]}]}], "mult": 0.6}],
+   "outcomes": [{"weight": 1, "effects": [{"handler": "chaos_trouble", "args": {"kind": "appliance"}}], "text": "Something broke down.", "kind": "warn"}],
+   "statistical": {"outcomes": [
+    {"weight": 3, "when": [{"coins_at_least": 120}], "effects": [{"coins_add": -60}], "summary": "{house} had an appliance break down and paid for the repair."},
+    {"weight": 1, "effects": [], "summary": "{house} had an appliance break down and did without for a while."}
+   ]}
+  },
+  "roach_infestation": {
+   "label": "Roaches", "scope": "lot", "check": "day", "base_rate_per_year": 1.2, "notify_policy": "household", "severity": 2, "public": false,
+   "conditions": [{"any_member": [{"age_stage_is": ["teen", "adult", "elder"]}]}, {"chaos": {"messy_at_least": 2, "pests_below": 0.01}}],
+   "risk_mults": [{"label": "Hot weather", "when": [{"season_is": ["summer"]}], "mult": 1.5}],
+   "prevent": [{"label": "The exterminator was here lately", "when": [{"chaos": {"pest_free": true}}], "mult": 0.1}],
+   "outcomes": [{"weight": 1, "effects": [{"handler": "chaos_trouble", "args": {"kind": "pests"}}], "text": "Roaches turned up.", "kind": "warn"}],
+   "statistical": {"outcomes": [
+    {"weight": 3, "when": [{"coins_at_least": 100}], "effects": [{"coins_add": -80}], "summary": "{house} had roaches and called the exterminator."},
+    {"weight": 1, "effects": [], "summary": "{house} had roaches and scrubbed the kitchen for a week."}
+   ]}
+  }
+ }
+}

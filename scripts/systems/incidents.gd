@@ -40,6 +40,7 @@ static func reset() -> void:
 	Health.reset()
 	Graves.reset()
 	DisasterState.reset()
+	ChaosState.reset()
 	ChronicleHook.reset()
 
 static func seed_rng(s: int) -> void:
@@ -123,6 +124,7 @@ static func on_minute() -> void:
 	if not pending.is_empty():
 		IncidentFlow.process_pending()
 	Health.on_minute()
+	ChaosClock.on_minute()
 
 static func on_hour() -> void:
 	var t := PerfProf.start()
@@ -130,6 +132,7 @@ static func on_hour() -> void:
 	PerfProf.stop("incidents/hospital", t)
 	t = PerfProf.start()
 	Health.on_hour()
+	ChaosClock.on_hour()
 	PerfProf.stop("incidents/health", t)
 	t = PerfProf.start()
 	IncidentChecks.run("hour")
@@ -142,6 +145,7 @@ static func on_hour_sliced() -> void:
 		return
 	Hospital.on_hour()
 	Health.on_hour()
+	ChaosClock.on_hour()
 	IncidentSlices.begin("hour")
 
 static func on_day_sliced() -> void:
@@ -149,10 +153,12 @@ static func on_day_sliced() -> void:
 		on_day()
 		return
 	Health.on_day()
+	ChaosClock.on_day()
 	IncidentSlices.begin("day")
 
 static func on_day() -> void:
 	Health.on_day()
+	ChaosClock.on_day()
 	IncidentChecks.run("day")
 
 # ------------------------------------------------------------------ force / statistical
@@ -188,7 +194,7 @@ static func _timed_checkup(f) -> void:
 # ------------------------------------------------------------------ save
 static func to_dict() -> Dictionary:
 	return {"level": level_id(), "rng_seed": rng.seed, "rng_state": str(rng.state), "counters": counters.duplicate(true), "pending": pending.duplicate(true),
-		"history": _history.duplicate(true), "hospital": Hospital.to_dict(), "levels": LevelAccidents.to_dict(), "health": Health.to_dict(), "graves": Graves.to_dict(), "disasters": DisasterState.to_dict()}
+		"history": _history.duplicate(true), "hospital": Hospital.to_dict(), "levels": LevelAccidents.to_dict(), "health": Health.to_dict(), "graves": Graves.to_dict(), "disasters": DisasterState.to_dict(), "chaos": ChaosState.to_dict()}
 
 static func from_dict(d: Dictionary) -> void:
 	reset()
@@ -213,6 +219,7 @@ static func from_dict(d: Dictionary) -> void:
 	Health.from_dict(d.get("health", {}))
 	Graves.from_dict(d.get("graves", {}))
 	DisasterState.from_dict(d.get("disasters", {}))
+	ChaosState.from_dict(d.get("chaos", {}))
 
 static func record_history(entry: Dictionary) -> void:
 	_history.append(entry)

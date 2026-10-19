@@ -252,6 +252,7 @@ func _on_game_event(ev_name: String, payload: Dictionary) -> void:
 	CrimeFlow.on_game_event(ev_name, payload)
 	Fire.on_game_event(ev_name, payload)
 	DisasterClock.on_game_event(ev_name, payload)
+	ChaosClock.on_game_event(ev_name, payload)
 	MarketTick.on_game_event(ev_name, payload)
 	MoodSwings.on_game_event(ev_name, payload)
 	StoryPacing.on_game_event(ev_name, payload)
