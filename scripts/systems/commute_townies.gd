@@ -60,7 +60,7 @@ static func update(lot_id: String, now: int, instant: bool) -> void:
 			(f.needs[n] as Stat).set_value(40.0)
 	var vtype: String = Venues.type_of_lot(lot_id)
 	var made: int = 0
-	for t in Story.alive_townies():
+	for t in Story.free_townies():
 		if Workplace.lot_for_townie(t) != lot_id or not on_shift(t, now):
 			continue
 		var tid: int = int(t["id"])

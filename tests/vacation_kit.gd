@@ -34,6 +34,7 @@ static func warp(minutes: int, step: int = 20) -> void:
 		var d0: int = clk.total_minutes / 1440
 		clk.total_minutes += n
 		Vacation.on_minute()
+		CrimeFlow.on_minute()                          # queued trials, verdicts, police arrivals
 		if clk.total_minutes / 60 != h0:
 			Vacation.on_hour()
 		if clk.total_minutes / 1440 != d0:

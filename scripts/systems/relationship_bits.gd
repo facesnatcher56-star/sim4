@@ -1,4 +1,4 @@
-﻿class_name RelationshipBits
+class_name RelationshipBits
 extends RefCounted
 ## Relationship bits (labels), flags/status changes, compatibility and the describe text.
 
@@ -149,7 +149,7 @@ static func set_flag(a: int, b: int, flag: String, on: bool = true, announce: bo
 	SocialGatherings.refresh_markers(SysUtil.folk(a))
 	SocialGatherings.refresh_markers(SysUtil.folk(b))
 	if on and announce and flag == "dating":
-		SysUtil.notify("%s and %s are now dating!" % [SysUtil.folk_name(a), SysUtil.folk_name(b)], "relationship")
+		RelNotify.say([a, b], "%s and %s are now dating!" % [SysUtil.folk_name(a), SysUtil.folk_name(b)], "relationship")
 		SysUtil.game_event("relationship_status", {"folk_id": a, "target_id": b, "status": flag})
 	if on and announce and flag in ["sweetheart", "partner", "spouse"]:
 		SysUtil.notify("%s and %s are now %s!" % [SysUtil.folk_name(a), SysUtil.folk_name(b), bit_label(flag).to_lower() + "s"], "relationship")

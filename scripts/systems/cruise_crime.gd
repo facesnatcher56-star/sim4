@@ -58,7 +58,7 @@ static func detain(t: Dictionary, cs: Dictionary, pid: int) -> void:
 	cs["detained"] = pid
 	cs["accused"] = pid
 	var nm: String = CrimePerson.name_of(pid)
-	VacationLog.note(t, "crime", "Ship security detained %s in the brig over the %s. The police will meet the ship in port." % [nm, CaseStore.title(cs).to_lower()], [pid], 3, true)
+	VacationLog.note(t, "crime", "Ship security detained %s in the brig over %s. The police will meet the ship in port." % [nm, CaseText.neutral(cs)], [pid], 3, true)
 	SysUtil.notify("Ship security has detained %s." % nm, "story")
 	SysUtil.game_event("ship_detained", {"trip": int(t["id"]), "person": pid, "case": int(cs["id"])})
 	if str(t["cruise"].get("killer", {}).get("pid", -1)) == str(pid):
@@ -82,7 +82,7 @@ static func handover(t: Dictionary, where: String) -> void:
 			CruiseKiller.remove_person(t, det)
 			JusticeProcess.arrest(cs, det)
 		else:
-			VacationLog.note(t, "crime", "The police boarded at %s and took over the investigation of the %s." % [where, CaseStore.title(cs).to_lower()], [], 3, true)
+			VacationLog.note(t, "crime", "The police boarded at %s and took over the investigation of %s." % [where, CaseText.neutral(cs)], [], 3, true)
 			CaseStore.note(cs, "The ship reached %s. The police took over the case." % where, "", 2)
 		done += 1
 		lead = cs

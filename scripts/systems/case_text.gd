@@ -12,7 +12,14 @@ static func phrase(c: Dictionary, charge_id: String = "") -> String:
 	var tpl: String = str(cd.get("phrase", str(cd.get("label", id)).to_lower()))
 	if tpl.find("{victim}") >= 0 and victim < 0:
 		return str(cd.get("label", id)).to_lower()
-	return tpl.replace("{victim}", CrimePerson.name_of(victim) if victim >= 0 else "").replace("{place}", CaseStore.house_label(str(c.get("scene", ""))))
+	return tpl.replace("{victim}", victim_name(c) if victim >= 0 else "").replace("{place}", CaseStore.house_label(str(c.get("scene", ""))))
+
+## The victim's name, also when they are crew or somebody who is no longer on the map (the case remembered it when it was opened).
+static func victim_name(c: Dictionary) -> String:
+	var n: String = CrimePerson.name_of(int(c.get("victim", -1)))
+	if (n == "Someone" or n == "") and str(c.get("victim_name", "")) != "":
+		return str(c["victim_name"])
+	return n
 
 ## All charges as one phrase ("domestic violence against Tess and breaking probation").
 static func phrases(c: Dictionary) -> String:
@@ -65,12 +72,12 @@ static func arrested(c: Dictionary, pid: int) -> String:
 ## The crime itself as a noun phrase, from the case kind (known before any charge: "the death of Ivo").
 static func case_phrase(c: Dictionary) -> String:
 	if str(c.get("kind", "")) in ["murder", "serial", "manslaughter"] and int(c.get("victim", -1)) >= 0:
-		return "the death of %s" % CrimePerson.name_of(int(c["victim"]))
+		return "the death of %s" % victim_name(c)
 	return phrase(c, JusticeProcess.charge_for(c))
 
 static func charged(c: Dictionary, pid: int) -> String:
 	if str(c.get("kind", "")) in ["murder", "serial", "manslaughter"] and int(c.get("victim", -1)) >= 0:
-		return "%s was charged with %s over the death of %s." % [CrimePerson.name_of(pid), str(JusticeProcess.charge_def(str(c.get("charge", ""))).get("label", "murder")).to_lower(), CrimePerson.name_of(int(c["victim"]))]
+		return "%s was charged with %s over the death of %s." % [CrimePerson.name_of(pid), str(JusticeProcess.charge_def(str(c.get("charge", ""))).get("label", "murder")).to_lower(), victim_name(c)]
 	return "%s was charged with %s." % [CrimePerson.name_of(pid), phrases(c)]
 
 static func convicted(c: Dictionary, pid: int, s: Dictionary, plea: bool) -> String:

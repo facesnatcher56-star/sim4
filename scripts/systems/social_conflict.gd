@@ -79,7 +79,7 @@ static func _check_resolved(a: int, b: int, how: String) -> bool:
 	for f in [SysUtil.folk(a), SysUtil.folk(b)]:
 		if f != null:
 			f.add_buff(str(ac.get("resolved_buff", "makeup_glow")))
-	SysUtil.notify("%s and %s made up." % [SysUtil.folk_name(a), SysUtil.folk_name(b)], "relationship")
+	RelNotify.say([a, b], "%s and %s made up." % [SysUtil.folk_name(a), SysUtil.folk_name(b)], "relationship")
 	SysUtil.game_event("argument_resolved", {"folk_id": a, "target_id": b, "how": how})
 	return true
 
@@ -147,7 +147,7 @@ static func discover_cheating(victim: int, cheater: int, other: int) -> void:
 		if not (int(af["cheater"]) == cheater and int(af["victim"]) == victim):
 			keep.append(af)
 	RelationshipService.affairs = keep
-	SysUtil.notify("%s found out that %s was cheating with %s!" % [SysUtil.folk_name(victim), SysUtil.folk_name(cheater), SysUtil.folk_name(other)], "bad")
+	RelNotify.say([victim, cheater, other], "%s found out that %s was cheating with %s!" % [SysUtil.folk_name(victim), SysUtil.folk_name(cheater), SysUtil.folk_name(other)], "bad")
 	SysUtil.game_event("cheating_discovered", {"folk_id": victim, "target_id": cheater, "other_id": other})
 	var p: float = float(rc.get("auto_breakup", 0.6))
 	if SocialDynamics.has_t(victim, "jealous"):

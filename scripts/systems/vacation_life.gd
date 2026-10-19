@@ -1,4 +1,4 @@
-﻿class_name VacationLife
+class_name VacationLife
 extends RefCounted
 ## Life at the destination (task 22): the people who live or travel there, the weather of the place, small happenings, and what the
 ## activities leave behind (photos, souvenirs, spending money).
@@ -29,8 +29,7 @@ static func dest_def(t: Dictionary) -> Dictionary:
 static func start(t: Dictionary) -> void:
 	var dd: Dictionary = dest_def(t)
 	var r := Vacation.rng_for(t)
-	var names: Array = Story.cfg().get("first_names", ["Sam"])
-	var lasts: Array = Story.cfg().get("last_names", ["Reed"])
+	var taken: Array = []
 	var pool: Array = ["social", "outdoorsy", "foodie", "charmer", "romantic", "active", "easygoing", "musical", "creative", "optimist", "shy", "generous"]
 	var roster: Array = []
 	for i in mini(int(dd.get("locals", 4)), 8):
@@ -39,7 +38,9 @@ static func start(t: Dictionary) -> void:
 			var tt: String = str(pool[r.randi_range(0, pool.size() - 1)])
 			if not tr.has(tt):
 				tr.append(tt)
-		roster.append({"id": LOCAL_ID_BASE + int(t["zone"]) * 40 + i, "name": "%s %s" % [names[r.randi_range(0, names.size() - 1)], lasts[r.randi_range(0, lasts.size() - 1)]],
+		var first: String = Names.pick_first(taken, r)
+		taken.append(first)
+		roster.append({"id": LOCAL_ID_BASE + int(t["zone"]) * 40 + i, "name": "%s %s" % [first, Names.pick_last(r)],
 			"traits": tr, "kind": "local", "townie": -1, "role": "", "tile": [], "level": 0})
 	t["roster"] = roster
 	roll_weather(t)

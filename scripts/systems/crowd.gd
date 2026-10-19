@@ -161,7 +161,7 @@ static func _pick_townie(lot_id: String, vtype: String) -> Dictionary:
 	var present: Array = present_townie_ids()
 	var cands: Array = []
 	var weights: Array = []
-	var pool: Array = Story.alive_townies()
+	var pool: Array = Story.free_townies()
 	var resident_only: bool = bool(Venues.type_def(vtype).get("crowd_residents", false))
 	if resident_only:
 		pool = Neighborhood.residents_of(lot_id)

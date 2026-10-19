@@ -178,7 +178,7 @@ static func gossip_backfire(a: int, listener: int, subject: int, rumor: bool = f
 		fa.add_buff("reputation_smear")
 	if fs != null:
 		fs.add_buff("offended")
-	SysUtil.notify("%s found out that %s was gossiping about them!" % [SysUtil.folk_name(subject), SysUtil.folk_name(a)], "warn")
+	RelNotify.say([subject, a], "%s found out that %s was gossiping about them!" % [SysUtil.folk_name(subject), SysUtil.folk_name(a)], "warn")
 	SysUtil.game_event("gossip_backfired", {"folk_id": a, "target_id": listener, "about": subject})
 
 static func _rumor(a: int, t: int, tier: String, strength: float) -> void:

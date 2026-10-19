@@ -1,4 +1,4 @@
-﻿class_name CaseStore
+class_name CaseStore
 extends RefCounted
 ## The shared CASE RECORD. One dictionary per crime, JSON safe, kept in JusticeState.cases:
 ##   id, kind (burglary | robbery | assault | murder | theft | arson | manslaughter | serial), scene ("home:1" | "town:3" | "street"), day, minute,
@@ -30,7 +30,7 @@ static func create(kind: String, culprit: int, victim: int, scene: String, opts:
 		"loot_value": int(opts.get("loot_value", 0)), "stolen_coins": int(opts.get("stolen_coins", 0)), "state": "hidden", "disc_day": -1, "reporter": -1,
 		"progress": 0.0, "tips": 0.0, "recovered": false, "accused": -1, "suspect_ids": [], "wrongful": false, "charge": "", "bail": 0, "lawyer": -1,
 		"plea": false, "trial": {}, "verdict": "", "sentence": {}, "serial": int(opts.get("serial", -1)), "notes": [], "reopened": 0,
-		"hush": false, "public": bool(opts.get("public", true)), "missing": 0.0, "hours_hidden": 0, "reported_min": -1}
+		"hush": false, "victim_name": CrimePerson.name_of(victim) if victim >= 0 else "", "public": bool(opts.get("public", true)), "missing": 0.0, "hours_hidden": 0, "reported_min": -1}
 	JusticeState.next_case += 1
 	JusticeState.cases[int(c["id"])] = c
 	JusticeState.count(kind)
@@ -114,7 +114,7 @@ static func kind_label(kind: String) -> String:
 
 ## One short player-facing title for lists: "Murder of Ada Finch (open)".
 static func title(c: Dictionary) -> String:
-	var v: String = CrimePerson.name_of(int(c["victim"])) if int(c["victim"]) >= 0 else ""
+	var v: String = CaseText.victim_name(c) if int(c["victim"]) >= 0 else ""
 	var base: String
 	match str(c["kind"]):
 		"burglary": base = "Break-in at %s" % house_label(str(c["scene"]))

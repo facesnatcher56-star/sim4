@@ -544,6 +544,22 @@
     "rot": 2
    },
    {
+    "def": "toilet",
+    "tile": [
+     18,
+     17
+    ],
+    "rot": 2
+   },
+   {
+    "def": "sink",
+    "tile": [
+     19,
+     17
+    ],
+    "rot": 2
+   },
+   {
     "def": "door",
     "tile": [
      6,
@@ -859,6 +875,24 @@
     "level": 1
    },
    {
+    "def": "toilet",
+    "tile": [
+     20,
+     17
+    ],
+    "rot": 2,
+    "level": 1
+   },
+   {
+    "def": "sink",
+    "tile": [
+     21,
+     17
+    ],
+    "rot": 2,
+    "level": 1
+   },
+   {
     "def": "door",
     "tile": [
      6,
@@ -1081,6 +1115,24 @@
      13
     ],
     "rot": 0,
+    "level": 2
+   },
+   {
+    "def": "toilet",
+    "tile": [
+     26,
+     17
+    ],
+    "rot": 2,
+    "level": 2
+   },
+   {
+    "def": "sink",
+    "tile": [
+     27,
+     17
+    ],
+    "rot": 2,
     "level": 2
    },
    {

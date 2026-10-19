@@ -1,4 +1,4 @@
-﻿class_name Careers
+class_name Careers
 extends RefCounted
 ## Jobs, shifts, performance, promotions, school and retirement. Data: data/careers.json.
 ## At shift start a folk with a job is routed off-lot through Away ("left_for_work"), and comes back at shift end
@@ -158,8 +158,24 @@ static func apply_schedule(f) -> void:
 		f.work_start = float(sv.get("start", f.work_start))
 		f.work_end = float(sv.get("end", f.work_end))
 
+## Who may hold a job: the household's own people (never crew, crowd NPCs, visitors), adults and elders; teens only in the part-time careers
+## (settings.teen_careers, level 1). "" = fine, else a reason.
+static func why_not_work(f, cid: String = "", level: int = 1) -> String:
+	if f == null:
+		return "nobody"
+	if int(f.household_id) <= 0 or f.has_meta("visitor") or f.has_meta("staff") or f.has_meta("crowd") or f.has_meta("trip_npc"):
+		return "not one of the household"
+	var stage: String = str(f.age_stage)
+	if stage in ["adult", "elder"]:
+		return ""
+	if stage == "teen" and cid != "" and level <= 1 and (settings().get("teen_careers", ["barista", "gardener", "handyperson"]) as Array).has(cid):
+		return ""
+	return "too young for that job"
+
 static func hire(f, cid: String, level: int = 1) -> bool:
 	if f == null or career_def(cid).is_empty() or level_def(cid, level).is_empty():
+		return false
+	if why_not_work(f, cid, level) != "":
 		return false
 	if retired.has(int(f.id)):
 		return false
@@ -196,6 +212,14 @@ static func pending_offer(folk_id: int) -> Dictionary:
 static func make_offer(f, cid: String = "", level: int = 0) -> Dictionary:
 	if f == null or jobs.has(int(f.id)) or retired.has(int(f.id)):
 		return {}
+	if why_not_work(f) != "":
+		if str(f.age_stage) != "teen" or why_not_work(f, "x") == "not one of the household":
+			return {}
+		if cid == "":
+			cid = str((settings().get("teen_careers", ["barista", "gardener", "handyperson"]) as Array)[0])
+		level = 1
+		if why_not_work(f, cid, 1) != "":
+			return {}
 	if cid == "":
 		cid = _best_career_for(f)
 	if cid == "":
@@ -221,6 +245,9 @@ static func accept_offer(folk_id: int) -> bool:
 	var f = SysUtil.folk(folk_id)
 	if o.is_empty() or f == null:
 		return false
+	if why_not_work(f, str(o["career"]), int(o["level"])) != "":
+		offers.erase(folk_id)
+		return false
 	return hire(f, str(o["career"]), int(o["level"]))
 
 static func decline_offer(folk_id: int) -> void:
@@ -241,7 +268,7 @@ static func _best_career_for(f) -> String:
 ## The computer's "Look for Jobs" interaction fires game_event job_search.
 static func on_job_search(folk_id: int) -> void:
 	var f = SysUtil.folk(folk_id)
-	if f == null or jobs.has(folk_id):
+	if f == null or jobs.has(folk_id) or (why_not_work(f) != "" and str(f.age_stage) != "teen"):
 		return
 	if not offers.has(folk_id):
 		make_offer(f)

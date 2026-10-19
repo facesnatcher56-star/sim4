@@ -46,6 +46,14 @@ static func alive_townies() -> Array:
 			out.append(townies[id])
 	return out
 
+## Townies who can be out and about: alive and not held (remand, jail, prison) or in hospital. Visits, invites, venue crowds and workplaces draw from this.
+static func free_townies() -> Array:
+	var out: Array = []
+	for id in townies:
+		if bool(townies[id]["alive"]) and not JusticeState.inmates.has(int(id)) and not Hospital.is_in(int(id)):
+			out.append(townies[id])
+	return out
+
 static func _log(text: String) -> void:
 	news.append({"day": SysUtil.day(), "text": text})
 	while news.size() > 60:

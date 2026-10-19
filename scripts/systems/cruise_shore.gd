@@ -1,4 +1,4 @@
-﻿class_name CruiseShore
+class_name CruiseShore
 extends RefCounted
 ## Ports of call and the rules of the quay (task 22). When the ship docks the port's holiday map is loaded into a second zone; at 09:00 the
 ## party goes ashore (a short hidden transit, then they stand in the port); at 15:30 there is a last call, at 16:00 and 16:30 everybody who is not busy
@@ -49,7 +49,7 @@ static func dock(t: Dictionary, port: String, day: int) -> void:
 	t["roster_port"] = res.get("spawn", [])
 	VacationLog.note(t, "port", "%s docked at %s. Shore day: the ship sails at %s." % [str(c["name"]), str(pd.get("label", port)), _hh(float(CruiseRoute.ship().get("sail_hour", 17.0)))], t["folk"], 1, true)
 	CruiseCrime.handover(t, str(pd.get("label", port)))
-	SysUtil.notify("%s: %s. Shore day until %s." % [str(pd.get("label", port)), str(pd.get("blurb", "")), _hh(float(CruiseRoute.ship().get("all_aboard_hour", 16.5)))], "travel")
+	SysUtil.notify("%s: %s. Shore day until %s." % [str(pd.get("label", port)), str(pd.get("blurb", "")).trim_suffix("."), _hh(float(CruiseRoute.ship().get("all_aboard_hour", 16.5)))], "travel")
 
 static func _hh(h: float) -> String:
 	return "%02d:%02d" % [int(h), int(round((h - floorf(h)) * 60.0))]
@@ -249,6 +249,7 @@ static func unload_port(t: Dictionary) -> void:
 # ------------------------------------------------------------------ the end of the cruise
 static func disembark(t: Dictionary) -> void:
 	var c: Dictionary = t["cruise"]
+	CruiseLife.surface_secrets(t)
 	c["flights"] = []
 	VacationLog.note(t, "port", "The party disembarked from %s." % str(c["name"]), t["folk"], 1, false)
 	VacationTrip.leave_destination(t, false)

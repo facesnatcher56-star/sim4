@@ -1,4 +1,4 @@
-﻿class_name StoryVisits
+class_name StoryVisits
 extends RefCounted
 ## Townie visits, party invites and situations.
 
@@ -11,7 +11,7 @@ static func _visits_and_invites(day: int) -> void:
 	if SysUtil.chance(float(v.get("daily_chance", 0.55)) * StoryPacing.mult("visit", int(residents[0].household_id))):
 		var cands: Array = []
 		var weights: Array = []
-		for t in Story.alive_townies():
+		for t in Story.free_townies():
 			if Story.stage_of(t) in ["baby", "toddler"] or day - int(t["last_visit_day"]) < 2:
 				continue
 			var w: float = 1.0
@@ -34,7 +34,7 @@ static func _visits_and_invites(day: int) -> void:
 			if SysUtil.is_away(r2):
 				continue
 			var inviters: Array = []
-			for t2 in Story.alive_townies():
+			for t2 in Story.free_townies():
 				if Story.stage_of(t2) in ["adult", "elder", "teen"] and RelationshipService.value(int(t2["id"]), int(r2.id), "friendship") >= float(ic.get("min_friendship", 15)):
 					inviters.append(t2)
 			var who = SysUtil.pick(inviters)
@@ -144,8 +144,8 @@ static func _arrive(sit: Dictionary) -> void:
 	var count: int = 0
 	for gid in sit["guest_ids"]:
 		var t: Dictionary = Story.townies.get(int(gid), {})
-		if t.is_empty() or not bool(t["alive"]):
-			continue
+		if t.is_empty() or not bool(t["alive"]) or JusticeState.inmates.has(int(gid)):
+			continue                          # dead, or held in custody: a charged suspect does not come to dinner
 		var there = SysUtil.folk(int(gid))
 		if there != null:
 			if not there.has_meta("crowd"):

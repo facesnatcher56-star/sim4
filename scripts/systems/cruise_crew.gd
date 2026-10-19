@@ -30,8 +30,7 @@ static func start(t: Dictionary) -> void:
 			break
 		if not chosen.has(p2):
 			chosen.append(p2)
-	var names: Array = Story.cfg().get("first_names", ["Sam"])
-	var lasts: Array = Story.cfg().get("last_names", ["Reed"])
+	var taken: Array = []                            # first names used aboard so far (the name pool avoids the town's own as well)
 	var idx: int = 0
 	for p3 in chosen:
 		var role: String = str(p3["role"])
@@ -40,7 +39,9 @@ static func start(t: Dictionary) -> void:
 		if cd.has("names"):
 			nm = str((cd["names"] as Array)[r.randi_range(0, (cd["names"] as Array).size() - 1)])
 		else:
-			nm = "%s %s (%s)" % [names[r.randi_range(0, names.size() - 1)], lasts[r.randi_range(0, lasts.size() - 1)], str(cd.get("label", role.capitalize()))]
+			var first: String = Names.pick_first(taken, r)
+			taken.append(first)
+			nm = "%s %s (%s)" % [first, Names.pick_last(r), str(cd.get("label", role.capitalize()))]
 		roster.append({"id": CREW_ID_BASE + int(t["zone"]) * 40 + idx, "name": nm, "traits": [], "kind": "crew", "role": role, "outfit": str(cd.get("outfit", "")),
 			"townie": -1, "tile": [p3["tile"].x, p3["tile"].y], "level": int(p3["level"])})
 		idx += 1

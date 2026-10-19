@@ -346,6 +346,7 @@ def ship():
     t.obj("sofa", 11, 13); t.obj("sofa", 18, 13); t.obj("piano", 14, 13); t.obj("tv", 20, 13)
     t.obj("bar_counter", 12, 16); t.obj("plant", 10, 16, 2); t.obj("plant", 21, 16, 2)
     t.obj("bed", 23, 13); t.obj("bed", 23, 16); t.obj("sink", 27, 13); t.obj("medical_cabinet", 26, 13); t.obj("lamp", 27, 16, 2)
+    t.obj("toilet", 18, 17, 2); t.obj("sink", 19, 17, 2)                      # public toilets on every public deck
     posts += [{"role": "waiter", "tile": [13, 7], "level": 0}, {"role": "waiter", "tile": [19, 7], "level": 0},
               {"role": "bartender", "tile": [14, 16], "level": 0}, {"role": "medical", "tile": [25, 15], "level": 0},
               {"role": "security", "tile": [16, 14], "level": 0}]
@@ -366,6 +367,7 @@ def ship():
     t.obj("stereo", 5, 13, 0, 1); t.obj("stereo", 8, 13, 0, 1); t.obj("bar_counter", 6, 16, 0, 1)
     t.obj("bar_counter", 12, 13, 0, 1); t.obj("bar_counter", 15, 13, 0, 1); t.obj("pool_table", 17, 16, 0, 1); t.obj("sofa", 11, 16, 0, 1)
     t.obj("bookshelf", 23, 13, 0, 1); t.obj("bookshelf", 25, 13, 0, 1); t.obj("armchair", 24, 16, 2, 1); t.obj("armchair", 26, 16, 2, 1)
+    t.obj("toilet", 20, 17, 2, 1); t.obj("sink", 21, 17, 2, 1)
     posts += [{"role": "entertainer", "tile": [13, 6], "level": 1}, {"role": "bartender", "tile": [13, 15], "level": 1},
               {"role": "waiter", "tile": [14, 9], "level": 1}]
     # ---- level 2: bridge, spa, gym / open sun deck with the pool
@@ -378,6 +380,7 @@ def ship():
     for x in (5, 8, 11, 14):
         t.obj("deck_chair", x, 17, 2, 2)
     t.obj("hot_tub", 18, 13, 0, 2); t.obj("bar_counter", 23, 16, 0, 2); t.obj("table", 21, 13, 0, 2); t.obj("plant", 27, 13, 0, 2)
+    t.obj("toilet", 26, 17, 2, 2); t.obj("sink", 27, 17, 2, 2)
     posts += [{"role": "captain", "tile": [7, 6], "level": 2}, {"role": "lifeguard", "tile": [13, 14], "level": 2},
               {"role": "cleaner", "tile": [20, 16], "level": 2}]
     # ---- level 3: suites and ocean-view cabins

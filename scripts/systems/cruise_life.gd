@@ -1,4 +1,4 @@
-﻿class_name CruiseLife
+class_name CruiseLife
 extends RefCounted
 ## Life on board (task 22): the programme (welcome buffet, captain's dinner, formal night, talent show, deck party, theme nights, shows, farewell
 ## dinner; data/cruise_ship.json "program"), the sea state of the day, seasickness, and shipboard romance and drama with passengers.
@@ -131,4 +131,34 @@ static func _evening(t: Dictionary) -> void:
 		var a = cands[r.randi_range(0, cands.size() - 1)]
 		var b = cands[r.randi_range(0, cands.size() - 1)]
 		if a != b:
-			VacationLog.note(t, "romance", "%s and %s had a loud disagreement over a deck chair." % [a.name, b.name], [int(a.id), int(b.id)], 1, false)
+			if r.randf() < float(rc.get("affair_chance", 0.5)):
+				_affair(t, a, b, r)
+			else:
+				VacationLog.note(t, "romance", "%s and %s had a loud disagreement over a deck chair." % [a.name, b.name], [int(a.id), int(b.id)], 1, false)
+
+## A passenger with a partner at home has a shipboard fling: nobody saw. It becomes a SECRET of theirs (RelationshipKnowledge) that can come
+## out in conversation, and may reach the partner when the cruise ends (surface_secrets).
+static func _affair(t: Dictionary, a, b, r: RandomNumberGenerator) -> void:
+	var c: Dictionary = t["cruise"]
+	var partners: Array = RelationshipBits.romantic_partners(int(a.id))
+	if partners.is_empty() or CrimePerson.is_kin_or_partner(int(a.id), int(b.id)):
+		return
+	RelationshipService.add_both(int(a.id), int(b.id), "romance", 14.0)
+	var list: Array = RelationshipKnowledge.ensure_secrets(int(a.id))
+	var sid: int = list.size() + 100
+	list.append({"id": sid, "kind": "affair", "text": "had a shipboard fling with %s" % b.name, "severity": 0.8, "known_by": []})
+	if not c.has("affairs"):
+		c["affairs"] = []
+	(c["affairs"] as Array).append({"owner": int(a.id), "other": int(b.id), "sid": sid})
+	VacationLog.note(t, "romance", "%s slipped away with %s for the evening. Nobody saw." % [a.name, b.name], [int(a.id), int(b.id)], 2, false)
+
+## The cruise is over: an undiscovered affair may reach the partner at home (a toast only if the household cares).
+static func surface_secrets(t: Dictionary) -> void:
+	var c: Dictionary = t.get("cruise", {})
+	var r := Vacation.rng_for(t)
+	for af in c.get("affairs", []):
+		if r.randf() > 0.35:
+			continue
+		for p in RelationshipBits.romantic_partners(int(af["owner"])):
+			RelationshipKnowledge.learn_secret(int(p), int(af["owner"]), int(af["sid"]))
+			RelNotify.say([int(p), int(af["owner"])], "%s found out about %s

@@ -137,7 +137,9 @@ static func _found(c: Dictionary, how: String) -> void:
 	if bool(c.get("folk_victim", false)):
 		text = "The police are investigating the death of %s." % nm
 	CaseStore.note(c, text, "murder", 5)
-	CaseStore.toast(c, text, "death")
+	if DeathCauses.last_notified != v:           # the death toast already said it
+		CaseStore.toast(c, text, "death")
+	DeathCauses.last_notified = -1
 	JusticeState.uneasy_until = maxi(JusticeState.uneasy_until, SysUtil.day() + int(JusticeState.sect("police").get("uneasy_days_murder", 10)))
 	Police.open_case(c)
 

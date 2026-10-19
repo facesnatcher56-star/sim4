@@ -16,6 +16,8 @@ extends RefCounted
 
 static func normalise(c: Dictionary) -> void:
 	SysUtil.ints_in(c, ["idx", "port_zone", "storm_until"])
+	for af in c.get("affairs", []):
+		SysUtil.ints_in(af, ["owner", "other", "sid"])
 	for e in c.get("timeline", []):
 		SysUtil.ints_in(e, ["min", "day"])
 	for r in c.get("route", []):
@@ -120,7 +122,8 @@ static func _handle(t: Dictionary, e: Dictionary) -> void:
 	var c: Dictionary = t["cruise"]
 	match str(e["kind"]):
 		"board_open":
-			VacationLog.note(t, "port", "Boarding opened for %s." % str(c["name"]), [], 1, false)
+			if Cruise.members_aboard(t).is_empty():            # no announcement after they have already boarded
+				VacationLog.note(t, "port", "Boarding opened for %s." % str(c["name"]), [], 1, false)
 		"dock":
 			CruiseShore.dock(t, str(e["port"]), int(e["day"]))
 		"ashore":

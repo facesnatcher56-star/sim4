@@ -17,7 +17,7 @@ static func on_day(_day: int) -> void:
 		return
 	for fid in Careers.offers.keys():
 		var f = SysUtil.folk(int(fid))
-		if f == null or not SysUtil.is_resident(f) or SysUtil.is_away(f) or Careers.jobs.has(int(fid)):
+		if f == null or not SysUtil.is_resident(f) or SysUtil.is_away(f) or Careers.jobs.has(int(fid)) or Careers.why_not_work(f, str(Careers.offers[fid]["career"]), int(Careers.offers[fid]["level"])) != "":
 			continue
 		if not (f.queue as Array).is_empty():       # the player is directing them
 			continue

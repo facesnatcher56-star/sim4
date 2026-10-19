@@ -14,6 +14,7 @@ static var causes: Dictionary = {}
 static var default_def: Dictionary = {}
 
 static func reset() -> void:
+	last_notified = -1
 	_loaded = false
 	causes = {}
 	default_def = {}
@@ -106,6 +107,8 @@ static func closeness(resident_id: int, dead_id: int) -> float:
 	return 0.0
 
 # ------------------------------------------------------------------ townies
+static var last_notified: int = -1      # the townie whose death the household was just told about (CaseDiscovery then does not say it again)
+
 ## A Story townie dies (no Folk on the map): record, grief for residents who knew them, a park grave, chronicle. Returns a legacy-like dict.
 static func kill_townie(tid: int, cause: String) -> Dictionary:
 	var t: Dictionary = Story.townies.get(tid, {})
@@ -128,6 +131,7 @@ static func kill_townie(tid: int, cause: String) -> Dictionary:
 	Story._log("%s passed away (%s)." % [nm, str(cdef.get("label", "")).to_lower()])
 	if not mourners.is_empty():
 		SysUtil.notify(text, "death")
+		last_notified = tid
 	var legacy: Dictionary = {"folk_id": tid, "name": nm, "cause": str(cdef.get("label", "")), "cause_id": str(cdef["id"]), "day": SysUtil.day(),
 		"mourners": mourners, "townie": true, "legacy_text": str(cdef.get("legacy_text", "")), "summary": text}
 	Graves.place_for(legacy, null, cdef)
