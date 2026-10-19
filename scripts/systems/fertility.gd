@@ -30,7 +30,16 @@ static func by_age(id: int) -> float:
 		return 0.0 if stage != "elder" else float(cfg().get("elder", 0.0))
 	var c: Dictionary = cfg()
 	var curve: Array = c.get("female_curve", []) if Sexes.is_female(id) else c.get("male_curve", [])
-	return curve_value(curve, Family.age_days_of(id))
+	var age: float = Family.age_days_of(id)
+	var v: float = curve_value(curve, age)
+	if Sexes.is_female(id):                        # the carrier's window closes well before the elder birthday, so no birth lands in elderhood
+		v *= clampf((end_age() - age) / maxf(float(c.get("female_taper_days", 10.0)), 0.1), 0.0, 1.0)
+	return v
+
+## The age (in age days) at which a woman's fertility reaches 0: the elder start minus the whole pregnancy (game days x ageing rate) minus a margin.
+static func end_age() -> float:
+	var elder_from: float = float(Aging.stage_def("elder").get("from_day", 172))
+	return elder_from - float(Pregnancy.length_days()) * Aging.age_rate() - float(cfg().get("female_end_before_elder_days", 8.0))
 
 ## Full fertility 0..1: age x traits x buffs, 0 when infertile.
 static func of(id: int) -> float:

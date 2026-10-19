@@ -93,7 +93,7 @@ func _protection(f: Array) -> void:
 
 func _fertility(f: Array) -> void:
 	var w := K.setup(520)
-	var ages := [92.0, 120.0, 150.0, 168.0]
+	var ages := [92.0, 120.0, 150.0, 158.0]
 	var last := 2.0
 	for a in ages:
 		var p: Array = _pair(w, "female", "male", a, 92.0)
