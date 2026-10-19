@@ -8,6 +8,7 @@ func run() -> Array:
 	var f: Array = []
 	_dating(f)
 	_continuations(f)
+	_stages(f)
 	return f
 
 func _adult_townies() -> Array:
@@ -67,4 +68,21 @@ func _continuations(f: Array) -> void:
 	var kids_before: int = Aging.children_of(a.id).size()
 	StorySingles.on_day(11)
 	K.expect(f, Aging.children_of(a.id).size() == kids_before + 1, "a well-off single household adopts an orphan")
+	K.teardown()
+
+func _stages(f: Array) -> void:
+	var w := K.setup()
+	K.set_time(10, 9)
+	Story.generate_townies(12)
+	var a := K.make_folk(w, "Adultsingle", [], 1)
+	var elder_ids: Array = []
+	for t in Story.free_townies():
+		if Story.stage_of(t) == "elder":
+			elder_ids.append(int(t["id"]))
+	K.expect(f, not elder_ids.is_empty(), "the town has an elder")
+	for id in StorySingles.candidates(a):
+		K.expect(f, not elder_ids.has(int(id)), "an adult is never matched with an elder")
+	var e := K.make_folk(w, "Elderlysingle", [], 2, Vector2i(14, 12), "elder")
+	for id2 in StorySingles.candidates(e):
+		K.expect(f, Story.stage_of(Story.townies[int(id2)]) == "elder" if Story.townies.has(int(id2)) else str(SysUtil.folk(int(id2)).age_stage) == "elder", "an elder is only matched with an elder")
 	K.teardown()

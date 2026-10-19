@@ -32,12 +32,16 @@ static func candidates(f) -> Array:
 	var out: Array = []
 	for t in Story.free_townies():
 		var tid: int = int(t["id"])
-		if is_single(tid) and RomanceRules.allowed(int(f.id), tid) and not JusticeOrders.bars(tid, int(f.id)):
+		if is_single(tid) and RomanceRules.allowed(int(f.id), tid) and not JusticeOrders.bars(tid, int(f.id)) and _fits_stage(str(f.age_stage), Story.stage_of(t)):
 			out.append(tid)
 	for o in SysUtil.residents():
-		if int(o.household_id) != int(f.household_id) and is_single(int(o.id)) and RomanceRules.allowed(int(f.id), int(o.id)):
+		if int(o.household_id) != int(f.household_id) and is_single(int(o.id)) and RomanceRules.allowed(int(f.id), int(o.id)) and _fits_stage(str(f.age_stage), str(o.age_stage)):
 			out.append(int(o.id))
 	return out
+
+## Same life stage: an adult is matched with an adult, an elder with an elder (an elder is never picked for a non-elder).
+static func _fits_stage(mine: String, theirs: String) -> bool:
+	return mine == theirs
 
 static func _nudge_date(c: Dictionary, f) -> bool:
 	var ids: Array = candidates(f)
