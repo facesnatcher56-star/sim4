@@ -51,24 +51,67 @@ static func alibi(p: int, c: Dictionary) -> float:
 	if loc == "away":
 		return 0.8
 	# elsewhere: stronger if someone else was there too
-	var company: int = 0
-	for q in JusticeState.whereabouts:
-		if int(q) != p and CrimePlace.where_was(int(q), int(c["minute"])) == loc:
-			company += 1
+	var company: int = _company_at(p, loc, int(c["minute"]))
 	var home_like: bool = loc.begins_with("home:") or loc.begins_with("town:")
 	if loc == "street":
 		return 0.1
 	return 0.7 if company > 0 else (0.4 if home_like else 0.5)
 
+## How many OTHER tracked people were at `loc` at `minute`. Inside a suspects() scan the whole table is counted once (O(n) per case, not per suspect: a
+## 200-person scan was 40,000 where_was calls, 100+ ms per open case); outside a scan it is counted directly.
+static var _scan: Dictionary = {}          # loc -> people tracked there at _scan_minute
+static var _scan_minute: int = -1
+static var _scanning: bool = false
+static var _scan_case: int = -1
+static var _scan_gossip: Dictionary = {}   # person -> gossip items about them that count for the scanned case (one walk of the table, not one per suspect)
+
+static func _company_at(p: int, loc: String, minute: int) -> int:
+	if _scanning and minute == _scan_minute:
+		return int(_scan.get(loc, 0)) - (1 if JusticeState.whereabouts.has(p) else 0)
+	var company: int = 0
+	for q in JusticeState.whereabouts:
+		if int(q) != p and CrimePlace.where_was(int(q), minute) == loc:
+			company += 1
+	return company
+
+static func _begin_scan(c: Dictionary) -> void:
+	var minute: int = int(c["minute"])
+	_scan_case = int(c["id"])
+	_scan_gossip = {}
+	for holder in RelationshipService.gossip_items:
+		for it in RelationshipService.gossip_items[holder]:
+			if _gossip_hit(it, c):
+				var about: int = int(it.get("about", -1))
+				_scan_gossip[about] = int(_scan_gossip.get(about, 0)) + 1
+	_scan = {}
+	for q in JusticeState.whereabouts:
+		var l: String = CrimePlace.where_was(int(q), minute)
+		_scan[l] = int(_scan.get(l, 0)) + 1
+	_scan_minute = minute
+	_scanning = true
+
+static func _end_scan() -> void:
+	_scanning = false
+	_scan = {}
+	_scan_gossip = {}
+	_scan_case = -1
+
 # ------------------------------------------------------------------ gossip and reputation
 static func gossip(p: int, c: Dictionary) -> float:
+	if _scanning and int(c["id"]) == _scan_case:
+		return clampf(float(_scan_gossip.get(p, 0)) * 0.4, 0.0, 1.0)
+	return clampf(float(_gossip_count(p, c)) * 0.4, 0.0, 1.0)
+
+static func _gossip_hit(it: Dictionary, c: Dictionary) -> bool:
+	return str(it.get("kind", "")) in ["murder_threat", "grudge", "crime_suspect"] and (int(it.get("sid", -1)) == int(c["id"]) or int(it.get("other", -1)) == int(c.get("victim", -2)) or int(it.get("sid", -1)) < 0)
+
+static func _gossip_count(p: int, c: Dictionary) -> int:
 	var n: int = 0
 	for holder in RelationshipService.gossip_items:
 		for it in RelationshipService.gossip_items[holder]:
-			if int(it.get("about", -1)) == p and str(it.get("kind", "")) in ["murder_threat", "grudge", "crime_suspect"]:
-				if int(it.get("sid", -1)) == int(c["id"]) or int(it.get("other", -1)) == int(c.get("victim", -2)) or int(it.get("sid", -1)) < 0:
-					n += 1
-	return clampf(float(n) * 0.4, 0.0, 1.0)
+			if int(it.get("about", -1)) == p and _gossip_hit(it, c):
+				n += 1
+	return n
 
 # ------------------------------------------------------------------ scores
 static func reveal(c: Dictionary) -> float:
@@ -110,11 +153,13 @@ static func strength(p: int, c: Dictionary) -> float:
 ## Everyone worth looking at, best first: [{pid, score}] (top n).
 static func suspects(c: Dictionary, n: int = 4) -> Array:
 	var rows: Array = []
+	_begin_scan(c)
 	for p in CrimePerson.everyone():
 		if p == int(c.get("victim", -2)) or not CrimePerson.is_adult(p) or CrimePerson.in_custody(p):
 			continue
 		var s: float = suspicion(p, c)
 		if s > 0.05:
 			rows.append({"pid": p, "score": s})
+	_end_scan()
 	rows.sort_custom(func(a, b): return float(a["score"]) > float(b["score"]) or (float(a["score"]) == float(b["score"]) and int(a["pid"]) < int(b["pid"])))
 	return rows.slice(0, n)

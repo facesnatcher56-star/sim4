@@ -146,8 +146,10 @@ static func has_record(pid: int) -> bool:
 ## Persons who are family / partner / close friends of `pid`, nearest first by rank.
 static func close_ones(pid: int) -> Array:
 	var out: Array = []
-	for rank in ["spouse", "partner", "family", "sweetheart", "best_friend"]:
-		for o in RelationshipBits.others_with_bit(pid, rank):
+	var ranks: Array = ["spouse", "partner", "family", "sweetheart", "best_friend"]
+	var by: Dictionary = RelationshipBits.others_by_bits(pid, ranks)         # one pass over the pairs, not one per rank
+	for rank in ranks:
+		for o in by[rank]:
 			if not out.has(int(o)):
 				out.append(int(o))
 	return out

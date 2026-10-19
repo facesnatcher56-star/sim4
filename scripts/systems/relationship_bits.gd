@@ -99,6 +99,25 @@ static func others_with_bit(a: int, bit: String) -> Array:
 			out.append(other)
 	return out
 
+## Several bits at once: bit -> [others], in pair order. One walk over a's pairs and one bit_for each (others_with_bit per bit costs one bit_for per pair per bit).
+static func others_by_bits(a: int, bits: Array) -> Dictionary:
+	var out: Dictionary = {}
+	for b in bits:
+		out[b] = []
+	for key in RelationshipService.keys_of(a):
+		var p: Dictionary = RelationshipService.pairs[key]
+		var other: int = -1
+		if int(p["lo"]) == a:
+			other = int(p["hi"])
+		elif int(p["hi"]) == a:
+			other = int(p["lo"])
+		if other < 0:
+			continue
+		var bit: String = bit_for(a, other)
+		if out.has(bit):
+			(out[bit] as Array).append(other)
+	return out
+
 static func all_known(a: int) -> Array:
 	var out: Array = []
 	for key in RelationshipService.keys_of(a):

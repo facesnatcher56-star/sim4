@@ -215,19 +215,20 @@ static func _life_events(dc: Dictionary) -> void:
 	# marriage
 	for key in RelationshipService.pairs.keys():
 		var p: Dictionary = RelationshipService.pairs[key]
+		var fl: Dictionary = p["flags"]
+		if not fl.get("partner", false) or fl.get("spouse", false):
+			continue                                    # most pairs are not unmarried partners: the cheap flag test first (same pairs, same order, same dice)
 		var a: int = int(p["lo"])
 		var b: int = int(p["hi"])
 		if not (townies.has(a) and townies.has(b)) or not (bool(townies[a]["alive"]) and bool(townies[b]["alive"])):
 			continue
 		if not RomanceRules.allowed(a, b):
 			continue
-		var fl: Dictionary = p["flags"]
-		if fl.get("partner", false) and not fl.get("spouse", false):
-			if RelationshipService.value(a, b, "romance") >= 80.0 and SysUtil.chance(float(dc.get("marry_chance", 0.12))):
-				RelationshipBits.set_flag(a, b, "spouse", true, false)
-				_log("%s and %s got married!" % [name_of(a), name_of(b)])
-				ChronicleHook.note("wedding", "%s and %s got married." % [name_of(a), name_of(b)], [a, b], "town:%d" % int(townies[a].get("lot", 0)), 2, true)
-				_tell_residents_about(a, b, "%s and %s got married!" % [name_of(a), name_of(b)])
+		if RelationshipService.value(a, b, "romance") >= 80.0 and SysUtil.chance(float(dc.get("marry_chance", 0.12))):
+			RelationshipBits.set_flag(a, b, "spouse", true, false)
+			_log("%s and %s got married!" % [name_of(a), name_of(b)])
+			ChronicleHook.note("wedding", "%s and %s got married." % [name_of(a), name_of(b)], [a, b], "town:%d" % int(townies[a].get("lot", 0)), 2, true)
+			_tell_residents_about(a, b, "%s and %s got married!" % [name_of(a), name_of(b)])
 	# moving away
 	for t in alive_townies():
 		if SysUtil.chance(float(dc.get("move_away_chance", 0.01))) and stage_of(t) == "adult":

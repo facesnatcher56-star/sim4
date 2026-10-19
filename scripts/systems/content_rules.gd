@@ -33,11 +33,13 @@ static var _last_spoil_toast: int = -99
 
 static func reset() -> void:
 	_last_spoil_toast = -99
+	_daily_memo = {}
 
 static func on_day(_day: int) -> void:
 	var spoiled_total: int = 0
 	for o in _all_objects():
-		spoiled_total += apply_object_day(o)
+		if _has_daily(str(o.def_id)):               # only the few object kinds with a daily rule (the other 90% cost one lookup, not a state walk)
+			spoiled_total += apply_object_day(o)
 	if spoiled_total > 0:
 		var st: Dictionary = cfg().get("spoil_toast", {})
 		if spoiled_total >= int(st.get("min_items", 4)) and _day - _last_spoil_toast >= int(st.get("gap_days", 3)):
@@ -45,6 +47,21 @@ static func on_day(_day: int) -> void:
 			SysUtil.notify("A lot of food in the fridge went bad.", "warn")
 		else:
 			ChronicleHook.note("spoilage", "Some food in the fridge went bad.", [], "", 1, false)
+
+static var _daily_memo: Dictionary = {}        # object def id -> does any state key carry a daily rule?
+
+static func _has_daily(def_id: String) -> bool:
+	if _daily_memo.has(def_id):
+		return bool(_daily_memo[def_id])
+	var spec: Dictionary = SimEnv.data().object_def(def_id).get("state", {})
+	var yes := false
+	for key in spec:
+		var sd: Variant = spec[key]
+		if sd is Dictionary and ((sd as Dictionary).has("daily_reset") or (sd as Dictionary).has("daily_add") or (sd as Dictionary).has("spoil_per_day")):
+			yes = true
+			break
+	_daily_memo[def_id] = yes
+	return yes
 
 ## Apply the daily rules to one object. Returns the number of items that spoiled.
 static func apply_object_day(o) -> int:
