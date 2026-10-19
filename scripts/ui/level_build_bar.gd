@@ -30,7 +30,7 @@ func _ready() -> void:
 	rr.add_child(UIU.make_label("Roof", 13))
 	_roof = OptionButton.new()
 	for s in LevelBuild.ROOF_STYLES:
-		_roof.add_item("%s (%d C)" % [str(s).capitalize(), int(LevelBuild.ROOF_PRICE[s])])
+		_roof.add_item("%s (%d C)" % [UIU.sentence(str(s)), int(LevelBuild.ROOF_PRICE[s])])
 		_roof.set_item_metadata(_roof.item_count - 1, s)
 	_roof.item_selected.connect(_on_roof)
 	rr.add_child(_roof)

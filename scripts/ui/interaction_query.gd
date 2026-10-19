@@ -17,8 +17,8 @@ static func build_entries(folk, ids: Array, table: Dictionary, checker: Callable
 			reason = str(checker.call(id))
 		out.append({
 			"id": id,
-			"label": str(def.get("label", str(id).capitalize())),
-			"category": str(def.get("category", def.get("kind", "general"))).capitalize(),
+			"label": str(def.get("label", UIU.sentence(str(id)))),
+			"category": UIU.sentence(str(def.get("category", def.get("kind", "general")))),
 			"enabled": reason == "",
 			"reason": reason,
 		})
@@ -36,13 +36,13 @@ const TAG_GROUPS := [["Food", ["food", "drink", "cook", "snack", "coffee", "tea"
 
 static func category_for(def: Dictionary) -> String:
 	if def.has("category"):
-		return str(def["category"]).capitalize()
+		return UIU.sentence(str(def["category"]))
 	var tags: Array = def.get("tags", [])
 	for g in TAG_GROUPS:
 		for t in tags:
 			if t in g[1]:
 				return str(g[0])
-	return "Other" if str(def.get("kind", "")) == "super" else str(def.get("kind", "general")).capitalize()
+	return "Other" if str(def.get("kind", "")) == "super" else UIU.sentence(str(def.get("kind", "general")))
 
 static func describe_tests(def: Dictionary, folk = null, target = null) -> String:
 	var parts: Array = []
@@ -67,7 +67,7 @@ static func describe_tests(def: Dictionary, folk = null, target = null) -> Strin
 				"has_trait": parts.append("needs the %s trait" % PieEntries.label_of_trait(str(v)))
 				"lacks_trait": parts.append("not for %s Folk" % PieEntries.label_of_trait(str(v)))
 				"coins_at_least": parts.append("costs %s Coins" % v)
-				"skill_at_least": parts.append("needs %s skill level %s" % [str(v[0]).capitalize(), v[1]])
+				"skill_at_least": parts.append("needs %s skill level %s" % [UIU.sentence(str(v[0])), v[1]])
 				"object_state_above": parts.append("Out of stock" if str(v[0]) == "stock" else "Nothing to do here")
 				"object_state_below", "object_state_eq": parts.append("Nothing to do here")
 				_: parts.append("not possible right now")

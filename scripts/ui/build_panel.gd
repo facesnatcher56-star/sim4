@@ -55,7 +55,7 @@ func _ready() -> void:
 	if fd is Dictionary:
 		fnames = fnames.filter(func(k): return not bool(fd[k].get("terrain", false)))   # roads/water aren't player floors
 	for fl in fnames:
-		floor_option.add_item(str(fl).capitalize())
+		floor_option.add_item(UIU.sentence(str(fl)))
 		floor_option.set_item_metadata(floor_option.item_count - 1, fl)
 	floor_option.add_item("Remove floor")
 	floor_option.set_item_metadata(floor_option.item_count - 1, "none")
@@ -89,7 +89,7 @@ func build_catalog(table: Dictionary = {}) -> void:
 	var groups: Dictionary = {}
 	for id in objs:
 		var tags: Array = objs[id].get("tags", [])
-		var g := str(tags[0]).capitalize() if tags.size() > 0 else "Misc"
+		var g := UIU.sentence(str(tags[0])) if tags.size() > 0 else "Misc"
 		if not groups.has(g):
 			groups[g] = []
 		groups[g].append(id)

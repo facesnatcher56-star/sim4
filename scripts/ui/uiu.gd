@@ -99,11 +99,16 @@ static func buff_id(b) -> String:
 	if v == null: v = b.get("buff_id")
 	return str(v) if v != null else str(b)
 
+## Sentence case for an id or label ("hair_style" -> "Hair style"); String.capitalize() would give "Hair Style".
+static func sentence(t: String) -> String:
+	var s := t.replace("_", " ").strip_edges()
+	return s.substr(0, 1).to_upper() + s.substr(1).to_lower() if s != "" else s
+
 static func interaction_label(def_id: String) -> String:
 	var t := tbl("interactions")
 	if t.has(def_id):
-		return str(t[def_id].get("label", def_id.capitalize()))
-	return def_id.replace("_", " ").capitalize()
+		return str(t[def_id].get("label", sentence(def_id)))
+	return sentence(def_id)
 
 static func clock_text() -> String:
 	if Clock.has_method("hour") and Clock.has_method("minute"):
