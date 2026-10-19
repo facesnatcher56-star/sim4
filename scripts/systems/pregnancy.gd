@@ -113,6 +113,7 @@ static func on_hour() -> void:
 ## Daily: births at the due date, risks, noticing, loss dice.
 static func on_day() -> void:
 	PregnancyLoss.daily_pending()
+	ClinicRoute.on_day()
 	for mid in Aging.pregnancies.keys():
 		if not Aging.pregnancies.has(mid):
 			continue

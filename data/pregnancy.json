@@ -151,6 +151,10 @@
   "doubt_days": 6,
   "reveal_romance_loss": 40.0
  },
+ "clinic_route": {
+  "cost": 900,
+  "success": 0.8
+ },
  "townie": {
   "daily_chance": 0.012,
   "max_kids": 3,

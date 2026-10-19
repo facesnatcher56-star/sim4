@@ -59,6 +59,11 @@ func _labour(f: Array) -> void:
 	_clock_to(int(lb["end"]) + 1)
 	K.expect(f, w.all_folk().size() == before + 1 and not Aging.pregnancies.has(m.id) and not m.has_buff("in_labour"), "the baby arrives when labour ends")
 	K.expect(f, K.count_events("labour_started") == 1 and K.count_events("baby_born") == 1, "events: labour, birth")
+	var raw := ""
+	for n in K.notes:
+		if str(n[0]).find("{") >= 0 or str(n[0]).find("%s") >= 0:
+			raw += str(n[0]) + " | "
+	K.expect(f, raw == "", "no raw pronoun tokens or format leftovers in any text: %s" % raw)
 	K.teardown()
 	# a clock that only ticks days still delivers
 	w = K.setup(902)

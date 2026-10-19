@@ -120,6 +120,27 @@
    "tags": ["health", "social"],
    "thought": "It might help to talk."
   },
+  "clinic_baby": {
+   "label": "Have a Baby with the Clinic's Help",
+   "category": "romantic",
+   "kind": "social",
+   "target": "folk",
+   "duration_min": 120,
+   "posture": "stand",
+   "tests": [
+    {"relationship_above": ["romance", 44]},
+    {"any": [{"has_buff": "stage_adult"}]}
+   ],
+   "target_tests": [
+    {"any": [{"has_buff": "stage_adult"}]}
+   ],
+   "on_finish": [{"fire_event": "clinic_baby"}],
+   "autonomous": false,
+   "priority": "normal",
+   "cooldown_min": 5760,
+   "tags": ["social", "romance", "baby", "commitment"],
+   "thought": "The clinic could make us a family."
+  },
   "paternity_test": {
    "label": "Take a Paternity Test",
    "kind": "super",

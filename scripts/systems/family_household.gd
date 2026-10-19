@@ -144,6 +144,10 @@ static func adopt(townie_id: int, parent_id: int, co_parent_id: int = -1) -> Dic
 		var sp: int = FamilyTree.spouse_of(parent_id)
 		if sp >= 0 and SysUtil.folk(sp) != null and int(SysUtil.folk(sp).household_id) == int(p.household_id):
 			co_parent_id = sp
+	if co_parent_id < 0:                      # a live-in partner of any sex adopts together with them
+		var pt: Dictionary = FamilyTree.partner_of(parent_id)
+		if not pt.is_empty() and SysUtil.folk(int(pt["id"])) != null and int(SysUtil.folk(int(pt["id"])).household_id) == int(p.household_id):
+			co_parent_id = int(pt["id"])
 	var surname: String = FamilyMarriage._surname(str(p.name))
 	if not invite_to_household(townie_id, int(p.household_id)):
 		return {"ok": false, "reason": "failed"}
