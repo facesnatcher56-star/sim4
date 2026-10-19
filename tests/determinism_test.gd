@@ -35,6 +35,11 @@ func play(seed_value: int, minutes: int, start_day: int, start_hour: int, with_c
 	HoodKit.teardown()
 	return out
 
+## A third game of the first seed AFTER a game of another seed: catches caches / statics keyed so that a later game reads an earlier game's data
+## (the WeatherWorld rain index did, see weather_rain_cache_test.gd). Costs one more play, so the 3-day slow variant switches it off.
+func _replay_after_other_seed() -> bool:
+	return true
+
 func run() -> Array:
 	fails = []
 	var p := _plan()
@@ -44,4 +49,8 @@ func run() -> Array:
 		_check(a[k] == b[k], "same seed twice, same commands: %s differs (%s vs %s)" % [k, str(a[k]), str(b[k])])
 	var c := play(556, int(p[0]), int(p[1]), int(p[2]), true)
 	_check(c["world"] != a["world"] or c["systems"] != a["systems"], "a different seed gives a different state (the hash is sensitive)")
+	if _replay_after_other_seed():
+		var d := play(555, int(p[0]), int(p[1]), int(p[2]), true)
+		for k in ["world", "story", "systems", "min"]:
+			_check(a[k] == d[k], "same seed after a game of another seed: %s differs (%s vs %s)" % [k, str(a[k]), str(d[k])])
 	return fails

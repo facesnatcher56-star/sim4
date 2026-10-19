@@ -64,6 +64,8 @@ static func reset_index() -> void:
 	_ix_next = 0
 	_ix = {}
 	_catch = {}
+	_rain_groups = {}          # holds the OLD game's WorldObject instances; its key (count, id sum, world node) matches a new game that reuses the node
+	_rain_groups_key = []
 
 static var _def_match: Dictionary = {}     # kind -> {def id: bool}: the object definitions decide, so the answer is memoised per definition
 

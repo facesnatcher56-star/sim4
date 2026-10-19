@@ -61,6 +61,27 @@ every need quantised to a whole number with an odd offset so JSON float loss nev
 objects. Only what survives snapshot > JSON > restore is in it (crowd NPCs / visitors are excluded); `coop_hash_test` proves
 host == client, also mid-activity. Add fields only together with a round-trip test.
 
+## Finding a nondeterminism
+
+Symptom: `determinism_test` / `determinism_longrun_test` ("same seed twice") fails, a refactor changes `state_hash_probe` output, or two runs
+of the same game choose differently. The usual cause is NOT a random number: the rng stream states are equal, the INPUT of a decision differs
+(a stale static cache, a once-only flag, an unordered iteration). Procedure:
+
+1. Reproduce in one process, then across processes. `tools/godot_guard.ps1 -Seconds 500 -MaxSeconds 800 -Tail 100000 -Args ... run_one.gd -- determinism_diag`
+   (the guard prints only the last 40 log lines unless `-Tail` is raised, and under parallel load the default 120 s silence limit kills a quiet test).
+   A fresh process that passes while the second game in a process fails = state left over from the first game (a cache no `reset` clears).
+   Cross-process check: run `state_hash_probe.gd -- 1 4242` 3-4 times in parallel and compare the `HASH` lines (they must be identical).
+2. `determinism_diag` plays the hood game twice and prints (a) the first minute where any OBJECT's state differs (the cause: here a plant
+   stayed dry, 13 game hours before anybody looked at it), (b) the first minute where an rng stream or a person's choice differs (the symptom),
+   with both candidate lists and scores, and (c) the first differing event. Fix the earliest difference, rerun until "DIFF none".
+3. Typical causes, in the order to check them: static caches keyed by something that survives a new game (a node that is reused, an
+   instance id, a count) and holding objects of the old game (`WeatherWorld._rain_groups`); static counters / flags that `reset_all` misses;
+   `randomize()` / unseeded `RandomNumberGenerator.new()` (SimSeed.apply must seed every stream); `Dictionary` / `Array` order from
+   `keys()` that depends on insertion history (sort first); `sort_custom` without a tie-break (Godot's sort is unstable); wall clock
+   (`Time.*`, `OS.*`, the `SimScheduler` frame budget: 0 in tests and in the probe); anything that reads a frame count or `delta`.
+4. Add a test that fails without the fix (`weather_rain_cache_test` is the model: a cheap direct check of the stale state), keep
+   `determinism_test` green, and if the fix changes behaviour regenerate `tests/baseline/coop_hash_3day.json` (see its test) and say why.
+
 ## Joining without a relay (NAT)
 
 The code is base32 of IPv4 + port + check byte (`ABCD-EFGH-IJKL`) and encodes the **host's LAN address**; typing `ip` or `ip:port`
