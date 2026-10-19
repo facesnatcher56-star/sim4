@@ -3181,6 +3181,331 @@
    "custody_loss": false,
    "consecutive": false,
    "stub": false
+  },
+  "drug_dealing": {
+   "label": "Drug dealing",
+   "class": "felony",
+   "grade": 1,
+   "severity": 3,
+   "bail": 400,
+   "phrase": "dealing",
+   "description": "Selling banned street substances.",
+   "elements": [
+    "sold a banned substance",
+    "for money"
+   ],
+   "guideline": {
+    "fine": [
+     80,
+     250
+    ],
+    "probation": [
+     14,
+     28
+    ],
+    "jail": [
+     3,
+     8
+    ],
+    "prison": [
+     8,
+     18
+    ],
+    "custody_at": 0.35,
+    "prison_at": 0.7
+   },
+   "petty": false,
+   "jury": true,
+   "aggravating": [
+    "prior_record",
+    "same_charge_prior",
+    "on_probation",
+    "repeat_victim"
+   ],
+   "mitigating": [
+    "first_offence",
+    "plea",
+    "provocation",
+    "remorse",
+    "reputation",
+    "lawyer"
+   ],
+   "record": {
+    "job_bans": [
+     "police_officer",
+     "detective",
+     "lawyer",
+     "judge"
+    ],
+    "expunge_days": 0
+   },
+   "restitution": false,
+   "family": "drug_dealing",
+   "order": false,
+   "courses": [],
+   "custody_loss": false,
+   "consecutive": false,
+   "stub": false
+  },
+  "loan_sharking": {
+   "label": "Loan sharking",
+   "class": "felony",
+   "grade": 1,
+   "severity": 3,
+   "bail": 350,
+   "phrase": "lending at crushing rates",
+   "description": "Lending money at crushing rates and frightening people into paying.",
+   "elements": [
+    "lent at crushing rates",
+    "threatened the borrower"
+   ],
+   "guideline": {
+    "fine": [
+     80,
+     240
+    ],
+    "probation": [
+     14,
+     28
+    ],
+    "jail": [
+     3,
+     8
+    ],
+    "prison": [
+     8,
+     16
+    ],
+    "custody_at": 0.35,
+    "prison_at": 0.7
+   },
+   "petty": false,
+   "jury": true,
+   "aggravating": [
+    "prior_record",
+    "same_charge_prior",
+    "on_probation",
+    "repeat_victim"
+   ],
+   "mitigating": [
+    "first_offence",
+    "plea",
+    "provocation",
+    "remorse",
+    "reputation",
+    "lawyer"
+   ],
+   "record": {
+    "job_bans": [
+     "police_officer",
+     "detective",
+     "lawyer",
+     "judge"
+    ],
+    "expunge_days": 0
+   },
+   "restitution": false,
+   "family": "loan_sharking",
+   "order": false,
+   "courses": [],
+   "custody_loss": false,
+   "consecutive": false,
+   "stub": false
+  },
+  "money_laundering": {
+   "label": "Money laundering",
+   "class": "felony",
+   "grade": 1,
+   "severity": 3,
+   "bail": 400,
+   "phrase": "cleaning dirty money",
+   "description": "Passing dirty money through a business.",
+   "elements": [
+    "moved dirty money",
+    "through a front"
+   ],
+   "guideline": {
+    "fine": [
+     120,
+     360
+    ],
+    "probation": [
+     14,
+     28
+    ],
+    "jail": [
+     3,
+     8
+    ],
+    "prison": [
+     8,
+     16
+    ],
+    "custody_at": 0.35,
+    "prison_at": 0.7
+   },
+   "petty": false,
+   "jury": true,
+   "aggravating": [
+    "prior_record",
+    "same_charge_prior",
+    "on_probation",
+    "repeat_victim"
+   ],
+   "mitigating": [
+    "first_offence",
+    "plea",
+    "provocation",
+    "remorse",
+    "reputation",
+    "lawyer"
+   ],
+   "record": {
+    "job_bans": [
+     "police_officer",
+     "detective",
+     "lawyer",
+     "judge"
+    ],
+    "expunge_days": 0
+   },
+   "restitution": false,
+   "family": "money_laundering",
+   "order": false,
+   "courses": [],
+   "custody_loss": false,
+   "consecutive": false,
+   "stub": false
+  },
+  "counterfeiting": {
+   "label": "Counterfeiting",
+   "class": "felony",
+   "grade": 1,
+   "severity": 3,
+   "bail": 350,
+   "phrase": "false notes",
+   "description": "Making and passing false cash.",
+   "elements": [
+    "made false money",
+    "passed it on"
+   ],
+   "guideline": {
+    "fine": [
+     100,
+     300
+    ],
+    "probation": [
+     14,
+     28
+    ],
+    "jail": [
+     3,
+     8
+    ],
+    "prison": [
+     8,
+     16
+    ],
+    "custody_at": 0.35,
+    "prison_at": 0.7
+   },
+   "petty": false,
+   "jury": true,
+   "aggravating": [
+    "prior_record",
+    "same_charge_prior",
+    "on_probation",
+    "repeat_victim"
+   ],
+   "mitigating": [
+    "first_offence",
+    "plea",
+    "provocation",
+    "remorse",
+    "reputation",
+    "lawyer"
+   ],
+   "record": {
+    "job_bans": [
+     "police_officer",
+     "detective",
+     "lawyer",
+     "judge"
+    ],
+    "expunge_days": 0
+   },
+   "restitution": false,
+   "family": "counterfeiting",
+   "order": false,
+   "courses": [],
+   "custody_loss": false,
+   "consecutive": false,
+   "stub": false
+  },
+  "illegal_gambling": {
+   "label": "Running a gambling den",
+   "class": "misdemeanour",
+   "grade": 2,
+   "severity": 2,
+   "bail": 150,
+   "phrase": "the card room",
+   "description": "Running a card room without a licence.",
+   "elements": [
+    "ran a gambling den",
+    "without a licence"
+   ],
+   "guideline": {
+    "fine": [
+     60,
+     200
+    ],
+    "probation": [
+     7,
+     14
+    ],
+    "jail": [
+     1,
+     4
+    ],
+    "prison": [
+     4,
+     8
+    ],
+    "custody_at": 0.4,
+    "prison_at": 0.8
+   },
+   "petty": false,
+   "jury": true,
+   "aggravating": [
+    "prior_record",
+    "same_charge_prior",
+    "on_probation",
+    "repeat_victim"
+   ],
+   "mitigating": [
+    "first_offence",
+    "plea",
+    "provocation",
+    "remorse",
+    "reputation",
+    "lawyer"
+   ],
+   "record": {
+    "job_bans": [
+     "police_officer",
+     "detective",
+     "lawyer",
+     "judge"
+    ],
+    "expunge_days": 56
+   },
+   "restitution": false,
+   "family": "illegal_gambling",
+   "order": false,
+   "courses": [],
+   "custody_loss": false,
+   "consecutive": false,
+   "stub": false
   }
  },
  "sentences": {
@@ -3760,7 +4085,13 @@
    "child_abuse": 8,
    "child_endangerment": 4,
    "child_neglect": 2,
-   "probation_violation": 0.3
+   "probation_violation": 0.3,
+   "drug_dealing": 1.0,
+   "dealing": 1.0,
+   "racket": 1.5,
+   "gang_violence": 2.0,
+   "loan_sharking": 1.0,
+   "contract_killing": 8.0
   }
  },
  "traits_townie_chance": {

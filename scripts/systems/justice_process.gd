@@ -89,6 +89,7 @@ static func file_charges(c: Dictionary) -> void:
 	c["state"] = "charged"
 	CaseStore.note(c, CaseText.charged(c, pid), "charged", 3)
 	arrange_lawyer(c)
+	CrimeUnderFlow.on_charged(c)                 # task 23: a hired killer may name the client
 	CrimeLifeSnitch.on_charged(c)               # crew members may talk; the accused may be offered a deal (task 21)
 	var tday: int = SysUtil.day() + JusticeState.rng.randi_range(int(cfg().get("trial_delay", [3, 5])[0]), int(cfg().get("trial_delay", [3, 5])[1]))
 	c["trial_day"] = tday

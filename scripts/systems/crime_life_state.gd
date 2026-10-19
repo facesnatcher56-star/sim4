@@ -61,6 +61,7 @@ static func reset() -> void:
 	offered.clear()
 	notoriety_kept.clear()
 	counters.clear()
+	CrimeUnderState.reset()                                     # task 23
 	seed_rng(int(sect("general").get("seed", 21021)))
 
 static func seed_rng(s: int) -> void:
@@ -118,7 +119,7 @@ static func _table(k: String) -> Dictionary:
 
 static func to_dict() -> Dictionary:
 	var out: Dictionary = {"rng_seed": rng.seed, "rng_state": str(rng.state), "cased": cased.duplicate(true), "next_heist": next_heist, "pending": pending.duplicate(true),
-		"footage": footage.duplicate(true), "counters": counters.duplicate(true), "mem_n": members.size()}
+		"footage": footage.duplicate(true), "counters": counters.duplicate(true), "mem_n": members.size(), "under": CrimeUnderState.to_dict()}
 	for k in INT_KEYED:
 		out[k] = SysUtil.str_keys(_table(k)).duplicate(true)
 	return out
@@ -133,9 +134,10 @@ static func from_dict(d: Dictionary) -> void:
 	next_heist = int(d.get("next_heist", 1))
 	pending = (d.get("pending", []) as Array).duplicate(true)
 	for p in pending:
-		SysUtil.ints_in(p, ["due_min", "pid", "target_id", "heist"])
+		SysUtil.ints_in(p, ["due_min", "pid", "target_id", "heist", "contract"])
 	footage = (d.get("footage", {}) as Dictionary).duplicate(true)
 	counters = (d.get("counters", {}) as Dictionary).duplicate(true)
+	CrimeUnderState.from_dict(d.get("under", {}))
 	for k in INT_KEYED:
 		var dst: Dictionary = _table(k)
 		dst.clear()

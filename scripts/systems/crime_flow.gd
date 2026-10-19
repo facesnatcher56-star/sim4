@@ -72,6 +72,7 @@ static func person_day(id: int, _elapsed: int = 1440) -> void:
 	CrimePressure.person_day(id)
 	CrimeAssault.person_day(id)
 	CrimeLifeTownie.person_day(id)
+	CrimeUnderFlow.person_day(id)
 
 # ------------------------------------------------------------------ clock
 static func on_minute() -> void:
@@ -213,5 +214,7 @@ static func on_game_event(ev: String, p: Dictionary) -> void:
 			Prison.visit(int(p.get("folk_id", -1)), int(p.get("target_id", -1)))
 		"crime_pickpocket", "crime_ask_around", "crime_case_here", "crime_review_footage", "guard_round", "released":
 			CrimeLifeFlow.on_event(ev, p)
+		"accident_rescued":
+			CrimeUnderFlow.on_event(ev, p)
 		"appeal_case":
 			JusticeAppeal.file(int(p.get("object_id", -1)))

@@ -130,6 +130,8 @@ static func on_minute() -> void:
 			"case":
 				if CrimePerson.alive(int(p2["pid"])) and not CrimePerson.in_custody(int(p2["pid"])):
 					CrimeLifeCasing.session(int(p2["pid"]), str(p2["target"]))
+			_:
+				CrimeUnderFlow.on_pending(p2)                  # task 23: research, a contract, a sale
 
 # ------------------------------------------------------------------ the act
 ## Roll and apply one job. Returns {outcome, loot, case, odds}. `opts`: odds overrides (cased, night ...), force (outcome), statistical.

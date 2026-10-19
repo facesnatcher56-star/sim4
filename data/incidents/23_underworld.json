@@ -1,0 +1,90 @@
+{
+ "_doc": "Task 23: underworld buffs (content only; the logic is in scripts/systems/crime_under_*.gd, rates in data/crimeunder.json).",
+ "handlers": {},
+ "content": {
+  "buffs": {
+   "craving": {
+    "label": "Craving",
+    "mood": {
+     "tense": 2,
+     "anxious": 1
+    },
+    "duration_min": 600,
+    "thought": "I need something to take the edge off."
+   },
+   "high": {
+    "label": "Floating",
+    "mood": {
+     "happy": 2,
+     "energized": 1
+    },
+    "duration_min": 240,
+    "thought": "Nothing matters for a while."
+   },
+   "crash": {
+    "label": "Crashing",
+    "mood": {
+     "uncomfortable": 2,
+     "angry": 1
+    },
+    "duration_min": 480,
+    "thought": "Everything hurts and everyone is too loud."
+   },
+   "withdrawal": {
+    "label": "Withdrawal",
+    "mood": {
+     "tense": 3,
+     "uncomfortable": 2
+    },
+    "duration_min": 1440,
+    "thought": "I can't think straight. I can't keep still."
+   },
+   "in_recovery": {
+    "label": "In Recovery",
+    "mood": {
+     "proud": 1,
+     "tense": 1
+    },
+    "duration_min": 4320,
+    "thought": "One day at a time."
+   },
+   "relieved": {
+    "label": "Relieved",
+    "mood": {
+     "happy": 2,
+     "energized": 1
+    },
+    "duration_min": 1440,
+    "thought": "Somebody warned me in time."
+   },
+   "hunted": {
+    "label": "Hunted",
+    "mood": {
+     "tense": 3,
+     "anxious": 2
+    },
+    "duration_min": 2880,
+    "thought": "Somebody wants me gone. I can feel it."
+   },
+   "hero_of_the_day": {
+    "label": "Hero of the Day",
+    "mood": {
+     "proud": 3,
+     "happy": 1
+    },
+    "duration_min": 720,
+    "thought": "I did the right thing and it counted."
+   },
+   "turned_my_life": {
+    "label": "Turned My Life Around",
+    "mood": {
+     "proud": 3,
+     "happy": 2
+    },
+    "duration_min": 4320,
+    "thought": "I am not who I used to be."
+   }
+  }
+ },
+ "incidents": {}
+}

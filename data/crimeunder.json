@@ -1,0 +1,94 @@
+{
+ "_doc": "Task 23: the underworld lines (hired gun, dealer, racketeer), crime families and gangs, the good side (bribes, internal affairs, undercover, heroes, redemption) and the two reputations. Table 'crimeunder', read by scripts/systems/crime_under_*.gd. Builds on data/crimelife.json (members, cred, heat, contacts). Game mechanics only: abstract rolls, contracts and scenes, fictional substances, no methods. Days are game days (a game year = 28). Tune here, not in code.",
+ "general": {"seed": 23023, "toast_gap_days": 1, "line_min_cred": 10},
+ "lines": {
+  "hit": {"label": "Hired gun", "min_cred": 18, "blurb": "You take contracts. You do not ask who the client is.",
+   "ranks": [{"id": "errand", "label": "Errand runner", "standing": 0}, {"id": "gun", "label": "Gun for hire", "standing": 10}, {"id": "pro", "label": "Professional", "standing": 30}, {"id": "legend", "label": "Legend", "standing": 65}]},
+  "deal": {"label": "Dealer", "min_cred": 6, "blurb": "You move fictional street substances for a supplier.",
+   "ranks": [{"id": "runner", "label": "Runner", "standing": 0, "stock_cap": 8}, {"id": "street", "label": "Street dealer", "standing": 12, "stock_cap": 16}, {"id": "corner", "label": "Corner boss", "standing": 35, "stock_cap": 30}, {"id": "supplier", "label": "Supplier", "standing": 70, "stock_cap": 60}]},
+  "racket": {"label": "Racketeer", "min_cred": 22, "blurb": "Loans, protection, dens and fronts.",
+   "ranks": [{"id": "collector", "label": "Collector", "standing": 0, "ops_cap": 2}, {"id": "enforcer", "label": "Enforcer", "standing": 14, "ops_cap": 4}, {"id": "racketeer", "label": "Racketeer", "standing": 40, "ops_cap": 7}, {"id": "kingpin", "label": "Kingpin", "standing": 80, "ops_cap": 12}]},
+  "via": {"record_convictions": 1, "desperate_risk": 0.5, "contact_trust": 0.0}
+ },
+ "hit": {
+  "grudge_rage": 58.0, "client_daily": 0.006, "player_rage": 85.0, "player_daily": 0.004, "boss_daily": 0.0015, "fee": [260, 900], "fee_wealth": 0.08, "fee_cap": 2600,
+  "deadline_days": [8, 18], "open_cap": 8, "quiet_chance": 0.3, "alone_chance": 0.25, "player_target_fee_mult": 1.6,
+  "research": {"minutes": 120, "gain": [0.2, 0.34], "stealth_gain": 0.03, "spotted": 0.08, "spotted_heat": 2.0, "stale_days": 10, "decay_day": 0.03},
+  "execute": {"minutes": 90, "base": 0.5, "research": 0.34, "skill": 0.18, "alone": 0.08, "gear": 0.08, "heat": 0.01, "min": 0.08, "max": 0.95, "seen_extra": 0.18,
+   "witness_cut": 0.7, "trace_base": 1.0, "trace_research": 0.55, "trace_mistake": 0.3, "botch_hurt": 0.5, "cred": 6.0, "xp": 18, "standing": 4.0, "botch_standing": -2.0},
+  "mistake_trace": 0.18, "conspiracy_link": 0.45, "family_revenge": 0.5, "rumour_client": 0.35, "client_cred_loss": -10.0, "tip_cred": -14.0,
+  "refuse": {"cred": -1.5, "standing": -0.5}, "tip": {"reward": [120, 420], "reward_wealth": 0.1, "client_finds_out": 0.5, "price_on_tipster": 0.25, "friend_buff": "relieved"},
+  "npc": {"join_daily": 0.0012, "min_rank": "burglar", "take_daily": 0.2, "research_days": [2, 5], "max_hitmen": 2, "outsider_pull": 0.45, "max_share": 0.02, "traits": ["vengeful", "dishonest", "hot_headed"]},
+  "attack": {"warn_days": 2, "protect_police": 0.45, "protect_lie_low": 0.3, "protect_guard": 0.25, "bribe_mult": 1.2, "success": 0.55, "hurt_severity": 2},
+  "guilt": {"kill": 1.0}
+ },
+ "deal": {
+  "substances": {
+   "glow": {"label": "Glow", "buy": 14, "sell": 34, "onset": 0.08, "harm": 1.0, "dose_price": 24, "blurb": "A bright, quick lift that wears off fast."},
+   "slumber": {"label": "Slumber", "buy": 20, "sell": 46, "onset": 0.05, "harm": 1.4, "dose_price": 30, "blurb": "A heavy calm. The comedown is long."}},
+  "corners": {"c1": "the market square", "c2": "behind the station", "c3": "the park gate", "c4": "the dock road"},
+  "batch": [2, 5], "sell_minutes": 60, "buy_markup_low_rank": 0.15, "supplier_trust": 0.0, "cred_per_sale": 0.35, "standing_per_sale": 0.35, "xp": 6,
+  "heat_per_sale": 0.45, "customer_pool": 40, "new_customer_min_coins": 15,
+  "sting": {"base": 0.03, "per_officer": 0.012, "heat": 0.02, "stealth": 0.05, "per_tip": 0.02, "cap": 0.5, "corrupt_cop": 0.5},
+  "informant": {"per_sale": 0.012, "addict": 0.02, "loyal_bonus": -0.5, "raid_per_tip": 0.04, "raid_cap": 0.4, "raid_min_tips": 2, "tips_decay_day": 0.1, "hide_stash": 0.5},
+  "rival": {"daily": 0.012, "corner_daily": 0.01, "lose_stock": 0.5, "hurt": 0.3, "muscle_skill": 0.6},
+  "corner": {"hold_per_sale": 0.06, "hold_decay_day": 0.02, "contest_pull": 0.5, "claim_hold": 0.35},
+  "npc": {"join_daily": 0.0016, "sell_daily": 0.25, "sales": [1, 3], "max_share": 0.04, "traits": ["dishonest", "reckless"], "pool_min_rank": "burglar", "arrest_cut": 0.6},
+  "crime_points": 0.2
+ },
+ "addict": {
+  "onset_trait": {"reckless": 1.8, "pessimist": 1.4, "hot_headed": 1.3, "optimist": 0.8, "honest": 0.7}, "onset_poor": 1.4, "onset_stress": 1.3, "onset_cap": 0.3,
+  "start_level": [0.15, 0.3], "level_dose": 0.025, "level_miss": -0.035, "dose_chance": 0.85, "level_cap": 1.0, "hooked_at": 0.45,
+  "overdose": {"base": 0.0009, "level": 0.012, "frail": 0.5, "death": 0.18, "severity": 2, "mix": 1.5},
+  "frail_day": 0.006, "frail_heal": -0.004, "desperate_theft": 0.06, "desperate_at": 0.5,
+  "mood": ["craving", "high", "crash"], "mood_chance": 0.5, "job_loss_level": 0.7, "job_loss_daily": 0.01,
+  "rehab": {"days": 3, "fee": 160, "success": 0.45, "willpower": 0.04, "level_cut": 0.55, "relapse_daily": 0.012, "relapse_dealer": 2.0, "relapse_days": 30,
+   "townie_daily": 0.03, "townie_min_level": 0.35, "support": 0.12, "shame_visible": -2.0, "stay_clean_cut": 0.02},
+  "friend_help": 0.05, "cap": 60, "town_cap_share": 0.1
+ },
+ "gang": {
+  "names": ["the Harbour Crew", "the Ashen Hands", "the Lantern Row boys", "the Salt Street Family", "the Velvet Knives", "the Corner Kings"],
+  "found_daily": 0.01, "found_rank": "crew_boss", "min_members": 2, "max_members": 7, "max_gangs": 3, "recruit_daily": 0.03, "join_cred": 22.0, "offer_gap_days": 14,
+  "ranks": [{"id": "associate", "label": "Associate", "standing": 0}, {"id": "soldier", "label": "Soldier", "standing": 8}, {"id": "lieutenant", "label": "Lieutenant", "standing": 28}, {"id": "boss", "label": "Boss", "standing": 60}],
+  "loyalty": {"start": 0.6, "cut_day": 0.004, "boss_jailed": -0.25, "paid": 0.01, "betray_below": 0.28, "betray_daily": 0.01, "player_base": 0.7},
+  "dues_day": 3.0, "territory_income": 6.0, "standing_day": 0.15, "standing_job": 1.0, "cred_join": 3.0, "leave_traitor": 0.3, "challenge_base": 0.3, "challenge_cred": 0.004,
+  "war": {"daily": 0.004, "min_territory": 1, "days": [8, 16], "incidents_day": [1, 3], "casualty": 0.04, "jail": 0.05, "end_strength": 0.25, "police_end": 0.06,
+   "player_hurt": 0.15, "player_cred": 1.5, "player_prompt_gap": 3, "truce_chance": 0.03, "points": "gang_violence"},
+  "bust": {"base": 0.002, "per_tip": 0.04, "strength": 1.0, "arrest_share": 0.6, "cooldown_days": 20},
+  "informant": {"reward": [150, 450], "bust_tip": 0.25, "exposed_daily": 0.02, "exposed_hurt": 0.4, "immunity_days": 20, "cred": -40.0, "protect_days": 56, "protect_fee": 0}
+ },
+ "racket": {
+  "loan": {"principal": [60, 300], "interest": 0.25, "term_days": 7, "min_coins_borrower": 0, "visit_pressure": 6.0, "escalate_after": 2, "report_chance": 0.12, "pay_chance": 0.55,
+   "default_cut": 0.5, "cred": 1.4, "standing": 1.6, "heat": 1.2, "debtor_cap": 6, "townie_daily": 0.01, "charge": "loan_sharking", "taint": 0.6},
+  "protect": {"fee": [18, 55], "term_days": 7, "refuse_vandal": 0.55, "report_chance": 0.1, "pay_chance": 0.6, "cred": 1.0, "standing": 1.2, "heat": 1.5, "target_cap": 6, "player_biz_daily": 0.01,
+   "vandal_loss": [20, 90], "charge": "extortion", "taint": 0.4},
+  "den": {"setup": 450, "income_day": [14, 30], "raid_daily": 0.012, "heat_day": 0.4, "cred": 1.5, "standing": 0.3, "charge": "illegal_gambling", "taint": 0.5, "cap": 2},
+  "launder": {"fee_share": 0.2, "week_cap": 800, "audit_base": 0.004, "audit_taint": 0.012, "front_setup": 300, "charge": "money_laundering", "taint_cut": 1.0},
+  "counterfeit": {"batch_cost": 80, "batch_value": [180, 360], "passes": 0.7, "detect": 0.12, "charge": "counterfeiting", "taint": 1.2, "cred": 2.0, "standing": 1.5, "xp": 8},
+  "taint_decay_day": 0.05, "taint_audit_at": 4.0, "audit_fine_share": 0.3,
+  "npc": {"join_daily": 0.0012, "op_daily": 0.15, "max_share": 0.03}
+ },
+ "good": {
+  "bribe": {"daily": 0.015, "min_taken_for_ia": 1, "amount": [90, 400], "careers": ["police_officer", "detective"], "pride_refuse": 1.0, "take_corruption": 1.0, "client_cred": 1.0,
+   "protects_dealer": 0.5, "townie_take": 0.45, "townie_daily": 0.002},
+  "ia": {"base": 0.0, "per_bribe": 0.012, "rival_tip": 0.01, "tip_ia": 0.05, "cleared": 0.2, "suspend_days": 10, "convict": 0.5, "fine": [150, 400], "charge": "bribery", "decay_day": 0.0015},
+  "undercover": {"days": 14, "trust_day": 0.07, "evidence_day": 0.08, "exposed_daily": 0.02, "exposed_hurt": 2, "bust_evidence": 0.7, "arrest_share": 0.7, "reward": 350},
+  "sting": {"detective": 1.4, "skill": 0.3, "base": 0.35, "reward": 120, "cap": 0.9},
+  "hero": {"intervene_base": 0.45, "fitness": 0.35, "hurt": 0.3, "rep": 3.0, "rep_fail": 0.5, "reward_pride": "proud", "min_heat": 0, "rescue_rep": 4.0},
+  "cops_share": 0.1
+ },
+ "redeem": {
+  "days": 56, "base_day": 0.8, "job": 0.6, "mentor": 0.7, "streak": 0.002, "resist": 4.0, "fall": -20.0, "tempt_daily": 0.03, "tempt_gap": 7, "mentor_chance": 0.1,
+  "pardon_at": 100.0, "expunge_classes": ["misdemeanour", "felony"], "never": ["murder", "manslaughter", "child_abuse"], "rep_gain": 10.0, "record_cut": 8, "second_chance": ["cook", "gardener", "handyperson", "barista"],
+  "townie_daily": 0.01, "townie_min_straight": 10, "pull_back": 0.5
+ },
+ "rep": {
+  "public_per_hero": 0.5, "public_floor": -50, "hero_decay_day": 0.005, "honour_day": 0.0, "notoriety_weight": 1.0, "known_underworld_cred": 12.0, "heat_attention": 0.02,
+  "shrug": ["dishonest", "vengeful", "hot_headed", "grudgeholder", "competitive"], "suffer": ["empath", "honest", "generous", "forgiving"],
+  "guilt_buff": "troubled_conscience", "pride_buff": "proud", "guilt_days": 5,
+  "family": {"disown": 0.25, "cover": 0.3, "join": 0.08, "friendship": -30.0, "cover_trace": 0.35, "min_friendship": 40.0},
+  "refuse_theft": {"window_days": 56, "charges": ["theft", "shoplifting", "burglary", "robbery", "grand_theft", "car_theft"], "rep_below": 20.0},
+  "wave": {"points": 30.0, "report_every": 7}
+ },
+ "buffs": {}
+}

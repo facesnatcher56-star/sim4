@@ -126,6 +126,8 @@ static func title(c: Dictionary) -> String:
 		"manslaughter": base = "Death of %s" % v
 		"order_violation": base = "Broken protective order (%s)" % v
 		"fraud": base = "Fraud against %s" % v
+		"dealing": base = "Dealing on the streets"
+		"racket": base = "Racketeering"
 		"embezzlement": base = "Missing money at work"
 		"blackmail": base = "Blackmail of %s" % v
 		"vandalism", "trespassing", "disturbance", "shoplifting": base = kind_label(str(c["kind"])).capitalize()

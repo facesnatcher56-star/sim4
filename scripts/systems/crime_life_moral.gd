@@ -66,6 +66,7 @@ static func find_out(culprit: int, kin: int) -> void:
 	if CrimePerson.is_player(culprit) or CrimePerson.is_player(kin):
 		SysUtil.notify("%s found out what %s has been up to, and is deeply troubled." % [CrimePerson.name_of(kin), CrimePerson.name_of(culprit)], "warn")
 	CrimeLifeState.count("found_out")
+	CrimeUnderRep.family_reaction(culprit, kin)               # task 23: disown, cover up or join
 	SysUtil.game_event("crime_life_found_out", {"folk_id": culprit, "kin": kin})
 
 # ------------------------------------------------------------------ notoriety (legacy score)

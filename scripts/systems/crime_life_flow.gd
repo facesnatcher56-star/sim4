@@ -35,6 +35,7 @@ static func on_day(sliced: bool) -> void:
 			CrimeLifePath.on_day_member(int(pid))
 	if not sliced:
 		CrimeLifeTownie.on_day_all()
+	CrimeUnderFlow.on_day(sliced)                              # task 23: the underworld lines, gangs, the good side
 
 ## A desperate PLAYER folk is offered shady work now and then (09c pressure): join, or say no thanks.
 static func _offers() -> void:

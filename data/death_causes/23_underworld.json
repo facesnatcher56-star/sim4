@@ -1,0 +1,38 @@
+{
+ "causes": {
+  "overdose": {
+   "label": "An overdose",
+   "text": "{name} did not wake up. The doctors say it was too much.",
+   "legacy_text": "{Their} life was worn away by a habit {they} could not break.",
+   "grief": {
+    "strength": 1.8,
+    "days": 9
+   },
+   "child_text": "{They} got very sick and didn't get better.",
+   "memory": {
+    "value": -0.8,
+    "text": "the night we lost {name}"
+   },
+   "grave_style": "stone",
+   "unexpected": true,
+   "severity": 4
+  },
+  "gang_violence": {
+   "label": "Gang trouble",
+   "text": "{name} died in trouble between rival crews.",
+   "legacy_text": "{Their} life ended in the troubles of the streets.",
+   "grief": {
+    "strength": 1.9,
+    "days": 9
+   },
+   "child_text": "There was trouble in the street and {they} didn't come back.",
+   "memory": {
+    "value": -0.9,
+    "text": "the night {name} was lost to the streets"
+   },
+   "grave_style": "stone",
+   "unexpected": true,
+   "severity": 5
+  }
+ }
+}
