@@ -20,6 +20,10 @@ var host: CoopHost = null
 var client: CoopClient = null
 var mp: SceneMultiplayer = null
 var peer: ENetMultiplayerPeer = null
+var time: CoopTime = null          # host only
+var alerts: CoopAlerts = null
+var _time_next: float = 0.0
+var _active_next: float = 0.0
 var port: int = 0
 var address_ip: String = ""
 var error_text: String = ""
@@ -38,12 +42,22 @@ static func ensure(tree: SceneTree) -> CoopSession:
 func _process(delta: float) -> void:
 	pump(delta)
 
+## Idle detection (stage 3): any key or mouse use counts. The host notes its own; a client tells the host at most every 5 seconds.
+func _input(event: InputEvent) -> void:
+	if not (event is InputEventKey or event is InputEventMouseButton or event is InputEventMouseMotion):
+		return
+	if role == "host" and time != null:
+		time.note_input(Players.LOCAL, _t)
+	elif role == "client" and client != null and client.state == "synced" and _t >= _active_next:
+		_active_next = _t + 5.0
+		client.send_active(1)
+
 func is_active() -> bool:
 	return role != "none"
 
 # ------------------------------------------------------------------ host
 ## Open a lobby. Returns "" on success or a plain-language reason.
-func start_host(p_port: int, p_name: String, max_players: int = CoopProto.MAX_PEERS) -> String:
+func start_host(p_port: int, p_name: String, max_players: int = CoopProto.MAX_PEERS, p_pace: String = "normal") -> String:
 	stop()
 	peer = ENetMultiplayerPeer.new()
 	var err := peer.create_server(p_port, 8, CHANNELS)
@@ -59,6 +73,7 @@ func start_host(p_port: int, p_name: String, max_players: int = CoopProto.MAX_PE
 	host.send_fn = func(id: int, b: PackedByteArray, ch: int): _send_to(id, b, ch)
 	host.drop_fn = func(id: int): if peer != null: peer.disconnect_peer(id, false)
 	host.lobby_changed.connect(func(): changed.emit())
+	_start_time(p_pace)
 	error_text = ""
 	changed.emit()
 	return ""
@@ -76,6 +91,10 @@ func join(text: String, p_name: String) -> String:
 	client = CoopClient.new()
 	client.player_name = p_name.strip_edges().left(24) if p_name.strip_edges() != "" else "Player"
 	client.send_fn = func(b: PackedByteArray, ch: int): _send_to(1, b, ch)
+	client.install_remote()
+	client.time_updated.connect(func(_s): changed.emit())
+	CoopTime.active = true               # a client never advances or pauses the clock: it only shows what the host sends
+	Clock.coop_rate = 0.0
 	client.state_changed.connect(func(_s, _t2): changed.emit())
 	client.lobby_updated.connect(func(_l): changed.emit())
 	client.progress.connect(func(_f): changed.emit())
@@ -96,7 +115,36 @@ func _connect_client(retry: bool) -> void:
 	if not retry:
 		client.mark_connecting("Connecting to %s:%d..." % [address_ip, port])
 
+## Stage 3: the host owns the clock. One fixed pace, auto-skip, alerts, pause votes (CoopTime); live deltas and alerts are wired here.
+func _start_time(p_pace: String) -> void:
+	time = CoopTime.new()
+	time.set_pace(p_pace)
+	time.players_fn = host.connected_pids
+	time.alert_fn = host.send_alert
+	time.changed.connect(host.broadcast_time)
+	host.time = time
+	time.note_input(Players.LOCAL, _t)
+	time.start()
+	alerts = CoopAlerts.new(time)
+	alerts.connect_events()
+	host.live.connect_events()
+
+func _stop_time() -> void:
+	if alerts != null:
+		alerts.disconnect_events()
+	if host != null:
+		host.live.disconnect_events()
+	if time != null:
+		time.stop()
+	time = null
+	alerts = null
+	if role == "client" or client != null:
+		Commands.remote = Callable()
+	CoopTime.active = false
+	Clock.coop_rate = -1.0
+
 func stop() -> void:
+	_stop_time()
 	if role == "host" and host != null:
 		host.close()
 	if client != null and role == "client":
@@ -145,6 +193,9 @@ func pump(delta: float) -> void:
 		mp.poll()
 	if role == "host" and host != null:
 		host.tick(_t)
+		if time != null and _t >= _time_next:
+			_time_next = _t + 0.25
+			time.update(_t, SimEnv.now_min())
 	elif role == "client" and client != null:
 		client.tick(_t)
 		_client_upkeep()

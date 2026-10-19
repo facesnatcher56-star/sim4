@@ -52,7 +52,7 @@ static func track_open(id: int, vis: bool) -> void:
 		if k != id and (o == null or (o is Control and not o.is_visible_in_tree())):
 			_open.erase(k)
 	if vis and not _open.has(id):
-		if _open.is_empty() and GameSettings.get_bool("pause_on_dialog") and UIU.get_speed() != 0:
+		if _open.is_empty() and not CoopTime.active and GameSettings.get_bool("pause_on_dialog") and UIU.get_speed() != 0:      # co-op: menus never pause
 			_resume_speed = UIU.get_speed()
 			UIU.set_speed(0)
 		_open[id] = true

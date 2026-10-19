@@ -13,8 +13,19 @@ const START_MINUTE := 7 * 60
 var total_minutes: int = START_MINUTE
 var speed: int = 1
 var _accum: float = 0.0
+## Co-op (CoopTime on the host): >= 0 = the fixed pace in game minutes per real second (0 = voted pause) and manual speed changes
+## are ignored. -1 = solo behaviour. A co-op client never advances time itself (speed stays 0, CoopView sets total_minutes).
+var coop_rate: float = -1.0
+const COOP_MAX_PER_FRAME := 6      # a skip at 60x never freezes one slow frame
 
 func _process(delta: float) -> void:
+	if coop_rate >= 0.0:
+		_accum += delta * coop_rate
+		var c := mini(int(_accum), COOP_MAX_PER_FRAME)
+		_accum = minf(_accum - c, 2.0)
+		if c > 0:
+			advance_minutes(c)
+		return
 	if speed <= 0:
 		return
 	_accum += delta * MIN_PER_SEC[clampi(speed, 0, 3)]
@@ -24,6 +35,8 @@ func _process(delta: float) -> void:
 		advance_minutes(n)
 
 func set_speed(s: int) -> void:
+	if coop_rate >= 0.0:
+		return          # no manual fast-forward / pause in co-op (CoopTime decides)
 	s = clampi(s, 0, 3)
 	if s != speed:
 		speed = s

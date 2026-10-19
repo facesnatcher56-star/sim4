@@ -9,10 +9,21 @@ signal lobby_updated(lobby: Dictionary)
 signal event_received(kind: String, text: String, data: Dictionary)
 signal command_result(seq: int, ok: bool, msg: String)
 signal snapshot_loaded(hash: String)
+signal time_updated(state: Dictionary)          # stage 3: pace / skip / pause / vote
+signal household_result(ok: bool, msg: String, lot: String)
+signal alert_received(text: String, data: Dictionary)
+signal delta_applied(minute: int)
 
 var send_fn: Callable                                  # (bytes, channel)
 var load_fn: Callable = CoopSnapshot.load_text         # (json text) -> "" or reason
 var hash_fn: Callable = CoopHash.of_world
+var view_fn: Callable = CoopView.apply                 # (delta dict) -> "" or why a snapshot is needed
+var time_state: Dictionary = {}
+var deltas: int = 0
+var resyncs: int = 0
+var hash_checks: int = 0
+var hash_mismatches: int = 0
+var last_delta_minute: int = -1
 var player_name: String = "Player"
 var token: String = ""
 var player_id: int = 0
@@ -63,11 +74,39 @@ func send_command(folk_id: int, action: String, args: Dictionary, now: float) ->
 		_raw(b, CoopProto.CH_CONTROL)
 	return seq
 
+## Stage 2: from now on Commands.run (the one door the UI uses) sends orders to the host instead of running them here.
+func install_remote() -> void:
+	Commands.remote = Callable(self, "_remote_run")
+
+func uninstall_remote() -> void:
+	Commands.remote = Callable()
+
+func _remote_run(env: Dictionary) -> Dictionary:
+	if state != "synced":
+		return {"ok": false, "msg": "Not connected to the host yet."}
+	var seq := send_command(int(env.get("folk_id", -1)), str(env["action"]), CoopCommands.to_wire(env.get("args", {})), _last_rx)
+	return {"ok": true, "msg": "", "pending": true, "seq": seq}
+
 func request_snapshot() -> void:
 	_send(CoopProto.SNAP_REQ, {"why": "refresh"})
 
 func set_ready(v: bool) -> void:
 	_send(CoopProto.READY, {"ready": v})
+
+## Stage 2: ask the host to make my household (HouseholdSetup dictionary) on `lot_id` ("" = any free home).
+func send_household(h: Dictionary, lot_id: String = "") -> bool:
+	var data := CoopHouseholds.pack(h)
+	if data.size() > CoopProto.MAX_DELTA_BYTES:
+		return false
+	_send(CoopProto.HOUSEHOLD, {"lot": lot_id, "data": data})
+	return true
+
+## Stage 3: "pause" + yes = call (or accept) a pause vote, "pause" + no = decline, "resume" = carry on.
+func send_vote(kind: String, yes: bool = true) -> void:
+	_send(CoopProto.VOTE, {"kind": kind, "yes": yes})
+
+func send_active(n: int = 0) -> void:
+	_send(CoopProto.ACTIVE, {"n": n})
 
 func tick(now: float) -> void:
 	if state in ["idle", "connecting", "refused", "ended", "lost", "failed"]:
@@ -142,7 +181,15 @@ func on_packet(bytes: PackedByteArray, now: float) -> void:
 			if pending.erase(seq2):
 				command_result.emit(seq2, bool(m["ok"]), str(m["msg"]))
 		CoopProto.EVENT:
+			match str(m["kind"]):
+				"household": household_result.emit(bool(m["data"].get("ok", false)), str(m["text"]), str(m["data"].get("lot", "")))
+				"alert": alert_received.emit(str(m["text"]), m["data"])
 			event_received.emit(str(m["kind"]), str(m["text"]), m["data"])
+		CoopProto.DELTA:
+			_delta(m)
+		CoopProto.TIME:
+			time_state = m["d"]
+			time_updated.emit(time_state)
 		_:
 			pass            # PONG and anything else: the heartbeat clock above is all we need
 
@@ -169,12 +216,36 @@ func _chunk(m: Dictionary) -> void:
 		_go("ended", err)
 		return
 	loads += 1
+	if player_id > 0:
+		Players.local_id = player_id       # a snapshot load resets the systems; this machine's player is still us
 	host_hash = ras.state_hash
 	last_hash = str(hash_fn.call())
 	snapshot_loaded.emit(last_hash)
 	_send(CoopProto.HASH, {"xfer": ras.xfer, "hash": last_hash, "minute": SimEnv.now_min()})
 
+## Stage 2: a live delta. Applied to the local view; a periodic hash goes back; a view that cannot follow asks for a snapshot.
+func _delta(m: Dictionary) -> void:
+	if state != "synced":
+		return
+	var d := CoopLive.decode(m["data"])
+	var why: String = str(view_fn.call(d))
+	deltas += 1
+	last_delta_minute = int(m["minute"])
+	delta_applied.emit(last_delta_minute)
+	if why != "":
+		resyncs += 1
+		if _resync_at < 0.0:
+			_resync_at = _last_rx + 0.2
+		return
+	if str(m["hash"]) != "":
+		hash_checks += 1
+		_send(CoopProto.HASH, {"xfer": 0, "hash": str(hash_fn.call()), "minute": int(m["minute"])})
+
 func _sync(m: Dictionary) -> void:
+	if int(m["xfer"]) == 0:                 # answer to a periodic check
+		if not bool(m["ok"]):
+			hash_mismatches += 1
+		return
 	if bool(m["ok"]):
 		_desync_retries = 0
 		_go("synced", "Connected to %s." % host_name)

@@ -20,6 +20,10 @@ var bar: ProgressBar
 var peers_box: VBoxContainer
 var info: Label
 var open_btn: Button
+var pace_opt: OptionButton
+var new_btn: Button
+var picker: CoopHouseholdPick
+var _asked := false
 var join_btn: Button
 var refresh_btn: Button
 var tab_host: Button
@@ -64,6 +68,15 @@ func _ready() -> void:
 	slot_opt = OptionButton.new()
 	host_box.add_child(UIU.make_label("Town to play", 14))
 	host_box.add_child(slot_opt)
+	host_box.add_child(UIU.make_label("Pace of time (fixed for the whole session; time skips by itself when everyone is asleep or away)", 12, UITheme.MUTED))
+	pace_opt = OptionButton.new()
+	for k in CoopTime.PACES:
+		pace_opt.add_item("%s (%s game minute per second)" % [CoopTime.PACE_LABELS[k], str(CoopTime.PACES[k])], pace_opt.item_count)
+		pace_opt.set_item_metadata(pace_opt.item_count - 1, k)
+	pace_opt.select(1)
+	host_box.add_child(pace_opt)
+	new_btn = _button("Start a new co-op town first...", _new_town, host_box)
+	new_btn.tooltip_text = "Pick a scenario and your household, then open Co-op again and choose 'The game I am playing now'"
 	open_btn = _button("Open the lobby", _open_lobby, host_box)
 	peers_box = VBoxContainer.new()
 	host_box.add_child(peers_box)
@@ -150,9 +163,10 @@ func _open_lobby() -> void:
 		return
 	if id > 0 and main_node != null and main_node.has_method("load_game"):
 		main_node.call("load_game", id)           # the same path as the Load button
-	var err := ses.start_host(CoopProto.DEFAULT_PORT, name_edit.text)
+	var pace := str(pace_opt.get_item_metadata(pace_opt.selected))
+	var err := ses.start_host(CoopProto.DEFAULT_PORT, name_edit.text, CoopProto.MAX_PEERS, pace)
 	if err != "":
-		err = ses.start_host(CoopProto.DEFAULT_PORT + 1 + randi() % 50, name_edit.text)      # the usual port is taken: try a nearby one
+		err = ses.start_host(CoopProto.DEFAULT_PORT + 1 + randi() % 50, name_edit.text, CoopProto.MAX_PEERS, pace)      # the usual port is taken: try a nearby one
 	if err != "":
 		status.text = err
 		return
@@ -200,6 +214,33 @@ func _join() -> void:
 	c.snapshot_loaded.connect(func(_h): _refresh())
 	_refresh()
 
+func _new_town() -> void:
+	if main_node != null and main_node.has_method("_on_title_new_game"):
+		_leave()
+		main_node.call("_on_title_new_game")
+
+## A client without a household yet chooses one (once per session); the host makes it and sends the new town.
+func _maybe_pick_household() -> void:
+	var c := ses.client
+	if c == null or c.state != "synced" or picker != null or _asked or Players.household_of(c.player_id) > 0:
+		return
+	_asked = true
+	picker = CoopHouseholdPick.new()
+	picker.theme = UITheme.build()
+	get_parent().add_child(picker)
+	picker.chosen.connect(func(h):
+		if not c.send_household(h):
+			picker.show_error("That household is too big to send."))
+	picker.cancelled.connect(_leave)
+	c.household_result.connect(func(ok, msg, _lot):
+		if ok:
+			if picker != null:
+				picker.queue_free()
+				picker = null
+			visible = false
+		elif picker != null:
+			picker.show_error(msg))
+
 ## The client's snapshot loader: clear the old game, restore in memory (no save slot is touched), enter the game, freeze time.
 func _load_into_game(text: String) -> String:
 	if main_node != null and main_node.has_method("_clear_world"):
@@ -235,7 +276,8 @@ func _refresh() -> void:
 		info.text = ""
 		status.text = c.status
 		if c.state == "synced":
-			status.text = "%s\nYou are in %s's town. It is paused for you until you refresh; orders you give are carried out by the host." % [c.status, c.host_name]
+			status.text = "%s\nYou are in %s's town. Time runs at the host's pace; your orders are carried out by the host." % [c.status, c.host_name]
+			_maybe_pick_household()
 		for p in c.lobby.get("peers", []):
 			status.text += "\n%s - %s" % [p["name"], "ready" if p["ready"] else "joining..."]
 	else:

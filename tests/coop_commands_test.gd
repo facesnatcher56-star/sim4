@@ -21,8 +21,9 @@ func run() -> Array:
 		return fails
 	var f: Folk = cmd["folk"]
 	var env := {"player_id": 2, "folk_id": f.id, "action": "interact", "args": {"interaction_id": cmd["iid"], "target_id": cmd["tid"]}, "game_minute": 0, "seq": 1}
+	Players.set_player(2, 1, "Ann")      # the Players table is the allowlist
 	_check(CoopCommands.allowed(2, f.id), "player 2 may command household 1")
-	_check(not CoopCommands.allowed(1, f.id) and not CoopCommands.allowed(9, f.id), "unlisted players may not")
+	_check(not CoopCommands.allowed(3, f.id) and not CoopCommands.allowed(9, f.id), "players without that household may not")
 	var stranger := -1
 	for g in WorldIface.all_folk():
 		if int(g.household_id) <= 0:
@@ -41,7 +42,7 @@ func run() -> Array:
 	bad["args"] = {"interaction_id": cmd["iid"], "target_id": "x"}
 	_check(CoopCommands.check(bad) != "", "bad target type refused")
 	bad = env.duplicate(true)
-	bad["player_id"] = 1
+	bad["player_id"] = 3
 	var q0 := f.queue.size()
 	_check(not CoopCommands.apply(bad)["ok"] and f.queue.size() == q0, "a refused envelope changes nothing")
 	var r := CoopCommands.apply(env)
@@ -49,6 +50,7 @@ func run() -> Array:
 	_check(f.current != null or f.queue.size() > q0, "the folk has the order (current or queued)")
 	CoopCommands.set_allowlist({2: [77]})
 	_check(not CoopCommands.allowed(2, f.id), "custom allowlist replaces the default")
-	CoopCommands.set_allowlist({2: [1], 3: [1], 4: [1]})
+	CoopCommands.set_allowlist({})
+	Players.remove_player(2)
 	HoodKit.teardown()
 	return fails

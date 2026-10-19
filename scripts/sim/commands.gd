@@ -14,6 +14,8 @@ extends RefCounted
 const LOG_CAP := 500
 static var log: Array = []             # [{seq, player_id, folk_id, action, args, game_minute, ok}] oldest first, at most LOG_CAP
 static var seq: int = 0
+## Set on a co-op client: Callable(envelope) -> {ok, msg, pending}. Commands are then sent to the host instead of run here.
+static var remote: Callable = Callable()
 
 static func reset() -> void:
 	log.clear()
@@ -21,19 +23,23 @@ static func reset() -> void:
 
 static func run(env: Dictionary) -> Dictionary:
 	var e: Dictionary = {
-		"player_id": int(env.get("player_id", Players.LOCAL)),
+		"player_id": int(env.get("player_id", Players.local_id)),
 		"folk_id": int(env.get("folk_id", -1)),
 		"action": str(env.get("action", "")),
 		"args": (env.get("args", {}) as Dictionary).duplicate(true) if env.get("args", {}) is Dictionary else {},
 		"game_minute": int(env.get("game_minute", SimEnv.now_min())),
 	}
+	if remote.is_valid():        # a co-op client: the order goes to the host, which runs it (CoopClient.send_command via CoopRemote)
+		return remote.call(e)
 	seq += 1
 	e["seq"] = seq
 	var res: Dictionary
 	if not CommandActions.has_action(e["action"]):
 		res = {"ok": false, "msg": "That action is not available."}
 	else:
+		PlayerLots.acting = int(e["player_id"])        # build rules follow the player whose order this is
 		res = CommandActions.dispatch(e)
+		PlayerLots.acting = -1
 		if not res.has("ok"):
 			res["ok"] = true
 	var entry: Dictionary = e.duplicate()

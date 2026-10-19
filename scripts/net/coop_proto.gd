@@ -5,10 +5,11 @@ extends RefCounted
 ## SCHEMAS, every field must be present with exactly the declared kind and within its size cap, no extra fields, floats
 ## must be finite, nested values may only be plain data (no Objects). Anything else is rejected with a reason string.
 
-const VERSION := 1                 # bump on ANY change of a message layout or meaning
+const VERSION := 2               # bump on ANY change of a message layout or meaning
 const DEFAULT_PORT := 24680
 const MAX_PEERS := 4               # host + 3 clients
 const CHUNK_BYTES := 32768
+const MAX_DELTA_BYTES := 16384     # one live update / household description, compressed
 const MAX_PACKET := 40000          # absolute cap for any packet (a chunk is the biggest message)
 const MAX_SNAPSHOT_RAW := 96 * 1024 * 1024
 const CH_CONTROL := 0              # reliable, ordered
@@ -22,6 +23,9 @@ const SNAP_REQ := 4
 const HASH := 5
 const BYE := 6
 const READY := 7
+const HOUSEHOLD := 8      # stage 2: "create my household" (JSON in bytes) -> the host answers with an EVENT "household" and a fresh snapshot
+const VOTE := 9           # stage 3: pause vote ("pause" call / answer, "resume")
+const ACTIVE := 19        # stage 3: the player used mouse / keyboard (idle detection), at most every few seconds
 # host -> client
 const WELCOME := 10
 const REFUSE := 11
@@ -32,6 +36,8 @@ const CHUNK := 15
 const ACK := 16
 const EVENT := 17
 const SYNC := 18
+const DELTA := 20         # stage 2: live state since the last delta (JSON in zstd bytes), `hash` = host hash at `minute` when a check is due
+const TIME := 21          # stage 3: pace / skip / pause / vote state (plain dictionary)
 
 ## kind codes: i = int, s = String, b = bool, y = PackedByteArray, d = plain Dictionary, a = plain Array.
 ## Each field is [kind, cap]: cap = max characters / bytes / entries for s, y, d, a.
@@ -52,6 +58,11 @@ const SCHEMAS := {
 	ACK: {"seq": ["i", 0], "ok": ["b", 0], "msg": ["s", 160], "minute": ["i", 0]},
 	EVENT: {"kind": ["s", 32], "text": ["s", 200], "data": ["d", 16]},
 	SYNC: {"xfer": ["i", 0], "ok": ["b", 0], "host_hash": ["s", 64]},
+	HOUSEHOLD: {"lot": ["s", 24], "data": ["y", MAX_DELTA_BYTES]},
+	VOTE: {"kind": ["s", 16], "yes": ["b", 0]},
+	ACTIVE: {"n": ["i", 0]},
+	DELTA: {"minute": ["i", 0], "hash": ["s", 64], "data": ["y", MAX_DELTA_BYTES]},
+	TIME: {"d": ["d", 16]},
 }
 const MAX_DEPTH := 3
 const MAX_NODES := 200

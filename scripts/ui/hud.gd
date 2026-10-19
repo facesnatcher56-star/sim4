@@ -100,8 +100,11 @@ func _ready() -> void:
 	tracker = ScenarioTracker.new()      # 'Getting Started' checklist (top-left), only visible with a scenario
 	tracker.goals_requested.connect(func(): goals_dialog.toggle_for(selected_folk_id))
 	add_child(tracker)
+	var coop_hud := CoopHud.new()      # pace / why time is skipping / pause vote / alerts / name tags; invisible outside a co-op session
+	coop_hud.hud = self
+	add_child(coop_hud)
 	_build_dialogs()      # added after the tips so dialogs always sit on top of them
-	UIU.connect_ev("game_event", func(n, _p): if n == "lot_changed": _update_clock())
+	UIU.connect_ev("game_event", func(n, _p): if n == "lot_changed" or n == "coop_clock": _update_clock())
 	UIU.connect_ev("selection_changed", _on_selection_changed)
 	UIU.connect_ev("coins_changed", _on_coins_changed)
 	UIU.connect_ev("folk_added", func(_i): rebuild_folk_row())
@@ -379,6 +382,8 @@ func rebuild_folk_row() -> void:
 	for f in World.all_folk():
 		if f.has_meta("visitor") or f.has_meta("away"):
 			continue
+		if CoopTime.active and not CoopVisibility.is_mine(f):
+			continue      # co-op: the folk row (and every panel behind it) is YOUR household only
 		var b := Button.new()
 		b.custom_minimum_size = Vector2(46, 46)
 		b.tooltip_text = str(f.name)
@@ -420,6 +425,8 @@ func _on_selection_changed(kind: String, id: int) -> void:
 func _on_coins_changed(_hh: int, amount: int) -> void:
 	if _hh <= 0:
 		return      # ambient NPCs (household -1) pay with their own pocket money
+	if CoopTime.active and _hh != Players.primary_household():
+		return      # co-op: the top bar shows only your own household's money
 	coins = amount
 	coins_label.text = "%d Coins" % amount
 

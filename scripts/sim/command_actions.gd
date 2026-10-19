@@ -105,7 +105,8 @@ static func _travel(e: Dictionary) -> Dictionary:
 
 static func _go_home(e: Dictionary) -> Dictionary:
 	var a: Dictionary = e["args"]
-	return Neighborhood.travel(a.get("folk_ids", []), Neighborhood.HOME, a.get("opts", {}))
+	var lot: String = PlayerLots.lot_of(int(e["player_id"]))      # each co-op player's own lot
+	return Neighborhood.travel(a.get("folk_ids", []), lot if lot != "" else Neighborhood.HOME, a.get("opts", {}))
 
 static func _pay_bill(e: Dictionary) -> Dictionary:
 	var hid: int = int(e["args"].get("household_id", _hid(e)))
