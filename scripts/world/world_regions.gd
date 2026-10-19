@@ -158,7 +158,7 @@ func is_lot(id: int) -> bool:
 func can_build(tile: Vector2i) -> bool:
 	if not enforce or regions.is_empty():
 		return true
-	return home_id != NONE and region_at(tile) == home_id
+	return PlayerLots.build_ok(region_at(tile))      # the acting player's own lot (the home region = player 1; co-op players get converted townie homes)
 
 
 func can_build_all(tiles: Array) -> bool:
@@ -278,6 +278,8 @@ func to_dict() -> Dictionary:
 			"lot": r["lot"], "entry": [e.x, e.y]}
 		if r.has("door"):
 			d["door"] = [(r["door"] as Vector2i).x, (r["door"] as Vector2i).y]
+		if r.has("pid"):
+			d["pid"] = int(r["pid"])      # co-op: the player who lives on this lot
 		for k in ["axis", "lines"]:
 			if r.has(k):
 				d[k] = r[k]
@@ -295,6 +297,8 @@ func from_dict(d: Dictionary) -> void:
 			"label": str(rd.get("label", "")), "lot": str(rd.get("lot", "")), "entry": Vector2i(int(e[0]), int(e[1]))}
 		if rd.has("door"):
 			r["door"] = Vector2i(int(rd["door"][0]), int(rd["door"][1]))
+		if rd.has("pid"):
+			r["pid"] = int(rd["pid"])
 		if rd.has("axis"):
 			r["axis"] = str(rd["axis"])
 		if rd.has("lines"):

@@ -9,11 +9,15 @@ extends RefCounted
 ## household 1; tests/hood_kit and start_kit create household 1; ScenarioGoals pays the primary household. Everything else asks Players.
 
 const LOCAL := 1
+const COLORS := [Color("#3d85c6"), Color("#e07a5f"), Color("#81b29a"), Color("#c77dbb")]     # name tag / ring colour per player id 1..4
 
+## The player id of THIS machine: LOCAL (the host / a solo game) or, on a co-op client, the id the host gave us. UI and `primary_household()` follow it.
+static var local_id: int = LOCAL
 static var table: Dictionary = {}          # player id -> {"household_id": int, "name": String}
 
 static func reset() -> void:
 	table.clear()
+	local_id = LOCAL
 
 static func set_player(player_id: int, household_id: int, name: String = "") -> void:
 	table[player_id] = {"household_id": household_id, "name": name if name != "" else "Player %d" % player_id}
@@ -52,7 +56,19 @@ static func owns(player_id: int, household_id: int) -> bool:
 
 ## The local player's household (what Economy.primary_household() answers).
 static func primary_household() -> int:
-	return household_of(LOCAL)
+	return household_of(local_id)
+
+static func color_of(player_id: int) -> Color:
+	return COLORS[clampi(player_id - 1, 0, COLORS.size() - 1)]
+
+## A household id nobody uses yet (for a player joining a running town).
+static func new_household_id() -> int:
+	var top := 0
+	for pid in ids():
+		top = maxi(top, int((table[pid] as Dictionary)["household_id"]))
+	for f in WorldIface.all_folk():
+		top = maxi(top, int(f.household_id))
+	return top + 1
 
 static func _fallback_household() -> int:
 	var w = WorldIface.world()

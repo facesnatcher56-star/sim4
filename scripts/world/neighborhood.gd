@@ -108,7 +108,7 @@ static func travel_minutes(a: String, b: String) -> int:
 static func residents_of(lot_id: String) -> Array:
 	var homes: Array = []
 	for l in lots():
-		if str(l.get("type", "")) == "townie_home":
+		if str(l.get("type", "")) == "townie_home" and not PlayerLots.is_claimed(str(l["id"])):      # a co-op player lives there now: its townies moved to the other homes
 			homes.append(str(l["id"]))
 	var idx: int = homes.find(lot_id)
 	var out: Array = []

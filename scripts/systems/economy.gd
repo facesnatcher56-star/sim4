@@ -123,6 +123,9 @@ static func price_of_def(def_id: String) -> int:
 static func default_owner(o) -> int:
 	var w = WorldIface.world()
 	if w != null and "regions" in w and w.regions.has_regions():
+		var pid: int = PlayerLots.region_owner(w.regions.region_of(o.tile))       # the player living on that lot (co-op), else community property
+		if pid > 0 and pid != Players.LOCAL:
+			return Players.household_of(pid)
 		return primary_household() if w.regions.region_at(o.tile) == w.regions.home_id else -1
 	return primary_household()
 
