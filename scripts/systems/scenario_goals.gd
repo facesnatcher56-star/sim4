@@ -24,8 +24,9 @@ static func install() -> void:
 			ev.game_event.connect(_on_event)
 	if clk != _clk:
 		_clk = clk
-		if not clk.hour_passed.is_connected(_on_hour):
-			clk.hour_passed.connect(_on_hour)
+		var sch := SimScheduler.of(clk)           # hourly poll = a row in sim_registry.gd (scenario_rows)
+		if not sch.has_group(SimRegistry.GROUP_SCENARIO):
+			SimRegistry.install_scenario(sch)
 
 static func _on_hour(_h: int) -> void:
 	poll()

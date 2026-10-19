@@ -38,6 +38,8 @@ func _process(_d: float) -> bool:
 	if _frames == 30:
 		var days := int(args[0]) if args.size() > 0 else 2
 		var clock = root.get_node("Clock")
+		if clock.has_meta("sim_scheduler"):
+			clock.get_meta("sim_scheduler").budget_usec = 0      # frame-budget deferral depends on wall time: off for a reproducible hash
 		for m in range(days * 1440):
 			clock.advance_minutes(1)
 		print("HASH coop=", CoopHash.of_world(), " minute=", clock.total_minutes)

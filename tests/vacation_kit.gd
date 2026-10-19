@@ -38,7 +38,7 @@ static func warp(minutes: int, step: int = 20) -> void:
 		if clk.total_minutes / 60 != h0:
 			Vacation.on_hour()
 		if clk.total_minutes / 1440 != d0:
-			Kit.mgr._on_day(clk.day())
+			clk.day_passed.emit(clk.day())      # the scheduler's day layer
 		left -= n
 
 static func run_until(cond: Callable, max_minutes: int, step: int = 5) -> bool:

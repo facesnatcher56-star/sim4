@@ -219,6 +219,10 @@ static func command(cmd: Dictionary) -> Dictionary:
 	return {"ok": false, "reason": "unknown action"}
 
 # ------------------------------------------------------------------ clock hooks (SystemsManager; idle cost = an emptiness test)
+## Emptiness gate for the scheduler rows (sim_registry.gd): no trips = nothing to step.
+static func busy() -> bool:
+	return not trips.is_empty()
+
 static func on_minute() -> void:
 	if trips.is_empty():
 		return

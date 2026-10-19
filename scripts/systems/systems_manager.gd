@@ -11,7 +11,13 @@ signal day_summary(day: int, lines: Array)
 static var instance: SystemsManager = null
 
 var autosave_enabled: bool = true
-var enabled: bool = true
+## false = the clock jobs of this manager are skipped (SimScheduler group switch).
+var enabled: bool = true:
+	set(v):
+		enabled = v
+		if _sched != null:
+			_sched.set_group_enabled(SimRegistry.systems_group(self), v)
+var _sched: SimScheduler = null
 var _connected: bool = false
 var _clock = null
 var _events = null
@@ -35,9 +41,9 @@ func setup() -> void:
 	instance = self
 	_clock = SimEnv.clock()
 	_events = SimEnv.events()
-	_clock.minute_passed.connect(_on_minute)
-	_clock.hour_passed.connect(_on_hour)
-	_clock.day_passed.connect(_on_day)
+	_sched = SimScheduler.of(_clock)               # the clock jobs (minute / hour / day steps) are the rows of sim_registry.gd
+	SimRegistry.install_systems(_sched, self)
+	_sched.set_group_enabled(SimRegistry.systems_group(self), enabled)
 	_events.interaction_started.connect(_on_interaction_started)
 	_events.interaction_finished.connect(_on_interaction_finished)
 	_events.relationship_changed.connect(_on_relationship_changed)
@@ -56,8 +62,10 @@ func teardown() -> void:
 	if not _connected:
 		return
 	_connected = false
-	for pair in [[_clock, "minute_passed", _on_minute], [_clock, "hour_passed", _on_hour], [_clock, "day_passed", _on_day],
-			[_events, "interaction_started", _on_interaction_started], [_events, "interaction_finished", _on_interaction_finished],
+	if _sched != null:
+		_sched.remove_group(SimRegistry.systems_group(self))
+		_sched = null
+	for pair in [[_events, "interaction_started", _on_interaction_started], [_events, "interaction_finished", _on_interaction_finished],
 			[_events, "relationship_changed", _on_relationship_changed], [_events, "game_event", _on_game_event],
 			[_events, "buff_added", _on_buff_added], [_events, "skill_changed", _on_skill_changed],
 			[_events, "folk_added", _on_folk_added], [_events, "object_placed", _on_object_placed],
@@ -126,97 +134,14 @@ func ensure_registered() -> void:
 	Careers.enroll_school()
 
 # ------------------------------------------------------------------ clock
-## Per-minute steps, in order (a list so tests/perf_probe.gd can time each one: `prof_on` + `prof`).
-var _minute_steps: Array = []
-var prof_on: bool = false
-var prof: Dictionary = {}          # label -> [usec, calls]
+## The per-minute / hourly / daily steps are rows in sim_registry.gd (systems_rows), run by the SimScheduler in that order.
+## Their stopwatch is SimScheduler.stats() (tests/perf_probe.gd, tests/perf_scale.gd).
 
-func _on_minute(_total: int) -> void:
-	if not enabled:
-		return
-	if _minute_steps.is_empty():
-		_minute_steps = [["NeighborhoodService.before", NeighborhoodService.before_minute], ["CareerShifts", CareerShifts.on_minute],
-			["Away", Away.on_minute], ["StoryVisits", StoryVisits.on_minute], ["BabyCare", BabyCare.on_minute],
-			["AccidentMarks", AccidentMarks.on_minute], ["Incidents", Incidents.on_minute], ["CrimeFlow", CrimeFlow.on_minute],
-			["Fire", Fire.on_minute], ["DisasterClock", DisasterClock.on_minute], ["Vacation", Vacation.on_minute],
-			["NeighborhoodService.after", NeighborhoodService.after_minute], ["WeatherFolk", WeatherFolk.on_minute], ["LevelSystems", LevelSystems.on_minute]]
-	for s in _minute_steps:
-		var t0 := Time.get_ticks_usec() if prof_on else 0
-		(s[1] as Callable).call()
-		if prof_on:
-			var rec: Array = prof.get(s[0], [0, 0])
-			rec[0] += Time.get_ticks_usec() - t0
-			rec[1] += 1
-			prof[s[0]] = rec
+func autosave_active() -> bool:
+	return autosave_enabled
 
-## One step of the hourly / daily lists done: record it under `label` (PerfProf, only while profiling) and restart the stopwatch.
-static func _lap(label: String, t0: int) -> int:
-	PerfProf.stop(label, t0)
-	return PerfProf.start()
-
-func _on_hour(hour: int) -> void:
-	if not enabled:
-		return
-	ensure_registered()
-	var t := PerfProf.start()          # opt-in per-step timing for tests/perf_scale.gd (a boolean test when off)
-	WeatherWorld.on_hour(hour)
-	t = _lap("hour/WeatherWorld.on_hour", t)
-	Holidays.on_hour()
-	t = _lap("hour/Holidays.on_hour", t)
-	Goals.on_hour()
-	t = _lap("hour/Goals.on_hour", t)
-	Story.on_hour(hour)
-	t = _lap("hour/Story.on_hour", t)
-	Family.on_hour()
-	t = _lap("hour/Family.on_hour", t)
-	AccidentMarks.on_hour(hour)
-	t = _lap("hour/AccidentMarks.on_hour", t)
-	Incidents.on_hour()
-	t = _lap("hour/Incidents.on_hour", t)
-	AccidentMarks.after_hour()
-	t = _lap("hour/AccidentMarks.after_hour", t)
-	CrimeFlow.on_hour()
-	t = _lap("hour/CrimeFlow.on_hour", t)
-	DisasterClock.on_hour(hour)
-	t = _lap("hour/DisasterClock.on_hour", t)
-	Vacation.on_hour()
-
-func _on_day(day: int) -> void:
-	if not enabled:
-		return
-	ensure_registered()
-	var t := PerfProf.start()
-	Holidays.on_day(day)
-	t = _lap("day/Holidays.on_day", t)
-	Aging.on_day(day)
-	t = _lap("day/Aging.on_day", t)
-	Family.on_day(day)
-	t = _lap("day/Family.on_day", t)
-	Careers.on_day(day)
-	t = _lap("day/Careers.on_day", t)
-	WeatherWorld.on_day(day)
-	t = _lap("day/WeatherWorld.on_day", t)
-	Economy.on_day(day)
-	t = _lap("day/Economy.on_day", t)
-	RelationshipService.on_day(day)
-	t = _lap("day/RelationshipService.on_day", t)
-	Story.on_day(day)
-	t = _lap("day/Story.on_day", t)
-	Fire.on_day(day)
-	t = _lap("day/Fire.on_day", t)
-	Incidents.on_day()
-	t = _lap("day/Incidents.on_day", t)
-	CrimeFlow.on_day(day)
-	t = _lap("day/CrimeFlow.on_day", t)
-	DisasterClock.on_day(day)
-	MarketTick.on_day(day)
-	t = _lap("day/DisasterClock.on_day", t)
-	StoryPacing.on_day(day)
-	t = _lap("day/StoryPacing.on_day", t)
-	Vacation.on_day()
+func emit_systems_day(day: int) -> void:
 	SysUtil.game_event("systems_day", {"day": day})
-	if autosave_enabled:
-		SaveLoad.autosave()
 
 # ------------------------------------------------------------------ events
 func _on_interaction_started(folk_id: int, iid: String, target_id: int) -> void:

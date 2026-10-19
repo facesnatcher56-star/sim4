@@ -1,6 +1,6 @@
 extends Node
 ## SimDirector: ticks every folk once per game minute (needs, buffs, interactions, autonomy).
-## In the game it listens to Clock.minute_passed; tests can drive it directly with tick_minute().
+## In the game the SimScheduler runs it every minute (registered by connect_clock, row in sim_registry.gd); tests can drive it directly with tick_minute().
 ## (No class_name: it is an autoload singleton named SimDirector.)
 
 const IDLE_RETRY_MIN := 3
@@ -20,13 +20,26 @@ func _prof(label: String, t0: int) -> void:
 	rec[1] += 1
 	prof[label] = rec
 
+var _sched: SimScheduler = null
+
 func _ready() -> void:
 	connect_clock()
 
+## Register this director's per-minute tick in the scheduler of the current Clock (idempotent; rebinds when SimEnv swapped the Clock).
 func connect_clock() -> void:
-	var c = SimEnv.clock()
-	if not c.minute_passed.is_connected(_on_minute):
-		c.minute_passed.connect(_on_minute)
+	var s := SimScheduler.of(SimEnv.clock())
+	if s != _sched or not s.has_group(SimRegistry.director_group(self)):
+		disconnect_clock()
+		_sched = s
+		SimRegistry.install_director(s, self)
+
+func disconnect_clock() -> void:
+	if _sched != null:
+		_sched.remove_group(SimRegistry.director_group(self))
+		_sched = null
+
+func _exit_tree() -> void:
+	disconnect_clock()
 
 func _on_minute(_total: int) -> void:
 	if enabled:

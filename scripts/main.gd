@@ -17,7 +17,9 @@ func _ready() -> void:
 	GameSettings.load_settings()      # before anything shows: window, quality, audio, keys
 	SettingsApply.apply_all()
 	GameSettings.bus.changed.connect(_on_setting_changed)
-	Clock.day_passed.connect(_autosave_check)
+	var sched := SimScheduler.of(Clock)
+	SimRegistry.install_app(sched, self)      # autosave on the player's interval = a daily row in sim_registry.gd
+	sched.budget_usec = 4000                 # a frame whose sim work passed ~4 ms postpones LOW-priority jobs to a later tick (stats: deferred)
 	systems = SystemsManager.install(self)
 	systems.autosave_enabled = false      # Main autosaves itself so the interval setting applies
 	if ResourceLoader.exists(LOT_VIEW_PATH):

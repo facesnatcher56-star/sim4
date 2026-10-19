@@ -1,6 +1,6 @@
-﻿extends SceneTree
+extends SceneTree
 ## Reusable profiler (not a unit test): boots the real game (main.start_new_game), advances N game days minute by minute and
-## times every Clock listener (minute / hour / day) separately, plus SimDirector's inner phases.
+## times every SimScheduler job (minute / hour / day) separately, plus SimDirector's inner phases.
 ##   godot --headless --path . --script res://tests/perf_probe.gd -- [days=2]
 ## Prints a table sorted by total time. Run through tools/godot_guard.ps1 (see docs/PERFORMANCE.md).
 const Watchdog := preload("res://tests/watchdog.gd")
@@ -9,24 +9,6 @@ var _main: Node = null
 var _frames := 0
 var _days := 2
 var _acc: Dictionary = {}       # label -> [usec, calls]
-
-func _label(c: Callable) -> String:
-	var o = c.get_object()
-	var n: String = o.get_script().get_global_name() if o != null and o.get_script() != null and o.get_script().get_global_name() != "" else (o.name if o is Node else str(o))
-	return "%s.%s" % [n, c.get_method()]
-
-func _wrap(sig: Signal, tag: String) -> void:
-	for conn in sig.get_connections():
-		var orig: Callable = conn["callable"]
-		var label := "%s %s" % [tag, _label(orig)]
-		sig.disconnect(orig)
-		sig.connect(func(a):
-			var t := Time.get_ticks_usec()
-			orig.call(a)
-			var rec: Array = _acc.get(label, [0, 0])
-			rec[0] += Time.get_ticks_usec() - t
-			rec[1] += 1
-			_acc[label] = rec)
 
 func _process(_d: float) -> bool:
 	var args := Watchdog.user_args()
@@ -44,11 +26,10 @@ func _process(_d: float) -> bool:
 	if _frames == 30:
 		var clock = root.get_node("Clock")
 		var dir = root.get_node("SimDirector")
-		for pair in [[clock.minute_passed, "min "], [clock.hour_passed, "hour"], [clock.day_passed, "day "]]:
-			_wrap(pair[0], pair[1])
+		var sched := SimScheduler.of(clock)
+		sched.reset_stats()
+		sched.profile = true
 		dir.prof.clear()
-		SystemsManager.instance.prof.clear()
-		SystemsManager.instance.prof_on = true
 		dir.prof_on = true
 		PerfProf.totals.clear()
 		PerfProf.on = true
@@ -60,14 +41,15 @@ func _process(_d: float) -> bool:
 		var total := Time.get_ticks_msec() - t0
 		dir.prof_on = false
 		PerfProf.on = false
-		SystemsManager.instance.prof_on = false
+		sched.profile = false
 		print("== perf_probe: %d game days in %d ms (avg folk per minute %.1f)" % [_days, total, float(folk_ticks) / float(_days * 1440)])
 		var rows: Array = []
 		for k in _acc:
 			rows.append([k, _acc[k][0] / 1000.0, _acc[k][1]])
-		var sp: Dictionary = SystemsManager.instance.prof
-		for k in sp:
-			rows.append(["  systems/" + k, sp[k][0] / 1000.0, sp[k][1]])
+		var st: Dictionary = sched.stats()
+		for r in st["rows"]:
+			rows.append(["  job %s %s" % [str(r["cadence"]), r["name"]], float(r["usec"]) / 1000.0, r["calls"]])
+		print("scheduler: %d jobs, %d ticks, deferred %d, timed fired %d" % [st["jobs"], st["ticks"], st["deferred_total"], st["timed_fired"]])
 		for k in dir.prof:
 			rows.append(["  director/" + k, dir.prof[k][0] / 1000.0, dir.prof[k][1]])
 		for k in PerfProf.totals:

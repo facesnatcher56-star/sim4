@@ -4,7 +4,7 @@ extends RefCounted
 ##  * hidden mood-effect buffs (Emotions.install_buffs)
 ##  * data/social.json "story_scores" merged into data/story.json visits.score so group socials count for Story parties
 ##  * the `karaoke` interaction is offered by the stereo (objects.json is not edited)
-##  * signal binding: Clock.minute_passed / hour_passed -> SocialDynamics, Events.game_event -> SocialDynamics.on_game_event.
+##  * signal binding: SimScheduler rows (sim_registry.gd) -> SocialDynamics.on_minute / on_hour, Events.game_event -> SocialDynamics.on_game_event.
 ##    Rebinds automatically when SimEnv swaps in new standalone Events / Clock instances (tests).
 ## ensure() is called from RelationshipService hooks, so it works whether or not SystemsManager is installed.
 
@@ -46,19 +46,15 @@ static func _bind() -> void:
 	var ck = SimEnv.clock()
 	if ck != _clock:
 		_clock = ck
-		if not ck.minute_passed.is_connected(SocialDynamics.on_minute):
-			ck.minute_passed.connect(SocialDynamics.on_minute)
-		if not ck.hour_passed.is_connected(SocialDynamics.on_hour):
-			ck.hour_passed.connect(SocialDynamics.on_hour)
+		var sch := SimScheduler.of(ck)            # the minute / hour jobs are rows in sim_registry.gd (social_rows)
+		if not sch.has_group(SimRegistry.GROUP_SOCIAL):
+			SimRegistry.install_social(sch)
 
 ## Detach (tests that replace Events/Clock call this implicitly through the rebinding in ensure()).
 static func unbind() -> void:
 	if _events != null and is_instance_valid(_events) and _events.game_event.is_connected(SocialDynamics.on_game_event):
 		_events.game_event.disconnect(SocialDynamics.on_game_event)
 	if _clock != null and is_instance_valid(_clock):
-		if _clock.minute_passed.is_connected(SocialDynamics.on_minute):
-			_clock.minute_passed.disconnect(SocialDynamics.on_minute)
-		if _clock.hour_passed.is_connected(SocialDynamics.on_hour):
-			_clock.hour_passed.disconnect(SocialDynamics.on_hour)
+		SimScheduler.of(_clock).remove_group(SimRegistry.GROUP_SOCIAL)
 	_events = null
 	_clock = null

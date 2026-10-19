@@ -35,8 +35,7 @@ const MAX_NODE_GROWTH := 1.25            # node count at the end vs after the fi
 const MAX_MEM_GROWTH := 1.5              # static memory at the end vs after the first measured day
 
 var fails: Array = []
-var _wraps: Array = []                   # [signal, original, wrapper]
-var _acc: Dictionary = {}                # label -> [usec, calls]
+var _sched: SimScheduler = null          # the Clock's scheduler: every clock job is timed there (profile = true)
 var _profile: String = ""
 
 
@@ -73,11 +72,10 @@ func measure(profile: String, minutes: int) -> Dictionary:
 	var res: Dictionary = {"profile": profile, "info": info, "minutes": minutes, "date": Time.get_datetime_string_from_system(false, true)}
 	print("== built '%s': %s tiles, %d lots, %d townies, %d objects, %d buildings, %d towers, %d incident defs in %.1f s" % [profile, str(info["map"]), info["lots"], info["townies"], info["objects"], info["buildings"], info["towers"], info["incident_defs"], info["build_s"]])
 	clock.advance_minutes(60)                        # warm-up: caches, the first crowd fill (not measured)
-	_acc.clear()
-	_wrap_listeners(clock)
+	_sched = SimScheduler.of(clock)
+	_sched.reset_stats()
+	_sched.profile = true
 	dir.prof.clear()
-	Kit.mgr.prof.clear()
-	Kit.mgr.prof_on = true
 	dir.prof_on = true
 	PerfProf.totals.clear()
 	PerfProf.on = true
@@ -96,12 +94,12 @@ func measure(profile: String, minutes: int) -> Dictionary:
 	var day_t := 0
 	var t_all := 0
 	var slow: Array = []                             # minutes over SLOW_MIN_MS: what they spent it on (the worst-frame spikes)
-	var before: Dictionary = _snap(dir, Kit.mgr)
+	var before: Dictionary = _snap(dir)
 	for m in minutes:
 		var t0 := Time.get_ticks_usec()
 		clock.advance_minutes(1)
 		var dt := Time.get_ticks_usec() - t0
-		var after: Dictionary = _snap(dir, Kit.mgr)
+		var after: Dictionary = _snap(dir)
 		if dt > SLOW_MIN_MS * 1000 and slow.size() < 6000:
 			slow.append([dt, _slow_row(clock.time_string(), dt, before, after)])
 		before = after
@@ -126,9 +124,8 @@ func measure(profile: String, minutes: int) -> Dictionary:
 				mem_day1 = int(Performance.get_monitor(Performance.MEMORY_STATIC))
 				nodes_day1 = int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT))
 	dir.prof_on = false
-	Kit.mgr.prof_on = false
+	_sched.profile = false
 	PerfProf.on = false
-	_unwrap_listeners()
 	slow.sort_custom(func(a, b): return a[0] > b[0])
 	res["slow"] = slow.slice(0, 12).map(func(r): return r[1])
 	res["slow_count"] = slow.size()
@@ -153,7 +150,8 @@ func measure(profile: String, minutes: int) -> Dictionary:
 	res["mem_end"] = int(Performance.get_monitor(Performance.MEMORY_STATIC))
 	res["mem_day1"] = mem_day1
 	res["townies_end"] = Story.alive_townies().size()
-	res["rows"] = _rows(dir, Kit.mgr)
+	res["rows"] = _rows(dir)
+	res["sched"] = _sched.stats()
 	var fills := 0
 	for k in dir.prof:
 		if str(k).ends_with("fill (autonomy)"):
@@ -165,18 +163,22 @@ func measure(profile: String, minutes: int) -> Dictionary:
 	return res
 
 
-## usec per label of every profiler (listeners, SystemsManager steps, director phases, PerfProf leaves), cumulative.
-func _snap(dir, mgr) -> Dictionary:
+## usec per label of every profiler (scheduler jobs, director phases, PerfProf leaves), cumulative.
+func _snap(dir) -> Dictionary:
 	var out: Dictionary = {}
-	for k in _acc:
-		out[k] = _acc[k][0]
-	for k in mgr.prof:
-		out["systems/" + k] = mgr.prof[k][0]
+	for r in _sched.stats()["rows"]:
+		out[_job_key(r)] = int(r["usec"])
 	for k in dir.prof:
 		out["director/" + k] = dir.prof[k][0]
 	for k in PerfProf.totals:
 		out[k] = PerfProf.totals[k][0]
 	return out
+
+
+## Row label of a scheduler job: hour / day jobs keep their own "hour/..." "day/..." names, minute jobs are "systems/<name>".
+func _job_key(r: Dictionary) -> String:
+	var n: String = r["name"]
+	return n if (n.begins_with("hour/") or n.begins_with("day/") or int(r["cadence"]) >= 60) else "systems/" + n
 
 
 func _slow_row(when: String, dt: int, before: Dictionary, after: Dictionary) -> String:
@@ -192,45 +194,29 @@ func _slow_row(when: String, dt: int, before: Dictionary, after: Dictionary) -> 
 	return "%s  %.0f ms: %s" % [when, dt / 1000.0, "; ".join(parts)]
 
 
-func _label(c: Callable) -> String:
-	var o = c.get_object()
-	var n: String = o.get_script().get_global_name() if o != null and o.get_script() != null and o.get_script().get_global_name() != "" else (o.name if o is Node else str(o))
-	return "%s.%s" % [n, c.get_method()]
-
-
-func _wrap_listeners(clock) -> void:
-	for pair in [[clock.minute_passed, "min "], [clock.hour_passed, "hour"], [clock.day_passed, "day "]]:
-		var sig: Signal = pair[0]
-		for conn in sig.get_connections():
-			var orig: Callable = conn["callable"]
-			var label := "%s %s" % [pair[1], _label(orig)]
-			var wrapper := func(a):
-				var t := Time.get_ticks_usec()
-				orig.call(a)
-				var rec: Array = _acc.get(label, [0, 0])
-				rec[0] += Time.get_ticks_usec() - t
-				rec[1] += 1
-				_acc[label] = rec
-			sig.disconnect(orig)
-			sig.connect(wrapper)
-			_wraps.append([sig, orig, wrapper])
-
-
-func _unwrap_listeners() -> void:
-	for w in _wraps:
-		(w[0] as Signal).disconnect(w[2])
-		(w[0] as Signal).connect(w[1])
-	_wraps.clear()
-
-
-## Rows [label, total ms, calls, ms per game minute, group] sorted by cost. Groups: "listener" (whole Clock listeners; they nest the rest), "systems"
-## (SystemsManager._on_minute steps), "director" (SimDirector phases), "leaf" (PerfProf labels inside the systems).
-func _rows(dir, mgr) -> Array:
+## Rows [label, total ms, calls, ms per game minute, group] sorted by cost. Groups: "listener" (the three scheduler layers: minute without the
+## director, the director itself, hour jobs, day jobs; they contain the rows below them), "systems" (minute-layer jobs), "director" (SimDirector phases),
+## "leaf" (PerfProf labels inside the systems and the hour / day jobs).
+func _rows(dir) -> Array:
 	var rows: Array = []
-	for k in _acc:
-		rows.append([k, _acc[k][0] / 1000.0, _acc[k][1], "listener"])
-	for k in mgr.prof:
-		rows.append(["systems/" + k, mgr.prof[k][0] / 1000.0, mgr.prof[k][1], "systems"])
+	var st: Dictionary = _sched.stats()
+	var dir_us := 0
+	var hour_us := 0
+	var day_us := 0
+	for r in st["rows"]:
+		var key := _job_key(r)
+		if r["name"] == "SimDirector":
+			dir_us += int(r["usec"])
+			continue
+		if key.begins_with("systems/"):
+			rows.append([key, float(r["usec"]) / 1000.0, r["calls"], "systems"])
+		else:
+			rows.append([key, float(r["usec"]) / 1000.0, r["calls"], "leaf"])
+	var lu: Array = st["layer_usec"]
+	rows.append(["min  SimDirector", dir_us / 1000.0, _sched.layer_calls[0], "listener"])
+	rows.append(["min  scheduler minute jobs (all but the director)", (int(lu[0]) - dir_us) / 1000.0, _sched.layer_calls[0], "listener"])
+	rows.append(["hour scheduler hour jobs", int(lu[1]) / 1000.0, _sched.layer_calls[1], "listener"])
+	rows.append(["day  scheduler day jobs", int(lu[2]) / 1000.0, _sched.layer_calls[2], "listener"])
 	for k in dir.prof:
 		rows.append(["director/" + k, dir.prof[k][0] / 1000.0, dir.prof[k][1], "director"])
 	for k in PerfProf.totals:
@@ -355,6 +341,8 @@ func print_report(res: Dictionary) -> void:
 		print("   %-8s %-52s %8.3f ms/min %9.0f ms %9d calls" % [r[3], r[0], float(r[1]) / m, r[1], r[2]])
 		shown += 1
 	print("   (%d rows >= 0.02 ms/min of %d)" % [shown, res["rows"].size()])
+	var st: Dictionary = res["sched"]
+	print("   scheduler: %d jobs, %d ticks, deferred %d (pending %d), timed fired %d" % [st["jobs"], st["ticks"], st["deferred_total"], st["deferred_pending"], st["timed_fired"]])
 
 
 ## Append a dated section to docs/PERF_SCALE_RESULTS.md (header added when the file is new).
@@ -376,9 +364,9 @@ func append_results(res: Dictionary) -> void:
 		s += "choose(%s) %.2f ms, %.1f paths, %d cands; " % [k, c["ms"], c["paths"], c["cands"]]
 	s += "\n- nodes max %d / end %d (day 1: %d), orphans %d, objects %d, resources %d, static mem %.0f MB (day 1 %.0f MB); build %.1f s, run %.0f s wall\n\n" % [res["nodes_max"], res["nodes_end"], res["nodes_day1"], res["orphans_end"], res["objects_end"], res["resources_end"], float(res["mem_end"]) / 1048576.0, float(res["mem_day1"]) / 1048576.0, info["build_s"], res["wall_s"]]
 	if not (res["slow"] as Array).is_empty():
-		s += "- slow minutes (> %d ms): %s
-
-" % [SLOW_MIN_MS, " / ".join((res["slow"] as Array).slice(0, 8))]
+		s += "- slow minutes (> %d ms): %s\n\n" % [SLOW_MIN_MS, " / ".join((res["slow"] as Array).slice(0, 8))]
+	var sst: Dictionary = res["sched"]
+	s += "- scheduler: %d jobs, deferred %d (pending at end %d), timed fired %d; ms per game minute by system: %s" % [sst["jobs"], sst["deferred_total"], sst["deferred_pending"], sst["timed_fired"], _by_owner_text(sst, m)] + "\n\n"
 	s += "| group | row | ms/game-min | total ms | calls |\n|---|---|---|---|---|\n"
 	var n := 0
 	for r in res["rows"]:
@@ -393,3 +381,14 @@ func append_results(res: Dictionary) -> void:
 	f.store_string(existing + s)
 	f.close()
 	print("   results appended to docs/PERF_SCALE_RESULTS.md")
+
+
+func _by_owner_text(st: Dictionary, minutes: float) -> String:
+	var rows: Array = []
+	for o in st["by_owner"]:
+		rows.append([o, float(st["by_owner"][o]["usec"]) / 1000.0 / minutes, int(st["by_owner"][o]["deferred"])])
+	rows.sort_custom(func(a, b): return a[1] > b[1])
+	var parts: Array = []
+	for r in rows.slice(0, 14):
+		parts.append("%s %.2f%s" % [r[0], r[1], (" (%d deferred)" % r[2]) if r[2] > 0 else ""])
+	return ", ".join(parts)
