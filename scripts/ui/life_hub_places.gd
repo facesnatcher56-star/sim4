@@ -56,7 +56,7 @@ static func _place(dlg: LifeHub, f, pid: String) -> void:
 	if not Places.is_there(f, pid):
 		var lot: String = Places.lot_of(pid)
 		var mins: int = Neighborhood.walk_minutes(dlg.folk_id, PlayerLots.home_of(f) if lot == Places.HOME else lot)
-		dlg.row_with("You are not there. It is about %d minutes' walk." % mins,
+		dlg.row_with("You are not there. It is a walk of about %s." % SysUtil.count_text(mins, "minute"),
 			[dlg.button("Go there", "Walk to " + Places.lot_label(pid), func(): dlg.act("go", {"place": pid}), Places.on_map(lot))])
 	var svcs: Dictionary = Places.services(pid)
 	if svcs.is_empty():

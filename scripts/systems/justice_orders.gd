@@ -56,7 +56,7 @@ static func issue(c: Dictionary, days: int) -> Dictionary:
 		JusticeState.next_order += 1
 		JusticeState.orders.append(o)
 		JusticeState.count("orders")
-		var text: String = "A protective order now keeps %s away from %s for %d days." % [CrimePerson.name_of(off), CrimePerson.name_of(vic), days]
+		var text: String = "A protective order now keeps %s away from %s for %s." % [CrimePerson.name_of(off), CrimePerson.name_of(vic), SysUtil.count_text(days, "day")]
 		CaseStore.note(c, text, "protective_order", 3)
 		if CaseStore.household_involved(c):
 			SysUtil.notify(text, "story")

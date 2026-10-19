@@ -72,7 +72,7 @@ static func finish(t: Dictionary) -> void:
 		if bool(t["sitter"]):
 			bits.append("the sitter kept the plants and the post in order")
 		else:
-			bits.append("%d days of mail and %d papers on the mat" % [int(h["mail"]), int(h["papers"])])
+			bits.append("%s of mail and %s on the mat" % [SysUtil.count_text(int(h["mail"]), "day"), SysUtil.count_text(int(h["papers"]), "paper")])
 			if int(h["plants"]) > 0:
 				bits.append("%d of %d plants wilted" % [wilted, int(h["plants"])])
 		if paid > 0:

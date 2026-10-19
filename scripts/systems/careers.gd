@@ -140,7 +140,7 @@ static func qualify(f, cid: String, level: int, branch: String = "") -> Dictiona
 		if f.traits.has(str(t2)):
 			missing.append("not %s" % str(t2))
 	if req.has("friends") and RelationshipBits.count_bit(int(f.id), "friend", true) < int(req["friends"]):
-		missing.append("%d friends" % int(req["friends"]))
+		missing.append(SysUtil.count_text(int(req["friends"]), "friend"))
 	return {"ok": missing.is_empty(), "missing": missing}
 
 static func trait_bonus(f, cid: String) -> float:
