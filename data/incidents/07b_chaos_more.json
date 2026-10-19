@@ -11,7 +11,7 @@
    "kin": {"min_estate": 150, "min_age_days": 160, "estate_share": 0.8, "max_estate": 2500, "min_gap_days": 56, "friendship": 15, "visit_min": 180},
    "neglect": {"days_to_report": 2},
    "spread": {"chance": 0.04, "penalty": 6.0},
-   "targets_b": {"gas_leak": 0.05, "mould_growth": 0.4, "layoff": 0.12, "midlife_crisis": 0.3, "identity_theft": 0.1, "eviction_notice": 2.0, "runaway_teen": 1.5,
+   "targets_b": {"gas_leak": 0.05, "mould_growth": 0.4, "layoff": 0.04, "midlife_crisis": 0.3, "identity_theft": 0.03, "eviction_notice": 2.0, "runaway_teen": 1.5,
                "lottery_win": 0.4, "inheritance": 0.25, "long_lost_family": 0.12}
   }
  },
@@ -68,7 +68,7 @@
    ]}
   },
   "layoff": {
-   "label": "Layoff", "scope": "folk", "check": "day", "base_rate_per_year": 0.12, "notify_policy": "household", "severity": 3, "public": false,
+   "label": "Layoff", "scope": "folk", "check": "day", "base_rate_per_year": 0.04, "notify_policy": "household", "severity": 3, "public": false,
    "conditions": [{"age_stage_is": ["adult"]}, {"chaos": {"employed": true}}],
    "prevent": [{"label": "Doing really well at work", "when": [{"chaos": {"performing": true}}], "mult": 0.3},
                {"label": "Senior staff are safer", "when": [{"career_level_at_least": 4}], "mult": 0.5}],
@@ -98,7 +98,7 @@
    "statistical": {"outcomes": [{"weight": 1, "effects": [], "summary": "{name} is going through a midlife crisis."}]}
   },
   "identity_theft": {
-   "label": "Identity theft", "scope": "folk", "check": "day", "base_rate_per_year": 0.1, "notify_policy": "household", "severity": 3, "public": false,
+   "label": "Identity theft", "scope": "folk", "check": "day", "base_rate_per_year": 0.03, "notify_policy": "household", "severity": 3, "public": false,
    "conditions": [{"age_stage_is": ["adult", "elder"]}, {"coins_at_least": 150}, {"chaos": {"theft_open": false}}],
    "risk_mults": [{"label": "Banks and shops online", "when": [{"has_object": "computer"}], "mult": 1.5}],
    "prevent": [{"label": "Sharp with passwords", "when": [{"skill_at_least": ["logic", 3]}], "mult": 0.5}],
@@ -141,7 +141,8 @@
   "long_lost_family": {
    "label": "Long-lost family", "scope": "lot", "check": "day", "base_rate_per_year": 0.12, "notify_policy": "household", "severity": 2, "public": false,
    "conditions": [{"any_member": [{"age_stage_is": ["adult", "elder"]}]}],
-   "outcomes": [{"weight": 1, "effects": [{"handler": "chaos_trouble", "args": {"kind": "kin"}}], "text": "A long-lost sibling turned up.", "kind": "good"}]
+   "outcomes": [{"weight": 1, "effects": [{"handler": "chaos_trouble", "args": {"kind": "kin"}}], "text": "A long-lost sibling turned up.", "kind": "good"}],
+   "statistical": {"outcomes": [{"weight": 1, "effects": [], "summary": ""}]}
   }
  }
 }

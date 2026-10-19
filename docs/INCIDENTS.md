@@ -34,6 +34,7 @@ Death causes go in `data/death_causes/NN_<task>.json` (`{"causes": {"fire": {...
 | `notify_policy` | `household` (only the player's own people / lots toast) / `known` (default: also people the household has met) / `town` (always) / `quiet` (chronicle only) |
 | `surprise` | `false` = ignore the Surprises setting (default true) |
 | `severity`, `public` | 1..5 and bool, copied into the chronicle entry |
+| `chronicle_min_severity` | outcomes below this severity (1..5) are not written to the town chronicle, only to the history and the toast per `notify_policy` (everyday mishaps; default 0 = always) |
 
 Text tokens: `{name}` (the Folk, townie or "Your home"), `{house}` ("The Ashby house"), `{amount}`. Use they / them. No ids, no jargon.
 

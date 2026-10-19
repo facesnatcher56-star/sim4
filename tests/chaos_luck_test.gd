@@ -88,6 +88,9 @@ func _long_lost(f: Array) -> void:
 	K.expect(f, Story.situations.size() == sit0 + 1, "they come to visit the same day")
 	var r2: Dictionary = Incidents.force("long_lost_family", {"lot": "home:1", "outcome": 0})
 	K.expect(f, str(r2["text"]) == "" and Story.townies.size() == n0 + 1, "not again for a long while (min gap)")
+	ChaosState.stats.erase("kin_day")
+	var r3: Dictionary = Incidents.force("long_lost_family", {"lot": "home:1", "outcome": 0})
+	K.expect(f, str(r3["text"]) == "" and Story.townies.size() == n0 + 1, "and never twice for the same family line, even after the gap")
 	K.expect(f, Incidents.effective_rate("long_lost_family", IncidentSubject.of_household(1)) > 0.0, "(the dice themselves stay rare: %.2f a year)" % Incidents.effective_rate("long_lost_family", IncidentSubject.of_household(1)))
 	K.teardown()
 	# someone who already has a parent on record gets a half sibling through that parent

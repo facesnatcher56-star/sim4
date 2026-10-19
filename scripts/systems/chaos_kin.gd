@@ -60,10 +60,22 @@ static func inheritance(hid: int) -> Dictionary:
 	return {"text": "%s, a relative of %s's, passed away peacefully and left %d coins in their will." % [nm, heir.name, amount], "kind": "good"}
 
 # ------------------------------------------------------------------ long-lost family
+## A family line gets its long-lost sibling once: nobody in the house, nor any of their parents, has had one turn up before.
+static func _line_had_one(grown: Array) -> bool:
+	for g in grown:
+		if ChaosState.stats.has("kin_line_%d" % int(g.id)):
+			return true
+		for p in FamilyTree.parents_of(int(g.id)):
+			if ChaosState.stats.has("kin_line_%d" % int(p)):
+				return true
+	return false
+
 static func long_lost(hid: int) -> Dictionary:
 	var c: Dictionary = cfg()
 	var grown: Array = _grown(hid)
 	if grown.is_empty() or SysUtil.day() - int(ChaosState.stats.get("kin_day", -9999)) < int(c.get("min_gap_days", 56)):
+		return {"text": ""}
+	if _line_had_one(grown):
 		return {"text": ""}
 	var m = grown[Incidents.rng.randi_range(0, grown.size() - 1)]
 	var lo: float = float(Aging.stage_def("adult").get("from_day", 76)) + 2.0
@@ -89,5 +101,9 @@ static func long_lost(hid: int) -> Dictionary:
 	RelationshipService.add_both(int(m.id), tid, "friendship", float(c.get("friendship", 15)))
 	StoryVisits.invite_over(tid, int(m.id), int(c.get("visit_min", 180)))
 	ChaosState.stats["kin_day"] = SysUtil.day()
+	for g in grown:
+		ChaosState.stats["kin_line_%d" % int(g.id)] = 1
+		for p in FamilyTree.parents_of(int(g.id)):
+			ChaosState.stats["kin_line_%d" % int(p)] = 1
 	ChaosState.count("long_lost")
 	return {"text": "A stranger at the door says they are %s's long-lost sibling. %s was raised elsewhere and only just found the family. They have come to visit." % [m.name, t["name"]], "kind": "good"}

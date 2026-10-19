@@ -26,7 +26,7 @@ func _layoff(f: Array) -> void:
 	_job(ada)
 	K.expect(f, Careers.has_job(int(ada.id)), "test setup: Ada has a job")
 	var rate: float = Incidents.effective_rate("layoff", IncidentSubject.of_folk(ada))
-	K.expect(f, absf(rate - 0.12) < 0.001, "a working adult can be laid off (%.3f a year)" % rate)
+	K.expect(f, absf(rate - 0.04) < 0.001, "a working adult can be laid off (%.3f a year)" % rate)
 	Careers.jobs[int(ada.id)]["performance"] = 90.0
 	K.expect(f, Incidents.effective_rate("layoff", IncidentSubject.of_folk(ada)) < rate * 0.4, "doing well at work protects (%.3f)" % Incidents.effective_rate("layoff", IncidentSubject.of_folk(ada)))
 	Careers.jobs[int(ada.id)]["performance"] = 40.0

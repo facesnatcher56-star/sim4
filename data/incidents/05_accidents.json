@@ -1405,6 +1405,7 @@
    "check": "hour",
    "base_rate_per_year": 3.4,
    "notify_policy": "household",
+   "chronicle_min_severity": 4,
    "severity": 2,
    "conditions": [
     {
@@ -2023,6 +2024,7 @@
    "check": "hour",
    "base_rate_per_year": 2.0,
    "notify_policy": "household",
+   "chronicle_min_severity": 4,
    "severity": 2,
    "conditions": [
     {
@@ -2208,6 +2210,7 @@
    "check": "hour",
    "base_rate_per_year": 0.0,
    "notify_policy": "household",
+   "chronicle_min_severity": 4,
    "severity": 2,
    "surprise": false,
    "conditions": [],

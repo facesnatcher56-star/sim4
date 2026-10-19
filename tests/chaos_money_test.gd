@@ -19,7 +19,7 @@ func _theft(f: Array) -> void:
 	var kid := K.make_folk(h["w"], "Kit Voss", [], 1, Vector2i(15, 12), "child")
 	K.expect(f, Incidents.effective_rate("identity_theft", IncidentSubject.of_folk(kid)) == 0.0, "a child can never be a victim")
 	var rate: float = Incidents.effective_rate("identity_theft", IncidentSubject.of_folk(ada))
-	K.expect(f, rate > 0.09 and rate < 0.2, "an adult with savings can (%.3f a year, more with a computer)" % rate)
+	K.expect(f, rate > 0.025 and rate < 0.08, "an adult with savings can (%.3f a year, more with a computer)" % rate)
 	WorldIface.coins[1] = 100
 	K.expect(f, Incidents.effective_rate("identity_theft", IncidentSubject.of_folk(ada)) == 0.0, "with next to nothing there is nothing to steal")
 	WorldIface.coins[1] = 2000
