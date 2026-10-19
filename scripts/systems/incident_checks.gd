@@ -79,8 +79,15 @@ static func _roll(id: String, def: Dictionary, s) -> void:
 	var c: Dictionary = Incidents._counter(id)
 	c["checks"] = int(c["checks"]) + 1
 	c["exposure"] = float(c["exposure"]) + 1.0 / IncidentRisk.checks_per_year(check)
-	var p: float = IncidentRisk.rate_to_chance(IncidentRisk.effective_rate(def, s, true, true) * StoryPacing.incident_mult(id, s), check)
-	if p > 0.0 and Incidents.rng.randf() < p:
+	var pacing: float = StoryPacing.incident_mult(id, s)
+	# The draw comes first, against the best case (every risk entry at once, nothing preventing). A draw that cannot hit skips the risk and
+	# prevent conditions, which were most of the cost of the dice; the odds are unchanged, the event happens exactly when the draw is under
+	# the real chance. (One draw per rolled subject, where a prevented subject used to draw nothing: the random stream is not the old one.)
+	var u: float = Incidents.rng.randf()
+	if u >= IncidentRisk.rate_to_chance(IncidentRisk.max_rate(def, id) * pacing, check):
+		return
+	var p: float = IncidentRisk.rate_to_chance(IncidentRisk.effective_rate(def, s, true, true) * pacing, check)
+	if u < p:
 		_dirty()
 		IncidentFlow.start(id, s)
 		_dirty()

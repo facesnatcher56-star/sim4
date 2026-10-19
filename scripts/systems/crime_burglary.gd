@@ -19,7 +19,7 @@ static func pick_burglar(lot_key: String, exclude: Array = []) -> int:
 	var ids: Array = []
 	var w: Array = []
 	var k: Dictionary = cfg().get("burglar_weights", {})
-	for pid in CrimePerson.townies_only():
+	for pid in CrimePerson.sample_townies():
 		if exclude.has(pid) or not CrimePerson.is_adult(pid) or CrimePerson.in_custody(pid) or Hospital.is_in(pid):
 			continue
 		if lot_key == CrimePerson.home_key(pid) or Story.stage_of(CrimePerson.rec(pid)) == "elder":

@@ -44,7 +44,8 @@ in the world cost nothing per minute. Anything that only reacts to an event uses
 - [ ] Added a count the benchmark can assert (work items per minute) or a cap the long-run test checks.
 - [ ] Ran `powershell -File tools/run_scale.ps1` (big town, 3 game days) and compared with the last section of `docs/PERF_SCALE_RESULTS.md`: ms/game-min total and for your system,
       folk / path-query counts, nodes, memory. **A regression over 10% needs a written reason in the done message.**
-- [ ] Fast tier still under 120 s (`tests/perf_scale_small_test.gd` is the fast-tier twin: counts only).
+- [ ] Fast tier still passes and stays near 120 s wall: `powershell -File tools/run_fast.ps1` (6 balanced shards side by side; `tests/perf_scale_small_test.gd` is the benchmark's fast-tier twin: counts only).
+- [ ] Dice over many subjects draw FIRST against an upper bound (`IncidentRisk.max_rate`) and evaluate conditions only for a draw that can hit; "who would do this" pickers weigh a sample (`CrimePerson.sample_townies`), never the whole town; a daily lump goes through `DaySlices` or a LOW row.
 
 ## The scheduler (task 17.2): how clock work is registered
 
@@ -193,6 +194,45 @@ incidents / accident / health / crime / crime_rates / determinism / weather / fi
 - The remaining midnight jobs (Careers, Story, Economy, MarketTick, CaseInvestigation) and the crime event handlers (burglary, street robbery, vandalism: 0.3-0.5 s per hit) need slicing / cheaper candidate search.
 - The camera focus hook (`Tiers.set_focus`) is available but not wired to the camera yet (the anchors are the controlled folk).
 - Vacation extras (trip zone) are ACTIVE by rule; TownSim does not drive commute paths (CommuteTownies windows are its schedule).
+
+### Round 3 (2026-10-19, after 17.3): cheaper dice, pickers, rain and midnight
+
+Big town, 3 game days. Before = 17.3 on a quiet machine; after = this round with two long saga probes running alongside (so the rows matter more than
+the absolutes; the dated section in `docs/PERF_SCALE_RESULTS.md` has the full tables):
+
+| | before (17.3) | after | budget |
+|---|---|---|---|
+| ms per game minute | 23.4 | 17.6 | 20 |
+| per frame at speed 3 (avg) | 4.69 ms | 3.51 ms | 4 |
+| worst game minute | 465 ms (a vandalism / burglary handler inside an Incidents slice) | 263 ms | 12 |
+| town-level work per frame | 3.29 ms | 2.44 ms | 1 |
+| Incidents.slice (all the hourly dice) | 4.14 | 2.17 | |
+| CareerShifts | 0.39 | 0.21 | |
+| crowd/lot pick | 1.11 | 0.90 | |
+| the midnight minute | 281 ms (Story, Careers, Economy, CrimeFlow, StoryPacing, MarketTick in one frame) | 110 ms; the LOW jobs run in the next minutes | |
+
+What changed (the rules in the checklist above came out of it):
+1. **Dice draw first** (`IncidentChecks._roll`): one draw per rolled subject against `IncidentRisk.max_rate(def)` (every risk entry at once, no prevent entry,
+   the Surprises level, the empty-house factor at its maximum; cached per def). Only a draw under that bound evaluates the risk and prevent conditions,
+   which were most of the cost of ~25 defs x ~200 subjects per hour. The odds are identical (the event happens exactly when the draw is under the real
+   chance); the random stream is not (a prevented subject used to draw nothing), so the cross-platform hash baseline was regenerated.
+2. **Offender pickers sample the town** (`CrimePerson.sample_townies`, 48 of the townies in id order from a random start): `CrimePetty._offender` and
+   `CrimeBurglary.pick_burglar` weighed all 200 townies with `CrimePressure.risk` each, 15-20 ms per pick on a stub town and 300-500 ms inside a slice
+   on the big one (the worst minutes of 17.3).
+3. **Midnight**: the heavy day rows (Careers, WeatherWorld.on_day, Economy, RelationshipService, Story, CrimeFlow, MarketTick, StoryPacing, autosave) are
+   LOW priority, so the frame budget (`SimScheduler.budget_usec`, 4 ms in main.gd and now in `perf_scale.gd` too, one game minute per frame there) moves
+   them to the following minutes instead of one frame; `CaseInvestigation.on_day` (suspect scoring per open case, 100-200 ms) is a `DaySlices` pass.
+   Daily jobs can now land up to 12 game minutes after midnight when every frame is over budget (a probe stepping an hour per frame sees the mood
+   journal at 00:12); at speed 3 they trickle over the first minutes of the day.
+4. **CareerShifts** loops the people with a job or a school place (`Careers.jobs` / `Careers.school`), not every folk in the world.
+5. **Crowd picks** build `Story.free_townies()` and the residents once per `Crowd.update`, not once per pick.
+6. **Accident scan**: the water objects (tubs, pools, ponds: hundreds in the big town) are bucketed by 16x16 chunk; a person checks the 3x3 chunks
+   around them instead of every water object on the map.
+7. **Rain**: `WeatherWorld._hourly_objects` groups the rain index by lot once; a rainy hour waters the plants of the lots near an anchor and counts one
+   deferred hour per far lot, instead of visiting every plant on the map to find out that it is far (150-200 ms per rainy hour before).
+
+Not done: the town-level budget (1 ms per frame; still about 2.4) and the household `choose` (17.4) are untouched; the NEAR / TOWN ticks of the
+director (about 0.3 ms per tick, 11-14 ticks a minute) and `accident/scan` (about 120 us per person) are the next per-minute items.
 
 ## Scale benchmark
 
@@ -464,6 +504,14 @@ Per-file growth that is NOT from this pass: hood_lots 4.6 -> 9.6 s and map_lots 
 9 -> 12.7 s and commute (circadian work of another agent).
 Not done: sharing one built map between tests (snapshot / restore of World + Neighborhood statics): about 0.3 s x ~100 `new_game` calls = 30 s, but the
 restore would have to reproduce the RNG and the id counters exactly; I did not risk it. `--import` is not part of any test run.
+
+### Sharded fast tier (2026-10-19)
+
+175 files take **586 s in one process on a quiet machine** (coop_net 56 s, cruise_needs 30, romance_run 28, townie_needs 25, coop_skip_run 22,
+circadian 16, content_run 15, determinism 14 ...). `tools/run_fast.ps1` runs `run_all.gd --shard=k/6` six times side by side (each shard is a balanced
+slice of the file list: the files are dealt heaviest first to the lightest slice, weights in `run_all.gd WEIGHT`, so the slices finish together) and
+prints one summary with every FAIL line: **175 files, 0 failed, 144 s wall** with two other Godot runs going; 111-126 s per shard. That is how the
+120 s target is met; the single-process tier is unchanged for `--only`, `--shuffle` and the slow tier.
 
 ### Final three fast runs (shuffle seeds 41, 52, 63)
 

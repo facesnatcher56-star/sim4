@@ -46,9 +46,10 @@ static func on_minute() -> void:
 	Commute.on_minute()
 	var day: int = SysUtil.day()
 	var h: float = SysUtil.hour_f()
-	for f in WorldIface.all_folk():
-		var fid: int = int(f.id)
-		if SysUtil.is_away(f) or Away.pending.has(fid) or Commute.active(fid) or Away.is_away(fid) or Vacation.on_trip(fid):
+	for fid0 in Careers.jobs.keys() + Careers.school.keys():      # the active set: people with a job or a school place (never every folk in the world)
+		var fid: int = int(fid0)
+		var f = WorldIface.get_folk(fid)
+		if f == null or SysUtil.is_away(f) or Away.pending.has(fid) or Commute.active(fid) or Away.is_away(fid) or Vacation.on_trip(fid):
 			continue
 		if Careers.jobs.has(fid):
 			var j: Dictionary = Careers.jobs[fid]

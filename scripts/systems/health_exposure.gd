@@ -85,7 +85,12 @@ static func hourly(f, r: Dictionary) -> void:
 	var m: float = Health.stage_mult(f)
 	for t in ["cold", "heat"]:
 		var tc: Dictionary = _tc(t)
-		if tc.is_empty() or float(r.get(t + "_min", 0.0)) < float(tc["death_min"]) * m:
+		if tc.is_empty():
+			continue
+		var cur: float = float(r.get(t + "_min", 0.0))
+		if cur < stage_min(t, 1) * m * 0.5:
+			_sweep(f, tc)
+		if cur < float(tc["death_min"]) * m:
 			continue
 		if not (tc.get("death_stages", []) as Array).has(str(f.age_stage)):
 			continue
@@ -93,6 +98,15 @@ static func hourly(f, r: Dictionary) -> void:
 			Health.count("death_" + t)
 			Aging.kill(int(f.id), str(tc["cause"]))
 			return
+
+## Stage buffs have no timer: only the minute tick clears them, and only while the counter is above zero. A record that was pruned (the person
+## was out of the world for a while) or reset leaves the buff on for ever otherwise: "shivering" at uncomfortable 3 colours every mood for
+## months. Once an hour anyone wearing a stage buff with the counter back near zero loses it.
+static func _sweep(f, tc: Dictionary) -> void:
+	for st in tc.get("stages", []):
+		var buff: String = str(st.get("buff", ""))
+		if buff != "" and f.has_buff(buff):
+			f.remove_buff(buff)
 
 ## A drink of water (interaction drink_water): takes the edge off the heat.
 static func cool_down(f) -> void:

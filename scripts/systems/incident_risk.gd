@@ -41,6 +41,24 @@ static func risk_factor(def: Dictionary, subj, phase: String = "") -> float:
 		f *= float(e["mult"])
 	return f
 
+## Upper bound of effective_rate for ANY subject: every risk entry multiplying at once, no prevent entry, the empty-house burglary factor at its
+## maximum, the Surprises setting. Cached per def (cleared with the defs). IncidentChecks rolls its one draw against this first.
+static var _max_cache: Dictionary = {}
+
+static func max_rate(def: Dictionary, id: String = "") -> float:
+	var base: Variant = _max_cache.get(id, null)
+	if base == null or id == "":
+		var r: float = float(def.get("base_rate_per_year", 0.0))
+		for e in def.get("risk_mults", []):
+			r *= maxf(float((e as Dictionary).get("mult", 1.0)), 1.0)
+		var tags: Variant = def.get("tags", null)
+		if tags != null and (tags as Array).has("burglary_odds"):
+			r *= maxf(float(VacationHome.cfg().get("burglary_away_mult", 3.0)), 1.0)
+		base = r
+		if id != "":
+			_max_cache[id] = base
+	return float(base) * (Incidents.surprise_mult() if bool(def.get("surprise", true)) else 1.0)
+
 ## Effective events per year for this subject (0 when the conditions fail). `surprise` = apply the Surprises setting.
 static func effective_rate(def: Dictionary, subj, surprise: bool = true, conditions_checked: bool = false) -> float:
 	if not conditions_checked and not IncidentCond.check(def.get("conditions", []), subj):

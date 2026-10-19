@@ -94,7 +94,7 @@ static func on_incident(ctx: Dictionary, args: Dictionary) -> Dictionary:
 static func _offender(lot_key: String, kind: String) -> int:
 	var ids: Array = []
 	var w: Array = []
-	for pid in CrimePerson.townies_only():
+	for pid in CrimePerson.sample_townies():
 		if lot_key == CrimePerson.home_key(int(pid)) or CrimePerson.in_custody(int(pid)):
 			continue
 		var weight: float = 0.3 + CrimePressure.risk(int(pid)) * 2.0

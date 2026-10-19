@@ -246,7 +246,6 @@ static func kill(culprit: int, victim: int, scene: String, kind: String, opts: D
 	if witnessed or CrimePerson.folk(victim) != null:
 		# seen, or a Folk on the map: the death is known at once
 		CrimePerson.hide_death(victim, cause)
-		c["found"] = true
 		var rep: int = int(witnesses[0]) if not witnesses.is_empty() else -1
 		c["state"] = "hidden"
 		CaseDiscovery.report(c, rep, "seen" if witnessed else "body")

@@ -275,3 +275,47 @@ SocialDynamics as LOW. The overhead of the scheduler layer is within the noise o
 
 Biggest spikes before: Day 4 00:00 6485 ms (CrimeFlow.on_day 5410, Incidents.on_hour 316, RelationshipService.on_day 291), Incidents.on_hour 700-2300 ms at midday. After: a rare crime event inside an
 Incidents slice (300-500 ms), midnight Careers / Story / CaseInvestigation (about 250-330 ms), the first rainy hour's object index (about 180 ms once).
+
+## 2026-10-19 05:26:18  big  (63 lots, 200 townies, map (320, 272), 3.0 days)
+
+- **ms/game-min 17.56** | frame avg 3.51 ms (budget 4) | worst minute 262.6 ms (budget 12) | p99 83.8 | median 12.29 | town-level 2.44 ms/frame (budget 1) | by day: 15.64, 23.27, 13.78
+- tiers (avg active / near / town / statistical): [6.2, 30.4, 65.8, 96.8]; ACTIVE max 45 (cap 60); folk ticked per game minute 11.8; at the end [3, 12, 57, 131]
+- folk in world avg 36.5 / max 160; crowd+staff avg 34.1 / max 126; path queries 2897 (0.67/game-min, 51034 fills); choose(household) 9.73 ms, 7.3 paths, 176 cands; choose(npc) 9.79 ms, 6.0 paths, 572 cands; 
+- nodes max 6 / end 6 (day 1: 6), orphans 1, objects 11146, resources 288, static mem 159 MB (day 1 148 MB); build 2.0 s, run 83 s wall
+
+- slow minutes (> 30 ms): Day 1 11:01  263 ms: hour/WeatherWorld.on_hour 193; weather/objects 190; systems/Incidents.slice 25; systems/NeighborhoodService.after 24; after/Crowd.update 24 / Day 1 10:01  253 ms: hour/WeatherWorld.on_hour 193; weather/objects 187; systems/NeighborhoodService.after 28; after/Crowd.update 28; crowd/lots 27 / Day 1 09:01  250 ms: hour/WeatherWorld.on_hour 194; weather/objects 187; systems/NeighborhoodService.after 28; after/Crowd.update 27; crowd/lots 27 / Day 3 13:02  209 ms: systems/NeighborhoodService.after 195; after/Crowd.update 195; crowd/lots 195; crowd/lot pick 93; crowd/lot staff 46 / Day 2 13:02  202 ms: systems/NeighborhoodService.after 135; after/Crowd.update 134; crowd/lots 133; crowd/lot staff 42; crowd/lot pick 41 / Day 3 01:00  186 ms: DaySlices 164; hour/AccidentMarks.on_hour 9; hour/CrimeFlow.on_hour 5 / Day 4 01:00  184 ms: DaySlices 164; hour/AccidentMarks.on_hour 8; hour/CrimeFlow.on_hour 5 / Day 2 08:01  179 ms: hour/WeatherWorld.on_hour 110; weather/objects 105; systems/NeighborhoodService.after 40; after/Crowd.update 40; crowd/lots 39
+
+- scheduler: 54 jobs, deferred 4835 (pending at end 7), timed fired 0; ms per game minute by system: SimDirector 5.37, Incidents 2.80, NeighborhoodService 2.63, AccidentMarks 2.25, SocialDynamics 1.19 (3967 deferred), WeatherFolk 0.61, CrimeFlow 0.55 (3 deferred), DaySlices 0.50, Tiers 0.44, TownSim 0.31 (484 deferred), WeatherWorld 0.31 (75 deferred), LevelSystems 0.14, CareerShifts 0.10, Careers 0.03 (3 deferred)
+
+| group | row | ms/game-min | total ms | calls |
+|---|---|---|---|---|
+| listener | min  scheduler minute jobs (all but the director) | 11.417 | 49322 | 4320 |
+| listener | min  SimDirector | 5.375 | 23218 | 4320 |
+| systems | systems/NeighborhoodService.after | 2.628 | 11354 | 4320 |
+| systems | systems/Incidents.slice | 2.468 | 10661 | 4320 |
+| leaf | after/Crowd.update | 2.426 | 10482 | 4320 |
+| systems | systems/AccidentMarks | 2.071 | 8945 | 4320 |
+| leaf | crowd/lots | 1.732 | 7483 | 4320 |
+| leaf | accident/scan | 1.594 | 6884 | 4320 |
+| director | director/other needs/buffs/mood | 1.324 | 5719 | 38074 |
+| director | director/household fill (autonomy) | 1.233 | 5326 | 12960 |
+| systems | systems/SocialDynamics.on_minute | 1.036 | 4476 | 4261 |
+| director | director/other emergency+interaction tick | 1.005 | 4343 | 38074 |
+| leaf | crowd/lot pick | 0.938 | 4053 | 1232 |
+| director | director/other fill (autonomy) | 0.893 | 3859 | 38074 |
+| listener | hour scheduler hour jobs | 0.757 | 3269 | 72 |
+| systems | systems/WeatherFolk | 0.611 | 2638 | 4320 |
+| director | director/household needs/buffs/mood | 0.573 | 2476 | 12960 |
+| leaf | social/sync+record | 0.534 | 2307 | 4261 |
+| leaf | DaySlices | 0.498 | 2153 | 56 |
+| leaf | accident/rescue | 0.465 | 2011 | 4320 |
+| leaf | CrimeFlow.person_day | 0.464 | 2004 | 4320 |
+| leaf | crowd/drive | 0.452 | 1953 | 4320 |
+| systems | systems/Tiers | 0.439 | 1898 | 4320 |
+| systems | systems/Incidents | 0.322 | 1391 | 4320 |
+| leaf | TownSim.hourly | 0.314 | 1357 | 4320 |
+| leaf | hour/WeatherWorld.on_hour | 0.304 | 1314 | 71 |
+| leaf | crowd/lot commute | 0.294 | 1270 | 3216 |
+| leaf | weather/objects | 0.288 | 1243 | 71 |
+| leaf | incdef/slip_fall | 0.282 | 1218 | 4320 |
+| leaf | social/conversation | 0.275 | 1188 | 4261 |

@@ -74,6 +74,8 @@ func measure(profile: String, minutes: int) -> Dictionary:
 	print("== built '%s': %s tiles, %d lots, %d townies, %d objects, %d buildings, %d towers, %d incident defs in %.1f s" % [profile, str(info["map"]), info["lots"], info["townies"], info["objects"], info["buildings"], info["towers"], info["incident_defs"], info["build_s"]])
 	clock.advance_minutes(60)                        # warm-up: caches, the first crowd fill (not measured)
 	_sched = SimScheduler.of(clock)
+	_sched.budget_usec = 4000                           # as main.gd: LOW jobs of a frame over 4 ms move to the next minutes (the midnight lump)
+	_sched.frame_fn = func() -> int: return int(clock.total_minutes)      # every game minute is its own frame here
 	_sched.reset_stats()
 	_sched.profile = true
 	dir.prof.clear()

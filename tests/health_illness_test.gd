@@ -14,7 +14,33 @@ func run() -> Array:
 	_worsens(f)
 	_food(f)
 	_townies(f)
+	_timer(f)
 	return f
+
+## Medicine leaves a fractional timer; the rest bonus of a resting patient must not push it below zero: a negative timer is Folk's "no timer",
+## and the cold (uncomfortable 2, contagious) would never end. Also: an older save with such a timer heals on the next hourly check.
+func _timer(f: Array) -> void:
+	var w := _world()
+	var a := K.make_folk(w, "Ada", [], 1)
+	Incidents.force("catch_cold", {"folk_id": a.id})
+	HealthIllness.cure(a, 0.4)
+	for b in a.buffs:
+		if str(b["id"]) in ["common_cold", "sick"]:
+			b["remaining"] = 0.5
+	a.posture = "lie"
+	HealthIllness.tick_minute(a, Health.rec_of(a.id))
+	a.tick_buffs(1.0)
+	K.expect(f, not a.has_buff("common_cold") and not a.has_buff("sick"), "half a minute of cold left while resting: it runs out, the timer never goes negative")
+	Health.on_hour()
+	K.expect(f, not Health.is_ill(a), "and the illness record is closed")
+	var b2 := K.make_folk(w, "Bea", [], 1)
+	Incidents.force("catch_cold", {"folk_id": b2.id})
+	for bb in b2.buffs:
+		if str(bb["id"]) in ["common_cold", "sick"]:
+			bb["remaining"] = -0.3
+	Health.on_hour()
+	K.expect(f, not b2.has_buff("common_cold") and not b2.has_buff("sick") and not Health.is_ill(b2), "a negative illness timer (older save) ends the illness on the hour")
+	K.teardown()
 
 func _world() -> StubWorld:
 	var w := K.setup()

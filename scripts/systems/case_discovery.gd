@@ -129,6 +129,8 @@ static func report(c: Dictionary, reporter: int, how: String) -> void:
 
 ## The body is found: the death becomes known (grief, grave) and the murder investigation begins in earnest.
 static func _found(c: Dictionary, how: String) -> void:
+	if bool(c.get("found", false)):
+		return                 # a body is found once: a later search day, a serial-pattern sweep or a second case on the same death must not announce it again
 	c["found"] = true
 	var v: int = int(c["victim"])
 	CrimePerson.reveal_death(v)

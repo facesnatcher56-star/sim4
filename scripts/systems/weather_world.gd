@@ -130,33 +130,59 @@ static func _indexed(kind: String) -> Array:
 static func _def_of(o) -> Dictionary:
 	return SimEnv.data().object_def(str(o.def_id))
 
+## The rain index grouped by lot: lot id -> {"plots": garden plots, "plants": plants with a water state}; "" = not inside a lot. Rebuilt when
+## objects were added or removed. A rainy hour then visits the plants of the lots near an anchor only; a far lot is one counter (caught up daily).
+static var _rain_groups: Dictionary = {}
+static var _rain_groups_key: Array = []
+
+static func _rain_by_lot() -> Dictionary:
+	var lst: Array = _indexed("rain")
+	var ids: int = 0                       # the key is the index itself (count + id sum), not the world's next object id: a shop restocking
+	for o0 in lst:                         # or a bought chair must not rebuild the groups (that rebuild was the 190 ms rainy hour)
+		ids += int(o0.id)
+	var key: Array = [lst.size(), ids, WorldIface.world()]
+	if key == _rain_groups_key and not _rain_groups.is_empty():
+		return _rain_groups
+	_rain_groups_key = key
+	_rain_groups = {}
+	for o in lst:
+		var d: Dictionary = _def_of(o)
+		var which: String = ""
+		if str(o.def_id) == "garden_plot":
+			which = "plots"
+		elif (d.get("tags", []) as Array).has("plant") and (d.get("state", {}) as Dictionary).has("water"):
+			which = "plants"
+		if which == "":
+			continue
+		var lot: String = NeighborhoodLots.lot_at(o.tile)
+		if not _rain_groups.has(lot):
+			_rain_groups[lot] = {"plots": [], "plants": []}
+		((_rain_groups[lot] as Dictionary)[which] as Array).append(o)
+	return _rain_groups
+
 static func _hourly_objects(cur: String, kind: String, e: Dictionary) -> void:
 	if kind != "rain":
 		return
 	var g: Dictionary = e.get("garden", {})
 	var w = WorldIface.world()
 	var can_out: bool = w != null and w.has_method("is_outdoor")
-	var far_lots: Dictionary = {}
-	for o in _indexed("rain"):
-		var d: Dictionary = _def_of(o)
-		var tags: Array = d.get("tags", [])
-		var key: String = ""
-		var amt: float = 0.0
-		if str(o.def_id) == "garden_plot":
-			key = "water"
-			amt = float(g.get("rain_water_per_hour", 0.6))
-		elif tags.has("plant") and can_out and (d.get("state", {}) as Dictionary).has("water"):
-			if not Tiers.tile_near(o.tile):              # a far place: no per-plant work now, the rain is counted per lot and caught up daily (on_day)
-				far_lots[NeighborhoodLots.lot_at(o.tile)] = true
-				continue
-			if not bool(w.is_outdoor(o.tile, int(o.level))):
-				continue
-			key = "water"
-			amt = float(g.get("plant_rain_water_per_hour", 0.8))
-		if key != "":
-			WorldIface.state_add(o, key, amt)
-	for fl in far_lots:
-		Weather._rain_deferred[fl] = int(Weather._rain_deferred.get(fl, 0)) + 1
+	var plot_amt: float = float(g.get("rain_water_per_hour", 0.6))
+	var plant_amt: float = float(g.get("plant_rain_water_per_hour", 0.8))
+	var near: Dictionary = Tiers.lot_distances(int(Tiers.cfg().get("near_radius", 64)))
+	var groups: Dictionary = _rain_by_lot()
+	for lot in groups:
+		var grp: Dictionary = groups[lot]
+		for o in grp["plots"]:                       # garden plots catch the rain wherever they are (cheap: a few per lot)
+			WorldIface.state_add(o, "water", plot_amt)
+		if not can_out or (grp["plants"] as Array).is_empty():
+			continue
+		var far: bool = not Tiers.anchors.is_empty() and (not near.has(lot) if lot != "" else not Tiers.tile_near((grp["plants"][0] as Object).tile))
+		if far:                                      # no per-plant work now: the rain is counted per lot and caught up daily (on_day)
+			Weather._rain_deferred[lot] = int(Weather._rain_deferred.get(lot, 0)) + 1
+			continue
+		for o2 in grp["plants"]:
+			if bool(w.is_outdoor(o2.tile, int(o2.level))):
+				WorldIface.state_add(o2, "water", plant_amt)
 
 static func _puddle_tick(kind: String, e: Dictionary) -> void:
 	var w = WorldIface.world()

@@ -8,9 +8,15 @@ extends RefCounted
 static func cfg() -> Dictionary:
 	return JusticeState.sect("investigation")
 
+## Daily: every open or cold case gets a day of work. With the scheduler the cases are spread over the 24 hours (DaySlices: each case once a day,
+## no midnight lump of suspect scoring); tests that call on_day directly run the whole list at once.
 static func on_day() -> void:
-	for c in CaseStore.in_state(["open", "cold"]):
-		work(c)
+	var cases: Array = CaseStore.in_state(["open", "cold"])
+	if DaySlices.enabled():
+		DaySlices.begin("cases", cases, func(c): if str(c.get("state", "")) in ["open", "cold"]: work(c))
+	else:
+		for c in cases:
+			work(c)
 
 ## One day of work on a case. Returns the arrested person id or -1. Public so the tests can step cases.
 static func work(c: Dictionary) -> int:

@@ -185,24 +185,47 @@ static func _water_objects(c: Dictionary) -> Variant:      # null = this world c
 	var stamp: Array = [w, kinds, w.objects.size() if "objects" in w else -1, w._next_id if "_next_id" in w else -1]
 	if not _water_stamp.is_empty() and is_same(_water_stamp[0], stamp[0]) and is_same(_water_stamp[1], stamp[1]) and _water_stamp[2] == stamp[2] and _water_stamp[3] == stamp[3]:
 		return _water_list
+	_water_chunks.clear()
+	var chunked: bool = w.has_method("chunk_of")
 	for o in w.all_objects():
 		if kinds.has(str(o.def_id)):
 			out.append(o)
+			if chunked:
+				var ch: Vector2i = w.chunk_of(o.tile)
+				if not _water_chunks.has(ch):
+					_water_chunks[ch] = []
+				(_water_chunks[ch] as Array).append(o)
 	_water_stamp = stamp
 	_water_list = out
 	return out
 
 static var _water_stamp: Array = []
 static var _water_list: Array = []
+static var _water_chunks: Dictionary = {}      # 16x16 chunk -> water objects in it (the big town has hundreds of tubs, pools and ponds)
+
+## The water objects that can be within `r` tiles of `tile`: the 3x3 chunks around it (r is under a chunk side), or the whole list without chunks.
+static func _water_candidates(tile: Vector2i, water: Array) -> Array:
+	if _water_chunks.is_empty():
+		return water
+	var w = WorldIface.world()
+	var ch: Vector2i = w.chunk_of(tile)
+	var out: Array = []
+	for dx in [-1, 0, 1]:
+		for dy in [-1, 0, 1]:
+			var lst: Variant = _water_chunks.get(ch + Vector2i(dx, dy), null)
+			if lst != null:
+				out.append_array(lst)
+	return out
 
 static func reset_cache() -> void:
 	_water_stamp = []
 	_water_list = []
+	_water_chunks.clear()
 
 static func _near_water(f, c: Dictionary, water: Variant) -> bool:
 	var r: int = int(c.get("near_water_tiles", 4))
 	var any: bool = water == null
-	for o in (water if water != null else []):
+	for o in (_water_candidates(f.tile, water) if water != null else []):
 		if absi(o.tile.x - f.tile.x) <= r and absi(o.tile.y - f.tile.y) <= r:
 			any = true
 			break

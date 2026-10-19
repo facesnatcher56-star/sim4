@@ -65,20 +65,20 @@ static func systems_rows(sm: Object) -> Array:
 		["day/Holidays.on_day", "Holidays", 1440, 210, N, "day", Holidays.on_day, null, "world-level"],
 		["day/Aging.on_day", "Aging", 1440, 220, N, "day", Aging.on_day, null, "residents + townies: O(people) cheap comparisons"],
 		["day/Family.on_day", "Family", 1440, 230, N, "day", Family.on_day, null, "residents + townie family records (small)"],
-		["day/Careers.on_day", "Careers", 1440, 240, N, "day", Careers.on_day, null, "residents' jobs; townie careers by daily comparison"],
-		["day/WeatherWorld.on_day", "WeatherWorld", 1440, 250, N, "day", WeatherWorld.on_day_sched, null, "garden plots + the rain catch-up of far plants (sliced over the day)"],
-		["day/Economy.on_day", "Economy", 1440, 260, N, "day", Economy.on_day, null, "bills per household"],
-		["day/RelationshipService.on_day", "RelationshipService", 1440, 270, N, "day", RelationshipService.on_day_sched, null, "known pairs, 1/24 per hour (DaySlices); ACTIVE and STATISTICAL pairs alike (data only)"],
-		["day/Story.on_day", "Story", 1440, 280, N, "day", Story.on_day, null, "STATISTICAL townies: daily dice (TOWN townies too)"],
+		["day/Careers.on_day", "Careers", 1440, 240, L, "day", Careers.on_day, null, "residents' jobs; townie careers by daily comparison"],
+		["day/WeatherWorld.on_day", "WeatherWorld", 1440, 250, L, "day", WeatherWorld.on_day_sched, null, "garden plots + the rain catch-up of far plants (sliced over the day)"],
+		["day/Economy.on_day", "Economy", 1440, 260, L, "day", Economy.on_day, null, "bills per household"],
+		["day/RelationshipService.on_day", "RelationshipService", 1440, 270, L, "day", RelationshipService.on_day_sched, null, "known pairs, 1/24 per hour (DaySlices); ACTIVE and STATISTICAL pairs alike (data only)"],
+		["day/Story.on_day", "Story", 1440, 280, L, "day", Story.on_day, null, "STATISTICAL townies: daily dice (TOWN townies too)"],
 		["day/Fire.on_day", "Fire", 1440, 290, N, "day", Fire.on_day, null, "burning / burnt lots only"],
 		["day/Incidents.on_day", "Incidents", 1440, 300, N, "", Incidents.on_day_sliced, null, "Health.on_day, then starts the sliced daily dice (96 slices)"],
-		["day/CrimeFlow.on_day", "CrimeFlow", 1440, 310, N, "day", CrimeFlow.on_day, null, "global passes and case upkeep; per-person dice are the bucketed daily job, grudges are sliced (DaySlices)"],
+		["day/CrimeFlow.on_day", "CrimeFlow", 1440, 310, L, "day", CrimeFlow.on_day, null, "global passes and case upkeep; per-person dice are the bucketed daily job, grudges are sliced (DaySlices)"],
 		["day/DisasterClock.on_day", "DisasterClock", 1440, 320, N, "day", DisasterClock.on_day, null, "running disasters only"],
-		["day/MarketTick.on_day", "MarketTick", 1440, 330, N, "day", MarketTick.on_day, null, "markets, shops, bank, rents (world-level)"],
-		["day/StoryPacing.on_day", "StoryPacing", 1440, 340, N, "day", StoryPacing.on_day, null, "world-level"],
+		["day/MarketTick.on_day", "MarketTick", 1440, 330, L, "day", MarketTick.on_day, null, "markets, shops, bank, rents (world-level)"],
+		["day/StoryPacing.on_day", "StoryPacing", 1440, 340, L, "day", StoryPacing.on_day, null, "world-level"],
 		["day/Vacation.on_day", "Vacation", 1440, 350, N, "", Vacation.on_day, Callable(Vacation, "busy"), "active trips only"],
 		["day/systems_day event", "SystemsManager", 1440, 360, N, "day", Callable(sm, "emit_systems_day"), null, "event bus"],
-		["day/autosave", "SaveLoad", 1440, 370, N, "", SaveLoad.autosave, autosave_on, "one autosave per day (when Main is not doing it)"],
+		["day/autosave", "SaveLoad", 1440, 370, L, "", SaveLoad.autosave, autosave_on, "one autosave per day (when Main is not doing it)"],
 	]
 
 # ------------------------------------------------------------------ the other Clock listeners
@@ -96,7 +96,7 @@ static func scenario_rows() -> Array:
 	return [["hour/ScenarioGoals.poll", "ScenarioGoals", 60, 500, N, "hour", ScenarioGoals._on_hour, Callable(Scenario, "active"), "only while a scenario is active"]]
 
 static func app_rows(main: Object) -> Array:
-	return [["day/Main.autosave", "Main", 1440, 900, N, "day", Callable(main, "_autosave_check"), null, "player autosave interval"]]
+	return [["day/Main.autosave", "Main", 1440, 900, L, "day", Callable(main, "_autosave_check"), null, "player autosave interval"]]
 
 # ------------------------------------------------------------------ installers
 static func install(sched: SimScheduler, group: String, rows: Array) -> void:

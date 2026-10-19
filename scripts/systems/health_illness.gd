@@ -90,7 +90,7 @@ static func tick_minute(f, r: Dictionary) -> void:
 	for buff in [str(kd.get("buff", "")), "sick"]:
 		for b in f.buffs:
 			if str(b["id"]) == buff and float(b["remaining"]) > 0.0:
-				b["remaining"] = float(b["remaining"]) - bonus
+				b["remaining"] = maxf(float(b["remaining"]) - bonus, 0.0)      # never below zero: a negative timer means "no timer" and the buff would stay for ever
 
 static func hourly(f, r: Dictionary) -> void:
 	var kind: String = str(r.get("ill", ""))
@@ -100,12 +100,21 @@ static func hourly(f, r: Dictionary) -> void:
 	var buff: String = str(kd.get("buff", ""))
 	if buff == "":
 		buff = "sick"
-	if not f.has_buff(buff):                 # the buff ran out (or the hospital took it): over
+	if not f.has_buff(buff) or _timer_lost(f, buff):      # the buff ran out (or the hospital took it): over
+		f.remove_buff(buff)
 		f.remove_buff("sick")
 		_recovered(f, r, kd)
 		return
 	if bool(kd.get("contagious", false)) and not SysUtil.is_away(f):
 		_spread(f, kd)
+
+## An illness buff whose timer went negative (older saves: the rest bonus could push a fractional timer below zero, which Folk.tick_buffs reads
+## as "no timer") is over: the person would otherwise be ill, contagious and uncomfortable for the rest of their life.
+static func _timer_lost(f, buff: String) -> bool:
+	for b in f.buffs:
+		if str(b["id"]) == buff:
+			return float(b["remaining"]) < 0.0
+	return false
 
 static func _spread(f, kd: Dictionary) -> void:
 	var ic: Dictionary = Health.cfg("illness")

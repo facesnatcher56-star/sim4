@@ -171,7 +171,9 @@ Files stay small (aim < 400 lines). Big static classes are split by responsibili
 
 ## Tests
 ```
-Godot --headless --path . --script res://tests/run_all.gd                       # FAST tier (~45 s): everything except the long simulations
+powershell -File tools/run_fast.ps1                                              # FAST tier in 6 parallel shards (about 2 min wall; 175 files, 10 min in one process)
+Godot --headless --path . --script res://tests/run_all.gd                       # FAST tier in one process: everything except the long simulations
+Godot --headless --path . --script res://tests/run_all.gd -- --shard=2/6        # one balanced slice of the fast tier (what run_fast.ps1 runs)
 Godot --headless --path . --script res://tests/run_all.gd -- --slow             # + weather_longrun, systems_integration, hood_sim, family_integration, sim_longrun, social_autonomy (~5 min)
 Godot --headless --path . --script res://tests/run_all.gd -- --shuffle[=seed]   # random file order (prints the seed); every order must pass
 Godot --headless --path . --script res://tests/run_all.gd -- --only=sim_basic,world_test

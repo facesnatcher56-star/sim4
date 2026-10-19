@@ -141,7 +141,8 @@ static func record(def_id: String, def: Dictionary, subj, ctx: Dictionary, oc: D
 		"forced": forced, "outcome": int(oc.get("index", 0)), "folk_id": subj.id if subj.kind != "lot" else -1, "folk_name": subj.display_name()})
 	if str(res["text"]) != "":
 		ChronicleHook.note(def_id, str(res["text"]), ids, subj.lot_key, sev, is_public)
-		toast(def, subj, str(res["text"]), kind)
+		if not (subj.kind != "lot" and DeathCauses.last_notified == int(subj.id)):      # a kill effect already toasted the death: one toast, not two
+			toast(def, subj, str(res["text"]), kind)
 	SysUtil.game_event("incident", {"id": def_id, "folk_id": subj.id if subj.kind != "lot" else -1, "lot": subj.lot_key, "outcome": int(oc.get("index", 0)),
 		"forced": forced, "statistical": statistical, "text": str(res["text"])})
 

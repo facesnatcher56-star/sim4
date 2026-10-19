@@ -129,8 +129,13 @@ static func _remove(f) -> void:
 	SysUtil.world_remove_folk(int(f.id))
 
 ## Per-minute entry point (cheap: the crowd of a lot is only re-balanced every crowd_check_min).
+static var _pool_cache: Variant = null          # Story.free_townies() for the length of one update (several lots pick in one minute)
+static var _res_cache: Variant = null
+
 static func update(force: bool = false) -> void:
 	var now: int = SimEnv.now_min()
+	_pool_cache = null
+	_res_cache = null
 	var t := PerfProf.start()
 	_step_leavers(now)
 	PerfProf.stop("crowd/step_leavers", t)
@@ -200,11 +205,15 @@ static func _update_lot(lot_id: String, now: int, force: bool) -> void:
 static func _pick_townie(lot_id: String, vtype: String) -> Dictionary:
 	var cands: Array = []
 	var weights: Array = []
-	var pool: Array = Story.free_townies()
+	if _pool_cache == null:
+		_pool_cache = Story.free_townies()
+	if _res_cache == null:
+		_res_cache = SysUtil.residents()
+	var pool: Array = _pool_cache
 	var resident_only: bool = bool(Venues.type_def(vtype).get("crowd_residents", false))
 	if resident_only:
 		pool = Neighborhood.residents_of(lot_id)
-	var res: Array = SysUtil.residents()
+	var res: Array = _res_cache
 	# a window of the pool from a random start (PICK_SAMPLE people looked at, not all 200): the tier-aware picker for big towns
 	var n_pool: int = pool.size()
 	var start: int = SysUtil.rng.randi_range(0, maxi(n_pool - 1, 0))

@@ -24,6 +24,7 @@ static var files: Array = []
 
 static func reset() -> void:
 	_loaded = false
+	IncidentRisk._max_cache.clear()
 	config = {}
 	defs = {}
 	handler_specs = {}

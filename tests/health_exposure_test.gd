@@ -10,7 +10,22 @@ func run() -> Array:
 	_heat(f)
 	_death(f)
 	_shelter(f)
+	_stuck(f)
 	return f
+
+## A stage buff left behind without exposure behind it (the health record was pruned while the person was out of the world, or reset) is
+## cleared within the hour instead of colouring every mood for the rest of their life.
+func _stuck(f: Array) -> void:
+	var w := K.setup()
+	SysContent.install_all()
+	var a := _winter(w)
+	a.set_meta("outdoors", false)
+	a.add_buff("shivering")
+	a.add_buff("hypothermia")
+	Health.records.erase(a.id)
+	Health.on_hour()
+	K.expect(f, not a.has_buff("shivering") and not a.has_buff("hypothermia"), "a stage buff with no exposure behind it is cleared by the hourly sweep")
+	K.teardown()
 
 func _winter(w: StubWorld) -> Folk:
 	Incidents.reset()

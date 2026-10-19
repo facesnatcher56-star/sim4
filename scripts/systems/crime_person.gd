@@ -121,6 +121,19 @@ static func townies_only() -> Array:
 	out.sort()
 	return out
 
+const PICK_SAMPLE := 48
+
+## A random window of the living townies (ids in order, wrapping): the pickers that weigh "who would do this" look at a sample, not the whole town.
+static func sample_townies(n: int = PICK_SAMPLE) -> Array:
+	var all: Array = townies_only()
+	if all.size() <= n:
+		return all
+	var start: int = JusticeState.rng.randi_range(0, all.size() - 1)
+	var out: Array = []
+	for i in n:
+		out.append(all[(start + i) % all.size()])
+	return out
+
 static func in_custody(pid: int) -> bool:
 	return JusticeState.inmates.has(pid)
 
