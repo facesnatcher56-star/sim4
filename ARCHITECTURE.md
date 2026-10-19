@@ -21,6 +21,16 @@ After adding / removing a `class_name` file run `Godot --headless --path . --imp
 - `World` Ã¢â‚¬â€ `scripts/world/world.gd` Ã¢â‚¬â€ grid, objects, folk registry, pathfinding (A*)
 - `SimDirector` Ã¢â‚¬â€ `scripts/sim/director.gd` Ã¢â‚¬â€ ticks all folk & autonomy each game minute
 
+## Scheduler, commands, players, determinism (task 17.2 / 24A)
+- **SimScheduler** (`scripts/sim/sim_scheduler.gd`) is the only listener of `Clock.minute_passed` / `hour_passed` / `day_passed` (views excepted). Every clock hook is a row in
+  `scripts/sim/sim_registry.gd` (name, owner, cadence, order, priority, Callable, emptiness gate, note); it also offers timed wake-ups (`at(minute, ...)`), bucketed per-id
+  periodic jobs and a frame budget that defers LOW jobs. See docs/PERFORMANCE.md "The scheduler" (with the generated registry table).
+- **Commands** (`scripts/sim/commands.gd`, handlers in `command_actions.gd`): every player action is `Commands.run({player_id, folk_id, action, args, game_minute})`; the UI
+  (pie menu, build mode, careers, travel, bank/market, vacation, goals ...) and `CoopCommands.apply` call it; a bounded log (seq, game minute) supports replay (`Commands.replay`).
+- **Players** (`scripts/systems/players.gd`): player id -> household id, name (saved in the `players` block). `Economy.primary_household()` reads it.
+- **Determinism**: `SimSeed.apply(seed)` seeds every random stream; `NewGame.start` calls it with the world seed. Reset every static counter / cache / once-only flag in
+  `SystemsManager.reset_all` (tests/determinism_diag.gd finds the ones that leak between games). Tests: determinism_test, command_replay_test, players_test.
+
 ## Signals on `Events` (exact names Ã¢â‚¬â€ all agents must use these)
 ```
 signal folk_added(folk_id: int)
