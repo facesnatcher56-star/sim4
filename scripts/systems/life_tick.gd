@@ -13,11 +13,17 @@ static func reset() -> void:
 	PlaceMember.reset()
 	EduState.reset()
 	HealthLife.reset()
+	FoodServices.reset()
+	LifeFame.reset()
+	LeagueState.reset()
+	ClubState.reset()
 
 ## A new game: the staff of every place is hired and this year's school events that are already past do not fire.
 static func new_game() -> void:
 	PlaceStaff.fill_all(false)
 	EduSchool.init_year(SysUtil.day())
+	LeagueState.ensure()
+	ClubState.ensure()
 
 static func on_day(day: int) -> void:
 	PlaceStaff.on_day(day)
@@ -26,6 +32,10 @@ static func on_day(day: int) -> void:
 	EduTownies.on_day(day)
 	EduJobs.refresh(day)
 	HealthLifeDay.on_day(day)
+	PlaceNews.on_day(day)
+	LifeFame.on_day(day)
+	LeagueState.on_day(day)
+	ClubState.on_day(day)
 
 static func on_interaction_finished(folk_id: int, iid: String, success: bool) -> void:
 	PlaceUse.on_interaction_finished(folk_id, iid, success)
@@ -45,7 +55,8 @@ static func on_game_event(ev: String, payload: Dictionary) -> void:
 
 # ------------------------------------------------------------------ save
 static func to_dict() -> Dictionary:
-	return {"staff": PlaceStaff.to_dict(), "use": PlaceUse.to_dict(), "member": PlaceMember.to_dict(), "edu": EduState.to_dict(), "health": HealthLife.to_dict()}
+	return {"staff": PlaceStaff.to_dict(), "use": PlaceUse.to_dict(), "member": PlaceMember.to_dict(), "edu": EduState.to_dict(), "health": HealthLife.to_dict(),
+		"culture": {"fame": LifeFame.to_dict(), "league": LeagueState.to_dict(), "clubs": ClubState.to_dict()}}
 
 ## A save without the block (made before task 14) starts the life areas fresh.
 static func from_dict(d: Dictionary, has_block: bool) -> void:
@@ -58,3 +69,7 @@ static func from_dict(d: Dictionary, has_block: bool) -> void:
 	PlaceMember.from_dict(d.get("member", {}))
 	EduState.from_dict(d.get("edu", {}))
 	HealthLife.from_dict(d.get("health", {}))
+	var cu: Dictionary = d.get("culture", {})
+	LifeFame.from_dict(cu.get("fame", {}))
+	LeagueState.from_dict(cu.get("league", {}))
+	ClubState.from_dict(cu.get("clubs", {}))

@@ -45,7 +45,7 @@ func _hours(f: Array) -> void:
 	K.expect(f, Places.open_at("school") and not Places.open_at("college"), "Monday 10:00: the school is open, the college is not yet")
 	K.set_time(1, 19)
 	K.expect(f, Places.is_open("college") and Places.is_open("night_school") and not Places.open_at("school"), "Monday 19:00: college and night classes are open")
-	K.set_time(6, 19)                      # Saturday
+	K.set_time(6, 11)                      # Saturday morning
 	K.expect(f, not Places.open_at("college") and not Places.open_at("night_school") and not Venues.is_open_type("school", SimEnv.now_min()), "weekends: college, night classes and the school lot are closed")
 	K.expect(f, Places.status_text("night_school").begins_with("Opens"), "a closed place says when it opens (%s)" % Places.status_text("night_school"))
 	K.set_time(1, 19)

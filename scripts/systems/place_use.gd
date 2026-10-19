@@ -32,6 +32,7 @@ static func price(pid: String, sid: String, fid: int = -1) -> int:
 	if not sm.is_empty():
 		p *= float(sm.get(Seasons.current(), 1.0))
 	p *= PlaceMember.discount(fid, pid, svc)
+	p *= FoodMenu.price_mult(pid, sid)
 	return maxi(int(round(p)), 1)
 
 static func why_not(fid: int, pid: String, sid: String) -> String:
@@ -39,7 +40,11 @@ static func why_not(fid: int, pid: String, sid: String) -> String:
 	var f = SysUtil.folk(fid)
 	if svc.is_empty() or f == null:
 		return "That is not available."
-	var why: String = Places.stage_reason(str(f.age_stage), svc)
+	var why: String = Places.place_reason(str(f.age_stage), pid)
+	if why == "":
+		why = Places.stage_reason(str(f.age_stage), svc)
+	if why == "":
+		why = Places.when_reason(svc)
 	if why != "":
 		return why
 	if not Places.exists(pid) or not Places.is_open(pid):
@@ -83,7 +88,7 @@ static func _queue(f, svc: Dictionary, minutes: float, rec: Dictionary) -> bool:
 		return false
 	ir.def = ir.def.duplicate(true)
 	ir.def["duration_min"] = minutes
-	ir.def["label"] = str(svc.get("label", "Visit"))
+	ir.def["label"] = Places.service_label(str(rec.get("place", "")), str(rec.get("service", ""))) if rec.has("place") else str(svc.get("label", "Visit"))
 	ir.def["posture"] = str(svc.get("posture", "stand"))
 	f.enqueue(ir)
 	return true

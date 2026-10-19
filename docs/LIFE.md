@@ -65,6 +65,34 @@ randomness comes from the module's own seeded stream (`PlaceStaff.rng`, `EduStat
   and the strain resets to 40. Ordinary workers: 0.1 a game year; always-tired workers: 0.85.
 * The "Health" tab of the Town window shows all of it in plain words.
 
+## Food and nightlife
+
+Data: `data/life/30_food.json`. Eight places: **The Copper Spoon Restaurant** (cafe lot, 11:00 to 22:00, waiters and a chef; starters, mains, desserts, a kids' menu and a tasting dinner;
+**one special per course per day**, 20 percent cheaper and a little more fun, picked from the date so a replay agrees), **Zip Burger** (fast food: filling, cheap, bad for the diet meter),
+**The Gilded Barrel** (bar, 17:00 to 02:00, adults only, a quiz night on Wednesdays), **Neon Hollow Nightclub** (Thursday to Sunday 22:00 to 04:00, adults only: dance floor, VIP booth, cocktails),
+**Flour and Crumb Bakery** (loaves and pastries go to the home pantry), **Frosty's Ice Cream Cart** (closed in winter), **The Roaming Kitchen Food Truck** (Friday to Sunday; the cuisine changes
+every week) and **Willow Green Farmers' Market** (Saturday and Sunday: produce for the pantry, honey, flowers, and it buys the household's crafts and garden produce at full price).
+* Dishes are services: `needs` (hunger, fun ...), `buffs` (well fed, tipsy), `meters.diet` (fast food and snacks lower it, salads and fish raise it). Age rules are data: `adult_only` on the
+  bar and the club (every service), `min_stage` on mains, `stages` on the kids' menu; teens and children are refused in plain words.
+* **Drinks** (`FoodServices`): each strong drink counts for the evening (a night lasts until 06:00); the fourth gives a hangover, the barkeeper refuses at the fifth.
+* The club and the bar are open after midnight (hours past 24 in `schedule`); the cafe lot stays open for them (`Places.extra_open`, `Venues.minutes_to_close` looks for the real closing time).
+* Gambling is adult-only too: `BankGamble.play_cards` and the lottery tickets (`ShopBuy.why_not`) refuse children and teens.
+* Each place posts its own small news items now and then (`PlaceNews`, about 1 a day across the whole town): "The Copper Spoon has Fish with Greens as today's special".
+
+## Culture and leisure
+
+Data: `data/life/40_culture.json`. **Starlight Cinema** (office lot, 13:00 to 01:00; a family film, a new release and a late show with ratings: a child sees only the family film, a teen not the late show),
+**Larkfield Hall Theatre** and **Concerts** (school lot, Friday to Sunday; plays and live music, and you can take a part or book a set), **Hollow Oak Museum** and **Oak Street Gallery** (library lot),
+**Ironleaf Bowling Alley**, **Arcade** and **Swimming Pool** (gym lot; a gym pass halves the pool), **Willow Green Sports Field** (pick-up games and a local league), **Lake Shore** and **Southwoods Campsite**
+(park lot; closed in winter, swimming in summer only), **Hollow Oak Community Hall** with a book club (Tuesday), chess club (Thursday) and garden club (Saturday morning).
+* **Programmes** (`Programme`): every title rotates weekly per slot ("Family Film: The Little Lighthouse"), counted from day 1.
+* **Performing** (`LeisureServices`): skill-gated (guitar 3, piano 3, singing 4, acting 2); pay = base + per level x skill, success 55 percent + 7 per level above the minimum; a flop pays 40 percent and
+  embarrasses. **Fame** (`LifeFame`) grows with sets, gallery sales and wins and fades 1.5 percent a day ("unknown" .. "a local star").
+* **Gallery**: exhibit up to three paintings (from the crafts the household made) at 1.5 times the market stall price. **Records**: bowling and arcade scores, a personal best and a town record in the chronicle.
+* **League** (`LeagueState`): four teams (Fernwood Foxes, Ironleaf Rovers, Larkfield Lions, Greenbarrow Giants) with townies on the rosters; a round each Saturday (resolved Sunday), a three-round
+  season, a champion announced; a resident joins a team and plays on Saturdays to strengthen it (the measured title share of a team with a weekly player is 0.32 against 0.25 of a fair team).
+* **Clubs** (`ClubState`): five townie members each; a resident joins for 5 coins, goes on the club's day: skill xp, company and friendship with some members; the club's weekly line is news.
+
 ## Tier / cadence / active set / caps
 
 | System | Tier | Cadence | Active set | Caps |
@@ -78,6 +106,10 @@ randomness comes from the module's own seeded stream (`PlaceStaff.rng`, `EduStat
 | HealthLifeDay / HealthCond | residents ACTIVE, townies STATISTICAL | daily | all residents + alive townies (~24), a few lines each | 4 conditions, 1 flare roll per condition per day |
 | HealthRisk | event | inside the incident dice | tagged incidents only (`illness`, `cardiac`) | one empty-array test otherwise |
 | Counselling | event | on a session | the person | |
+| PlaceNews | town | daily | places with a `news` list | about 1 chronicle line a day in total |
+| LeagueState | town (statistical) | weekly (Sunday) | 4 teams, 12 townies, residents who joined | 8 results kept |
+| ClubState | town | weekly lines; residents on their visit | 3 clubs x 5 members | |
+| LifeFame / records | event + daily fade | | people with fame | fame 0..100 |
 
 Nothing polls per minute. The one clock entry is `day/LifeTick.on_day` (SimRegistry).
 
@@ -95,4 +127,6 @@ See the status list at the bottom of this file, updated as areas land.
 | Spec item | State |
 |---|---|
 | Health: family doctor and clinic, pharmacy counter, dentist, therapy and counsellor (grief, burnout, trauma), gym, long-term conditions, diet and fitness affecting health and lifespan | done (places inside the hospital, market and gym lots); hospital floors from task 10 |
+| Food and nightlife: restaurant with menu and waiters, fast food, bar, nightclub, bakery, ice cream, food trucks, farmers market | done as places inside the cafe, market and park lots |
+| Culture and leisure: cinema, theatre, concert hall, museum, gallery, bowling, arcade, pool, sports field with a league, lake, campsite, community centre with clubs | done as places inside the office, school, library, gym and park lots (no beach: the map has only the Town Green pond) |
 | Education: preschool, school grades / homework / report cards / teachers / events, college, degrees, night classes, library courses, skills job market | done (places inside existing lots, no new 3D lots) |

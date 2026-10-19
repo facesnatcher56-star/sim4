@@ -121,7 +121,6 @@ static func on_day(day: int) -> void:
 		var r: Array = rosters.get(pid, [])
 		for i in range(r.size() - 1, -1, -1):
 			if int(r[i]["id"]) == 0 and rng.randf() < turnover:
-				LifeNote.news(pid, "%s has left %s." % [r[i]["name"], Places.label(pid)])
 				r.remove_at(i)
 		if min_staff(pid) > 0 and rng.randf() < shut:
 			var reasons: Array = c.get("closure_reasons", ["a burst pipe"])

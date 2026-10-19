@@ -29,6 +29,19 @@
    },
    "duration_min": 0,
    "thought": "My tooth is killing me. Time for the dentist."
+  },
+  "hangover": {
+   "label": "Hangover",
+   "mood": {
+    "sad": 1,
+    "uncomfortable": 2
+   },
+   "duration_min": 480,
+   "need_decay_mult": {
+    "energy": 1.3,
+    "fun": 1.1
+   },
+   "thought": "Never again..."
   }
  }
 }

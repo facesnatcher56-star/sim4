@@ -56,7 +56,13 @@ static func minutes_to_close(lot_id: String, at_min: int = -1) -> int:
 	var hr: Array = hours(vtype)
 	if float(hr[1]) >= 24.0 and float(hr[0]) <= 0.0:
 		return 100000
-	return int(float(hr[1]) * 60.0) - at_min % 1440
+	var base: int = int(float(hr[1]) * 60.0) - at_min % 1440
+	if base >= 0 and not is_open_type(vtype, at_min + base):
+		return base
+	for step in range(1, 24 * 4 + 1):          # task 14: a place inside the lot keeps it open past the venue's own hours: look for the real closing time
+		if not is_open_type(vtype, at_min + step * 15):
+			return step * 15
+	return 100000
 
 ## Human readable status for the UI.
 static func status_text(lot_id: String) -> String:

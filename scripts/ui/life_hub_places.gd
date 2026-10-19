@@ -64,7 +64,7 @@ static func _place(dlg: LifeHub, f, pid: String) -> void:
 		var s: Dictionary = svcs[sid]
 		var why: String = PlaceUse.why_not(dlg.folk_id, pid, str(sid))
 		var price: int = PlaceUse.price(pid, str(sid), dlg.folk_id)
-		var txt: String = "%s%s%s" % [str(s.get("label", sid)), "" if price <= 0 else ", %d coins" % price, "" if int(s.get("minutes", 0)) <= 0 else ", about %s" % _span(int(s["minutes"]))]
+		var txt: String = "%s%s%s%s" % [Places.service_label(pid, str(sid)), " (today's special)" if FoodMenu.is_special(pid, str(sid)) else "", "" if price <= 0 else ", %d coins" % price, "" if int(s.get("minutes", 0)) <= 0 else ", about %s" % _span(int(s["minutes"]))]
 		dlg.row_with(txt, [dlg.button("Use", why if why != "" else "Go ahead", func(): dlg.act("use", {"place": pid, "service": sid}), why == "")], why != "")
 
 static func _span(minutes: int) -> String:

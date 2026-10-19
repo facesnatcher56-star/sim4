@@ -8,6 +8,8 @@ static func apply(f, pid: String, sid: String, svc: Dictionary, announce: bool =
 	var out: Dictionary = {}
 	for n in (svc.get("needs", {}) as Dictionary):
 		f.add_to_stat(str(n), float(svc["needs"][n]))
+	if FoodMenu.is_special(pid, sid):
+		f.add_to_stat("fun", float(LifeDefs.cfg("food").get("special_fun", 4)))
 	for b in svc.get("buffs", []):
 		f.add_buff(str(b))
 	for s in (svc.get("skill_xp", {}) as Dictionary):
@@ -23,12 +25,14 @@ static func apply(f, pid: String, sid: String, svc: Dictionary, announce: bool =
 		SysUtil.game_event(str(svc["event"]), {"folk_id": int(f.id), "place": pid, "service": sid})
 	var text: String = str(out.get("text", svc.get("text", "")))
 	if text != "":
-		text = text.replace("{name}", str(f.name)).replace("{place}", Places.label(pid)).replace("{staff}", _staff(pid))
+		text = text.replace("{title}", Programme.title(pid, str(svc.get("programme_slot", "")))).replace("{name}", str(f.name)).replace("{place}", Places.label(pid)).replace("{staff}", _staff(pid, str(svc.get("who_role", ""))))
 		out["text"] = text
 		if announce:
 			SysUtil.notify(text, str(svc.get("kind", "good")))
 	return out
 
-static func _staff(pid: String) -> String:
-	var n: String = PlaceStaff.who(pid)
+static func _staff(pid: String, role: String = "") -> String:
+	var n: String = PlaceStaff.who(pid, role)
+	if n == "":
+		n = PlaceStaff.who(pid)
 	return n if n != "" else "the staff"

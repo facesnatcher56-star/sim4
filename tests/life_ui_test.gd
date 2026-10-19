@@ -49,6 +49,19 @@ func run() -> Array:
 	hub.refresh()
 	txt = "\n".join(_texts(hub.body))
 	K.expect(f, txt.find("Cooking Basics: next lesson") >= 0, "other places list their lessons")
+	K.set_time(3, 13)
+	hub.kind = "food"
+	hub.place_id = "restaurant"
+	hub.refresh()
+	txt = "
+".join(_texts(hub.body))
+	K.expect(f, txt.find("THE COPPER SPOON RESTAURANT") >= 0 and txt.find("(today's special)") >= 0 and txt.find("Kids' Menu") >= 0 and txt.find("(waiter)") >= 0, "Food places show the menu with today's specials and the waiters")
+	hub.kind = "culture"
+	hub.place_id = "cinema"
+	hub.refresh()
+	txt = "
+".join(_texts(hub.body))
+	K.expect(f, txt.find("Family Film: ") >= 0 and txt.find("{") < 0, "Culture places show the programme of the week")
 	hub._pick("study")
 	txt = "\n".join(_texts(hub.body))
 	K.expect(f, txt.find("College:") >= 0 and txt.find("[Drop out]") >= 0, "Study tab shows the college course")

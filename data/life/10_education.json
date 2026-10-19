@@ -59,7 +59,7 @@
    }
   },
   "staff": {
-   "turnover_per_day": 0.012,
+   "turnover_per_day": 0.006,
    "closure_per_day": 0.006,
    "closure_reasons": [
     "a burst pipe",

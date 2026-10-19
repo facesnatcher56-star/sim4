@@ -65,6 +65,8 @@ static func open_at(pid: String, at_min: int = -1) -> bool:
 		return false
 	var h: float = float(at_min % 1440) / 60.0
 	var day: int = at_min / 1440 + 1
+	if d.has("seasons") and not (d["seasons"] as Array).has(Seasons.season_at_day(day)):
+		return false
 	for row in schedule(pid):
 		var hr: Array = row.get("hours", [0, 24])
 		var o: float = float(hr[0])
@@ -146,6 +148,35 @@ static func is_there(f, pid: String) -> bool:
 	return not on_map(lot) or Neighborhood.lot_of(f) == lot
 
 # ------------------------------------------------------------------ rules
+## The service's label with the programme title of the week filled in ("Family Film: {title}").
+static func service_label(pid: String, sid: String) -> String:
+	var svc: Dictionary = services(pid).get(sid, {})
+	var l: String = str(svc.get("label", sid))
+	if l.find("{title}") >= 0:
+		l = l.replace("{title}", Programme.title(pid, str(svc.get("programme_slot", ""))))
+	return l
+
+## Place-level age rule (`adult_only`, `min_stage`): the bar and the nightclub keep children and teens out of every service.
+static func place_reason(stage: String, pid: String) -> String:
+	var d: Dictionary = def(pid)
+	return stage_reason(stage, {"adult_only": d.get("adult_only", false), "min_stage": d.get("min_stage", "")}) if (d.has("adult_only") or d.has("min_stage")) else ""
+
+## A service that is on only some days or weeks ("when": {"days": [weekdays], "week_mod": [m, k]}): "" when it is on now.
+static func when_reason(svc: Dictionary, at_min: int = -1) -> String:
+	var w: Dictionary = svc.get("when", {})
+	if w.is_empty():
+		return ""
+	if at_min < 0:
+		at_min = SimEnv.now_min()
+	var day: int = at_min / 1440 + 1
+	if w.has("days") and not SysUtil.has_int(w["days"], SysUtil.weekday(day)):
+		return "Not today."
+	if w.has("season") and not (w["season"] as Array).has(Seasons.season_at_day(day)):
+		return "Not in this season."
+	if w.has("week_mod") and ((day - 1) / 7) % int(w["week_mod"][0]) != int(w["week_mod"][1]):
+		return "Not on the menu this week."
+	return ""
+
 ## Is this life stage allowed to use the service? ("" = yes, else a plain-word reason.)
 static func stage_reason(stage: String, svc: Dictionary) -> String:
 	if svc.has("stages"):
@@ -155,6 +186,6 @@ static func stage_reason(stage: String, svc: Dictionary) -> String:
 	var idx: int = Aging.stage_index(stage)
 	if bool(svc.get("adult_only", false)) and idx < Aging.stage_index("adult"):
 		return "Only for adults."
-	if svc.has("min_stage") and idx < Aging.stage_index(str(svc["min_stage"])):
+	if str(svc.get("min_stage", "")) != "" and idx < Aging.stage_index(str(svc["min_stage"])):
 		return "Too young for that."
 	return ""

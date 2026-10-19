@@ -154,6 +154,9 @@ static func _jackpot_p() -> float:
 ## A hand of cards for `stake` coins. Returns {ok, won, delta, reason}.
 static func play_cards(hid: int, folk_id: int, stake: int) -> Dictionary:
 	var g: Dictionary = SysUtil.table("bank").get("gamble", {})
+	var gf = SysUtil.folk(folk_id)
+	if gf != null and Places.stage_reason(str(gf.age_stage), {"adult_only": true}) != "":
+		return {"ok": false, "won": false, "delta": 0, "reason": "Only adults can gamble."}          # task 14: gambling is adult-only
 	if stake <= 0 or not Economy.spend(hid, stake, "card game stake"):
 		return {"ok": false, "won": false, "delta": 0, "reason": "Not enough coins."}
 	var won: bool = rng.randf() < float(g.get("cards_win_p", 0.47))
