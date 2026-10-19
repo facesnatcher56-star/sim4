@@ -48,11 +48,11 @@ func _test_legacy_mode() -> void:
 func _test_map_layout() -> void:
 	var rep: Dictionary = MapBuilder.build(W)
 	_check(W.width == W.MAP_W and W.height == W.MAP_H, "map size")
-	_check(int(rep["lots"]) == 15, "15 lots expected, got %s" % str(rep["lots"]))
+	_check(int(rep["lots"]) == 16, "16 lots expected, got %s" % str(rep["lots"]))
 	var lots: Array = []
 	for k in ["home", "venue", "townie_home"]:
 		lots.append_array(W.regions.of_kind(k))
-	_check(lots.size() == 15, "lot regions %d" % lots.size())
+	_check(lots.size() == 16, "lot regions %d" % lots.size())
 	var map_rc := Rect2i(0, 0, W.width, W.height)
 	for i in lots.size():
 		var a: Rect2i = lots[i]["rect"]
@@ -131,7 +131,7 @@ func _test_chunks() -> void:
 	W.paint_floor(t + Vector2i(1, 0), "wood", 0)
 	var dirty: Array = W.regions.take_dirty_floor_chunks()
 	_check(dirty.size() == 1 and dirty[0] == W.chunk_of(t + Vector2i(1, 0)), "dirty floor chunk set %s" % str(dirty))
-	_check(W.regions.chunk_count() == Vector2i(W.MAP_W / 16, (W.MAP_H + 15) / 16), "chunk count %s" % str(W.regions.chunk_count()))
+	_check(W.regions.chunk_count() == Vector2i((W.MAP_W + 15) / 16, (W.MAP_H + 15) / 16), "chunk count %s" % str(W.regions.chunk_count()))
 
 
 func _test_rooms_at_scale() -> void:
