@@ -119,7 +119,7 @@ static func _townie_jobs(c: Dictionary) -> void:
 					t["level"] = 1
 					t.erase("seeking")
 	if laid.size() >= 2:
-		ChronicleHook.note("economy", "%d people lost their jobs in the cuts." % laid.size(), [], "town:0", 2, true)
+		ChronicleHook.note("economy", "%s lost their jobs in the cuts." % SysUtil.count_text(laid.size(), "person", "people"), [], "town:0", 2, true)
 	elif laid.size() == 1:
 		Story._log("%s was laid off." % laid[0])
 

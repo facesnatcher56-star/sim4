@@ -13,7 +13,7 @@ static func build(dlg: LifeHub) -> void:
 	for p in pets:
 		var sd: Dictionary = PetState.species_def(str(p["species"]))
 		dlg.heading("%s the %s" % [p["name"], sd.get("label", "pet")])
-		dlg.line("Feeling %s. Age %d days, %d trick%s, bond %d." % [PetState.mood(p), PetState.age_days(p), int(p["tricks"]), "" if int(p["tricks"]) == 1 else "s", int(float(p["bond"]))], 14)
+		dlg.line("Feeling %s. Age %s, %s, bond %d." % [PetState.mood(p), SysUtil.count_text(int(PetState.age_days(p)), "day"), SysUtil.count_text(int(p["tricks"]), "trick"), int(float(p["bond"]))], 14)
 		dlg.line("Fullness", 12, UITheme.MUTED)
 		dlg.bar(float(p["fullness"]), 100.0, "Feed every day")
 		dlg.line("Fun", 12, UITheme.MUTED)

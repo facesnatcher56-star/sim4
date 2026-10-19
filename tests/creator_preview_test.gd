@@ -48,6 +48,14 @@ func run() -> Array:
 	_check(GeneticsSex.in_hair_pool("female", int(f["hair_style"])), "the woman's starting hair is from the usual pool (%d)" % int(f["hair_style"]))
 	_check(GeneticsSex.in_hair_pool("male", int(m["hair_style"])), "the man's starting hair is from the usual pool (%d)" % int(m["hair_style"]))
 	_check(int(f["facial_hair"]) == 0, "no facial hair on a woman")
+	var dressed: Dictionary = Genetics.random_appearance(null, "")
+	dressed["top"] = 4
+	dressed["bottom"] = 2
+	var dressed_f: Dictionary = dressed.duplicate(true)
+	GeneticsSex.creator_fit(dressed, "male", "Vance")
+	GeneticsSex.creator_fit(dressed_f, "female", "Vance")
+	_check(GeneticsSex.in_outfit_pool("male", "top", int(dressed["top"])) and GeneticsSex.in_outfit_pool("male", "bottom", int(dressed["bottom"])), "a man starts in a shirt and trousers, not a dress or skirt (%d / %d)" % [int(dressed["top"]), int(dressed["bottom"])])
+	_check(int(dressed_f["top"]) == 4 and int(dressed_f["bottom"]) == 2, "a woman's outfit is left as it was; any outfit stays selectable")
 	# every hair style stays selectable: the editor never limits the choice
 	var kept: Dictionary = m.duplicate(true)
 	kept["hair_style"] = 2

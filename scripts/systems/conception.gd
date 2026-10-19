@@ -25,7 +25,7 @@ static func check(a: int, b: int) -> Dictionary:
 	var carrier: int = a if sa == Sexes.FEMALE else b
 	var other: int = b if carrier == a else a
 	if Fertility.by_age(carrier) <= 0.0 or Fertility.by_age(other) <= 0.0:
-		return {"ok": false, "reason": "too_old" if RomanceRules.stage_of(carrier) == "elder" or RomanceRules.stage_of(other) == "elder" else "too_young"}
+		return {"ok": false, "reason": "too_young" if RomanceRules.stage_of(carrier) in ["baby", "toddler", "child", "teen"] or RomanceRules.stage_of(other) in ["baby", "toddler", "child", "teen"] else "too_old"}
 	if Aging.pregnancies.has(carrier):
 		return {"ok": false, "reason": "already_pregnant"}
 	return {"ok": true, "reason": "ok", "carrier": carrier, "other": other}

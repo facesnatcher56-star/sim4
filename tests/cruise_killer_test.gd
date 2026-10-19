@@ -17,6 +17,7 @@ func run() -> Array:
 	var a: Dictionary = _voyage(8)
 	var b: Dictionary = _voyage(8)
 	_check(a["victims"] == b["victims"] and a["phase"] == b["phase"] and a["killer"] == b["killer"], "same seed, same story: %s vs %s" % [str(a), str(b)])
+	_check(a["st_seed"] == b["st_seed"], "both plays start with the same storyteller stream (%s vs %s)" % [str(a["st_seed"]), str(b["st_seed"])])
 	var c: Dictionary = _voyage(31)
 	_check(int(c["killer"]) >= 1000, "another seed also runs")
 	K.teardown()
@@ -24,6 +25,10 @@ func run() -> Array:
 
 ## Returns a small summary used for the repeatability check.
 func _voyage(seed_value: int) -> Dictionary:
+	# Every play starts from the same master seed: Kit.new_game only seeds SysUtil, and Storyteller.master_seed (which survives reset_all) would
+	# otherwise leak from whatever ran before (the first play of a process had 0, the second the fixture's 4242: different storyteller dice, different
+	# SysUtil draws on day 3, a different victim).
+	TestFixture.reset()
 	K.new_game("small", 9000, false, seed_value)
 	var res: Dictionary = Vacation.book_and_go(1, "cruise", {"length_days": 5, "cabin_class": "inside", "seed": seed_value})
 	var tid: int = int(res["trip"])
@@ -71,13 +76,16 @@ func _voyage(seed_value: int) -> Dictionary:
 		var main: Dictionary = {}
 		for cid2 in k["cases"]:
 			var c2: Dictionary = CaseStore.get_case(int(cid2))
-			if int(c2.get("accused", -1)) == int(k["pid"]):
+			# the arrest charges ONE main case; the other victims' cases are joined to it (CrimeSerial.mark_caught) and stay open
+			if int(c2.get("accused", -1)) == int(k["pid"]) and (main.is_empty() or c2.has("joined")):
 				main = c2
 		_check(not main.is_empty() and str(main["state"]) in ["arrested", "charged", "trial", "closed"], "charged and heading for trial (%s)" % str(main.get("state", "?")))
+		if main.has("joined"):
+			_check((main["joined"] as Array).size() + 1 == (k["cases"] as Array).size(), "every victim's case is joined to the main one")
 		_check(not bool(JusticeState.serial.get("active", true)) and bool(JusticeState.serial.get("caught", false)), "the serial run is over")
 	for cid3 in k["cases"]:
 		_check(not bool(CaseStore.get_case(int(cid3)).get("ship_hold", false)) or str(k["phase"]) == "hunting", "no case stays held after the handover")
-	var out: Dictionary = {"killer": int(k["pid"]), "victims": (k["victims"] as Array).duplicate(), "phase": str(k["phase"])}
+	var out: Dictionary = {"killer": int(k["pid"]), "victims": (k["victims"] as Array).duplicate(), "phase": str(k["phase"]), "st_seed": Storyteller.rng.seed}
 	# the rest of the cruise ends normally
 	K.warp(int(t["return_min"]) - K.now() + 120)
 	_check(Vacation.trip(tid).is_empty(), "the cruise ended")

@@ -275,6 +275,7 @@
    0.4,
    1.8
   ],
+  "start_treasury": 500,
   "topup_share": 0.25,
   "debt": {
    "limit": -400,

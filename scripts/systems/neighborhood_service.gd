@@ -117,7 +117,7 @@ static func _closing() -> void:
 			continue
 		var left: int = Venues.minutes_to_close(lot_id)
 		if left == int(cfg().get("closing_notice_min", 20)):
-			SysUtil.notify("%s closes in %d minutes." % [Neighborhood.label_of(lot_id), left], "warn")
+			SysUtil.notify("%s closes in %s." % [Neighborhood.label_of(lot_id), SysUtil.count_text(left, "minute")], "warn")
 		if not Venues.is_open(lot_id):
 			SysUtil.notify("%s is closed. Heading home." % Neighborhood.label_of(lot_id), "warn")
 			Neighborhood.travel(here, Neighborhood.HOME, {"quiet": true})

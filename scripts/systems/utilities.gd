@@ -222,8 +222,8 @@ static func status_lines(hid: int) -> Array:
 
 static func _span(minutes: int) -> String:
 	if minutes < 90:
-		return "%d minutes" % maxi(minutes, 1)
-	return "%d hours" % int(round(float(minutes) / 60.0))
+		return SysUtil.count_text(maxi(minutes, 1), "minute")
+	return SysUtil.count_text(int(round(float(minutes) / 60.0)), "hour")
 
 # ------------------------------------------------------------------ save
 static func to_dict() -> Dictionary:

@@ -48,9 +48,9 @@ static func sentence(s: Dictionary) -> String:
 	var pd: int = int(s.get("probation_days", days if t == "probation" else 0))
 	var sd: int = int(s.get("service_days", days if t == "service" else 0))
 	if pd > 0:
-		bits.append("%d days of probation" % pd)
+		bits.append("%s of probation" % SysUtil.count_text(pd, "day"))
 	if sd > 0:
-		bits.append("%d days of community service" % sd)
+		bits.append("%s of community service" % SysUtil.count_text(sd, "day"))
 	if int(s.get("fine", 0)) > 0:
 		bits.append("a fine of %d coins" % int(s["fine"]))
 	if int(s.get("restitution", 0)) > 0:

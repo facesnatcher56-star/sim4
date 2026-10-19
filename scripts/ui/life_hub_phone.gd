@@ -35,7 +35,7 @@ static func build(dlg: LifeHub) -> void:
 			dlg.body.add_child(fl)
 			for o in LifeOuting.outings():
 				var w: String = LifeOuting.why_not(fid, int(c["id"]), o)
-				var b := dlg.button(str(o["label"]).capitalize(), w if w != "" else "Ask %s along" % c["name"], func():
+				var b := dlg.button(UIU.sentence(str(o["label"])), w if w != "" else "Ask %s along" % c["name"], func():
 					asking = -1
 					dlg.act("phone_invite", {"other": c["id"], "outing": o["id"]}), w == "")
 				fl.add_child(b)

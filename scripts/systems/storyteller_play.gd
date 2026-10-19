@@ -7,6 +7,8 @@ extends RefCounted
 ## ctx is plain data so it can sit in the saved queue: {key, hid, folk_id, other, lot, zone, who, stat}.
 
 static func lot_members(n: int) -> Array:
+	if StorytellerScan.active():
+		return StorytellerScan.lot_members(n)
 	var out: Array = []
 	for tid in Story.townies:
 		var t: Dictionary = Story.townies[tid]
@@ -16,6 +18,11 @@ static func lot_members(n: int) -> Array:
 	return out
 
 static func residents_of(hid: int) -> Array:
+	if StorytellerScan.active():
+		return StorytellerScan.residents(hid, func(): return _residents_of(hid))
+	return _residents_of(hid)
+
+static func _residents_of(hid: int) -> Array:
 	var out: Array = []
 	for f in WorldIface.all_folk():
 		if int(f.household_id) == hid and SysUtil.is_resident(f):
@@ -24,6 +31,11 @@ static func residents_of(hid: int) -> Array:
 	return out
 
 static func lots_in_zone(zone: String) -> Array:
+	if StorytellerScan.active():
+		return StorytellerScan.zone_lots(zone, func(): return _lots_in_zone(zone))
+	return _lots_in_zone(zone)
+
+static func _lots_in_zone(zone: String) -> Array:
 	var seen: Dictionary = {}
 	for tid in Story.townies:
 		var t: Dictionary = Story.townies[tid]
@@ -71,7 +83,7 @@ static func _can_home(c: Dictionary, when: Dictionary, hid: int) -> bool:
 		return false
 	if bool(when.get("nojob", false)) and not adults.any(func(f): return not Careers.has_job(int(f.id))):
 		return false
-	if bool(when.get("pets", false)) and not Storyteller.pets_exist():
+	if bool(when.get("pets", false)) and not Storyteller.pets_exist(hid):
 		return false
 	if when.has("tier") and StorytellerBudget.tier_of("h%d" % hid) != str(when["tier"]):
 		return false
@@ -82,60 +94,69 @@ static func _can_home(c: Dictionary, when: Dictionary, hid: int) -> bool:
 	if when.has("min_day") and SysUtil.day() < int(when["min_day"]):
 		return false
 	if c.has("incident"):
-		return not _incident_subjects(c, "h%d" % hid).is_empty()
+		return not _incident_subjects(c, "h%d" % hid, true).is_empty()
 	return true
 
 static func _can_lot(c: Dictionary, n: int) -> bool:
 	if lot_members(n).is_empty():
 		return false
 	if c.has("incident"):
-		return bool(c.get("lot", false)) and not _incident_subjects(c, "l%d" % n).is_empty()
+		return bool(c.get("lot", false)) and not _incident_subjects(c, "l%d" % n, true).is_empty()
 	return c.has("lot_text")
 
 static func _can_district(c: Dictionary, zone: String) -> bool:
 	if c.has("incident"):
-		return not _incident_subjects(c, "d" + zone).is_empty()
+		return not _incident_subjects(c, "d" + zone, true).is_empty()
 	var fx: Array = c.get("fx", [])
 	for e in fx:
 		if (e as Dictionary).has("other_coins") or (e as Dictionary).has("other_friend") or (e as Dictionary).has("lay_off"):
 			return not townies_in_zone(zone).is_empty()
 	return true
 
-## Subjects (IncidentSubject) an incident card can play on, in a stable order.
-static func _incident_subjects(c: Dictionary, key: String) -> Array:
+## Subjects (IncidentSubject) an incident card can play on, in a stable order. `first_only` stops at the first one that qualifies (eligibility only asks
+## whether there is any; the subjects are built one at a time, so a card that fits the first person does not test the rest of the district).
+static func _incident_subjects(c: Dictionary, key: String, first_only: bool = false) -> Array:
 	var def: Dictionary = IncidentDefs.get_def(str(c.get("incident", "")))
 	if def.is_empty():
 		return []
 	var out: Array = []
-	var cands: Array = []
+	var ids: Array = []              # what to build a subject from, all of one `make` kind
+	var make: String = ""
 	var kind: String = StorytellerBudget.kind_of(key)
 	var target: String = str(c.get("target", "lot"))
 	match kind:
 		"home":
 			var hid: int = StorytellerBudget.id_of(key)
 			if target == "lot":
-				cands.append(IncidentSubject.of_household(hid))
+				ids = [hid]
+				make = "household"
 			else:
-				for f in residents_of(hid):
-					cands.append(IncidentSubject.of_folk(f))
+				ids = residents_of(hid)
+				make = "folk"
 		"lot":
 			var n: int = StorytellerBudget.id_of(key)
 			if target == "lot":
-				cands.append(IncidentSubject.of_town_lot(n))
+				ids = [n]
+				make = "town_lot"
 			else:
-				for m in lot_members(n):
-					cands.append(IncidentSubject.of_townie(m))
+				ids = lot_members(n)
+				make = "townie"
 		"district":
 			var zone: String = StorytellerBudget.zone_of_key(key)
 			if target == "lot":
-				for n2 in lots_in_zone(zone):
-					cands.append(IncidentSubject.of_town_lot(int(n2)))
+				ids = lots_in_zone(zone)
+				make = "town_lot"
 			else:
-				for m2 in townies_in_zone(zone):
-					cands.append(IncidentSubject.of_townie(int(m2)))
-	for s in cands:
-		if IncidentCond.check(def.get("conditions", []), s) and (str(c.get("tone", "bad")) == "good" or IncidentRisk.risk_factor(def, s) > 0.0):
+				ids = townies_in_zone(zone)
+				make = "townie"
+	var conds: Array = def.get("conditions", [])
+	var good: bool = str(c.get("tone", "bad")) == "good"
+	for x in ids:
+		var s = IncidentSubject.of_household(int(x)) if make == "household" else (IncidentSubject.of_folk(x) if make == "folk" else (IncidentSubject.of_town_lot(int(x)) if make == "town_lot" else IncidentSubject.of_townie(int(x))))
+		if IncidentCond.check(conds, s) and (good or IncidentRisk.risk_factor(def, s) > 0.0):
 			out.append(s)
+			if first_only:
+				break
 	return out
 
 # ------------------------------------------------------------------ the context

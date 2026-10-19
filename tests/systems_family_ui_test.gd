@@ -53,7 +53,7 @@ func run() -> Array:
 	var txt: String = _texts(fp.family_box)
 	K.expect(f, txt.find("PARTNER") >= 0 and txt.find("Bo Rowe") >= 0 and txt.find("Partner") >= 0, "partner section lists Bo")
 	K.expect(f, txt.find("CHILDREN") >= 0 and txt.find("Kit Rowe") >= 0 and txt.find("Sam Rowe") >= 0, "children listed")
-	K.expect(f, txt.find("Child)") >= 0, "ages / stages shown: %s" % txt)
+	K.expect(f, txt.find("child)") >= 0, "ages / stages shown: %s" % txt)
 	K.expect(f, fp.family_buttons.has("propose") and not fp.family_buttons["propose"].disabled, "Propose is enabled for a partner")
 	K.expect(f, not fp.family_buttons["try_for_baby"].disabled and not fp.family_buttons["adopt_child"].disabled, "Try for Baby / Adopt enabled for an adult couple")
 	K.expect(f, fp.family_buttons["have_wedding"].disabled, "Hold Wedding disabled until engaged")
