@@ -45,7 +45,18 @@ static func _lawsuit(p: Dictionary) -> void:
 		if int(r.household_id) == owner_hid:
 			def = int(r.id)
 			break
-	if victim < 0 or def < 0 or not JusticeState.chance(float(k.get("chance", 0.3)) * (2.0 if bool(p.get("fatal", false)) else 1.0)):
+	if victim < 0 or def < 0:
+		return
+	# only serious injuries lead to court, and people rarely sue friends and family (a stranger or an enemy is likelier to)
+	if not bool(p.get("fatal", false)) and int(p.get("severity", 0)) < int(k.get("min_severity", 2)):
+		return
+	var rel: float = 1.0
+	var bit: String = RelationshipBits.bit_for(victim, def)
+	if bit in ["spouse", "partner", "sweetheart", "family", "best_friend", "friend"]:
+		rel = float(k.get("friend_mult", 0.1))
+	elif bit == "enemy":
+		rel = float(k.get("enemy_mult", 2.0))
+	if not JusticeState.chance(float(k.get("chance", 0.08)) * rel * (2.0 if bool(p.get("fatal", false)) else 1.0)):
 		return
 	var amt: int = int(k.get("amount", 250)) * (3 if bool(p.get("fatal", false)) else 1)
 	file("lawsuit", victim, def, amt, "%s is suing %s for %d coins after getting hurt at their home." % [CrimePerson.name_of(victim), CrimePerson.name_of(def), amt])

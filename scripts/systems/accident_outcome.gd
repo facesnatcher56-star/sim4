@@ -19,7 +19,7 @@ static func on_incident(ctx: Dictionary, args: Dictionary) -> Dictionary:
 		return {}
 	if int(args.get("severity", 0)) > 0:
 		hurt(f, int(args["severity"]), str(args.get("reason", "")), cause)
-		note_property(f, cause, false)
+		note_property(f, cause, false, int(args["severity"]))
 	if str(args.get("buff", "")) != "":
 		f.add_buff(str(args["buff"]))
 	return {}
@@ -34,7 +34,7 @@ static func property_owner(f) -> int:
 			return int(o.household_id)
 	return 0
 
-static func note_property(f, cause: String, fatal: bool) -> void:
+static func note_property(f, cause: String, fatal: bool, severity: int = 0) -> void:
 	var owner: int = property_owner(f)
 	if owner > 0:
-		SysUtil.game_event("accident_on_property", {"victim": int(f.id), "lot": "home:%d" % owner, "owner": owner, "cause": cause, "fatal": fatal})
+		SysUtil.game_event("accident_on_property", {"victim": int(f.id), "lot": "home:%d" % owner, "owner": owner, "cause": cause, "fatal": fatal, "severity": severity})

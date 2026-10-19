@@ -283,7 +283,7 @@ func _civil(f: Array) -> void:
 	var ids: Array = C.adults()
 	K.set_time(5, 9, 0)
 	JusticeState.sect("civil")["lawsuit"]["chance"] = 1.0
-	SysUtil.game_event("accident_on_property", {"victim": int(ids[0]), "lot": "home:1", "owner": 1, "cause": "fall", "fatal": false})
+	SysUtil.game_event("accident_on_property", {"victim": int(ids[0]), "lot": "home:1", "owner": 1, "cause": "fall", "fatal": false, "severity": 3})
 	K.expect(f, JusticeState.civil.size() == 1 and str(JusticeState.civil[0]["kind"]) == "lawsuit", "an injury on someone's property leads to a lawsuit")
 	for d in 8:
 		SimEnv.clock().total_minutes += 1440
@@ -301,7 +301,26 @@ func _civil(f: Array) -> void:
 	K.expect(f, CrimePerson.coins(a) + CrimePerson.coins(b) == before, "the settlement only moves coins between them")
 	var sc: Dictionary = JusticeCivil.small_claim(a, b, 80, "a damaged fence")
 	K.expect(f, str(sc["kind"]) == "small_claims", "small claims exist")
+	# minor injuries never lead to court, and relatives rarely sue
+	var n0: int = JusticeState.civil.size()
+	SysUtil.game_event("accident_on_property", {"victim": int(ids[0]), "lot": "home:1", "owner": 1, "cause": "fall", "fatal": false, "severity": 1})
+	K.expect(f, JusticeState.civil.size() == n0, "a minor injury is never sued over")
+	for o in SysUtil.residents():
+		if int(o.household_id) == 1:
+			RelationshipBits.set_flag(int(ids[0]), int(o.id), "family", true, false)
+	var cases: int = 0
+	for i in 100:
+		var before_n: int = _last_civil_id()
+		SysUtil.game_event("accident_on_property", {"victim": int(ids[0]), "lot": "home:1", "owner": 1, "cause": "fall", "fatal": false, "severity": 3})
+		cases += 1 if _last_civil_id() != before_n else 0
+	K.expect(f, cases < 35, "relatives rarely sue even after a serious injury (%d of 100 at certain base chance)" % cases)
 	K.teardown()
+
+func _last_civil_id() -> int:
+	var m: int = 0
+	for c in JusticeState.civil:
+		m = maxi(m, int(c["id"]))
+	return m
 
 func _careers(f: Array) -> void:
 	var w := C.town(12)

@@ -3088,7 +3088,10 @@
   "base_win": 0.55,
   "settle_share": 0.5,
   "lawsuit": {
-   "chance": 0.3,
+   "chance": 0.08,
+   "min_severity": 2,
+   "friend_mult": 0.1,
+   "enemy_mult": 2.0,
    "amount": 250
   },
   "inheritance": {
