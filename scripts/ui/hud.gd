@@ -1,4 +1,4 @@
-﻿class_name Hud
+class_name Hud
 extends Control
 ## Root of the in-game HUD. Everything is built in code so the scene stays trivial.
 signal save_requested(slot: int)
@@ -28,6 +28,7 @@ var floor_selector: FloorSelector
 var goals_dialog: GoalsDialog
 var career_dialog: CareerDialog
 var money_hub: BankHub                  # task 13: Town & Money window
+var vacation_dialog: VacationDialog
 var household_dialog: HouseholdDialog
 var help_dialog: HelpDialog
 var incident_debug: IncidentDebug
@@ -213,6 +214,8 @@ func _build_dialogs() -> void:
 	goals_dialog = GoalsDialog.new()
 	career_dialog = CareerDialog.new()
 	money_hub = BankHub.new()
+	vacation_dialog = VacationDialog.new()
+	UIU.connect_ev("game_event", func(n, p): if n == "vacation_open_booking": vacation_dialog.show_for(int(p.get("folk_id", selected_folk_id))))
 	household_dialog = HouseholdDialog.new()
 	help_dialog = HelpDialog.new()
 	help_dialog.tips_requested.connect(func(): tips.start(true))
@@ -232,11 +235,13 @@ func _build_dialogs() -> void:
 	case_prompt = CasePrompt.new()
 	JusticePlayer.ask_fn = case_prompt.ask
 	for d in [goals_dialog, career_dialog, money_hub, household_dialog, help_dialog, pause_menu, settings_dialog, confirm_dialog, incident_debug, case_board, case_prompt, share_hub]:
+	for d in [goals_dialog, career_dialog, vacation_dialog, household_dialog, help_dialog, pause_menu, settings_dialog, confirm_dialog, incident_debug, case_board, case_prompt]:
 		add_child(d)
 	save_menu.visibility_changed.connect(func(): UIDialog.track_open(save_menu.get_instance_id(), save_menu.visible))
 
 func dialogs() -> Array:
 	return [confirm_dialog, settings_dialog, share_hub, pause_menu, goals_dialog, career_dialog, money_hub, household_dialog, help_dialog, incident_debug, case_board, case_prompt]
+	return [confirm_dialog, settings_dialog, pause_menu, goals_dialog, career_dialog, vacation_dialog, household_dialog, help_dialog, incident_debug, case_board, case_prompt]
 
 func _on_pause_choice(id: String) -> void:
 	pause_menu.hide_dialog()
