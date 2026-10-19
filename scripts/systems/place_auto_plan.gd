@@ -63,6 +63,8 @@ static func chance(f, kid: String, d: Dictionary, price: int) -> float:
 	var stage: String = str(f.age_stage)
 	if d.has("stages") and not (d["stages"] as Array).has(stage):
 		return 0.0
+	if stage == "toddler" and not (c.get("toddler_kinds", []) as Array).has(kid):
+		return 0.0                    # a toddler is taken places, they do not go to the cinema by themselves
 	var p: float = float(d.get("base", 0.0))
 	if not bool(d.get("essential", false)):
 		p *= float(c.get("scale", 1.0)) * float((c.get("stage_all", {}) as Dictionary).get(stage, 1.0))

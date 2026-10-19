@@ -25,7 +25,7 @@ static func reset() -> void:
 	last.clear()
 	claims.clear()
 	tally.clear()
-	stats = {"planned": 0, "started": 0, "done": 0, "dropped": 0, "kinds": {}, "drops": {}}
+	stats = {"planned": 0, "started": 0, "done": 0, "dropped": 0, "kinds": {}, "drops": {}, "who": {}}
 	rng = RandomNumberGenerator.new()
 	rng.seed = SEED
 	off = false
@@ -131,7 +131,7 @@ static func from_dict(d: Dictionary) -> void:
 	if not s.is_empty():
 		for k5 in ["planned", "started", "done", "dropped"]:
 			stats[k5] = int(s.get(k5, 0))
-		for sub in ["kinds", "drops"]:
+		for sub in ["kinds", "drops", "who"]:
 			stats[sub] = {}
 			for k6 in (s.get(sub, {}) as Dictionary):
 				stats[sub][str(k6)] = int(s[sub][k6])

@@ -14,7 +14,7 @@ static func eval(gate: String, f, kind: String, d: Dictionary, day: int) -> Dict
 	var stage: String = str(f.age_stage)
 	match gate:
 		"ill":
-			return {"mult": 1.0} if _sick(f) else NO          # once the doctor has seen them (medicated) they rest
+			return {"mult": 1.0} if _sick(f) else NO          # once the doctor has seen them they rest for a couple of days
 		"checkup":
 			if stage in ["baby", "toddler", "child"]:
 				return NO
@@ -67,8 +67,17 @@ static func eval(gate: String, f, kind: String, d: Dictionary, day: int) -> Dict
 			return _invite(f)
 	return NO
 
+## Ill or hurt enough to see the doctor (a cold or a sprain is waited out at home): data config.auto.doctor.
 static func _sick(f) -> bool:
-	return (Health.is_ill(f) or Health.is_injured(f)) and not Health.is_collapsed(f) and not Hospital.is_in(int(f.id)) and not f.has_buff("medicated")
+	if Health.is_collapsed(f) or Hospital.is_in(int(f.id)) or SysUtil.day() - PlaceAuto.was_done(int(f.id), "clinic_sick") < int(PlaceAuto.cfg().get("doctor", {}).get("again_days", 2)):
+		return false                # (medicine from the bathroom cabinet is not the doctor: they still go)
+	var dc: Dictionary = PlaceAuto.cfg().get("doctor", {})
+	if Health.is_ill(f):
+		var ill: Dictionary = Health.illness_of(f)
+		var after: float = float(dc.get("%s_after_hours" % str(ill["kind"]), dc.get("ill_after_hours", 0.0))) * 60.0
+		if int(ill["severity"]) >= 2 or float(SysUtil.now() - int(ill["since"])) >= after:
+			return true
+	return Health.is_injured(f) and Health.injury_severity(f) >= int(dc.get("injury_min_severity", 2))
 
 # ------------------------------------------------------------------ pets
 static func _vet(f, day: int) -> Dictionary:

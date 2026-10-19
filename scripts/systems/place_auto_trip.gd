@@ -105,6 +105,7 @@ static func _start(p: Dictionary, now: int) -> bool:
 	PlaceAuto.trips[fid] = trip
 	PlaceAuto.count("started")
 	PlaceAuto.tick("kinds", str(p["kind"]))
+	PlaceAuto.tick("who", str(f.name))
 	return true
 
 # ------------------------------------------------------------------ following
@@ -118,6 +119,9 @@ static func _step(fid: int, now: int) -> void:
 		"go":
 			if Places.is_there(f, str(t["place"])) and NeighborhoodLots.walking_to(f) == "":
 				t["state"] = "use"
+			elif str(f.get_meta("denied", "")) == Places.lot_of(str(t["place"])):
+				_finish(f, t, false, "denied")          # the door would not let them in (closing, a fee they could not pay)
+				return
 			elif now - int(t["t0"]) > int(PlaceAuto.cfg().get("walk_limit_min", 120)):
 				_finish(f, t, false, "late")
 				return

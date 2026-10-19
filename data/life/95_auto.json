@@ -5,6 +5,7 @@
    "enabled": true,
    "scale": 0.22,
    "trips_per_day": {"work": 1, "free": 2},
+   "toddler_kinds": ["preschool"],
    "wait_min": 150,
    "walk_limit_min": 120,
    "min_gap_hours": 3,
@@ -19,6 +20,7 @@
    "invite_yes_base": 0.6,
    "invite_yes_per_friendship": 0.004,
    "ill_delay_hours": [1, 3],
+   "doctor": {"cold_after_hours": 30, "flu_after_hours": 0, "ill_after_hours": 0, "injury_min_severity": 2, "again_days": 2},
    "pet": {
     "feed_below": 55,
     "play_below": 40,

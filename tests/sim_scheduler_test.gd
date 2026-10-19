@@ -187,7 +187,7 @@ func _registry() -> void:
 		if int(r["cadence"]) == 1 and not (r["name"] in ["Tiers", "TownSim.sync", "CrimeFlow.sync", "Incidents.slice", "WeatherWorld.rain"]):      # the tier rows (17.3) are not old steps
 			order.append(r["name"])
 	var old_steps := ["NeighborhoodService.before", "CareerShifts", "Away", "StoryVisits", "BabyCare", "AccidentMarks", "Incidents", "CrimeFlow", "Fire",
-		"DisasterClock", "Vacation", "Utilities", "Transport", "CityAmbulance", "NeighborhoodService.after", "WeatherFolk", "LevelSystems"]
+		"DisasterClock", "Vacation", "PlaceAuto", "Utilities", "Transport", "CityAmbulance", "NeighborhoodService.after", "WeatherFolk", "LevelSystems"]
 	_check(order == old_steps, "the minute rows keep the old SystemsManager step order: %s" % str(order))
 	var d: String = s.describe()
 	for needle in ["hour/Incidents.on_hour", "day/CrimeFlow.on_day", "| minute | 210 |"]:
