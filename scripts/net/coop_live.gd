@@ -15,6 +15,8 @@ var hash_every_min: int = 10
 var full_every_min: int = 60
 var toasts: Array = []                  # ring of {i, text, kind}
 var hash_log: Dictionary = {}           # game minute -> host hash (for the minutes where a check was due), last 8
+var canon_log: Dictionary = {}          # the same minutes as hash_log, the full canonical text (to see WHAT differed after a mismatch; tests print it)
+var _canon: String = ""
 var deltas_sent: int = 0
 var bytes_sent: int = 0
 var _toast_n: int = 0
@@ -44,6 +46,7 @@ func new_peer() -> Dictionary:
 
 ## Called after a snapshot went to the peer: the next delta carries everything again.
 func reset_peer(st: Dictionary) -> void:
+	_hash_minute = -1      # the world may have changed inside this minute (a household moved in): never reuse a cached hash
 	st["rows"] = {}
 	st["coins"] = {}
 	st["toast"] = _toast_n
@@ -104,10 +107,13 @@ func hash_due(now_min: int) -> String:
 		return ""
 	if _hash_minute != now_min:
 		_hash_minute = now_min
-		_hash_val = CoopHash.of_world()
+		_canon = CoopHash.canonical()
+		_hash_val = str(_canon.sha256_text().substr(0, 16))
+		canon_log[now_min] = _canon
 		hash_log[now_min] = _hash_val
 		while hash_log.size() > 8:
 			hash_log.erase(hash_log.keys()[0])
+			canon_log.erase(canon_log.keys()[0])
 	return _hash_val
 
 const MAX_RAW := 262144

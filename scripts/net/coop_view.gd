@@ -12,7 +12,7 @@ static func apply(d: Dictionary) -> String:
 	if d.is_empty() or not d.has("m"):
 		return "bad delta"
 	var need := ""
-	Clock.total_minutes = int(d["m"])
+	SimEnv.clock().total_minutes = int(d["m"])
 	last_minute = int(d["m"])
 	applied += 1
 	for r in d.get("f", []):

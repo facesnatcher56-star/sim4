@@ -94,7 +94,7 @@ func join(text: String, p_name: String) -> String:
 	client.install_remote()
 	client.time_updated.connect(func(_s): changed.emit())
 	CoopTime.active = true               # a client never advances or pauses the clock: it only shows what the host sends
-	Clock.coop_rate = 0.0
+	SimEnv.clock().coop_rate = 0.0
 	client.state_changed.connect(func(_s, _t2): changed.emit())
 	client.lobby_updated.connect(func(_l): changed.emit())
 	client.progress.connect(func(_f): changed.emit())
@@ -141,7 +141,7 @@ func _stop_time() -> void:
 	if role == "client" or client != null:
 		Commands.remote = Callable()
 	CoopTime.active = false
-	Clock.coop_rate = -1.0
+	SimEnv.clock().coop_rate = -1.0
 
 func stop() -> void:
 	_stop_time()

@@ -41,7 +41,7 @@ var _sig: String = ""
 
 # ------------------------------------------------------------------ lifecycle
 func start(p_clock = null) -> void:
-	clock = p_clock if p_clock != null else Clock
+	clock = p_clock if p_clock != null else SimEnv.clock()
 	active = true
 	_apply_rate()
 

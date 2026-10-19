@@ -25,9 +25,12 @@ func run() -> Array:
 	var cmd := Kit.find_command()
 	_check(not cmd.is_empty(), "found a runnable command")
 	if not cmd.is_empty():
+		Players.set_player(1, 1, "Hosty")
+		Players.set_player(2, 1, "Ann")         # stage-1 scenario: the first client may command household 1
 		_ses = CoopSession.new()
 		var port := _open_lobby()
 		if port > 0:
+			_ses.time.paused = true             # the test moves game time itself (HoodKit.run); Clock's own process must not
 			_scenario(port, cmd)
 		_ses.stop()
 	for pid in _pids:
@@ -95,6 +98,7 @@ func _scenario(port: int, cmd: Dictionary) -> void:
 	for pid in _pids:
 		OS.kill(pid)
 	_pids.clear()
+	_live_scenario(port)
 	# version mismatch, real sockets, in-process client: it says another build, the host expects this one
 	var odd := CoopSession.new()
 	CoopProto.build_override = "old-build"
@@ -112,12 +116,96 @@ func _scenario(port: int, cmd: Dictionary) -> void:
 		OS.delay_msec(5)
 	_check(odd.client.state == "refused", "a mismatching build is refused (%s)" % odd.client.state)
 	_check("version" in odd.client.status.to_lower() and "host" in odd.client.status.to_lower(), "with a plain-language reason: " + odd.client.status)
-	_check(_ses.host.player_count() == 2, "the refused client took no seat")
+	_check(_ses.host.player_count() == 3, "the refused client took no seat")
 	odd.stop()
+
+## Stage 2: a second client makes its own household on its own lot, its order for the host's folk is refused, and live deltas make its view
+## track the host (positions exactly, clock, periodic hash check without a mismatch, no extra snapshot). Then it drops and comes back as the same player.
+func _live_scenario(port: int) -> void:
+	Players.remove_player(2)
+	var host_hh := Players.household_of(1)
+	_ses.host.live.min_gap_s = 0.03
+	_ses.host.live.hash_every_min = 5
+	_ses.host.live.full_every_min = 100000
+	var res := _tmp("c")
+	_spawn([str(port), res, "live", "Bea"])
+	var s := _wait_stage(res, "synced", 60.0)
+	_check(not s.is_empty(), "live client joined")
+	if s.is_empty():
+		return
+	var pid := int(s["pid"])
+	var h := _wait_stage(res, "housed", 40.0)
+	_check(not h.is_empty(), "the client made a household and received the new town")
+	if h.is_empty():
+		return
+	var hh := Players.household_of(pid)
+	_check(hh > 0 and hh != host_hh, "the host's Players table has a household of its own for the client (%d vs %d)" % [hh, host_hh])
+	_check(int(h["local_id"]) == pid and int(h["hh"]) == hh and int(h["host_hh"]) == host_hh, "the client sees the same table: it is player %d with household %d (%s)" % [pid, int(h["hh"]), str(h)])
+	_check(Players.primary_household() == host_hh, "the host's own primary household is untouched")
+	_check(PlayerLots.lot_of(pid) != "" and PlayerLots.lot_of(pid) != "home", "the client has its own lot (%s)" % PlayerLots.lot_of(pid))
+	var fr := _wait_stage(res, "foreign", 30.0)
+	_check(not fr.is_empty() and not bool(fr["ok"]), "an order for the host's folk is rejected (%s)" % str(fr.get("msg", "")))
+	var own := _wait_stage(res, "own", 30.0)
+	_check(not own.is_empty() and bool(own["ok"]), "an order for its own folk is accepted (%s)" % str(own.get("msg", "")))
+	var snaps0 := _ses.host.snapshots_sent
+	# the host plays 25 game minutes; deltas flow
+	for i in 25:
+		HoodKit.run(1)
+		var t0 := Time.get_ticks_msec()
+		while Time.get_ticks_msec() - t0 < 120:
+			_pump()
+			OS.delay_msec(5)
+	var minute := SimEnv.now_min()
+	var tick := {}
+	var t1 := Time.get_ticks_msec()
+	while Time.get_ticks_msec() - t1 < 15000:
+		_pump()
+		tick = _read(res)
+		if int(tick.get("minute", -1)) == minute and tick.get("stage", "") == "tick":
+			break
+		OS.delay_msec(10)
+	_check(int(tick.get("minute", -1)) == minute, "the client's clock follows the host's (%s vs %d)" % [str(tick.get("minute", -1)), minute])
+	var off := 0
+	var tiles: Dictionary = tick.get("tiles", {})
+	for f in WorldIface.all_folk():
+		if int(f.household_id) > 0:
+			var tt: Array = tiles.get(str(f.id), [])
+			if tt.size() != 2 or int(tt[0]) != f.tile.x or int(tt[1]) != f.tile.y:
+				off += 1
+	_check(off == 0 and tiles.size() >= 4, "every household folk is where the host has it (%d of %d off)" % [off, tiles.size()])
+	_check(int(tick.get("deltas", 0)) >= 10, "state deltas arrived (%s)" % str(tick.get("deltas", 0)))
+	_check(int(tick.get("hc", 0)) >= 3 and int(tick.get("hm", 0)) == 0 and _ses.host.desyncs_total == 0, "periodic hash checks matched (checks %s, mismatches %s)" % [str(tick.get("hc", 0)), str(tick.get("hm", 0))])
+	_check(_ses.host.snapshots_sent == snaps0 and int(tick.get("loads", 0)) == 2, "no extra snapshot was needed (loads %s)" % str(tick.get("loads", 0)))
+	_check(_ses.host.live.bytes_sent / maxi(1, _ses.host.live.deltas_sent) < 4000, "deltas are small (%d bytes on average)" % (_ses.host.live.bytes_sent / maxi(1, _ses.host.live.deltas_sent)))
+	if _ses.host.desyncs_total > 0:
+		var hc: String = str(_ses.host.live.canon_log.get(_ses.host.last_bad_minute, ""))
+		var cc: String = str(tick.get("bad", ""))
+		var hp := hc.split("|")
+		var cp := cc.split("|")
+		for i in mini(hp.size(), cp.size()):
+			if hp[i] != cp[i]:
+				print("DESYNC part ", i, " host=", hp[i], " client=", cp[i])
+		print("DESYNC sizes ", hp.size(), " ", cp.size(), " minute ", _ses.host.last_bad_minute)
+	# TIME reached the client
+	var ts: Dictionary = tick.get("time_state", {})
+	_check(ts.has("pace") and ts.get("paused", false), "the client knows the pace and pause state (%s)" % str(ts))
+	# reconnect: same player, same household
+	var token := str(s["token"])
+	for p in _pids:
+		OS.kill(p)
+	_pids.clear()
+	var res2 := _tmp("d")
+	_spawn([str(port), res2, "rejoin", "Bea", token])
+	var r := _wait_stage(res2, "synced", 60.0)
+	_check(not r.is_empty() and int(r["pid"]) == pid, "the dropped player came back as the same player")
+	_check(Players.household_of(pid) == hh and _ses.host.player_count() == 3, "with the same household, no ghost seat (%d)" % _ses.host.player_count())
+	for p in _pids:
+		OS.kill(p)
+	_pids.clear()
 
 # ------------------------------------------------------------------ plumbing
 func _clean_files() -> void:
-	for tag in ["a", "b"]:
+	for tag in ["a", "b", "c", "d"]:
 		DirAccess.remove_absolute(_tmp(tag))
 
 func _tmp(tag: String) -> String:

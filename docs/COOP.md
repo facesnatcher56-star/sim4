@@ -90,3 +90,69 @@ reconnect and takeover, garbage, rate limit, command idempotence, kick, close), 
 `coop_lobby_test`, and `coop_net_test` (real localhost sockets; a second headless Godot, `tests/fixtures/coop_client.gd`, started
 through `tools/godot_guard.ps1` with a short budget: join > snapshot > same hash > command applied on the host > event on the client >
 fresh snapshot > same hash; kill the client and rejoin with its token; build mismatch refused). Random free port per run.
+
+---
+
+# Stages 2 and 3: players, households, live updates, the time model (protocol VERSION 2)
+
+## Players and households
+
+- **Players table** (`Players`, saved): player id -> {household id, name}. `Players.local_id` is THIS machine's player (1 on the host or in a solo game, the id the host gave a client);
+  `Players.primary_household()` and the HUD follow it. `Players.color_of(pid)` is the name tag colour.
+- **`CoopCommands.allow` is now the Players lookup** (`households_of(pid)`; the `allow` dictionary is only a test override). A player may command a folk only of their own household.
+  Allowed actions: interact (pie menu orders and walk-to), career_accept / decline / skip / unskip, set_aspiration, travel, go_home, pay_bill, build_place / sell / wall / floor.
+  Not yet (refused with a plain message): market, vacation, invite_to_venue, prison_visit, build_undo. Tiles travel as `{"_v":[x,y]}` (`CoopCommands.to_wire / from_wire`).
+- **`Commands.run` carries the player id**: default `Players.local_id`. On a client `Commands.remote` is set (`CoopClient.install_remote`), so every UI action goes to the host as a CMD
+  instead of running locally. While a command runs, `PlayerLots.acting` is the issuing player, and `WorldRegions.can_build` asks `PlayerLots.build_ok(region)`.
+- **Lots** (`PlayerLots`): the host lives on the map's `home` lot. A joining player gets a **converted townie home**: `townie_a`, `townie_b` or `townie_c` (so at most
+  3 clients, 4 players). NOT convertible: the apartment block, venues, the park, roads. No empty residential plots exist on the current map; a future "empty plot" kind only has to be
+  listed by `PlayerLots.free_lots`. The region gets `pid` (saved with the regions), its objects go to the new household (`Economy.owner`), its townie residents move to the other townie
+  homes (`Neighborhood.residents_of` skips claimed lots). Build mode is limited to your own lot for every player.
+- **Join flow**: connect -> snapshot -> `CoopHouseholdPick` (ready-made households from the scenario presets, or "Customise..." = the normal household creator) ->
+  HOUSEHOLD message (`CoopHouseholds.pack`) -> host `CoopHouseholds.join` (sanitises everything, claims a lot, creates the folk on the lot's spawn tiles, registers them with the
+  systems, starting funds, Players entry) -> EVENT `household` {ok, hid, lot} -> fresh snapshot (the client reloads and sees its household). A late joiner does exactly this
+  mid-game. A reconnecting player (same token) keeps their pid and household. A player who leaves for good keeps their household (it runs on autonomy).
+  Host flow: the lobby has a pace selector and "Start a new co-op town first..." (opens the normal start picker; afterwards open Co-op again and pick "The game I am playing now").
+- **UI for your household only**: folk row, panels, money (top bar), goals, careers, build mode. Other players' folk appear in the world with a coloured name tag "Name - Player"
+  (`CoopHud`; yours say "(you)"). `CoopVisibility.visible_to(pid, entity)` is the single hook the tier work (17.3) replaces; `is_mine` and `toast_for` are the household rules.
+
+## Live updates (`CoopLive` on the host, `CoopView` on the client)
+
+Message `DELTA {minute, hash, data}`; `data` = `[u32 raw size][zstd JSON]`, at most 16 KB (`CoopLive.pack_json`). Contents: `m` minute, `f` folk rows that CHANGED since that peer's
+last delta (`i x y l` position, `a t` activity and target, `po` posture, `aw` away reason, `md mi` mood, `n` needs as whole numbers = exactly what the state hash sees), `c` coins that
+changed (per household), `t` toasts (at most 8; toasts about another player's folk are filtered by `CoopVisibility.toast_for`), `nf` folk count, `no` object count.
+Bounds: at most 64 rows; one delta per peer per 0.5 s real time and per game minute; a delta that does not fit becomes a snapshot. Deltas average a few hundred bytes.
+The client applies it to its local world (`CoopView.apply`): positions, activity (a stand-in Interaction that the FolkView reads), needs, mood, away flag, coins, toasts, clock.
+It does NOT simulate: the clock never advances locally (`Clock.coop_rate = 0`).
+- **Safety nets**: the client asks for a snapshot when a folk is unknown or the folk or object count differs (build mode, births, deaths); the host re-sends a full snapshot every
+  60 game minutes (`live.full_every_min`) and whenever a hash check fails. **Hash check**: every 10 game minutes the delta carries the host's `CoopHash`; the client answers
+  `HASH {xfer: 0, minute}`; the host answers `SYNC {xfer: 0, ok}`; a mismatch is counted (`desyncs_total`) and answered with a snapshot. Deltas start only after the first snapshot
+  was acknowledged.
+- Not live yet (arrives with the next snapshot): crowd NPCs and visitors on lots, weather, Chronicle and case board contents, other players' buff lists.
+
+## The time model (`CoopTime`, host only)
+
+- **One fixed pace**, chosen in the lobby before the session: relaxed 0.5, normal 1, quick 2 game minutes per real second. No fast-forward buttons (`Clock.coop_rate` overrides
+  the speed; the HUD hides the buttons) and menus never pause (`UIDialog.track_open` is a no-op while `CoopTime.active`; build mode neither).
+- **Auto skip** at 45 game minutes per real second while EVERY connected player is passive (`CoopTime.household_passive`: all their folk are away - work, school, hospital, jail,
+  trip - or asleep: `sleep_bed / nap_bed / nap_sofa / sleep_crib`). A player with no input for 3 real minutes is on autopilot and counts as passive; a dropped player is not waited
+  for; a player still choosing a household counts as active. The banner "Everyone is asleep or away, so time is skipping ahead." is shown to all (TIME message -> `CoopHud`).
+- **Alerts** (`CoopAlerts`, listens to `game_event`): fire started / alarm, murderous rage, death, arrest, child services warning, labour, phone call, town disasters (siren, start,
+  impact), chronicle severity 4+, or any system's own `SysUtil.game_event("coop_alert", {alert_players: [ids], text, folk_id})` (an `alert_players` list in any payload wins). The skip
+  stops, normal pace holds for 20 game minutes, and the right players get a toast with a "Show me" camera button (EVENT `alert`, with the folk's tile; no sound).
+- **Pause** only by unanimous vote: `VOTE {kind: "pause", yes}`; anyone calls it, every connected player must accept (a "no" cancels, 30 s timeout); alone it passes at once.
+  While paused any player may resume (`VOTE {kind: "resume"}`).
+- Hooks for later stages (nothing built): the waiting player's spectate / read / chat options hang on `time.state()` and `CoopTime.passive(pid)`; night-shift prompts on `passive()` and
+  `CoopAlerts`; player-vs-player crime settings on `Commands` (`player_id`) and `PlayerLots.player_of_lot`.
+
+## Limits and rough edges
+
+`go_home` follows `PlayerLots.lot_of(pid)`, but older systems that send folk to `Neighborhood.HOME` (commute return, parties, visits) still mean the host's home for other players'
+folk. A player who leaves for good keeps their household and lot. The inbound rate limit is still the stage-1 token bucket (30 packets/s); outbound live traffic is bounded by
+`live.min_gap_s`.
+
+## Tests added
+
+`coop_players_test` (join, lots, allowlist, build rules, hostile input, save / load, delta build and apply), `coop_time_test` (pace, skip, alerts, vote, idle, dropped players),
+`coop_skip_run_test` (real sim, 2 game days, two households, skip at night, resume in the morning, menus do not pause), and `coop_net_test` extended (second client over sockets: own
+household and lot, foreign order rejected, deltas keep positions identical, periodic hash without a mismatch, reconnect keeps the player).

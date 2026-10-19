@@ -31,6 +31,7 @@ var peers: Dictionary = {}        # transport peer id -> record
 var reserved: Dictionary = {}     # token -> {pid, name, at}: dropped clients that may come back
 var invalid_total: int = 0
 var desyncs_total: int = 0
+var last_bad_minute: int = -1
 var snapshots_sent: int = 0
 var _now: float = 0.0
 var _xfer: int = 0
@@ -304,6 +305,7 @@ func _periodic_hash(id: int, p: Dictionary, m: Dictionary) -> void:
 	if not ok:
 		p["desyncs"] = int(p["desyncs"]) + 1
 		desyncs_total += 1
+		last_bad_minute = int(m["minute"])
 		_snap_req(id, p)
 
 ## Client asks for a snapshot because its view cannot follow (unknown folk, other object count).

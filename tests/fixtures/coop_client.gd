@@ -66,6 +66,9 @@ func _step() -> void:
 		_write("refused", {"state": c.state, "text": c.status})
 		_finish(0)
 		return
+	if _mode == "live":
+		_live_step(c)
+		return
 	if _stage == 0 and c.state == "synced":
 		_stage = 1
 		_write("synced", {"hash": CoopHash.of_world(), "minute": SimEnv.now_min(), "token": c.token, "pid": c.player_id,
@@ -76,6 +79,43 @@ func _step() -> void:
 		_stage = 4
 		_write("resynced", {"hash": CoopHash.of_world(), "minute": SimEnv.now_min(), "loads": c.loads, "host_hash": c.host_hash})
 
+## mode "live" (stage 2): join, make a household, try an order for the HOST's folk (must be refused), give one for our own folk (accepted), then
+## keep reporting positions / minute / delta counters every 100 ms so the host can compare them with its own world.
+var _next_tick := 0
+var _seq_foreign := -1
+var _seq_own := -1
+
+func _live_step(c: CoopClient) -> void:
+	match _stage:
+		0:
+			if c.state == "synced":
+				_stage = 1
+				_write("synced", {"token": c.token, "pid": c.player_id})
+				c.household_result.connect(func(ok, msg, lot): _write("household", {"hh_ok": ok, "hh_msg": msg, "lot": lot}))
+				c.send_household({"name": "Beas", "folk": [{"name": "Bea", "stage": "adult", "traits": ["neat", "active", "social"], "aspiration": "", "appearance": {}, "rel": "none"}]})      # the host fills in a look
+		1:
+			if c.loads >= 2 and c.state == "synced" and Players.household_of(c.player_id) > 0:
+				_stage = 2
+				_write("housed", {"hash": CoopHash.of_world(), "local_id": Players.local_id, "hh": Players.primary_household(),
+					"host_hh": Players.household_of(1), "players": Players.ids(), "loads": c.loads})
+				_seq_foreign = c.send_command(_folk_of(Players.household_of(1)), "interact", {"interaction_id": "chat", "target_id": -1, "strict": true}, 0.0)
+		2, 3:
+			pass            # waiting for the acks (see _on_result)
+	if _stage >= 2 and Time.get_ticks_msec() >= _next_tick:
+		_next_tick = Time.get_ticks_msec() + 100
+		var tiles := {}
+		for f in WorldIface.all_folk():
+			if int(f.household_id) > 0:
+				tiles[str(f.id)] = [f.tile.x, f.tile.y]
+		_write("tick", {"minute": SimEnv.now_min(), "tiles": tiles, "deltas": c.deltas, "hc": c.hash_checks, "hm": c.hash_mismatches,
+			"resyncs": c.resyncs, "bad": c.bad_canon, "loads": c.loads, "state": c.state, "time_state": c.time_state})
+
+func _folk_of(hid: int) -> int:
+	for f in WorldIface.all_folk():
+		if int(f.household_id) == hid:
+			return int(f.id)
+	return -1
+
 func _first_folk() -> int:
 	for f in WorldIface.all_folk():
 		if int(f.household_id) == 1:
@@ -83,6 +123,13 @@ func _first_folk() -> int:
 	return -1
 
 func _on_result(seq: int, ok: bool, msg: String) -> void:
+	if _mode == "live":
+		if seq == _seq_foreign:
+			_write("foreign", {"ok": ok, "msg": msg})
+			_seq_own = _ses.client.send_command(_folk_of(Players.primary_household()), "career_skip", {}, 0.0)
+		elif seq == _seq_own:
+			_write("own", {"ok": ok, "msg": msg})
+		return
 	if seq == _cmd_seq:
 		_stage = 2
 		_write("acked", {"ok": ok, "msg": msg})

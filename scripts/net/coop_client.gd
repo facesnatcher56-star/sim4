@@ -23,6 +23,8 @@ var deltas: int = 0
 var resyncs: int = 0
 var hash_checks: int = 0
 var hash_mismatches: int = 0
+var last_canon: String = ""             # canonical state text at the last hash check (diagnostics)
+var bad_canon: String = ""
 var last_delta_minute: int = -1
 var player_name: String = "Player"
 var token: String = ""
@@ -239,12 +241,14 @@ func _delta(m: Dictionary) -> void:
 		return
 	if str(m["hash"]) != "":
 		hash_checks += 1
+		last_canon = CoopHash.canonical()
 		_send(CoopProto.HASH, {"xfer": 0, "hash": str(hash_fn.call()), "minute": int(m["minute"])})
 
 func _sync(m: Dictionary) -> void:
 	if int(m["xfer"]) == 0:                 # answer to a periodic check
 		if not bool(m["ok"]):
 			hash_mismatches += 1
+			bad_canon = last_canon
 		return
 	if bool(m["ok"]):
 		_desync_retries = 0
