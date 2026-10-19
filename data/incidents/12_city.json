@@ -673,6 +673,9 @@
     "tests": [
      {
       "coins_at_least": 2
+     },
+     {
+      "lacks_buff": "wx_severe"
      }
     ],
     "per_min": {
@@ -716,6 +719,9 @@
        "fun",
        85
       ]
+     },
+     {
+      "lacks_buff": "wx_severe"
      }
     ],
     "per_min": {

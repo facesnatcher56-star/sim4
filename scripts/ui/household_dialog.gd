@@ -11,6 +11,7 @@ func build() -> void:
 	title_label.text = "Household money"
 	line("%d Coins" % Economy.balance(hid), 26, Color("#f2c94c"))
 	_bills(hid)
+	_utilities(hid)
 	_week(hid)
 
 func _bills(hid: int) -> void:
@@ -25,6 +26,8 @@ func _bills(hid: int) -> void:
 		var days_left := int(bl["due"]) - today
 		var when := "OVERDUE (includes a %d coin late fee)" % int(bl.get("fee", 0)) if late else ("due today" if days_left <= 0 else "due in %d day%s (day %d)" % [days_left, "" if days_left == 1 else "s", int(bl["due"])])
 		line("%d coins, %s" % [int(bl["amount"]), when], 15, Color("#e8913d") if late else UITheme.TEXT)
+		if bl.has("parts"):
+			line(UtilityBills.describe(bl["parts"]), 11, UITheme.MUTED)       # task 12: the bill split by utility
 	if not due.is_empty():
 		var pay := Button.new()
 		pay.text = "Pay all bills (%d coins)" % Economy.owed(hid)
@@ -40,6 +43,11 @@ func _bills(hid: int) -> void:
 		line("Bills are paid automatically on the due date if you can afford them. Several missed bills lead to repossession.", 11, UITheme.MUTED)
 	else:
 		line("Auto-pay is off: pay bills here before they go overdue.", 11, UITheme.MUTED)
+
+func _utilities(hid: int) -> void:
+	heading("Utilities")
+	for l in Utilities.status_lines(hid):
+		line(str(l), 12, UITheme.MUTED if str(l).find("working") >= 0 else Color("#e8913d"))
 
 func _week(hid: int) -> void:
 	heading("Last 7 days")
