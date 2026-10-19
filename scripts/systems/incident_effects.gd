@@ -90,7 +90,7 @@ static func _full_effect(eff: Dictionary, ctx: Dictionary) -> Dictionary:
 					Hospital.fall_ill(f, int(v.get("severity", 1)), str(v.get("reason", "")))
 			"hospital":
 				if f != null:
-					Hospital.admit(int(f.id), int(v.get("severity", 2)), str(v.get("reason", "")))
+					Hospital.emergency(int(f.id), int(v.get("severity", 2)), str(v.get("reason", "")))
 			"coins_range":
 				ctx["amount"] = Incidents.rng.randi_range(int(v[0]), int(v[1]))
 				var hid: int = int(ctx.get("household_id", 0))
@@ -134,7 +134,7 @@ static func _stat_effect(eff: Dictionary, ctx: Dictionary) -> Dictionary:
 					Aging.kill(tgt.id, str(v))
 			"injure", "sick", "hospital":
 				if tgt != null and (str(key) == "hospital" or int(v.get("severity", 1)) >= int(Hospital.cfg().get("min_admit_severity", 2))):
-					Hospital.admit(tgt.id, int(v.get("severity", 2)), str(v.get("reason", "")))
+					Hospital.emergency(tgt.id, int(v.get("severity", 2)), str(v.get("reason", "")))
 			"coins_range":
 				ctx["amount"] = Incidents.rng.randi_range(int(v[0]), int(v[1]))
 				if tgt != null and tgt.kind == "townie":

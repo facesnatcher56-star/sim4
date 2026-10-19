@@ -100,6 +100,9 @@ static func interaction_xp(vtype: String) -> Dictionary:
 
 ## Can these folk (ids) enter lot_id now? -> {ok, reason, fee}. Does not charge.
 static func check_entry(lot_id: String, folk_ids: Array, household_id: int = -1) -> Dictionary:
+	var closed: String = CityPolicy.blocks_entry(lot_id, folk_ids)       # task 12: park hours and the curfew
+	if closed != "":
+		return {"ok": false, "reason": closed, "fee": 0}
 	var vtype := type_of_lot(lot_id)
 	if not is_open_type(vtype):
 		return {"ok": false, "reason": "%s is closed. %s." % [str(Neighborhood.lot(lot_id).get("label", lot_id)), status_text(lot_id)], "fee": 0}

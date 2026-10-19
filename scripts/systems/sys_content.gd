@@ -27,6 +27,7 @@ static func install_all() -> void:
 	PregnancyContent.install()
 	WeatherContent.install()
 	IncidentContent.install()
+	CityGov.install()                  # task 12: the politician career, the mayor and election interactions
 	VacationContent.install()          # idempotent; also runs inside install() before the tag patches
 
 ## Buffs derived from other tables: the hidden stage_<id> markers (data/aging.json) and the goals' perk buffs.

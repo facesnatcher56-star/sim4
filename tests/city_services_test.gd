@@ -64,7 +64,7 @@ func run() -> Array:
 	var ada: Folk = folk[0]
 	Kit.set_time(3, 13)
 	CityServices.reset()
-	var ok: bool = Hospital.admit(int(ada.id), 2, "a test")
+	var ok: bool = Hospital.emergency(int(ada.id), 2, "a test")
 	_check(ok and not Hospital.patients.has(int(ada.id)) and CityAmbulance.holding(int(ada.id)), "a serious case waits for the ambulance first")
 	_check(Kit.has_note("ambulance is on its way"), "the player is told an ambulance is coming")
 	var wait: int = int(CityServices.pending[0]["minutes"])
@@ -75,14 +75,14 @@ func run() -> Array:
 	# a mild case goes straight in
 	var bo: Folk = folk[1] if folk.size() > 1 else ada
 	CityServices.reset()
-	Hospital.admit(int(bo.id), 1, "a scrape")
+	Hospital.emergency(int(bo.id), 1, "a scrape")
 	_check(Hospital.patients.has(int(bo.id)) and not CityAmbulance.holding(int(bo.id)), "a mild case needs no ambulance")
 	Hospital.discharge(int(bo.id))
 	# a slow ambulance can make things worse
 	CityServices.reset()
 	CityServices.cfg()["ambulance"]["worsen_after"] = 0
 	CityServices.cfg()["ambulance"]["worsen_chance"] = 1.0
-	Hospital.admit(int(ada.id), 2, "a slow test")
+	Hospital.emergency(int(ada.id), 2, "a slow test")
 	Kit.run(int(CityServices.pending[0]["minutes"]) + 2)
 	_check(int((Hospital.patients.get(int(ada.id), {}) as Dictionary).get("severity", 0)) == 3 and int(CityServices.stats.get("worsened", 0)) == 1, "waiting too long makes it worse")
 	# --- far patients

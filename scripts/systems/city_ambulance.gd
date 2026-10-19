@@ -1,6 +1,6 @@
 class_name CityAmbulance
 extends RefCounted
-## The ambulance (task 12.3): a serious injury or collapse at home is not a blink away from a hospital bed any more. Hospital.admit hands the call here; an ambulance
+## The ambulance (task 12.3): a serious injury or collapse at home is not a blink away from a hospital bed any more. Hospital.emergency hands the call here; an ambulance
 ## starts from the hospital lot (CityServices.dispatch), the patient waits for the response minutes, and a slow response (longer than ambulance.worsen_after) can make
 ## the condition worse. Residents on the real map only: townies in a far house are statistical (CityServices.death_mult), and test worlds without a map admit at once.
 ##   CityAmbulance.hold(folk_id, severity, reason) -> true when the admission is now scheduled (the caller must not admit again)

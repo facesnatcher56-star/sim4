@@ -40,12 +40,16 @@ static func fall_ill(f, severity: int, reason: String = "") -> void:
 	Health.fall_ill(f, "generic", severity, reason)
 
 # ------------------------------------------------------------------ admit / discharge
+## An emergency (injury, illness, collapse): on the real map the patient at home waits for the ambulance first (task 12.3), else admitted at once.
+static func emergency(folk_id: int, severity: int, reason: String = "") -> bool:
+	if CityAmbulance.hold(folk_id, clampi(severity, 1, 3), reason):
+		return true
+	return admit(folk_id, severity, reason)
+
 static func admit(folk_id: int, severity: int, reason: String = "") -> bool:
 	severity = clampi(severity, 1, 3)
 	if patients.has(folk_id):
 		return false
-	if CityAmbulance.hold(folk_id, severity, reason):       # task 12: an ambulance has to come first (real map, residents)
-		return true
 	var mins: float = _by_sev("stay_hours", severity, 16.0) * 60.0
 	var f = SysUtil.folk(folk_id)
 	var rec: Dictionary = {"severity": severity, "reason": reason, "admitted_min": SysUtil.now(), "until_min": SysUtil.now() + int(mins),

@@ -46,7 +46,7 @@ static func fall_ill(f, kind: String, severity: int = 1, cause: String = "") -> 
 	Health.count("ill_" + kind)
 	SysUtil.game_event("fell_ill", {"folk_id": int(f.id), "severity": severity, "reason": cause, "kind": kind})
 	if severity >= int(IncidentDefs.cfg("hospital", {}).get("min_admit_severity", 2)):
-		Hospital.admit(int(f.id), severity, cause)
+		Hospital.emergency(int(f.id), severity, cause)
 	return true
 
 ## Treat: shorten the illness by `fraction` (1.0 = cured now). Returns true when the illness is over.

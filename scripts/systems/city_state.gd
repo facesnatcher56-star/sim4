@@ -21,16 +21,18 @@ static func reset() -> void:
 	Utilities.reset()
 	Transport.reset()
 	CityServices.reset()
+	CityGov.reset()
 
 static func on_game_event(ev: String, payload: Dictionary) -> void:
 	Utilities.on_event(ev, payload)
 	CityCmd.on_event(ev, payload)
+	CityGov.on_event(ev, payload)
 
 static func cfg() -> Dictionary:
 	return SysUtil.table("city")
 
 static func to_dict() -> Dictionary:
-	return {"rng_seed": str(rng.seed), "rng_state": str(rng.state), "utilities": Utilities.to_dict(), "transport": Transport.to_dict(), "services": CityServices.to_dict()}
+	return {"rng_seed": str(rng.seed), "rng_state": str(rng.state), "utilities": Utilities.to_dict(), "transport": Transport.to_dict(), "services": CityServices.to_dict(), "gov": CityGov.to_dict()}
 
 static func from_dict(d: Dictionary) -> void:
 	reset()
@@ -41,6 +43,7 @@ static func from_dict(d: Dictionary) -> void:
 	Utilities.from_dict(d.get("utilities", {}))
 	Transport.from_dict(d.get("transport", {}))
 	CityServices.from_dict(d.get("services", {}))
+	CityGov.from_dict(d.get("gov", {}))
 
 # ------------------------------------------------------------------ zones
 static func zones() -> Array:

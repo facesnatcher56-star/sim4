@@ -73,6 +73,9 @@ static func _build_sell(e: Dictionary) -> Dictionary:
 static func _build_wall(e: Dictionary) -> Dictionary:
 	var a: Dictionary = e["args"]
 	var w = _world()
+	var permit: Dictionary = CityPolicy.pay_permit(_hid(e), "build")        # task 12: a building permit, only when the council has voted for permits
+	if not bool(permit["ok"]):
+		return {"ok": false, "n": 0, "msg": str(permit["reason"])}
 	var n: int = w.set_wall_line(a["a"], a["b"], str(a.get("type", "wall")), _hid(e), int(a.get("level", 0)))
 	return {"ok": n > 0, "n": n, "msg": "" if n > 0 else str(w.last_error)}
 

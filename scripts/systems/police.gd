@@ -34,7 +34,7 @@ static func strength() -> float:
 ## Patrols out at night make street crime harder.
 static func patrol_factor() -> float:
 	var c: Dictionary = cfg()
-	return 1.0 / (1.0 + float(officers()) * float(c.get("patrol_per_officer", 0.15)) + (float(c.get("serial_patrol", 0.5)) if JusticeState.serial.get("hunt", false) else 0.0))
+	return CityPolicy.crime_mult() / (1.0 + float(officers()) * float(c.get("patrol_per_officer", 0.15)) + (float(c.get("serial_patrol", 0.5)) if JusticeState.serial.get("hunt", false) else 0.0))      # task 12: a curfew helps
 
 static func open_case(c: Dictionary) -> void:
 	c["state"] = "open"

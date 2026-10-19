@@ -137,6 +137,7 @@ func new_game(household_ids: Array = [], lifespan: String = "") -> void:
 		Economy.start_funds(int(hid))
 	ensure_registered()
 	Story.generate_townies()
+	CityGov.ensure()                 # task 12: the first mayor and council come from the townies
 	Economy.refresh_objects()
 	MarketTick.new_game()
 
@@ -166,6 +167,7 @@ func _on_interaction_started(folk_id: int, iid: String, target_id: int) -> void:
 	MoodSwings.on_started(folk_id, iid)
 	Fire.on_interaction_started(folk_id, iid, target_id)
 	Health.on_interaction_started(folk_id, iid, target_id)
+	CityPolicy.on_interaction(SysUtil.folk(folk_id), iid)
 	var rec: Dictionary = Away.on_started(folk_id, iid)
 	if not rec.is_empty():
 		var f = SysUtil.folk(folk_id)

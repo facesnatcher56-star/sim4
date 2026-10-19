@@ -10,7 +10,7 @@ static func reset() -> void:
 	_override.clear()
 
 static func funding(dept: String) -> float:
-	return float(_override.get(dept, 1.0))
+	return float(_override.get(dept, CityGov.funding_of(dept)))
 
 static func set_funding(dept: String, v: float) -> void:
 	_override[dept] = v

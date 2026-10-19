@@ -51,6 +51,7 @@ static func components() -> Dictionary:
 		"police": -minf(float(Police.officers()) * float(k.get("per_officer", 6.0)), float(k.get("police_cap", 20.0))),
 		"lamps": -minf(float(lamps) * float(k.get("per_lamp", 1.5)), float(k.get("lamp_cap", 12.0))),
 		"watch": -float(k.get("watch", 12.0)) if watch_active() else 0.0,
+		"budget": -(CityBudget.funding("police") - 1.0) * 10.0 - (CityBudget.funding("parks") - 1.0) * 3.0,        # task 12: a funded police service and well kept parks lower crime
 		"base": float(k.get("base", 8.0))}
 	return c
 

@@ -38,8 +38,9 @@ static func open(hid: int, t: String, lot: String, mode: String, nm: String = ""
 	if mode != "rent" and mode != "own":
 		return _no("Rent or buy the space.")
 	var cost: int = open_cost(t, lot, mode)
-	if not Economy.can_afford(hid, cost):
-		return _no("You need %d coins to open." % cost)
+	if not Economy.can_afford(hid, cost + CityPolicy.permit_fee("business")):
+		return _no("You need %d coins to open (a permit costs %d)." % [cost + CityPolicy.permit_fee("business"), CityPolicy.permit_fee("business")])
+	CityPolicy.pay_permit(hid, "business")          # task 12: only when the council has voted for permits
 	Economy.spend(hid, cost, "new business: %s" % str(td.get("label", t)))
 	if nm == "":
 		nm = "%s's %s" % [_founder(hid), str(td.get("label", t))]

@@ -111,7 +111,7 @@ static func _town_help(f, r: Dictionary, now: int, kind: String) -> void:
 	if now - int(r.get("collapse_min", now)) < wait:
 		return
 	rescue(f, null)
-	Hospital.admit(int(f.id), 2, "neglect")
+	Hospital.emergency(int(f.id), 2, "neglect")
 	SysUtil.game_event("neglect_emergency", {"folk_id": int(f.id), "kind": kind})
 	Health.count("neglect_emergency")
 

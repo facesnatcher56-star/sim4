@@ -194,7 +194,7 @@ static func on_returned(f, rec: Dictionary) -> void:
 			var sc: Dictionary = Careers.cfg().get("school", {})
 			var gd: float
 			if completed:
-				gd = float(sc.get("base_gain", 1)) + float(Careers.settings().get("mood_gain", {}).get(str(f.mood_name), 0.0)) * float(sc.get("mood_scale", 0.8))
+				gd = (float(sc.get("base_gain", 1)) + float(Careers.settings().get("mood_gain", {}).get(str(f.mood_name), 0.0)) * float(sc.get("mood_scale", 0.8))) * (0.85 + 0.15 * CityBudget.funding("schools"))      # task 12: school budget
 				st["days"] = int(st["days"]) + 1
 				SkillInterest.school_day(f)
 			else:

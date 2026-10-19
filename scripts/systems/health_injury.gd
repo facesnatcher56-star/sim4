@@ -18,7 +18,7 @@ static func injure(f, severity: int, cause: String = "") -> bool:
 	Health.count("injured")
 	SysUtil.game_event("injured", {"folk_id": int(f.id), "severity": severity, "reason": cause})
 	if severity >= int(IncidentDefs.cfg("hospital", {}).get("min_admit_severity", 2)):
-		Hospital.admit(int(f.id), severity, cause)
+		Hospital.emergency(int(f.id), severity, cause)
 	return true
 
 static func heal(f) -> void:

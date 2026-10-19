@@ -104,7 +104,7 @@ static func plan(from_lot: String, to_lot: String, now: int = -1) -> Dictionary:
 	return _with_fare(best, m) if bool(best["ok"]) else best
 
 static func _with_fare(p: Dictionary, m: Dictionary) -> Dictionary:
-	p["fare"] = int(round(float(m.get("fare", 4)) * Transport.price_mult()))
+	p["fare"] = int(round(float(m.get("fare", 4)) * Transport.price_mult() * CityPolicy.fare_mult()))
 	return p
 
 ## The next `n` times (game minutes) a bus of route `route_id` calls at lot `lot`.

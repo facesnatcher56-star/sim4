@@ -48,7 +48,7 @@ static func parts(hid: int) -> Dictionary:
 		var v: float = fixed * float(shares.get(u, 0.0)) + float(rec.get(u, 0.0)) * rate
 		if u == "power":
 			v += untracked * rate
-		out[u] = v * mult
+		out[u] = v * mult * (CityGov.tax if u == "rates" else 1.0)         # the council charges follow the tax rate (task 12.4)
 	_savings(hid, out)
 	out["cover"] = float(DisasterInsurance.bill_extra(hid)) + float(BankInsurance.bill_extra(hid)) + float(CrimeSecurityAlarm.bill_extra(hid))      # home insurance, health / car / life cover (13), alarm monitoring and a guard (21)
 	return out
@@ -64,7 +64,7 @@ static func _savings(hid: int, out: Dictionary) -> void:
 			continue
 		var spec: Dictionary = objs[oid]
 		for u in cut:
-			cut[u] += float(spec.get(u + "_cut", 0.0)) * (1.0 if oid == "well" else float(n))
+			cut[u] += (float(spec.get(u + "_cut", 0.0)) + (CityPolicy.solar_bonus() if u == "power" else 0.0)) * (1.0 if oid == "well" else float(n))
 	for u2 in cut:
 		out[u2] = float(out[u2]) * (1.0 - minf(float(cut[u2]), 0.9))
 
