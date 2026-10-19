@@ -29,6 +29,15 @@ func _all() -> Array:
 	Kit.teardown()
 	return fails
 
+## New game where only the folk a test hires has a job: the housemates would otherwise wander to the terminal ("Look for Jobs") on
+## their own, and their commutes (left_for_work / late toasts at 6:00 shifts) would pollute the global event and toast counts.
+func _new(start_id: String) -> Array:
+	var folk: Array = Kit.new_game(start_id)
+	StoryPacing.enabled = false
+	for i in range(1, folk.size()):
+		Careers.retired[int(folk[i].id)] = {"career": "", "level": 1, "pension": 0}      # Careers.hire refuses retired folk
+	return folk
+
 func _hire(f: Folk, cid: String, level: int = 1) -> void:
 	Careers.hire(f, cid, level)
 	WorldIface.coins[int(f.household_id)] = 0
@@ -39,7 +48,7 @@ func _expected_pay(f: Folk, hours: float) -> int:
 	return int(round(hours * float(ld.get("pay", 0)) * CareerProgress.pay_multiplier(float(j["performance"]))))
 
 func _on_time_and_back() -> void:
-	var folk: Array = Kit.new_game("small")
+	var folk: Array = _new("small")
 	var mira: Folk = folk[0]
 	_hire(mira, "coder")                                     # 09:00 - 17:00 at the office
 	Kit.set_time(2, 6, 30)                                   # Tuesday
@@ -88,7 +97,7 @@ func _on_time_and_back() -> void:
 		_check(not Kit.has_note("closed") and not Kit.has_note("Entry costs"), "no venue refusal for staff")
 
 func _late_departure() -> void:
-	var folk: Array = Kit.new_game("small")
+	var folk: Array = _new("small")
 	var mira: Folk = folk[0]
 	_hire(mira, "coder")
 	var p0: float = CareerProgress.performance_of(mira.id)
@@ -110,7 +119,7 @@ func _plan_minutes(f: Folk) -> float:
 	return Workplace.commute_minutes(f, NeighborhoodLots.entry_tile("office"))
 
 func _snow_slows() -> void:
-	var folk: Array = Kit.new_game("small")
+	var folk: Array = _new("small")
 	var mira: Folk = folk[0]
 	_hire(mira, "coder")
 	Kit.set_time(2, 6, 0)
@@ -135,7 +144,7 @@ func _snow_slows() -> void:
 	Weather.force("sunny", 0.0)
 
 func _townie_coworker() -> void:
-	var folk: Array = Kit.new_game("small")
+	var folk: Array = _new("small")
 	var mira: Folk = folk[0]
 	_hire(mira, "coder")
 	var t: Dictionary = Story.add_townie(-1.0, "Pip Marlow", [], "coder", 1)
@@ -169,7 +178,7 @@ func _townie_coworker() -> void:
 	_check(CommuteTownies.busy_elsewhere(t, "cafe", SimEnv.now_min()), "at work, so not available for the cafe crowd")
 
 func _school_teen() -> void:
-	var folk: Array = Kit.new_game("small")
+	var folk: Array = _new("small")
 	var kid: Folk = folk[1]
 	Aging.set_age_days(kid, 82.0)
 	kid.age_stage = "teen"
@@ -191,7 +200,7 @@ func _school_teen() -> void:
 		_check(NeighborhoodLots.lot_at(kid.tile) == "home" and Kit.count_events("returned_home") >= 1, "the teen walked home (%s)" % NeighborhoodLots.lot_at(kid.tile))
 
 func _visible_jobs() -> void:
-	var folk: Array = Kit.new_game("small")
+	var folk: Array = _new("small")
 	var mira: Folk = folk[0]
 	_hire(mira, "barista")
 	_check(Workplace.visible_job("barista") == "work_counter" and Workplace.lot_of_folk(mira) == "cafe", "the barista works at the cafe, visibly")
@@ -224,7 +233,7 @@ func _visible_jobs() -> void:
 		_check(Commute.trips.has(mira.id), "and she heads home")
 
 func _save_mid_commute() -> void:
-	var folk: Array = Kit.new_game("small")
+	var folk: Array = _new("small")
 	var mira: Folk = folk[0]
 	_hire(mira, "coder")
 	Kit.set_time(2, 7, 0)
@@ -238,7 +247,7 @@ func _save_mid_commute() -> void:
 	var snap: Dictionary = SaveLoad.snapshot("commute")
 	var parsed: Variant = JSON.parse_string(JSON.stringify(snap))
 	_check(parsed is Dictionary and ((parsed as Dictionary)["systems"] as Dictionary).has("commute"), "the commute is in the save")
-	Kit.new_game("large")
+	_new("large")
 	_check(SaveLoad.restore(parsed), "restore works")
 	var m2 = SysUtil.folk(mira.id)
 	_check(m2 != null and m2.tile == tile_before and Commute.trips.has(mira.id), "position and trip restored")
@@ -246,7 +255,7 @@ func _save_mid_commute() -> void:
 	_check(Kit.count_events("arrived_at_work") >= 1 and SysUtil.is_away(m2), "she carried on and arrived (%s)" % str(Commute.trips.get(mira.id, {})))
 	# and a save INSIDE the building
 	var snap2: Variant = JSON.parse_string(JSON.stringify(SaveLoad.snapshot("inside")))
-	Kit.new_game("large")
+	_new("large")
 	SaveLoad.restore(snap2)
 	var m3 = SysUtil.folk(mira.id)
 	_check(m3 != null and SysUtil.is_away(m3) and NeighborhoodLots.lot_at(m3.tile) == "office" and Commute.on_shift(mira.id), "a save inside the office restores the shift")
@@ -255,7 +264,7 @@ func _save_mid_commute() -> void:
 		_check(Kit.count_events("returned_from_work") >= 1, "and the shift ends normally after loading")
 
 func _missed_shift() -> void:
-	var folk: Array = Kit.new_game("small")
+	var folk: Array = _new("small")
 	var mira: Folk = folk[0]
 	_hire(mira, "coder")
 	Kit.set_time(2, 8, 10)

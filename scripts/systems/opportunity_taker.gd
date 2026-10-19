@@ -13,6 +13,8 @@ static func fit_chance(f, cid: String) -> float:
 	return clampf(p, 0.0, float(o.get("max", 0.85)))
 
 static func on_day(_day: int) -> void:
+	if not StoryPacing.enabled:
+		return
 	for fid in Careers.offers.keys():
 		var f = SysUtil.folk(int(fid))
 		if f == null or not SysUtil.is_resident(f) or SysUtil.is_away(f) or Careers.jobs.has(int(fid)):
