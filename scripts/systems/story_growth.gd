@@ -17,7 +17,7 @@ static func on_day() -> void:
 # ------------------------------------------------------------------ births
 static func _births() -> void:
 	var g: Dictionary = cfg()
-	var pop_max: int = int(Story.cfg().get("max_population", 24))
+	var pop_max: int = int(Story.cfg().get("max_population", 24)) + CityPlan.extra_capacity()      # task 12: new housing
 	var today: int = SysUtil.day()
 	for key in RelationshipService.pairs.keys():
 		if population() >= pop_max:
@@ -67,7 +67,7 @@ static func _arrivals() -> void:
 	var g: Dictionary = cfg()
 	var c: Dictionary = Story.cfg()
 	var pop: int = population()
-	if pop >= int(c.get("max_population", 24)):
+	if pop >= int(c.get("max_population", 24)) + CityPlan.extra_capacity():
 		return
 	var deficit: int = maxi(int(c.get("townie_count", 12)) - pop, 0)
 	var chance: float = float(g.get("arrive_chance", 0.15)) + float(g.get("arrive_per_missing", 0.05)) * deficit

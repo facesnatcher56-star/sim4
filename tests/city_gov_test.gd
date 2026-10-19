@@ -57,7 +57,7 @@ func run() -> Array:
 	CityGov.set_tax(0.7)
 	K.expect(f, CityMood.update() > low, "heavy taxes make the town grumpy")
 	CityGov.set_tax(1.0)
-	K.expect(f, CityMood.complaint() in ["services", "utilities", "tax", "crime", "roads"] and CityMood.words() != "", "the biggest complaint and the mood are in words: %s / %s" % [CityMood.complaint(), CityMood.words()])
+	K.expect(f, CityMood.complaint() in ["services", "utilities", "tax", "crime", "roads", "public"] and CityMood.words() != "", "the biggest complaint and the mood are in words: %s / %s" % [CityMood.complaint(), CityMood.words()])
 	# --- the campaign
 	var first_mayor: int = int(CityGov.mayor["id"])
 	CityGov.mayor["term_end"] = SysUtil.day() + 10
@@ -161,6 +161,9 @@ func run() -> Array:
 		if CityGov.history.size() > before_n:
 			proposed += 1
 	K.expect(f, proposed > 5, "a townie mayor brings policies to the council every so often (%d in 39 months)" % proposed)
+	# --- the notice board
+	CityGov.on_event("town_notice", {"folk_id": ada.id})
+	K.expect(f, K.has_note("Taxes are") and K.has_note("budget goes to") and K.has_note("Mayor "), "the town notice says who is mayor, the taxes and where the money goes")
 	# --- save and load
 	var before: String = JSON.stringify(CityState.to_dict())
 	CityState.from_dict(JSON.parse_string(before))

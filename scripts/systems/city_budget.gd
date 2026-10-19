@@ -18,7 +18,8 @@ static func set_funding(dept: String, v: float) -> void:
 ## Breakage multiplier for rates: starved departments let things fall apart (data: utilities.maintenance).
 static func maintenance_mult(dept: String) -> float:
 	var m: Dictionary = (CityState.cfg().get("utilities", {}) as Dictionary).get("maintenance", {})
-	return clampf(1.0 / maxf(funding(dept), 0.1), float(m.get("min_mult", 0.5)), float(m.get("max_mult", 2.2)))
+	var aged: float = 1.0 + (CityPublic.age * float((CityState.cfg().get("public", {}) as Dictionary).get("age", {}).get("maintenance", 0.6)) if dept == "utilities" else 0.0)      # ageing pipes and cables
+	return clampf(1.0 / maxf(funding(dept), 0.1) * aged, float(m.get("min_mult", 0.5)), float(m.get("max_mult", 2.2)))
 
 ## Crew speed multiplier (repairs take hours / speed).
 static func repair_speed(dept: String) -> float:

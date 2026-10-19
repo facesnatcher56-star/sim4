@@ -27,6 +27,7 @@ static func parts() -> Dictionary:
 	out["tax"] = clampf((1.0 - CityGov.tax) * 2.0, -1.0, 1.0)
 	out["crime"] = clampf((float(m.get("crime_ok", 35.0)) - CrimeRate.value()) / 50.0, -1.0, 1.0)
 	out["roads"] = clampf((TransportTraffic.mean_quality() - float(m.get("road_ok", 0.6))) * 3.0, -1.0, 1.0)
+	out["public"] = CityPublic.quality()
 	return out
 
 static func update() -> float:

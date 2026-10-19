@@ -126,6 +126,212 @@
      "decor": 0.4,
      "interactions": []
     }
+   },
+   "streetlamp": {
+    "def": {
+     "label": "Streetlamp",
+     "size": [
+      1,
+      1
+     ],
+     "price": 120,
+     "tags": [
+      "outdoor",
+      "civic",
+      "utility"
+     ],
+     "model": "res://assets/models/streetlamp.glb",
+     "color": "#3b3f48",
+     "height": 2.4,
+     "slots": [
+      {
+       "offset": [
+        0,
+        1
+       ],
+       "pose": "stand"
+      }
+     ],
+     "state": {},
+     "advertises": {},
+     "decor": 0.2,
+     "interactions": []
+    }
+   },
+   "bench": {
+    "def": {
+     "label": "Park Bench",
+     "size": [
+      2,
+      1
+     ],
+     "price": 80,
+     "tags": [
+      "outdoor",
+      "seat",
+      "civic"
+     ],
+     "model": "res://assets/models/bench.glb",
+     "color": "#8a6a3e",
+     "height": 0.8,
+     "slots": [
+      {
+       "offset": [
+        0,
+        1
+       ],
+       "pose": "stand"
+      }
+     ],
+     "state": {},
+     "advertises": {
+      "comfort": 1.0
+     },
+     "decor": 0.3,
+     "interactions": [
+      "sit_chair"
+     ]
+    }
+   },
+   "public_bin": {
+    "def": {
+     "label": "Public Bin",
+     "size": [
+      1,
+      1
+     ],
+     "price": 40,
+     "tags": [
+      "outdoor",
+      "civic",
+      "clean",
+      "utility"
+     ],
+     "model": "res://assets/models/public_bin.glb",
+     "color": "#4a6b3a",
+     "height": 0.9,
+     "slots": [
+      {
+       "offset": [
+        0,
+        1
+       ],
+       "pose": "stand"
+      }
+     ],
+     "state": {},
+     "advertises": {},
+     "decor": 0.0,
+     "interactions": [
+      "empty_trash"
+     ]
+    }
+   },
+   "public_toilet": {
+    "def": {
+     "label": "Public Toilet",
+     "size": [
+      1,
+      1
+     ],
+     "price": 220,
+     "tags": [
+      "outdoor",
+      "civic",
+      "plumbing"
+     ],
+     "model": "res://assets/models/public_toilet.glb",
+     "color": "#7a8a93",
+     "height": 2.2,
+     "slots": [
+      {
+       "offset": [
+        0,
+        1
+       ],
+       "pose": "stand"
+      }
+     ],
+     "state": {},
+     "advertises": {
+      "bladder": 3.0
+     },
+     "decor": -0.2,
+     "interactions": [
+      "use_toilet",
+      "clean_toilet"
+     ]
+    }
+   },
+   "fountain": {
+    "def": {
+     "label": "Fountain",
+     "size": [
+      1,
+      1
+     ],
+     "price": 300,
+     "tags": [
+      "outdoor",
+      "civic",
+      "water"
+     ],
+     "model": "res://assets/models/fountain.glb",
+     "color": "#5a8fa8",
+     "height": 1.2,
+     "slots": [
+      {
+       "offset": [
+        0,
+        1
+       ],
+       "pose": "stand"
+      }
+     ],
+     "state": {},
+     "advertises": {
+      "fun": 0.8
+     },
+     "decor": 0.8,
+     "interactions": [
+      "toss_coin"
+     ]
+    }
+   },
+   "playground": {
+    "def": {
+     "label": "Playground",
+     "size": [
+      2,
+      2
+     ],
+     "price": 420,
+     "tags": [
+      "outdoor",
+      "civic",
+      "fun"
+     ],
+     "model": "res://assets/models/playground.glb",
+     "color": "#d98a3a",
+     "height": 1.6,
+     "slots": [
+      {
+       "offset": [
+        0,
+        1
+       ],
+       "pose": "stand"
+      }
+     ],
+     "state": {},
+     "advertises": {
+      "fun": 2.5
+     },
+     "decor": 0.6,
+     "interactions": [
+      "play_on_playground"
+     ]
+    }
    }
   },
   "interactions": {
@@ -450,6 +656,80 @@
     "priority": "normal",
     "advertises": {},
     "thought": "When is the next bus?"
+   },
+   "toss_coin": {
+    "label": "Toss a Coin",
+    "kind": "super",
+    "target": "object",
+    "objects": [
+     "fountain"
+    ],
+    "tags": [
+     "fun",
+     "outdoor"
+    ],
+    "duration_min": 3,
+    "posture": "stand",
+    "tests": [
+     {
+      "coins_at_least": 2
+     }
+    ],
+    "per_min": {
+     "fun": 1.2
+    },
+    "on_finish": [
+     {
+      "coins_add": -1
+     },
+     {
+      "stat_add": [
+       "fun",
+       6
+      ]
+     }
+    ],
+    "autonomous": true,
+    "priority": "low",
+    "advertises": {
+     "fun": 0.8
+    },
+    "thought": "Make a wish."
+   },
+   "play_on_playground": {
+    "label": "Play on the Playground",
+    "kind": "super",
+    "target": "object",
+    "objects": [
+     "playground"
+    ],
+    "tags": [
+     "fun",
+     "outdoor",
+     "kids"
+    ],
+    "duration_min": 40,
+    "posture": "stand",
+    "tests": [
+     {
+      "stat_below": [
+       "fun",
+       85
+      ]
+     }
+    ],
+    "per_min": {
+     "fun": 0.7,
+     "energy": -0.25,
+     "social": 0.1
+    },
+    "on_finish": [],
+    "autonomous": true,
+    "priority": "low",
+    "advertises": {
+     "fun": 2.5
+    },
+    "thought": "Swings and slides!"
    }
   },
   "object_interactions": {
@@ -472,6 +752,9 @@
    ],
    "stove": [
     "boil_water"
+   ],
+   "fountain": [
+    "toss_coin"
    ]
   }
  }

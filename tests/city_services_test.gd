@@ -80,10 +80,14 @@ func run() -> Array:
 	Hospital.discharge(int(bo.id))
 	# a slow ambulance can make things worse
 	CityServices.reset()
+	var keep_after = CityServices.cfg()["ambulance"]["worsen_after"]
+	var keep_chance = CityServices.cfg()["ambulance"]["worsen_chance"]
 	CityServices.cfg()["ambulance"]["worsen_after"] = 0
 	CityServices.cfg()["ambulance"]["worsen_chance"] = 1.0
 	Hospital.emergency(int(ada.id), 2, "a slow test")
 	Kit.run(int(CityServices.pending[0]["minutes"]) + 2)
+	CityServices.cfg()["ambulance"]["worsen_after"] = keep_after            # the data tables are shared by every test of the process
+	CityServices.cfg()["ambulance"]["worsen_chance"] = keep_chance
 	_check(int((Hospital.patients.get(int(ada.id), {}) as Dictionary).get("severity", 0)) == 3 and int(CityServices.stats.get("worsened", 0)) == 1, "waiting too long makes it worse")
 	# --- far patients
 	_check(CityServices.death_mult() > 0.9 and CityServices.death_mult() < 1.15, "at the standard budget far patients are not more or less safe (x%.2f)" % CityServices.death_mult())

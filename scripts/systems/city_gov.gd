@@ -123,7 +123,7 @@ static func heads() -> int:
 
 static func revenue(at_tax: float) -> float:
 	var r: Dictionary = cfg().get("revenue", {})
-	return (float(r.get("base", 20.0)) + float(r.get("per_head", 8.0)) * float(heads()) + float(r.get("per_player_household", 40.0)) * float(maxi(Players.count(), 1))) * at_tax
+	return (float(r.get("base", 20.0)) + float(r.get("per_head", 8.0)) * float(heads()) + float(r.get("per_player_household", 40.0)) * float(maxi(Players.count(), 1)) + CityPlan.revenue_bonus()) * at_tax
 
 ## Fresh funding numbers from the current shares and revenue (the savings top up the departments that fall short).
 static func recompute() -> void:
@@ -139,6 +139,7 @@ static func recompute() -> void:
 		if d == "reserve":
 			continue
 		var f: float = float(alloc.get(d, 0.0)) / maxf(float(def[d]), 0.001) * ratio * austerity
+		f += CityPlan.funding_bonus(str(d))
 		funding_now[d] = clampf(f, float(rng_f[0]), float(rng_f[1]))
 		if f < 1.0:
 			gaps[d] = (1.0 - f) * std_income * float(def[d])
@@ -178,6 +179,8 @@ static func budget_week(announce: bool = true) -> void:
 # ------------------------------------------------------------------ the clock
 static func on_day(day: int) -> void:
 	ensure()
+	CityPublic.on_day(day)
+	CityPlan.on_day(day)
 	if mayor.is_empty():
 		return
 	if day >= next_budget_day:
@@ -186,6 +189,41 @@ static func on_day(day: int) -> void:
 	CityElection.on_day(day)
 	CityPolicy.on_day(day)
 	CityElection.sync_buff()
+
+# ------------------------------------------------------------------ the notice board (plain words for the player)
+static func status_lines() -> Array:
+	var out: Array = []
+	if mayor.is_empty():
+		return ["The town has no mayor yet."]
+	var plat: String = str(((cfg().get("platforms", {}) as Dictionary).get(str(mayor.get("platform", "")), {}) as Dictionary).get("label", ""))
+	out.append("Mayor %s%s. %s" % [str(mayor["name"]), (" (%s)" % plat) if plat != "" else "", CityMood.words()])
+	out.append("Taxes are %d percent of the standard rate. The town takes in about %d coins a week." % [int(round(tax * 100.0)), int(round(revenue(tax)))])
+	var top: String = ""
+	var best: float = 0.0
+	for d in alloc:
+		if d != "reserve" and float(alloc[d]) > best:
+			best = float(alloc[d])
+			top = str(d)
+	out.append("Most of the budget goes to %s. Savings: %d coins." % [str((cfg().get("dept_labels", {}) as Dictionary).get(top, top)), int(round(treasury))])
+	if policies.is_empty():
+		out.append("No special laws are in force.")
+	else:
+		var names: Array = []
+		for pid in policies:
+			names.append(str(((CityPolicy.cfg()[pid]) as Dictionary).get("label", pid)).to_lower())
+		out.append("In force: %s." % ", ".join(names))
+	if CityElection.phase == "campaign":
+		out.append("Election campaign under way. Election day is day %d." % CityElection.vote_day)
+	else:
+		out.append("The next election is on day %d." % int(mayor["term_end"]))
+	for p in CityPlan.projects:
+		out.append(CityPlan.describe(p))
+	var dark: int = 0
+	for z in CityState.zone_ids():
+		dark += int(CityPublic.broken.get(str(z), 0))
+	if dark > 0:
+		out.append("%d street lamps are out across town." % dark)
+	return out
 
 # ------------------------------------------------------------------ install (content generated from the data)
 static func install() -> void:
@@ -212,6 +250,9 @@ static func on_event(ev: String, payload: Dictionary) -> void:
 				var step: float = float((cfg().get("tax", {}) as Dictionary).get("step", 0.1))
 				set_tax(tax + (step if ev == "tax_up" else -step))
 				SysUtil.notify("Taxes are now %d percent of the standard rate." % int(round(tax * 100.0)), "info")
+		"town_notice":
+			for line in status_lines():
+				SysUtil.notify(str(line), "info")
 		"vote_mayor":
 			CityElection.cast_vote(f)
 		"run_for_mayor":
@@ -223,6 +264,9 @@ static func on_event(ev: String, payload: Dictionary) -> void:
 				var d: String = ev.substr(6)
 				shift(d, float(cfg().get("alloc_step", 0.03)))
 				SysUtil.notify("More of the budget now goes to %s." % str((cfg().get("dept_labels", {}) as Dictionary).get(d, d)), "info")
+			elif ev.begins_with("rezone_") and is_mayor:
+				CityPlan.shift_zoning(ev.substr(7))
+				SysUtil.notify("New land will be used more for %s." % ev.substr(7), "info")
 			elif ev.begins_with("propose_") and is_mayor:
 				CityPolicy.propose(ev.substr(8), true)
 

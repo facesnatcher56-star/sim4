@@ -259,14 +259,14 @@
    "per_player_household": 40.0
   },
   "alloc": {
-   "utilities": 0.22,
-   "fire": 0.12,
-   "police": 0.16,
-   "health": 0.16,
-   "roads": 0.14,
+   "utilities": 0.19,
+   "fire": 0.11,
+   "police": 0.15,
+   "health": 0.15,
+   "roads": 0.13,
    "parks": 0.06,
    "schools": 0.12,
-   "reserve": 0.02
+   "reserve": 0.09
   },
   "alloc_step": 0.03,
   "alloc_min": 0.03,
@@ -335,6 +335,15 @@
     "tax": 0.05,
     "complaint": "schools",
     "line": "promised better schools"
+   },
+   "parks": {
+    "label": "Clean and green",
+    "alloc": {
+     "parks": 0.05
+    },
+    "tax": 0.05,
+    "complaint": "public",
+    "line": "promised cleaner streets and better parks"
    }
   },
   "mood": {
@@ -343,7 +352,8 @@
     "utilities": 0.25,
     "tax": 0.2,
     "crime": 0.3,
-    "roads": 0.25
+    "roads": 0.25,
+    "public": 0.2
    },
    "crime_ok": 35.0,
    "road_ok": 0.6,
@@ -448,6 +458,129 @@
    "repealed": "The council ended: {label}.",
    "debt": "The town is running out of money. Services will be cut back.",
    "budget": "The town budget: taxes bring in {income} coins a week."
+  }
+ },
+ "public": {
+  "lamps": 8,
+  "lamp_break_per_day": 0.03,
+  "lamps_fixed_per_week": 2,
+  "lamp_equiv": 8,
+  "bins": 5,
+  "bin_fill_per_day": 0.15,
+  "bins_emptied_per_week": 1.2,
+  "litter_up": 0.035,
+  "litter_down": 0.03,
+  "benches": 4,
+  "toilets": 1,
+  "fountains": 1,
+  "playgrounds": 1,
+  "amenity_every_weeks": 8,
+  "amenity_cost": {
+   "benches": 60,
+   "toilets": 150,
+   "fountains": 220,
+   "playgrounds": 300,
+   "lamps": 40,
+   "bins": 30
+  },
+  "amenity_cap": {
+   "benches": 10,
+   "toilets": 3,
+   "fountains": 3,
+   "playgrounds": 3,
+   "lamps": 14,
+   "bins": 9
+  },
+  "age": {
+   "per_day": 0.0016,
+   "relief": 0.0032,
+   "maintenance": 0.6
+  },
+  "decor_days": 3,
+  "decor_mood": 0.12,
+  "mood_weight": 0.2,
+  "texts": {
+   "lamps_out": "Several street lamps are out on {zone}. People feel uneasy after dark.",
+   "lamps_fixed": "The street lamps on {zone} are working again.",
+   "litter": "Rubbish is piling up on {zone}: the bins are not being emptied.",
+   "amenity": "A new {what} was built on {zone}.",
+   "decor": "The town is decorated for {label}."
+  }
+ },
+ "plan": {
+  "check_days": 7,
+  "fill_trigger": 0.9,
+  "max_projects": 2,
+  "zoning": {
+   "residential": 0.55,
+   "commercial": 0.3,
+   "civic": 0.15
+  },
+  "zoning_step": 0.1,
+  "zoning_min": 0.05,
+  "kinds": {
+   "residential": {
+    "label": "a block of flats",
+    "short": "flats",
+    "cost": 300,
+    "scaffold_days": [
+     2,
+     4
+    ],
+    "build_days": [
+     8,
+     14
+    ],
+    "workers": [
+     4,
+     8
+    ],
+    "capacity": 4
+   },
+   "commercial": {
+    "label": "a row of shops",
+    "short": "shops",
+    "cost": 250,
+    "scaffold_days": [
+     2,
+     3
+    ],
+    "build_days": [
+     6,
+     10
+    ],
+    "workers": [
+     3,
+     6
+    ],
+    "revenue": 18.0
+   },
+   "civic": {
+    "label": "a community centre",
+    "short": "community centre",
+    "cost": 280,
+    "scaffold_days": [
+     2,
+     4
+    ],
+    "build_days": [
+     8,
+     12
+    ],
+    "workers": [
+     3,
+     6
+    ],
+    "funding_bonus": {
+     "parks": 0.05,
+     "schools": 0.03
+    }
+   }
+  },
+  "texts": {
+   "scaffold": "Scaffolding has gone up on {zone}: {what} is planned.",
+   "done": "{what} opened on {zone}.",
+   "waiting": "The town cannot afford to build {what} yet."
   }
  }
 }

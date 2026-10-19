@@ -45,3 +45,19 @@ Data: `data/city.json` `gov`. Code: `CityGov` (budget, taxes, mayor, council, sa
 - **Policies** (`CityPolicy`, data): curfew for under-18s (venue entry at night, fewer street crimes), park closing hours, quiet hours (noise fines), free buses, green energy grants (bigger solar cut), permits (a building permit per day, a business permit). The council votes by leaning (axes: safety, freedom, thrift, services, peace, green); a law cannot be reopened for 28 days; townie mayors bring one about monthly; a player mayor uses mailbox interactions (Council: ..., Raise / Lower Taxes, Budget: more for ...).
 - Shared-file hooks: `Venues.check_entry` (policy), `Police.patrol_factor`, `CrimeRate.components`, `CareerShifts` school gain, `TransportBus` fares, `UtilityBills`, `BusinessCmd.open` + `CommandActions._build_wall` (permits), `SystemsManager` interaction start (noise), `SysContent.install_all` (`CityGov.install`).
 - Tests: `tests/city_gov_test.gd`, `tests/city_gov_longrun_test.gd` (slow: incumbent win rate by mood, 30 years of budgets).
+
+## 12.5 Public spaces and ageing infrastructure
+Data: `data/city.json` `public`. Code: `CityPublic`.
+- **Street lamps** per zone (8): they break daily (more as the infrastructure ages), crews fix two a week times the parks funding; dark zones count against the crime rate (`CrimeRate.components.lamps` uses `CityPublic.lamp_equiv`) and against the town's mood.
+- **Bins and litter**: bins fill; the parks budget empties them weekly; full bins turn into litter (toast for the player's zone when it gets bad).
+- **Benches, public toilets, fountains, playgrounds, bins**: counts per zone; the parks budget (funding 1.05 or better) and the savings build one every eight weeks. Objects with the same names exist as content (`streetlamp`, `bench`, `public_bin`, `public_toilet`, `fountain`, `playground`, with `toss_coin` and `play_on_playground`) so they can be placed on a lot; the town's own are numbers.
+- **Holiday decoration** for three days (announced, a little mood), **ageing**: the infrastructure age rises slowly and is renewed by utilities funding (>= 0.6); `CityBudget.maintenance_mult("utilities")` grows with it.
+
+## 12.6 Town planning and growth
+Data: `data/city.json` `plan`. Code: `CityPlan`.
+- **Zoning** (residential 55 / commercial 30 / civic 15 percent by default); the mayor shifts it (`Rezone: more ... land`).
+- **Growth**: weekly, a town that is 90 percent full starts a project (a block of flats, a row of shops or a community centre) in a zone chosen by the zoning shares, if the savings pay for it. **Construction takes days**: scaffolding (2-4 days), then 3-8 workers build (8-14 days), then it opens (toast for the player's zone, chronicle).
+- **Effects**: flats raise the population cap (+4: `StoryGrowth` arrivals and births use `max_population + CityPlan.extra_capacity()`), shops raise the town's revenue, a community centre adds to the parks and schools budgets.
+- **Not done**: the map itself does not grow (no new blocks, roads or buildings in the 3D world: every slot of the street grid is taken); a finished project is a record and a chronicle line.
+- The town notice (mailbox: `Read the Town Notice`, `CityGov.status_lines`) shows mayor, mood, taxes, where the money goes, laws, elections, projects and dark lamps in plain words.
+- Tests: `tests/city_town_test.gd`, `tests/city_town_longrun_test.gd` (slow).

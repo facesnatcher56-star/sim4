@@ -40,7 +40,7 @@ static func components() -> Dictionary:
 			adults += 1
 			if not CrimePerson.has_job(int(p)):
 				jobless += 1
-	var lamps: int = 0
+	var lamps: int = CityPublic.lamp_equiv()                       # task 12: the town's street lamps (broken ones count against it)
 	for o in SysUtil.all_world_objects():
 		if str(o.def_id) in ["streetlamp", "street_lamp"]:
 			lamps += 1

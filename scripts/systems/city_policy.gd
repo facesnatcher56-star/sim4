@@ -195,6 +195,7 @@ static func install_content() -> void:
 		return
 	var inter: Dictionary = {}
 	var mayor_test: Array = [{"has_buff": "mayor"}]
+	inter["town_notice"] = _def("Read the Town Notice", "town_notice", [], "What is the town up to?")
 	inter["vote_mayor"] = _def("Vote for Mayor", "vote_mayor", [], "Time to have my say.")
 	inter["run_for_mayor"] = _def("Run for Mayor", "run_for_mayor", [], "Maybe I should stand for mayor.")
 	inter["tax_up"] = _def("Raise Taxes", "tax_up", mayor_test, "The town needs the money.")
@@ -202,6 +203,8 @@ static func install_content() -> void:
 	for d in (g.get("dept_labels", {}) as Dictionary):
 		if d != "reserve":
 			inter["focus_" + str(d)] = _def("Budget: more for %s" % str((g["dept_labels"] as Dictionary)[d]), "focus_" + str(d), mayor_test, "Where should the money go?")
+	for zk in ["residential", "commercial", "civic"]:
+		inter["rezone_" + zk] = _def("Rezone: more %s land" % zk, "rezone_" + zk, mayor_test, "How should the town grow?")
 	for pid in ids():
 		inter["propose_" + pid] = _def("Council: %s" % str((cfg()[pid] as Dictionary).get("label", pid)), "propose_" + pid, mayor_test, "Let me put it to the council.")
 	var on_mailbox: Array = inter.keys()
