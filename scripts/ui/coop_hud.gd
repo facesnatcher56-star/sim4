@@ -21,6 +21,7 @@ var _poll := 0.0
 var _wired := 0
 var _was_active := false
 var _tag_i := 0
+var _waiting: CoopWaiting          # read the town stories / watch the active player while time cannot skip
 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
@@ -47,6 +48,10 @@ func _ready() -> void:
 	_alert_box.add_child(_alert_label)
 	_look_btn = _btn("Show me", _alert_box, _look)
 	_btn("Dismiss", _alert_box, func(): _alert_until = 0.0)
+	_waiting = CoopWaiting.new()
+	_waiting.hud = hud
+	add_child(_waiting)
+	_waiting.top_level = true          # lives at the screen edge, not inside the pace bar
 	visible = false
 
 func _btn(text: String, parent: Control, cb: Callable) -> Button:
@@ -100,6 +105,7 @@ func _refresh(ses: CoopSession) -> void:
 	_accept_btn.visible = voting and not i_voted
 	_decline_btn.visible = voting and not i_voted
 	_alert_box.visible = Time.get_ticks_msec() / 1000.0 < _alert_until
+	_waiting.update_state(st)
 
 func _on_pause() -> void:
 	var ses := CoopSession.instance

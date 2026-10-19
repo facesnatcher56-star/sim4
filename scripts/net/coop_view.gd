@@ -26,6 +26,8 @@ static func apply(d: Dictionary) -> String:
 		var hid := int(k)
 		WorldIface.coins[hid] = int(coins[k])
 		SimEnv.emit("coins_changed", hid, int(coins[k]))
+	if d.has("s"):
+		CoopStories.apply(d["s"])
 	for t in d.get("t", []):
 		SimEnv.emit("notification", str(t[0]), str(t[1]))
 	if need == "":

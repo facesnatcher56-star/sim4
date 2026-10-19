@@ -157,3 +157,18 @@ test `lot == Neighborhood.HOME` (fire insurance, burglary targets, crowd spawns,
 `coop_players_test` (join, lots, allowlist, build rules, hostile input, save / load, delta build and apply), `coop_time_test` (pace, skip, alerts, vote, idle, dropped players),
 `coop_skip_run_test` (real sim, 2 game days, two households, skip at night, resume in the morning, menus do not pause), and `coop_net_test` extended (second client over sockets: own
 household and lot, foreign order rejected, deltas keep positions identical, periodic hash without a mismatch, reconnect keeps the player).
+
+---
+
+# Stage 4: waiting players, lobby idle setting, alert flash
+
+## Waiting players (`CoopWaiting`, `CoopStories`)
+
+A player whose household is asleep or away while another player is busy cannot skip time. `CoopHud` then shows `CoopWaiting` (left edge, "Hide" button): **Town stories** (the news log
+`Story.news` + public `ChronicleHook` notes, newest first) and **Watch <Name>** (a read-only camera that follows one of the active player's folk through `lot_view.focus_on`, plus a
+line per folk: "Name: doing X (mood)"). It shows only while `CoopWaiting.waiting(time_state, me)` is true: my household passive, `skip` false, not paused, someone else active.
+- The host builds the stories per peer (`CoopStories.lines_for(pid)`, newest 12 lines) and puts them in the DELTA under `s` ONLY when the list changed; a client keeps the last list in
+  `CoopStories.feed` (`CoopView.apply`). Notes marked `public: false` never leave the host.
+- **Visibility**: every story entry (a Dictionary `{kind, text, day, severity, subjects, lot}`) and every watched folk goes through `CoopVisibility.visible_to(player, entity)`. That
+  function is the only place the tier rules live; nothing here checks households itself.
+- Nothing in the panel sends a command.

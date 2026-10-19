@@ -42,7 +42,7 @@ func _on_note(text: String, kind: String) -> void:
 
 ## New per-peer record (stored by CoopHost in the peer's record under "live").
 func new_peer() -> Dictionary:
-	return {"rows": {}, "coins": {}, "toast": _toast_n, "sent_s": -100.0, "sent_min": -1, "full_min": SimEnv.now_min(), "need_snap": ""}
+	return {"rows": {}, "coins": {}, "toast": _toast_n, "sent_s": -100.0, "sent_min": -1, "full_min": SimEnv.now_min(), "need_snap": "", "story_sig": ""}
 
 ## Called after a snapshot went to the peer: the next delta carries everything again.
 func reset_peer(st: Dictionary) -> void:
@@ -53,6 +53,7 @@ func reset_peer(st: Dictionary) -> void:
 	st["sent_min"] = -1
 	st["full_min"] = SimEnv.now_min()
 	st["need_snap"] = ""
+	st["story_sig"] = ""
 
 func _row(f) -> Dictionary:
 	var needs := {}
@@ -96,6 +97,11 @@ func build(st: Dictionary, player_id: int, now_s: float) -> Dictionary:
 	var d := {"m": now_min, "f": rows, "c": coins, "t": tl, "nf": count, "no": (w.objects as Dictionary).size() if w != null and "objects" in w else 0}
 	st["sent_s"] = now_s
 	st["sent_min"] = now_min
+	var story_lines := CoopStories.lines_for(player_id)       # town stories for a waiting player: only when the list changed
+	var story_sig := CoopStories.signature(story_lines)
+	if story_sig != str(st.get("story_sig", "")):
+		st["story_sig"] = story_sig
+		d["s"] = story_lines
 	if now_min - int(st["full_min"]) >= full_every_min:
 		st["full_min"] = now_min
 		st["need_snap"] = "periodic"
