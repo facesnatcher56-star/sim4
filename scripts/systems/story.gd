@@ -149,9 +149,10 @@ static func on_day(day: int) -> void:
 			_log("%s retired." % t["name"])
 		elif st == "adult":
 			if str(t["career"]) == "":
-				if SysUtil.chance(float(dc.get("job_chance", 0.12))):
+				if SysUtil.chance(float(dc.get("job_chance", 0.12)) * MarketEconomy.hiring_mult()):
 					t["career"] = str(SysUtil.pick(c.get("careers", [])))
 					t["level"] = 1
+					t.erase("seeking")
 					_log("%s started a new job." % t["name"])
 			else:
 				var lmax: int = Careers.max_level(str(t["career"]))
@@ -163,6 +164,7 @@ static func on_day(day: int) -> void:
 					if int(t["level"]) < 1:
 						t["career"] = ""
 						t["level"] = 1
+						t["seeking"] = true
 						_log("%s lost their job." % t["name"])
 				if str(t["career"]) != "":
 					t["coins"] = int(t["coins"]) + int(dc.get("coins_per_level", 40)) * int(t["level"])

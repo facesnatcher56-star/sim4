@@ -1,4 +1,4 @@
-class_name Hud
+﻿class_name Hud
 extends Control
 ## Root of the in-game HUD. Everything is built in code so the scene stays trivial.
 signal save_requested(slot: int)
@@ -15,6 +15,7 @@ var speed_buttons: Dictionary = {}     # speed int -> Button
 var build_button: Button
 var save_button: Button
 var map_button: Button
+var money_button: Button
 var lot_label: Label
 var travel_panel: TravelPanel
 var folk_panel: FolkPanel
@@ -26,6 +27,7 @@ var build_panel: BuildPanel
 var floor_selector: FloorSelector
 var goals_dialog: GoalsDialog
 var career_dialog: CareerDialog
+var money_hub: BankHub                  # task 13: Town & Money window
 var household_dialog: HouseholdDialog
 var help_dialog: HelpDialog
 var incident_debug: IncidentDebug
@@ -159,6 +161,11 @@ func _build_top_bar() -> void:
 	map_button.tooltip_text = "Neighbourhood map and travel (M)"
 	map_button.pressed.connect(func(): travel_panel.toggle())
 	h.add_child(map_button)
+	money_button = Button.new()
+	money_button.text = "Money"
+	money_button.tooltip_text = "Shops, your business, homes and the bank (optional)"
+	money_button.pressed.connect(func(): money_hub.toggle_for(selected_folk_id))
+	h.add_child(money_button)
 	build_button = Button.new()
 	build_button.text = "Build/Buy"
 	build_button.toggle_mode = true
@@ -204,6 +211,7 @@ func _build_left() -> void:
 func _build_dialogs() -> void:
 	goals_dialog = GoalsDialog.new()
 	career_dialog = CareerDialog.new()
+	money_hub = BankHub.new()
 	household_dialog = HouseholdDialog.new()
 	help_dialog = HelpDialog.new()
 	help_dialog.tips_requested.connect(func(): tips.start(true))
@@ -222,12 +230,12 @@ func _build_dialogs() -> void:
 	case_board = CaseBoard.new()
 	case_prompt = CasePrompt.new()
 	JusticePlayer.ask_fn = case_prompt.ask
-	for d in [goals_dialog, career_dialog, household_dialog, help_dialog, pause_menu, settings_dialog, confirm_dialog, incident_debug, case_board, case_prompt, share_hub]:
+	for d in [goals_dialog, career_dialog, money_hub, household_dialog, help_dialog, pause_menu, settings_dialog, confirm_dialog, incident_debug, case_board, case_prompt, share_hub]:
 		add_child(d)
 	save_menu.visibility_changed.connect(func(): UIDialog.track_open(save_menu.get_instance_id(), save_menu.visible))
 
 func dialogs() -> Array:
-	return [confirm_dialog, settings_dialog, share_hub, pause_menu, goals_dialog, career_dialog, household_dialog, help_dialog, incident_debug, case_board, case_prompt]
+	return [confirm_dialog, settings_dialog, share_hub, pause_menu, goals_dialog, career_dialog, money_hub, household_dialog, help_dialog, incident_debug, case_board, case_prompt]
 
 func _on_pause_choice(id: String) -> void:
 	pause_menu.hide_dialog()
@@ -355,7 +363,7 @@ func select_folk(id: int) -> void:
 	folk_panel.show_folk(f)
 	queue_bar.set_folk(f)
 	rebuild_folk_row()
-	for d in [goals_dialog, career_dialog]:
+	for d in [goals_dialog, career_dialog, money_hub]:
 		if d != null and d.visible:
 			d.show_for(id)
 

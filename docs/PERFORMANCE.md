@@ -87,3 +87,18 @@ crowd upkeep; the incident, health, accident, fire and disaster tests exercise t
   accident_longrun 82 s, systems_family_integration 79 s, weather_longrun 67 s, systems_integration 57 s, hood_sim 48 s, townie_needs 42 s,
   disaster_longrun 36 s, commute_longrun 23 s. Getting under 600 s needs these long runs shortened by their owners (`TestFixture.pick(full, quick)`
   for the loops, fewer simulated days); that was not done here because the files belong to the parallel crime / fire / health / disaster tracks.
+
+## System cadence table: economy track (task 13; details in docs/ECONOMY.md)
+
+All new systems are daily or weekly and event driven; nothing runs per minute. Off until `MarketEconomy.start()`.
+
+| System | Tier | Cadence | Active set | Caps |
+|---|---|---|---|---|
+| MarketEconomy (prosperity, indexes, unemployment) | town | daily | ~12 townies | history 12 |
+| ShopStock (shelves, deals, orders) | town | daily + on command | ~9 shops x <= 6 items | orders 40 |
+| MarketWork (teen job, gigs, crafts, layoffs, benefit) | household | daily + events | the household's folk | gigs 2/day each |
+| HousingProps / HousingRent | town | daily / weekly | <= ~12 properties | 5 listings |
+| BusinessSim / BusinessDay (player and townie) | town | daily | open businesses (<= 10 slots) | reviews 8, townie businesses 5 |
+| BankAccounts (interest, loan payments) | town | daily / weekly | households with savings or loans | 2 loans each |
+| BankGamble (lottery, urges) | town | daily, draw weekly | ticket holders, people with addiction | addiction 0..100 |
+| BankInsurance / BankWill | event | on payout / death | none | |

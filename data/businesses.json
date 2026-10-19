@@ -15,11 +15,11 @@
   "office": 0.7
  },
  "lot_rent": {
-  "cafe": 28,
-  "market": 30,
-  "gym": 25,
-  "library": 18,
-  "office": 22
+  "cafe": 45,
+  "market": 48,
+  "gym": 40,
+  "library": 30,
+  "office": 35
  },
  "max_levels": 3,
  "expand": {
@@ -114,7 +114,7 @@
     "market"
    ],
    "fitout": 2400,
-   "demand": 0.9,
+   "demand": 0.75,
    "avg_spend": 26,
    "unit_cost": 7,
    "cap_per_staff": 1.2,

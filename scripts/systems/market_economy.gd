@@ -109,33 +109,47 @@ static func _townie_jobs(c: Dictionary) -> void:
 			if rng.randf() < float(c.get("layoff_chance", 0.02)) * (-prosperity):
 				t["career"] = ""
 				t["level"] = 1
+				t["seeking"] = true
 				laid.append(str(t["name"]))
-		elif job == "" and not t.has("job_biz") and prosperity > float(c.get("hire_above", 0.1)):
+		elif job == "" and bool(t.get("seeking", false)) and not t.has("job_biz") and prosperity > float(c.get("hire_above", 0.1)):
 			if rng.randf() < float(c.get("hire_chance", 0.12)) * prosperity:
 				var careers: Array = Story.cfg().get("careers", [])
 				if not careers.is_empty():
 					t["career"] = str(careers[rng.randi_range(0, careers.size() - 1)])
 					t["level"] = 1
+					t.erase("seeking")
 	if laid.size() >= 2:
 		ChronicleHook.note("economy", "%d people lost their jobs in the cuts." % laid.size(), [], "town:0", 2, true)
 	elif laid.size() == 1:
 		Story._log("%s was laid off." % laid[0])
 
+## Share of the workforce without a job. The workforce = working adults + people who lost a job and are looking (a townie who is just
+## not working, or a household that is not job hunting, is not unemployed).
 static func _measure_unemployment() -> float:
 	var workers: int = 0
 	var jobless: int = 0
 	for t in Story.alive_townies():
 		if Story.stage_of(t) != "adult":
 			continue
-		workers += 1
-		if str(t.get("career", "")) == "" and not t.has("job_biz") and not bool(t.get("owner_biz", false)):
+		var has_work: bool = str(t.get("career", "")) != "" or t.has("job_biz") or bool(t.get("owner_biz", false))
+		if has_work:
+			workers += 1
+		elif bool(t.get("seeking", false)):
+			workers += 1
 			jobless += 1
 	for f in SysUtil.residents():
-		if f.age_stage == "adult":
+		if f.age_stage != "adult":
+			continue
+		if Careers.has_job(int(f.id)) or MarketWork.is_self_employed(int(f.id)):
 			workers += 1
-			if not Careers.has_job(int(f.id)) and not MarketWork.is_self_employed(int(f.id)):
-				jobless += 1
+		elif MarketWork.jobless.has(int(f.id)):
+			workers += 1
+			jobless += 1
 	return float(jobless) / float(maxi(workers, 1))
+
+## Story's daily job chance is scaled by this: jobs are easy to find in a boom and scarce in a recession (1.0 while the economy is off).
+static func hiring_mult() -> float:
+	return clampf(1.0 + prosperity * 1.5, 0.15, 2.0) if enabled else 1.0
 
 static func _report(day: int, c: Dictionary) -> void:
 	history.append({"day": day, "prosperity": snappedf(prosperity, 0.01), "price": snappedf(price_idx, 0.001), "unemployment": snappedf(unemployment, 0.001)})

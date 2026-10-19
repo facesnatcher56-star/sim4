@@ -11,6 +11,7 @@ func run() -> Array:
 	_credit(f)
 	_insurance(f)
 	_will(f)
+	_interactions(f)
 	_lottery(f)
 	_cards_and_addiction(f)
 	return f
@@ -106,6 +107,19 @@ func _will(f: Array) -> void:
 	BankWill.write(int(a2.id), int(c2.id))
 	Aging.kill(int(a2.id), "old age")
 	K.expect(f, Economy.balance(3) > 1000 and Economy.balance(3) <= 1500, "the heir gets the estate after the debt (%d)" % Economy.balance(3))
+	K.teardown()
+
+func _interactions(f: Array) -> void:
+	var w := E.setup(2000)
+	IncidentContent.install()
+	for iid in ["write_will", "money_matters", "sell_crafts", "freelance_gig", "odd_job"]:
+		K.expect(f, not SimEnv.data().interaction_def(iid).is_empty(), "interaction %s is installed" % iid)
+	var desk: Dictionary = SimEnv.data().object_def("desk")
+	K.expect(f, (desk.get("interactions", []) as Array).has("write_will"), "the desk offers Write a Will")
+	K.expect(f, (SimEnv.data().object_def("mailbox").get("interactions", []) as Array).has("money_matters"), "the mailbox offers Manage Money")
+	var bea: Folk = K.make_folk(w, "Bea", [], 1, Vector2i(14, 14))
+	SysUtil.game_event("write_will", {"folk_id": 1})
+	K.expect(f, BankWill.heir_of(1) == int(bea.id), "the Write a Will event names a housemate by default (heir %d)" % BankWill.heir_of(1))
 	K.teardown()
 
 func _lottery(f: Array) -> void:
