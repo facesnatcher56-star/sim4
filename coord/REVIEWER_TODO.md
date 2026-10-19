@@ -3,7 +3,7 @@
 Things the reviewer has promised the owner. Update when done.
 
 - [ ] **Cruise report:** when task 22 lands (with the 22b hooks), run a family on a full cruise and write the owner a full report. Then a second run with one killer aboard (`serial_killer_aboard`), and report what happens.
-- [ ] **Rerun the same 4 households** (family 11, couple 22, solo 33, roommates 44; 56 days each, one hour per frame) once the task 19 fixes land (violence loop, crime rates, weather seed, jobs and money), and compare with the first runs.
+- [x] **Rerun the same 4 households** (done, see 19c) (family 11, couple 22, solo 33, roommates 44; 56 days each, one hour per frame) once the task 19 fixes land (violence loop, crime rates, weather seed, jobs and money), and compare with the first runs.
 - [ ] **Full-lifetime run** (about 230 days, several households) after the crime and story fixes, to see a generation die and heirs take over (task 15 succession).
 - [ ] **Re-profile** after each scalability step (17.x) with the per-listener probe, and check `perf_scale` numbers.
 - [x] **Owner decisions:** life length decided (stretch childhood only: 16d). Co-op design posted (task 24).
