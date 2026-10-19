@@ -1,0 +1,86 @@
+{
+ "_doc": "Transport (task 12.2): modes, cars, parking, buses, taxis, traffic, lights and road works. Times in game minutes, money in coins (prices follow the town economy index). Speeds are multiples of walking (0.3 min per tile).",
+ "version": 1,
+ "map": {"w": 160, "h": 136},
+ "min_ride_tiles": 24,
+ "value_of_time": {"coin_min": 1.6, "poor_below": 150, "poor_mult": 2.5},
+ "modes": {
+  "walk": {"label": "on foot", "speed": 1.0},
+  "bike": {"label": "by bike", "speed": 2.3, "price": 140, "weather": {"rain": 0.7, "fog": 0.85, "snow": 0.0, "thunderstorm": 0.0, "cold_snap": 0.8, "heatwave": 0.9, "windy": 0.85}},
+  "bus": {"label": "by bus", "speed": 2.2, "fare": 4, "walk_min": 3, "dwell": 0.5},
+  "taxi": {"label": "by taxi", "speed": 3.0, "base": 8, "per_tile": 0.06, "wait": [3, 9], "night_wait_add": 6},
+  "car": {"label": "by car", "speed": 3.2}
+ },
+ "traffic": {
+  "curve": [0.05, 0.04, 0.03, 0.03, 0.05, 0.15, 0.4, 0.85, 1.0, 0.7, 0.55, 0.6, 0.7, 0.6, 0.55, 0.65, 0.9, 1.0, 0.8, 0.5, 0.35, 0.25, 0.15, 0.08],
+  "weekend": 0.65,
+  "weather": {"rain": 1.15, "thunderstorm": 1.2, "snow": 1.3, "fog": 1.1, "cold_snap": 1.05},
+  "jam_speed": 0.5,
+  "works_speed": 0.75
+ },
+ "lights": {"cycle_min": 4, "walk_share": 0.5, "walk_risk": 0.3, "stop_risk": 1.5, "dark_risk": 1.25, "dark_speed": 0.85, "road_w": 6},
+ "roads": {
+  "start": 0.85, "decay_per_day": 0.006, "decay_cold": 0.004, "works_gain": 0.5, "works_below": 0.55, "works_chance_per_day": 0.25,
+  "works_days": [2, 5], "pipe_works_days": [1, 3], "pothole_below": 0.4, "crash_mult": 1.0, "wear_mult": 1.0
+ },
+ "cars": {
+  "models": {
+   "banger": {"label": "Old Banger", "price": 900, "fuel": "petrol", "tank": 30, "per_tile": 0.06, "cond": 0.6, "resale": 0.45},
+   "hatch": {"label": "Town Hatchback", "price": 2400, "fuel": "petrol", "tank": 40, "per_tile": 0.04, "cond": 1.0, "resale": 0.6},
+   "estate": {"label": "Family Estate", "price": 3400, "fuel": "petrol", "tank": 55, "per_tile": 0.05, "cond": 1.0, "resale": 0.6},
+   "ev": {"label": "Electric Runabout", "price": 3800, "fuel": "electric", "tank": 40, "per_tile": 0.03, "cond": 1.0, "resale": 0.55}
+  },
+  "starter_model": "hatch",
+  "fuel_price": {"petrol": 2.4, "electric": 1.4},
+  "home_charge_mult": 0.6,
+  "wear_per_trip": 0.0006,
+  "wear_old": 0.0004,
+  "breakdown_below": 0.35,
+  "breakdown_delay_min": 30,
+  "repair_per_cond": 600,
+  "repair_days": [1, 3],
+  "min_trip_fuel": 0.5,
+  "limit_per_household": 3
+ },
+ "crash": {
+  "per_trip": 0.0036, "night": 1.6, "rush": 1.35, "tired": 1.8, "tired_energy": -40,
+  "weather": {"rain": 1.8, "thunderstorm": 2.2, "snow": 3.0, "fog": 2.0, "cold_snap": 1.6, "windy": 1.2},
+  "outcomes": {"minor": 0.7, "serious": 0.25, "wreck": 0.05},
+  "minor": {"cond": [0.08, 0.2], "injure": 0.12},
+  "serious": {"cond": [0.3, 0.5], "injure": 0.8, "severity": 2},
+  "wreck": {"cond": [1.0, 1.0], "injure": 1.0, "severity": 3, "death": 0.04},
+  "delay_min": 25, "tow_fee": 60, "bike_per_trip": 0.002, "bike_injure": 0.4
+ },
+ "parking": {
+  "capacity": {"home": 2, "townie_home": 2, "park": 8, "cafe": 8, "gym": 8, "library": 6, "market": 14, "office": 24, "school": 16, "hospital": 24, "police": 10, "courthouse": 10, "default": 6},
+  "ambient": {"home": 0.0, "townie_home": 0.3, "default": 0.15, "business": 0.7, "business_types": ["office", "school", "hospital", "market", "courthouse", "police"], "day_from": 7.5, "day_to": 18.5},
+  "fee": {"market": 0, "default": 0},
+  "search_min": [3, 10],
+  "garage": {"label": "Station Street Car Park", "capacity": 120, "fee_per_day": 6, "walk_min": 4},
+  "tow": {"night_from": 1, "night_to": 6, "chance": 0.4, "fee": 60, "pound_per_day": 10, "street_ticket": 25, "ticket_chance": 0.15, "tow_types": ["cafe", "market", "office", "gym", "library", "school", "park"]}
+ },
+ "bus": {
+  "service_from": 5.5, "service_to": 23.5,
+  "routes": [
+   {"id": "green", "name": "Green Line", "stops": ["school", "library", "office", "gym", "cafe", "market", "park"], "offset": 0,
+    "headway": {"peak": 8, "day": 12, "evening": 20, "night": 60}},
+   {"id": "blue", "name": "Blue Line", "stops": ["hospital", "townie_c", "home", "market", "townie_a", "townie_b", "apartments"], "offset": 4,
+    "headway": {"peak": 8, "day": 12, "evening": 20, "night": 60}},
+   {"id": "red", "name": "Red Line", "stops": ["police", "courthouse", "apartments", "townie_b", "gym", "office"], "offset": 7,
+    "headway": {"peak": 10, "day": 15, "evening": 25, "night": 60}}
+  ],
+  "bands": {"peak": [[7, 9.5], [16.5, 18.5]], "evening": [[19, 23.5]], "night": [[23.5, 24], [0, 5.5]]},
+  "roads_funding_headway": 0.35
+ },
+ "taxi": {"night_from": 22, "night_to": 6},
+ "text": {
+  "crash_minor": "{name} had a bump on the road. The car is dented.",
+  "crash_serious": "{name} crashed the car and was hurt. The car needs real repairs.",
+  "crash_wreck": "{name} was in a bad crash. The car is a wreck.",
+  "breakdown": "{name}'s car broke down on the way. It will need repairs.",
+  "towed": "Your car was towed from the street. Collect it at the pound.",
+  "ticket": "A parking ticket on the car: {fee} coins.",
+  "no_fuel": "The car is out of fuel, so {name} went another way.",
+  "bike_crash": "{name} came off the bike on the way."
+ }
+}

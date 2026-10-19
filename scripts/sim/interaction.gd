@@ -165,6 +165,8 @@ func start() -> bool:
 		_release()
 		return false
 	travel_total = n * WALK_MIN_PER_TILE / (Health.speed_mult(actor) * Weather.walk_speed_mult()) + float(params.get("delay_min", 0.0))      # injured folk and snow / rain walk slower; delay_min = traffic wait (commutes)
+	if params.has("ride_minutes"):
+		travel_total = float(params["ride_minutes"])      # task 12: a bike, bus, taxi or car trip decided by TransportTrip
 	travel_total += level_extra_min
 	travel_left = travel_total
 	actor.current = self

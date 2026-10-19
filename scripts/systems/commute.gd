@@ -40,7 +40,7 @@ static func lead_hours(f) -> float:
 	var lot: String = Workplace.lot_of_folk(f)
 	if lot == "":
 		return 0.0
-	var m: float = Workplace.commute_minutes(f, NeighborhoodLots.entry_tile(lot))
+	var m: float = Workplace.trip_minutes(f, NeighborhoodLots.entry_tile(lot))
 	return 0.0 if m < 0.0 else (m + Workplace.num("buffer_min", 10.0)) / 60.0
 
 static func begin(f, kind: String, ctx: Dictionary) -> bool:
@@ -48,7 +48,7 @@ static func begin(f, kind: String, ctx: Dictionary) -> bool:
 	if lot == "":
 		return false
 	var dest: Vector2i = NeighborhoodLots.entry_tile(lot)
-	var plan: float = Workplace.commute_minutes(f, dest)
+	var plan: float = Workplace.trip_minutes(f, dest)
 	if plan < 0.0 or dest.x < 0:
 		return false
 	var fid: int = int(f.id)
@@ -74,6 +74,10 @@ static func _walk(f, dest: Vector2i) -> bool:
 	ir.def["priority"] = "high"
 	ir.params["commute"] = true
 	ir.params["delay_min"] = Workplace.traffic_delay(f, dest)
+	var ride: Dictionary = TransportTrip.start(f, dest, {"commute": true})      # task 12: bike / bus / taxi / own car, decided by time, cost and weather
+	if str(ride["mode"]) != "walk" and float(ride["total_minutes"]) >= 0.0:
+		ir.params["ride_minutes"] = float(ride["total_minutes"])
+		ir.params["ride_mode"] = str(ride["mode"])
 	f.enqueue(ir)
 	return true
 

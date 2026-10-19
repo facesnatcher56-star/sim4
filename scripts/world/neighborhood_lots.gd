@@ -101,6 +101,11 @@ static func walk_to(f, tile: Vector2i, lot_id: String) -> bool:
 	if ir == null:
 		return false
 	ir.params["lot"] = lot_id
+	if SysUtil.is_resident(f):
+		var ride: Dictionary = TransportTrip.start(f, tile, {"own_only": true})      # task 12: the player's own bike or car (no fares behind the player's back)
+		if str(ride["mode"]) != "walk" and float(ride["total_minutes"]) >= 0.0:
+			ir.params["ride_minutes"] = float(ride["total_minutes"])
+			ir.params["ride_mode"] = str(ride["mode"])
 	f.enqueue(ir)
 	return true
 

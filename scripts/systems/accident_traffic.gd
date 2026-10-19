@@ -31,7 +31,7 @@ static func risk_at(tile: Vector2i, hour: float) -> float:
 		return 0.0
 	if provider.is_valid():
 		return clampf(float(provider.call(tile, hour)), 0.0, 1.0)
-	return risk_for_hour(hour, kind)
+	return clampf(risk_for_hour(hour, kind) * TransportTraffic.tile_mult(tile, hour, kind), 0.0, 1.0)      # task 12: traffic lights at the junctions
 
 ## The built-in rule without a tile (far townies): night is the dangerous time, jaywalking beats the crosswalk.
 static func risk_for_hour(hour: float, kind: String = "crosswalk") -> float:

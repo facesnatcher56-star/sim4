@@ -2,30 +2,477 @@
  "_doc": "Task 12 content (city infrastructure): buffs, objects and interactions of the utility networks. Numbers live in data/city.json. Merged into the shared tables by IncidentContent.",
  "content": {
   "buffs": {
-   "no_water": {"label": "No Running Water", "mood": {"uncomfortable": 1}, "duration_min": 0, "thought": "The taps are dry."},
-   "no_signal": {"label": "No Phone Line", "mood": {"uncomfortable": 1}, "duration_min": 0, "thought": "There is no phone signal."},
-   "offline": {"label": "No Internet", "mood": {"bored": 1}, "duration_min": 0, "thought": "The internet is down."},
-   "boil_notice": {"label": "Boil Water Notice", "mood": {}, "duration_min": 0, "thought": "I should boil the water before I drink it."}
+   "no_water": {
+    "label": "No Running Water",
+    "mood": {
+     "uncomfortable": 1
+    },
+    "duration_min": 0,
+    "thought": "The taps are dry."
+   },
+   "no_signal": {
+    "label": "No Phone Line",
+    "mood": {
+     "uncomfortable": 1
+    },
+    "duration_min": 0,
+    "thought": "There is no phone signal."
+   },
+   "offline": {
+    "label": "No Internet",
+    "mood": {
+     "bored": 1
+    },
+    "duration_min": 0,
+    "thought": "The internet is down."
+   },
+   "boil_notice": {
+    "label": "Boil Water Notice",
+    "mood": {},
+    "duration_min": 0,
+    "thought": "I should boil the water before I drink it."
+   }
   },
   "objects": {
-   "solar_panel": {"def": {"label": "Solar Panels", "size": [1, 1], "price": 900, "tags": ["utility", "outdoor", "green"], "model": "res://assets/models/solar_panel.glb",
-    "color": "#2d4f8a", "height": 0.6, "slots": [{"offset": [0, 1], "pose": "stand"}], "state": {}, "advertises": {}, "decor": 0.0, "interactions": []}},
-   "water_tank": {"def": {"label": "Water Tank", "size": [1, 1], "price": 450, "tags": ["utility", "outdoor", "green"], "model": "res://assets/models/water_tank.glb",
-    "color": "#5a8fa8", "height": 1.1, "slots": [{"offset": [0, 1], "pose": "stand"}], "state": {}, "advertises": {}, "decor": -0.1, "interactions": []}},
-   "well": {"def": {"label": "Well", "size": [1, 1], "price": 1400, "tags": ["utility", "outdoor", "green"], "model": "res://assets/models/well.glb",
-    "color": "#8a7a62", "height": 1.0, "slots": [{"offset": [0, 1], "pose": "stand"}], "state": {}, "advertises": {}, "decor": 0.4, "interactions": []}}
+   "solar_panel": {
+    "def": {
+     "label": "Solar Panels",
+     "size": [
+      1,
+      1
+     ],
+     "price": 900,
+     "tags": [
+      "utility",
+      "outdoor",
+      "green"
+     ],
+     "model": "res://assets/models/solar_panel.glb",
+     "color": "#2d4f8a",
+     "height": 0.6,
+     "slots": [
+      {
+       "offset": [
+        0,
+        1
+       ],
+       "pose": "stand"
+      }
+     ],
+     "state": {},
+     "advertises": {},
+     "decor": 0.0,
+     "interactions": []
+    }
+   },
+   "water_tank": {
+    "def": {
+     "label": "Water Tank",
+     "size": [
+      1,
+      1
+     ],
+     "price": 450,
+     "tags": [
+      "utility",
+      "outdoor",
+      "green"
+     ],
+     "model": "res://assets/models/water_tank.glb",
+     "color": "#5a8fa8",
+     "height": 1.1,
+     "slots": [
+      {
+       "offset": [
+        0,
+        1
+       ],
+       "pose": "stand"
+      }
+     ],
+     "state": {},
+     "advertises": {},
+     "decor": -0.1,
+     "interactions": []
+    }
+   },
+   "well": {
+    "def": {
+     "label": "Well",
+     "size": [
+      1,
+      1
+     ],
+     "price": 1400,
+     "tags": [
+      "utility",
+      "outdoor",
+      "green"
+     ],
+     "model": "res://assets/models/well.glb",
+     "color": "#8a7a62",
+     "height": 1.0,
+     "slots": [
+      {
+       "offset": [
+        0,
+        1
+       ],
+       "pose": "stand"
+      }
+     ],
+     "state": {},
+     "advertises": {},
+     "decor": 0.4,
+     "interactions": []
+    }
+   }
   },
   "interactions": {
-   "check_utilities": {"label": "Check Utilities", "kind": "super", "target": "object", "objects": ["mailbox"], "tags": ["paperwork"], "duration_min": 2,
-    "posture": "stand", "tests": [], "per_min": {}, "on_finish": [{"fire_event": "check_utilities"}], "autonomous": false, "priority": "normal", "advertises": {},
-    "thought": "What is working and what is not?"},
-   "report_outage": {"label": "Report an Outage", "kind": "super", "target": "object", "objects": ["mailbox"], "tags": ["paperwork"], "duration_min": 3,
-    "posture": "stand", "tests": [], "per_min": {}, "on_finish": [{"fire_event": "report_outage"}], "autonomous": false, "priority": "normal", "advertises": {},
-    "thought": "The crews should know about this."},
-   "boil_water": {"label": "Boil Drinking Water", "kind": "super", "target": "object", "objects": ["tea_kettle", "stove"], "tags": ["chore", "kitchen"], "duration_min": 10,
-    "posture": "stand", "tests": [{"has_buff": "boil_notice"}], "per_min": {"energy": -0.05}, "on_finish": [{"fire_event": "boil_water"}], "autonomous": true,
-    "priority": "low", "advertises": {"comfort": 1.0}, "thought": "Better boil the water first."}
+   "check_utilities": {
+    "label": "Check Utilities",
+    "kind": "super",
+    "target": "object",
+    "objects": [
+     "mailbox"
+    ],
+    "tags": [
+     "paperwork"
+    ],
+    "duration_min": 2,
+    "posture": "stand",
+    "tests": [],
+    "per_min": {},
+    "on_finish": [
+     {
+      "fire_event": "check_utilities"
+     }
+    ],
+    "autonomous": false,
+    "priority": "normal",
+    "advertises": {},
+    "thought": "What is working and what is not?"
+   },
+   "report_outage": {
+    "label": "Report an Outage",
+    "kind": "super",
+    "target": "object",
+    "objects": [
+     "mailbox"
+    ],
+    "tags": [
+     "paperwork"
+    ],
+    "duration_min": 3,
+    "posture": "stand",
+    "tests": [],
+    "per_min": {},
+    "on_finish": [
+     {
+      "fire_event": "report_outage"
+     }
+    ],
+    "autonomous": false,
+    "priority": "normal",
+    "advertises": {},
+    "thought": "The crews should know about this."
+   },
+   "boil_water": {
+    "label": "Boil Drinking Water",
+    "kind": "super",
+    "target": "object",
+    "objects": [
+     "tea_kettle",
+     "stove"
+    ],
+    "tags": [
+     "chore",
+     "kitchen"
+    ],
+    "duration_min": 10,
+    "posture": "stand",
+    "tests": [
+     {
+      "has_buff": "boil_notice"
+     }
+    ],
+    "per_min": {
+     "energy": -0.05
+    },
+    "on_finish": [
+     {
+      "fire_event": "boil_water"
+     }
+    ],
+    "autonomous": true,
+    "priority": "low",
+    "advertises": {
+     "comfort": 1.0
+    },
+    "thought": "Better boil the water first."
+   },
+   "buy_car_banger": {
+    "label": "Buy a Car: Old Banger",
+    "kind": "super",
+    "target": "object",
+    "objects": [
+     "mailbox"
+    ],
+    "tags": [
+     "paperwork"
+    ],
+    "duration_min": 3,
+    "posture": "stand",
+    "tests": [],
+    "per_min": {},
+    "on_finish": [
+     {
+      "fire_event": "buy_car_banger"
+     }
+    ],
+    "autonomous": false,
+    "priority": "normal",
+    "advertises": {},
+    "thought": "A car would make the days easier."
+   },
+   "buy_car_hatch": {
+    "label": "Buy a Car: Town Hatchback",
+    "kind": "super",
+    "target": "object",
+    "objects": [
+     "mailbox"
+    ],
+    "tags": [
+     "paperwork"
+    ],
+    "duration_min": 3,
+    "posture": "stand",
+    "tests": [],
+    "per_min": {},
+    "on_finish": [
+     {
+      "fire_event": "buy_car_hatch"
+     }
+    ],
+    "autonomous": false,
+    "priority": "normal",
+    "advertises": {},
+    "thought": "A car would make the days easier."
+   },
+   "buy_car_estate": {
+    "label": "Buy a Car: Family Estate",
+    "kind": "super",
+    "target": "object",
+    "objects": [
+     "mailbox"
+    ],
+    "tags": [
+     "paperwork"
+    ],
+    "duration_min": 3,
+    "posture": "stand",
+    "tests": [],
+    "per_min": {},
+    "on_finish": [
+     {
+      "fire_event": "buy_car_estate"
+     }
+    ],
+    "autonomous": false,
+    "priority": "normal",
+    "advertises": {},
+    "thought": "A car would make the days easier."
+   },
+   "buy_car_ev": {
+    "label": "Buy a Car: Electric Runabout",
+    "kind": "super",
+    "target": "object",
+    "objects": [
+     "mailbox"
+    ],
+    "tags": [
+     "paperwork"
+    ],
+    "duration_min": 3,
+    "posture": "stand",
+    "tests": [],
+    "per_min": {},
+    "on_finish": [
+     {
+      "fire_event": "buy_car_ev"
+     }
+    ],
+    "autonomous": false,
+    "priority": "normal",
+    "advertises": {},
+    "thought": "A car would make the days easier."
+   },
+   "sell_car": {
+    "label": "Sell the Car",
+    "kind": "super",
+    "target": "object",
+    "objects": [
+     "mailbox"
+    ],
+    "tags": [
+     "paperwork"
+    ],
+    "duration_min": 3,
+    "posture": "stand",
+    "tests": [],
+    "per_min": {},
+    "on_finish": [
+     {
+      "fire_event": "sell_car"
+     }
+    ],
+    "autonomous": false,
+    "priority": "normal",
+    "advertises": {},
+    "thought": "Time to let the car go."
+   },
+   "refuel_car": {
+    "label": "Fill Up the Car",
+    "kind": "super",
+    "target": "object",
+    "objects": [
+     "mailbox"
+    ],
+    "tags": [
+     "paperwork"
+    ],
+    "duration_min": 3,
+    "posture": "stand",
+    "tests": [],
+    "per_min": {},
+    "on_finish": [
+     {
+      "fire_event": "refuel_car"
+     }
+    ],
+    "autonomous": false,
+    "priority": "normal",
+    "advertises": {},
+    "thought": "Better fill the tank."
+   },
+   "repair_car": {
+    "label": "Repair the Car",
+    "kind": "super",
+    "target": "object",
+    "objects": [
+     "mailbox"
+    ],
+    "tags": [
+     "paperwork"
+    ],
+    "duration_min": 3,
+    "posture": "stand",
+    "tests": [],
+    "per_min": {},
+    "on_finish": [
+     {
+      "fire_event": "repair_car"
+     }
+    ],
+    "autonomous": false,
+    "priority": "normal",
+    "advertises": {},
+    "thought": "The car needs the garage."
+   },
+   "collect_car": {
+    "label": "Collect the Car from the Pound",
+    "kind": "super",
+    "target": "object",
+    "objects": [
+     "mailbox"
+    ],
+    "tags": [
+     "paperwork"
+    ],
+    "duration_min": 3,
+    "posture": "stand",
+    "tests": [],
+    "per_min": {},
+    "on_finish": [
+     {
+      "fire_event": "collect_car"
+     }
+    ],
+    "autonomous": false,
+    "priority": "normal",
+    "advertises": {},
+    "thought": "Get the car back."
+   },
+   "buy_bike": {
+    "label": "Buy a Bike",
+    "kind": "super",
+    "target": "object",
+    "objects": [
+     "mailbox"
+    ],
+    "tags": [
+     "paperwork"
+    ],
+    "duration_min": 3,
+    "posture": "stand",
+    "tests": [],
+    "per_min": {},
+    "on_finish": [
+     {
+      "fire_event": "buy_bike"
+     }
+    ],
+    "autonomous": false,
+    "priority": "normal",
+    "advertises": {},
+    "thought": "A bike would be handy."
+   },
+   "bus_times": {
+    "label": "Check Bus Times",
+    "kind": "super",
+    "target": "object",
+    "objects": [
+     "mailbox"
+    ],
+    "tags": [
+     "paperwork"
+    ],
+    "duration_min": 3,
+    "posture": "stand",
+    "tests": [],
+    "per_min": {},
+    "on_finish": [
+     {
+      "fire_event": "bus_times"
+     }
+    ],
+    "autonomous": false,
+    "priority": "normal",
+    "advertises": {},
+    "thought": "When is the next bus?"
+   }
   },
-  "object_interactions": {"mailbox": ["check_utilities", "report_outage"], "tea_kettle": ["boil_water"], "stove": ["boil_water"]}
+  "object_interactions": {
+   "mailbox": [
+    "check_utilities",
+    "report_outage",
+    "buy_car_banger",
+    "buy_car_hatch",
+    "buy_car_estate",
+    "buy_car_ev",
+    "sell_car",
+    "refuel_car",
+    "repair_car",
+    "collect_car",
+    "buy_bike",
+    "bus_times"
+   ],
+   "tea_kettle": [
+    "boil_water"
+   ],
+   "stove": [
+    "boil_water"
+   ]
+  }
  }
 }

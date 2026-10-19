@@ -76,6 +76,8 @@ static func begin(util: String, zone: String, hours: float, cause: String, opts:
 	count("outages")
 	count("util_" + util)
 	count("cause_" + cause)
+	if cause == "burst_main":
+		TransportTraffic.add_works(zone, "pipe", maxf(hours / 24.0, 0.1))      # the repair crew digs up the street
 	if bool(opts.get("apply", true)):
 		UtilityHomes.on_start(o)
 	if not bool(opts.get("silent", false)):
@@ -242,6 +244,8 @@ static func from_dict(d: Dictionary) -> void:
 	boiled = (d.get("boiled", {}) as Dictionary).duplicate()
 	reserve = (d.get("reserve", {}) as Dictionary).duplicate()
 	history = (d.get("history", []) as Array).duplicate(true)
+	for hrec in history:
+		SysUtil.ints_in(hrec, ["day"])
 	stats = {}
 	for k2 in (d.get("stats", {}) as Dictionary):
 		stats[str(k2)] = int(d["stats"][k2])

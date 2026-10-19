@@ -110,6 +110,14 @@ static func commute_minutes(f, to: Vector2i) -> float:
 		return -1.0
 	return float(n) * Interaction.WALK_MIN_PER_TILE / speed_factor(f)
 
+## Planned minutes of the way the folk would really go (task 12: bike, bus, taxi, own car, else on foot), cached for ten game minutes. Used for lead times.
+static func trip_minutes(f, to: Vector2i) -> float:
+	var walk: float = commute_minutes(f, to)
+	if walk < 0.0 or str(f.age_stage) == "toddler":
+		return walk
+	var best: float = TransportTrip.estimate(f, to, WorldIface.path_length(f.tile, to))
+	return best if best >= 0.0 else walk
+
 ## Extra wait on the way (placeholder for real traffic): every busy road crossing on the route costs a little. 0 without Traffic.provider.
 static func traffic_delay(f, to: Vector2i) -> float:
 	if not Traffic.provider.is_valid():
