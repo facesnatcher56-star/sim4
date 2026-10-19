@@ -227,8 +227,9 @@ static func finish_visible(f, success: bool) -> void:
 static func _start_home(f, t: Dictionary) -> void:
 	t["state"] = "home"
 	t["left_min"] = SysUtil.now()
-	var home: Vector2i = NeighborhoodLots.entry_tile(Neighborhood.HOME)
-	if NeighborhoodLots.lot_at(f.tile) == Neighborhood.HOME or home.x < 0:
+	var hl: String = PlayerLots.home_of(f)
+	var home: Vector2i = NeighborhoodLots.entry_tile(hl)
+	if NeighborhoodLots.lot_at(f.tile) == hl or home.x < 0:
 		_home(f, t)
 	else:
 		_walk(f, home)
@@ -236,8 +237,9 @@ static func _start_home(f, t: Dictionary) -> void:
 static func _step_home(f, t: Dictionary, now: int) -> void:
 	if Away.active.has(int(f.id)) or Away.pending.has(int(f.id)):
 		return
-	var home: Vector2i = NeighborhoodLots.entry_tile(Neighborhood.HOME)
-	if NeighborhoodLots.lot_at(f.tile) == Neighborhood.HOME or f.tile == home:
+	var hl: String = PlayerLots.home_of(f)
+	var home: Vector2i = NeighborhoodLots.entry_tile(hl)
+	if NeighborhoodLots.lot_at(f.tile) == hl or f.tile == home:
 		_home(f, t)
 	elif now - int(t["left_min"]) > int(Workplace.num("home_timeout_min", 240.0)):
 		trips.erase(int(f.id))                         # gave up (autonomy / stranded_home takes over)

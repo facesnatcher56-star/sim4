@@ -43,8 +43,12 @@ static func members(t: Dictionary) -> Array:
 			out.append(f)
 	return out
 
-static func home_tile() -> Vector2i:
-	return Neighborhood.entry_tile(Neighborhood.HOME)
+## Door of the home lot of the trip's household (the host's home, or a co-op guest's own lot).
+static func home_lot(t: Dictionary = {}) -> String:
+	return PlayerLots.home_of_household(int(t.get("hid", 0)))
+
+static func home_tile(t: Dictionary = {}) -> Vector2i:
+	return Neighborhood.entry_tile(home_lot(t))
 
 # ------------------------------------------------------------------ the machine
 static func step(t: Dictionary, now: int) -> void:
@@ -172,9 +176,9 @@ static func detach_to_hospital(t: Dictionary, f) -> void:
 static func send_home_early(t: Dictionary, f) -> void:
 	var fid: int = int(f.id)
 	end_transit(f)
-	f.tile = home_tile()
+	f.tile = home_tile(t)
 	f.level = 0
-	NeighborhoodLots.mark_inside(f, Neighborhood.HOME)
+	NeighborhoodLots.mark_inside(f, home_lot(t))
 	f.remove_meta("trip_id")
 	f.remove_meta("trip_zone")
 	f.remove_buff("on_trip")
@@ -209,7 +213,7 @@ static func end_transit(f) -> void:
 ## Stay over (or the player said "come home"): the party is hidden again for the journey home, the zone is unloaded.
 static func leave_destination(t: Dictionary, early: bool) -> void:
 	VacationLife.stop(t)
-	var home: Vector2i = home_tile()
+	var home: Vector2i = home_tile(t)
 	var tmin: int = int(t["travel_min"])
 	var i: int = 0
 	for f in members(t):
@@ -218,7 +222,7 @@ static func leave_destination(t: Dictionary, early: bool) -> void:
 		f.remove_meta("trip_zone")
 		f.tile = home if i == 0 else NeighborhoodTravel._spread(home, i)
 		f.level = 0
-		NeighborhoodLots.mark_inside(f, Neighborhood.HOME)
+		NeighborhoodLots.mark_inside(f, home_lot(t))
 		Away.send(f, float(maxi(tmin, 2)), "vacation", {"label": "Travelling home", "trip": int(t["id"])})
 		i += 1
 	if int(t["zone"]) >= 0:
@@ -234,14 +238,14 @@ static func leave_destination(t: Dictionary, early: bool) -> void:
 
 ## Home again: the journey ends, the return effects apply, the house is looked at, the trip becomes history.
 static func come_back(t: Dictionary) -> void:
-	var home: Vector2i = home_tile()
+	var home: Vector2i = home_tile(t)
 	var i: int = 0
 	var back: Array = []
 	for f in members(t):
 		end_transit(f)
 		f.tile = home if i == 0 else NeighborhoodTravel._spread(home, i)
 		f.level = 0
-		NeighborhoodLots.mark_inside(f, Neighborhood.HOME)
+		NeighborhoodLots.mark_inside(f, home_lot(t))
 		f.idle_until_min = 0
 		f.remove_meta("trip_id")
 		f.remove_buff("on_trip")

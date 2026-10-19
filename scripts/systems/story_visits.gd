@@ -48,11 +48,11 @@ static func _has_open_invite(folk_id: int) -> bool:
 			return true
 	return false
 
-## Where visitors come to: the player's home lot entry on the map (a fixed tile in tests / a single lot).
-static func entrance() -> Vector2i:
+## Where visitors come to: the door of the host's home lot (`host_id` = the host folk; a co-op guest hosts at their OWN lot, -1 = the home lot), a fixed tile in tests / a single lot.
+static func entrance(host_id: int = -1) -> Vector2i:
 	if Story.spawn_tile != Vector2i(-999, -999):
 		return Story.spawn_tile
-	var door: Vector2i = Neighborhood.entry_tile(Neighborhood.HOME)
+	var door: Vector2i = Neighborhood.entry_tile(PlayerLots.home_of(SysUtil.folk(host_id)) if host_id >= 0 else Neighborhood.HOME)
 	if door.x >= 0:
 		return door
 	var w = WorldIface.world()
@@ -146,7 +146,7 @@ static func _arrive(sit: Dictionary) -> void:
 		sit["state"] = "done"
 		return
 	sit["host_ids"] = hosts_alive
-	var tile: Vector2i = entrance()
+	var tile: Vector2i = entrance(int(hosts_alive[0]))
 	var count: int = 0
 	for gid in sit["guest_ids"]:
 		var t: Dictionary = Story.townies.get(int(gid), {})
@@ -206,7 +206,7 @@ static func _begin_leave(sit: Dictionary) -> void:
 			f.cancel_current("leaving")
 			f.clear_queue()
 			f.add_buff("cheered_up")
-			var out := Interaction.create_goto(f, entrance(), false)       # guests walk to the door before they are gone
+			var out := Interaction.create_goto(f, _host_door(sit), false)       # guests walk to the door before they are gone
 			if out != null:
 				f.enqueue(out)
 	sit["leave_done_min"] = SysUtil.now() + 8
@@ -337,3 +337,8 @@ static func on_party_return(f, rec: Dictionary) -> void:
 				RelationshipService.add_both(int(f.id), int(o), "friendship", 6.0 if RelationshipService.knows(int(f.id), int(o)) else 5.0)
 		SysUtil.notify("%s had a great time at the party." % f.name, "visit")
 		SysUtil.game_event("party_attended", {"folk_id": f.id, "townie_id": tid})
+
+## Door of the lot where this situation's (first) host lives.
+static func _host_door(sit: Dictionary) -> Vector2i:
+	var hosts: Array = sit.get("host_ids", [])
+	return entrance(int(hosts[0]) if not hosts.is_empty() else -1)

@@ -147,8 +147,9 @@ It does NOT simulate: the clock never advances locally (`Clock.coop_rate = 0`).
 
 ## Limits and rough edges
 
-`go_home` follows `PlayerLots.lot_of(pid)`, but older systems that send folk to `Neighborhood.HOME` (commute return, parties, visits) still mean the host's home for other players'
-folk. A player who leaves for good keeps their household and lot. The inbound rate limit is still the stage-1 token bucket (30 packets/s); outbound live traffic is bounded by
+"Home" is per household: `PlayerLots.home_of(folk)` / `home_of_household(hid)` give the lot (the host and NPCs: `Neighborhood.HOME`; a co-op guest: their own lot). Commute return, stranded-walk home,
+hospital discharge, holiday return (`VacationTrip.home_tile(trip)`), visit/party doors (`StoryVisits.entrance(host_id)`) and `go_home` use it. Still host-home only: crime/fire/crowd rules that
+test `lot == Neighborhood.HOME` (fire insurance, burglary targets, crowd spawns, mailbox/lamp story hooks). A player who leaves for good keeps their household and lot. The inbound rate limit is still the stage-1 token bucket (30 packets/s); outbound live traffic is bounded by
 `live.min_gap_s`.
 
 ## Tests added

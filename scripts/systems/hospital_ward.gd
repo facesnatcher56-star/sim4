@@ -127,11 +127,12 @@ static func release(f, rec: Dictionary) -> void:
 static func _home(f) -> void:
 	f.cancel_current("discharged")
 	f.clear_queue()
-	NeighborhoodTravel.travel([int(f.id)], Neighborhood.HOME, {"instant": true, "free": true, "quiet": true})
-	if NeighborhoodLots.lot_at(f.tile) != Neighborhood.HOME:         # not movable (should not happen): put them at the home door by hand
-		f.tile = NeighborhoodLots.entry_tile(Neighborhood.HOME)
+	var hl: String = PlayerLots.home_of(f)          # their own home (a co-op guest's lot), else the home lot
+	NeighborhoodTravel.travel([int(f.id)], hl, {"instant": true, "free": true, "quiet": true})
+	if NeighborhoodLots.lot_at(f.tile) != hl:         # not movable (should not happen): put them at the home door by hand
+		f.tile = NeighborhoodLots.entry_tile(hl)
 		f.level = 0
-		NeighborhoodLots.mark_inside(f, Neighborhood.HOME)
+		NeighborhoodLots.mark_inside(f, hl)
 		Neighborhood.refresh_view(int(f.id))
 
 

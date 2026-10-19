@@ -218,10 +218,10 @@ static func step_flights(t: Dictionary, now: int) -> void:
 			fl["arrive_min"] = now + int(lb.get("transit_min", 600))
 			f.cancel_current("trip")
 			f.clear_queue()
-			f.tile = VacationTrip.home_tile()
+			f.tile = VacationTrip.home_tile(t)
 			f.level = 0
 			f.remove_meta("trip_zone")
-			NeighborhoodLots.mark_inside(f, Neighborhood.HOME)
+			NeighborhoodLots.mark_inside(f, VacationTrip.home_lot(t))
 			Away.send(f, float(int(lb.get("transit_min", 600))), "vacation", {"label": "Flying home", "trip": int(t["id"])})
 			VacationLog.note(t, "missed", "%s flew home alone (%d coins)." % [f.name, int(fl["cost"])], [int(f.id)], 2, true)
 			if ashore_members(t).is_empty() and (c["moves"] as Array).is_empty():

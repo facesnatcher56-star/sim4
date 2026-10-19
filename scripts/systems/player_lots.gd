@@ -73,6 +73,18 @@ static func lot_of(player_id: int) -> String:
 			return str(r["lot"])
 	return ""
 
+## Lot id a household lives on: its player's own lot in co-op, Neighborhood.HOME for the host, NPC households and solo games.
+## Everything that sends someone "home" (commute return, hospital discharge, holiday return, visits, parties) asks this, not Neighborhood.HOME.
+static func home_of_household(household_id: int) -> String:
+	var pid: int = Players.player_of(household_id)
+	if pid <= Players.LOCAL:
+		return Neighborhood.HOME
+	var lot: String = lot_of(pid)
+	return lot if lot != "" else Neighborhood.HOME
+
+static func home_of(f) -> String:
+	return Neighborhood.HOME if f == null else home_of_household(int(f.household_id))
+
 ## Player whose lot this is (0 = none / venue / street).
 static func player_of_lot(lot_id: String) -> int:
 	var rg = _regions()

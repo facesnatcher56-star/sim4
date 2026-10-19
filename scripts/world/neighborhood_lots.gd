@@ -203,8 +203,9 @@ static func stranded_home(f) -> bool:
 	if not urgent:
 		return false
 	f.set_meta("home_try", now + 60)
-	var home: Vector2i = entry_tile(Neighborhood.HOME)
-	return home.x >= 0 and walk_to(f, home, Neighborhood.HOME)
+	var hl: String = PlayerLots.home_of(f)
+	var home: Vector2i = entry_tile(hl)
+	return home.x >= 0 and walk_to(f, home, hl)
 static func mark_inside(f, lot_id: String) -> void:
 	f.set_meta(IN_LOT, lot_id)
 
