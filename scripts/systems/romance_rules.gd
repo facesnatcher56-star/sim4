@@ -8,7 +8,7 @@ extends RefCounted
 
 const ADULT_STAGES := ["adult", "elder"]
 const TAGS := ["flirt", "romance", "kiss", "dating", "wedding", "proposal", "conception"]
-const EVENTS := ["try_for_baby", "propose", "wedding"]
+const EVENTS := ["try_for_baby", "intimate_careful", "intimate_open", "propose", "wedding"]
 const ROMANTIC_FLAGS := ["dating", "sweetheart", "partner", "spouse", "ex"]
 
 ## Life stage of any person (on the lot, townie, or only in the family book). Strangers with no record count as adults.

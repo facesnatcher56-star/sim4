@@ -18,17 +18,27 @@ func _births(f: Array) -> void:
 	RelationshipService.add_both(int(a["id"]), int(b["id"]), "friendship", 60.0)
 	RelationshipBits.set_flag(int(a["id"]), int(b["id"]), "partner", true, false)
 	Story.cfg()["growth"]["baby_chance"] = 1.0
+	a["sex"] = "female"
+	b["sex"] = "male"
+	Fertility.state(int(a["id"]))["infertile"] = false
+	Fertility.state(int(b["id"]))["infertile"] = false
+	a["age_days"] = 90.0
+	b["age_days"] = 90.0
 	var before: int = Story.townies.size()
 	StoryGrowth._births()
-	K.expect(f, Story.townies.size() == before + 1, "a partnered adult couple has a baby (%d -> %d)" % [before, Story.townies.size()])
+	K.expect(f, a.has("preg"), "a partnered adult couple conceives")
+	K.set_time(SysUtil.day() + Pregnancy.length_days() + 1, 8)
+	PregnancyTownie.on_day()
+	K.expect(f, Story.townies.size() >= before + 1, "and has a baby (%d -> %d)" % [before, Story.townies.size()])
+	before = Story.townies.size()
 	StoryGrowth._births()
-	K.expect(f, Story.townies.size() == before + 1, "babies are spaced out by baby_gap_days")
+	K.expect(f, Story.townies.size() == before and not a.has("preg"), "babies are spaced out by baby_gap_days")
 	# an elder couple has none
 	Story.townies[int(a["id"])]["age_days"] = 200.0
 	Story.townies[int(a["id"])]["last_baby_day"] = -99
 	Story.townies[int(b["id"])]["last_baby_day"] = -99
 	StoryGrowth._births()
-	K.expect(f, Story.townies.size() == before + 1, "an elder is not a parent")
+	K.expect(f, Story.townies.size() == before and not a.has("preg"), "an elder is not a parent")
 	K.teardown()
 
 func _arrivals(f: Array) -> void:

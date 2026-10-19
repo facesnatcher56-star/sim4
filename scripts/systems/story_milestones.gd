@@ -36,6 +36,8 @@ static func _couple(c: Dictionary, f, o) -> void:
 	var b: int = int(o.id)
 	var hid: int = int(f.household_id)
 	var m: float = StoryPacing.mult("commitment", hid)
+	if RelationshipBits.has_flag(a, b, "spouse") or RelationshipBits.has_flag(a, b, "partner") or FamilyMarriage.is_engaged(a, b):
+		Intimacy.daily_couple(a, b)             # quiet evenings together: an unplanned pregnancy is possible, rarely
 	if RelationshipBits.has_flag(a, b, "spouse"):
 		if FamilyTree.spouse_of(a) == b and SysUtil.chance(float(c.get("baby_chance", 0.04)) * m):
 			Aging.try_for_baby(a, b)

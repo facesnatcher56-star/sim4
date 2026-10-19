@@ -55,6 +55,7 @@ func _roundtrip(f: Array) -> void:
 	RelationshipService.add_both(fresh.id, dad.id, "romance", 60.0)
 	RelationshipBits.set_flag(fresh.id, dad.id, "sweetheart", true, false)
 	K.expect(f, Aging.try_for_baby(fresh.id, dad.id)["ok"], "precondition: a pregnancy begins")
+	PregnancyStage.reveal(fresh.id, "test")
 	K.set_time(2, 20)
 	Family.update_pregnancies()
 	K.expect(f, Family.trimester_of(fresh.id) == 2 and fresh.has_buff("pregnant_t2"), "precondition: second trimester")

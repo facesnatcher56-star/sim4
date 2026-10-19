@@ -258,6 +258,10 @@ func _on_game_event(ev_name: String, payload: Dictionary) -> void:
 	MoodSwings.on_game_event(ev_name, payload)
 	StoryPacing.on_game_event(ev_name, payload)
 	Vacation.on_game_event(ev_name, payload)
+	Pregnancy.on_game_event(ev_name, payload)
+	PregnancyStage.on_game_event(ev_name, payload)
+	PregnancyTell.on_game_event(ev_name, payload)
+	Intimacy.on_game_event(ev_name, payload)
 	match ev_name:
 		"order_groceries":
 			var f = SysUtil.folk(int(payload.get("folk_id", -1)))
@@ -269,6 +273,8 @@ func _on_game_event(ev_name: String, payload: Dictionary) -> void:
 			var res: Dictionary = Aging.try_for_baby(int(payload.get("folk_id", -1)), int(payload.get("target_id", -1)))
 			if not bool(res["ok"]) and str(res["reason"]) == "no_luck":
 				SysUtil.notify("No luck this time... maybe try again later.", "info")
+			elif not bool(res["ok"]) and str(res["reason"]) in ["same_sex", "too_old"]:
+				SysUtil.notify(Conception.why_not(int(payload.get("folk_id", -1)), int(payload.get("target_id", -1))), "info")
 		"apologize":
 			RelationshipService.on_apologize(int(payload.get("folk_id", -1)), int(payload.get("target_id", -1)))
 		"propose":

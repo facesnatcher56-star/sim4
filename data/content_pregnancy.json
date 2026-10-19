@@ -1,0 +1,152 @@
+{
+ "_doc": "Task 18 content (merged by PregnancyContent / ContentMerge): quiet intimacy with a protection choice, pregnancy test, prenatal care, ultrasound, bed rest, the fertility clinic, and the buffs of pregnancy. Non-graphic: events and moods only.",
+ "interactions": {
+  "get_intimate_careful": {
+   "label": "Get Intimate (careful)",
+   "category": "romantic",
+   "kind": "social",
+   "target": "folk",
+   "duration_min": 60,
+   "posture": "stand",
+   "tests": [
+    {"relationship_above": ["romance", 44]},
+    {"any": [{"has_buff": "stage_adult"}, {"has_buff": "stage_elder"}]}
+   ],
+   "target_tests": [
+    {"any": [{"has_buff": "stage_adult"}, {"has_buff": "stage_elder"}]}
+   ],
+   "on_finish": [
+    {"relationship_add": ["romance", 3]},
+    {"add_buff": "bonded_glow"},
+    {"fire_event": "intimate_careful"}
+   ],
+   "autonomous": false,
+   "priority": "normal",
+   "tags": ["social", "romance", "intimate"],
+   "cooldown_min": 480,
+   "thought": "A quiet evening together."
+  },
+  "get_intimate_open": {
+   "label": "Get Intimate (no protection)",
+   "category": "romantic",
+   "kind": "social",
+   "target": "folk",
+   "duration_min": 60,
+   "posture": "stand",
+   "tests": [
+    {"relationship_above": ["romance", 44]},
+    {"any": [{"has_buff": "stage_adult"}, {"has_buff": "stage_elder"}]}
+   ],
+   "target_tests": [
+    {"any": [{"has_buff": "stage_adult"}, {"has_buff": "stage_elder"}]}
+   ],
+   "on_finish": [
+    {"relationship_add": ["romance", 3]},
+    {"add_buff": "bonded_glow"},
+    {"fire_event": "intimate_open"}
+   ],
+   "autonomous": false,
+   "priority": "normal",
+   "tags": ["social", "romance", "intimate"],
+   "cooldown_min": 480,
+   "thought": "A quiet evening together."
+  },
+  "take_pregnancy_test": {
+   "label": "Take a Pregnancy Test",
+   "kind": "super",
+   "target": "self",
+   "duration_min": 10,
+   "posture": "stand",
+   "tests": [{"has_buff": "feeling_off"}],
+   "on_finish": [{"fire_event": "take_pregnancy_test"}],
+   "autonomous": false,
+   "priority": "normal",
+   "tags": ["pregnancy", "health"],
+   "thought": "I need to know."
+  },
+  "prenatal_checkup": {
+   "label": "Prenatal Check-up",
+   "kind": "super",
+   "target": "self",
+   "duration_min": 60,
+   "posture": "stand",
+   "tests": [{"any": [{"has_buff": "pregnant"}, {"has_buff": "feeling_off"}]}],
+   "on_finish": [{"fire_event": "prenatal_checkup"}],
+   "autonomous": false,
+   "priority": "normal",
+   "cooldown_min": 1440,
+   "tags": ["pregnancy", "health"],
+   "thought": "A check-up will put my mind at rest."
+  },
+  "ultrasound_scan": {
+   "label": "Ultrasound Scan",
+   "kind": "super",
+   "target": "self",
+   "duration_min": 40,
+   "posture": "lie",
+   "tests": [{"has_buff": "pregnant"}],
+   "on_finish": [{"fire_event": "ultrasound_scan"}],
+   "autonomous": false,
+   "priority": "normal",
+   "cooldown_min": 2880,
+   "tags": ["pregnancy", "health"],
+   "thought": "I can't wait to see."
+  },
+  "bed_rest": {
+   "label": "Rest in Bed",
+   "kind": "super",
+   "target": "self",
+   "duration_min": 480,
+   "posture": "lie",
+   "tests": [{"has_buff": "pregnant"}],
+   "per_min": {"energy": 0.15, "comfort": 0.08},
+   "on_finish": [{"fire_event": "bed_rest_start"}],
+   "autonomous": false,
+   "priority": "normal",
+   "tags": ["pregnancy", "rest"],
+   "thought": "Time to take it easy."
+  },
+  "fertility_treatment": {
+   "label": "Fertility Clinic Treatment",
+   "kind": "super",
+   "target": "self",
+   "duration_min": 120,
+   "posture": "stand",
+   "tests": [{"any": [{"has_buff": "stage_adult"}]}, {"lacks_buff": "pregnant"}],
+   "on_finish": [{"fire_event": "fertility_treatment"}],
+   "autonomous": false,
+   "priority": "normal",
+   "cooldown_min": 5760,
+   "tags": ["pregnancy", "health"],
+   "thought": "The clinic might help."
+  }
+ },
+ "buffs": {
+  "feeling_off": {
+   "label": "Feeling Off",
+   "mood": {"uncomfortable": 1},
+   "duration_min": 0,
+   "need_decay_mult": {"energy": 1.3, "hunger": 1.2},
+   "thought": "I feel queasy and tired. What is wrong with me?"
+  },
+  "bed_rest": {
+   "label": "Bed Rest",
+   "mood": {"uncomfortable": 1},
+   "duration_min": 1440,
+   "need_decay_mult": {"energy": 0.6, "fun": 1.3},
+   "thought": "Taking it easy for the baby."
+  },
+  "expecting_joy": {
+   "label": "Over the Moon",
+   "mood": {"happy": 3},
+   "duration_min": 2880,
+   "thought": "We are going to have a baby!"
+  },
+  "expecting_worry": {
+   "label": "Worried About the Future",
+   "mood": {"tense": 2},
+   "duration_min": 2880,
+   "thought": "How will we manage?"
+  }
+ }
+}

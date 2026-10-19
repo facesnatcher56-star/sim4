@@ -24,6 +24,7 @@ static func install() -> void:
 static func install_all() -> void:
 	install()
 	FamilyContent.install()
+	PregnancyContent.install()
 	WeatherContent.install()
 	IncidentContent.install()
 	VacationContent.install()          # idempotent; also runs inside install() before the tag patches

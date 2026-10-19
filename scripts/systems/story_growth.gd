@@ -10,6 +10,7 @@ static func population() -> int:
 	return Story.alive_townies().size()
 
 static func on_day() -> void:
+	PregnancyTownie.on_day()
 	_births()
 	_arrivals()
 
@@ -39,16 +40,15 @@ static func _births() -> void:
 			continue
 		if int(ta.get("kids", 0)) + int(tb.get("kids", 0)) >= int(g.get("max_kids", 3)):
 			continue
-		if SysUtil.chance(float(g.get("baby_chance", 0.05))):
-			_born(ta, tb)
+		PregnancyTownie.consider(ta, tb, float(g.get("baby_chance", 0.05)))
 
 static func _can_parent(t: Dictionary) -> bool:
 	return Story.stage_of(t) == "adult"
 
-static func _born(ta: Dictionary, tb: Dictionary) -> void:
+static func _born(ta: Dictionary, tb: Dictionary, sex: String = "") -> void:
 	var a: int = int(ta["id"])
 	var b: int = int(tb["id"])
-	var baby: Dictionary = Story.add_townie(0.0, "", [])
+	var baby: Dictionary = Story.add_townie(0.0, "", [], "", 1, sex)
 	baby["name"] = "%s %s" % [Names.pick_first([], null, Sexes.of_townie(baby)), Story.name_of(a).split(" ")[-1]]
 	baby["lot"] = int(ta.get("lot", 1))
 	RelationshipBits.set_flag(int(baby["id"]), a, "family", true, false)

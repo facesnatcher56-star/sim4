@@ -12,6 +12,7 @@ static var dead: Array = []              # legacy records
 static var lifespan_setting: String = ""  # "" = use data default
 
 static func reset() -> void:
+	Pregnancy.reset()
 	records.clear()
 	pregnancies.clear()
 	cooldowns.clear()
@@ -220,74 +221,19 @@ static func _grow_trait(f) -> void:
 		SysUtil.notify("%s's personality is showing: %s." % [f.name, str(SimEnv.data().trait_def(str(t2)).get("label", t2))], "birthday")
 
 # ------------------------------------------------------------------ pregnancy / birth
-## Returns {"ok": bool, "reason": String}. `actor_id` carries the pregnancy.
+## Returns {"ok": bool, "reason": String}. The FEMALE of the pair carries, whichever folk started it (Conception).
 static func try_for_baby(actor_id: int, partner_id: int) -> Dictionary:
-	var a = SysUtil.folk(actor_id)
-	var b = SysUtil.folk(partner_id)
-	var pc: Dictionary = cfg().get("pregnancy", {})
-	if a == null or b == null:
-		return {"ok": false, "reason": "missing"}
-	var min_idx: int = stage_index(str(pc.get("min_stage", "adult")))
-	if stage_index(str(a.age_stage)) < min_idx or stage_index(str(b.age_stage)) < min_idx:
-		return {"ok": false, "reason": "too_young"}
-	if not RomanceRules.allowed(actor_id, partner_id):
-		return {"ok": false, "reason": "not_allowed"}
-	if pregnancies.has(actor_id) or pregnancies.has(partner_id) or a.has_buff("pregnant"):
-		return {"ok": false, "reason": "already_pregnant"}
-	if SysUtil.day() < int(cooldowns.get(actor_id, 0)):
-		return {"ok": false, "reason": "cooldown"}
-	var rom: float = minf(RelationshipService.value(actor_id, partner_id, "romance"), RelationshipService.value(partner_id, actor_id, "romance"))
-	if rom < float(pc.get("min_romance", 45)):
-		return {"ok": false, "reason": "not_romantic_enough"}
-	if not (RelationshipBits.bit_for(actor_id, partner_id) in ["sweetheart", "partner", "spouse"]):
-		return {"ok": false, "reason": "not_a_couple"}
-	cooldowns[actor_id] = SysUtil.day() + int(pc.get("cooldown_days", 4))
-	if not SysUtil.chance(float(pc.get("success_chance", 0.45))):
-		return {"ok": false, "reason": "no_luck"}
-	pregnancies[actor_id] = {"father": partner_id, "due_day": SysUtil.day() + int(pc.get("days", 3)), "started": SysUtil.day(), "started_min": SysUtil.now()}
-	a.add_buff("pregnant")
-	Family.update_pregnancies()
-	SysUtil.notify("%s is expecting a baby!" % a.name, "birthday")
-	SysUtil.game_event("pregnant", {"folk_id": actor_id, "target_id": partner_id})
-	return {"ok": true, "reason": "pregnant"}
+	var res: Dictionary = Conception.try_for_baby(actor_id, partner_id)
+	if bool(res.get("ok", false)):
+		Family.update_pregnancies()
+	return res
 
 static func _check_births() -> void:
-	for mid in pregnancies.keys():
-		if SysUtil.day() >= int(pregnancies[mid]["due_day"]):
-			_birth(int(mid), int(pregnancies[mid]["father"]))
-			pregnancies.erase(mid)
+	Pregnancy.on_day()
 
+## Deliver now (tests and the old call sites): PregnancyBirth makes the baby or babies from the record, or one baby without a record.
 static func _birth(mother_id: int, father_id: int) -> void:
-	var m = SysUtil.folk(mother_id)
-	if m == null:
-		return
-	var pc: Dictionary = cfg().get("pregnancy", {})
-	var father = SysUtil.folk(father_id)
-	var baby_sex: String = Sexes.roll()
-	var gen: Dictionary = Genetics.inherit(Family.person_info(mother_id), Family.person_info(father_id), null,
-		{"chance": float(pc.get("inherit_chance", 0.35)), "cap": int(pc.get("max_inherited", 2)), "sex": baby_sex})
-	var inherited: Array = gen["traits"]
-	var baby_name: String = Names.pick_first([], SysUtil.rng, baby_sex) + " " + _surname(str(m.name))
-	var baby := Folk.create(baby_name, [], -1, baby_sex)
-	baby.appearance = gen["appearance"]
-	baby.household_id = int(m.household_id)
-	baby.age_stage = "baby"
-	register(baby, 0.0, [mother_id, father_id])
-	(records[int(baby.id)] as Dictionary)["inherited"] = inherited
-	for pid in [mother_id, father_id]:
-		if records.has(pid):
-			(records[pid]["children"] as Array).append(int(baby.id))
-	SysUtil.world_add_folk(baby, m.tile)
-	baby.level = int(m.level)                      # born on the mother's floor
-	m.remove_buff("pregnant")
-	Family.on_birth(baby, mother_id, father_id)
-	for pid2 in [mother_id, father_id]:
-		RelationshipBits.set_flag(int(baby.id), int(pid2), "family", true, false)
-		RelationshipService.add_both(int(baby.id), int(pid2), "friendship", 40.0)
-	RelationshipBits.set_flag(mother_id, father_id, "family", true, false)
-	var in_hospital: bool = HospitalWard.lot_id() != "" and SysUtil.chance(float(Hospital.cfg().get("birth", {}).get("chance", 0.7))) and HospitalWard.birth(m, baby)
-	SysUtil.notify("%s was born to %s%s!" % [baby_name, m.name, " at the hospital" if in_hospital else ""], "birthday")
-	SysUtil.game_event("baby_born", {"folk_id": mother_id, "baby_id": baby.id, "target_id": father_id, "hospital": in_hospital})
+	PregnancyBirth.deliver(mother_id, father_id)
 
 static func _surname(full: String) -> String:
 	var parts: PackedStringArray = full.split(" ")
@@ -435,7 +381,7 @@ static func legacy_summary(folk_id: int) -> Dictionary:
 # ------------------------------------------------------------------ save
 static func to_dict() -> Dictionary:
 	return {"records": SysUtil.str_keys(records).duplicate(true), "pregnancies": SysUtil.str_keys(pregnancies).duplicate(true),
-		"cooldowns": SysUtil.str_keys(cooldowns), "dead": dead.duplicate(true), "lifespan": lifespan_setting}
+		"cooldowns": SysUtil.str_keys(cooldowns), "dead": dead.duplicate(true), "lifespan": lifespan_setting, "preg": Pregnancy.to_dict()}
 
 static func from_dict(d: Dictionary) -> void:
 	reset()
@@ -444,6 +390,7 @@ static func from_dict(d: Dictionary) -> void:
 	cooldowns = SysUtil.int_keys(d.get("cooldowns", {}))
 	dead = (d.get("dead", []) as Array).duplicate(true)
 	lifespan_setting = str(d.get("lifespan", ""))
+	Pregnancy.from_dict(d.get("preg", {}))
 	for k in records:
 		var r: Dictionary = records[k]
 		r["last_year"] = int(r["last_year"])
@@ -460,5 +407,6 @@ static func from_dict(d: Dictionary) -> void:
 		pregnancies[k]["father"] = int(pregnancies[k]["father"])
 		pregnancies[k]["due_day"] = int(pregnancies[k]["due_day"])
 		pregnancies[k]["started"] = int(pregnancies[k]["started"])
+		Pregnancy.normalize_loaded(pregnancies[k])
 		if pregnancies[k].has("started_min"):
 			pregnancies[k]["started_min"] = int(pregnancies[k]["started_min"])

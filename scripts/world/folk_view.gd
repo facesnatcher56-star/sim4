@@ -19,7 +19,7 @@ func _process(delta: float) -> void:
 	if _check_tick % 20 == 0:
 		if stage_of(f) != _stage_now:
 			_build_visual()
-		elif hash(_appearance_of(f)) + 31 * hash(_stage_now) != _look_sig:
+		elif hash(_appearance_of(f)) + 31 * hash(_stage_now) + 977 * bump_of(f) != _look_sig:
 			_apply_appearance(f)
 	_update_waypoints(f)
 	_resolve_target(f)

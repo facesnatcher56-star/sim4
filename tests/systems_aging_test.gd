@@ -113,6 +113,7 @@ func _baby(f: Array) -> void:
 	K.expect(f, not res["ok"] and res["reason"] == "not_a_couple", "needs a sweetheart bond or better: %s" % str(res))
 	RelationshipBits.set_flag(a.id, b.id, "sweetheart", true, false)
 	res = Aging.try_for_baby(a.id, b.id)
+	PregnancyStage.reveal(a.id, "test")
 	K.expect(f, res["ok"] and a.has_buff("pregnant"), "pregnancy begins: %s" % str(res))
 	K.expect(f, not Aging.try_for_baby(a.id, b.id)["ok"], "no double pregnancy")
 	var folk_before: int = w.all_folk().size()

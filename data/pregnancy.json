@@ -1,0 +1,87 @@
+{
+ "_doc": "Task 18 sections 2-3: fertility, conception, pregnancy. Length and the older keys (days, success_chance, min_romance, inherit_chance, cooldown_days, min_stage) stay in data/aging.json 'pregnancy'. Ages are in age days (adult from 76, elder from 172).",
+ "fertility": {
+  "female_curve": [[0, 0.0], [75, 0.0], [76, 1.0], [110, 1.0], [140, 0.6], [165, 0.25], [171, 0.1]],
+  "male_curve": [[0, 0.0], [75, 0.0], [76, 1.0], [120, 1.0], [171, 0.6]],
+  "elder": 0.0,
+  "trait_mult": {"active": 1.05, "lazy": 0.95, "workaholic": 0.95, "romantic": 1.05},
+  "buff_mult": {"work_stress": 0.8, "anxious_jitters": 0.85, "exhausted": 0.7, "starving": 0.6, "hungry": 0.9, "grieving": 0.8, "grieving_heavy": 0.7, "grieving_shattered": 0.6, "flu": 0.6, "injured": 0.7, "tipsy": 0.95, "well_rested": 1.05, "treated": 1.5},
+  "infertile_rate": 0.06,
+  "reveal_after_tries": 3,
+  "clinic": {"cost": 400, "cure_chance": 0.6, "boost_days": 12, "twins_mult": 6.0, "minutes": 120}
+ },
+ "conception": {
+  "unprotected_chance": 0.1,
+  "protected_chance": 0.01,
+  "intimacy_per_day": 0.25,
+  "protected_share": 0.75,
+  "protected_share_traits": {"romantic": 0.6, "shy": 0.8, "impulsive": 0.5},
+  "min_romance": 40,
+  "after_birth_days": 4,
+  "twins": 0.02,
+  "triplets": 0.001
+ },
+ "stage": {
+  "symptoms_at": 0.18,
+  "auto_known_at": 0.5,
+  "test_cost": 12,
+  "test_accuracy_from": 0.12,
+  "checkup_cost": 40,
+  "ultrasound_cost": 70,
+  "ultrasound_from": 0.3,
+  "late_from": 0.66,
+  "late_blocked_tags": ["exercise", "heavy_work", "physical"],
+  "length_jitter_days": 0.0
+ },
+ "tell": {
+  "partner_delay_hours": 6,
+  "keep_secret_chance": 0.12,
+  "keep_secret_unplanned": 0.35,
+  "secret_traits": {"shy": 0.2, "loner": 0.15},
+  "notice_chance_per_day": 0.35,
+  "public_at_trimester": 3,
+  "friend_min": 30,
+  "reaction": {
+   "base_joy": 0.4,
+   "planned": 0.5,
+   "unplanned": -0.2,
+   "married": 0.3,
+   "committed": 0.1,
+   "romance_per_point": 0.004,
+   "poor": -0.25,
+   "poor_coins": 80,
+   "good_traits": {"romantic": 0.2, "optimist": 0.15, "generous": 0.1, "social": 0.05},
+   "bad_traits": {"pessimist": -0.2, "workaholic": -0.15, "hot_headed": -0.15, "jealous": -0.05},
+   "joy_at": 0.45,
+   "anger_below": -0.15,
+   "breakup_below": -0.45,
+   "breakup_chance": 0.5
+  }
+ },
+ "care": {
+  "visit_risk_cut": 0.25,
+  "max_visits": 3,
+  "rest_risk_cut": 0.15,
+  "healthy_food_cut": 0.1,
+  "bed_rest_cut": 0.3
+ },
+ "leave": {
+  "maternity_before_days": 0.34,
+  "maternity_after_days": 3,
+  "paternity_after_days": 1,
+  "keeps_job": true
+ },
+ "risk": {
+  "age_from": 140,
+  "age_points": 1.0,
+  "points": {"injured": 2.0, "flu": 1.5, "food_poisoning": 1.5, "hypothermia": 2.0, "heat_exhaustion": 2.0, "starving": 2.0, "work_stress": 0.8, "anxious_jitters": 0.5, "exhausted": 1.0, "tipsy": 0.4},
+  "event_points": {"fell_on_stairs": 3.0, "injured": 2.0, "fell_ill": 1.5, "health_collapsed": 3.0},
+  "event_decay_per_day": 0.5,
+  "multiples_points": 1.0
+ },
+ "townie": {
+  "daily_chance": 0.012,
+  "max_kids": 3,
+  "gap_days": 8
+ }
+}

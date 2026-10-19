@@ -112,7 +112,9 @@ func _births(f: Array) -> void:
 	Aging.set_age_days(dad, 92.0)
 	var girls := 0
 	for i in 40:
-		Aging._birth(mom.id, dad.id)
+		Aging.pregnancies[mom.id] = {"father": dad.id, "due_day": 1, "started": 1, "kids": 1, "kid_sexes": [Sexes.roll()]}
+		PregnancyBirth.deliver(mom.id, dad.id)
+		Aging.pregnancies.erase(mom.id)
 	for b in w.all_folk():
 		if b.age_stage == "baby":
 			K.expect(f, Sexes.valid(b.sex), "baby has a sex")

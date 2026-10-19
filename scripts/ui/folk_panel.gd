@@ -649,7 +649,8 @@ func _build_family() -> void:
 	var row := HFlowContainer.new()
 	family_box.add_child(row)
 	_family_button(row, "propose", "Propose", grown and here and pst in ["sweetheart", "partner"], pid, "Needs a sweetheart or partner who is here.")
-	_family_button(row, "try_for_baby", "Try for Baby", grown and here and pst in ["sweetheart", "partner", "spouse", "fiance"], pid, "Needs a partner who is here.")
+	var baby_why: String = Conception.why_not(folk_id, pid) if here else ""
+	_family_button(row, "try_for_baby", "Try for Baby", grown and here and pst in ["sweetheart", "partner", "spouse", "fiance"] and baby_why == "", pid, baby_why if baby_why != "" else "Needs a partner who is here.")
 	_family_button(row, "have_wedding", "Hold Wedding", grown and here and pst == "fiance", pid, "Needs a fiance(e) who is here.")
 	_family_button(row, "adopt_child", "Adopt a Child", grown, -1, "Adults only.")
 	_heir_row()

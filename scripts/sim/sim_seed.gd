@@ -10,6 +10,7 @@ static func apply(master: int) -> void:
 	SysUtil.seed_rng(master)
 	Genetics.seed_rng(master ^ 0x5eed1)
 	Sexes.seed_rng(master ^ 0x5eed4)
+	Pregnancy.seed_rng(master ^ 0x5eed5)
 	Autonomy.rng = RandomNumberGenerator.new()
 	Autonomy.rng.seed = master ^ 0x5eed2
 	Loot.rng = RandomNumberGenerator.new()

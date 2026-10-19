@@ -60,11 +60,14 @@ func _pregnancy(f: Array) -> void:
 	var a: Folk = pair[0]
 	var b: Folk = pair[1]
 	var c := K.make_folk(w, "Cy", ["lazy"], 1, Vector2i(15, 12))
+	c.sex = "male"
 	Aging.set_age_days(c, 92.0)
 	RelationshipService.add_both(a.id, c.id, "romance", 60.0)
 	K.expect(f, Aging.try_for_baby(a.id, c.id)["reason"] == "not_a_couple", "try for baby needs a sweetheart bond or better")
 	K.set_time(1, 8)
 	var res: Dictionary = Aging.try_for_baby(a.id, b.id)
+	K.expect(f, res["ok"] and not a.has_buff("pregnant"), "she does not know yet: only feels off later")
+	PregnancyStage.reveal(a.id, "test")
 	K.expect(f, res["ok"] and a.has_buff("pregnant") and a.has_buff("pregnant_t1"), "pregnancy starts in the first trimester: %s" % str(res))
 	K.expect(f, Family.trimester_of(a.id) == 1 and Family.pregnancy_progress(a.id) < 0.01, "progress starts at zero")
 	var decay_t1: float = a.decay_mult("bladder")

@@ -102,12 +102,16 @@ func _appearance_of(f) -> Dictionary:
 ## Show / hide / tint the model parts for the appearance (FolkRigStyle); a changed look rebuilds the model (unused parts are freed).
 var _styled: bool = false
 
+## 1 while she is in the third trimester of a pregnancy (a rounder body), else 0.
+func bump_of(f) -> int:
+	return 1 if f != null and f.has_method("has_buff") and f.has_buff("pregnant_t3") else 0
+
 func _apply_appearance(f) -> void:
 	if _styled and not _is_placeholder:
 		_build_visual()
 		return
 	var ap := _appearance_of(f)
-	_look_sig = hash(ap) + 31 * hash(_stage_now)
+	_look_sig = hash(ap) + 31 * hash(_stage_now) + 977 * bump_of(f)
 	var skin := color_of(ap.get("skin", null), Color(0.90, 0.70, 0.56))
 	var hair := color_of(ap.get("hair_color", null), Color(0.25, 0.15, 0.10))
 	var eyes := color_of(ap.get("eye_color", null), Color(0.20, 0.30, 0.45))
@@ -124,7 +128,8 @@ func _apply_appearance(f) -> void:
 	if _is_placeholder:
 		_tint_placeholder(tints)
 		return
-	_rig.scale = Vector3(build * height, height, build * height)
+	var wide: float = 1.0 + 0.14 * float(bump_of(f))              # a visible bump in the third trimester
+	_rig.scale = Vector3(build * height * wide, height, build * height * wide)
 	FolkRigStyle.apply(_rig, ap, _stage_now, shirt_d)
 	_styled = true
 

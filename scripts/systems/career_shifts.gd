@@ -79,6 +79,8 @@ static func _start_shift(f, j: Dictionary, h: float) -> void:
 	var fid: int = int(f.id)
 	var s: Dictionary = Careers.settings()
 	var title: String = Careers.title_of(fid)
+	if PregnancyLeave.on_leave(fid):          # maternity / paternity leave or bed rest: the job is kept, nothing is recorded
+		return
 	if int(Careers.skip_flags.get(fid, -1)) == SysUtil.day():
 		_record_skip(f, j, float(s.get("skip_penalty", 15)), "chose to skip work")
 		return

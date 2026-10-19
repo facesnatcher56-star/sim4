@@ -210,7 +210,7 @@ static func update_pregnancies() -> void:
 	var bufs: Array = cfg().get("pregnancy", {}).get("trimester_buffs", ["pregnant_t1", "pregnant_t2", "pregnant_t3"])
 	for mid in Aging.pregnancies.keys():
 		var f = SysUtil.folk(int(mid))
-		if f == null:
+		if f == null or not Pregnancy.known(int(mid)):         # until she knows she only feels off
 			continue
 		var tri: int = trimester_of(int(mid))
 		for i in bufs.size():
@@ -227,6 +227,7 @@ static func update_pregnancies() -> void:
 
 # ------------------------------------------------------------------ events / clock
 static func on_hour() -> void:
+	Pregnancy.on_hour()
 	update_pregnancies()
 
 static func on_day(_day: int) -> void:

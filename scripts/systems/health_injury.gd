@@ -62,6 +62,9 @@ static func speed_mult(f) -> float:
 
 ## "" when fine, else a short reason (the thing the person cannot do because of how they feel).
 static func blocks_activity(f, tags: Array) -> String:
+	var late: String = PregnancyStage.blocks_activity(f, tags)
+	if late != "":
+		return late
 	var ic: Dictionary = Health.cfg("injury")
 	for t in tags:
 		if (ic.get("blocked_tags", []) as Array).has(str(t)):
