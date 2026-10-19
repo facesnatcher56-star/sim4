@@ -11,8 +11,11 @@ static var cooldowns: Dictionary = {}    # folk_id -> day until which they will 
 static var dead: Array = []              # legacy records
 static var lifespan_setting: String = ""  # "" = use data default
 
+static var house_names: Dictionary = {}     # household id -> the name given in the creator (the babies' family name when the parents have none)
+
 static func reset() -> void:
 	Pregnancy.reset()
+	house_names.clear()
 	records.clear()
 	pregnancies.clear()
 	cooldowns.clear()
@@ -237,9 +240,19 @@ static func _birth(mother_id: int, father_id: int) -> void:
 		pregnancies[mother_id] = {"father": father_id, "due_day": SysUtil.day(), "started": SysUtil.day(), "known": true, "kids": 1, "kid_sexes": [Sexes.roll()]}
 	PregnancyLabour.finish(mother_id)
 
+## Family name for a new baby: the mother's surname, else the father's, else the household's name, else "" (a first name only; never a parent's first name).
+static func family_name(mother, father_id: int) -> String:
+	var s: String = _surname(str(mother.name))
+	if s == "" and father_id >= 0:
+		s = _surname(Family.name_of(father_id))
+	if s == "":
+		s = str(house_names.get(int(mother.household_id), ""))
+	return s
+
+## The family name of a baby: the last word of a parent's full name when there is one (never a lone first name), else "".
 static func _surname(full: String) -> String:
-	var parts: PackedStringArray = full.split(" ")
-	return parts[parts.size() - 1] if parts.size() > 1 else full
+	var parts: PackedStringArray = full.strip_edges().split(" ", false)
+	return parts[parts.size() - 1] if parts.size() > 1 else ""
 
 static func children_of(folk_id: int) -> Array:
 	return (records.get(folk_id, {}) as Dictionary).get("children", [])
@@ -388,7 +401,7 @@ static func legacy_summary(folk_id: int) -> Dictionary:
 # ------------------------------------------------------------------ save
 static func to_dict() -> Dictionary:
 	return {"records": SysUtil.str_keys(records).duplicate(true), "pregnancies": SysUtil.str_keys(pregnancies).duplicate(true),
-		"cooldowns": SysUtil.str_keys(cooldowns), "dead": dead.duplicate(true), "lifespan": lifespan_setting, "preg": Pregnancy.to_dict()}
+		"cooldowns": SysUtil.str_keys(cooldowns), "dead": dead.duplicate(true), "lifespan": lifespan_setting, "preg": Pregnancy.to_dict(), "house_names": SysUtil.str_keys(house_names)}
 
 static func from_dict(d: Dictionary) -> void:
 	reset()
@@ -397,6 +410,7 @@ static func from_dict(d: Dictionary) -> void:
 	cooldowns = SysUtil.int_keys(d.get("cooldowns", {}))
 	dead = (d.get("dead", []) as Array).duplicate(true)
 	lifespan_setting = str(d.get("lifespan", ""))
+	house_names = SysUtil.int_keys(d.get("house_names", {}))
 	Pregnancy.from_dict(d.get("preg", {}))
 	for k in records:
 		var r: Dictionary = records[k]

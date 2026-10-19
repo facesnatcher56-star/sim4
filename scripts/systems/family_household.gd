@@ -4,9 +4,13 @@ extends RefCounted
 
 # ------------------------------------------------------------------ households
 ## Leave the lot: becomes an off-lot townie keeping their id (relationships, family links and age carry over).
-static func move_out(folk_id: int, coin_share: float = 0.5, orphan: bool = false) -> bool:
+## Only grown-ups leave on their own. A baby, toddler, child or teen leaves only when child services takes them (`orphan`) or they go with a
+## parent or relative who looks after them (`placed`); anything else is refused, so nobody young is ever left alone.
+static func move_out(folk_id: int, coin_share: float = 0.5, orphan: bool = false, placed: bool = false) -> bool:
 	var f = SysUtil.folk(folk_id)
 	if f == null:
+		return false
+	if not (str(f.age_stage) in ["adult", "elder"]) and not orphan and not placed:
 		return false
 	var hid: int = int(f.household_id)
 	var coins: int = 0
