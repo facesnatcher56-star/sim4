@@ -363,6 +363,8 @@ static func kill(folk_id: int, cause: String = "old age") -> Dictionary:
 
 static func _inherit(f, mourners: Array) -> Dictionary:
 	var hid: int = int(f.household_id)
+	if not SysUtil.is_resident(f):
+		return {"to": -1, "coins": 0, "note": "no estate"}     # visitors / NPCs (household -1) own nothing: never the town's coins or objects
 	var survivors: int = 0
 	for o in SysUtil.residents():
 		if int(o.household_id) == hid and int(o.id) != int(f.id):
@@ -372,9 +374,9 @@ static func _inherit(f, mourners: Array) -> Dictionary:
 	var willed: Dictionary = BankWill.apply(f, mourners)       # task 13: a will names the heir
 	if not willed.is_empty():
 		return willed
-	# household ends: closest heir inherits funds and the lot's objects
+	# household ends: the closest own family inherits funds and the household's objects (friends and strangers never do)
 	var heir = null
-	for rank in ["spouse", "partner", "family", "sweetheart", "best_friend"]:
+	for rank in ["spouse", "partner", "family", "sweetheart"]:
 		for mid in mourners:
 			if RelationshipBits.bit_for(int(mid), int(f.id)) == rank:
 				heir = SysUtil.folk(int(mid))

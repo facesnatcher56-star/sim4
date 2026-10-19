@@ -179,6 +179,24 @@ func _death(f: Array) -> void:
 	var lg: Dictionary = Aging.kill(e.id)
 	K.expect(f, int(lg["inheritance"].get("coins", 0)) == 700 and WorldIface.get_coins(6) == 700 and WorldIface.get_coins(5) == 0, "heir inherits the coins: %s" % str(lg["inheritance"]))
 	K.expect(f, int(Economy.owner.get(chair.id, -1)) == 6, "heir inherits the objects")
+	# a stranger's death (visitor / household -1) hands nobody the town's coins or objects; a mere friend is no heir
+	var vis := K.make_folk(w, "Vi", [], 9)
+	var fr := K.make_folk(w, "Fred", [], 10)
+	vis.set_meta("visitor", true)
+	WorldIface.coins[-1] = 99999
+	WorldIface.coins[9] = 500
+	RelationshipService.add_both(vis.id, fr.id, "friendship", 90.0)
+	var cm = w.add_object("chair", Vector2i(3, 3))
+	Economy.owner[cm.id] = -1
+	var lv: Dictionary = Aging.kill(vis.id)
+	K.expect(f, int(lv["inheritance"].get("coins", 0)) == 0 and WorldIface.get_coins(10) == 0 and int(Economy.owner.get(cm.id, 0)) == -1, "a visitor's death moves nothing: %s" % str(lv["inheritance"]))
+	var lone := K.make_folk(w, "Lone", [], 11)
+	var pal := K.make_folk(w, "Pal", [], 12)
+	WorldIface.coins[11] = 300
+	RelationshipService.add_both(lone.id, pal.id, "friendship", 95.0)
+	RelationshipBits.set_flag(lone.id, pal.id, "best_friend")
+	var ll: Dictionary = Aging.kill(lone.id)
+	K.expect(f, int(ll["inheritance"].get("to", 0)) == -1 and WorldIface.get_coins(12) == 0, "a best friend is not an heir: %s" % str(ll["inheritance"]))
 	# natural death roll: past the max age is certain
 	var h := K.make_folk(w, "Hal", [], 7)
 	Aging.set_age_days(h, 263.0)

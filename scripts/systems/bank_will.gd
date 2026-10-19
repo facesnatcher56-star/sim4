@@ -67,7 +67,8 @@ static func on_write_event(folk_id: int) -> void:
 ## {} = no will (the old rules decide). Otherwise the estate is moved and the Aging result dictionary is returned.
 static func apply(f, _mourners: Array) -> Dictionary:
 	var fid: int = int(f.id)
-	if not wills.has(fid):
+	if not wills.has(fid) or not SysUtil.is_resident(f):
+		wills.erase(fid)
 		return {}
 	var heir_id: int = heir_of(fid)
 	wills.erase(fid)
