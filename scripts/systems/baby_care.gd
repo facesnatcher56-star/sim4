@@ -101,8 +101,19 @@ static func care_pending(baby_id: int) -> bool:
 			return true
 		for q in f.queue:
 			if _is_care(str((q as Interaction).def_id)) and int((q as Interaction).target_id) == baby_id:
+				if _stale(f, q as Interaction):
+					return false          # queued but never started: let another adult take it
 				return true
 	return false
+
+## A care job that has sat in somebody's queue for a while behind something else.
+static func _stale(f, ir: Interaction) -> bool:
+	if f.current == null or _is_care(str(f.current.def_id)):
+		return false
+	var born: int = int(ir.get_meta("queued_at", SysUtil.now()))
+	if not ir.has_meta("queued_at"):
+		ir.set_meta("queued_at", born)
+	return SysUtil.now() - born >= int(cfg().get("stale_after_min", 20))
 
 ## Queue the next needed care on a suitable adult. Returns the caregiver id or -1.
 static func assign_care(baby) -> int:
@@ -111,7 +122,7 @@ static func assign_care(baby) -> int:
 	var wants: Array = wanted_care(baby)
 	if wants.is_empty():
 		return -1
-	var urgent: bool = is_crying(int(baby.id))
+	var urgent: bool = is_crying(int(baby.id)) or str((wants[0] as Dictionary)["need"]) == "hunger"      # a hungry baby comes before the adults' own needs, asleep or not
 	var cands: Array = caregivers_for(baby)
 	cands.sort_custom(func(a, b):
 		var ba: int = 0 if (a.current == null and a.queue.is_empty()) else 1
@@ -128,7 +139,7 @@ static func assign_care(baby) -> int:
 		if busy:
 			if not urgent:
 				continue
-			if c.current != null and (not c.current.is_interruptible() or c.current.effective_priority() >= Interaction.PRIORITY["high"]):
+			if c.current != null and (not c.current.is_interruptible() or c.current.effective_priority() >= Interaction.PRIORITY["urgent"]):
 				continue
 		for w in wants:
 			var ir := Interaction.create(str(w["iid"]), c, int(baby.id), false)
