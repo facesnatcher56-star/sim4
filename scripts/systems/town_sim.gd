@@ -32,6 +32,8 @@ static func reset() -> void:
 	_tracked_n = -1
 	_homes_n = -1
 	_venues_n = -1
+	_wcache.clear()
+	CommuteTownies._workers_key = []
 	hourly_calls = 0
 	if _job != null:
 		for s in _job.slots:
@@ -147,6 +149,19 @@ static func where(t: Dictionary, minute: int) -> Dictionary:
 			if Venues.is_open(lot, minute):
 				return {"lot": lot, "act": LEISURE}
 	return {"lot": home, "act": HOME_ACT}
+
+static var _wcache: Dictionary = {}       # townie id -> [5-minute bucket, where dictionary]
+
+## `where` cached per 5-minute bucket (the crowd asks for 200 townies at a dozen lots in the same minute).
+static func where_cached(t: Dictionary, minute: int) -> Dictionary:
+	var id: int = int(t["id"])
+	var b: int = minute / 5
+	var e: Array = _wcache.get(id, [])
+	if e.size() == 2 and int(e[0]) == b:
+		return e[1]
+	var w: Dictionary = where(t, minute)
+	_wcache[id] = [b, w]
+	return w
 
 static func lot_at(t: Dictionary, minute: int) -> String:
 	return str(where(t, minute)["lot"])

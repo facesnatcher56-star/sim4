@@ -7,6 +7,11 @@ extends RefCounted
 static func reset() -> void:
 	JusticeState.reset()
 	JusticePlayer.reset()
+	_sync_key = []
+	if sliced():
+		for sl in _person_job.slots:
+			(sl as Array).clear()
+		_person_job.count = 0
 
 static func install() -> void:
 	JusticeCareers.install()
@@ -21,6 +26,46 @@ static func uninstall() -> void:
 	var traits: Dictionary = SimEnv.data().traits()
 	for id in CrimeTraits.IDS:
 		traits.erase(id)
+
+# ------------------------------------------------------------------ per-person daily dice, sliced over the day (task 17.3)
+## The fraud and pressure dice (one roll per adult per day, each with a risk lookup) used to run for everybody inside the midnight tick (1-5 s at 200 townies).
+## With a scheduler they are a BUCKETED daily job: every person is visited once a day at minute (id % 1440), same dice and rates, nothing at midnight.
+## Without one (tests that call the on_day passes directly) the old all-in-one loops run.
+static var _person_job: SimJob = null
+static var _sync_key: Array = []
+
+static func install_sliced(sched: SimScheduler, group: String) -> void:
+	_person_job = sched.add_bucketed("CrimeFlow.person_day", "CrimeFlow", group, 1440, 305, SimScheduler.NORMAL, CrimeFlow.person_day,
+		"TOWN / STATISTICAL townies and residents: fraud + pressure dice once a day, bucketed by id (no midnight lump)")
+	sched.add("CrimeFlow.sync", "CrimeFlow", group, 1, 306, SimScheduler.NORMAL, CrimeFlow.sync_persons, "", Callable(CrimeFlow, "needs_sync"),
+		"keeps the bucketed job's ids equal to the living townies and residents")
+	_sync_key = []
+
+static func sliced() -> bool:
+	return _person_job != null and not _person_job.removed and _person_job.enabled
+
+static func needs_sync() -> bool:
+	return sliced() and _sync_key != [Story.townies.size(), Story.next_id, Economy.household_ids().size()]
+
+static func sync_persons() -> void:
+	if not sliced():
+		return
+	for tid in Story.townies:
+		if bool(Story.townies[tid].get("alive", false)):
+			_person_job.track(int(tid))
+	for r in SysUtil.residents():
+		_person_job.track(int(r.id))
+	_sync_key = [Story.townies.size(), Story.next_id, Economy.household_ids().size()]
+
+static func person_day(id: int, _elapsed: int = 1440) -> void:
+	if not JusticeState.enabled:
+		return
+	var alive: bool = bool(Story.townies.get(id, {}).get("alive", false)) or SysUtil.folk(id) != null
+	if not alive:
+		_person_job.untrack(id)
+		return
+	CrimeFraud.person_day(id)
+	CrimePressure.person_day(id)
 
 # ------------------------------------------------------------------ clock
 static func on_minute() -> void:
@@ -38,25 +83,68 @@ static func on_day(_day: int) -> void:
 	if not JusticeState.enabled:
 		return
 	install()
+	var _pt := 0
+	_pt = PerfProf.start()
 	CrimeTraits.roll_townies()
+	PerfProf.stop("crimeday/CrimeTraits.roll_townies", _pt)
+	_pt = PerfProf.start()
 	CrimeRate.on_day()
+	PerfProf.stop("crimeday/CrimeRate.on_day", _pt)
+	_pt = PerfProf.start()
 	JusticeCareers.on_day()
-	CrimePressure.on_day()
-	CrimeFraud.on_day()
+	PerfProf.stop("crimeday/JusticeCareers.on_day", _pt)
+	_pt = PerfProf.start()
+	if not sliced():                    # sliced: the bucketed daily job rolls these dice one person at a time
+		CrimePressure.on_day()
+	PerfProf.stop("crimeday/CrimePressure.on_day", _pt)
+	_pt = PerfProf.start()
+	if sliced():
+		CrimeFraud.audit()
+	else:
+		CrimeFraud.on_day()
+	PerfProf.stop("crimeday/CrimeFraud.on_day", _pt)
+	_pt = PerfProf.start()
 	CrimeBlackmail.on_day()
+	PerfProf.stop("crimeday/CrimeBlackmail.on_day", _pt)
+	_pt = PerfProf.start()
 	CrimeRevenge.on_day()
+	PerfProf.stop("crimeday/CrimeRevenge.on_day", _pt)
+	_pt = PerfProf.start()
 	CrimeMurder.on_day()
+	PerfProf.stop("crimeday/CrimeMurder.on_day", _pt)
+	_pt = PerfProf.start()
 	CrimeAssault.on_day()
+	PerfProf.stop("crimeday/CrimeAssault.on_day", _pt)
+	_pt = PerfProf.start()
 	JusticeOrders.on_day()
+	PerfProf.stop("crimeday/JusticeOrders.on_day", _pt)
+	_pt = PerfProf.start()
 	CrimeChildAbuse.on_day()
+	PerfProf.stop("crimeday/CrimeChildAbuse.on_day", _pt)
+	_pt = PerfProf.start()
 	ChildServices.on_day()
+	PerfProf.stop("crimeday/ChildServices.on_day", _pt)
+	_pt = PerfProf.start()
 	CrimeSerial.on_day()
+	PerfProf.stop("crimeday/CrimeSerial.on_day", _pt)
+	_pt = PerfProf.start()
 	CaseDiscovery.on_day()
+	PerfProf.stop("crimeday/CaseDiscovery.on_day", _pt)
+	_pt = PerfProf.start()
 	CaseInvestigation.on_day()
+	PerfProf.stop("crimeday/CaseInvestigation.on_day", _pt)
+	_pt = PerfProf.start()
 	Prison.on_day()
+	PerfProf.stop("crimeday/Prison.on_day", _pt)
+	_pt = PerfProf.start()
 	JusticeSentence.on_day()
+	PerfProf.stop("crimeday/JusticeSentence.on_day", _pt)
+	_pt = PerfProf.start()
 	JusticeAppeal.on_day()
+	PerfProf.stop("crimeday/JusticeAppeal.on_day", _pt)
+	_pt = PerfProf.start()
 	JusticeCivil.on_day()
+	PerfProf.stop("crimeday/JusticeCivil.on_day", _pt)
 
 ## Dispatch one due queued event.
 static func run_pending(p: Dictionary) -> void:

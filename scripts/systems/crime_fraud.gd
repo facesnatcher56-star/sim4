@@ -29,22 +29,25 @@ static func embezzle(pid: int, amount: int = -1) -> Dictionary:
 static func on_day() -> void:
 	if not JusticeState.enabled:
 		return
-	var k: Dictionary = cfg()
 	for pid in CrimePerson.everyone():
-		var p: int = int(pid)
-		if CrimePerson.is_player(p) or CrimePerson.in_custody(p):
-			continue
-		if office_career(CrimePerson.career(p)):
-			var r: float = CrimePressure.risk(p)
-			var chance: float = float(k.get("embezzle_daily", 0.004)) * (0.2 + 4.0 * r) * (3.0 if CrimePerson.has_trait(p, "dishonest") else 1.0) * Incidents.surprise_mult()
-			if r >= float(k.get("embezzle_min_risk", 0.1)) and JusticeState.chance(chance):
-				embezzle(p)
-		if CrimePerson.has_trait(p, "dishonest") and JusticeState.chance(float(k.get("scam_daily", 0.002)) * Incidents.surprise_mult() * (0.5 + CrimePressure.risk(p) * 2.0)):
-			scam(p)
-		var r2: float = CrimePressure.risk(p)
-		if r2 >= float(k.get("arson_min_risk", 0.5)) and JusticeState.chance(r2 * r2 * r2 * float(k.get("arson_daily", 0.003)) * (2.0 if CrimePerson.has_trait(p, "dishonest") else 1.0) * Incidents.surprise_mult()):
-			insurance_arson(p)
+		person_day(int(pid))
 	audit()
+
+## One person's daily fraud dice (the body of the old everyone loop; CrimeFlow.person_day calls it from the bucketed daily job).
+static func person_day(p: int) -> void:
+	var k: Dictionary = cfg()
+	if CrimePerson.is_player(p) or CrimePerson.in_custody(p):
+		return
+	if office_career(CrimePerson.career(p)):
+		var r: float = CrimePressure.risk(p)
+		var chance: float = float(k.get("embezzle_daily", 0.004)) * (0.2 + 4.0 * r) * (3.0 if CrimePerson.has_trait(p, "dishonest") else 1.0) * Incidents.surprise_mult()
+		if r >= float(k.get("embezzle_min_risk", 0.1)) and JusticeState.chance(chance):
+			embezzle(p)
+	if CrimePerson.has_trait(p, "dishonest") and JusticeState.chance(float(k.get("scam_daily", 0.002)) * Incidents.surprise_mult() * (0.5 + CrimePressure.risk(p) * 2.0)):
+		scam(p)
+	var r2: float = CrimePressure.risk(p)
+	if r2 >= float(k.get("arson_min_risk", 0.5)) and JusticeState.chance(r2 * r2 * r2 * float(k.get("arson_daily", 0.003)) * (2.0 if CrimePerson.has_trait(p, "dishonest") else 1.0) * Incidents.surprise_mult()):
+		insurance_arson(p)
 
 ## The audit: embezzlement cases whose audit day has come are found (the culprit is fired right then).
 static func audit() -> void:

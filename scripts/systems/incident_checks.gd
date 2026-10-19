@@ -17,8 +17,10 @@ static var _stale := true
 static func _list(kind: String) -> Array:
 	if _stale:
 		_cache.clear()
+		IncidentSubject.clear_cache()
 		_stale = false
 	if not _cache.has(kind):
+		var tl := PerfProf.start()
 		match kind:
 			"folk":
 				_cache[kind] = folk_subjects(true)
@@ -26,15 +28,27 @@ static func _list(kind: String) -> Array:
 				_cache[kind] = townie_subjects()
 			_:
 				_cache[kind] = lot_subjects()
+		PerfProf.stop("incidents/build " + kind, tl)
 	return _cache[kind]
+
+static func _dirty() -> void:
+	_stale = true
+	IncidentSubject.clear_cache()
 
 static func run(check: String) -> void:
 	IncidentDefs.ensure()
 	_stale = true
+	IncidentSubject.caching = true
+	_run_defs(check)
+	IncidentSubject.caching = false
+	IncidentSubject.clear_cache()
+
+static func _run_defs(check: String) -> void:
 	for id in IncidentDefs.ids():
 		var def: Dictionary = IncidentDefs.defs[id]
 		if str(def["check"]) != check:
 			continue
+		var tdef := PerfProf.start()
 		match str(def["scope"]):
 			"folk":
 				for s in _list("folk"):
@@ -47,6 +61,8 @@ static func run(check: String) -> void:
 					_roll(id, def, s3)
 			"town":
 				_town(id, def)
+		PerfProf.stop("incidents/scope " + str(def["scope"]), tdef)
+		PerfProf.stop("incdef/" + str(id), tdef)
 
 static func _roll(id: String, def: Dictionary, s) -> void:
 	if not IncidentCond.check(def.get("conditions", []), s):
@@ -55,10 +71,11 @@ static func _roll(id: String, def: Dictionary, s) -> void:
 	var c: Dictionary = Incidents._counter(id)
 	c["checks"] = int(c["checks"]) + 1
 	c["exposure"] = float(c["exposure"]) + 1.0 / IncidentRisk.checks_per_year(check)
-	var p: float = IncidentRisk.rate_to_chance(IncidentRisk.effective_rate(def, s) * StoryPacing.incident_mult(id, s), check)
+	var p: float = IncidentRisk.rate_to_chance(IncidentRisk.effective_rate(def, s, true, true) * StoryPacing.incident_mult(id, s), check)
 	if p > 0.0 and Incidents.rng.randf() < p:
-		_stale = true
+		_dirty()
 		IncidentFlow.start(id, s)
+		_dirty()
 
 static func _town(id: String, def: Dictionary) -> void:
 	var dummy = IncidentSubject.of_town_lot(0)
@@ -71,11 +88,12 @@ static func _town(id: String, def: Dictionary) -> void:
 	var p: float = IncidentRisk.rate_to_chance(IncidentRisk.effective_rate(def, dummy), check)
 	if p <= 0.0 or Incidents.rng.randf() >= p:
 		return
-	_stale = true
+	_dirty()
 	for ls in lot_subjects():
 		var hit: float = minf(float(def.get("lot_hit", 1.0)) * IncidentRisk.risk_factor(def, ls, "lot"), 1.0)
 		if hit > 0.0 and Incidents.rng.randf() < hit:
 			IncidentFlow.resolve(id, ls, not ls.is_full(), false)
+			_dirty()
 
 # ------------------------------------------------------------------ candidates
 static func folk_subjects(with_townies: bool) -> Array:

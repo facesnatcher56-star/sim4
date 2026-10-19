@@ -71,23 +71,26 @@ static func help(pid: int, kind: String, coins: int = 0, from: int = -1) -> void
 static func on_day() -> void:
 	if not JusticeState.enabled:
 		return
-	var k: Dictionary = cfg()
 	for pid in CrimePerson.everyone():
-		var p: int = int(pid)
-		if not CrimePerson.is_adult(p) or CrimePerson.stage(p) == "elder" or CrimePerson.in_custody(p) or Hospital.is_in(p):
-			continue
-		if CrimePerson.is_player(p):
-			continue                       # a player folk makes their own choices
-		var r: float = risk(p)
-		var klepto: bool = CrimePerson.has_trait(p, "kleptomaniac")
-		if klepto and JusticeState.chance(float(k.get("klepto_daily", 0.02)) * Incidents.surprise_mult()):
-			CrimePetty.commit("shoplifting", p, "street", {"petty": true})
-		if r < float(k.get("min_risk", 0.15)):
-			continue
-		var chance: float = r * r * float(k.get("daily", 0.02)) * Incidents.surprise_mult() * CrimeRate.crime_mult()
-		if not JusticeState.chance(chance):
-			continue
-		_desperate_act(p, r)
+		person_day(int(pid))
+
+## One person's daily pressure dice (the body of the old everyone loop).
+static func person_day(p: int) -> void:
+	var k: Dictionary = cfg()
+	if not CrimePerson.is_adult(p) or CrimePerson.stage(p) == "elder" or CrimePerson.in_custody(p) or Hospital.is_in(p):
+		return
+	if CrimePerson.is_player(p):
+		return                             # a player folk makes their own choices
+	var r: float = risk(p)
+	var klepto: bool = CrimePerson.has_trait(p, "kleptomaniac")
+	if klepto and JusticeState.chance(float(k.get("klepto_daily", 0.02)) * Incidents.surprise_mult()):
+		CrimePetty.commit("shoplifting", p, "street", {"petty": true})
+	if r < float(k.get("min_risk", 0.15)):
+		return
+	var chance: float = r * r * float(k.get("daily", 0.02)) * Incidents.surprise_mult() * CrimeRate.crime_mult()
+	if not JusticeState.chance(chance):
+		return
+	_desperate_act(p, r)
 
 static func _desperate_act(p: int, r: float) -> void:
 	var kinds: Array = ["shoplifting", "theft", "burglary", "robbery", "fraud"]

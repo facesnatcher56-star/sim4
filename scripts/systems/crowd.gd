@@ -16,6 +16,7 @@ const RECOVER_BASE := 0.3       # ... by this much per minute, plus RECOVER_PER_
 const RECOVER_PER_HOUR := 0.15
 const RECOVER_MAX := 1.0
 const ARRIVE_MIN := -25.0       # a customer arrives with every need above this (the venue-tuned ones are low, never at the go-home floor)
+const PICK_SAMPLE := 60           # townies examined per pick (a random window of the free townies)
 const NEED_FLOOR := -35.0      # an NPC with a need below this goes home (needs are -100..100; they are re-rolled on the next visit by spawn_npc)
 
 static var _last_check: Dictionary = {}     # lot_id -> game minute of the last full crowd update
@@ -148,13 +149,6 @@ static func update(force: bool = false) -> void:
 			clear_npcs(lot_id2)
 	PerfProf.stop("crowd/lots", t)
 
-## NeighborhoodLots.player_near for a precomputed list of resident tiles.
-static func _any_within(tiles: Array, lot_id: String, radius: int) -> bool:
-	for t in tiles:
-		if NeighborhoodLots.distance_to(t, lot_id) <= radius:
-			return true
-	return false
-
 static func _update_lot(lot_id: String, now: int, force: bool) -> void:
 	var first: bool = not _last_check.has(lot_id)
 	if not force and not first and now - int(_last_check[lot_id]) < int(cfg().get("crowd_check_min", 10)):
@@ -162,8 +156,13 @@ static func _update_lot(lot_id: String, now: int, force: bool) -> void:
 	_last_check[lot_id] = now
 	WorldIface.coins[-1] = 99999            # NPCs can pay for coffee (household -1); never saved (Economy.to_dict)
 	var vtype: String = Venues.type_of_lot(lot_id)
+	var tp := PerfProf.start()
 	update_staff(lot_id)
+	PerfProf.stop("crowd/lot staff", tp)
+	tp = PerfProf.start()
 	CommuteTownies.update(lot_id, now, force or first)       # townies whose job is here (they are not part of the customer count)
+	PerfProf.stop("crowd/lot commute", tp)
+	tp = PerfProf.start()
 	var target: int = Venues.crowd_target(vtype, SimEnv.hour_f())
 	var here: Array = []
 	for f in crowd_folk(lot_id):
@@ -187,14 +186,18 @@ static func _update_lot(lot_id: String, now: int, force: bool) -> void:
 	# too few: welcome new arrivals (at most 2 per check so the room fills gradually, all at once when the lot wakes up)
 	var room: int = mini(target - here.size(), Venues.crowd_cap() - count(lot_id) + CommuteTownies.present(lot_id).size())
 	var spawn_max: int = room if (force or first) else mini(room, 2)
+	PerfProf.stop("crowd/lot balance", tp)
 	for _i in spawn_max:
+		tp = PerfProf.start()
 		var t: Dictionary = _pick_townie(lot_id, vtype)
+		PerfProf.stop("crowd/lot pick", tp)
 		if t.is_empty():
 			break
-		spawn_npc(t, lot_id, vtype, -1, not (force or first))
+		tp = PerfProf.start()
+		spawn_npc(t, lot_id, vtype, -1, not (force or first) and int(Tiers.lot_distances(DROP_RADIUS).get(lot_id, 999)) <= int(Tiers.cfg().get("active_radius", 24)))
+		PerfProf.stop("crowd/lot spawn", tp)
 
 static func _pick_townie(lot_id: String, vtype: String) -> Dictionary:
-	var present: Array = present_townie_ids()
 	var cands: Array = []
 	var weights: Array = []
 	var pool: Array = Story.free_townies()
@@ -202,16 +205,20 @@ static func _pick_townie(lot_id: String, vtype: String) -> Dictionary:
 	if resident_only:
 		pool = Neighborhood.residents_of(lot_id)
 	var res: Array = SysUtil.residents()
-	for t in pool:
+	# a window of the pool from a random start (PICK_SAMPLE people looked at, not all 200): the tier-aware picker for big towns
+	var n_pool: int = pool.size()
+	var start: int = SysUtil.rng.randi_range(0, maxi(n_pool - 1, 0))
+	for pi in mini(n_pool, PICK_SAMPLE):
+		var t: Dictionary = pool[(start + pi) % n_pool]
 		var tid: int = int(t["id"])
-		if present.has(tid) or SysUtil.folk(tid) != null or CommuteTownies.busy_elsewhere(t, lot_id, SimEnv.now_min()):
+		if _all_crowd.has(tid) or SysUtil.folk(tid) != null or CommuteTownies.busy_elsewhere(t, lot_id, SimEnv.now_min()):
 			continue
 		if Story.stage_of(t) in ["baby", "toddler"]:
 			continue
 		if not resident_only and Story.stage_of(t) == "child":
 			continue
 		var w: float = 1.0
-		var sched: Dictionary = TownSim.where(t, SimEnv.now_min())      # the cheap schedule: nobody asleep at the venue, regulars where they are expected
+		var sched: Dictionary = TownSim.where_cached(t, SimEnv.now_min())      # the cheap schedule: nobody asleep at the venue, regulars where they are expected
 		if str(sched["act"]) == TownSim.SLEEP:
 			continue
 		if str(sched["lot"]) == lot_id:
@@ -291,6 +298,9 @@ static func recover(f, hours: float) -> void:
 ## An NPC whose time is up walks to the lot's door (one route, computed once by the go_here interaction) and is removed there.
 static func start_leaving(f) -> void:
 	if f.has_meta("leaving"):
+		return
+	if Tiers.of(f) != Tiers.ACTIVE and not f.has_meta("meetup") and not f.has_meta("coworker"):
+		_remove(f)               # NEAR / TOWN people are off screen: they leave at once (no walk to the door, no path query)
 		return
 	f.set_meta("leaving", SimEnv.now_min() + int(cfg().get("leave_walk_min", 12)))
 	f.cancel_current("leaving")

@@ -114,6 +114,29 @@ func coins() -> int:
 		return WorldIface.get_coins(household_id)
 	return int(t().get("coins", 0))
 
+## During an hourly / daily check run (IncidentChecks.run) the answers below are cached: nothing changes between two dice of the same pass until a hit
+## (IncidentChecks clears the cache then). Outside a run nothing is cached.
+static var caching := false
+static var _members: Dictionary = {}       # town lot number -> member subjects
+static var _on_map_ids: Dictionary = {}    # townie id -> true for townies standing on the map as Folk
+static var _on_map_ok := false
+
+static var _have: Dictionary = {}          # household id -> def ids of the objects it owns (Economy.objects_of scans every object in the world)
+
+static func household_defs(hid: int) -> Array:
+	if not _have.has(hid):
+		var out: Array = []
+		for o in Economy.objects_of(hid):
+			out.append(str(o.def_id))
+		_have[hid] = out
+	return _have[hid]
+
+static func clear_cache() -> void:
+	_have.clear()
+	_members.clear()
+	_on_map_ids.clear()
+	_on_map_ok = false
+
 ## Members of a lot subject (subjects); a folk / townie answers with itself.
 func members() -> Array:
 	var out: Array = []
@@ -125,12 +148,16 @@ func members() -> Array:
 				out.append(of_folk(f))
 	else:
 		var n: int = int(lot_key.get_slice(":", 1))
+		if caching and _members.has(n):
+			return _members[n]
 		var ids: Array = Story.townies.keys()
 		ids.sort()
 		for tid in ids:
 			var rec: Dictionary = Story.townies[tid]
 			if bool(rec["alive"]) and int(rec.get("lot", 0)) == n and not on_map(int(tid)):
 				out.append(of_townie(int(tid)))
+		if caching:
+			_members[n] = out
 	return out
 
 func head():
@@ -153,6 +180,14 @@ func known_by_household() -> bool:
 
 ## Is this townie standing on the map as a (visitor) Folk? Then the FULL version handles them.
 static func on_map(townie_id: int) -> bool:
+	if caching:
+		if not _on_map_ok:
+			_on_map_ids.clear()
+			for g in WorldIface.all_folk():
+				if g.has_meta("townie_id"):
+					_on_map_ids[int(g.get_meta("townie_id"))] = true
+			_on_map_ok = true
+		return _on_map_ids.has(townie_id)
 	for f in WorldIface.all_folk():
 		if f.has_meta("townie_id") and int(f.get_meta("townie_id")) == townie_id:
 			return true

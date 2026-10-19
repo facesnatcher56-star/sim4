@@ -2,7 +2,16 @@ class_name StoryVisits
 extends RefCounted
 ## Townie visits, party invites and situations.
 
+## A guest taken into custody after the invitation does not come: scheduled visits drop them.
+static func prune_held_guests() -> void:
+	if JusticeState.inmates.is_empty():
+		return
+	for sit in Story.situations:
+		if str(sit["state"]) == "scheduled":
+			sit["guest_ids"] = (sit["guest_ids"] as Array).filter(func(g): return not JusticeState.inmates.has(int(g)))
+
 static func _visits_and_invites(day: int) -> void:
+	prune_held_guests()
 	var v: Dictionary = Story.cfg().get("visits", {})
 	var residents: Array = SysUtil.residents()
 	if residents.is_empty():
@@ -104,6 +113,7 @@ static func start_party(host_id: int, townie_ids: Array, duration: int = 240) ->
 
 static func on_minute() -> void:
 	var now: int = SysUtil.now()
+	prune_held_guests()
 	for sit in Story.situations:
 		match str(sit["state"]):
 			"scheduled":

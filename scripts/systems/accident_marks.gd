@@ -33,12 +33,48 @@ static func is_awake_here(f) -> bool:
 ## Other people who could help right now (awake, same lot or the same street).
 static func company(f, stages: Array = []) -> Array:
 	var out: Array = []
-	for o in WorldIface.folk_near(f):
+	for o in _near_folk(f):
 		if int(o.id) == int(f.id) or not is_awake_here(o):
 			continue
 		if not stages.is_empty() and not stages.has(str(o.age_stage)):
 			continue
 		out.append(o)
+	return out
+
+## folk_near(f) from a per-minute grouping of the world (region id -> folk, plus the street folk), built once per minute by on_minute: the scan asks it
+## once per scanned person, and WorldIface.folk_near is a pass over all folk per call (quadratic). Same answer, up to the folk who moved this minute.
+static var _grp_min: int = -1
+static var _grp: Dictionary = {}
+static var _street: Array = []
+
+static func _build_groups(now: int) -> void:
+	_grp_min = -1
+	_grp = {}
+	_street = []
+	var w = WorldIface.world()
+	if w == null or not ("regions" in w) or not w.regions.has_regions():
+		return
+	for o in WorldIface.all_folk():
+		var orid: int = w.regions.region_at(o.tile)
+		if orid != -1 and w.regions.is_lot(orid):
+			if not _grp.has(orid):
+				_grp[orid] = []
+			(_grp[orid] as Array).append(o)
+		else:
+			_street.append(o)
+	_grp_min = now
+
+static func _near_folk(f) -> Array:
+	if _grp_min != SysUtil.now():
+		return WorldIface.folk_near(f)
+	var w = WorldIface.world()
+	var rid: int = w.regions.region_at(f.tile)
+	if rid != -1 and w.regions.is_lot(rid):
+		return _grp.get(rid, [])
+	var out: Array = []
+	for o in _street:
+		if absi(o.tile.x - f.tile.x) + absi(o.tile.y - f.tile.y) <= 12:
+			out.append(o)
 	return out
 
 static func helper_stages() -> Array:
@@ -52,10 +88,12 @@ static func on_minute() -> void:
 	var t := PerfProf.start()
 	var water: Variant = _water_objects(c)
 	var now: int = SysUtil.now()
+	_build_groups(now)
 	for f in Tiers.due_folk(now):            # tiers (17.3): ACTIVE people every minute, NEAR / TOWN people on their turn with the odds scaled to the period
 		if Hospital.is_in(f) or str(f.age_stage) == "baby":
 			continue
 		_scan(f, c, water, Tiers.period_of(int(f.id)))
+	_grp_min = -1
 	PerfProf.stop("accident/scan", t)
 	t = PerfProf.start()
 	AccidentRescue.on_minute()

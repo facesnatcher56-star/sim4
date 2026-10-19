@@ -107,6 +107,7 @@ static func install(sched: SimScheduler, group: String, rows: Array) -> void:
 static func install_systems(sched: SimScheduler, sm: Object) -> void:
 	install(sched, systems_group(sm), systems_rows(sm))
 	TownSim.install(sched, systems_group(sm))
+	CrimeFlow.install_sliced(sched, systems_group(sm))
 
 static func install_director(sched: SimScheduler, dir: Object) -> void:
 	install(sched, director_group(dir), director_rows(dir))

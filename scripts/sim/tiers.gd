@@ -42,6 +42,7 @@ static func reset() -> void:
 	_new.clear()
 	_below.clear()
 	_cand.clear()
+	_period.clear()
 	_saved.clear()
 	_has_focus = false
 	anchors = []
@@ -93,14 +94,7 @@ static func in_world_count() -> int:
 
 ## Minutes between full ticks of a person in the world: 1 for ACTIVE, near_period / far_near_period for NEAR, town_period for TOWN.
 static func period_of(id: int) -> int:
-	match int(_sets.tier_of.get(id, ACTIVE)):
-		ACTIVE:
-			return 1
-		NEAR:
-			var cd: Array = _cand.get(id, [])
-			return _n("far_near_period", 10) if (cd.size() > 1 and int(cd[1]) >= _n("far_near_dist", 44)) else _n("near_period", 5)
-		_:
-			return _n("town_period", 15)
+	return int(_period.get(id, 1))
 
 static func is_tiered(id: int) -> bool:
 	return int(_kind.get(id, 0)) == 1
@@ -150,6 +144,7 @@ static func on_removed(id: int) -> void:
 	_new.erase(id)
 	_below.erase(id)
 	_cand.erase(id)
+	_period.erase(id)
 	if _sets.has(id):
 		var old: int = _sets.drop(id)
 		_notify(id, old, -1, null)
@@ -219,6 +214,10 @@ static func refresh(_total: int = 0) -> void:
 	_anchor_sig = sig
 	_anchors_dirty = false
 	_due_min = -1
+	var p_near: int = int(c.get("near_period", 5))
+	var p_far: int = int(c.get("far_near_period", 10))
+	var p_far_d: int = int(c.get("far_near_dist", 44))
+	var p_town: int = int(c.get("town_period", 15))
 	var demote: int = int(c.get("demote_min", 10))
 	var stick: int = int(c.get("stickiness", 4))
 	var ranked: Array = []            # tiered ACTIVE people for the cap: [score, id]
@@ -264,6 +263,12 @@ static func refresh(_total: int = 0) -> void:
 		else:
 			_below.erase(id2)
 		if cur == ACTIVE:
+			_period.erase(id2)
+		elif cur == NEAR:
+			_period[id2] = p_far if int(cd[1]) >= p_far_d else p_near
+		else:
+			_period[id2] = p_town
+		if cur == ACTIVE:
 			active_n += 1
 			ranked.append([int(cd[1]) - (stick if int(_sets.tier_of.get(id2, -1)) == ACTIVE else 0), int(id2)])
 	_saved.clear()
@@ -276,6 +281,7 @@ static func refresh(_total: int = 0) -> void:
 			_below.erase(cid)
 			stats["capped"] = int(stats["capped"]) + 1
 			_assign(cid, NEAR, _world[cid], ACTIVE)
+			_period[cid] = p_near
 	stats["refresh"] = int(stats["refresh"]) + 1
 	stats["usec"] = int(stats["usec"]) + Time.get_ticks_usec() - t0
 
@@ -297,6 +303,7 @@ static var _due_min: int = -1
 static var _due: Array = []
 static var _lotd_key: int = -1
 static var _lotd: Dictionary = {}
+static var _period: Dictionary = {}        # id -> minutes between full ticks (absent = 1), set whenever a person's tier or distance band changes
 static var _anchors_dirty := true         # a resident entered / left the world: the controlled list must be rebuilt
 
 ## Folk a per-minute system should look at THIS minute: every ACTIVE person, plus the NEAR / TOWN people whose turn it is ((now + id) % period == 0).

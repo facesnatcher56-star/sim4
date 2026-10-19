@@ -34,17 +34,33 @@ static func cfg() -> Dictionary:
 static func lots() -> Array:
 	return cfg().get("lots", [])
 
-static func lot_ids() -> Array:
-	var out: Array = []
-	for l in lots():
-		out.append(str(l["id"]))
-	return out
+static var _lot_src: Array = []                 # the lots array the caches below were built from
+static var _lot_n: int = -1
+static var _lot_by_id: Dictionary = {}
+static var _lot_id_list: Array = []
 
+static func _lot_cache() -> void:
+	var arr: Array = lots()
+	if arr.size() == _lot_n and is_same(arr, _lot_src):
+		return
+	_lot_src = arr
+	_lot_n = arr.size()
+	_lot_by_id = {}
+	_lot_id_list = []
+	for l in arr:
+		var lid := str(l["id"])
+		if not _lot_by_id.has(lid):
+			_lot_by_id[lid] = l
+		_lot_id_list.append(lid)
+
+static func lot_ids() -> Array:
+	_lot_cache()
+	return _lot_id_list.duplicate()
+
+## Lot record by id (dictionary lookup: the lot table is cached, it used to be a scan of every lot per call).
 static func lot(lot_id: String) -> Dictionary:
-	for l in lots():
-		if str(l["id"]) == lot_id:
-			return l
-	return {}
+	_lot_cache()
+	return _lot_by_id.get(lot_id, {})
 
 static func starts() -> Array:
 	return cfg().get("starts", [])

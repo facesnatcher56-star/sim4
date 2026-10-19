@@ -125,9 +125,15 @@ static func on_minute() -> void:
 	Health.on_minute()
 
 static func on_hour() -> void:
+	var t := PerfProf.start()
 	Hospital.on_hour()
+	PerfProf.stop("incidents/hospital", t)
+	t = PerfProf.start()
 	Health.on_hour()
+	PerfProf.stop("incidents/health", t)
+	t = PerfProf.start()
 	IncidentChecks.run("hour")
+	PerfProf.stop("incidents/checks", t)
 
 static func on_day() -> void:
 	Health.on_day()

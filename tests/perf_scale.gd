@@ -87,6 +87,8 @@ func measure(profile: String, minutes: int) -> Dictionary:
 	var crowd_max := 0
 	var crowd_sum := 0
 	var crowd_n := 0
+	var tier_sum: Array = [0, 0, 0, 0]
+	var tier_n := 0
 	var node_max := 0
 	var mem_day1 := 0
 	var nodes_day1 := 0
@@ -110,6 +112,10 @@ func measure(profile: String, minutes: int) -> Dictionary:
 		folk_sum += nf
 		folk_max = maxi(folk_max, nf)
 		if m % 10 == 0:
+			var tc: Array = Tiers.counts()
+			for ti in 4:
+				tier_sum[ti] += int(tc[ti])
+			tier_n += 1
 			var nc: int = Crowd.count() + Crowd.staff_folk().size()
 			crowd_max = maxi(crowd_max, nc)
 			crowd_sum += nc
@@ -138,6 +144,8 @@ func measure(profile: String, minutes: int) -> Dictionary:
 	res["median_min_ms"] = float(sorted[sorted.size() / 2]) / 1000.0
 	res["folk_avg"] = float(folk_sum) / float(minutes)
 	res["folk_max"] = folk_max
+	res["tiers_avg"] = tier_sum.map(func(x): return float(x) / float(maxi(tier_n, 1)))
+	res["tiers_end"] = Tiers.counts()
 	res["crowd_avg"] = float(crowd_sum) / float(maxi(crowd_n, 1))
 	res["crowd_max"] = crowd_max
 	res["paths_run"] = Autonomy.path_queries - pq0
@@ -326,6 +334,7 @@ func print_report(res: Dictionary) -> void:
 	print("== SCALE '%s': %d game minutes (%.1f days) in %.0f ms (%.2f ms/game-min; per frame at speed 3: avg %.2f ms, worst minute %.1f ms, p99 %.1f, median %.2f)" % [res["profile"], minutes, m / 1440.0, res["total_ms"], res["total_ms"] / m, frame_avg_ms(res), res["worst_min_ms"], res["p99_min_ms"], res["median_min_ms"]])
 	print("   ms/game-min by day: %s" % ", ".join((res["day_ms_per_min"] as Array).map(func(x): return "%.2f" % x)))
 	print("   folk in world avg %.1f max %d, crowd+staff avg %.1f max %d, townies alive %d, path queries %d (%.2f per game-min)" % [res["folk_avg"], res["folk_max"], res["crowd_avg"], res["crowd_max"], res["townies_end"], res["paths_run"], float(res["paths_run"]) / m])
+	print("   tiers (avg active/near/town/statistical): %s; end %s; %s" % [str((res["tiers_avg"] as Array).map(func(x): return snappedf(x, 0.1))), str(res["tiers_end"]), Tiers.describe()])
 	print("   nodes max %d end %d (day 1: %d), orphans %d, objects %d, resources %d, static mem %.0f MB (day 1: %.0f MB)" % [res["nodes_max"], res["nodes_end"], res["nodes_day1"], res["orphans_end"], res["objects_end"], res["resources_end"], float(res["mem_end"]) / 1048576.0, float(res["mem_day1"]) / 1048576.0])
 	for k in res["choose"]:
 		var c: Dictionary = res["choose"][k]

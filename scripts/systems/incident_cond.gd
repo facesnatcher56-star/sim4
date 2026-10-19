@@ -25,6 +25,14 @@ static func check_one(c: Variant, subj) -> bool:
 		return check(c, subj)
 	if not (c is Dictionary):
 		return false
+	if subj.folk != null:                  # a real Folk: when no key is one of ours, SysCond takes the whole dictionary (no one-key dictionary per key)
+		var own := false
+		for key0 in c:
+			if OWN_KEYS.has(str(key0)):
+				own = true
+				break
+		if not own:
+			return SysCond.check_one(c, subj.folk)
 	for key in c:
 		if not _key(str(key), c[key], subj):
 			return false
@@ -106,8 +114,11 @@ static func _has_object(subj, v: Variant) -> bool:
 		var hid: int = subj.household_id
 		if hid <= 0 and subj.folk != null:
 			hid = int(subj.folk.household_id)
-		for o in Economy.objects_of(hid):
-			have.append(str(o.def_id))
+		if IncidentSubject.caching:
+			have = IncidentSubject.household_defs(hid)
+		else:
+			for o in Economy.objects_of(hid):
+				have.append(str(o.def_id))
 	for w in want:
 		if have.has(str(w)):
 			return true

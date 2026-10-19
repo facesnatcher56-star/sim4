@@ -53,6 +53,23 @@ static func present(lot_id: String) -> Array:
 			out.append(f)
 	return out
 
+static var _workers: Dictionary = {}      # lot id -> townie ids whose job is there (rebuilt when the day, the roster or the lot table changes)
+static var _workers_key: Array = []
+
+## The townies working at a lot, from a cache (the crowd used to test all 200 townies at every lot on every check).
+static func workers_of(lot_id: String) -> Array:
+	var key: Array = [SysUtil.day(), Story.townies.size(), Story.next_id, Neighborhood.lots().size()]
+	if key != _workers_key:
+		_workers_key = key
+		_workers = {}
+		for tid in Story.townies:
+			var wl: String = Workplace.lot_for_townie(Story.townies[tid])
+			if wl != "":
+				if not _workers.has(wl):
+					_workers[wl] = []
+				(_workers[wl] as Array).append(int(tid))
+	return _workers.get(lot_id, [])
+
 ## Bring the townies on shift at `lot_id` into view (at most a few per update, all at once when the lot wakes up).
 static func update(lot_id: String, now: int, instant: bool) -> void:
 	for f in present(lot_id):
@@ -60,8 +77,9 @@ static func update(lot_id: String, now: int, instant: bool) -> void:
 			(f.needs[n] as Stat).set_value(40.0)
 	var vtype: String = Venues.type_of_lot(lot_id)
 	var made: int = 0
-	for t in Story.free_townies():
-		if Workplace.lot_for_townie(t) != lot_id or not on_shift(t, now):
+	for wid in workers_of(lot_id):
+		var t: Dictionary = Story.townies.get(wid, {})
+		if t.is_empty() or not bool(t["alive"]) or JusticeState.inmates.has(wid) or Hospital.is_in(wid) or not on_shift(t, now):
 			continue
 		var tid: int = int(t["id"])
 		var there = SysUtil.folk(tid)

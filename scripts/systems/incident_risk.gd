@@ -42,8 +42,8 @@ static func risk_factor(def: Dictionary, subj, phase: String = "") -> float:
 	return f
 
 ## Effective events per year for this subject (0 when the conditions fail). `surprise` = apply the Surprises setting.
-static func effective_rate(def: Dictionary, subj, surprise: bool = true) -> float:
-	if not IncidentCond.check(def.get("conditions", []), subj):
+static func effective_rate(def: Dictionary, subj, surprise: bool = true, conditions_checked: bool = false) -> float:
+	if not conditions_checked and not IncidentCond.check(def.get("conditions", []), subj):
 		return 0.0
 	var r: float = float(def.get("base_rate_per_year", 0.0)) * risk_factor(def, subj, "occ" if str(def.get("scope", "")) == "town" else "")
 	r *= VacationHome.rate_mult(def, subj)          # task 22: an empty house is a better target (incidents tagged "burglary_odds")
