@@ -48,8 +48,10 @@ static func reset() -> void:
 static func destinations() -> Array:
 	var out: Array = []
 	var ds: Dictionary = SysUtil.table("vacation").get("destinations", {})
-	var ids: Array = ds.keys()
-	ids.sort()
+	var ids: Array = ["beach", "mountain", "city", "camping"].filter(func(x): return ds.has(x))
+	for k in ds.keys():
+		if not ids.has(k):
+			ids.append(k)
 	for id in ids:
 		var d: Dictionary = ds[id]
 		out.append({"id": str(id), "label": str(d.get("label", id)), "blurb": str(d.get("blurb", "")), "days": d.get("days", [2, 14]), "kind": "resort"})

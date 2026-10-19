@@ -69,7 +69,10 @@ static func template_of(lot_id: String) -> String:
 static func label_of(lot_id: String) -> String:
 	if lot_id == "":
 		return "the street"
-	return str(lot(lot_id).get("label", lot_id))
+	var l: Dictionary = lot(lot_id)
+	if l.is_empty() and WorldIface.world() != null and WorldIface.world().get("regions") != null:      # task 22: holiday zones are lots that exist only on a trip
+		return str((WorldIface.world().regions as WorldRegions).by_lot(lot_id).get("label", lot_id))
+	return str(l.get("label", lot_id))
 
 static func venue_type(lot_id: String) -> String:
 	return Venues.type_of_lot(lot_id)

@@ -18,6 +18,7 @@ func run() -> Array:
 	_save_mid_stay()
 	_empty_house_and_alarm()
 	_home_while_away()
+	_work_and_school()
 	K.teardown()
 	return fails
 
@@ -214,3 +215,47 @@ func _home_while_away() -> void:
 
 func Kit_set_day(day: int) -> void:
 	K.Kit.set_time(day, 8, 0)
+func _work_and_school() -> void:
+	var folk: Array = K.new_game("small")
+	var mira: Folk = folk[0]
+	Careers.hire(mira, "coder", 1)
+	var kid := Folk.create("Pip", ["active"])
+	kid.household_id = 1
+	kid.age_stage = "child"
+	WorldIface.world().add_folk(kid, folk[1].tile)
+	Careers.enroll_school()
+	K.Kit.set_time(7, 20, 0)                            # Sunday evening: Monday to Wednesday are work and school days
+	var q: Dictionary = Vacation.quote(1, "camping", {"length_days": 3})
+	_check(bool(q["ok"]), "quote with a worker and a pupil: %s" % str(q.get("reason", "")))
+	var rows: Dictionary = {}
+	for r in q["leave"]:
+		rows[int(r["folk_id"])] = r
+	_check(rows.has(int(mira.id)) and int(rows[int(mira.id)]["work_days"]) == 3 and int(rows[int(mira.id)]["paid"]) == 3, "the preview shows 3 work days, all paid leave (level 1: 2 + 1 days)")
+	_check(rows.has(int(kid.id)) and int(rows[int(kid.id)]["school_days"]) >= 2, "and school days missed for the child (%s)" % str(rows.get(int(kid.id), {})))
+	var perf0: float = CareerProgress.performance_of(int(mira.id))
+	var grade0: float = float(Careers.school[int(kid.id)]["grade"])
+	var coins0: int = Economy.balance(1)
+	var res: Dictionary = Vacation.book_and_go(1, "camping", {"length_days": 3, "travel_min": 30})
+	_check(bool(res["ok"]), "booked")
+	var pay_before: int = Economy.balance(1)
+	K.warp(3 * 1440 + 300)
+	_check(Vacation.trip_of_household(1).is_empty(), "back")
+	var paid_leave := 0
+	for e in Economy.ledger_for(1):
+		if str(e["reason"]) == "paid leave":
+			paid_leave += int(e["amount"])
+	_check(paid_leave > 0, "paid leave was paid (%d coins)" % paid_leave)
+	_check(is_equal_approx(CareerProgress.performance_of(int(mira.id)), perf0), "paid days cost no performance")
+	_check(float(Careers.school[int(kid.id)]["grade"]) < grade0, "the school grade dropped (%.0f -> %.0f)" % [grade0, float(Careers.school[int(kid.id)]["grade"])])
+	# a second, unpaid trip: the allowance is used up
+	K.Kit.set_time(14, 20, 0)
+	Vacation.leave_used[int(mira.id)] = {"year": VacationWork.year_of(14), "used": 99}
+	var q2: Dictionary = Vacation.quote(1, "camping", {"length_days": 2, "who": [int(mira.id)]})
+	var row2: Dictionary = q2["leave"][0] if not (q2["leave"] as Array).is_empty() else {}
+	_check(not row2.is_empty() and int(row2["unpaid"]) == 2 and int(row2["paid"]) == 0, "no paid leave left: both work days are unpaid (%s)" % str(row2))
+	var perf1: float = CareerProgress.performance_of(int(mira.id))
+	var skipped0: int = int(Careers.jobs[int(mira.id)]["days_skipped"])
+	Vacation.book_and_go(1, "camping", {"length_days": 2, "who": [int(mira.id)], "travel_min": 30})
+	K.warp(2 * 1440 + 300)
+	_check(CareerProgress.performance_of(int(mira.id)) < perf1 - 5.0 and int(Careers.jobs[int(mira.id)]["days_skipped"]) == skipped0 + 2, "unpaid days hurt the job (%.1f -> %.1f)" % [perf1, CareerProgress.performance_of(int(mira.id))])
+	K.teardown()
