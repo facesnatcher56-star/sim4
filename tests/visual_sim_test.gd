@@ -3,6 +3,7 @@ extends RefCounted
 ## beside it, crowd spawns are free walkable tiles, the shower/bath of a bathroom is private, generated homes have no overlapping objects, every yard
 ## piece has usable use tiles, and every desk, computer and terminal comes with a chair.
 const Kit = preload("res://tests/house_kit.gd")
+const LKit = preload("res://tests/level_kit.gd")
 
 var fails: Array = []
 var W: Node
@@ -33,6 +34,8 @@ func run() -> Array:
 	_spawn_tiles()
 	_generated_homes()
 	_bathroom_privacy()
+	_fire_escape_is_not_a_shortcut()
+	_no_walkable_decoration()
 	W.reset()
 	return fails
 
@@ -216,3 +219,48 @@ func _bathroom_privacy() -> void:
 		_check(not W.bathroom_locked(o, b.id), "%s still locked after the shower is free" % o.def_id)
 	W.remove_folk(a.id)
 	W.remove_folk(b.id)
+
+
+## Item 1 (27b): the outside fire escape is a real route but the way out of a fire, not a shortcut: with a stair core in the building an ordinary
+## walk from the street to the upper floor goes through the door and the stairs, never over the escape and its balcony.
+func _fire_escape_is_not_a_shortcut() -> void:
+	LKit.tower(2, false, 0, true)
+	W.levels.buildings[W.levels.building_at(Vector2i(8, 12))]["rect"] = LKit.FOOT.grow(1)
+	W.levels.touch()
+	W.levels.set_floor_rect_raw(Vector2i(3, 9), Vector2i(3, 9), "stone", 1)
+	_check(W.place_object("door", Vector2i(4, 9), 3, 1) >= 0, "door to the balcony: %s" % W.last_error)
+	_check(W.place_object("fire_escape", Vector2i(3, 7), 1, 0) >= 0, "fire escape: %s" % W.last_error)
+	var from := Vector3i(3, 5, 0)
+	var to := Vector3i(6, 9, 1)
+	var route: Array = W.find_route(from, to)
+	_check(not route.is_empty(), "no route from the street to the upper floor")
+	var on_escape := false
+	for p in route:
+		on_escape = on_escape or (p.z == 1 and p.x == 3)
+	_check(not on_escape, "an ordinary walk to the upper floor went over the fire escape and its balcony")
+	W.reset()
+	# with no stair core at all the escape is still a way up and down (it is what the fire flight uses)
+	LKit.tower(2, false, 0, false)
+	W.levels.buildings[W.levels.building_at(Vector2i(8, 12))]["rect"] = LKit.FOOT.grow(1)
+	W.levels.touch()
+	W.levels.set_floor_rect_raw(Vector2i(3, 9), Vector2i(3, 9), "stone", 1)
+	W.place_object("door", Vector2i(4, 9), 3, 1)
+	W.place_object("fire_escape", Vector2i(3, 7), 1, 0)
+	_check(W.has_route(from, to), "the escape is no longer a route when it is the only one")
+	W.reset()
+
+
+## Item 1 (27b): no shipped template (hand-made lots, generated homes and venues, generated buildings) contains an object that is walkable by accident:
+## everything that does not block is a wall-mounted piece, a floor layer piece (rug) or a portal (stairs, lift, fire escape).
+func _no_walkable_decoration() -> void:
+	for f in ["lot_templates", "generated_lots", "generated_buildings"]:
+		var j: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/%s.json" % f))
+		for id in j["lots"]:
+			for o in (j["lots"][id].get("objects", []) as Array):
+				var d: Dictionary = HousePlan.def_of(str(o["def"]))
+				_check(not d.is_empty(), "%s %s: unknown object %s" % [f, id, str(o["def"])])
+				if d.is_empty() or d.has("portal") or str(d.get("mount", "")) == "wall" or HousePlan.is_floor_layer(d):
+					continue
+				_check(bool(d.get("blocks", true)), "%s %s: %s does not block and is not a portal / wall piece / floor piece (walkable decoration)" % [f, id, str(o["def"])])
+	var fe: Dictionary = HousePlan.def_of("fire_escape")
+	_check(bool((fe.get("portal", {}) as Dictionary).get("exterior", false)), "the fire escape is not flagged as an exterior portal")

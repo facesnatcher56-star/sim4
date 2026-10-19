@@ -14,6 +14,7 @@ extends RefCounted
 
 const STAIR_PEN := 4.0                # route-cost units (1 unit = one tile step) added per level climbed by stairs / ladder
 const LADDER_PEN := 6.0
+const EXTERIOR_PEN := 60.0            # an outside fire escape is the way out of a fire or a last resort, not a shortcut: ordinary walks use the doors and the stair core
 const ELEV_BASE := 4.0                # fixed cost of waiting for / boarding a lift
 const ELEV_PER_LEVEL := 1.0
 
@@ -232,6 +233,8 @@ func traverse(rec: Dictionary, from_p: Vector3i, to_p: Vector3i, smult: float = 
 			steps.append(run[i])
 	steps.append(to_p)
 	var pen: float = LADDER_PEN if kind == "ladder" else STAIR_PEN
+	if bool(rec.get("exterior", false)):
+		pen += EXTERIOR_PEN
 	return {"cost": (float(run.size()) + pen) * smult + 1.0, "steps": steps}
 
 
