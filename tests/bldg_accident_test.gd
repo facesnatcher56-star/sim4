@@ -69,11 +69,11 @@ func _stairs() -> void:
 	_check(LevelAccidents.fall_chance(wet) >= base * 2.0, "wet feet slip more")
 	_check(LevelAccidents.fall_chance(tired) > base, "tired folk stumble more")
 	# dice over many minutes (the chance is raised so a short run shows it); cooldown 0 so every minute can fall
-	var lv: Dictionary = IncidentDefs.cfg("levels", {})
+	var lv: Dictionary = IncidentDefs.cfg("level_accidents", {})
 	lv["fall_per_min"] = 0.08
 	lv["fall_cooldown_min"] = 0
 	lv["severity"] = [1.0, 0.0, 0.0]                      # light falls only: nobody leaves for the hospital in this loop
-	IncidentDefs.config["levels"] = lv
+	IncidentDefs.config["level_accidents"] = lv
 	LevelAccidents.rng.seed = 9
 	var falls_adult := 0
 	var falls_elder := 0
