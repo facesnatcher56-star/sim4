@@ -221,7 +221,7 @@ func _input(ev: InputEvent) -> void:
 	GameSettings.flush()
 	refresh()
 	if other != "" and note != null:
-		note.text = "%s was using that key and is now unbound." % other.trim_prefix("sim_").replace("_", " ").capitalize()
+		note.text = "%s was using that key and is now unbound." % UIU.sentence(other.trim_prefix("sim_"))
 
 func _unhandled_input(ev: InputEvent) -> void:
 	if visible and ev is InputEventKey and ev.pressed and not ev.echo and ev.keycode == KEY_ESCAPE:

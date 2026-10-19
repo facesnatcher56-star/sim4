@@ -65,3 +65,28 @@ static func creator_fit(ap: Dictionary, sex: String, key: String = "") -> void:
 	var pool: Array = hair_pool(sex)
 	if not pool.is_empty() and not in_hair_pool(sex, int(ap.get("hair_style", 0))):
 		ap["hair_style"] = int(pool[absi(hash(key + sex)) % pool.size()])
+	_fit_outfit(ap, sex, key)
+
+
+## The usual clothes of a sex (sex.<s>.outfit_pool {top: [...], bottom: [...]}); empty = no preference. Every top and bottom stays selectable.
+static func outfit_pool(sex: String, part: String) -> Array:
+	var p = cfg(sex).get("outfit_pool", {})
+	var a = (p as Dictionary).get(part, []) if p is Dictionary else []
+	return a if a is Array else []
+
+
+static func in_outfit_pool(sex: String, part: String, v: int) -> bool:
+	for x in outfit_pool(sex, part):
+		if int(x) == v:
+			return true
+	return false
+
+
+## A new creator look starts in the sex's usual clothes (a man is not dressed in a dress or an apron); a top or bottom already in the pool is kept.
+static func _fit_outfit(ap: Dictionary, sex: String, key: String) -> void:
+	var tops: Array = outfit_pool(sex, "top")
+	if not tops.is_empty() and not in_outfit_pool(sex, "top", int(ap.get("top", 0))):
+		ap["top"] = int(tops[absi(hash(key + sex + "top")) % tops.size()])
+	var bottoms: Array = outfit_pool(sex, "bottom")
+	if not bottoms.is_empty() and not in_outfit_pool(sex, "bottom", int(ap.get("bottom", 0))):
+		ap["bottom"] = int(bottoms[absi(hash(key + sex + "bottom")) % bottoms.size()])

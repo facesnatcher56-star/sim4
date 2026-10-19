@@ -16,6 +16,9 @@ func run() -> Array:
 	# --- the first mayor and council
 	K.expect(f, not CityGov.mayor.is_empty() and Story.townies.has(int(CityGov.mayor["id"])), "a townie is mayor at the start (%s)" % str(CityGov.mayor.get("name", "nobody")))
 	K.expect(f, CityGov.council.size() == 4 and not CityGov.council.any(func(m): return int(m["id"]) == int(CityGov.mayor["id"])), "the council has four other townies")
+	K.expect(f, t0_seed(), "the town starts with a reserve that pays for a first project (%d)" % int(CityGov.treasury))
+	CityGov.treasury = 0.0                 # the budget checks below are about the shares alone, without savings topping up
+	CityGov.recompute()
 	# --- budget
 	K.expect(f, is_equal_approx(CityGov.tax, 1.0) and is_equal_approx(CityBudget.funding("police"), 1.0), "the standard budget funds every department at 1.0")
 	CityGov.set_tax(1.3)
@@ -170,3 +173,7 @@ func run() -> Array:
 	K.expect(f, JSON.stringify(CityState.to_dict()) == before, "the government survives a JSON round trip")
 	K.teardown()
 	return f
+
+
+func t0_seed() -> bool:
+	return CityGov.treasury >= 400.0

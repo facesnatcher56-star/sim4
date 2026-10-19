@@ -126,7 +126,7 @@ func _heist(pid: int) -> void:
 		var ob := OptionButton.new()
 		var ids: Array = CrimeLifeHeist.target_ids()
 		for t in ids:
-			ob.add_item(str(CrimeLifeHeist.target_def(str(t)).get("label", t)).capitalize())
+			ob.add_item(UIU.sentence(str(CrimeLifeHeist.target_def(str(t)).get("label", t))))
 		ob.select(maxi(ids.find(_heist_target), 0))
 		ob.item_selected.connect(func(i): _heist_target = str(ids[i]))
 		body.add_child(ob)

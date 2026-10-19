@@ -181,7 +181,7 @@ func _build_needs() -> void:
 		var def: Dictionary = defs.get(nid, {})
 		var row := HBoxContainer.new()
 		row.mouse_filter = Control.MOUSE_FILTER_STOP
-		var lab := UIU.make_label(str(def.get("label", str(nid).capitalize())), 14)
+		var lab := UIU.make_label(str(def.get("label", UIU.sentence(str(nid)))), 14)
 		lab.custom_minimum_size = Vector2(80, 0)
 		row.add_child(lab)
 		var bar := ProgressBar.new()
@@ -252,7 +252,7 @@ func _active_buff_ids(include_hidden: bool = false) -> Array:
 
 func _buff_label(id: String) -> String:
 	var bd: Dictionary = UIU.tbl("buffs").get(id, {})
-	var lab := str(bd.get("label", id.capitalize()))
+	var lab := str(bd.get("label", UIU.sentence(id)))
 	var m = bd.get("mood", {})
 	if m is Dictionary and m.size() > 0:
 		var parts: Array = []
@@ -291,7 +291,7 @@ func mood_color(mood: String) -> Color:
 static func mood_name(mood: String) -> String:
 	if mood == "neutral":
 		return "Calm"
-	return Emotions.label(mood) if Emotions.mood_defs().has(mood) else mood.capitalize()
+	return Emotions.label(mood) if Emotions.mood_defs().has(mood) else UIU.sentence(mood)
 
 const INTENSITY_WORDS := ["", "mild", "strong", "intense"]
 
@@ -364,7 +364,7 @@ func _build_traits() -> void:
 	for t in UIU.prop(folk, "traits", []):
 		var chip := PanelContainer.new()
 		chip.add_theme_stylebox_override("panel", UITheme.box(UITheme.ACCENT.darkened(0.45), 12, UITheme.ACCENT, 1, 8))
-		var l := UIU.make_label(str(defs.get(t, {}).get("label", str(t).capitalize())), 12)
+		var l := UIU.make_label(str(defs.get(t, {}).get("label", UIU.sentence(str(t)))), 12)
 		chip.add_child(l)
 		chip.tooltip_text = str(defs.get(t, {}).get("description", ""))
 		trait_box.add_child(chip)
@@ -409,7 +409,7 @@ func _build_skills() -> void:
 		var row := HBoxContainer.new()
 		row.name = "skill_" + str(s)
 		var lv := _skill_level(st)
-		var lab := UIU.make_label("%s  Lv %d" % [str(s).capitalize(), lv], 14)
+		var lab := UIU.make_label("%s  Lv %d" % [UIU.sentence(str(s)), lv], 14)
 		lab.custom_minimum_size = Vector2(130, 0)
 		row.add_child(lab)
 		var bar := ProgressBar.new()
@@ -538,7 +538,7 @@ func _rel_card(oid: int) -> PanelContainer:
 		var om: Dictionary = other.get_mood()
 		var mn := str(om.get("mood", "neutral"))
 		if mn != "neutral":
-			var ml := UIU.make_label("● " + (Emotions.label(mn) if Emotions.mood_defs().has(mn) else mn.capitalize()), 11, mood_color(mn))
+			var ml := UIU.make_label("● " + (Emotions.label(mn) if Emotions.mood_defs().has(mn) else UIU.sentence(mn)), 11, mood_color(mn))
 			ml.tooltip_text = mood_tooltip_for(other)
 			ml.mouse_filter = Control.MOUSE_FILTER_STOP
 			head.add_child(ml)
@@ -600,7 +600,7 @@ func _on_family_event(ev: String, _payload: Dictionary = {}) -> void:
 		call_deferred("_build_relationships")
 
 func _family_line(n: Dictionary, extra: String = "") -> String:
-	var s := "%s  (%s)" % [str(n.get("name", "?")), str(n.get("stage_text", n.get("stage", ""))).capitalize()]
+	var s := "%s  (%s)" % [str(n.get("name", "?")), UIU.sentence(str(n.get("stage_text", n.get("stage", ""))))]
 	if not bool(n.get("alive", true)):
 		s += "  [passed away]"
 	elif not bool(n.get("on_lot", false)):

@@ -54,7 +54,7 @@ func _init() -> void:
 
 
 func _title(k: String) -> String:
-	return k.replace("_", " ").capitalize()
+	return UIU.sentence(k.replace("_", " "))
 
 
 func _tab(title: String) -> VBoxContainer:
