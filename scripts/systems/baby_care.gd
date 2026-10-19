@@ -78,13 +78,35 @@ static func severity(baby) -> Dictionary:
 			severe = true
 	return {"cry": cry, "severe": severe, "worst": worst, "worst_value": wv}
 
+## Toddlers and young children (they walk and eat on their own, but a parent still has to step in; no crying / removal here, that is
+## ChaosNeglect's job and this keeps it from ever starting).
+static func kids() -> Array:
+	var out: Array = []
+	var stages: Array = cfg().get("kid_care", {}).get("stages", [])
+	for f in SysUtil.residents():
+		if str(f.age_stage) in stages:
+			out.append(f)
+	return out
+
+static func _is_kid(f) -> bool:
+	return str(f.age_stage) != "baby"
+
+static func _sleeping(f) -> bool:
+	return f.current != null and str(f.current.def_id).begins_with("sleep")
+
 ## Ordered wishes [{iid, need, gap}] - most pressing first.
 static func wanted_care(baby) -> Array:
-	var below: Dictionary = cfg().get("care_below", {})
+	var kc: Dictionary = cfg().get("kid_care", {})
+	var kid: bool = _is_kid(baby)
+	var below: Dictionary = kc.get("below", {}) if kid else cfg().get("care_below", {})
 	var out: Array = []
 	var map: Dictionary = {"hunger": "feed_baby", "bladder": "change_diaper", "hygiene": "change_diaper", "energy": "rock_to_sleep",
 		"fun": "play_with_baby", "social": "hold_baby"}
 	for n in map:
+		if kid and str(baby.age_stage) == "child" and not (kc.get("child_needs", []) as Array).has(n):
+			continue
+		if kid and n == "energy" and _sleeping(baby):
+			continue
 		var v: float = _need(baby, n)
 		var th: float = float(below.get(n, -30))
 		if v < th:
@@ -123,6 +145,8 @@ static func assign_care(baby) -> int:
 	if wants.is_empty():
 		return -1
 	var urgent: bool = is_crying(int(baby.id)) or str((wants[0] as Dictionary)["need"]) == "hunger"      # a hungry baby comes before the adults' own needs, asleep or not
+	if _is_kid(baby):
+		urgent = (cfg().get("kid_care", {}).get("urgent_needs", []) as Array).has(str((wants[0] as Dictionary)["need"]))    # real care beats the adults' whims
 	var cands: Array = caregivers_for(baby)
 	cands.sort_custom(func(a, b):
 		var ba: int = 0 if (a.current == null and a.queue.is_empty()) else 1
@@ -173,6 +197,9 @@ static func evaluate(step: float) -> void:
 			continue
 		if bool(c.get("auto_care", true)):
 			assign_care(baby)
+	if bool(c.get("auto_care", true)):
+		for kid in kids():
+			assign_care(kid)
 
 static func _set_crying(baby, s: Dictionary, on: bool) -> void:
 	var c: Dictionary = cfg()

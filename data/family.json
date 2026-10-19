@@ -75,6 +75,13 @@
     "recover_factor": 2.0,
     "cry_buff": "crying",
     "household_buff": "baby_crying",
-    "new_parent_buff": "new_parent"
+    "new_parent_buff": "new_parent",
+    "kid_care": {
+      "_doc": "Toddlers and young children: a parent at home is sent for the same care as a baby (feed, wash, bed, cuddle/play), ahead of their own whims.",
+      "stages": ["toddler", "child"],
+      "below": {"hunger": -25, "bladder": -45, "hygiene": -45, "energy": -45, "fun": -60, "social": -60},
+      "child_needs": ["hunger", "hygiene", "energy"],
+      "urgent_needs": ["hunger", "bladder", "hygiene", "energy"]
+    }
   }
 }
