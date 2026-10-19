@@ -42,6 +42,7 @@ func run() -> Array:
 	_shower_keeps_its_clip()
 	_idle_spacing()
 	_no_straight_line_through_furniture()
+	_make_bed_stands_beside()
 	_route_hop_stays_on_walkable_tiles(3)          # a stale blocked first step (within the backlog)
 	_route_hop_stays_on_walkable_tiles(7)          # a long backlog that is hopped along the route
 	_holder.free()
@@ -194,5 +195,34 @@ func _route_hop_stays_on_walkable_tiles(extra: int) -> void:
 			through += 1
 	_check(through == 0, "the view stood on a blocked tile in %d frames (stale first step / hop, %d extra steps)" % [through, extra])
 	_check(Vector2(fv.position.x, fv.position.z).distance_to(Vector2(goal) + Vector2(0.5, 0.5)) < 0.4, "the hopper never arrived: %s" % str(fv.position))
+	fv.free()
+	W.remove_folk(f.id)
+
+
+## Item 4 (27b): making the bed is a chore done standing beside it (the bed's slots are lie slots on top of the mattress); sleeping still lies down.
+func _make_bed_stands_beside() -> void:
+	W.reset()
+	var bid: int = W.place_object("bed", Vector2i(8, 8), 0)
+	_check(bid >= 0, "could not place the bed: %s" % W.last_error)
+	var bed = W.get_object(bid)
+	var slot: Vector2i = bed.slot_tile(0)
+	var pr := _mk("Maker", slot)
+	var f: Folk = pr[0]
+	var fv: FolkView = pr[1]
+	_check(W.reserve(bid, 0, f.id), "could not reserve the bed")
+	f.current = Interaction.create("make_bed", f, bid)
+	f.current.state = "running"
+	_step(fv, 40)
+	_check(fv.pose != "lie" and not FolkClipRules.is_lie_clip(fv.clip), "making the bed lies down: pose %s clip %s" % [fv.pose, fv.clip])
+	_check(fv.clip == "Wash", "making the bed plays '%s'" % fv.clip)
+	var on_bed: Vector2 = bed.slot_use_pos(0)
+	_check(Vector2(fv.position.x, fv.position.z).distance_to(on_bed) > 0.8, "making the bed stands on the mattress: %s" % str(fv.position))
+	f.current = Interaction.create("sleep_bed", f, bid)
+	f.current.state = "running"
+	W.folk_pose.erase(f.id)
+	_step(fv, 60)
+	_check(fv.pose == "lie", "sleeping in the bed is not lying: %s" % fv.pose)
+	W.release(bid, 0, f.id)
+	f.current = null
 	fv.free()
 	W.remove_folk(f.id)

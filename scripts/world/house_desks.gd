@@ -48,3 +48,139 @@ static func add_chairs(plan: HousePlan, fz: HouseFurnish) -> int:
 			added += 1
 			break
 	return added
+
+
+# ------------------------------------------------------------------ finished templates (hand-made lots, generated venues and buildings)
+
+## Puts a chair on the use tile of every desk / computer / terminal of a finished lot template (floors, walls, objects, optional `levels`) that has none,
+## wherever that tile is free floor, not behind a wall, not an entry / spawn / stop tile and not the only link between two parts of the level (the walkable
+## tiles of the level stay in as many pieces as before). Used by tools/add_template_chairs.gd on the shipped data and by the data check in visual_sim_test.
+## Returns the chairs added (appended to t["objects"]). No rng, so it can be run again on its own output (it then adds nothing).
+static func fix_template(t: Dictionary) -> int:
+	var levels: Array = [0]
+	for k in (t.get("levels", {}) as Dictionary):
+		levels.append(int(k))
+	var must := _must_tiles(t)
+	var added := 0
+	for lv in levels:
+		added += _fix_level(t, lv, must)
+	return added
+
+
+static func _must_tiles(t: Dictionary) -> Dictionary:
+	var out: Dictionary = {}
+	for k in ["entry", "bedroom"]:
+		if t.has(k):
+			out[Vector2i(int(t[k][0]), int(t[k][1]))] = true
+	for s in t.get("spawn", []):
+		out[Vector2i(int(s[0]), int(s[1]))] = true
+	for k in (t.get("stops", {}) as Dictionary):
+		out[Vector2i(int(t["stops"][k][0]), int(t["stops"][k][1]))] = true
+	for s in t.get("staff", []):
+		if s is Dictionary and s.has("tile"):
+			out[Vector2i(int(s["tile"][0]), int(s["tile"][1]))] = true
+		elif s is Array and s.size() >= 2 and (s[0] is float or s[0] is int):
+			out[Vector2i(int(s[0]), int(s[1]))] = true
+	return out
+
+
+## Floors, walls and objects of one level of a template.
+static func _level_part(t: Dictionary, lv: int) -> Array:
+	if lv == 0:
+		return [t.get("floors", []), t.get("walls", [])]
+	var l: Dictionary = (t.get("levels", {}) as Dictionary).get(str(lv), {})
+	return [l.get("floors", []), l.get("walls", [])]
+
+
+static func _fix_level(t: Dictionary, lv: int, must: Dictionary) -> int:
+	var part := _level_part(t, lv)
+	var floors: Dictionary = {}
+	for f in (part[0] as Array):
+		var r: Array = f["rect"]
+		for y in range(int(r[1]), int(r[3]) + 1):
+			for x in range(int(r[0]), int(r[2]) + 1):
+				floors[Vector2i(x, y)] = true
+	var edges: Dictionary = {}
+	for w in (part[1] as Array):
+		if str(w["type"]) not in HousePlan.BLOCK:
+			continue
+		var a := Vector2i(int(w["a"][0]), int(w["a"][1]))
+		var b := Vector2i(int(w["b"][0]), int(w["b"][1]))
+		if a.y == b.y:
+			for x in range(mini(a.x, b.x), maxi(a.x, b.x)):
+				edges[Vector3i(x, a.y, 0)] = true
+		else:
+			for y in range(mini(a.y, b.y), maxi(a.y, b.y)):
+				edges[Vector3i(a.x, y, 1)] = true
+	var occ: Dictionary = {}
+	var desks: Array = []
+	var objs: Array = t["objects"]
+	for o in objs:
+		if int(o.get("level", 0)) != lv:
+			continue
+		var d := HousePlan.def_of(str(o["def"]))
+		var tile := Vector2i(int(o["tile"][0]), int(o["tile"][1]))
+		if str(d.get("mount", "")) == "wall":
+			if str(d.get("wall_type", "")) == "door":
+				edges.erase(HousePlan.mount_edge(tile, int(o.get("rot", 0))))
+			elif str(d.get("wall_type", "")) == "window":
+				edges[HousePlan.mount_edge(tile, int(o.get("rot", 0)))] = true
+			continue
+		if d.is_empty() or HousePlan.is_floor_layer(d):
+			continue
+		for ft in HousePlan.footprint(d, tile, int(o.get("rot", 0))):
+			occ[ft] = o
+		if str(o["def"]) in TYPES:
+			desks.append(o)
+	var added := 0
+	for o in desks:
+		var d := HousePlan.def_of(str(o["def"]))
+		var tile := Vector2i(int(o["tile"][0]), int(o["tile"][1]))
+		var fp := HousePlan.footprint(d, tile, int(o.get("rot", 0)))
+		for s in HousePlan.slot_tiles(d, tile, int(o.get("rot", 0))):
+			if occ.has(s) and "seat" in (HousePlan.def_of(str((occ[s] as Dictionary)["def"])).get("tags", []) as Array):
+				break                                               # already has a seat
+			if s in fp or occ.has(s) or not floors.has(s) or must.has(s):
+				continue
+			var from := Vector2i.ZERO
+			var ok := false
+			for t0 in fp:
+				var dir: Vector2i = s - t0
+				if absi(dir.x) + absi(dir.y) == 1 and not edges.has(HousePlan.edge(t0, s)):
+					from = dir
+					ok = true
+					break
+			if not ok:
+				continue
+			var before := _pieces(floors, occ, edges, Vector2i(-9999, -9999))
+			if _pieces(floors, occ, edges, s) > before:
+				continue                                            # the use tile is a link (a corridor): leave it open
+			var chair := {"def": "chair", "tile": [s.x, s.y], "rot": HousePlan.FRONT.find(-from)}
+			if lv != 0:
+				chair["level"] = lv
+			objs.append(chair)
+			occ[s] = chair
+			added += 1
+			break
+	return added
+
+
+## Number of separate walkable pieces of a level (4-neighbour, walls and closed edges between), with tile `skip` counted as blocked.
+static func _pieces(floors: Dictionary, occ: Dictionary, edges: Dictionary, skip: Vector2i) -> int:
+	var seen: Dictionary = {}
+	var n := 0
+	for start in floors:
+		if seen.has(start) or occ.has(start) or start == skip:
+			continue
+		n += 1
+		var stack: Array = [start]
+		seen[start] = true
+		while not stack.is_empty():
+			var c: Vector2i = stack.pop_back()
+			for dd in HousePlan.DIRS4:
+				var nb: Vector2i = c + dd
+				if seen.has(nb) or not floors.has(nb) or occ.has(nb) or nb == skip or edges.has(HousePlan.edge(c, nb)):
+					continue
+				seen[nb] = true
+				stack.append(nb)
+	return n

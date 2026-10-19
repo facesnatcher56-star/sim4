@@ -27,6 +27,12 @@ static func urgent_move(f) -> bool:
 	return false
 
 
+## Chores on a bed, a toilet or another seat or bunk (making the bed, cleaning the toilet): the folk stands beside the object on its use tile, it
+## never lies or sits down on it. Data: animation_map `stand_at_slot` (interaction ids).
+static func stands_at_slot(f) -> bool:
+	return f != null and f.current != null and str(f.current.def_id) in (FolkView.anim_map().get("stand_at_slot", []) as Array)
+
+
 static func is_sit_clip(c: String) -> bool:
 	return c in (FolkView.anim_map().get("sit_clips", []) as Array)
 

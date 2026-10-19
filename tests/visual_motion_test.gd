@@ -146,7 +146,7 @@ func _data_sit_lie_clips() -> void:
 				if idef.is_empty() or str(idef.get("target", "object")) != "object":
 					continue
 				if str(iid) in ["clean_object", "repair_object", "make_bed", "clean_toilet"]:
-					continue          # maintenance: the folk stands next to the object
+					continue          # maintenance: the folk stands next to the object (animation_map stand_at_slot)
 				var raw := FolkClipRules.pick_from(FolkClipRules.entry_for(str(iid), idef.get("tags", [])), p)
 				var ok: bool = FolkClipRules.is_sit_clip(raw) if p == "sit" else FolkClipRules.is_lie_clip(raw)
 				_check(ok, "%s on %s (%s slot) maps to '%s', not a %s clip" % [iid, oid, p, raw, p])

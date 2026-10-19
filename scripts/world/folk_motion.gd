@@ -134,6 +134,8 @@ func _resolve_target(f) -> void:
 		var si: int = _res_cache[1]
 		if o != null and o.slots_reserved.get(si, -1) == folk_id and f.tile == o.slot_tile(si):
 			var sp: String = o.slot_pose(si)
+			if sp != "stand" and FolkClipRules.stands_at_slot(f):
+				sp = "stand"                                              # a chore on a bed or toilet: stand beside it
 			var seat = _seat_at_slot(o, si, f)
 			if sp == "stand" and seat != null:
 				_target_pose = "sit"                                      # the chair at the desk, computer or table: use it sitting, facing the object

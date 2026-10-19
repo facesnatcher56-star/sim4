@@ -36,6 +36,7 @@ func run() -> Array:
 	_bathroom_privacy()
 	_fire_escape_is_not_a_shortcut()
 	_no_walkable_decoration()
+	_template_chairs()
 	W.reset()
 	return fails
 
@@ -264,3 +265,33 @@ func _no_walkable_decoration() -> void:
 				_check(bool(d.get("blocks", true)), "%s %s: %s does not block and is not a portal / wall piece / floor piece (walkable decoration)" % [f, id, str(o["def"])])
 	var fe: Dictionary = HousePlan.def_of("fire_escape")
 	_check(bool((fe.get("portal", {}) as Dictionary).get("exterior", false)), "the fire escape is not flagged as an exterior portal")
+
+
+## Item 4 (27b): every shipped template (hand-made lots, generated lots, generated buildings) has a chair on the use tile of its desks, computers and terminals
+## wherever the tile can take one: running HouseDesks.fix_template over it adds nothing (tools/add_template_chairs.gd was run), and most desks have a seat (the rest stand on a corridor link, an entry tile or a taken tile).
+func _template_chairs() -> void:
+	for f in ["lot_templates", "generated_lots", "generated_buildings"]:
+		var j: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/%s.json" % f))
+		var desks := 0
+		var seated := 0
+		for id in j["lots"]:
+			var t: Dictionary = (j["lots"][id] as Dictionary).duplicate(true)
+			var occ: Dictionary = {}
+			for o in t["objects"]:
+				var d: Dictionary = HousePlan.def_of(str(o["def"]))
+				if str(d.get("mount", "")) == "wall" or HousePlan.is_floor_layer(d) or d.is_empty():
+					continue
+				for ft in HousePlan.footprint(d, Vector2i(int(o["tile"][0]), int(o["tile"][1])), int(o.get("rot", 0))):
+					occ[Vector3i(ft.x, ft.y, int(o.get("level", 0)))] = str(o["def"])
+			for o in t["objects"]:
+				if str(o["def"]) in HouseDesks.TYPES:
+					desks += 1
+					var d2: Dictionary = HousePlan.def_of(str(o["def"]))
+					for s in HousePlan.slot_tiles(d2, Vector2i(int(o["tile"][0]), int(o["tile"][1])), int(o.get("rot", 0))):
+						if "seat" in (HousePlan.def_of(str(occ.get(Vector3i(s.x, s.y, int(o.get("level", 0))), ""))).get("tags", []) as Array):
+							seated += 1
+							break
+			var more := HouseDesks.fix_template(t)
+			_check(more == 0, "%s %s: %d desks could still get a chair (run tools/add_template_chairs.gd)" % [f, id, more])
+		_check(desks == 0 or float(seated) / float(desks) >= 0.85, "%s: only %d of %d desks, computers and terminals have a chair" % [f, seated, desks])
+		print("TEMPLATE CHAIRS %s: %d of %d desk-like objects have a chair" % [f, seated, desks])

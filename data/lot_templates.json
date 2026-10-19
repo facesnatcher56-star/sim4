@@ -363,6 +363,14 @@
       13
      ],
      "rot": 0
+    },
+    {
+     "def": "chair",
+     "tile": [
+      10,
+      8
+     ],
+     "rot": 3
     }
    ],
    "spawn": [
@@ -1895,6 +1903,30 @@
       21
      ],
      "rot": 0
+    },
+    {
+     "def": "chair",
+     "tile": [
+      5,
+      6
+     ],
+     "rot": 0
+    },
+    {
+     "def": "chair",
+     "tile": [
+      23,
+      6
+     ],
+     "rot": 0
+    },
+    {
+     "def": "chair",
+     "tile": [
+      13,
+      15
+     ],
+     "rot": 0
     }
    ],
    "spawn": [
@@ -3321,6 +3353,70 @@
       16
      ],
      "rot": 2
+    },
+    {
+     "def": "chair",
+     "tile": [
+      7,
+      15
+     ],
+     "rot": 0
+    },
+    {
+     "def": "chair",
+     "tile": [
+      9,
+      15
+     ],
+     "rot": 0
+    },
+    {
+     "def": "chair",
+     "tile": [
+      11,
+      15
+     ],
+     "rot": 0
+    },
+    {
+     "def": "chair",
+     "tile": [
+      14,
+      15
+     ],
+     "rot": 0
+    },
+    {
+     "def": "chair",
+     "tile": [
+      16,
+      15
+     ],
+     "rot": 0
+    },
+    {
+     "def": "chair",
+     "tile": [
+      19,
+      15
+     ],
+     "rot": 0
+    },
+    {
+     "def": "chair",
+     "tile": [
+      21,
+      15
+     ],
+     "rot": 0
+    },
+    {
+     "def": "chair",
+     "tile": [
+      23,
+      15
+     ],
+     "rot": 0
     }
    ],
    "spawn": [
@@ -4946,6 +5042,295 @@
      ],
      "rot": 2,
      "level": -1
+    },
+    {
+     "def": "chair",
+     "tile": [
+      11,
+      6
+     ],
+     "rot": 2
+    },
+    {
+     "def": "chair",
+     "tile": [
+      13,
+      6
+     ],
+     "rot": 2
+    },
+    {
+     "def": "chair",
+     "tile": [
+      15,
+      6
+     ],
+     "rot": 2
+    },
+    {
+     "def": "chair",
+     "tile": [
+      17,
+      6
+     ],
+     "rot": 2
+    },
+    {
+     "def": "chair",
+     "tile": [
+      19,
+      6
+     ],
+     "rot": 2
+    },
+    {
+     "def": "chair",
+     "tile": [
+      21,
+      6
+     ],
+     "rot": 2
+    },
+    {
+     "def": "chair",
+     "tile": [
+      11,
+      10
+     ],
+     "rot": 2
+    },
+    {
+     "def": "chair",
+     "tile": [
+      13,
+      10
+     ],
+     "rot": 2
+    },
+    {
+     "def": "chair",
+     "tile": [
+      15,
+      10
+     ],
+     "rot": 2
+    },
+    {
+     "def": "chair",
+     "tile": [
+      17,
+      10
+     ],
+     "rot": 2
+    },
+    {
+     "def": "chair",
+     "tile": [
+      21,
+      10
+     ],
+     "rot": 2
+    },
+    {
+     "def": "chair",
+     "tile": [
+      24,
+      6
+     ],
+     "rot": 2
+    },
+    {
+     "def": "chair",
+     "tile": [
+      25,
+      6
+     ],
+     "rot": 2
+    },
+    {
+     "def": "chair",
+     "tile": [
+      11,
+      13
+     ],
+     "rot": 2
+    },
+    {
+     "def": "chair",
+     "tile": [
+      13,
+      13
+     ],
+     "rot": 2
+    },
+    {
+     "def": "chair",
+     "tile": [
+      15,
+      13
+     ],
+     "rot": 2
+    },
+    {
+     "def": "chair",
+     "tile": [
+      17,
+      13
+     ],
+     "rot": 2
+    },
+    {
+     "def": "chair",
+     "tile": [
+      12,
+      7
+     ],
+     "rot": 2,
+     "level": 1
+    },
+    {
+     "def": "chair",
+     "tile": [
+      14,
+      7
+     ],
+     "rot": 2,
+     "level": 1
+    },
+    {
+     "def": "chair",
+     "tile": [
+      16,
+      7
+     ],
+     "rot": 2,
+     "level": 1
+    },
+    {
+     "def": "chair",
+     "tile": [
+      18,
+      7
+     ],
+     "rot": 2,
+     "level": 1
+    },
+    {
+     "def": "chair",
+     "tile": [
+      20,
+      7
+     ],
+     "rot": 2,
+     "level": 1
+    },
+    {
+     "def": "chair",
+     "tile": [
+      22,
+      7
+     ],
+     "rot": 2,
+     "level": 1
+    },
+    {
+     "def": "chair",
+     "tile": [
+      12,
+      13
+     ],
+     "rot": 2,
+     "level": 1
+    },
+    {
+     "def": "chair",
+     "tile": [
+      14,
+      13
+     ],
+     "rot": 2,
+     "level": 1
+    },
+    {
+     "def": "chair",
+     "tile": [
+      16,
+      13
+     ],
+     "rot": 2,
+     "level": 1
+    },
+    {
+     "def": "chair",
+     "tile": [
+      18,
+      13
+     ],
+     "rot": 2,
+     "level": 1
+    },
+    {
+     "def": "chair",
+     "tile": [
+      20,
+      13
+     ],
+     "rot": 2,
+     "level": 1
+    },
+    {
+     "def": "chair",
+     "tile": [
+      22,
+      13
+     ],
+     "rot": 2,
+     "level": 1
+    },
+    {
+     "def": "chair",
+     "tile": [
+      22,
+      8
+     ],
+     "rot": 2,
+     "level": 2
+    },
+    {
+     "def": "chair",
+     "tile": [
+      24,
+      7
+     ],
+     "rot": 2,
+     "level": 2
+    },
+    {
+     "def": "chair",
+     "tile": [
+      13,
+      12
+     ],
+     "rot": 2,
+     "level": -1
+    },
+    {
+     "def": "chair",
+     "tile": [
+      15,
+      12
+     ],
+     "rot": 2,
+     "level": -1
+    },
+    {
+     "def": "chair",
+     "tile": [
+      17,
+      12
+     ],
+     "rot": 2,
+     "level": -1
     }
    ],
    "spawn": [
@@ -5671,6 +6056,182 @@
      "tile": [
       24,
       16
+     ],
+     "rot": 2
+    },
+    {
+     "def": "chair",
+     "tile": [
+      17,
+      6
+     ],
+     "rot": 2
+    },
+    {
+     "def": "chair",
+     "tile": [
+      19,
+      6
+     ],
+     "rot": 2
+    },
+    {
+     "def": "chair",
+     "tile": [
+      21,
+      6
+     ],
+     "rot": 2
+    },
+    {
+     "def": "chair",
+     "tile": [
+      23,
+      6
+     ],
+     "rot": 2
+    },
+    {
+     "def": "chair",
+     "tile": [
+      7,
+      9
+     ],
+     "rot": 2
+    },
+    {
+     "def": "chair",
+     "tile": [
+      9,
+      9
+     ],
+     "rot": 2
+    },
+    {
+     "def": "chair",
+     "tile": [
+      11,
+      9
+     ],
+     "rot": 2
+    },
+    {
+     "def": "chair",
+     "tile": [
+      13,
+      9
+     ],
+     "rot": 2
+    },
+    {
+     "def": "chair",
+     "tile": [
+      15,
+      9
+     ],
+     "rot": 2
+    },
+    {
+     "def": "chair",
+     "tile": [
+      17,
+      9
+     ],
+     "rot": 2
+    },
+    {
+     "def": "chair",
+     "tile": [
+      7,
+      12
+     ],
+     "rot": 2
+    },
+    {
+     "def": "chair",
+     "tile": [
+      9,
+      12
+     ],
+     "rot": 2
+    },
+    {
+     "def": "chair",
+     "tile": [
+      11,
+      12
+     ],
+     "rot": 2
+    },
+    {
+     "def": "chair",
+     "tile": [
+      13,
+      12
+     ],
+     "rot": 2
+    },
+    {
+     "def": "chair",
+     "tile": [
+      15,
+      12
+     ],
+     "rot": 2
+    },
+    {
+     "def": "chair",
+     "tile": [
+      17,
+      12
+     ],
+     "rot": 2
+    },
+    {
+     "def": "chair",
+     "tile": [
+      7,
+      15
+     ],
+     "rot": 2
+    },
+    {
+     "def": "chair",
+     "tile": [
+      9,
+      15
+     ],
+     "rot": 2
+    },
+    {
+     "def": "chair",
+     "tile": [
+      11,
+      15
+     ],
+     "rot": 2
+    },
+    {
+     "def": "chair",
+     "tile": [
+      13,
+      15
+     ],
+     "rot": 2
+    },
+    {
+     "def": "chair",
+     "tile": [
+      15,
+      15
+     ],
+     "rot": 2
+    },
+    {
+     "def": "chair",
+     "tile": [
+      17,
+      15
      ],
      "rot": 2
     }

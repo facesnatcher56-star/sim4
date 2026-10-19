@@ -28,6 +28,7 @@
   },
   "sit_clips": ["Sit_Idle", "Sit_Eat", "Sit_Watch", "Sit_Read", "Sit_Type", "ToiletSit"],
   "lie_clips": ["Sleep", "Faint", "Fall", "Baby_Idle"],
+  "stand_at_slot": ["make_bed", "clean_toilet", "clean_object", "repair_object"],
   "sit_substitute": {"Read": "Sit_Read", "Type": "Sit_Type", "*": "Sit_Idle"},
   "posture": {"stand": "Use_Stand", "sit": "Sit_Idle", "lie": "Sleep"},
   "idle": {
@@ -66,7 +67,7 @@
     "fix_leak": {"default": "Use_Stand", "sit": "Sit_Idle"},
     "scrub_mould": {"default": "Wash", "sit": "Sit_Idle"},
     "take_cover": {"default": "Use_Stand", "sit": "Sit_Idle"},
-    "make_bed": {"default": "Use_Stand", "lie": "Sleep"},
+    "make_bed": "Wash",
     "clean_toilet": {"default": "Wash", "sit": "Sit_Idle"},
     "soak_hot_tub": {"default": "Swim_idle", "sit": "Sit_Idle"},
     "sit_chair": "Sit_Idle",
