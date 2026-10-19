@@ -23,6 +23,7 @@ var tabs: FolkLookTabs
 var others_provider: Callable = Callable()   # -> Array of the other members' appearances (set by the household creator)
 var sex_opt: OptionButton
 var _prev_traits: Array = [-1, -1, -1]
+static var _fitted: Array = []            # member dictionaries already given their sex's starting look
 
 func _ready() -> void:
 	add_theme_constant_override("separation", 18)
@@ -104,6 +105,7 @@ func _ready() -> void:
 	look.tooltip_text = "Roll a new random appearance that does not look like anyone else in the household or town"
 	look.pressed.connect(func():
 		fd["appearance"] = Genetics.unique_appearance(_others(), null, str(fd.get("sex", "")))
+		GeneticsSex.creator_fit(fd["appearance"], str(fd.get("sex", "")), str(fd.get("name", "")) + str(Time.get_ticks_msec()))
 		load_folk(fd, is_first, first_name)
 		changed.emit())
 	mid.add_child(look)
@@ -151,6 +153,9 @@ func load_folk(data: Dictionary, first: bool, first_member_name: String) -> void
 		if str(asp_opt.get_item_metadata(i)) == asp:
 			asp_opt.select(i)
 	fd["appearance"] = Genetics.normalize(fd["appearance"])
+	if not _fitted.any(func(x): return is_same(x, fd)):
+		_fitted.append(fd)                    # a member the creator has not shown yet starts with the look its sex usually has (any look stays selectable)
+		GeneticsSex.creator_fit(fd["appearance"], str(fd["sex"]), str(fd.get("name", "")))
 	tabs.load_ap(fd["appearance"])
 	_loading = false
 	preview.show_folk(str(fd.get("stage", "adult")), fd["appearance"])
@@ -209,7 +214,7 @@ func _set_sex(s: String) -> void:
 	if _loading:
 		return
 	fd["sex"] = s
-	GeneticsSex.fit(fd["appearance"], s)
+	GeneticsSex.creator_fit(fd["appearance"], s, str(fd.get("name", "")))
 	_loading = true
 	tabs.load_ap(fd["appearance"])
 	_loading = false
