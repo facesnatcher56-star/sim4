@@ -256,6 +256,24 @@ static func inherit(parent_a, parent_b, r: RandomNumberGenerator = null, opts: D
 	ap = GeneticsUnique.make_distinct(ap, others, g)
 	return {"appearance": ap, "traits": inherit_traits(parent_a, parent_b, g, opts)}
 
+## Traits a child can pick up at RANDOM (an extra at birth, a new one on growing up): everything the parents / the child do not already
+## have, except the rare and negative ones (data/genetics.json inherit.rare_traits: crime traits). Those only come down from a parent
+## (inherit_chance) or from the townie roll, so they stay rare. Traits that conflict with one already held are skipped.
+static func random_pool(have: Array) -> Array:
+	var rare: Array = cfg().get("inherit", {}).get("rare_traits", [])
+	var table: Dictionary = SimEnv.data().traits()
+	var out: Array = []
+	for t in table:
+		if have.has(t) or rare.has(str(t)):
+			continue
+		var clash: bool = false
+		for c in (table[t] as Dictionary).get("conflicts", []):
+			if have.has(str(c)):
+				clash = true
+		if not clash:
+			out.append(str(t))
+	return out
+
 static func inherit_traits(parent_a, parent_b, r: RandomNumberGenerator = null, opts: Dictionary = {}) -> Array:
 	var g: RandomNumberGenerator = _r(r)
 	var inh: Dictionary = cfg().get("inherit", {})
@@ -275,10 +293,7 @@ static func inherit_traits(parent_a, parent_b, r: RandomNumberGenerator = null, 
 			out.append(t)
 	# random extras: traits neither parent has
 	var extras: int = int(opts.get("extra", inh.get("random_extra_traits", 1)))
-	var cand: Array = []
-	for t2 in SimEnv.data().traits():
-		if not pool.has(t2):
-			cand.append(str(t2))
+	var cand: Array = random_pool(pool)
 	for _i in extras:
 		if cand.is_empty() or out.size() >= cap:
 			break

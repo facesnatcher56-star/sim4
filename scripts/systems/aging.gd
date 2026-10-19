@@ -197,7 +197,7 @@ static func _age_up(f, new_stage: String) -> void:
 	f.age_stage = new_stage
 	apply_stage_buff(f)
 	var label: String = str(stage_def(new_stage).get("label", new_stage))
-	SysUtil.notify("%s grew up into a %s!" % [f.name, label.to_lower()], "birthday")
+	SysUtil.notify("%s grew up into %s %s!" % [f.name, article(new_stage), label.to_lower()], "birthday")
 	SysUtil.game_event("aged_up", {"folk_id": f.id, "from": old, "to": new_stage})
 	if SysUtil.is_resident(f):
 		ChronicleHook.note("aged_up", "%s grew up into %s %s." % [f.name, article(new_stage), label.to_lower()], [int(f.id)], "home:%d" % int(f.household_id), 2)
@@ -213,9 +213,7 @@ static func _grow_trait(f) -> void:
 		if not f.traits.has(t):
 			cand.append(t)
 	if cand.is_empty() and can_add_trait(f):
-		for t in SimEnv.data().traits():
-			if not f.traits.has(t):
-				cand.append(t)
+		cand = Genetics.random_pool(f.traits)
 	if can_add_trait(f) and not cand.is_empty():
 		var t2 = SysUtil.pick(cand)
 		f.traits.append(str(t2))

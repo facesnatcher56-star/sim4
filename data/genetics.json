@@ -48,6 +48,7 @@
     "floors": ["#6aa84f", "#8a6a45", "#9a9a9a", "#b0b0b0", "#b8864e", "#d9e4ea", "#8a6f9e", "#4a4d55", "#b9b6ae", "#86c35f", "#d8c690", "#4f8fc9"]
   },
   "inherit": {
+    "rare_traits": ["dishonest", "kleptomaniac", "vengeful", "reckless"],
     "skin_weight_sigma": 0.18,
     "color_mutation_sigma": 0.012,
     "color_mutation_max": 0.03,
