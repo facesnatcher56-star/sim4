@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "ignore_skills": ["charisma", "cooking", "handiness"],
+  "fatigue": {"from_level": 4, "per_level": 0.16, "min": 0.2, "interest_levels": 3},
+  "interest": {"trait": 1.5, "aspiration": 1.8, "career": 1.8, "max_boost": 2.6, "boost_until_level": 8},
+  "traits": {
+    "outdoorsy": ["fitness", "gardening", "fishing"],
+    "active": ["fitness"],
+    "green_thumb": ["gardening"],
+    "musical": ["guitar", "piano"],
+    "showoff": ["guitar", "piano"],
+    "creative": ["painting", "writing"],
+    "bookworm": ["writing", "logic"],
+    "gamer": ["logic"],
+    "perfectionist": ["painting", "guitar", "piano"]
+  },
+  "aspirations": {
+    "athlete": ["fitness"],
+    "artist": ["painting"],
+    "melody_maker": ["guitar", "piano"],
+    "garden_guardian": ["gardening"],
+    "master_angler": ["fishing"],
+    "wordsmith": ["writing"],
+    "curious_mind": ["logic"]
+  }
+}

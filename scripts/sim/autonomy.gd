@@ -317,7 +317,7 @@ static func _profile(folk, iid: String, d: Dictionary, obj, cache: Dictionary, p
 	var c0: float = base * float(p["buff_mult"]) * float(p["trait_mult"]) * float(rt["mult"]) + float(p["like"])
 	if base > 0.0 or float(rt["bonus"]) > 0.0:
 		c0 += float(rt["bonus"])
-	var variety: float = AutonomyVariety.mult(folk, iid, d, obj) * StoryPacing.interaction_mult(folk, d)      # "bored of it" (data/autonomy_variety.json)
+	var variety: float = AutonomyVariety.mult(folk, iid, d, obj) * StoryPacing.interaction_mult(folk, d) * SkillInterest.mult(folk, iid, d)      # "bored of it" (data/autonomy_variety.json), skill taste (data/skill_interest.json)
 	p["variety"] = variety
 	if c0 > 0.0:
 		c0 *= variety
