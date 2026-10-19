@@ -7,6 +7,7 @@ extends RefCounted
 ##   pests_below X        roach level lower than X          pests_at_least X   roach level at least X
 ##   pest_free true|false   an exterminator was here lately
 ##   leaking true|false   water is running right now
+##   more keys (gas, damp, employed, midlife, behind, estate_relative ...): see ChaosLifeConds.
 ## Real lots read the real objects; far lots have no objects, so the answers are fixed by data / a stable hash (the statistical version).
 
 const FIXTURES := ["sink", "toilet", "bathtub", "shower", "washing_machine"]
@@ -34,6 +35,8 @@ static func check(v: Variant, subj) -> bool:
 				ok = (int((ChaosState.pests.get(str(hid), {}) as Dictionary).get("free_until", -1)) > SysUtil.day()) == bool(want)
 			"leaking":
 				ok = (not ChaosState.leak_of(hid).is_empty()) == bool(want)
+			_:
+				ok = ChaosLifeConds.check_key(str(key), want, subj)
 		if not ok:
 			return false
 	return true

@@ -6,12 +6,31 @@ extends RefCounted
 ## The player's counterplay lives in ChaosClock (check the pipes, fix it yourself, call a plumber / handyperson / exterminator, traps, cleaning).
 
 static func on_incident(ctx: Dictionary, args: Dictionary) -> Dictionary:
+	var kind: String = str(args.get("kind", ""))
+	if kind == "layoff":                                      # far townies lose their job too
+		return ChaosJob.layoff(ctx, args)
 	if bool(ctx.get("statistical", false)):
 		return {}
 	var hid: int = int(ctx.get("household_id", 0))
 	if hid <= 0:
 		return {"text": ""}
-	match str(args.get("kind", "")):
+	match kind:
+		"gas":
+			return ChaosGas.start(hid)
+		"mould":
+			return mould(hid)
+		"midlife":
+			return ChaosJob.midlife(ctx, args)
+		"theft":
+			return ChaosMoney.theft(ctx.get("folk", null))
+		"eviction":
+			return ChaosMoney.eviction(hid)
+		"runaway":
+			return ChaosTeen.run_away(ctx.get("folk", null))
+		"inheritance":
+			return ChaosKin.inheritance(hid)
+		"kin":
+			return ChaosKin.long_lost(hid)
 		"pipe":
 			return pipe(hid, "pipe")
 		"overflow":
@@ -77,6 +96,15 @@ static func appliance(hid: int) -> Dictionary:
 	ChaosState.count("appliance")
 	ChaosClock.sync_markers(hid)
 	return {"text": "The %s has stopped working.%s Repair it yourself (the handiness skill helps) or call a handyperson at the mailbox for about %d coins." % [label_of(o), extra, ChaosClock.handy_quote(hid)], "kind": "warn"}
+
+# ------------------------------------------------------------------ mould
+## Slow damp: a first patch of mould on the home's damage record. DisasterAftermath grows it day by day until it is scrubbed (scrub_mould) or repaired.
+static func mould(hid: int) -> Dictionary:
+	var rec: Dictionary = DisasterState.lot("home:%d" % hid)
+	rec["mould"] = maxf(float(rec["mould"]), float(ChaosState.cfg("mould").get("start", 0.3)))
+	ChaosState.count("mould_slow")
+	ChaosClock.sync_markers(hid)
+	return {"text": "Dark patches of mould are creeping across the bathroom wall. Scrub it off at the sink or bath before it spreads and makes people ill; a clean, dry bathroom keeps it away.", "kind": "warn"}
 
 # ------------------------------------------------------------------ pests
 static func pests(hid: int) -> Dictionary:

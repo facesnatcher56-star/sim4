@@ -1,0 +1,147 @@
+{
+ "_doc": "Task 07b: the rest of household chaos. Home: gas leak (ChaosGas), slow mould. Life: layoffs / closures, midlife crisis, identity theft, eviction notice, runaway teen (adults and teens only; children never get adult-only events). Good surprises (finding money already exists as the framework example found_money in 00_framework_examples.json): a lottery ticket win (needs a market ticket), an inheritance from a REAL old relative through BankWill, a long-lost sibling who really is family (RomanceRules treats them as family). Neglect -> child services is not an incident: ChaosNeglect feeds the existing ChildServices path from the health neglect hook. Twins wait for task 18 (ChaosTwinsHook). Handler: ChaosEvents.on_incident (chaos_trouble, declared in 07_chaos.json). Rates per household / person per game year (28 days), Rare level; eviction, runaway, lottery and inheritance are per QUALIFYING subject-year (the gate is the condition).",
+ "config": {
+  "chaos": {
+   "gas": {"notice_min": 4, "alarm_notice_min": 1, "flee_after_min": 14, "blast_after_min": 90, "blast_chance": 0.7, "blast_injury": 2, "blast_cost": 220, "fire_chance": 0.8, "company_fee": 60, "company_min": [30, 70]},
+   "mould": {"start": 0.3, "dirty_at": 6.0, "flood_at": 0.05, "rain_days": 4, "far_damp_pct": 20},
+   "life": {"midlife_from": 112, "midlife_to": 148, "severance_hours": 40, "splurge": [120, 300], "performing_at": 75},
+   "money": {"theft_share": 0.25, "theft_min": 40, "theft_max": 600, "theft_drain_per_day": 15, "theft_cap": 900, "police_days": [3, 6], "refund_share": 0.85,
+             "refund_unreported": 0.4, "bank_review_days": 21, "bailiff_items": 3, "repossessed_within_days": 56},
+   "teen": {"moods": ["sad", "angry", "tense", "uncomfortable"], "mood_intensity": 2, "low_need": -45, "good_day_takes": 2, "days_min": 2, "days_max": 4},
+   "kin": {"min_estate": 150, "min_age_days": 160, "estate_share": 0.8, "max_estate": 2500, "min_gap_days": 56, "friendship": 15, "visit_min": 180},
+   "neglect": {"days_to_report": 2},
+   "spread": {"chance": 0.04, "penalty": 6.0},
+   "targets_b": {"gas_leak": 0.05, "mould_growth": 0.4, "layoff": 0.12, "midlife_crisis": 0.3, "identity_theft": 0.1, "eviction_notice": 2.0, "runaway_teen": 1.5,
+               "lottery_win": 0.4, "inheritance": 0.25, "long_lost_family": 0.12}
+  }
+ },
+ "content": {
+  "buffs": {
+   "gas_smell": {"label": "Smell of Gas", "mood": {"tense": 3}, "duration_min": 0, "thought": "Is that gas? Everybody out!", "autonomy_mult": {"interaction:shut_off_gas": 10.0}},
+   "laid_off": {"label": "Laid Off", "mood": {"sad": 2}, "duration_min": 4320, "thought": "Now what? I need a new job."},
+   "midlife_crisis": {"label": "Midlife Crisis", "mood": {"uncomfortable": 1, "sad": 1}, "duration_min": 7200, "thought": "Is this really all there is?"},
+   "burnt_out": {"label": "Burnt Out", "mood": {"sad": 2}, "duration_min": 5760, "need_decay_mult": {"energy": 1.3, "fun": 1.2}, "thought": "I am completely worn out."},
+   "identity_theft": {"label": "Identity Stolen", "mood": {"tense": 2}, "duration_min": 40320, "thought": "Somebody is pretending to be me."},
+   "eviction_scare": {"label": "Shaken by the Bailiffs", "mood": {"sad": 2, "tense": 1}, "duration_min": 2880, "thought": "They took our things. We cannot let that happen again."},
+   "worried_sick": {"label": "Worried Sick", "mood": {"tense": 2, "sad": 1}, "duration_min": 8640, "thought": "Where did they go? I hope they are safe."}
+  },
+  "interactions": {
+   "shut_off_gas": {"label": "Shut Off the Gas", "kind": "super", "target": "object", "objects": ["stove"], "tags": ["chore", "repair", "safety"],
+    "duration_min": 3, "posture": "stand", "tests": [{"has_buff": "gas_smell"}], "per_min": {}, "works_when_broken": true, "on_finish": [{"fire_event": "shut_off_gas"}],
+    "autonomous": true, "priority": "urgent", "advertises": {"tidy": 6.0}, "thought": "Turn the gas off at the valve."},
+   "call_gas_company": {"label": "Call the Gas Company", "kind": "super", "target": "object", "objects": ["mailbox"], "tags": ["repair", "chore"],
+    "duration_min": 3, "posture": "stand", "tests": [{"has_buff": "gas_smell"}], "per_min": {}, "on_finish": [{"fire_event": "call_gas_company"}],
+    "autonomous": false, "priority": "urgent", "advertises": {}, "thought": "Call the gas company, quickly."},
+   "report_identity_theft": {"label": "Report Identity Theft", "kind": "super", "target": "object", "objects": ["computer", "mailbox"], "tags": ["paperwork"],
+    "duration_min": 8, "posture": "sit", "tests": [{"has_buff": "identity_theft"}], "per_min": {}, "on_finish": [{"fire_event": "report_identity_theft"}],
+    "autonomous": false, "priority": "normal", "advertises": {}, "thought": "I have to tell the police."}
+  },
+  "object_interactions": {
+   "stove": ["shut_off_gas"],
+   "mailbox": ["call_gas_company", "report_identity_theft"],
+   "computer": ["report_identity_theft"]
+  }
+ },
+ "incidents": {
+  "gas_leak": {
+   "label": "Gas leak", "scope": "lot", "check": "hour", "base_rate_per_year": 0.05, "notify_policy": "household", "severity": 4, "public": false,
+   "conditions": [{"any_member": [{"age_stage_is": ["teen", "adult", "elder"]}]}, {"chaos": {"gas": true}}],
+   "risk_mults": [{"label": "Heating season", "when": [{"season_is": ["winter"]}], "mult": 1.5}],
+   "prevent": [
+    {"label": "Pipes checked lately", "when": [{"any_member": [{"has_buff": "pipes_checked"}]}], "mult": 0.5},
+    {"label": "Someone handy keeps the gas line sound", "when": [{"any_member": [{"skill_at_least": ["handiness", 4]}]}], "mult": 0.5}
+   ],
+   "outcomes": [{"weight": 1, "effects": [{"handler": "chaos_trouble", "args": {"kind": "gas"}}], "text": "There is a gas leak.", "kind": "bad"}],
+   "statistical": {"outcomes": [
+    {"weight": 8, "when": [{"coins_at_least": 100}], "effects": [{"coins_add": -40}], "summary": "{house} smelled gas, got out in time and paid the gas company."},
+    {"weight": 3, "effects": [], "summary": "{house} smelled gas, got out in time and waited in the street for the gas company."},
+    {"weight": 1, "effects": [{"hospital": {"severity": 2, "reason": "a gas blast"}}], "summary": "{house} had a gas blast in the kitchen and someone was taken to hospital."}
+   ]}
+  },
+  "mould_growth": {
+   "label": "Mould", "scope": "lot", "check": "day", "base_rate_per_year": 0.4, "notify_policy": "household", "severity": 2, "public": false,
+   "conditions": [{"any_member": [{"age_stage_is": ["teen", "adult", "elder"]}]}, {"chaos": {"damp": true, "mould_below": 0.1}}],
+   "outcomes": [{"weight": 1, "effects": [{"handler": "chaos_trouble", "args": {"kind": "mould"}}], "text": "Mould is growing.", "kind": "warn"}],
+   "statistical": {"outcomes": [
+    {"weight": 2, "when": [{"coins_at_least": 80}], "effects": [{"coins_add": -50}], "summary": "{house} found mould in the bathroom and paid to have it cleaned out."},
+    {"weight": 1, "effects": [], "summary": "{house} found mould in the bathroom and scrubbed it for a week."}
+   ]}
+  },
+  "layoff": {
+   "label": "Layoff", "scope": "folk", "check": "day", "base_rate_per_year": 0.12, "notify_policy": "household", "severity": 3, "public": false,
+   "conditions": [{"age_stage_is": ["adult"]}, {"chaos": {"employed": true}}],
+   "prevent": [{"label": "Doing really well at work", "when": [{"chaos": {"performing": true}}], "mult": 0.3},
+               {"label": "Senior staff are safer", "when": [{"career_level_at_least": 4}], "mult": 0.5}],
+   "warning": {"lead_min": 720, "thought": "There are rumours of layoffs at work...", "text": "There are rumours of layoffs at {name}'s workplace. Doing well at work may keep the job safe.", "kind": "warn",
+               "averted": "{name} kept the job when the cuts came."},
+   "defuse": [{"chaos": {"performing": true}}],
+   "outcomes": [
+    {"weight": 6, "effects": [{"handler": "chaos_trouble", "args": {"kind": "layoff", "how": "cut"}}], "text": "Laid off.", "kind": "bad"},
+    {"weight": 1, "effects": [{"handler": "chaos_trouble", "args": {"kind": "layoff", "how": "closure"}}], "text": "The business closed.", "kind": "bad"}
+   ],
+   "statistical": {"outcomes": [
+    {"weight": 6, "effects": [{"handler": "chaos_trouble", "args": {"kind": "layoff"}}], "summary": "{name} was laid off in cutbacks and is looking for work."},
+    {"weight": 1, "effects": [{"handler": "chaos_trouble", "args": {"kind": "layoff"}}], "summary": "{name}'s workplace closed down and they are looking for work."}
+   ]}
+  },
+  "midlife_crisis": {
+   "label": "Midlife crisis", "scope": "folk", "check": "day", "base_rate_per_year": 0.3, "notify_policy": "household", "severity": 2, "public": false,
+   "conditions": [{"age_stage_is": ["adult"]}, {"chaos": {"midlife": true}}],
+   "risk_mults": [{"label": "Workaholic", "when": [{"has_trait": "workaholic"}], "mult": 2.0}],
+   "prevent": [{"label": "Happy and busy", "when": [{"mood_is": "happy"}], "mult": 0.6}],
+   "outcomes": [
+    {"weight": 5, "effects": [{"handler": "chaos_trouble", "args": {"kind": "midlife", "how": "restless"}}], "text": "A midlife crisis.", "kind": "warn"},
+    {"weight": 3, "when": [{"has_trait": "workaholic"}, {"chaos": {"employed": true}}], "effects": [{"handler": "chaos_trouble", "args": {"kind": "midlife", "how": "burnout"}}], "text": "Burnout.", "kind": "warn"},
+    {"weight": 2, "when": [{"chaos": {"employed": true}}], "effects": [{"handler": "chaos_trouble", "args": {"kind": "midlife", "how": "quit"}}], "text": "Quit.", "kind": "warn"},
+    {"weight": 3, "when": [{"coins_at_least": 300}], "effects": [{"handler": "chaos_trouble", "args": {"kind": "midlife", "how": "splurge"}}], "text": "A splurge.", "kind": "warn"}
+   ],
+   "statistical": {"outcomes": [{"weight": 1, "effects": [], "summary": "{name} is going through a midlife crisis."}]}
+  },
+  "identity_theft": {
+   "label": "Identity theft", "scope": "folk", "check": "day", "base_rate_per_year": 0.1, "notify_policy": "household", "severity": 3, "public": false,
+   "conditions": [{"age_stage_is": ["adult", "elder"]}, {"coins_at_least": 150}, {"chaos": {"theft_open": false}}],
+   "risk_mults": [{"label": "Banks and shops online", "when": [{"has_object": "computer"}], "mult": 1.5}],
+   "prevent": [{"label": "Sharp with passwords", "when": [{"skill_at_least": ["logic", 3]}], "mult": 0.5}],
+   "outcomes": [{"weight": 1, "effects": [{"handler": "chaos_trouble", "args": {"kind": "theft"}}], "text": "Identity theft.", "kind": "bad"}],
+   "statistical": {"outcomes": [
+    {"weight": 1, "when": [{"coins_at_least": 150}], "effects": [{"coins_add": -60}], "summary": "{name} was a victim of identity theft and lost some savings."}
+   ]}
+  },
+  "eviction_notice": {
+   "label": "Eviction notice", "scope": "lot", "check": "day", "base_rate_per_year": 2.0, "notify_policy": "household", "severity": 3, "public": false,
+   "conditions": [{"any_member": [{"age_stage_is": ["adult", "elder"]}]}, {"chaos": {"behind": true}}],
+   "warning": {"lead_min": 2880, "thought": "We are going to lose everything...", "text": "An eviction notice came in the post: pay the overdue bills within two days (mailbox) or the bailiffs will take things away.", "kind": "bad",
+               "averted": "The bills are paid and the landlord withdrew the notice."},
+   "defuse": [{"chaos": {"behind": false}}],
+   "outcomes": [{"weight": 1, "effects": [{"handler": "chaos_trouble", "args": {"kind": "eviction"}}], "text": "The bailiffs came.", "kind": "bad"}]
+  },
+  "runaway_teen": {
+   "label": "Runaway teen", "scope": "folk", "check": "day", "base_rate_per_year": 1.5, "notify_policy": "household", "severity": 3, "public": false,
+   "conditions": [{"age_stage_is": ["teen"]}, {"lacks_buff": "away"}, {"chaos": {"unhappy_days_at_least": 5}}],
+   "warning": {"lead_min": 360, "thought": "I can't stay here any more...", "text": "{name} has been miserable for days and keeps staring at the door. Cheer them up soon, or they may run away.", "kind": "warn",
+               "averted": "{name} seems a little better and unpacked the bag."},
+   "defuse": [{"chaos": {"unhappy_days_below": 3}}],
+   "outcomes": [{"weight": 1, "effects": [{"handler": "chaos_trouble", "args": {"kind": "runaway"}}], "text": "A teen ran away.", "kind": "bad"}],
+   "statistical": {"outcomes": [{"weight": 1, "effects": [], "summary": "{name} ran off for a few days and came back."}]}
+  },
+  "lottery_win": {
+   "label": "Lottery win", "scope": "lot", "check": "day", "base_rate_per_year": 0.4, "notify_policy": "household", "severity": 2, "public": false,
+   "conditions": [{"any_member": [{"age_stage_is": ["adult", "elder"]}]}, {"chaos": {"tickets": true}}],
+   "outcomes": [
+    {"weight": 80, "effects": [{"coins_range": [25, 60]}], "text": "A ticket from the market won a small prize in the town raffle: {amount} coins.", "kind": "good"},
+    {"weight": 17.5, "effects": [{"coins_range": [100, 250]}], "text": "A ticket from the market won a nice prize in the town raffle: {amount} coins!", "kind": "good"},
+    {"weight": 2.5, "effects": [{"coins_range": [1500, 3000]}], "text": "A ticket from the market won the big prize in the town raffle: {amount} coins! What a day!", "kind": "good", "severity": 3}
+   ]
+  },
+  "inheritance": {
+   "label": "Inheritance", "scope": "lot", "check": "day", "base_rate_per_year": 0.25, "notify_policy": "household", "severity": 2, "public": false,
+   "conditions": [{"any_member": [{"age_stage_is": ["adult", "elder"]}]}, {"chaos": {"estate_relative": true}}],
+   "outcomes": [{"weight": 1, "effects": [{"handler": "chaos_trouble", "args": {"kind": "inheritance"}}], "text": "A relative left an inheritance.", "kind": "good"}]
+  },
+  "long_lost_family": {
+   "label": "Long-lost family", "scope": "lot", "check": "day", "base_rate_per_year": 0.12, "notify_policy": "household", "severity": 2, "public": false,
+   "conditions": [{"any_member": [{"age_stage_is": ["adult", "elder"]}]}],
+   "outcomes": [{"weight": 1, "effects": [{"handler": "chaos_trouble", "args": {"kind": "kin"}}], "text": "A long-lost sibling turned up.", "kind": "good"}]
+  }
+ }
+}

@@ -34,6 +34,8 @@ static func broken_objects(hid: int) -> Array:
 
 # ------------------------------------------------------------------ clock
 static func on_minute() -> void:
+	if not ChaosState.gas.is_empty():
+		ChaosGas.on_minute()
 	if ChaosState.jobs.is_empty():
 		return
 	var now: int = SysUtil.now()
@@ -49,6 +51,8 @@ static func on_minute() -> void:
 				exterminate(int(j["hid"]))
 			"handy":
 				fix_all(int(j["hid"]))
+			"gas":
+				ChaosGas.stop(int(j["hid"]), "the gas company")
 	ChaosState.jobs = keep
 
 static func on_hour() -> void:
@@ -58,6 +62,9 @@ static func on_hour() -> void:
 static func on_day() -> void:
 	for key in ChaosState.pests.keys():
 		_pest_day(int(key))
+	ChaosTeen.on_day()
+	ChaosMoney.on_day()
+	ChaosNeglect.on_day()
 
 static func _leak_hour(hid: int) -> void:
 	var lk: Dictionary = ChaosState.leak_of(hid)
@@ -113,6 +120,7 @@ static func _pest_day(hid: int) -> void:
 			SysUtil.notify(msg, "bad")
 			ChronicleHook.note("pests", msg, [], "home:%d" % hid, 2, false)
 	if lv >= float(c.get("swarm", 0.85)):
+		ChaosPests.spread(hid)
 		var res: Array = SysUtil.residents().filter(func(f): return int(f.household_id) == hid and not f.has_buff("sick"))
 		if not res.is_empty() and Incidents.rng.randf() < float(c.get("sick_chance", 0.15)):
 			Hospital.fall_ill(res[Incidents.rng.randi_range(0, res.size() - 1)], 1, "something they ate from a roach-ridden kitchen")
@@ -162,16 +170,26 @@ static func handy_quote(hid: int) -> int:
 	return q
 
 # ------------------------------------------------------------------ interactions (game events)
-const EVENTS := ["fix_leak", "check_pipes", "call_plumber", "call_exterminator", "call_handyperson", "set_roach_traps"]
+const EVENTS := ["fix_leak", "check_pipes", "call_plumber", "call_exterminator", "call_handyperson", "set_roach_traps", "shut_off_gas", "call_gas_company",
+	"report_identity_theft", "returned_to_lot"]
 
 static func on_game_event(ev: String, payload: Dictionary) -> void:
 	if not EVENTS.has(ev):
 		return
 	var f = SysUtil.folk(int(payload.get("folk_id", -1)))
+	if ev == "returned_to_lot":
+		ChaosTeen.on_returned(f, str(payload.get("reason", "")))
+		return
 	if f == null or int(f.household_id) <= 0:
 		return
 	var hid: int = int(f.household_id)
 	match ev:
+		"shut_off_gas":
+			ChaosGas.stop(hid, str(f.name))
+		"call_gas_company":
+			hire_gas(hid, false)
+		"report_identity_theft":
+			ChaosMoney.report(f, hid)
 		"check_pipes":
 			SysUtil.notify("%s checked the pipes and tightened what was loose." % f.name, "info")
 		"fix_leak":
@@ -205,6 +223,13 @@ static func _diy(f, hid: int) -> void:
 		ChaosState.count("diy_failed")
 		SysUtil.notify("%s's patch did not hold and the water is still running. More practice would help, or call a plumber." % f.name, "warn")
 
+static func hire_gas(hid: int, from_outside: bool) -> void:
+	if not ChaosGas.active(hid):
+		return
+	_hire(hid, "gas", int(ChaosState.cfg("gas").get("company_fee", 60)), "the gas company", "gas company")
+	if from_outside:
+		SysUtil.notify("Everybody is out. The gas company has been called from the street.", "info")
+
 static func _hire(hid: int, kind: String, fee: int, who: String, what: String) -> void:
 	if ChaosState.job_pending(hid, kind):
 		SysUtil.notify("%s is already on the way." % who.capitalize(), "info")
@@ -212,6 +237,6 @@ static func _hire(hid: int, kind: String, fee: int, who: String, what: String) -
 	if not Economy.spend(hid, fee, what):
 		SysUtil.notify("%s wants %d coins and the household cannot afford it yet." % [who.capitalize(), fee], "warn")
 		return
-	var span: Array = ChaosState.cfg("jobs").get(kind, [40, 90])
+	var span: Array = ChaosState.cfg("jobs").get(kind, ChaosState.cfg("gas").get("company_min", [40, 90]) if kind == "gas" else [40, 90])
 	ChaosState.jobs.append({"hid": hid, "kind": kind, "due": SysUtil.now() + Incidents.rng.randi_range(int(span[0]), int(span[1]))})
 	SysUtil.notify("You paid %s %d coins. They will be there within the hour or two." % [who, fee], "info")
