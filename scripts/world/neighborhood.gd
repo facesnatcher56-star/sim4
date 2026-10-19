@@ -137,7 +137,7 @@ static func residents_of(lot_id: String) -> Array:
 
 static func home_of_townie(townie_id: int) -> String:
 	for l in lots():
-		if str(l.get("type", "")) == "townie_home" and not PlayerLots.is_claimed(str(l["id"])):      # a co-op player lives there now: its townies moved to the other homes
+		if str(l.get("type", "")) == "townie_home":
 			for t in residents_of(str(l["id"])):
 				if int(t["id"]) == townie_id:
 					return str(l["id"])
