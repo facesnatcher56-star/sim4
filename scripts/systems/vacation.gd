@@ -165,15 +165,12 @@ static func book_and_go(hid: int, dest: String, opts: Dictionary = {}) -> Dictio
 	var o: Dictionary = opts.duplicate(true)
 	if not o.has("depart_min"):
 		o["depart_min"] = SysUtil.now() + 1
-	if o.has("seed"):
-		pass
 	var res: Dictionary = book(hid, dest, o)
 	if not bool(res["ok"]):
 		return res
 	var t: Dictionary = trips[int(res["trip"])]
 	if dest == "cruise":
 		res.merge(Cruise.describe(t), true)
-	res["ship"] = res.get("ship", {})
 	return res
 
 static func cancel(trip_id: int, reason: String = "cancelled") -> bool:
@@ -254,8 +251,6 @@ static func on_game_event(ev: String, payload: Dictionary) -> void:
 				VacationLife.on_activity(t, ev, int(payload["folk_id"]))
 		"plan_vacation":
 			SysUtil.game_event("vacation_open_booking", {"folk_id": int(payload.get("folk_id", -1))})
-		"folk_removed":
-			pass
 
 # ------------------------------------------------------------------ save
 static func to_dict() -> Dictionary:
