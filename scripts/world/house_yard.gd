@@ -80,11 +80,41 @@ static func build(plan: HousePlan, fz: HouseFurnish, spec: Dictionary, fp: Dicti
 				for x in range(yard.position.x, yard.end.x):
 					var fpr := HousePlan.footprint(d, Vector2i(x, y), rot)
 					if HouseCands.fits(yard, fpr):
-						cands.append([rng.randf() * 0.6 - 0.35 * _edge_dist(Vector2i(x, y), yard, sh), Vector2i(x, y), rot])
-		if fz.try_place(-1, did, cands, yard) and did == "table":
+						var sc: float = rng.randf() * 0.6 - 0.35 * _edge_dist(Vector2i(x, y), yard, sh)
+						if _slots_open(plan, d, Vector2i(x, y), rot, fpr, yard):
+							cands.append([sc, Vector2i(x, y), rot])
+		var placed: bool = fz.try_place(-1, did, cands, yard)
+		if placed and did != "table":          # (a table's slots are its chairs, placed next)
+			_reserve_slots(plan, plan.objects.size() - 1)
+		if placed and did == "table":
 			for k in rng.randi_range(2, 4):
 				fz.try_place(-1, "dining_chair", HouseCands.seat(fz, -1, "dining_chair", {"ref": "table"}), yard)
 	return {"floors": floors, "walls": walls, "yard": yard}
+
+
+## Every use slot of a yard piece is inside the yard, free, and on its own side of any fence (so nobody stands in the bed to use it).
+static func _slots_open(plan: HousePlan, d: Dictionary, tile: Vector2i, rot: int, fp: Array, yard: Rect2i) -> bool:
+	if HousePlan.is_floor_layer(d) or str(d.get("mount", "")) == "wall":
+		return true
+	for s in HousePlan.slot_tiles(d, tile, rot):
+		if s in fp:
+			continue
+		if not yard.has_point(s) or plan.occ.has(s):
+			return false
+		for ft in fp:
+			if absi(ft.x - s.x) + absi(ft.y - s.y) == 1 and plan.blocked_edge(ft, s):
+				return false
+	return true
+
+
+## A placed yard piece keeps its use tiles free: nothing placed later may stand on them.
+static func _reserve_slots(plan: HousePlan, idx: int) -> void:
+	var o: Dictionary = plan.objects[idx]
+	var d := HousePlan.def_of(str(o["def"]))
+	var fp := HousePlan.footprint(d, o["tile"], int(o["rot"]))
+	for s in HousePlan.slot_tiles(d, o["tile"], int(o["rot"])):
+		if not (s in fp):
+			plan.clear[s] = true
 
 
 ## Distance to the nearest fence line or house wall: yard pieces hug the edges instead of floating in the lawn.

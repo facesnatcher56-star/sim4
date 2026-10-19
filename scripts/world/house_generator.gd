@@ -85,6 +85,10 @@ static func make_home(spec: Dictionary, taken: Dictionary = {}) -> Dictionary:
 			why[k] = int(why.get(k, 0)) + 1
 			continue
 		var t := _export(plan, spec, rl)
+		var bad := HouseAudit.audit(t)
+		if not bad.is_empty():
+			why["audit: " + str(bad[0]).substr(0, 40)] = int(why.get("audit: " + str(bad[0]).substr(0, 40), 0)) + 1
+			continue
 		var ps := HouseSignature.plan_sig(t)
 		var ls := HouseSignature.layout_sig(t)
 		if taken.has(ps) or taken.has(ls):
@@ -138,6 +142,8 @@ static func _attempt(plan: HousePlan, spec: Dictionary, rl: Dictionary, rng: Ran
 		fz.room(ri, [{"d": ["plant", "lamp", "bookshelf", "plant"], "at": ["corner", "wall"]}])
 	if not fz.missing.is_empty():
 		return ["required: " + str(fz.missing[0])]
+	if HouseDesks.add_chairs(plan, fz) < HouseDesks.count(plan):
+		return ["a desk or computer without a chair"]
 	HouseDoors.windows(plan, rl, rng)
 	issues = HouseScore.final(plan, links, rl, str(spec["size"]))
 	if not issues.is_empty():

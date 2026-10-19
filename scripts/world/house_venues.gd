@@ -84,6 +84,7 @@ static func _attempt(plan: HousePlan, fz: HouseFurnish, vspec: Dictionary, alt: 
 	if not fz.missing.is_empty():
 		return "required " + str(fz.missing[0])
 	if not park:
+		HouseDesks.add_chairs(plan, fz)                  # best effort in venues (rows of computers): a chair on each use tile that can take one
 		HouseDoors.windows(plan, rl, rng)
 	var kinds: Dictionary = {}
 	for o in plan.objects:
