@@ -9,7 +9,6 @@ extends RefCounted
 
 const MAX_ROWS := 64
 const MAX_TOASTS := 8
-const NEED_DECIMALS := 0.01
 
 var min_gap_s: float = 0.5
 var hash_every_min: int = 10
@@ -55,7 +54,7 @@ func reset_peer(st: Dictionary) -> void:
 func _row(f) -> Dictionary:
 	var needs := {}
 	for nid in f.needs:
-		needs[nid] = snappedf((f.needs[nid] as Stat).value, NEED_DECIMALS)
+		needs[nid] = floori((f.needs[nid] as Stat).value + CoopHash.BIAS)      # whole numbers, exactly what the state hash sees (fewer rows change)
 	var cur = f.current
 	return {"i": int(f.id), "x": f.tile.x, "y": f.tile.y, "l": int(f.level), "a": str(cur.def_id) if cur != null else "",
 		"t": int(cur.target_id) if cur != null else -1, "po": str(f.posture), "aw": str(f.get_meta("away", "")) if f.has_meta("away") else "",
@@ -111,12 +110,32 @@ func hash_due(now_min: int) -> String:
 			hash_log.erase(hash_log.keys()[0])
 	return _hash_val
 
+const MAX_RAW := 262144
+
 func encode(d: Dictionary) -> PackedByteArray:
-	return JSON.stringify(d).to_utf8_buffer().compress(FileAccess.COMPRESSION_ZSTD)
+	return pack_json(d)
 
 static func decode(bytes: PackedByteArray) -> Dictionary:
-	var raw := bytes.decompress_dynamic(CoopProto.MAX_DELTA_BYTES * 16, FileAccess.COMPRESSION_ZSTD)
-	if raw.is_empty():
+	return unpack_json(bytes)
+
+## JSON -> [u32 raw size][zstd]. The size header lets the receiver bound the allocation before decompressing.
+static func pack_json(v: Variant) -> PackedByteArray:
+	var raw := JSON.stringify(v).to_utf8_buffer()
+	var comp := raw.compress(FileAccess.COMPRESSION_ZSTD)
+	var out := PackedByteArray()
+	out.resize(4)
+	out.encode_u32(0, raw.size())
+	out.append_array(comp)
+	return out
+
+static func unpack_json(bytes: PackedByteArray) -> Dictionary:
+	if bytes.size() < 5:
+		return {}
+	var n := bytes.decode_u32(0)
+	if n < 2 or n > MAX_RAW:
+		return {}
+	var raw := bytes.slice(4).decompress(n, FileAccess.COMPRESSION_ZSTD)
+	if raw.size() != n:
 		return {}
 	var v: Variant = JSON.parse_string(raw.get_string_from_utf8())
 	return v if v is Dictionary else {}

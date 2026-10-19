@@ -10,14 +10,10 @@ const MAX_NAME := 16
 const START_FUNDS_FALLBACK := 5000
 
 static func parse(bytes: PackedByteArray) -> Dictionary:
-	var raw := bytes.decompress_dynamic(CoopProto.MAX_DELTA_BYTES * 8, FileAccess.COMPRESSION_ZSTD)
-	if raw.is_empty():
-		return {}
-	var v: Variant = JSON.parse_string(raw.get_string_from_utf8())
-	return v if v is Dictionary else {}
+	return CoopLive.unpack_json(bytes)
 
 static func pack(h: Dictionary) -> PackedByteArray:
-	return JSON.stringify(h).to_utf8_buffer().compress(FileAccess.COMPRESSION_ZSTD)
+	return CoopLive.pack_json(h)
 
 static func _clean(s: String, max_len: int, fallback: String) -> String:
 	var out := ""

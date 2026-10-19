@@ -56,7 +56,7 @@ static func _apply_row(f, r: Dictionary) -> void:
 	var needs: Dictionary = r.get("n", {})
 	for nid in needs:
 		if f.needs.has(nid):
-			(f.needs[nid] as Stat).value = float(needs[nid])
+			(f.needs[nid] as Stat).value = float(needs[nid]) + 0.5 - CoopHash.BIAS      # the middle of the whole-number bucket the host sent
 	var iid := str(r.get("a", ""))
 	if iid == "":
 		f.current = null
