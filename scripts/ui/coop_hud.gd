@@ -24,8 +24,11 @@ var _tag_i := 0
 var _waiting: CoopWaiting          # read the town stories / watch the active player while time cannot skip
 
 func _ready() -> void:
-	set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
-	position.y = 64.0
+	set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)          # right side under the top bar: the toast stack owns the centre
+	grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	offset_left = -12.0
+	offset_right = -12.0
+	offset_top = 68.0
 	mouse_filter = Control.MOUSE_FILTER_PASS
 	var v := VBoxContainer.new()
 	add_child(v)
@@ -35,7 +38,7 @@ func _ready() -> void:
 	row.add_child(_pace)
 	_banner = UIU.make_label("", 14)
 	_banner.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_banner.custom_minimum_size = Vector2(360, 0)
+	_banner.custom_minimum_size = Vector2(300, 0)
 	row.add_child(_banner)
 	_pause_btn = _btn("Pause...", row, _on_pause)
 	_accept_btn = _btn("Accept", row, func(): _vote("pause", true))
@@ -44,7 +47,7 @@ func _ready() -> void:
 	v.add_child(_alert_box)
 	_alert_label = UIU.make_label("", 15, Color("#f2c94c"))
 	_alert_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_alert_label.custom_minimum_size = Vector2(360, 0)
+	_alert_label.custom_minimum_size = Vector2(300, 0)
 	_alert_box.add_child(_alert_label)
 	_look_btn = _btn("Show me", _alert_box, _look)
 	_btn("Dismiss", _alert_box, func(): _alert_until = 0.0)

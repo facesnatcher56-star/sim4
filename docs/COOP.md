@@ -179,3 +179,10 @@ line per folk: "Name: doing X (mood)"). It shows only while `CoopWaiting.waiting
 - An alert for a player who is on autopilot carries `loud: true` in its data (`CoopHost.send_alert`). `CoopHud` then calls `CoopNotify.attention`: the window flashes in the task bar
   (`DisplayServer.window_request_attention`), a two-note chime plays on the SFX bus (generated in memory; Mute and volume settings apply) and the alert box pulses (not with Reduce motion).
 - `coop_net_test` prints a drift line (`client resyncs, hash checks, mismatches, host desyncs, extra snapshots, deltas`) and fails when the client view had to ask for a resync.
+
+## UI screenshots
+
+`tests/coop_shot.gd` (windowed, needs a display; run through the guard without `--headless`):
+`godot_guard.ps1 -Args "--path",".","--resolution","1280x720","--script","res://tests/coop_shot.gd","--","<scenario>","out.png"`, scenarios `lobby_host | lobby_join | pick | hud | alert | waiting | waiting_guest`.
+Results are in `docs/coop_shots/`. They are ONE window: the "guest" views set `Players.local_id = 2` in the host process (a second real window cannot be driven from a headless harness);
+the guest is marked as connected by hand. Found and fixed: the pace bar sat under the centre toast stack (now top right, below the top bar).
