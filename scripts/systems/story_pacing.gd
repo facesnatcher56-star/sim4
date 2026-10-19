@@ -98,7 +98,8 @@ static func incident_mult(incident_id: String, subj) -> float:
 	var hid: int = household_of_subject(subj)
 	return mult("mishap", hid) if hid > 0 else 1.0
 
-static func interaction_mult(folk, d: Dictionary) -> float:
+## `memo` (optional): one decision's cache (Autonomy passes its profile cache): the drama multiplier of a kind does not change within a decision.
+static func interaction_mult(folk, d: Dictionary, memo: Dictionary = {}) -> float:
 	if str(d.get("target", "object")) != "folk" or int(folk.household_id) <= 0:
 		return 1.0
 	var tags: Array = d.get("tags", [])
@@ -107,7 +108,10 @@ static func interaction_mult(folk, d: Dictionary) -> float:
 	for k in kinds:
 		for t in (kinds[k] as Dictionary).get("tags", []):
 			if tags.has(t):
-				m *= mult(str(k), int(folk.household_id))
+				var mk: String = "#sp|" + str(k)
+				if not memo.has(mk):
+					memo[mk] = mult(str(k), int(folk.household_id))
+				m *= float(memo[mk])
 				break
 	return m
 

@@ -19,14 +19,25 @@ static func _value(fid: int, key: String, now: int) -> float:
 	var half: float = maxf(float(cfg().get("half_life_days", 1.0)), 0.05) * 1440.0
 	return float(e[0]) * pow(0.5, float(now - int(e[1])) / half)
 
+static var _ex_cfg: Dictionary = {}
+static var _ex_memo: Dictionary = {}          # iid -> [def it was computed for, exempt?]: the table is static data, Autonomy asks this for every candidate kind of every decision
+
 static func exempt(iid: String, d: Dictionary) -> bool:
 	var c: Dictionary = cfg()
-	if (c.get("exempt_ids", []) as Array).has(iid):
-		return true
-	for t in d.get("tags", []):
-		if (c.get("exempt_tags", []) as Array).has(t):
-			return true
-	return false
+	if not is_same(c, _ex_cfg):
+		_ex_cfg = c
+		_ex_memo = {}
+	var m: Variant = _ex_memo.get(iid, null)
+	if m != null and is_same((m as Array)[0], d):
+		return bool((m as Array)[1])
+	var yes := (c.get("exempt_ids", []) as Array).has(iid)
+	if not yes:
+		for t in d.get("tags", []):
+			if (c.get("exempt_tags", []) as Array).has(t):
+				yes = true
+				break
+	_ex_memo[iid] = [d, yes]
+	return yes
 
 ## Score multiplier in (min_mult, 1].
 static func mult(folk, iid: String, d: Dictionary, obj) -> float:

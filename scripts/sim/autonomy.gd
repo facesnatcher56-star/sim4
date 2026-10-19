@@ -196,16 +196,17 @@ static func gather(folk, closed = null) -> Array:
 	for o in near_objs:
 		var def_id := str(o.def_id)
 		if not offered.has(def_id):
-			var open_ids: Array = []
+			var open_ids: Array = []              # [interaction id, profile key "iid|object kind"]: the key is built once per kind, not once per object
 			for iid in _offered_by(def_id, defs):
 				var why: String = "" if closed == null else _closed_reason(folk, iid, defs[iid], def_id, cache)
 				if why == "":
-					open_ids.append(iid)
+					open_ids.append([iid, iid + "|" + def_id])
 				else:
 					closed.append(_closed_row(iid, defs[iid], def_id, "object", why))
 			offered[def_id] = open_ids
-		for iid in offered[def_id]:
-			out.append({"id": iid, "target_id": int(o.id), "kind": "object", "obj": o, "folk": null, "pk": iid + "|" + def_id})
+		var oid: int = int(o.id)
+		for e in offered[def_id]:
+			out.append({"id": e[0], "target_id": oid, "kind": "object", "obj": o, "folk": null, "pk": e[1]})
 	var others: Array = WorldIface.folk_near(folk)
 	for e in _folk_self_defs(defs):
 		var iid: String = e[0]
@@ -317,7 +318,7 @@ static func _profile(folk, iid: String, d: Dictionary, obj, cache: Dictionary, p
 	var c0: float = base * float(p["buff_mult"]) * float(p["trait_mult"]) * float(rt["mult"]) + float(p["like"])
 	if base > 0.0 or float(rt["bonus"]) > 0.0:
 		c0 += float(rt["bonus"])
-	var variety: float = AutonomyVariety.mult(folk, iid, d, obj) * StoryPacing.interaction_mult(folk, d) * SkillInterest.mult(folk, iid, d)      # "bored of it" (data/autonomy_variety.json), skill taste (data/skill_interest.json)
+	var variety: float = AutonomyVariety.mult(folk, iid, d, obj) * StoryPacing.interaction_mult(folk, d, cache) * SkillInterest.mult(folk, iid, d, cache)      # "bored of it" (data/autonomy_variety.json), skill taste (data/skill_interest.json)
 	p["variety"] = variety
 	if c0 > 0.0:
 		c0 *= variety
@@ -531,7 +532,10 @@ static func choose(folk) -> Dictionary:
 		elif ks.begins_with("int:"):
 			bias_int[ks.substr(4)] = b
 	var pending: Array = []
+	var tp := PerfProf.start()
 	var gathered := gather(folk, all_rec)
+	PerfProf.stop("choose/gather", tp)
+	tp = PerfProf.start()
 	var fx: int = folk.tile.x
 	var fy: int = folk.tile.y
 	var native_slot := true
@@ -546,7 +550,9 @@ static func choose(folk) -> Dictionary:
 				all_rec.append({"interaction": iid, "label": iid, "target_id": cand["target_id"], "kind": cand["kind"],
 					"object": str(obj.def_id) if obj != null else "", "skipped": true, "skip_reason": "unknown interaction", "score": 0.0, "sub": {}, "estimated": true})
 				continue
+			var tpf := PerfProf.start()
 			p = _profile(folk, iid, d, obj, profiles, cand["pk"])
+			PerfProf.stop("p1/_profile", tpf)
 		var dx: int
 		var dy: int
 		var bias := 0.0
@@ -581,6 +587,8 @@ static func choose(folk) -> Dictionary:
 				row["skip_reason"] = "score <= 0"
 		elif score > 0.0:
 			pending.append([score, cand, -1])
+	PerfProf.stop("choose/pass1", tp)
+	tp = PerfProf.start()
 	pending.sort_custom(func(a, b): return float(a[0]) > float(b[0]))
 	# 2. real path lengths, best bound first, until the bound of the next candidate cannot beat the DETAIL_N-th real score:
 	#    the result is exactly what scoring every candidate would give, with a handful of path queries.
@@ -605,6 +613,7 @@ static func choose(folk) -> Dictionary:
 			else:
 				rec["skipped"] = true
 				rec["skip_reason"] = "score <= 0"
+	PerfProf.stop("choose/eval", tp)
 	scored.sort_custom(func(a, b): return float(a[0]["score"]) > float(b[0]["score"]))
 	# the debug breakdown is only built for the best DETAIL_N candidates
 	var best: Array = []

@@ -42,7 +42,8 @@ static func skill_mult(folk, skill: String, interest: Dictionary) -> float:
 	return m
 
 ## Multiplier for an interaction def (1.0 when it trains nothing that is covered).
-static func mult(folk, iid: String, d: Dictionary) -> float:
+## `memo` (optional): one decision's cache (Autonomy's profile cache): this person's interests are worked out once per decision, not once per interaction.
+static func mult(folk, iid: String, d: Dictionary, memo: Dictionary = {}) -> float:
 	var xp: Dictionary = d.get("skill_xp_per_min", {})
 	if xp.is_empty() or AutonomyVariety.exempt(iid, d):
 		return 1.0
@@ -55,7 +56,11 @@ static func mult(folk, iid: String, d: Dictionary) -> float:
 		if ignore.has(str(s)):
 			continue
 		if not have:
-			interest = interests(folk)
+			if memo.has("#interest"):
+				interest = memo["#interest"]
+			else:
+				interest = interests(folk)
+				memo["#interest"] = interest
 			have = true
 		total += skill_mult(folk, str(s), interest)
 		n += 1
