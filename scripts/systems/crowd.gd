@@ -240,16 +240,53 @@ static func _pick_townie(lot_id: String, vtype: String) -> Dictionary:
 	var pick = SysUtil.pick_weighted(cands, weights)
 	return pick if pick != null else {}
 
+## The spawn tile at index `si` of `entries`, or the next one that is walkable and has nobody on it; a blocked spawn tile steps to an open neighbour.
+## (One rng draw as before: the choice of `si` is the only randomness.)
+static func _free_spawn(entries: Array, si: int) -> Vector2i:
+	var w = WorldIface.world()
+	if w == null or not w.has_method("is_walkable"):
+		return entries[si]
+	var taken: Dictionary = {}
+	for o in WorldIface.all_folk():
+		taken[o.tile] = true
+	for k in entries.size():
+		var t: Vector2i = entries[(si + k) % entries.size()]
+		if w.is_walkable(t) and not taken.has(t):
+			return t
+	var t0: Vector2i = entries[si]
+	return w.call("open_neighbor", t0, 0, t0) if w.has_method("open_neighbor") else t0
+
+## `t`, or the nearest walkable tile (rings of 1..3, fixed order) with nobody on it: arrivals at a gate do not stack up on one tile.
+static func free_near(t: Vector2i) -> Vector2i:
+	var w = WorldIface.world()
+	if w == null or not w.has_method("is_walkable"):
+		return t
+	var taken: Dictionary = {}
+	for o in WorldIface.all_folk():
+		taken[o.tile] = true
+	if not taken.has(t):
+		return t
+	for r in range(1, 4):
+		for dy in range(-r, r + 1):
+			for dx in range(-r, r + 1):
+				if maxi(absi(dx), absi(dy)) != r:
+					continue
+				var c := t + Vector2i(dx, dy)
+				if w.is_walkable(c) and not taken.has(c) and (not w.has_method("edge_open") or w.edge_open(t, c)):
+					return c
+	return t
+
+
 ## Create one ambient NPC from a townie record, at the lot's spawn tiles.
 ## `arrive`: the NPC appears at the lot's street gate and walks in to a spot inside (a lot waking up fills at once without it).
 static func spawn_npc(t: Dictionary, lot_id: String, vtype: String, stay_override: int = -1, arrive: bool = false) -> Folk:
 	var tid: int = int(t["id"])
 	var vd: Dictionary = Venues.type_def(vtype)
 	var entries: Array = NeighborhoodLots.spawns_of(lot_id)
-	var tile: Vector2i = entries[SysUtil.rng.randi_range(0, entries.size() - 1)]
+	var tile: Vector2i = _free_spawn(entries, SysUtil.rng.randi_range(0, entries.size() - 1))
 	var inside: Vector2i = tile
 	if arrive:
-		tile = NeighborhoodLots.gate_tile(lot_id)
+		tile = free_near(NeighborhoodLots.gate_tile(lot_id))
 	var keep_next: int = Folk._next_id
 	var f := Folk.create(str(t["name"]), (t["traits"] as Array).duplicate(), tid, Sexes.of_townie(t))
 	Folk._next_id = keep_next

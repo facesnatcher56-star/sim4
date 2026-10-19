@@ -165,14 +165,16 @@
      0,
      1
     ],
-    "pose": "stand"
+    "pose": "stand",
+    "sit_if_seat": true
    },
    {
     "offset": [
      1,
      1
     ],
-    "pose": "stand"
+    "pose": "stand",
+    "sit_if_seat": true
    }
   ],
   "state": {
@@ -334,6 +336,8 @@
   ]
  },
  "shower": {
+  "private": true,
+  "room_lock": true,
   "label": "Shower",
   "size": [
    1,
@@ -378,6 +382,8 @@
   ]
  },
  "bathtub": {
+  "private": true,
+  "room_lock": true,
   "label": "Bathtub",
   "size": [
    2,
@@ -710,7 +716,8 @@
      0,
      1
     ],
-    "pose": "stand"
+    "pose": "stand",
+    "sit_if_seat": true
    }
   ],
   "state": {
@@ -1369,7 +1376,8 @@
      0,
      1
     ],
-    "pose": "stand"
+    "pose": "stand",
+    "sit_if_seat": true
    }
   ],
   "state": {
@@ -1928,14 +1936,16 @@
      0,
      1
     ],
-    "pose": "stand"
+    "pose": "stand",
+    "sit_if_seat": true
    },
    {
     "offset": [
      1,
      1
     ],
-    "pose": "stand"
+    "pose": "stand",
+    "sit_if_seat": true
    }
   ],
   "state": {
@@ -2506,7 +2516,8 @@
      0,
      1
     ],
-    "pose": "stand"
+    "pose": "stand",
+    "sit_if_seat": true
    }
   ],
   "state": {

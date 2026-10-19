@@ -123,6 +123,31 @@ static func release(obj_id: int, slot_idx: int, folk_id: int) -> void:
 	if w != null and w.has_method("release") and slot_idx >= 0:
 		w.release(obj_id, slot_idx, folk_id)
 
+## Somebody else is in (or heading for) the shower or bath of the bathroom this object is in.
+static func bathroom_locked(obj, folk_id: int) -> bool:
+	var w = world()
+	return w != null and w.has_method("bathroom_locked") and bool(w.call("bathroom_locked", obj, folk_id))
+
+## The folk is in the middle of something private (shower, bath: objects.json `private`): nobody chats to them.
+static func private_use(f) -> bool:
+	if f == null or f.current == null or str(f.current.state) != "running" or f.current.obj == null:
+		return false
+	return bool(SimEnv.data().object_def(str(f.current.obj.def_id)).get("private", false))
+
+## A walkable tile beside `t` for meeting someone who sits or lies on it (`t` itself when walkable).
+static func meet_tile(t: Vector2i, level: int, toward: Vector2i) -> Vector2i:
+	var w = world()
+	if w != null and w.has_method("open_neighbor"):
+		return w.call("open_neighbor", t, level, toward)
+	return t
+
+## Tile a folk steps to when it gets up from `slot_idx` of `obj` (the slot tile itself when that is walkable).
+static func exit_tile(obj, slot_idx: int) -> Vector2i:
+	var w = world()
+	if w != null and w.has_method("exit_tile"):
+		return w.call("exit_tile", obj, slot_idx)
+	return use_tile(obj, slot_idx)
+
 ## Tile a folk stands on to use `slot_idx` of `obj`.
 static func use_tile(obj, slot_idx: int) -> Vector2i:
 	var w = world()

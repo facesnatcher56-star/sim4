@@ -119,9 +119,13 @@ static func def_runnable(d: Dictionary, f: Folk, o, target: Folk) -> bool:
 			return false
 		if not WorldIface.has_free_slot(o, f.id):
 			return false
+		if WorldIface.bathroom_locked(o, f.id):
+			return false                       # the shower or bath of this bathroom is taken: wait outside
 	elif kind == "folk":
 		if target == null or target.id == f.id:
 			return false
+		if WorldIface.private_use(target):
+			return false                       # nobody chats to somebody in the shower
 		if not Cond.check(d.get("target_tests", []), {"folk": target, "object": null, "target": f}):
 			return false
 		if RomanceRules.is_romantic_def(d) and not RomanceRules.allowed(int(f.id), int(target.id)):
@@ -146,8 +150,10 @@ func start() -> bool:
 	elif target_kind == "folk":
 		if target_folk == null:
 			return false
-		use_tile = target_folk.tile
+		use_tile = WorldIface.meet_tile(target_folk.tile, target_folk.level, actor.tile)      # a target on a seat or bed is met beside it, never on the furniture
 	elif goto_tile.x >= 0:
+		if goto_level == 0:
+			goto_tile = WorldIface.meet_tile(goto_tile, 0, actor.tile)          # a go-here onto furniture or a wall lands beside it
 		use_tile = goto_tile
 	var n := 0                           # the real route is computed ONCE here; tick() only walks along it
 	path = []
@@ -210,7 +216,7 @@ func _arrive() -> void:
 		actor.tile = WorldIface.use_tile(obj, slot_idx)
 		actor.level = _dest_level()
 	elif target_kind == "folk" and target_folk != null:
-		actor.tile = target_folk.tile
+		actor.tile = WorldIface.meet_tile(target_folk.tile, target_folk.level, actor.tile)
 		actor.level = target_folk.level
 	elif goto_tile.x >= 0:
 		actor.tile = goto_tile
@@ -291,6 +297,7 @@ func finish(p_success: bool = true) -> void:
 		Loot.apply(def.get("on_finish", []), ctx)
 	else:
 		Loot.apply(def.get("on_cancel", []), ctx)
+	_step_off_seat()
 	_release()
 	# Memory of how it went.
 	var key := memory_key()
@@ -335,6 +342,15 @@ func cancel(reason: String = "interrupted") -> void:
 		return
 	cancel_reason = reason
 	finish(false)
+
+## Getting up from a seat or bed that sits on the object's own tile: step to the exit tile first, so the next walk and the view never start inside furniture.
+func _step_off_seat() -> void:
+	if target_kind != "object" or obj == null or slot_idx < 0:
+		return
+	var st := WorldIface.use_tile(obj, slot_idx)
+	if actor.tile != st:
+		return
+	actor.tile = WorldIface.exit_tile(obj, slot_idx)
 
 func _release() -> void:
 	if target_kind == "object" and obj != null and slot_idx >= 0:

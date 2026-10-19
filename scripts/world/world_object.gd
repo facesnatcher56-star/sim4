@@ -93,6 +93,12 @@ func slot_pose(idx: int) -> String:
 	return str(slots[idx].get("pose", "stand"))
 
 
+## A boolean flag of slot `idx` in the object data (e.g. sit_if_seat: a desk, computer or table whose use tile holds a chair is used sitting).
+func slot_flag(idx: int, key: String) -> bool:
+	var slots: Array = def.get("slots", [])
+	return idx >= 0 and idx < slots.size() and bool(slots[idx].get(key, false))
+
+
 ## Body position in tile units (x,z of the grid, not 3D) while using the slot.
 func slot_use_pos(idx: int) -> Vector2:
 	var slots: Array = def.get("slots", [])

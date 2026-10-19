@@ -181,7 +181,7 @@ static func _arrive(sit: Dictionary) -> void:
 		for n in f.needs:
 			(f.needs[n] as Stat).set_value(SysUtil.rng.randf_range(20.0, 70.0))
 		RelationshipService.restore_folk(f)
-		SysUtil.world_add_folk(f, arrival_tile(int(gid), tile))
+		SysUtil.world_add_folk(f, Crowd.free_near(arrival_tile(int(gid), tile)))      # guests do not stack up on one tile
 		Aging.apply_stage_buff(f)
 		(sit["roles"] as Dictionary)[str(gid)] = "guest"
 		(sit["spawned"] as Array).append(int(gid))

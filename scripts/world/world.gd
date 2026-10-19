@@ -69,6 +69,7 @@ var coin_refund: Callable = Callable()    # (household_id:int, amount:int) -> vo
 var last_error: String = ""
 
 var _next_id: int = 1
+var obj_gen: int = 0                     # bumped whenever an object is created or removed or the world is reset (caches key on it)
 var _held: Dictionary = {}               # folk id -> {object id: true} of the objects where it ever reserved a slot (release_all)
 var _occ: Dictionary = {}                 # tile -> object id (main layer)
 var _occ_floor: Dictionary = {}           # tile -> object id (floor layer, rugs)
@@ -148,6 +149,7 @@ func reset(w: int = DEFAULT_W, h: int = DEFAULT_H) -> void:
 	router.reset()
 	walls.clear()
 	mounts.clear()
+	obj_gen += 1
 	objects.clear()
 	_held.clear()
 	mess.clear()
@@ -393,6 +395,9 @@ func objects_of_def(def_id: String) -> Array: return objs.objects_of_def(def_id)
 func set_object_state(object_id: int, key: String, value: Variant) -> void: objs.set_object_state(object_id, key, value)
 func objects_with_tag(tag: String) -> Array: return objs.objects_with_tag(tag)
 func get_object(object_id: int): return objs.get_object(object_id)
+func exit_tile(o, slot_idx: int) -> Vector2i: return objs.exit_tile(o, slot_idx)
+func bathroom_locked(o, folk_id: int) -> bool: return objs.bathroom_locked(o, folk_id)
+func open_neighbor(t: Vector2i, level: int, toward: Vector2i) -> Vector2i: return objs.open_neighbor(t, level, toward)
 func remove_object(object_id: int) -> bool: return objs.remove_object(object_id)
 func can_place(def_id: String, tile: Vector2i, rot: int = 0, level: int = 0) -> bool: return objs.can_place(def_id, tile, rot, level)
 func add_object_state(object_id: int, key: String, delta: float) -> void: objs.add_object_state(object_id, key, delta)

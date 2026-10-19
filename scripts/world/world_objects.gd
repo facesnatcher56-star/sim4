@@ -82,6 +82,7 @@ func default_span(d: Dictionary, tile: Vector2i, level: int) -> int:
 	return maxi(0, world.levels.range_at(tile).y - level)
 
 func _create_object(def_id: String, tile: Vector2i, rot: int, force_id: int, level: int = 0, span: int = 0) -> int:
+	world.obj_gen += 1
 	var d := world.get_def(def_id)
 	var o = world.WorldObjectScript.new()
 	o.id = force_id if force_id >= 0 else world._next_id
@@ -132,6 +133,7 @@ func _create_object(def_id: String, tile: Vector2i, rot: int, force_id: int, lev
 func remove_object(object_id: int) -> bool:
 	if not world.objects.has(object_id):
 		return false
+	world.obj_gen += 1
 	var o = world.objects[object_id]
 	var lay: LevelLayer = world.levels.layer(o.level, false) if o.level != 0 else null
 	world.portals.on_removed(o)
@@ -298,3 +300,77 @@ func _street_objects_near(tile: Vector2i, r: float) -> Array:
 	for s in scored:
 		out.append(s[1])
 	return out
+
+## Where a folk steps to when it gets up from `slot_idx` of object `o`: the slot's own tile when that is walkable, else the first walkable,
+## open-edged neighbour (the front of the object first, then a fixed order). Deterministic; never an occupied-by-object tile.
+func exit_tile(o, slot_idx: int) -> Vector2i:
+	var s: Vector2i = o.slot_tile(slot_idx)
+	var lv: int = int(o.level)
+	if world.is_walkable(s, lv):
+		return s
+	var f := Vector2i(roundi(o.front_dir().x), roundi(o.front_dir().y))
+	var order: Array[Vector2i] = [f, Vector2i(-f.y, f.x), Vector2i(f.y, -f.x), -f]
+	for d in order:
+		var n: Vector2i = s + d
+		if world.is_walkable(n, lv) and world.edge_open(s, n, lv):
+			return n
+	for d in [Vector2i(1, 1), Vector2i(-1, 1), Vector2i(1, -1), Vector2i(-1, -1), Vector2i(2, 0), Vector2i(-2, 0), Vector2i(0, 2), Vector2i(0, -2)]:
+		var n2: Vector2i = s + d
+		if world.is_walkable(n2, lv) and world.edge_open(s, n2, lv):
+			return n2
+	return s
+
+
+## Walkable tile next to `t` (an occupied seat, say) that is reachable across an open edge, nearest to `toward`; ties in a fixed order.
+## `t` itself when it is walkable or has no open neighbour.
+func open_neighbor(t: Vector2i, level: int, toward: Vector2i) -> Vector2i:
+	if world.is_walkable(t, level):
+		return t
+	var best := t
+	var best_d := 1 << 30
+	for d in [Vector2i(0, 1), Vector2i(1, 0), Vector2i(0, -1), Vector2i(-1, 0), Vector2i(1, 1), Vector2i(-1, 1), Vector2i(1, -1), Vector2i(-1, -1)]:
+		var n: Vector2i = t + d
+		if not world.is_walkable(n, level) or not world.edge_open(t, n, level):
+			continue
+		var dist: int = maxi(absi(n.x - toward.x), absi(n.y - toward.y)) * 2 + (0 if d.x == 0 or d.y == 0 else 1)
+		if dist < best_d:
+			best_d = dist
+			best = n
+	return best
+
+
+## Privacy: somebody else is using (or on the way to) the shower or bath of this bathroom. Data: objects.json room_lock on the shower / bathtub.
+## Objects of other rooms are never locked, nor is the folk's own bathroom time.
+func bathroom_locked(o, folk_id: int) -> bool:
+	if not o.has_tag("bathroom"):
+		return false
+	var taken: Array = []
+	for b in _lock_objects():
+		for k in b.slots_reserved:
+			if int(b.slots_reserved[k]) != folk_id:
+				taken.append(b)
+				break
+	if taken.is_empty():
+		return false                                  # nobody is in a shower or bath (the usual case: no room lookups at all)
+	var rid: int = world.rooms.room_id(o.tile, o.level)
+	if rid < 0:
+		return false
+	for b in taken:
+		if int(b.level) == int(o.level) and world.rooms.room_id(b.tile, b.level) == rid:
+			return true
+	return false
+
+
+var _lock_key: int = -1
+var _lock_list: Array = []
+
+## The objects with a room_lock flag (shower, bath), cached until the object count changes.
+func _lock_objects() -> Array:
+	var key: int = world.obj_gen
+	if key != _lock_key:
+		_lock_key = key
+		_lock_list = []
+		for b in world.objects.values():
+			if bool(b.def.get("room_lock", false)):
+				_lock_list.append(b)
+	return _lock_list
