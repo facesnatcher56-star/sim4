@@ -44,6 +44,8 @@ static func outage(ctx: Dictionary, args: Dictionary) -> Dictionary:
 	var minutes: int = _hours_range("outage", "cutoff_hours" if cutoff else "hours")
 	var headline: String = "" if cutoff else "The power has gone out across town."
 	var rec: Dictionary = DisasterState.begin("outage", minutes, 1, headline, 2)
+	if not cutoff:
+		Utilities.external_power(minutes)          # task 12: the town-wide cut is also an outage of the power network (homes are handled here)
 	if stat:
 		return {"text": "", "kind": "info"}
 	var hid: int = int(ctx["household_id"])

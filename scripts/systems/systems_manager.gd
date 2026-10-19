@@ -121,6 +121,8 @@ static func reset_all() -> void:
 	MoodSwings.reset()
 	StoryPacing.reset()
 	Vacation.reset()
+	CityBudget.reset()
+	CityState.reset()
 
 ## Start a fresh game: reset systems, give every household starting funds, register all current folk, make townies.
 func new_game(household_ids: Array = [], lifespan: String = "") -> void:
@@ -258,6 +260,7 @@ func _on_game_event(ev_name: String, payload: Dictionary) -> void:
 	MoodSwings.on_game_event(ev_name, payload)
 	StoryPacing.on_game_event(ev_name, payload)
 	Vacation.on_game_event(ev_name, payload)
+	CityState.on_game_event(ev_name, payload)
 	Pregnancy.on_game_event(ev_name, payload)
 	PregnancyStage.on_game_event(ev_name, payload)
 	PregnancyTell.on_game_event(ev_name, payload)

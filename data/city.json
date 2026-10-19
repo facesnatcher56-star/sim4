@@ -1,0 +1,59 @@
+{
+ "_doc": "City infrastructure (task 12). Utilities as real networks per zone, the town budget, the council and its policies. Numbers only; wording lives next to the numbers. Rates are events per ZONE per game year (28 days), checked each game hour. See docs/CITY.md.",
+ "version": 1,
+ "zones": [
+  {"id": "north", "label": "the north side"},
+  {"id": "east", "label": "the east side"},
+  {"id": "south", "label": "the south side"},
+  {"id": "west", "label": "the west side"}
+ ],
+ "utilities": {
+  "year_days": 28,
+  "labels": {"power": "Electricity", "water": "Water and sewage", "internet": "Phone and internet", "rates": "Council charges"},
+  "short": {"power": "power", "water": "water", "internet": "phone and internet"},
+  "fixed_share": {"power": 0.3, "water": 0.25, "internet": 0.2, "rates": 0.25},
+  "usage": {
+   "take_shower": {"water": 2.0, "power": 1.0}, "take_bath": {"water": 4.5, "power": 1.5}, "use_toilet": {"water": 1.0},
+   "wash_hands": {"water": 0.5}, "wash_dishes": {"water": 2.0, "power": 1.0}, "watch_tv": {"power": 0.05},
+   "play_computer": {"power": 0.02, "internet": 0.02}, "work_computer": {"power": 0.02, "internet": 0.02}, "research_online": {"power": 0.02, "internet": 0.05},
+   "cook_meal": {"power": 1.4, "water": 0.6}, "exercise": {"power": 0.05}
+  },
+  "causes": {
+   "power": {
+    "storm": {"rate": 0.9, "hours": [2, 8], "weather": {"thunderstorm": 9.0, "windy": 4.0, "snow": 3.0, "cold_snap": 1.5}, "text": "A storm brought power lines down on {zone}.", "short": "storm damage"},
+    "overload": {"rate": 0.3, "hours": [1, 4], "weather": {"heatwave": 9.0, "cold_snap": 7.0}, "text": "Everyone's air conditioning or heating overloaded the power grid on {zone}.", "short": "an overloaded grid", "maintenance": true},
+    "fault": {"rate": 0.5, "hours": [1, 5], "weather": {}, "text": "A failed transformer cut the power on {zone}.", "short": "a failed transformer", "maintenance": true}
+   },
+   "water": {
+    "burst_main": {"rate": 0.55, "hours": [4, 12], "weather": {"cold_snap": 5.0, "snow": 2.5}, "text": "A water main burst on {zone}. Taps are dry until it is repaired.", "short": "a burst water main", "maintenance": true, "boil_after": 0.45},
+    "pump_fault": {"rate": 0.25, "hours": [2, 6], "weather": {}, "text": "A pumping station failed and the taps ran dry on {zone}.", "short": "a pumping station fault", "maintenance": true}
+   },
+   "internet": {
+    "line_fault": {"rate": 0.9, "hours": [1, 6], "weather": {"thunderstorm": 4.0, "windy": 2.0}, "text": "A cable fault knocked out phones and internet on {zone}.", "short": "a cable fault", "maintenance": true}
+   }
+  },
+  "boil": {
+   "contamination_rate": 0.2, "flood_mult": 8.0, "days": [2, 4], "ill_chance_per_day": 0.07, "boiled_hours": 12,
+   "text": "The water on {zone} is not safe to drink. Boil it first until the notice ends.",
+   "over_text": "The boil water notice on {zone} is over. The tap water is safe again."
+  },
+  "repair": {"report_cut": 0.25, "funding_min_speed": 0.6, "funding_max_speed": 1.4, "report_cost": 0},
+  "maintenance": {"min_mult": 0.5, "max_mult": 2.2},
+  "resilience": {
+   "solar_daylight": 0.3, "tank_default_hours": 36, "tank_refill_per_hour": 6, "well_needs_power": true, "generator_fuel_per_hour": 1.0,
+   "spoil_after_hours": 2, "spoil_chance": 0.5
+  },
+  "objects": {
+   "solar_panel": {"power_cut": 0.35, "label": "Solar panel"},
+   "water_tank": {"water_cut": 0.2, "hours": 36, "label": "Water tank"},
+   "well": {"water_cut": 0.55, "label": "Well"}
+  },
+  "overdue": {"internet_after_missed": 1},
+  "needs_signal": ["call_plumber", "call_handyperson", "call_exterminator", "call_firefighters", "call_repairers", "call_gas_company", "report_outage"],
+  "needs_online": ["research_online", "work_computer", "play_computer"],
+  "needs_water": ["take_shower", "take_bath", "wash_hands", "wash_dishes"],
+  "history_cap": 40,
+  "townie_lot_cap": 6,
+  "chronicle_hours": 3
+ }
+}

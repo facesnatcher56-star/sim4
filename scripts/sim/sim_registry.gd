@@ -44,6 +44,7 @@ static func systems_rows(sm: Object) -> Array:
 		["Fire", "Fire", 1, 290, N, "", Fire.on_minute, null, "lots with burning cells only (idle = zero)"],
 		["DisasterClock", "DisasterClock", 1, 300, N, "", DisasterClock.on_minute, null, "running disasters only"],
 		["Vacation", "Vacation", 1, 310, N, "", Vacation.on_minute, Callable(Vacation, "busy"), "trips on absolute due minutes; idle = one emptiness test"],
+		["Utilities", "Utilities", 1, 315, N, "", Utilities.on_minute, Callable(Utilities, "busy"), "zone outages only (a few records); idle = one emptiness test"],
 		["NeighborhoodService.after", "NeighborhoodService", 1, 320, N, "", NeighborhoodService.after_minute, null, "Crowd.update loops only the lots near an anchor (Tiers.lot_distances, cached); crowd checks per lot every 10 min; NEAR / TOWN crowd on their turn, they leave / arrive without walks; far lots dropped"],
 		["WeatherFolk", "WeatherFolk", 1, 330, N, "", WeatherFolk.on_minute, null, "ACTIVE every minute, NEAR / TOWN folk on their turn with the exposure scaled to the period"],
 		["LevelSystems", "LevelSystems", 1, 340, N, "", LevelSystems.on_minute, null, "multi-floor buildings with folk (ACTIVE / NEAR)"],
@@ -58,6 +59,7 @@ static func systems_rows(sm: Object) -> Array:
 		["hour/Incidents.on_hour", "Incidents", 60, 270, N, "", Incidents.on_hour_sliced, null, "hospital + health upkeep, then starts a sliced pass of the hourly dice (Incidents.slice)"],
 		["hour/AccidentMarks.after_hour", "AccidentMarks", 60, 280, N, "", AccidentMarks.after_hour_sched, null, "job markers removed again (unless sliced: done per slice)"],
 		["hour/CrimeFlow.on_hour", "CrimeFlow", 60, 290, N, "", CrimeFlow.on_hour, null, "places of everyone (O(people), a few lookups each)"],
+		["hour/Utilities.on_hour", "Utilities", 60, 295, N, "hour", Utilities.on_hour, null, "zones x causes (about 10 dice) + the player's homes while something is wrong; townie lots are one-line records"],
 		["hour/DisasterClock.on_hour", "DisasterClock", 60, 300, N, "hour", DisasterClock.on_hour, null, "running disasters only"],
 		["hour/Vacation.on_hour", "Vacation", 60, 310, N, "", Vacation.on_hour, Callable(Vacation, "busy"), "active trips only"],
 		# --- day layer (was SystemsManager._on_day)
@@ -74,6 +76,7 @@ static func systems_rows(sm: Object) -> Array:
 		["day/Fire.on_day", "Fire", 1440, 290, N, "day", Fire.on_day, null, "burning / burnt lots only"],
 		["day/Incidents.on_day", "Incidents", 1440, 300, N, "", Incidents.on_day_sliced, null, "Health.on_day, then starts the sliced daily dice (96 slices)"],
 		["day/CrimeFlow.on_day", "CrimeFlow", 1440, 310, L, "day", CrimeFlow.on_day, null, "global passes and case upkeep; per-person dice are the bucketed daily job, grudges are sliced (DaySlices)"],
+		["day/Utilities.on_day", "Utilities", 1440, 315, N, "day", Utilities.on_day, null, "boil notices and the player's homes only"],
 		["day/DisasterClock.on_day", "DisasterClock", 1440, 320, N, "day", DisasterClock.on_day, null, "running disasters only"],
 		["day/MarketTick.on_day", "MarketTick", 1440, 330, L, "day", MarketTick.on_day, null, "markets, shops, bank, rents (world-level)"],
 		["day/StoryPacing.on_day", "StoryPacing", 1440, 340, L, "day", StoryPacing.on_day, null, "world-level"],

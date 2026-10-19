@@ -269,18 +269,10 @@ static func note_usage(hid: int, interaction_id: String) -> void:
 	var w: Dictionary = bill_cfg().get("utility_weights", {})
 	if w.has(interaction_id) and hid > 0:
 		usage[hid] = float(usage.get(hid, 0.0)) + float(w[interaction_id])
+		UtilityBills.note(hid, interaction_id)
 
 static func compute_bill(hid: int) -> int:
-	var b: Dictionary = bill_cfg()
-	var amount: float = float(b.get("base", 50)) + float(lot_value(hid)) * float(b.get("lot_value_rate", 0.015))
-	amount += float(usage.get(hid, 0.0)) * float(b.get("utility_rate", 0.8))
-	amount *= Weather.bill_multiplier()    # heating / cooling over the billing cycle (1.0 when mild)
-	amount *= Scenario.bill_multiplier()   # new-game difficulty (1.0 on Normal)
-	amount *= MarketEconomy.price_mult()   # the town economy (task 13; 1.0 until it starts)
-	amount += float(DisasterInsurance.bill_extra(hid))   # optional home insurance premium (task 06)
-	amount += float(BankInsurance.bill_extra(hid))       # health / car / life premiums (task 13)
-	amount += float(CrimeSecurityAlarm.bill_extra(hid))  # alarm monitoring and a hired guard (task 21)
-	return int(round(amount))
+	return int(round(UtilityBills.total(UtilityBills.parts(hid))))     # split by utility; the fixed charges, usage, weather, difficulty, economy and cover are in UtilityBills.parts
 
 static func outstanding(hid: int) -> Array:
 	var out: Array = []
@@ -297,13 +289,15 @@ static func owed(hid: int) -> int:
 
 static func issue_bill(hid: int) -> Dictionary:
 	var b: Dictionary = bill_cfg()
-	var amount: int = compute_bill(hid)
+	var pr: Dictionary = UtilityBills.rounded(UtilityBills.parts(hid))
+	var amount: int = int(round(UtilityBills.total(pr)))
 	var bill: Dictionary = {"id": _seq, "hid": hid, "amount": amount, "base": amount, "issued": SysUtil.day(),
-		"due": SysUtil.day() + int(b.get("due_after_days", 3)), "paid": false, "late": false, "fee": 0}
+		"due": SysUtil.day() + int(b.get("due_after_days", 3)), "paid": false, "late": false, "fee": 0, "parts": pr}
 	_seq += 1
 	bills.append(bill)
 	usage[hid] = 0.0
-	SysUtil.notify("Household bills: %d coins, due on day %d." % [amount, int(bill["due"])], "bill")
+	UtilityBills.used.erase(str(hid))
+	SysUtil.notify("Household bills: %d coins (%s), due on day %d." % [amount, UtilityBills.describe(pr), int(bill["due"])], "bill")
 	SysUtil.game_event("bill_issued", {"household_id": hid, "amount": amount, "due": bill["due"]})
 	return bill
 

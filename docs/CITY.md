@@ -1,0 +1,18 @@
+# City infrastructure (task 12)
+
+Data: `data/city.json` (zones, utilities, later the budget and the council), `data/incidents/12_city.json` (buffs, objects, interactions), `data/transport.json`, `data/services.json`.
+State: ONE save block `systems.city` (`CityState.to_dict`, listed in `data/share_schema.json`). `CityState` owns the seeded dice (`CityState.rng`, saved) and the zone helpers.
+Rules every city system follows: the player's household(s) are FULL (real objects, buffs, bills), townie lots are STATISTICAL (one-line lot events, no per-person work),
+nothing loops all folk / all objects in a clock hook, every number is data, every player action is a command, every long-run rate has a slow test.
+
+## 12.1 Utilities as real networks
+- **Zones**: the town is cut into districts (`zones`). A household belongs to a zone by its id (`CityState.zone_of_household`), a townie lot by its number.
+- **Outages** (`Utilities`): `begin(util, zone, hours, cause)`; `util` is `power`, `water` or `internet` (phone and internet). Causes are data (`utilities.causes`): power = storm / overload / fault, water = burst main / pump fault, internet = line fault. Hourly dice per zone and cause (`UtilityEvents`): rate per zone-year x weather multiplier x maintenance (`CityBudget.maintenance_mult`), repairs take hours / `CityBudget.repair_speed`.
+- **Boil water notice** (`Utilities.start_boil`): after a burst main (45 percent), by contamination (x8 during a flood). People of the zone get the `boil_notice` buff; unboiled tap water can make them ill (daily dice); `boil_water` (kettle / stove) makes a batch safe for 12 hours; a well household is not affected.
+- **At home** (`UtilityHomes`): service = the zone's service plus the home's own backup. Generator (fuel burns hourly), solar panels (power only in daylight), water tank (a reserve of hours, refills when water is back), well (water without mains, needs power for the pump). Markers: `power_out`, `no_water`, `no_signal` (phone), `offline` (internet; also when the home has no power); interactions in `needs_water` / `needs_signal` / `needs_online` refuse while the marker is on (`UtilityContent`, same patch idea as `DisasterContent`). Lamps go dark and come back; a warm fridge spoils (reuses the disaster outage numbers).
+- **Unpaid bills**: phone and internet are cut after a missed bill (`overdue.internet_after_missed`); the existing `utility_cutoff` incident still cuts the power.
+- **Old town-wide power cut** (`power_outage` incident, 06) is also an outage of the power network in every zone (`Utilities.external_power`); its own handler still treats the homes.
+- **Bills split by utility** (`UtilityBills`): fixed charges by `fixed_share`, use by the utility the interaction used, `cover` = insurance premiums. Solar panels (-35 percent each of the power part), a water tank (-20 percent), a well (-55 percent). `Economy.compute_bill` is the sum; the bill record carries `parts`, the toast and `UtilityBills.describe` name them.
+- **Player**: mailbox interactions `Check Utilities` (plain-word status per utility with the reason and the time left), `Report an Outage` (crews 25 percent quicker, once per outage, needs a phone line); `Boil Drinking Water` at the kettle or stove. Toasts follow the household policy (only the player's own zone); the chronicle gets outages of 3 hours or more and every water outage.
+- Tier behaviour and cadence: see the headers of `utilities.gd` / `utility_homes.gd`; the clock rows are `Utilities` (minute, gated), `hour/Utilities.on_hour`, `day/Utilities.on_day`.
+- Tests: `tests/city_utilities_test.gd` (fast), `tests/city_utilities_longrun_test.gd` (slow: rates per cause, thunderstorms, a starved budget).

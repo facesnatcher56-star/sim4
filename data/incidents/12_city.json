@@ -1,0 +1,31 @@
+{
+ "_doc": "Task 12 content (city infrastructure): buffs, objects and interactions of the utility networks. Numbers live in data/city.json. Merged into the shared tables by IncidentContent.",
+ "content": {
+  "buffs": {
+   "no_water": {"label": "No Running Water", "mood": {"uncomfortable": 1}, "duration_min": 0, "thought": "The taps are dry."},
+   "no_signal": {"label": "No Phone Line", "mood": {"uncomfortable": 1}, "duration_min": 0, "thought": "There is no phone signal."},
+   "offline": {"label": "No Internet", "mood": {"bored": 1}, "duration_min": 0, "thought": "The internet is down."},
+   "boil_notice": {"label": "Boil Water Notice", "mood": {}, "duration_min": 0, "thought": "I should boil the water before I drink it."}
+  },
+  "objects": {
+   "solar_panel": {"def": {"label": "Solar Panels", "size": [1, 1], "price": 900, "tags": ["utility", "outdoor", "green"], "model": "res://assets/models/solar_panel.glb",
+    "color": "#2d4f8a", "height": 0.6, "slots": [{"offset": [0, 1], "pose": "stand"}], "state": {}, "advertises": {}, "decor": 0.0, "interactions": []}},
+   "water_tank": {"def": {"label": "Water Tank", "size": [1, 1], "price": 450, "tags": ["utility", "outdoor", "green"], "model": "res://assets/models/water_tank.glb",
+    "color": "#5a8fa8", "height": 1.1, "slots": [{"offset": [0, 1], "pose": "stand"}], "state": {}, "advertises": {}, "decor": -0.1, "interactions": []}},
+   "well": {"def": {"label": "Well", "size": [1, 1], "price": 1400, "tags": ["utility", "outdoor", "green"], "model": "res://assets/models/well.glb",
+    "color": "#8a7a62", "height": 1.0, "slots": [{"offset": [0, 1], "pose": "stand"}], "state": {}, "advertises": {}, "decor": 0.4, "interactions": []}}
+  },
+  "interactions": {
+   "check_utilities": {"label": "Check Utilities", "kind": "super", "target": "object", "objects": ["mailbox"], "tags": ["paperwork"], "duration_min": 2,
+    "posture": "stand", "tests": [], "per_min": {}, "on_finish": [{"fire_event": "check_utilities"}], "autonomous": false, "priority": "normal", "advertises": {},
+    "thought": "What is working and what is not?"},
+   "report_outage": {"label": "Report an Outage", "kind": "super", "target": "object", "objects": ["mailbox"], "tags": ["paperwork"], "duration_min": 3,
+    "posture": "stand", "tests": [], "per_min": {}, "on_finish": [{"fire_event": "report_outage"}], "autonomous": false, "priority": "normal", "advertises": {},
+    "thought": "The crews should know about this."},
+   "boil_water": {"label": "Boil Drinking Water", "kind": "super", "target": "object", "objects": ["tea_kettle", "stove"], "tags": ["chore", "kitchen"], "duration_min": 10,
+    "posture": "stand", "tests": [{"has_buff": "boil_notice"}], "per_min": {"energy": -0.05}, "on_finish": [{"fire_event": "boil_water"}], "autonomous": true,
+    "priority": "low", "advertises": {"comfort": 1.0}, "thought": "Better boil the water first."}
+  },
+  "object_interactions": {"mailbox": ["check_utilities", "report_outage"], "tea_kettle": ["boil_water"], "stove": ["boil_water"]}
+ }
+}
