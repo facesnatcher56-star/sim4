@@ -1,7 +1,7 @@
 ﻿{
   "version": 1,
   "home_id": "home",
-  "grid": [5, 4],
+  "grid": [7, 4],
   "travel": {"base_min": 5, "per_block_min": 4, "max_min": 40, "toast_seconds": 1.6},
   "pantry": {"units_per_trip": 6, "fridge_max": 10},
   "starts": [
@@ -30,6 +30,9 @@
     {"id": "police", "label": "Fernwood Police Station", "type": "police", "template": "police_01", "pos": [1, 3], "color": "#3b5b92", "blurb": "The front desk, detectives upstairs and the cells below."},
     {"id": "courthouse", "label": "Fernwood Courthouse", "type": "courthouse", "template": "courthouse_01", "pos": [2, 3], "color": "#8c7b5e", "blurb": "Trials are held in the courtroom upstairs."},
     {"id": "apartments", "label": "Elm Court Apartments", "type": "townie_home", "template": "apartments_01", "pool": "apartments", "pos": [3, 3], "color": "#9aa7b4", "blurb": "Flats on four floors, a lift and a shared stair."},
-    {"id": "works", "label": "Ironbridge Works", "type": "works", "template": "works", "pos": [4, 1], "color": "#7d7f86", "blurb": "Factory floor, warehouse, motor bay and control room, with a building yard out front."}
+    {"id": "works", "label": "Ironbridge Works", "type": "works", "template": "works", "pos": [4, 1], "color": "#7d7f86", "blurb": "Factory floor, warehouse, motor bay and control room, with a building yard out front."},
+    {"id": "fire_station", "label": "Fernwood Fire Station", "type": "fire", "template": "fire_01", "pos": [5, 0], "color": "#d9534f", "blurb": "The engines and the crew. Fires are fought from here."},
+    {"id": "city_hall", "label": "Fernwood City Hall", "type": "city_hall", "template": "cityhall_01", "pos": [5, 1], "color": "#8c7b5e", "blurb": "The mayor, the council chamber and the town notice board."},
+    {"id": "car_park", "label": "Station Street Car Park", "type": "garage", "template": "garage_01", "pos": [5, 2], "color": "#7a8794", "blurb": "Six levels of parking. A daily fee."}
   ]
 }

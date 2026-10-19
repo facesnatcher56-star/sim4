@@ -1,7 +1,7 @@
 {
  "_doc": "Transport (task 12.2): modes, cars, parking, buses, taxis, traffic, lights and road works. Times in game minutes, money in coins (prices follow the town economy index). Speeds are multiples of walking (0.3 min per tile).",
  "version": 1,
- "map": {"w": 160, "h": 136},
+ "map": {"w": 236, "h": 136},
  "min_ride_tiles": 24,
  "value_of_time": {"coin_min": 1.6, "poor_below": 150, "poor_mult": 2.5},
  "modes": {
@@ -52,7 +52,7 @@
   "delay_min": 25, "tow_fee": 60, "bike_per_trip": 0.002, "bike_injure": 0.4
  },
  "parking": {
-  "capacity": {"home": 2, "townie_home": 2, "park": 8, "cafe": 8, "gym": 8, "library": 6, "market": 14, "office": 24, "school": 16, "hospital": 24, "police": 10, "courthouse": 10, "default": 6},
+  "capacity": {"home": 2, "townie_home": 2, "park": 8, "cafe": 8, "gym": 8, "library": 6, "market": 14, "office": 24, "school": 16, "hospital": 24, "police": 10, "courthouse": 10, "fire": 6, "city_hall": 12, "garage": 60, "default": 6},
   "ambient": {"home": 0.0, "townie_home": 0.3, "default": 0.15, "business": 0.7, "business_types": ["office", "school", "hospital", "market", "courthouse", "police"], "day_from": 7.5, "day_to": 18.5},
   "fee": {"market": 0, "default": 0},
   "search_min": [3, 10],

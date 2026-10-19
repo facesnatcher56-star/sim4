@@ -86,6 +86,27 @@
       "ambient": {},
       "stay": [30, 120]
     },
+    "fire": {
+      "label": "Fire Station", "hours": [0, 24], "fee": 0,
+      "crowd": [[0, 0], [8, 1], [12, 1], [17, 1], [20, 0]],
+      "crowd_needs": {},
+      "ambient": {},
+      "stay": [20, 60]
+    },
+    "city_hall": {
+      "label": "City Hall", "hours": [8, 17], "days": [0, 1, 2, 3, 4], "fee": 0,
+      "crowd": [[0, 0], [8, 1], [10, 2], [14, 2], [17, 0]],
+      "crowd_needs": {},
+      "ambient": {},
+      "stay": [30, 90]
+    },
+    "garage": {
+      "label": "Car Park", "hours": [0, 24], "fee": 0,
+      "crowd": [[0, 0]],
+      "crowd_needs": {},
+      "ambient": {},
+      "stay": [5, 15]
+    },
     "school": {
       "label": "School", "hours": [8, 16], "days": [0, 1, 2, 3, 4], "fee": 0,
       "crowd": [[0, 0], [8, 4], [15, 2], [16, 0]],

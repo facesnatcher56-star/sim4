@@ -17,7 +17,7 @@ const StarterHouse := preload("res://scripts/world/starter_house.gd")
 
 const DEFAULT_W := 32            # legacy single lot
 const DEFAULT_H := 24
-const MAP_W := 200               # the one continuous neighbourhood (MapBuilder): change the size HERE only
+const MAP_W := 236               # the one continuous neighbourhood (MapBuilder): change the size HERE only
 const MAP_H := 154          # 136 + 18 more rows of Southwoods: room for the 22-row holiday zones (task 22)
 const BLOCKING_WALLS := ["wall", "window", "fence"]
 const WALL_TYPES := ["wall", "door", "window", "fence"]

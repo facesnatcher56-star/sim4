@@ -21,7 +21,11 @@ static func cfg() -> Dictionary:
 	return SysUtil.table("services")
 
 static func station(service: String) -> Dictionary:
-	return (cfg().get("stations", {}) as Dictionary).get(service, {})
+	var st: Dictionary = (cfg().get("stations", {}) as Dictionary).get(service, {})
+	if not st.is_empty() and Workplace.map_ready() and Neighborhood.lot(str(st.get("lot", ""))).is_empty() and not Neighborhood.lot("police").is_empty():
+		st = st.duplicate()
+		st["lot"] = "police"                      # a map without its own fire station (an old game): the engine starts from the police lot
+	return st
 
 static func count(key: String, n: int = 1) -> void:
 	stats[key] = int(stats.get(key, 0)) + n
@@ -85,6 +89,7 @@ static func dispatch(service: String, lot: String, opts: Dictionary = {}) -> Dic
 	out.append({"service": service, "back_min": SysUtil.now() + m + int(station(service).get("on_scene", 30)) + int(float(e["parts"]["drive"]))})
 	count("calls_" + service)
 	count("minutes_" + service, m)
+	VehicleFeed.post("dispatch", {"service": service, "lot": lot, "minutes": m, "drive": float(e["parts"]["drive"]), "on_scene": int(station(service).get("on_scene", 30))})      # the view layer draws the unit (read-only for the sim)
 	if m > int(round(float((c.get("targets", {}) as Dictionary).get(service, 10)))) * 2:
 		count("slow_" + service)
 	_prune()

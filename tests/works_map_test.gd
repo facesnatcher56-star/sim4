@@ -20,7 +20,7 @@ func run() -> Array:
 	CityState.reset()
 	UtilityEvents.dice_on = false
 	var W: Node = Kit.world()
-	_check(Neighborhood.lots().size() == 16 and not Neighborhood.lot("works").is_empty(), "16 lots, one of them the works")
+	_check(Neighborhood.lots().size() == 19 and not Neighborhood.lot("works").is_empty(), "19 lots, one of them the works")
 	var rg: Dictionary = W.regions.by_lot("works")
 	_check(not rg.is_empty() and str(rg["venue_type"]) == "works", "the works is a venue region")
 	var rc: Rect2i = rg["rect"]
