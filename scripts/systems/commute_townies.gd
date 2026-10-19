@@ -21,8 +21,12 @@ static func window(t: Dictionary, now: int) -> Dictionary:
 	var ld: Dictionary = _def(t)
 	var sh: float = float(ld.get("start", 9))
 	var eh: float = float(ld.get("end", 17))
-	if not CareerShifts.is_work_day(cid, day):
+	if not CareerShifts.is_work_day(cid, day) or WorksEvents.on_strike(cid):
 		return {}
+	var alt: Dictionary = WorksPay.townie_shift(t)       # task 31: some industrial townies work nights
+	if not alt.is_empty():
+		sh = float(alt["start"])
+		eh = float(alt["end"])
 	var tc: Dictionary = Workplace.cfg().get("townie", {})
 	var off: int = (int(t["id"]) * 7) % maxi(int(tc.get("spread_min", 15)), 1)
 	var s: int = (day - 1) * 1440 + int(sh * 60.0) - int(tc.get("arrive_early_min", 20)) + off

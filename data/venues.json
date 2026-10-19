@@ -94,6 +94,13 @@
       "ambient": {"buff": "venue_quiet_focus", "every_min": 180},
       "interaction_xp": {"do_homework": ["logic", 6], "read_book": ["logic", 4]},
       "stay": [60, 150]
+    },
+    "works": {
+      "label": "Works", "hours": [0, 24], "fee": 0,
+      "crowd": [[0, 0], [6, 1], [9, 2], [14, 2], [18, 1], [22, 0]],
+      "crowd_needs": {"energy": 20, "hygiene": 30},
+      "ambient": {},
+      "stay": [20, 60]
     }
   },
   "content": {

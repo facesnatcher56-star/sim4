@@ -206,6 +206,11 @@
     "rest_bonus_per_min": 1.0,
     "scuffle_chance": 0.08,
     "physical_careers": [
+     "factory_worker",
+     "warehouse_worker",
+     "construction_worker",
+     "mechanic",
+     "utility_tech",
      "cook",
      "chef",
      "barista",

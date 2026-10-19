@@ -18,6 +18,19 @@ func load_all(dir: String = DATA_DIR) -> void:
 			var parsed: Variant = load_file(dir.path_join(f))
 			if parsed is Dictionary:
 				tables[f.get_basename()] = parsed
+	_merge_career_files()
+
+## data/careers_<family>.json files carry more careers (same shape as data/careers.json `careers`); they join the one careers table.
+func _merge_career_files() -> void:
+	var cs: Dictionary = (tables.get("careers", {}) as Dictionary).get("careers", {})
+	if cs.is_empty():
+		return
+	for name in tables.keys():
+		if str(name).begins_with("careers_"):
+			var extra: Dictionary = (tables[name] as Dictionary).get("careers", {})
+			for cid in extra:
+				if not cs.has(cid):
+					cs[cid] = extra[cid]
 
 ## Returns parsed JSON or null (never errors out).
 func load_file(path: String) -> Variant:

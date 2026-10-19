@@ -11,6 +11,7 @@ static func install() -> void:
 	var cfg: Dictionary = (SimEnv.data().get_table("venues") as Dictionary).get("content", {})
 	ContentMerge.install(cfg, MARK, {"_sys_gate": true})      # _sys_gate: keep SysContent from re-gating these
 	BuildingContent.install()                                  # multi-floor building objects (hospital bed, ...)
+	Works.install()                                            # task 31: the works lot stations and work interactions
 
 ## Ids of every venue buff the crowd/ambient code may apply.
 static func buff_ids() -> Array:

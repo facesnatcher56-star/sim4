@@ -56,12 +56,14 @@ static func _roll(tid: int, t: Dictionary, hour: int, c: Dictionary, spec: Dicti
 		if _u(tid, hour, salt) < p:
 			buffs.append(str(m))
 	# a physical career at work
-	var tier: int = int((c.get("physical_careers", {}) as Dictionary).get(str(t.get("career", "")), 0))
+	var tier: int = Works.injury_tier(str(t.get("career", "")))
 	var w: Array = spec.get("work_hours", [9, 17])
 	if tier > 0 and hour >= int(w[0]) and hour < int(w[1]):
 		buffs.append("acc_job_risky")
 		if tier >= 2:
 			buffs.append("acc_job_very_risky")
+		if tier >= 3:
+			buffs.append("acc_job_hazard")
 	# company
 	if _u(tid, hour, 99) < float(spec.get("alone_p", 0.25)):
 		buffs.append("acc_alone")

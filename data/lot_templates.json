@@ -6636,6 +6636,460 @@
    ],
    "staff": [],
    "price": 0
+  },
+  "works": {
+   "label": "Ironbridge Works",
+   "description": "A factory floor, a warehouse, a motor bay and a control room under one roof, with a building yard out front. Work happens here at all hours.",
+   "kind": "venue",
+   "venue": "works",
+   "floors": [
+    {
+     "rect": [
+      0,
+      18,
+      31,
+      18
+     ],
+     "type": "stone"
+    },
+    {
+     "rect": [
+      0,
+      19,
+      31,
+      23
+     ],
+     "type": "concrete"
+    },
+    {
+     "rect": [
+      5,
+      4,
+      26,
+      17
+     ],
+     "type": "concrete"
+    },
+    {
+     "rect": [
+      5,
+      11,
+      15,
+      17
+     ],
+     "type": "tile"
+    }
+   ],
+   "walls": [
+    {
+     "a": [
+      5,
+      4
+     ],
+     "b": [
+      27,
+      4
+     ],
+     "type": "wall"
+    },
+    {
+     "a": [
+      5,
+      18
+     ],
+     "b": [
+      27,
+      18
+     ],
+     "type": "wall"
+    },
+    {
+     "a": [
+      5,
+      4
+     ],
+     "b": [
+      5,
+      18
+     ],
+     "type": "wall"
+    },
+    {
+     "a": [
+      27,
+      4
+     ],
+     "b": [
+      27,
+      18
+     ],
+     "type": "wall"
+    },
+    {
+     "a": [
+      16,
+      4
+     ],
+     "b": [
+      16,
+      10
+     ],
+     "type": "wall"
+    },
+    {
+     "a": [
+      16,
+      12
+     ],
+     "b": [
+      16,
+      18
+     ],
+     "type": "wall"
+    }
+   ],
+   "objects": [
+    {
+     "def": "door",
+     "tile": [
+      15,
+      17
+     ],
+     "rot": 2
+    },
+    {
+     "def": "window",
+     "tile": [
+      8,
+      17
+     ],
+     "rot": 2
+    },
+    {
+     "def": "window",
+     "tile": [
+      11,
+      17
+     ],
+     "rot": 2
+    },
+    {
+     "def": "window",
+     "tile": [
+      19,
+      17
+     ],
+     "rot": 2
+    },
+    {
+     "def": "window",
+     "tile": [
+      23,
+      17
+     ],
+     "rot": 2
+    },
+    {
+     "def": "window",
+     "tile": [
+      8,
+      4
+     ],
+     "rot": 0
+    },
+    {
+     "def": "window",
+     "tile": [
+      12,
+      4
+     ],
+     "rot": 0
+    },
+    {
+     "def": "window",
+     "tile": [
+      19,
+      4
+     ],
+     "rot": 0
+    },
+    {
+     "def": "window",
+     "tile": [
+      23,
+      4
+     ],
+     "rot": 0
+    },
+    {
+     "def": "window",
+     "tile": [
+      5,
+      7
+     ],
+     "rot": 3
+    },
+    {
+     "def": "window",
+     "tile": [
+      5,
+      14
+     ],
+     "rot": 3
+    },
+    {
+     "def": "window",
+     "tile": [
+      26,
+      7
+     ],
+     "rot": 1
+    },
+    {
+     "def": "window",
+     "tile": [
+      26,
+      14
+     ],
+     "rot": 1
+    },
+    {
+     "def": "assembly_line",
+     "tile": [
+      6,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "assembly_line",
+     "tile": [
+      10,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "assembly_line",
+     "tile": [
+      6,
+      8
+     ],
+     "rot": 0
+    },
+    {
+     "def": "assembly_line",
+     "tile": [
+      10,
+      8
+     ],
+     "rot": 0
+    },
+    {
+     "def": "control_panel",
+     "tile": [
+      7,
+      16
+     ],
+     "rot": 2
+    },
+    {
+     "def": "control_panel",
+     "tile": [
+      9,
+      16
+     ],
+     "rot": 2
+    },
+    {
+     "def": "desk",
+     "tile": [
+      12,
+      16
+     ],
+     "rot": 2
+    },
+    {
+     "def": "chair",
+     "tile": [
+      12,
+      15
+     ],
+     "rot": 0
+    },
+    {
+     "def": "vending_machine",
+     "tile": [
+      14,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "trash_bin",
+     "tile": [
+      14,
+      16
+     ],
+     "rot": 2
+    },
+    {
+     "def": "pallet_rack",
+     "tile": [
+      18,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "pallet_rack",
+     "tile": [
+      20,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "pallet_rack",
+     "tile": [
+      22,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "pallet_rack",
+     "tile": [
+      24,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "forklift",
+     "tile": [
+      19,
+      8
+     ],
+     "rot": 0
+    },
+    {
+     "def": "forklift",
+     "tile": [
+      23,
+      8
+     ],
+     "rot": 0
+    },
+    {
+     "def": "vehicle_lift",
+     "tile": [
+      18,
+      13
+     ],
+     "rot": 0
+    },
+    {
+     "def": "vehicle_lift",
+     "tile": [
+      22,
+      13
+     ],
+     "rot": 0
+    },
+    {
+     "def": "workbench",
+     "tile": [
+      24,
+      16
+     ],
+     "rot": 2
+    },
+    {
+     "def": "fire_extinguisher",
+     "tile": [
+      17,
+      16
+     ],
+     "rot": 2
+    },
+    {
+     "def": "fire_extinguisher",
+     "tile": [
+      17,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "plant",
+     "tile": [
+      5,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "plant",
+     "tile": [
+      26,
+      16
+     ],
+     "rot": 2
+    },
+    {
+     "def": "site_materials",
+     "tile": [
+      6,
+      20
+     ],
+     "rot": 0
+    },
+    {
+     "def": "site_materials",
+     "tile": [
+      10,
+      20
+     ],
+     "rot": 0
+    },
+    {
+     "def": "site_materials",
+     "tile": [
+      20,
+      20
+     ],
+     "rot": 0
+    },
+    {
+     "def": "site_materials",
+     "tile": [
+      24,
+      20
+     ],
+     "rot": 0
+    }
+   ],
+   "spawn": [
+    [
+     15,
+     19
+    ],
+    [
+     16,
+     19
+    ],
+    [
+     14,
+     19
+    ]
+   ],
+   "entry": [
+    15,
+    19
+   ],
+   "staff": [],
+   "price": 0
   }
  }
 }

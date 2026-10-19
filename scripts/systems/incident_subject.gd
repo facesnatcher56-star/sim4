@@ -7,7 +7,8 @@ extends RefCounted
 ##   kind "lot"    - a household lot (key "home:<hid>", full) or a townie lot (key "town:<n>", statistical)
 ## Townie skills come from their career (a cook has cooking = level + 1), needs / buffs are optional keys of the record.
 
-const CAREER_SKILL := {"cook": "cooking", "coder": "logic", "painter": "painting", "fitness_coach": "fitness"}
+const CAREER_SKILL := {"cook": "cooking", "coder": "logic", "painter": "painting", "fitness_coach": "fitness",
+	"factory_worker": "handiness", "warehouse_worker": "fitness", "construction_worker": "handiness", "mechanic": "handiness", "utility_tech": "handiness"}
 
 var kind: String = "folk"
 var id: int = -1                    # folk id / townie id / household id or townie lot number
