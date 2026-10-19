@@ -291,7 +291,7 @@ func _toddler(f: Array) -> void:
 	# toddlers can be played with and held, but not fed like babies
 	K.expect(f, Interaction.create("play_with_baby", a, baby.id, true).can_run(a), "play with a toddler")
 	(baby.needs["hunger"] as Stat).set_value(-50.0)
-	K.expect(f, not Interaction.create("feed_baby", a, baby.id, true).can_run(a), "feed_baby is for babies only")
+	K.expect(f, Interaction.create("feed_baby", a, baby.id, true).can_run(a), "a hungry toddler can be fed like a baby (kid care)")
 	# growing into a child with all skills >= 1 makes the parents proud
 	for s in ["walking", "talking", "potty"]:
 		baby.add_skill_xp(s, 150.0)
