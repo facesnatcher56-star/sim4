@@ -129,7 +129,7 @@ static func generate_townies(count: int = -1) -> void:
 		var b = SysUtil.pick(adults)
 		if a != null and b != null and a != b:
 			RelationshipService.add_both(int(a), int(b), "friendship", SysUtil.rng.randf_range(8.0, 45.0))
-	if adults.size() >= 4:
+	if adults.size() >= 4 and RomanceRules.allowed(adults[2], adults[3]):
 		RelationshipService.add_both(adults[2], adults[3], "friendship", 60.0)
 		RelationshipService.add_both(adults[2], adults[3], "romance", 70.0)
 		RelationshipBits.set_flag(adults[2], adults[3], "partner", true, false)
@@ -205,7 +205,7 @@ static func _pair_events(dc: Dictionary) -> void:
 		else:
 			RelationshipService.add_both(a, b, "friendship", SysUtil.rng.randf_range(1.0, 4.0) * (1.0 + compat * 0.5))
 			RelationshipService.add_history(a, b, "chat", 0.3, a)
-			if stage_of(townies[a]) != "teen" and stage_of(townies[b]) != "teen" and compat > 0.1 and RelationshipService.value(a, b, "friendship") > 25.0:
+			if RomanceRules.allowed(a, b) and compat > 0.1 and RelationshipService.value(a, b, "friendship") > 25.0:
 				RelationshipService.add_both(a, b, "romance", SysUtil.rng.randf_range(1.0, 4.0))
 		RelationshipService.touch(a, b)
 		RelationshipBits.auto_status(a, b)
@@ -218,6 +218,8 @@ static func _life_events(dc: Dictionary) -> void:
 		var a: int = int(p["lo"])
 		var b: int = int(p["hi"])
 		if not (townies.has(a) and townies.has(b)) or not (bool(townies[a]["alive"]) and bool(townies[b]["alive"])):
+			continue
+		if not RomanceRules.allowed(a, b):
 			continue
 		var fl: Dictionary = p["flags"]
 		if fl.get("partner", false) and not fl.get("spouse", false):

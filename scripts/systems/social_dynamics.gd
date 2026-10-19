@@ -81,6 +81,8 @@ static func resolve(actor_id: int, target_id: int, iid: String, d: Dictionary) -
 			topic = Conversation.pick_topic(actor_id, target_id)
 		teff = Conversation.topic_effect(actor_id, target_id, topic)
 	var req_fail := SocialScoring.check_requires(actor_id, target_id, sd.get("requires", []))
+	if req_fail == "" and RomanceRules.is_romantic_def(d) and not RomanceRules.allowed(actor_id, target_id):
+		req_fail = "not_allowed"
 	var sc := SocialScoring.success_score(a, t, iid, d, sd, teff)
 	var tier: String = "meh" if req_fail != "" else SocialScoring.tier_for(float(sc["score"]), sd)
 	var fx: Dictionary = {} if req_fail != "" else SocialScoring.fx_for(sd, tier)

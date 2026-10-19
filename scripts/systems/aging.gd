@@ -232,6 +232,8 @@ static func try_for_baby(actor_id: int, partner_id: int) -> Dictionary:
 	var min_idx: int = stage_index(str(pc.get("min_stage", "adult")))
 	if stage_index(str(a.age_stage)) < min_idx or stage_index(str(b.age_stage)) < min_idx:
 		return {"ok": false, "reason": "too_young"}
+	if not RomanceRules.allowed(actor_id, partner_id):
+		return {"ok": false, "reason": "not_allowed"}
 	if pregnancies.has(actor_id) or pregnancies.has(partner_id) or a.has_buff("pregnant"):
 		return {"ok": false, "reason": "already_pregnant"}
 	if SysUtil.day() < int(cooldowns.get(actor_id, 0)):

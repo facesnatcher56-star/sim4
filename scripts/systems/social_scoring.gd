@@ -20,6 +20,8 @@ static func success_score(a, t, iid: String, d: Dictionary, sd: Dictionary, teff
 	var tid: int = int(t.id)
 	var parts: Dictionary = {}
 	parts["base"] = float(sd.get("base", 0.5))
+	if RomanceRules.is_romantic_def(d) and not RomanceRules.allowed(aid, tid):
+		return {"score": -9.0, "parts": {"not_allowed": -9.0}}
 	var compat: float = RelationshipBits.compatibility(aid, tid)
 	parts["compat"] = compat * float(w.get("compat", 0.25))
 	parts["charisma"] = float(a.skill_level("charisma")) * float(w.get("charisma", 0.03))
@@ -146,6 +148,8 @@ static func reason_unavailable(actor, target, iid: String, include_cooldown: boo
 		return "Unknown action"
 	if include_cooldown and actor.on_cooldown(iid):
 		return "Too soon to do that again"
+	if target != null and str(d.get("target", "")) == "folk" and RomanceRules.is_romantic_def(d) and not RomanceRules.allowed(int(actor.id), int(target.id)):
+		return RomanceRules.why_not(int(actor.id), int(target.id))
 	var ctx := {"folk": actor, "object": null, "target": target}
 	for c in d.get("tests", []):
 		if not Cond.check([c], ctx):

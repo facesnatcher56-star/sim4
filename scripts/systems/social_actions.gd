@@ -6,6 +6,8 @@ extends RefCounted
 static func _act(act: String, arg: float, a, t, tier: String, iid: String) -> void:
 	var aid: int = int(a.id)
 	var tid: int = int(t.id)
+	if act in ["ask_out", "date", "make_official", "rekindle", "confess", "first_kiss"] and not RomanceRules.allowed(aid, tid):
+		return
 	match act:
 		"argue":
 			SocialConflict.escalate(aid, tid, arg)

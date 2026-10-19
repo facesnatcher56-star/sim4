@@ -105,11 +105,15 @@ static func _confront(a, t, tier: String) -> void:
 
 # ------------------------------------------------------------------ cheating
 static func cheat_check(a: int, b: int) -> void:
+	if not RomanceRules.allowed(a, b):
+		return
 	for pr in [[a, b], [b, a]]:
 		var x: int = pr[0]
 		var o: int = pr[1]
 		for victim in RelationshipRomance.exclusive_partners(x):
 			if int(victim) == o:
+				continue
+			if not RomanceRules.allowed(x, int(victim)):
 				continue
 			var fv = SysUtil.folk(int(victim))
 			var fx = SysUtil.folk(x)

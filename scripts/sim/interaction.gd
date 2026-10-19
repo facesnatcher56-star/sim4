@@ -124,6 +124,8 @@ static func def_runnable(d: Dictionary, f: Folk, o, target: Folk) -> bool:
 			return false
 		if not Cond.check(d.get("target_tests", []), {"folk": target, "object": null, "target": f}):
 			return false
+		if RomanceRules.is_romantic_def(d) and not RomanceRules.allowed(int(f.id), int(target.id)):
+			return false
 		var req: Array = (d.get("social", {}) as Dictionary).get("requires", [])
 		if not req.is_empty() and SocialScoring.check_requires(int(f.id), int(target.id), req) != "":
 			return false

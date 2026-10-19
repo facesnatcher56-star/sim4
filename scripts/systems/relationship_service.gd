@@ -65,6 +65,8 @@ static func value(a: int, b: int, track: String) -> float:
 ## Set a's feeling about b (writes the Folk when it is on the lot, else the store).
 static func set_value(a: int, b: int, track: String, v: float) -> void:
 	v = clampf(v, -100.0, 100.0)
+	if track == "romance" and v > 0.0 and not RomanceRules.allowed(a, b):    # minors and family never gain romance
+		v = 0.0
 	var p: Dictionary = _pair(a, b)
 	var vals: Dictionary = p["vals"]
 	var k: String = "%d>%d" % [a, b]

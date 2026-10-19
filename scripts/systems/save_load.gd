@@ -162,6 +162,7 @@ static func restore(d: Dictionary) -> bool:
 	Vacation.from_dict(sy.get("vacation", {}))
 	Players.from_dict(sy.get("players", {}))
 	CrimeFlow.install()               # reset_all removed the justice careers / crime traits; a loaded game may already use them
+	RomanceCleanup.run()              # old saves: no romance, bits, marriages or affairs for minors or family
 	return true
 
 ## Autosave (slot 0): SystemsManager calls this each game day.

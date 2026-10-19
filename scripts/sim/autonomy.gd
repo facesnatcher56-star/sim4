@@ -211,6 +211,7 @@ static func gather(folk, closed = null) -> Array:
 		var iid: String = e[0]
 		var d2: Dictionary = e[1]
 		var is_self: bool = e[2]
+		var romantic: bool = not is_self and RomanceRules.is_romantic_def(d2)
 		if closed != null:
 			var why2: String = _closed_reason(folk, iid, d2, "", cache)
 			if why2 != "":
@@ -221,7 +222,7 @@ static func gather(folk, closed = null) -> Array:
 			out.append({"id": iid, "target_id": -1, "kind": "none", "obj": null, "folk": null, "pk": pk})
 		else:
 			for f2 in others:
-				if f2.id != folk.id:
+				if f2.id != folk.id and not (romantic and not RomanceRules.allowed(int(folk.id), int(f2.id))):
 					out.append({"id": iid, "target_id": int(f2.id), "kind": "folk", "obj": null, "folk": f2, "pk": pk})
 	return out
 

@@ -138,7 +138,7 @@ func _affair() -> void:
 	var b = pax[1]
 	var spouse: int = -1
 	for tid in Story.townies:
-		if int(tid) != int(a.id) and int(tid) != int(b.id) and SysUtil.folk(int(tid)) == null:
+		if int(tid) != int(a.id) and int(tid) != int(b.id) and SysUtil.folk(int(tid)) == null and RomanceRules.allowed(int(a.id), int(tid)):
 			spouse = int(tid)
 			break
 	RelationshipBits.set_flag(int(a.id), spouse, "partner", true, false)

@@ -262,6 +262,8 @@ func get_rel(other_id: int, track: String) -> float:
 	return float((relationships.get(other_id, {}) as Dictionary).get(track, 0.0))
 
 func add_rel(other_id: int, track: String, delta: float) -> void:
+	if track == "romance" and delta > 0.0 and not RomanceRules.allowed(id, other_id):    # minors and family never gain romance
+		return
 	if not relationships.has(other_id):
 		relationships[other_id] = {}
 	var r: Dictionary = relationships[other_id]

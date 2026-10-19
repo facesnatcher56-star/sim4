@@ -109,11 +109,11 @@ static func _evening(t: Dictionary) -> void:
 		return
 	var cands: Array = CruiseCrew.passengers(t)
 	for f in Cruise.members_aboard(t):
-		if str(f.age_stage) not in ["adult", "elder", "teen"] or cands.is_empty():
+		if str(f.age_stage) not in ["adult", "elder"] or cands.is_empty():
 			continue
 		if r.randf() > float(rc.get("chance_per_evening", 0.14)) * (1.4 if f.has_trait("romantic") or f.has_trait("flirty") else 1.0):
 			continue
-		var adults: Array = cands.filter(func(x): return str(x.age_stage) in ["adult", "elder"] and not CrimePerson.is_kin_or_partner(int(f.id), int(x.id)))
+		var adults: Array = cands.filter(func(x): return str(x.age_stage) in ["adult", "elder"] and not CrimePerson.is_kin_or_partner(int(f.id), int(x.id)) and RomanceRules.allowed(int(f.id), int(x.id)))
 		if adults.is_empty():
 			continue
 		var npc = adults[r.randi_range(0, adults.size() - 1)]
@@ -141,7 +141,7 @@ static func _evening(t: Dictionary) -> void:
 static func _affair(t: Dictionary, a, b, r: RandomNumberGenerator) -> void:
 	var c: Dictionary = t["cruise"]
 	var partners: Array = RelationshipBits.romantic_partners(int(a.id))
-	if partners.is_empty() or CrimePerson.is_kin_or_partner(int(a.id), int(b.id)):
+	if partners.is_empty() or not RomanceRules.allowed(int(a.id), int(b.id)) or CrimePerson.is_kin_or_partner(int(a.id), int(b.id)):
 		return
 	RelationshipService.add_both(int(a.id), int(b.id), "romance", 14.0)
 	var list: Array = RelationshipKnowledge.ensure_secrets(int(a.id))

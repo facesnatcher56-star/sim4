@@ -13,6 +13,8 @@ static func is_engaged(a: int, b: int) -> bool:
 ## Handles the `propose` interaction: partner -> engaged; everything else keeps the old sweetheart -> partner path.
 ## Returns "engaged" | "already_engaged" | "already_married" | "declined" | "too_soon" | "no_bond" | "accepted" (became partners).
 static func on_propose(a: int, b: int) -> String:
+	if not RomanceRules.allowed(a, b):
+		return "no_bond"
 	if FamilyTree.spouse_of(a) == b:
 		return "already_married"
 	if is_engaged(a, b):
@@ -22,6 +24,8 @@ static func on_propose(a: int, b: int) -> String:
 	return RelationshipBits.propose(a, b)
 
 static func propose_marriage(a: int, b: int) -> String:
+	if not RomanceRules.allowed(a, b):
+		return "no_bond"
 	if FamilyTree.spouse_of(a) == b:
 		return "already_married"
 	if is_engaged(a, b):
@@ -92,6 +96,8 @@ static func apply_surname(a: int, b: int, mode: String) -> void:
 ## Wedding. `a` is the proposer / actor. Returns true when they are now married.
 static func marry(a: int, b: int, surname_mode: String = "", force: bool = false) -> bool:
 	var mc: Dictionary = Family.cfg().get("marriage", {})
+	if not RomanceRules.allowed(a, b):
+		return false
 	var key: String = SysUtil.pair_key(a, b)
 	if not Family.engaged.has(key) and not force:
 		return false

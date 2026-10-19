@@ -274,6 +274,8 @@ static func _romance_with_local(t: Dictionary, f, r: RandomNumberGenerator) -> v
 	if locals.is_empty():
 		return
 	var npc2 = locals[r.randi_range(0, locals.size() - 1)]
+	if not RomanceRules.allowed(int(f.id), int(npc2.id)):
+		return
 	RelationshipService.add_both(int(f.id), int(npc2.id), "friendship", 12.0)
 	RelationshipService.add_both(int(f.id), int(npc2.id), "romance", 10.0)
 

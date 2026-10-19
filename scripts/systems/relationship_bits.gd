@@ -127,6 +127,8 @@ static func _refresh_bits(a: int, b: int) -> void:
 
 # ------------------------------------------------------------------ flags / status changes
 static func set_flag(a: int, b: int, flag: String, on: bool = true, announce: bool = true) -> void:
+	if on and RomanceRules.ROMANTIC_FLAGS.has(flag) and flag != "ex" and not RomanceRules.allowed(a, b):
+		return
 	var p: Dictionary = RelationshipService._pair(a, b)
 	var fl: Dictionary = p["flags"]
 	if on:
@@ -177,6 +179,8 @@ static func _is_bonded(a: int) -> bool:
 
 ## Auto-promote mutual crushes to sweethearts and long-time sweethearts to partners.
 static func auto_status(a: int, b: int) -> void:
+	if not RomanceRules.allowed(a, b):
+		return
 	var c: Dictionary = RelationshipService.cfg()
 	var sw: Dictionary = c.get("sweetheart", {})
 	var p: Dictionary = RelationshipService._pair(a, b)
@@ -200,6 +204,8 @@ static func auto_status(a: int, b: int) -> void:
 
 ## Explicit proposal: sweetheart -> partner, partner -> spouse. Returns "accepted" | "declined" | "too_soon" | "no_bond".
 static func propose(a: int, b: int) -> String:
+	if not RomanceRules.allowed(a, b):
+		return "no_bond"
 	var p: Dictionary = RelationshipService._pair(a, b, false)
 	if p.is_empty():
 		return "no_bond"
