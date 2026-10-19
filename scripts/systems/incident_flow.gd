@@ -32,7 +32,8 @@ static func start(def_id: String, subj, immediate: bool = false) -> Dictionary:
 	if str(w.get("thought", "")) != "" and subj.folk != null:
 		SimEnv.emit("thought", int(subj.folk.id), str(w["thought"]))
 	if lead > 0 and subj.is_full() and not immediate:
-		Incidents.pending.append({"id": def_id, "kind": subj.kind, "sid": subj.id, "lot_key": subj.lot_key, "due_min": SysUtil.now() + lead, "defused": false})
+		Incidents.pending.append({"id": def_id, "kind": subj.kind, "sid": subj.id, "lot_key": subj.lot_key, "due_min": SysUtil.now() + lead, "defused": false,
+			"help_min": SysUtil.now() + int(w.get("auto_help_min", 0)) if int(w.get("auto_help_min", 0)) > 0 else -1})
 		Incidents._counter(def_id)["warned"] = int(Incidents._counter(def_id)["warned"]) + 1
 		toast(def, subj, IncidentEffects.fill(str(w.get("text", "")), ctx), str(w.get("kind", "warn")))
 		return {"ok": true, "mode": "warned", "text": str(w.get("text", ""))}
@@ -43,6 +44,7 @@ static func process_pending() -> void:
 	var keep: Array = []
 	for p in Incidents.pending:
 		if int(p["due_min"]) > now:
+			_auto_help(p, now)
 			keep.append(p)
 			continue
 		var def: Dictionary = IncidentDefs.get_def(str(p["id"]))
@@ -60,6 +62,15 @@ static func process_pending() -> void:
 			continue
 		resolve(str(p["id"]), subj, false, false)
 	Incidents.pending = keep
+
+## Warned folk or their household act on their own part-way through the lead time: the household calls the doctor when it can pay
+## (a poor household stays at risk until the player finds the money or the hospital route).
+static func _auto_help(p: Dictionary, now: int) -> void:
+	var at: int = int(p.get("help_min", -1))
+	if at < 0 or at > now or bool(p.get("defused", false)) or str(p["kind"]) != "folk":
+		return
+	p["help_min"] = -1
+	Incidents.call_doctor(int(p["sid"]))
 
 static func _rebuild(p: Dictionary):
 	match str(p["kind"]):

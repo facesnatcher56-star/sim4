@@ -15,7 +15,8 @@
    "prevent": [
     {"label": "Recent check-up", "when": [{"has_buff": "checked_up"}], "mult": 0.4}
    ],
-   "warning": {"lead_min": 90, "thought": "My chest feels so tight...", "text": "{name} looks pale and keeps holding their chest. A doctor might help.", "kind": "warn", "doctor_can_defuse": true,
+   "defuse": [{"has_buff": "in_hospital"}],
+   "warning": {"lead_min": 720, "auto_help_min": 360, "thought": "My chest feels so tight...", "text": "{name} looks pale and keeps holding their chest. A doctor or the hospital can help: there are some hours to act.", "kind": "warn", "doctor_can_defuse": true,
     "averted": "The doctor arrived in time and {name} is resting safely."},
    "outcomes": [
     {"weight": 5, "when": [{"lacks_buff": "checked_up"}], "effects": [{"kill": "heart_attack"}]},
