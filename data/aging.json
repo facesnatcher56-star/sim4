@@ -18,7 +18,9 @@
     "start_day": 202,
     "chance_per_day": 0.03,
     "ramp_per_day": 0.004,
-    "max_day": 262
+    "max_day": 262,
+    "broken_heart_chance": 0.1,
+    "same_night_delay": 0.9
   },
   "pregnancy": {
     "days": 3,

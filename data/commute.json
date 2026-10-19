@@ -4,6 +4,8 @@
  "buffer_min": 10,
  "grace_min": 5,
  "miss_after_min": 90,
+ "miss_plan_mult": 2.0,
+ "lead_mult": 1.15,
  "home_timeout_min": 240,
  "late": {"perf_per_10_min": 1.5, "perf_max": 10, "grade_loss": 1.5, "chronicle_min": 45},
  "traffic_wait_min": 1.5,

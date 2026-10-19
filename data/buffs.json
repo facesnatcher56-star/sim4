@@ -80,6 +80,7 @@
  "confident_glow": {"label": "Confident", "mood": {"confident": 3}, "duration_min": 240, "thought": "I've got this."},
  "playful_streak": {"label": "Playful", "mood": {"playful": 2}, "duration_min": 180, "thought": "Feeling silly!"},
  "smitten": {"label": "Smitten", "mood": {"flirty": 3, "dazed": 2}, "duration_min": 360, "autonomy_mult": {"flirt": 1.4}, "thought": "I can't stop thinking about them."},
+ "tempted": {"label": "Tempted", "mood": {"flirty": 2, "anxious": 1}, "duration_min": 10080, "autonomy_mult": {"flirt": 1.3}, "thought": "I should not be thinking about them."},
  "jealous_pang": {"label": "Jealous", "mood": {"jealous": 3, "tense": 1}, "duration_min": 240, "autonomy_mult": {"conflict": 1.3}, "thought": "I don't like how close those two are."},
  "heartbroken": {"label": "Heartbroken", "mood": {"sad": 4, "lonely": 2}, "duration_min": 4320, "need_decay_mult": {"fun": 1.2, "social": 1.1}, "thought": "It hurts so much."},
  "cheated_on": {"label": "Betrayed", "mood": {"angry": 3, "sad": 2}, "duration_min": 2880, "autonomy_mult": {"conflict": 1.4}, "thought": "How could they?"},

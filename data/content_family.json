@@ -2,7 +2,7 @@
  "_doc": "Family-layer content merged into the shared tables by ContentMerge (scripts/systems/content_merge.gd, family_content.gd). The crib object itself is defined in objects.json; this only makes it offer sleep_crib.",
  "interactions": {
   "feed_baby": {
-   "label": "Feed Little One",
+   "label": "Feed Them",
    "kind": "social",
    "target": "folk",
    "duration_min": 10.0,
@@ -31,6 +31,9 @@
       },
       {
        "has_buff": "stage_child"
+      },
+      {
+       "has_buff": "stage_teen"
       }
      ]
     },

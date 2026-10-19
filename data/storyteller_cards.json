@@ -50,7 +50,7 @@
       "arrive": "flame", "text": "{other}, an old flame, has turned up in town and left a note for {name}.",
       "signs": ["Someone from the past was asking about {name} at the café."],
       "options": [
-        {"id": "coffee", "label": "Catch up over coffee", "fx": [{"visit": 90}, {"friend": 10}, {"jealous_if_partnered": true}], "text": "{name} and {other} caught up over coffee."},
+        {"id": "coffee", "label": "Catch up over coffee", "fx": [{"visit": 90}, {"friend": 10}, {"jealous_if_partnered": true}, {"tempt": true}], "text": "{name} and {other} caught up over coffee."},
         {"id": "decline", "label": "Politely decline", "fx": [{"friend": -3}], "text": "{name} wished {other} well and kept things short."}],
       "default": "decline", "auto": "decline"},
     "rival_next_door": {"title": "A rival moves in", "size": "medium", "tone": "bad", "cat": "social", "scope": "home", "weight": 0.9, "tags": ["social"], "when": {"adult": true},

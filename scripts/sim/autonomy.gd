@@ -208,6 +208,7 @@ static func gather(folk, closed = null) -> Array:
 		for e in offered[def_id]:
 			out.append({"id": e[0], "target_id": oid, "kind": "object", "obj": o, "folk": null, "pk": e[1]})
 	var others: Array = WorldIface.folk_near(folk)
+	var partners: Variant = null      # committed partners, looked up once and only when a romantic interaction is considered (Straying)
 	for e in _folk_self_defs(defs):
 		var iid: String = e[0]
 		var d2: Dictionary = e[1]
@@ -222,8 +223,10 @@ static func gather(folk, closed = null) -> Array:
 		if is_self:
 			out.append({"id": iid, "target_id": -1, "kind": "none", "obj": null, "folk": null, "pk": pk})
 		else:
+			if romantic and partners == null:
+				partners = RelationshipRomance.exclusive_partners(int(folk.id))
 			for f2 in others:
-				if f2.id != folk.id and not (romantic and not RomanceRules.allowed(int(folk.id), int(f2.id))):
+				if f2.id != folk.id and not (romantic and not (RomanceRules.allowed(int(folk.id), int(f2.id)) and Straying.may_flirt(int(folk.id), int(f2.id), partners))):
 					out.append({"id": iid, "target_id": int(f2.id), "kind": "folk", "obj": null, "folk": f2, "pk": pk})
 	return out
 
