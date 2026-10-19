@@ -24,3 +24,6 @@ It kills Godot immediately on SCRIPT ERROR / Parse Error / Failed to load script
 3. The sim is separate from the view: no sim decisions in view code; view state is never saved as sim state.
 4. Everything is serialisable at any minute (mid-interaction, mid-trip, mid-fire, mid-trial) and loads identically.
 5. Keep `household_id`s generic: use the `players` table (player id -> household id) once it exists; never assume household 1 is the player in new code.
+
+## New save blocks (all agents)
+If you add a new top-level block to `SaveLoad.snapshot()["systems"]`, ALSO add its key to `town_system_keys` in `data/share_schema.json`, or exported towns containing it fail validation ("unexpected system"). `share_town_test` catches this.

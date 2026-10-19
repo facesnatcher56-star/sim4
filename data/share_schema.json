@@ -1,4 +1,4 @@
-{
+﻿{
   "format_version": 1,
   "household_ext": "sim4household",
   "town_ext": "sim4town",
@@ -31,7 +31,7 @@
     "objects": ["plant", "rug", "lamp", "mirror", "guitar_stand", "telescope", "coffee_maker", "tea_kettle", "nightstand"]
   },
   "town_top_keys": ["format", "version", "label", "day", "clock_total", "next_folk_id", "world", "folk", "systems", "household_name", "colors"],
-  "town_system_keys": ["economy", "careers", "relationships", "goals", "aging", "story", "away", "commute", "family", "babycare", "weather", "neighborhood", "scenario", "incidents", "justice", "fire", "share"],
+  "town_system_keys": ["economy", "careers", "relationships", "goals", "aging", "story", "away", "commute", "family", "babycare", "weather", "neighborhood", "scenario", "incidents", "justice", "fire", "share", "econ"],
   "household_keys": ["format", "version", "title", "day", "members", "relations", "parents", "history", "legacy"],
   "member_keys": ["ref", "name", "stage", "age_days", "traits", "appearance", "skills", "aspiration", "memories", "career", "level", "birth_doy"],
   "relation_kinds": ["spouse", "partner", "family", "friend"],
