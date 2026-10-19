@@ -89,11 +89,12 @@ old signal order. To add a system's hook: add ONE row to `systems_rows()` (name,
 | minute | 310 | Vacation | Vacation | minute | NORMAL | trips on absolute due minutes; idle = one emptiness test |
 | minute | 320 | NeighborhoodService.after | NeighborhoodService | minute | NORMAL | Crowd.update loops only the lots near an anchor (Tiers.lot_distances, cached); crowd checks per lot every 10 min; NEAR / TOWN crowd on their turn, they leave / arrive without walks; far lots dropped |
 | minute | 330 | WeatherFolk | WeatherFolk | minute | NORMAL | ACTIVE every minute, NEAR / TOWN folk on their turn with the exposure scaled to the period |
+| minute | 215 | WeatherWorld.rain | WeatherWorld | minute | NORMAL | places only: lots near an anchor catch the owed rain on their plants, 2+ lots per minute (RainSlices); idle = zero; far lots wait for the daily catch-up |
 | minute | 340 | LevelSystems | LevelSystems | minute | NORMAL | multi-floor buildings with folk (ACTIVE / NEAR) |
 | minute | 400 | SocialDynamics.on_minute | SocialDynamics | minute | LOW | mood sync for the due folk (ACTIVE every minute); contagion only inside the ACTIVE set; conversations in progress |
 | hour | 200 | hour/ensure_registered | SystemsManager | hour | NORMAL | residents only |
 | hour | 205 | DaySlices | DaySlices | hour | NORMAL | runs 1/24 of every registered daily pass each hour (relationship decay, grudges, ...); idle = one call |
-| hour | 210 | hour/WeatherWorld.on_hour | WeatherWorld | hour | LOW | garden plots always; plants only near an anchor (far lots count owed rain hours, caught up daily); weather steps are world-level |
+| hour | 210 | hour/WeatherWorld.on_hour | WeatherWorld | hour | LOW | garden plots always; plants: every lot only counts an owed rain hour (RainSlices waters the near ones over the next minutes, the daily catch-up the rest); weather steps are world-level |
 | hour | 220 | hour/Holidays.on_hour | Holidays | hour | LOW | world-level |
 | hour | 230 | hour/Goals.on_hour | Goals | hour | LOW | residents only (ACTIVE) |
 | hour | 240 | hour/Story.on_hour | Story | hour | LOW | STATISTICAL townies: hourly dice |
@@ -193,7 +194,7 @@ incidents / accident / health / crime / crime_rates / determinism / weather / fi
 - Fire / smoke / rooms are still world-level (they only cost where something burns); `WorldRooms` flood fills are not lazy per lot yet.
 - Other per-object logic (spoilage, broken / dirty ticks) does not loop all objects today, so it has no place-tier gating yet; weather plants are the first place-tier system.
 - The remaining midnight jobs (Careers, Story, Economy, MarketTick, CaseInvestigation) and the crime event handlers (burglary, street robbery, vandalism: 0.3-0.5 s per hit) need slicing / cheaper candidate search.
-- The camera focus hook (`Tiers.set_focus`) is available but not wired to the camera yet (the anchors are the controlled folk).
+- (Done in 17.4) The camera focus: `CameraFocus` (scripts/sim/camera_focus.gd) makes where a camera looks a Tiers anchor, see "Round 4" below.
 - Vacation extras (trip zone) are ACTIVE by rule; TownSim does not drive commute paths (CommuteTownies windows are its schedule).
 
 ### Round 3 (2026-10-19, after 17.3): cheaper dice, pickers, rain and midnight
@@ -232,8 +233,46 @@ What changed (the rules in the checklist above came out of it):
 7. **Rain**: `WeatherWorld._hourly_objects` groups the rain index by lot once; a rainy hour waters the plants of the lots near an anchor and counts one
    deferred hour per far lot, instead of visiting every plant on the map to find out that it is far (150-200 ms per rainy hour before).
 
-Not done: the town-level budget (1 ms per frame; still about 2.4) and the household `choose` (17.4) are untouched; the NEAR / TOWN ticks of the
+Not done (17.4 below took choose and the spikes): the town-level budget (1 ms per frame; still about 2.4); the NEAR / TOWN ticks of the
 director (about 0.3 ms per tick, 11-14 ticks a minute) and `accident/scan` (about 120 us per person) are the next per-minute items.
+
+### Round 4 (task 17.4): worst minute, camera focus, household `choose`
+
+Big town, 3 game days, same machine under load (other agents' Godot runs alongside; compare the counts and the spikes, not the absolutes). "before" is this branch before 17.4
+(origin/main b5f2fbb: 19.8 ms/min, worst minute 310 ms); "before, rebased" is the same code after rebasing onto the household-chaos incidents (task 07), which added four hourly dice
+whose `chaos` condition scanned every object of the town per roll; "after" is 17.4.
+
+| | before | before, rebased | after | budget |
+|---|---|---|---|---|
+| worst game minute | 310 ms (rain: `weather/objects` 220 ms in each of the first rainy hours) | 200 ms (chaos dice at :01) | **152 ms** | 12 |
+| the rain minute (every rainy hour) | 220-390 ms | | 39 ms peak (`systems/WeatherWorld.rain`) | |
+| crime event hit (burglary / robbery / vandalism, one pick of a burglar) | 22 ms quiet machine (130-480 ms in a loaded slice) | | 8 ms (about 60 ms loaded) | |
+| `CaseEvidence.suspects` (daily, per open case) | about 25 ms | | 9 ms | |
+| `Story.on_day` / `Careers.on_day` (midnight, LOW) | 34-56 ms / 43-72 ms | | 8-14 ms / 27 ms | |
+| household `choose` (benchmark) | 6.8 ms | | 6.8 ms (fresh state: 9.3 -> 9.0 with 230 candidates; 5-8% with a populated variety table) | 3 |
+| ms per game minute / frame avg at speed 3 | 19.8 / 3.96 ms | 22.7 / 4.53 ms | 21.6 / 4.32 ms (the town has grown by 4 incident defs and 50 more folk in the world) | 20 / 4 |
+
+What changed:
+1. **Rain**: a state write drops the lot's room partition (decor depends on state), and `is_outdoor` per plant rebuilt it, so a park with 30 plants cost 90 ms and the first plant test of
+   every lot paid a room build, every rainy hour. Now `_hourly_objects` only counts one owed hour per lot (`Weather._rain_deferred`, saved), `RainSlices` (a minute row, gated by "something is owed")
+   waters the lots near an anchor 2+ per minute (outdoor tests first, then the writes: `WeatherWorld.water_lot`), and the daily catch-up works per lot, not per plant. Without a scheduler
+   (tests) the near lots are watered at once as before.
+2. **Crime hits**: `conscience` called `close_alive` which asked the pair table once per rank (5 x `bit_for` per pair); `RelationshipBits.others_by_bits` does one pass. 48 candidate burglars per pick:
+   18 ms -> 6 ms. `CaseEvidence.suspects` counts company at a place and gossip about a person once per case instead of once per suspect (O(n^2) -> O(n)); same scores (`case_evidence_scan_test`).
+3. **Midnight**: `Story._life_events` tests the cheap `partner` flag before the townie lookups (same pairs, same order, same dice); `ContentRules.on_day` skips object kinds without a daily rule.
+4. **Chaos dice**: `Economy.objects_of` ran `refresh_objects` (two scans of every object of the town) on every call; the books now refresh only when `World._next_id` / object count change, and
+   `IncidentSubject.household_objects` caches the household's objects for one incident slice (the chaos conditions asked for them 3-4 times per roll).
+5. **Camera focus**: see below. 6. **choose**: `StoryPacing.interaction_mult`, `SkillInterest.mult` (per-decision memo in the profile cache), `AutonomyVariety.exempt` (memo by definition) and the
+   profile key per object kind are computed once instead of once per interaction / candidate.
+
+**Camera focus (the player sees what they look at).** `CameraFocus.look(source, tile)` sets an extra Tiers anchor where a camera looks: "cam" is the local camera (`LotView._apply_camera`; the
+spectate camera of `CoopWaiting` also calls it when following a folk so the place is simulated before the camera glide arrives), `p<id>` is a remote co-op player's camera: the client sends
+`CoopProto.CAMERA` (tile, at most every 2 s, only when the focus moved), the host keeps one source per connected player and drops it when they leave (protocol version 3). The focus moves only after
+6+ tiles of camera travel, so panning does not reclassify the town. Only the local "cam" focus is saved. A far lot someone watches is therefore ACTIVE / NEAR (full sim), not TOWN / STATISTICAL.
+
+Not done: `choose` is still ~6-9 ms (gather ~1/3: `_closed_reason` per interaction, pass 1 ~1/3: one `_profile` per distinct (interaction, object kind), path queries ~1/6); getting to 3 ms needs a
+cross-decision cache of the need-independent part of the profiles or a candidate index per lot. `Economy.objects_of` still walks every object once per call (5 ms in the big town): an owner index
+needs `Economy.owner` writes (aging, apartments, wills, burglary) to go through one setter. The remaining spikes (110-150 ms): `Crowd.update` spawn waves around 12:00, the sliced incident dice, `SocialDynamics.on_hour`.
 
 ## Scale benchmark
 

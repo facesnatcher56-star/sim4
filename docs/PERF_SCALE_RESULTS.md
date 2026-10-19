@@ -319,3 +319,47 @@ Incidents slice (300-500 ms), midnight Careers / Story / CaseInvestigation (abou
 | leaf | weather/objects | 0.288 | 1243 | 71 |
 | leaf | incdef/slip_fall | 0.282 | 1218 | 4320 |
 | leaf | social/conversation | 0.275 | 1188 | 4261 |
+
+## 2026-10-19 06:53:53  big  (63 lots, 196 townies, map (320, 272), 3.0 days)
+
+- **ms/game-min 21.60** | frame avg 4.32 ms (budget 4) | worst minute 152.4 ms (budget 12) | p99 86.9 | median 16.40 | town-level 2.87 ms/frame (budget 1) | by day: 16.21, 23.84, 24.77
+- tiers (avg active / near / town / statistical): [10.5, 37.0, 79.4, 70.9]; ACTIVE max 60 (cap 60); folk ticked per game minute 17.3; at the end [36, 5, 117, 39]
+- folk in world avg 48.0 / max 157; crowd+staff avg 46.1 / max 154; path queries 2695 (0.62/game-min, 74741 fills); choose(household) 6.84 ms, 6.0 paths, 2024 cands; choose(npc) 22.66 ms, 6.0 paths, 2024 cands; 
+- nodes max 6 / end 6 (day 1: 6), orphans 1, objects 11384, resources 293, static mem 166 MB (day 1 149 MB); build 2.2 s, run 100 s wall
+
+- slow minutes (> 30 ms): Day 3 12:01  152 ms: systems/Incidents.slice 60; systems/NeighborhoodService.after 32; after/Crowd.update 32; crowd/lots 30; systems/SimDirector 29 / Day 2 17:01  144 ms: systems/Incidents.slice 56; systems/NeighborhoodService.after 44; after/Crowd.update 44; crowd/lots 43; hour/SocialDynamics.on_hour 27 / Day 2 12:01  142 ms: systems/Incidents.slice 53; systems/SimDirector 45; systems/NeighborhoodService.after 19; after/Crowd.update 19; crowd/lots 17 / Day 3 15:01  132 ms: systems/Incidents.slice 50; hour/SocialDynamics.on_hour 42; systems/SimDirector 20; systems/NeighborhoodService.after 12; after/Crowd.update 12 / Day 2 13:02  131 ms: systems/NeighborhoodService.after 78; after/Crowd.update 78; crowd/lots 77; crowd/lot pick 32; hour/SocialDynamics.on_hour 24 / Day 3 17:01  131 ms: systems/NeighborhoodService.after 52; after/Crowd.update 52; crowd/lots 50; systems/Incidents.slice 41; crowd/lot pick 29 / Day 2 12:12  130 ms: systems/NeighborhoodService.after 80; after/Crowd.update 80; crowd/drive 78; systems/SimDirector 18; systems/AccidentMarks 11 / Day 2 16:01  127 ms: systems/Incidents.slice 60; systems/NeighborhoodService.after 27; after/Crowd.update 26; crowd/lots 25; hour/SocialDynamics.on_hour 20
+
+- scheduler: 55 jobs, deferred 5334 (pending at end 8), timed fired 0; ms per game minute by system: SimDirector 7.23, AccidentMarks 3.14, NeighborhoodService 2.95, Incidents 2.86, SocialDynamics 2.02 (3992 deferred), WeatherFolk 0.76, Tiers 0.57, WeatherWorld 0.39 (74 deferred), DaySlices 0.32, TownSim 0.30 (961 deferred), CareerShifts 0.30, CrimeFlow 0.29 (3 deferred), LevelSystems 0.18, StoryVisits 0.02
+
+| group | row | ms/game-min | total ms | calls |
+|---|---|---|---|---|
+| listener | min  scheduler minute jobs (all but the director) | 13.773 | 59499 | 4320 |
+| listener | min  SimDirector | 7.227 | 31219 | 4320 |
+| systems | systems/AccidentMarks | 2.951 | 12750 | 4320 |
+| systems | systems/NeighborhoodService.after | 2.943 | 12716 | 4320 |
+| leaf | after/Crowd.update | 2.737 | 11825 | 4320 |
+| systems | systems/Incidents.slice | 2.482 | 10721 | 4320 |
+| leaf | accident/scan | 2.333 | 10079 | 4320 |
+| director | director/other needs/buffs/mood | 2.176 | 9402 | 61781 |
+| leaf | crowd/lots | 1.830 | 7908 | 4320 |
+| systems | systems/SocialDynamics.on_minute | 1.797 | 7765 | 4263 |
+| director | director/other emergency+interaction tick | 1.494 | 6456 | 61781 |
+| director | director/household fill (autonomy) | 1.395 | 6025 | 12960 |
+| director | director/other fill (autonomy) | 1.226 | 5297 | 61781 |
+| leaf | crowd/lot pick | 0.984 | 4251 | 1384 |
+| systems | systems/WeatherFolk | 0.762 | 3293 | 4320 |
+| leaf | social/sync+record | 0.743 | 3212 | 4263 |
+| leaf | social/contagion | 0.652 | 2818 | 4263 |
+| leaf | accident/rescue | 0.609 | 2630 | 4320 |
+| listener | hour scheduler hour jobs | 0.592 | 2558 | 72 |
+| director | director/household needs/buffs/mood | 0.579 | 2501 | 12960 |
+| systems | systems/Tiers | 0.570 | 2464 | 4320 |
+| leaf | crowd/drive | 0.569 | 2458 | 4320 |
+| leaf | choose/gather | 0.433 | 1872 | 496 |
+| leaf | choose/pass1 | 0.419 | 1811 | 496 |
+| leaf | choose/eval | 0.411 | 1777 | 496 |
+| leaf | social/conversation | 0.389 | 1682 | 4263 |
+| systems | systems/Incidents | 0.369 | 1595 | 4320 |
+| leaf | crowd/lot commute | 0.352 | 1520 | 3690 |
+| systems | systems/WeatherWorld.rain | 0.349 | 1508 | 3727 |
+| leaf | p1/_profile | 0.342 | 1476 | 26213 |
