@@ -152,6 +152,8 @@ static func state_label(c: Dictionary) -> String:
 static func close_for_death(c: Dictionary, pid: int) -> void:
 	if str(c["state"]) in ["closed"] or int(c.get("accused", -1)) != pid:
 		return
+	if CrimePerson.death_hidden(pid):
+		return          # the town has not found them yet: the case closes (with this line) on the day the death comes out (on_death)
 	c["state"] = "closed"
 	c["closed_day"] = SysUtil.day()
 	c["verdict"] = ""

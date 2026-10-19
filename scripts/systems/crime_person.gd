@@ -164,6 +164,10 @@ static func hide_death(pid: int, cause: String) -> void:
 		t["hidden_death"] = cause
 		t["missing_since"] = SysUtil.day()
 
+## Gone but not yet found: nobody in town knows this death, so no line of text may mention it.
+static func death_hidden(pid: int) -> bool:
+	return Story.townies.has(pid) and (Story.townies[pid] as Dictionary).has("hidden_death")
+
 ## The death becomes known: grief, grave, chronicle (townie), exactly as an ordinary death.
 static func reveal_death(pid: int) -> void:
 	if not Story.townies.has(pid):
