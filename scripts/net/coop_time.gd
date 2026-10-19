@@ -14,7 +14,8 @@ signal changed
 const PACES := {"relaxed": 0.5, "normal": 1.0, "quick": 2.0}
 const PACE_LABELS := {"relaxed": "Relaxed", "normal": "Normal", "quick": "Quick"}
 const SKIP_RATE := 45.0                 # game minutes per real second while skipping (30 to 60)
-const IDLE_S := 180.0                   # no input for this long = autopilot
+const IDLE_S := 180.0                   # default: no input for this long = autopilot (3 real minutes); the lobby can change it per session
+const IDLE_CHOICES := [60.0, 180.0, 300.0, 600.0, 0.0]      # lobby choices in real seconds; 0 = never (nobody goes on autopilot)
 const ALERT_HOLD_MIN := 20              # game minutes at normal pace after a big moment
 const VOTE_TIMEOUT_S := 30.0
 const SLEEP_IDS := ["sleep_bed", "nap_bed", "nap_sofa", "sleep_crib"]
@@ -24,6 +25,7 @@ static var active: bool = false
 
 var pace: String = "normal"
 var paused: bool = false
+var idle_s: float = IDLE_S               # this session's autopilot timeout (lobby setting); 0 = never
 var skipping: bool = false
 var reason: String = ""
 var vote: Dictionary = {}                # {} or {caller, yes: {pid: true}, at}
@@ -84,7 +86,7 @@ func forget(player_id: int) -> void:
 	_last_input.erase(player_id)
 
 func is_idle(player_id: int, now_s: float) -> bool:
-	return _last_input.has(player_id) and now_s - float(_last_input[player_id]) > IDLE_S
+	return idle_s > 0.0 and _last_input.has(player_id) and now_s - float(_last_input[player_id]) > idle_s
 
 func _name(player_id: int) -> String:
 	return str(name_fn.call(player_id)) if name_fn.is_valid() else Players.name_of(player_id)

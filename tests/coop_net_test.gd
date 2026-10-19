@@ -175,6 +175,8 @@ func _live_scenario(port: int) -> void:
 	_check(off == 0 and tiles.size() >= 4, "every household folk is where the host has it (%d of %d off)" % [off, tiles.size()])
 	_check(int(tick.get("deltas", 0)) >= 10, "state deltas arrived (%s)" % str(tick.get("deltas", 0)))
 	_check(int(tick.get("hc", 0)) >= 3 and int(tick.get("hm", 0)) == 0 and _ses.host.desyncs_total == 0, "periodic hash checks matched (checks %s, mismatches %s)" % [str(tick.get("hc", 0)), str(tick.get("hm", 0))])
+	print("  [coop_net] drift log: client resyncs=%d, hash checks=%d, mismatches=%d, host desyncs=%d, extra snapshots=%d, deltas=%d" % [int(tick.get("resyncs", -1)), int(tick.get("hc", 0)), int(tick.get("hm", 0)), _ses.host.desyncs_total, _ses.host.snapshots_sent - snaps0, int(tick.get("deltas", 0))])
+	_check(int(tick.get("resyncs", 0)) == 0, "the view never had to ask for a resync (%s): drift would show here" % str(tick.get("resyncs", 0)))
 	_check(_ses.host.snapshots_sent == snaps0 and int(tick.get("loads", 0)) == 2, "no extra snapshot was needed (loads %s)" % str(tick.get("loads", 0)))
 	_check(_ses.host.live.bytes_sent / maxi(1, _ses.host.live.deltas_sent) < 4000, "deltas are small (%d bytes on average)" % (_ses.host.live.bytes_sent / maxi(1, _ses.host.live.deltas_sent)))
 	if _ses.host.desyncs_total > 0:

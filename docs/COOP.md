@@ -172,3 +172,10 @@ line per folk: "Name: doing X (mood)"). It shows only while `CoopWaiting.waiting
 - **Visibility**: every story entry (a Dictionary `{kind, text, day, severity, subjects, lot}`) and every watched folk goes through `CoopVisibility.visible_to(player, entity)`. That
   function is the only place the tier rules live; nothing here checks households itself.
 - Nothing in the panel sends a command.
+
+## Autopilot timeout and loud alerts
+
+- The idle-to-autopilot timeout is a **lobby setting** (`CoopTime.idle_s`; choices 1 / 3 (default) / 5 / 10 minutes or Never, `CoopTime.IDLE_CHOICES`; `CoopSession.start_host(..., p_idle_s)`).
+- An alert for a player who is on autopilot carries `loud: true` in its data (`CoopHost.send_alert`). `CoopHud` then calls `CoopNotify.attention`: the window flashes in the task bar
+  (`DisplayServer.window_request_attention`), a two-note chime plays on the SFX bus (generated in memory; Mute and volume settings apply) and the alert box pulses (not with Reduce motion).
+- `coop_net_test` prints a drift line (`client resyncs, hash checks, mismatches, host desyncs, extra snapshots, deltas`) and fails when the client view had to ask for a resync.

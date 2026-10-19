@@ -143,6 +143,8 @@ func _show_alert(text: String, data: Dictionary) -> void:
 	_look_btn.visible = _alert_tile.x >= 0
 	_alert_until = Time.get_ticks_msec() / 1000.0 + 25.0
 	UIU.notify(text, "bad")
+	if bool(data.get("loud", false)):
+		CoopNotify.attention(self, _alert_box)          # on autopilot: flash the window, chime, pulse the box
 
 func _look() -> void:
 	var lv = hud.get("lot_view") if hud != null else null

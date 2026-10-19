@@ -21,6 +21,7 @@ var peers_box: VBoxContainer
 var info: Label
 var open_btn: Button
 var pace_opt: OptionButton
+var idle_opt: OptionButton
 var new_btn: Button
 var picker: CoopHouseholdPick
 var _asked := false
@@ -75,6 +76,13 @@ func _ready() -> void:
 		pace_opt.set_item_metadata(pace_opt.item_count - 1, k)
 	pace_opt.select(1)
 	host_box.add_child(pace_opt)
+	host_box.add_child(UIU.make_label("Autopilot: a player with no mouse or keyboard input for this long counts as away, so time can skip. Big moments then flash the window and chime for them.", 12, UITheme.MUTED))
+	idle_opt = OptionButton.new()
+	for secs in CoopTime.IDLE_CHOICES:
+		idle_opt.add_item("Never" if float(secs) <= 0.0 else "After %d minute%s without input" % [int(float(secs) / 60.0), "" if float(secs) < 120.0 else "s"], idle_opt.item_count)
+		idle_opt.set_item_metadata(idle_opt.item_count - 1, float(secs))
+	idle_opt.select(CoopTime.IDLE_CHOICES.find(CoopTime.IDLE_S))
+	host_box.add_child(idle_opt)
 	new_btn = _button("Start a new co-op town first...", _new_town, host_box)
 	new_btn.tooltip_text = "Pick a scenario and your household, then open Co-op again and choose 'The game I am playing now'"
 	open_btn = _button("Open the lobby", _open_lobby, host_box)
@@ -164,9 +172,10 @@ func _open_lobby() -> void:
 	if id > 0 and main_node != null and main_node.has_method("load_game"):
 		main_node.call("load_game", id)           # the same path as the Load button
 	var pace := str(pace_opt.get_item_metadata(pace_opt.selected))
-	var err := ses.start_host(CoopProto.DEFAULT_PORT, name_edit.text, CoopProto.MAX_PEERS, pace)
+	var idle_s := float(idle_opt.get_item_metadata(idle_opt.selected))
+	var err := ses.start_host(CoopProto.DEFAULT_PORT, name_edit.text, CoopProto.MAX_PEERS, pace, idle_s)
 	if err != "":
-		err = ses.start_host(CoopProto.DEFAULT_PORT + 1 + randi() % 50, name_edit.text, CoopProto.MAX_PEERS, pace)      # the usual port is taken: try a nearby one
+		err = ses.start_host(CoopProto.DEFAULT_PORT + 1 + randi() % 50, name_edit.text, CoopProto.MAX_PEERS, pace, idle_s)      # the usual port is taken: try a nearby one
 	if err != "":
 		status.text = err
 		return

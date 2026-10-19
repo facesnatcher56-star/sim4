@@ -119,6 +119,29 @@ func run() -> Array:
 	passive = {1: true}
 	t.update(CoopTime.IDLE_S + 7.0, 50)
 	_check(t.is_skipping(), "a dropped player (not in the connected list) is not waited for")
+	# the autopilot timeout is a session setting (lobby): shorter, longer, never
+	var c2 := _make()
+	var t2: CoopTime = c2[0]
+	_check(t2.idle_s == CoopTime.IDLE_S and CoopTime.IDLE_S == 180.0, "default autopilot timeout is 3 real minutes")
+	t2.idle_s = 60.0
+	t2.note_input(1, 0.0)
+	_check(not t2.is_idle(1, 59.0) and t2.is_idle(1, 61.0), "a 1 minute setting puts a player on autopilot after 61 s")
+	t2.idle_s = 0.0
+	_check(not t2.is_idle(1, 100000.0), "'never' means nobody goes on autopilot")
+	_check(CoopTime.IDLE_CHOICES.has(0.0) and CoopTime.IDLE_CHOICES.has(CoopTime.IDLE_S), "the lobby offers 'never' and the default")
+	# an alert for a player on autopilot is marked loud (window flash + chime); for an active player it is not
+	var host := CoopHost.new()
+	host.time = t2
+	t2.idle_s = 60.0
+	t2.note_input(1, 0.0)
+	host.tick(120.0)
+	var got: Array = []
+	host.local_alert.connect(func(_text, _f, data): got.append(data))
+	host.send_alert(1, "Fire!", -1)
+	t2.note_input(1, 119.0)
+	host.send_alert(1, "Fire again!", -1)
+	_check(got.size() == 2 and bool(got[0]["loud"]) and not bool(got[1]["loud"]), "alert data says 'loud' only for a player on autopilot (%s)" % str(got))
+	_check(CoopNotify.chime().data.size() > 1000, "the chime sound is generated in memory")
 	# state for clients
 	var s := t.state()
 	_check(s.has("pace") and s.has("skip") and s.has("paused") and s.has("reason") and CoopProto.encode(CoopProto.TIME, {"d": s}).size() > 0, "state() fits a TIME message")

@@ -349,7 +349,8 @@ func _vote(p: Dictionary, m: Dictionary) -> void:
 ## Tell one player about a big moment (stage 3): a toast with a camera offer. Player 1 (the host) is told locally.
 func send_alert(pid: int, text: String, folk_id: int, kind: String = "alert") -> void:
 	var f = WorldIface.get_folk(folk_id)
-	var data := {"player_id": pid, "folk_id": folk_id, "x": f.tile.x if f != null else -1, "y": f.tile.y if f != null else -1}
+	var loud: bool = time != null and time.is_idle(pid, _now)        # on autopilot: flash the window and chime, not only a toast
+	var data := {"player_id": pid, "folk_id": folk_id, "x": f.tile.x if f != null else -1, "y": f.tile.y if f != null else -1, "loud": loud}
 	if pid == Players.LOCAL:
 		local_alert.emit(text, folk_id, data)
 		return

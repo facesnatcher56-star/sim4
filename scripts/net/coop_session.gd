@@ -57,7 +57,7 @@ func is_active() -> bool:
 
 # ------------------------------------------------------------------ host
 ## Open a lobby. Returns "" on success or a plain-language reason.
-func start_host(p_port: int, p_name: String, max_players: int = CoopProto.MAX_PEERS, p_pace: String = "normal") -> String:
+func start_host(p_port: int, p_name: String, max_players: int = CoopProto.MAX_PEERS, p_pace: String = "normal", p_idle_s: float = CoopTime.IDLE_S) -> String:
 	stop()
 	peer = ENetMultiplayerPeer.new()
 	var err := peer.create_server(p_port, 8, CHANNELS)
@@ -73,7 +73,7 @@ func start_host(p_port: int, p_name: String, max_players: int = CoopProto.MAX_PE
 	host.send_fn = func(id: int, b: PackedByteArray, ch: int): _send_to(id, b, ch)
 	host.drop_fn = func(id: int): if peer != null: peer.disconnect_peer(id, false)
 	host.lobby_changed.connect(func(): changed.emit())
-	_start_time(p_pace)
+	_start_time(p_pace, p_idle_s)
 	error_text = ""
 	changed.emit()
 	return ""
@@ -116,9 +116,10 @@ func _connect_client(retry: bool) -> void:
 		client.mark_connecting("Connecting to %s:%d..." % [address_ip, port])
 
 ## Stage 3: the host owns the clock. One fixed pace, auto-skip, alerts, pause votes (CoopTime); live deltas and alerts are wired here.
-func _start_time(p_pace: String) -> void:
+func _start_time(p_pace: String, p_idle_s: float = CoopTime.IDLE_S) -> void:
 	time = CoopTime.new()
 	time.set_pace(p_pace)
+	time.idle_s = maxf(p_idle_s, 0.0)
 	time.players_fn = host.connected_pids
 	time.alert_fn = host.send_alert
 	time.changed.connect(host.broadcast_time)
