@@ -22,6 +22,9 @@ static func drive(now: int) -> void:
 	for f in Crowd.crowd_folk():
 		if f.has_meta("leaving"):
 			continue
+		var per: int = Tiers.period_of(int(f.id))      # NEAR / TOWN: decisions every few minutes (the gaps between activities are 4-12 min anyway)
+		if per > 1 and (now + int(f.id)) % per != 0:
+			continue
 		f.idle_until_min = NEVER
 		if f.current != null or not f.queue.is_empty():
 			continue

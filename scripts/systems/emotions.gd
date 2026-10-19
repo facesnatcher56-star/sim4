@@ -260,7 +260,7 @@ static func contagion_tick() -> int:
 	if not bool(c.get("enabled", true)):
 		return 0
 	var caught := 0
-	var folks: Array = WorldIface.all_folk()
+	var folks: Array = Tiers.active()          # contagion needs people close together to see each other: the ACTIVE set only (17.3)
 	var moods: Array = c.get("moods", [])
 	var radius: float = float(c.get("radius", 4.5))
 	var min_i: int = int(c.get("min_intensity", 2))
@@ -276,9 +276,12 @@ static func contagion_tick() -> int:
 				continue
 			if str(dst.mood_name) == str(src.mood_name) and int(dst.mood_intensity) >= int(src.mood_intensity):
 				continue
-			var in_circle: bool = Conversation.same_circle(int(src.id), int(dst.id))
-			if not in_circle and Vector2(dst.tile - src.tile).length() > radius:
+			var far: bool = Vector2(dst.tile - src.tile).length() > radius
+			var in_circle: bool = far and Conversation.same_circle(int(src.id), int(dst.id))
+			if far and not in_circle:
 				continue
+			if not far:
+				in_circle = Conversation.same_circle(int(src.id), int(dst.id))
 			var p: float = float(c.get("chance_per_min", 0.035)) * (float(c.get("circle_mult", 3.0)) if in_circle else 1.0)
 			p *= susceptibility(dst, str(src.mood_name)) * float(src.mood_intensity) / 2.0
 			if SysUtil.rng.randf() < p:

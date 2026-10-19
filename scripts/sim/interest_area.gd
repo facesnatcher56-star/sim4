@@ -18,11 +18,15 @@ const FAR := 1 << 20
 static var _info: Dictionary = {}       # lot id -> {"rect": Rect2i, "open": bool}
 static var _rg_id: int = 0
 static var _rg_n: int = -1
+static var _list: Array = []            # [[lot id, Rect2i]] in lot table order
+static var _list_key: int = -1
 
 static func reset() -> void:
 	_info.clear()
 	_rg_id = 0
 	_rg_n = -1
+	_list = []
+	_list_key = -1
 
 static func _regions():
 	var w = WorldIface.world()
@@ -99,3 +103,14 @@ static func lots_within(tile: Vector2i, radius: int) -> Array:
 		if NeighborhoodLots.distance_to(tile, lot_id) <= radius:
 			out.append(lot_id)
 	return out
+
+## Every lot as [id, rect] in lot table order (cached; rebuilt when the lot table or the region table changes).
+static func lot_list() -> Array:
+	var rg = _regions()
+	var key: int = Neighborhood.lots().size() * 100003 + (0 if rg == null else (rg.regions as Dictionary).size()) + (0 if rg == null else rg.get_instance_id() % 997) * 7
+	if key != _list_key:
+		_list_key = key
+		_list = []
+		for lot_id in Neighborhood.lot_ids():
+			_list.append([lot_id, NeighborhoodLots.rect_of(lot_id)])
+	return _list

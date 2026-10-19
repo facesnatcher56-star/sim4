@@ -242,12 +242,12 @@ const STRANGER_PERIOD := 5
 static func on_minute(_total: int = 0) -> void:
 	var t := PerfProf.start()
 	var now: int = SysUtil.now()
-	for f in WorldIface.all_folk():
+	for f in Tiers.due_folk(now):          # tiers (17.3): moods only change when SimDirector ticks a person (ACTIVE: every minute, NEAR / TOWN: their turn)
 		if SysUtil.is_resident(f):
 			Emotions.sync(f)
 			Emotions.record_minute(f)
-		elif int(f.household_id) > 0 or not f.has_meta("visitor") or (now + int(f.id)) % STRANGER_PERIOD == 0:
-			Emotions.sync(f)             # strangers' moods only change when SimDirector ticks them (every STRANGER_PERIOD minutes)
+		else:
+			Emotions.sync(f)
 	PerfProf.stop("social/sync+record", t)
 	t = PerfProf.start()
 	Emotions.contagion_tick()

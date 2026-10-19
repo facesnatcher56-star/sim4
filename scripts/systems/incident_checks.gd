@@ -9,21 +9,41 @@ extends RefCounted
 ##            chance min(1, lot_hit x per_lot risk factor), outcome chosen per lot with that lot's own conditions.
 ## Subjects in hospital are skipped. Exposure (subject-years that passed the conditions) is counted for the statistical tests.
 
+## The candidate lists are built ONCE per run (not once per incident def) and rebuilt only after a hit changed the world (task 17.3). Same lists, same
+## order, same dice => the same outcomes as building them per def.
+static var _cache: Dictionary = {}
+static var _stale := true
+
+static func _list(kind: String) -> Array:
+	if _stale:
+		_cache.clear()
+		_stale = false
+	if not _cache.has(kind):
+		match kind:
+			"folk":
+				_cache[kind] = folk_subjects(true)
+			"townie":
+				_cache[kind] = townie_subjects()
+			_:
+				_cache[kind] = lot_subjects()
+	return _cache[kind]
+
 static func run(check: String) -> void:
 	IncidentDefs.ensure()
+	_stale = true
 	for id in IncidentDefs.ids():
 		var def: Dictionary = IncidentDefs.defs[id]
 		if str(def["check"]) != check:
 			continue
 		match str(def["scope"]):
 			"folk":
-				for s in folk_subjects(true):
+				for s in _list("folk"):
 					_roll(id, def, s)
 			"townie":
-				for s2 in townie_subjects():
+				for s2 in _list("townie"):
 					_roll(id, def, s2)
 			"lot":
-				for s3 in lot_subjects():
+				for s3 in _list("lot"):
 					_roll(id, def, s3)
 			"town":
 				_town(id, def)
@@ -37,6 +57,7 @@ static func _roll(id: String, def: Dictionary, s) -> void:
 	c["exposure"] = float(c["exposure"]) + 1.0 / IncidentRisk.checks_per_year(check)
 	var p: float = IncidentRisk.rate_to_chance(IncidentRisk.effective_rate(def, s) * StoryPacing.incident_mult(id, s), check)
 	if p > 0.0 and Incidents.rng.randf() < p:
+		_stale = true
 		IncidentFlow.start(id, s)
 
 static func _town(id: String, def: Dictionary) -> void:
@@ -50,6 +71,7 @@ static func _town(id: String, def: Dictionary) -> void:
 	var p: float = IncidentRisk.rate_to_chance(IncidentRisk.effective_rate(def, dummy), check)
 	if p <= 0.0 or Incidents.rng.randf() >= p:
 		return
+	_stale = true
 	for ls in lot_subjects():
 		var hit: float = minf(float(def.get("lot_hit", 1.0)) * IncidentRisk.risk_factor(def, ls, "lot"), 1.0)
 		if hit > 0.0 and Incidents.rng.randf() < hit:

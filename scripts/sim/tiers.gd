@@ -47,6 +47,10 @@ static func reset() -> void:
 	anchors = []
 	controlled_ids = []
 	_anchor_sig = 0
+	_due_min = -1
+	_lotd_key = -1
+	_lotd = {}
+	_anchors_dirty = true
 	InterestArea.reset()
 	TownSim.reset()
 	stats = {"refresh": 0, "usec": 0, "changes": 0, "promotions": 0, "demotions": 0, "capped": 0, "resyncs": 0, "classified": 0, "reused": 0}
@@ -123,8 +127,12 @@ static func focus_tile() -> Vector2i:
 # ------------------------------------------------------------------ world membership (hooks from World / StubWorld add_folk / remove_folk)
 static func on_added(f) -> void:
 	var id: int = int(f.id)
+	_due_min = -1
+	if int(f.household_id) > 0:
+		_anchors_dirty = true
 	_world[id] = f
 	_new[id] = true
+	Crowd.index(f)
 	_kind.erase(id)
 	_cand.erase(id)
 	if not _sets.has(id):
@@ -133,6 +141,10 @@ static func on_added(f) -> void:
 		(_sets.sets[_sets.tier_of[id]] as Dictionary)[id] = f
 
 static func on_removed(id: int) -> void:
+	_due_min = -1
+	if controlled_ids.has(id) or not _world.has(id) or int((_world[id]).household_id) > 0:
+		_anchors_dirty = true
+	Crowd.unindex(id)
 	_world.erase(id)
 	_kind.erase(id)
 	_new.erase(id)
@@ -157,6 +169,9 @@ static func controlled_households() -> Array:
 		out.append(Players.primary_household())
 	return out
 
+static func ensure_sync() -> void:
+	_resync()
+
 static func _resync() -> void:
 	var w = WorldIface.world()
 	if w == null or not ("folk" in w) or not (w.folk is Dictionary):
@@ -172,6 +187,8 @@ static func _resync() -> void:
 			on_added(w.folk[id2])
 
 static func _classify_kind(f) -> int:
+	if f.has_meta("trip_zone") or f.has_meta("trip_npc"):
+		return 0            # holiday-zone extras live with the travellers
 	return 1 if (f.has_meta("crowd") or f.has_meta("staff")) else 0
 
 static func refresh(_total: int = 0) -> void:
@@ -200,6 +217,8 @@ static func refresh(_total: int = 0) -> void:
 	for a in anchors:
 		sig = sig * 31 + int(a["tile"].x) * 1009 + int(a["tile"].y)
 	_anchor_sig = sig
+	_anchors_dirty = false
+	_due_min = -1
 	var demote: int = int(c.get("demote_min", 10))
 	var stick: int = int(c.get("stickiness", 4))
 	var ranked: Array = []            # tiered ACTIVE people for the cap: [score, id]
@@ -261,6 +280,7 @@ static func refresh(_total: int = 0) -> void:
 	stats["usec"] = int(stats["usec"]) + Time.get_ticks_usec() - t0
 
 static func _assign(id: int, tier: int, f, old: int) -> void:
+	_due_min = -1
 	var prev: int = _sets.put(id, tier, f)
 	if prev == tier:
 		return
@@ -271,6 +291,73 @@ static func _assign(id: int, tier: int, f, old: int) -> void:
 		else:
 			stats["demotions"] = int(stats["demotions"]) + 1
 	_notify(id, prev, tier, f)
+
+# ------------------------------------------------------------------ per-minute work lists
+static var _due_min: int = -1
+static var _due: Array = []
+static var _lotd_key: int = -1
+static var _lotd: Dictionary = {}
+static var _anchors_dirty := true         # a resident entered / left the world: the controlled list must be rebuilt
+
+## Folk a per-minute system should look at THIS minute: every ACTIVE person, plus the NEAR / TOWN people whose turn it is ((now + id) % period == 0).
+## `elapsed_of(id)` is how many minutes such a visit stands for. Cached per game minute, so several systems share one list.
+static func due_folk(now: int) -> Array:
+	if _due_min == now:
+		return _due
+	_due_min = now
+	_due = (_sets.sets[ACTIVE] as Dictionary).values()
+	for tier in [NEAR, TOWN]:
+		var st: Dictionary = _sets.sets[tier]
+		for id in st:
+			if (now + int(id)) % period_of(int(id)) == 0:
+				_due.append(st[id])
+	return _due
+
+## Anchors straight from the controlled folk (cheap): used by callers that may run before / without the per-minute refresh (tests, direct calls).
+static func _quick_anchors() -> void:
+	if _anchors_dirty:
+		var hh: Array = controlled_households()
+		controlled_ids = []
+		for id in _world:
+			var f = _world[id]
+			if hh.has(int(f.household_id)) and not f.has_meta("visitor"):
+				controlled_ids.append(int(id))
+		_anchors_dirty = false
+	anchors = []
+	for cid in controlled_ids:
+		var cf = _world.get(cid, null)
+		if cf != null and not cf.has_meta("away") and not cf.has_meta("trip_zone"):
+			anchors.append(InterestArea.make_anchor(cf.tile))
+	if _has_focus:
+		anchors.append(InterestArea.make_anchor(_focus))
+	var sg: int = 0
+	for a in anchors:
+		sg = sg * 31 + int(a["tile"].x) * 1009 + int(a["tile"].y)
+	if sg != _anchor_sig:
+		_anchor_sig = sg
+		_due_min = -1
+
+static func elapsed_of(id: int) -> int:
+	return period_of(id)
+
+## Lots within `radius` of an anchor: lot id -> distance of the nearest anchor to its rectangle (lot table order). Recomputed only when an anchor
+## moved, not every minute a system asks.
+static func lot_distances(radius: int = 64) -> Dictionary:
+	_quick_anchors()
+	var key: int = _anchor_sig * 7 + radius
+	if key == _lotd_key and not _lotd.is_empty():
+		return _lotd
+	_lotd_key = key
+	_lotd = {}
+	if anchors.is_empty():
+		return _lotd
+	for e in InterestArea.lot_list():
+		var best: int = InterestArea.FAR
+		for a in anchors:
+			best = mini(best, InterestArea.rect_dist(a["tile"], e[1]))
+		if best <= radius:
+			_lotd[e[0]] = best
+	return _lotd
 
 # ------------------------------------------------------------------ save / load
 static func to_dict() -> Dictionary:

@@ -76,17 +76,13 @@ static func on_minute() -> void:
 	var air_range: Array = e.get("fresh_air_temp", [10.0, 27.0])
 	var severe: bool = (wd.get("markers", []) as Array).has("wx_severe")
 	var now: int = SysUtil.now()
-	for f in WorldIface.all_folk():
+	for f in Tiers.due_folk(now):          # tiers (17.3): ACTIVE people every minute, NEAR / TOWN people on their turn
 		var fid: int = int(f.id)
 		if str(Weather._marker_sig.get(fid, "")) != sig or not Weather._marker_sig.has(fid):
 			sync_markers(f)
 		if SysUtil.is_away(f):
 			continue
-		var k := 1.0           # minutes of exposure this pass covers: strangers (crowd, townies, visitors) are done once per STRANGER_PERIOD minutes
-		if int(f.household_id) <= 0 and f.has_meta("visitor"):
-			if (now + fid) % STRANGER_PERIOD != 0:
-				continue
-			k = float(STRANGER_PERIOD)
+		var k: float = float(Tiers.period_of(fid))       # minutes of exposure this pass covers
 		var outside: bool = is_outside(f)
 		_set_marker(f, "wx_outside", outside)
 		var ex: Dictionary = Weather._exposure.get(fid, {})

@@ -20,36 +20,72 @@ const NEED_FLOOR := -35.0      # an NPC with a need below this goes home (needs 
 
 static var _last_check: Dictionary = {}     # lot_id -> game minute of the last full crowd update
 static var _staff_seq: int = 0
+static var _crowd_idx: Dictionary = {}      # lot id -> {folk id: Folk} of the customers / coworkers (maintained by Tiers.on_added / on_removed via index / unindex)
+static var _staff_idx: Dictionary = {}      # lot id -> {folk id: Folk} of the staff
+static var _all_crowd: Dictionary = {}      # folk id -> Folk of every crowd NPC (customers)
+static var _where: Dictionary = {}          # folk id -> [kind, lot id] so unindex needs no meta
 
 static func reset() -> void:
 	_last_check.clear()
 	_staff_seq = 0                 # staff ids / names / looks restart with each game (same seed => same town)
+	_crowd_idx.clear()
+	_staff_idx.clear()
+	_all_crowd.clear()
+	_where.clear()
 	CrowdDrive.reset()
 
 static func cfg() -> Dictionary:
 	return Venues.cfg()
 
 ## Ambient visitors (all lots, or only `lot_id`).
+## (Read from the incremental index: nobody scans the world for the crowd any more.)
 static func crowd_folk(lot_id: String = "") -> Array:
-	var out: Array = []
-	for f in WorldIface.all_folk():
-		if f.has_meta("crowd") and (lot_id == "" or str(f.get_meta("crowd")) == lot_id):
-			out.append(f)
-	return out
+	if lot_id == "":
+		return _all_crowd.values()
+	return (_crowd_idx.get(lot_id, {}) as Dictionary).values()
 
 static func staff_folk(lot_id: String = "") -> Array:
+	if lot_id != "":
+		return (_staff_idx.get(lot_id, {}) as Dictionary).values()
 	var out: Array = []
-	for f in WorldIface.all_folk():
-		if f.has_meta("staff") and (lot_id == "" or str(f.get_meta("staff_lot", "")) == lot_id):
-			out.append(f)
+	for lid in _staff_idx:
+		out.append_array((_staff_idx[lid] as Dictionary).values())
 	return out
 
 static func npc_ids() -> Array:
-	var out: Array = []
-	for f in WorldIface.all_folk():
-		if f.has_meta("crowd") or f.has_meta("staff"):
-			out.append(int(f.id))
+	var out: Array = _all_crowd.keys()
+	for lid in _staff_idx:
+		out.append_array((_staff_idx[lid] as Dictionary).keys())
 	return out
+
+## Index hooks (called by Tiers when a folk enters / leaves the world).
+static func index(f) -> void:
+	var id: int = int(f.id)
+	if f.has_meta("crowd"):
+		var lot: String = str(f.get_meta("crowd"))
+		if not _crowd_idx.has(lot):
+			_crowd_idx[lot] = {}
+		(_crowd_idx[lot] as Dictionary)[id] = f
+		_all_crowd[id] = f
+		_where[id] = [0, lot]
+	elif f.has_meta("staff"):
+		var sl: String = str(f.get_meta("staff_lot", ""))
+		if not _staff_idx.has(sl):
+			_staff_idx[sl] = {}
+		(_staff_idx[sl] as Dictionary)[id] = f
+		_where[id] = [1, sl]
+
+static func unindex(id: int) -> void:
+	if not _where.has(id):
+		return
+	var w: Array = _where[id]
+	_where.erase(id)
+	if int(w[0]) == 0:
+		if _crowd_idx.has(w[1]):
+			(_crowd_idx[w[1]] as Dictionary).erase(id)
+		_all_crowd.erase(id)
+	elif _staff_idx.has(w[1]):
+		(_staff_idx[w[1]] as Dictionary).erase(id)
 
 static func count(lot_id: String = "") -> int:
 	return crowd_folk(lot_id).size()
@@ -86,6 +122,7 @@ static func dismiss(f) -> void:
 static func _remove(f) -> void:
 	if f.has_meta("townie_id"):
 		RelationshipService.sync_folk(f)
+		TownSim.on_demoted(f)             # DEMOTION: needs / last place go back into the townie record
 	f.current = null
 	f.queue.clear()
 	SysUtil.world_remove_folk(int(f.id))
@@ -100,17 +137,15 @@ static func update(force: bool = false) -> void:
 	CrowdDrive.drive(now)
 	PerfProf.stop("crowd/drive", t)
 	t = PerfProf.start()
-	var seen: Array = []                  # tiles of the visible residents, listed once (not once per lot)
-	for r in SysUtil.residents():
-		if not SysUtil.is_away(r) and not r.has_meta("trip_zone"):      # task 22: travellers parked in a holiday zone do not wake the town
-			seen.append(r.tile)
-	for lot_id in Neighborhood.lot_ids():
-		if lot_id == Neighborhood.HOME:
-			continue
-		if _any_within(seen, lot_id, ACTIVE_RADIUS):
+	# Lots near the anchors (task 17.3): the tier manager caches lot -> distance for every lot within DROP_RADIUS of a controlled, visible folk
+	# (travellers parked in a holiday zone and folk away do not wake the town); nothing here loops all lots or all residents.
+	var near_lots: Dictionary = Tiers.lot_distances(DROP_RADIUS)
+	for lot_id in near_lots:
+		if lot_id != Neighborhood.HOME and int(near_lots[lot_id]) <= ACTIVE_RADIUS:
 			_update_lot(lot_id, now, force)
-		elif _last_check.has(lot_id) and not _any_within(seen, lot_id, DROP_RADIUS):
-			clear_npcs(lot_id)
+	for lot_id2 in _last_check.keys():
+		if lot_id2 != Neighborhood.HOME and not near_lots.has(lot_id2):
+			clear_npcs(lot_id2)
 	PerfProf.stop("crowd/lots", t)
 
 ## NeighborhoodLots.player_near for a precomputed list of resident tiles.
@@ -176,6 +211,11 @@ static func _pick_townie(lot_id: String, vtype: String) -> Dictionary:
 		if not resident_only and Story.stage_of(t) == "child":
 			continue
 		var w: float = 1.0
+		var sched: Dictionary = TownSim.where(t, SimEnv.now_min())      # the cheap schedule: nobody asleep at the venue, regulars where they are expected
+		if str(sched["act"]) == TownSim.SLEEP:
+			continue
+		if str(sched["lot"]) == lot_id:
+			w += 3.0
 		for r in res:
 			if RelationshipService.knows(int(r.id), tid):
 				w += 1.5
@@ -207,8 +247,7 @@ static func spawn_npc(t: Dictionary, lot_id: String, vtype: String, stay_overrid
 	f.set_meta("crowd", lot_id)
 	f.set_meta("arrived_min", SimEnv.now_min())
 	f.set_meta("leave_min", SimEnv.now_min() + stay)
-	for n in f.needs:
-		(f.needs[n] as Stat).set_value(SysUtil.rng.randf_range(15.0, 65.0))
+	TownSim.apply_to_folk(f, t, SimEnv.now_min())          # PROMOTION: plausible needs from the townie's curves (same data as the hourly TOWN update)
 	var cn: Dictionary = vd.get("crowd_needs", {})
 	for n2 in cn:
 		if f.needs.has(n2):
@@ -229,7 +268,7 @@ static func spawn_npc(t: Dictionary, lot_id: String, vtype: String, stay_overrid
 
 ## Stand-in for what the customer does at the venue (eat, drink, chat, play): inside the lot the needs creep back up the longer the visit lasts,
 ## so a regular never sinks to rock bottom; outside it (street, walking) nothing serves them and after OUTDOOR_MAX_MIN they head home.
-static func _serve(f, now: int) -> void:
+static func _serve(f, now: int, k: float = 1.0) -> void:
 	var lot_id: String = str(f.get_meta("crowd"))
 	if NeighborhoodLots.lot_at(f.tile) != lot_id:
 		var since: int = int(f.get_meta("outside_since", now))
@@ -247,7 +286,7 @@ static func recover(f, hours: float) -> void:
 	for n in f.needs:
 		var st: Stat = f.needs[n]
 		if st.value < RECOVER_TO:
-			st.add(minf(rate, RECOVER_TO - st.value))
+			st.add(minf(rate * k, RECOVER_TO - st.value))
 
 ## An NPC whose time is up walks to the lot's door (one route, computed once by the go_here interaction) and is removed there.
 static func start_leaving(f) -> void:
@@ -263,11 +302,14 @@ static func start_leaving(f) -> void:
 ## Cheap per-minute check: nobody path-finds here any more. Gone once at the door (or when the walk-out time is up).
 static func _step_leavers(now: int) -> void:
 	for f in crowd_folk():
+		var per: int = Tiers.period_of(int(f.id))      # NEAR / TOWN people are looked at every few minutes, with the elapsed minutes applied
+		if per > 1 and (now + int(f.id)) % per != 0:
+			continue
 		if not f.has_meta("leaving"):
 			if now >= int(f.get_meta("leave_min", 0)) or lowest_need(f) < NEED_FLOOR:      # time is up (also far from the player) or a need is low: go home
 				start_leaving(f)
 			else:
-				_serve(f, now)
+				_serve(f, now, float(per))
 			continue
 		if f.tile == NeighborhoodLots.entry_tile(str(f.get_meta("crowd"))) or now >= int(f.get_meta("leaving")) or (f.current == null and f.queue.is_empty()):
 			_remove(f)

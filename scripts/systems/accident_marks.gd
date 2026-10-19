@@ -52,15 +52,10 @@ static func on_minute() -> void:
 	var t := PerfProf.start()
 	var water: Variant = _water_objects(c)
 	var now: int = SysUtil.now()
-	for f in WorldIface.all_folk():
+	for f in Tiers.due_folk(now):            # tiers (17.3): ACTIVE people every minute, NEAR / TOWN people on their turn with the odds scaled to the period
 		if Hospital.is_in(f) or str(f.age_stage) == "baby":
 			continue
-		var period := 1
-		if int(f.household_id) <= 0 and f.has_meta("visitor"):      # strangers (crowd, townies, visitors): one scan per STRANGER_PERIOD, staggered by id
-			if (now + int(f.id)) % STRANGER_PERIOD != 0:
-				continue
-			period = STRANGER_PERIOD
-		_scan(f, c, water, period)
+		_scan(f, c, water, Tiers.period_of(int(f.id)))
 	PerfProf.stop("accident/scan", t)
 	t = PerfProf.start()
 	AccidentRescue.on_minute()

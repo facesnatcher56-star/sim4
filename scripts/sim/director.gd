@@ -27,6 +27,8 @@ var _sched: SimScheduler = null
 func reset_state() -> void:
 	ticks = 0
 	_stranger_acc.clear()
+	_last_tick.clear()
+	_clock = 0
 	last_choice.clear()
 
 func _ready() -> void:
@@ -52,14 +54,32 @@ func _on_minute(_total: int) -> void:
 	if enabled:
 		tick_minute(1)
 
-## Advance all folk by `minutes` (normally 1).
+## Advance the folk by `minutes` (normally 1) by TIER (task 17.3): the ACTIVE set (household, visitors, responders and the ambient people near the
+## household) every minute; the NEAR / TOWN sets only when their turn comes ((ticks + id) % period), with the elapsed minutes applied. Nothing here
+## scans the world: the sets are maintained by the Tiers manager.
 func tick_minute(minutes: int = 1) -> void:
 	ticks += 1
-	for f in WorldIface.all_folk():
-		if f.household_id <= 0 and f.has_meta("visitor") and STRANGER_PERIOD > 1:
-			_tick_stranger(f, float(minutes))
-		else:
-			tick_folk(f, float(minutes))
+	_clock += minutes
+	Tiers.ensure_sync()
+	for f in (Tiers.set_of(Tiers.ACTIVE) as Dictionary).values():
+		tick_folk(f, float(minutes))
+	for tier in [Tiers.NEAR, Tiers.TOWN]:
+		var st: Dictionary = Tiers.set_of(tier)
+		if st.is_empty():
+			continue
+		for id in st.keys():
+			if Tiers.due(int(id), ticks):
+				_tick_tiered(st[id], int(id))
+
+var _clock: int = 0                         # game minutes advanced through tick_minute (feeds the elapsed minutes of the NEAR / TOWN ticks)
+var _last_tick: Dictionary = {}             # folk id -> _clock at its last full tick
+
+func _tick_tiered(f: Folk, id: int) -> void:
+	var elapsed: float = float(_clock - int(_last_tick.get(id, _clock - Tiers.period_of(id))))
+	_last_tick[id] = _clock
+	if _last_tick.size() > 4000:
+		_last_tick.clear()
+	tick_folk(f, maxf(elapsed, 1.0))
 
 ## Strangers (crowd NPCs, townies, visitors: household_id <= 0 and meta "visitor") decay needs / buffs / mood once per STRANGER_PERIOD minutes, with
 ## the elapsed minutes (decay is linear, so the result is the same up to the clamp and the threshold buffs lagging a few minutes).
