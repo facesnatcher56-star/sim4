@@ -91,6 +91,8 @@ static func desk_tile(lot_id: String, f, level: int = 0) -> Vector2i:
 		desks.sort_custom(func(a, b): return a.id < b.id)
 		var o2 = desks[int(f.id) % desks.size()]
 		var t: Vector2i = WorldIface.use_tile(o2, 0)
+		if not w.is_walkable(t, level) and w.has_method("open_neighbor"):
+			t = w.open_neighbor(t, level, landing_tile(lot_id, level))          # a chair stands on the use tile: stand beside it
 		if w.is_walkable(t, level):
 			return t
 	if level != 0:

@@ -136,6 +136,7 @@ static func make(spec: Dictionary, taken: Dictionary = {}) -> Dictionary:
 			continue
 		var t := BldgExport.template(spec, fr, plans, units, lvs, bottom, top, rl)
 		var ls := HouseSignature.layout_sig(t)
+		HouseDesks.fix_template(t)                         # a chair on every desk / computer / terminal use tile that can take one (no rng)
 		if taken.has(ls):
 			why["duplicate"] = int(why.get("duplicate", 0)) + 1
 			continue

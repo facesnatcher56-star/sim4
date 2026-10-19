@@ -133,6 +133,12 @@ static func _fix_level(t: Dictionary, lv: int, must: Dictionary) -> int:
 		if str(o["def"]) in TYPES:
 			desks.append(o)
 	var added := 0
+	var seats: Array[Vector2i] = []                              # chairs of this level (kept reachable) incl. the ones added now
+	for o in objs:
+		if int(o.get("level", 0)) == lv and str(o["def"]) == "chair":
+			var ct := Vector2i(int(o["tile"][0]), int(o["tile"][1]))
+			if _seats_reachable(floors, occ, edges, [ct], Vector2i(-9999, -9999)):
+				seats.append(ct)                                # (a chair that is already walled in is not our concern)
 	for o in desks:
 		var d := HousePlan.def_of(str(o["def"]))
 		var tile := Vector2i(int(o["tile"][0]), int(o["tile"][1]))
@@ -155,6 +161,10 @@ static func _fix_level(t: Dictionary, lv: int, must: Dictionary) -> int:
 			var before := _pieces(floors, occ, edges, Vector2i(-9999, -9999))
 			if _pieces(floors, occ, edges, s) > before:
 				continue                                            # the use tile is a link (a corridor): leave it open
+			seats.append(s)
+			if not _seats_reachable(floors, occ, edges, seats, s):
+				seats.pop_back()
+				continue                                            # the chair (or an earlier one) would be walled in: nobody could walk up to it
 			var chair := {"def": "chair", "tile": [s.x, s.y], "rot": HousePlan.FRONT.find(-from)}
 			if lv != 0:
 				chair["level"] = lv
@@ -184,3 +194,40 @@ static func _pieces(floors: Dictionary, occ: Dictionary, edges: Dictionary, skip
 				seen[nb] = true
 				stack.append(nb)
 	return n
+
+
+## Every chair in `seats` (the last one is not in `occ` yet; `extra` is its tile) has a free neighbour in the biggest walkable piece of the level.
+static func _seats_reachable(floors: Dictionary, occ: Dictionary, edges: Dictionary, seats: Array, extra: Vector2i) -> bool:
+	var comp: Dictionary = {}
+	var sizes: Array = []
+	for start in floors:
+		if comp.has(start) or occ.has(start) or start == extra:
+			continue
+		var id := sizes.size()
+		var n := 1
+		var stack: Array = [start]
+		comp[start] = id
+		while not stack.is_empty():
+			var c: Vector2i = stack.pop_back()
+			for dd in HousePlan.DIRS4:
+				var nb: Vector2i = c + dd
+				if comp.has(nb) or not floors.has(nb) or occ.has(nb) or nb == extra or edges.has(HousePlan.edge(c, nb)):
+					continue
+				comp[nb] = id
+				n += 1
+				stack.append(nb)
+		sizes.append(n)
+	var main := 0
+	for i in sizes.size():
+		if int(sizes[i]) > int(sizes[main]):
+			main = i
+	for st in seats:
+		var ok := false
+		for dd in HousePlan.DIRS4:
+			var nb: Vector2i = st + dd
+			if comp.get(nb, -1) == main and not edges.has(HousePlan.edge(st, nb)):
+				ok = true
+				break
+		if not ok:
+			return false
+	return true

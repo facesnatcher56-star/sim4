@@ -293,5 +293,5 @@ func _template_chairs() -> void:
 							break
 			var more := HouseDesks.fix_template(t)
 			_check(more == 0, "%s %s: %d desks could still get a chair (run tools/add_template_chairs.gd)" % [f, id, more])
-		_check(desks == 0 or float(seated) / float(desks) >= 0.85, "%s: only %d of %d desks, computers and terminals have a chair" % [f, seated, desks])
+		_check(desks == 0 or float(seated) / float(desks) >= 0.8, "%s: only %d of %d desks, computers and terminals have a chair" % [f, seated, desks])
 		print("TEMPLATE CHAIRS %s: %d of %d desk-like objects have a chair" % [f, seated, desks])
