@@ -164,25 +164,44 @@ static func _hourly_objects(cur: String, kind: String, e: Dictionary) -> void:
 	if kind != "rain":
 		return
 	var g: Dictionary = e.get("garden", {})
-	var w = WorldIface.world()
-	var can_out: bool = w != null and w.has_method("is_outdoor")
 	var plot_amt: float = float(g.get("rain_water_per_hour", 0.6))
-	var plant_amt: float = float(g.get("plant_rain_water_per_hour", 0.8))
-	var near: Dictionary = Tiers.lot_distances(int(Tiers.cfg().get("near_radius", 64)))
 	var groups: Dictionary = _rain_by_lot()
+	var sliced: bool = RainSlices.enabled()
 	for lot in groups:
 		var grp: Dictionary = groups[lot]
 		for o in grp["plots"]:                       # garden plots catch the rain wherever they are (cheap: a few per lot)
 			WorldIface.state_add(o, "water", plot_amt)
-		if not can_out or (grp["plants"] as Array).is_empty():
+		if (grp["plants"] as Array).is_empty():
 			continue
-		var far: bool = not Tiers.anchors.is_empty() and (not near.has(lot) if lot != "" else not Tiers.tile_near((grp["plants"][0] as Object).tile))
-		if far:                                      # no per-plant work now: the rain is counted per lot and caught up daily (on_day)
+		# plants: with the scheduler every lot only counts the owed rain hour; RainSlices waters the lots near an anchor a few per minute (a rainy hour used
+		# to water them all in one frame, 100-400 ms), and the daily catch-up (on_day) takes what is still owed for far lots. Without it (tests) water now.
+		if sliced or lot_is_far(lot, grp):
 			Weather._rain_deferred[lot] = int(Weather._rain_deferred.get(lot, 0)) + 1
-			continue
-		for o2 in grp["plants"]:
-			if bool(w.is_outdoor(o2.tile, int(o2.level))):
-				WorldIface.state_add(o2, "water", plant_amt)
+		else:
+			water_lot(lot, 1)
+
+## A lot whose plants are not worth visiting now: no anchor is within the near radius (no anchor at all = nothing is far).
+static func lot_is_far(lot: String, grp: Dictionary) -> bool:
+	if Tiers.anchors.is_empty() or (grp.get("plants", []) as Array).is_empty():
+		return false
+	if lot != "":
+		return not Tiers.lot_distances(int(Tiers.cfg().get("near_radius", 64))).has(lot)
+	return not Tiers.tile_near((grp["plants"][0] as Object).tile)
+
+## Water the outdoor plants of one lot for `hours` rainy hours. The outdoor tests come first, then the writes: a state write drops the lot's room partition
+## (decor depends on state), so interleaving them rebuilt the lot's rooms once per plant (a park with 30 plants: 90 ms).
+static func water_lot(lot: String, hours: int) -> void:
+	var w = WorldIface.world()
+	var grp: Dictionary = _rain_by_lot().get(lot, {})
+	if w == null or not w.has_method("is_outdoor") or grp.is_empty() or hours <= 0:
+		return
+	var amt: float = float(Weather.effects().get("garden", {}).get("plant_rain_water_per_hour", 0.8)) * float(hours)
+	var wet: Array = []
+	for o in grp["plants"]:
+		if bool(w.is_outdoor(o.tile, int(o.level))):
+			wet.append(o)
+	for o2 in wet:
+		WorldIface.state_add(o2, "water", amt)
 
 static func _puddle_tick(kind: String, e: Dictionary) -> void:
 	var w = WorldIface.world()
@@ -239,17 +258,11 @@ static func _cozy(kind: String, e: Dictionary) -> void:
 			f.add_buff("cozy")
 
 # ------------------------------------------------------------------ daily tick
-## The daily catch-up of the plants in lots that were far away while it rained: the owed rain hours of their lot x the hourly amount (outdoor plants only).
-static var _catch: Dictionary = {}
+## The daily catch-up of the plants in lots that were far away while it rained (or are still owed their rain): the owed rain hours of their lot x the hourly amount.
+static func catch_up_lot(lot: String) -> void:
+	water_lot(lot, int(_catch.get(lot, 0)))
 
-static func catch_up_plant(o_id: int) -> void:
-	var w = WorldIface.world()
-	var o = WorldIface.get_object(o_id)
-	if o == null or w == null or not w.has_method("is_outdoor"):
-		return
-	var hrs: int = int(_catch.get(NeighborhoodLots.lot_at(o.tile), 0))
-	if hrs > 0 and bool(w.is_outdoor(o.tile, int(o.level))):
-		WorldIface.state_add(o, "water", float(Weather.effects().get("garden", {}).get("plant_rain_water_per_hour", 0.8)) * float(hrs))
+static var _catch: Dictionary = {}
 
 static func on_day_sched(day: int) -> void:
 	on_day(day, DaySlices.enabled())
@@ -258,15 +271,13 @@ static func on_day(day: int, sliced: bool = false) -> void:
 	if not Weather._rain_deferred.is_empty():
 		_catch = Weather._rain_deferred.duplicate()
 		Weather._rain_deferred.clear()
-		var ids: Array = []
-		for o0 in _indexed("rain"):
-			if str(o0.def_id) != "garden_plot" and _catch.has(NeighborhoodLots.lot_at(o0.tile)):
-				ids.append(int(o0.id))
+		var lots: Array = _catch.keys()
+		lots.sort()
 		if sliced:
-			DaySlices.begin("rain_catchup", ids, Callable(WeatherWorld, "catch_up_plant"))
+			DaySlices.begin("rain_catchup", lots, Callable(WeatherWorld, "catch_up_lot"))
 		else:
-			for oid in ids:
-				catch_up_plant(oid)
+			for lot in lots:
+				catch_up_lot(str(lot))
 	var e: Dictionary = Weather.effects()
 	var g: Dictionary = e.get("garden", {})
 	var frost: bool = Weather._min_today < float(e.get("frost_temp", 0.0)) and bool(g.get("frost_kills", true))
