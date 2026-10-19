@@ -1,4 +1,4 @@
-class_name Crowd
+﻿class_name Crowd
 extends RefCounted
 ## Ambient NPCs of the venue lots: townies (with their Genetics appearance) who are tuned to the venue by their starting needs
 ## and a hidden "regular" buff, plus uniformed staff (barista, trainer, cashier...) that stand at their post. Every venue lot of
@@ -92,15 +92,32 @@ static func _remove(f) -> void:
 ## Per-minute entry point (cheap: the crowd of a lot is only re-balanced every crowd_check_min).
 static func update(force: bool = false) -> void:
 	var now: int = SimEnv.now_min()
+	var t := PerfProf.start()
 	_step_leavers(now)
+	PerfProf.stop("crowd/step_leavers", t)
+	t = PerfProf.start()
 	CrowdDrive.drive(now)
+	PerfProf.stop("crowd/drive", t)
+	t = PerfProf.start()
+	var seen: Array = []                  # tiles of the visible residents, listed once (not once per lot)
+	for r in SysUtil.residents():
+		if not SysUtil.is_away(r):
+			seen.append(r.tile)
 	for lot_id in Neighborhood.lot_ids():
 		if lot_id == Neighborhood.HOME:
 			continue
-		if NeighborhoodLots.player_near(lot_id, ACTIVE_RADIUS):
+		if _any_within(seen, lot_id, ACTIVE_RADIUS):
 			_update_lot(lot_id, now, force)
-		elif _last_check.has(lot_id) and not NeighborhoodLots.player_near(lot_id, DROP_RADIUS):
+		elif _last_check.has(lot_id) and not _any_within(seen, lot_id, DROP_RADIUS):
 			clear_npcs(lot_id)
+	PerfProf.stop("crowd/lots", t)
+
+## NeighborhoodLots.player_near for a precomputed list of resident tiles.
+static func _any_within(tiles: Array, lot_id: String, radius: int) -> bool:
+	for t in tiles:
+		if NeighborhoodLots.distance_to(t, lot_id) <= radius:
+			return true
+	return false
 
 static func _update_lot(lot_id: String, now: int, force: bool) -> void:
 	var first: bool = not _last_check.has(lot_id)
@@ -273,10 +290,10 @@ static func update_staff(lot_id: String) -> void:
 			(sf.needs[n] as Stat).set_value(60.0)
 
 static func _spawn_staff(role: String, tile: Vector2i, lot_id: String) -> Folk:
-	var c: Dictionary = Story.cfg()
-	var names: Array = c.get("first_names", ["Sam"])
 	_staff_seq += 1
-	var nm: String = "%s (%s)" % [str(names[(_staff_seq * 7 + role.length()) % names.size()]), role.capitalize()]
+	var nr := RandomNumberGenerator.new()
+	nr.seed = _staff_seq * 7919 + role.length()
+	var nm: String = "%s (%s)" % [Names.pick_first([], nr), role.capitalize()]
 	var keep_next: int = Folk._next_id
 	var f := Folk.create(nm, [], STAFF_ID_BASE + _staff_seq)
 	Folk._next_id = keep_next

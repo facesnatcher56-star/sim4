@@ -1,0 +1,38 @@
+{
+  "half_life_days": 2.0,
+  "daily_cap_per_source": 1,
+  "calm_below": 3.0,
+  "busy_above": 9.0,
+  "max_boost": 1.2,
+  "max_cut": 0.6,
+  "weekly": {"quiet_below": 6, "busy_above": 18},
+  "kinds": {
+    "flirt": {"scale": 1.0, "tags": ["flirt", "romance"]},
+    "gossip": {"scale": 0.8, "tags": ["gossip", "secret"]},
+    "conflict": {"scale": 0.7, "tags": ["conflict"]},
+    "commitment": {"scale": 1.0, "tags": ["commitment", "baby"]},
+    "visit": {"scale": 1.0},
+    "job": {"scale": 1.0},
+    "mishap": {"scale": 0.6, "incidents": ["minor_fall", "found_money", "catch_cold"]}
+  },
+  "events": {
+    "relationship_bit_changed": 1.0, "first_kiss": 2.0, "jealousy": 2.0, "stormed_off": 2.0, "secret_learned": 2.0,
+    "breakup": 3.0, "married": 3.0, "engaged": 3.0, "baby_born": 3.0, "pregnant": 2.0, "hired": 1.5, "fired": 2.0,
+    "promoted": 1.5, "job_offer": 1.0, "party_attended": 1.0, "died": 4.0, "injured": 1.5, "fire_started": 3.0,
+    "disaster": 3.0, "murder": 5.0, "sentenced": 3.0, "skipped_work": 1.0, "aged_up": 1.0, "moved_in": 2.0, "moved_out": 2.0,
+    "met_townie": 1.0, "gossip_spread": 1.0, "secret_shared": 1.0, "rumor_spread": 0.7, "relationship_status": 1.5, "took_offer": 1.0, "left_job": 1.5,
+    "gathering_done": 0.7
+  },
+  "bit_beats": ["friend", "best_friend", "enemy", "sweetheart", "partner", "spouse"],
+  "chronicle": {"default_min_severity": 1, "ignore": ["spoilage", "weather_watch", "relationship", "aged_up"], "kinds": {"found_money": 1.0, "minor_fall": 1.0, "catch_cold": 0.6, "catch_flu": 1.2, "workout_injury": 1.0}},
+  "opportunity": {"base": 0.15, "per_fit": 0.12, "max": 0.85, "trait_mult": {"lazy": 0.6, "workaholic": 1.4, "loner": 0.8, "social": 1.1}},
+  "milestones": {"min_partner_days": 3, "bond_chance": 0.25, "propose_chance": 0.15, "min_engaged_days": 2, "marry_chance": 0.2, "baby_chance": 0.04,
+    "breakup_romance_below": 30, "breakup_friendship_below": 20, "breakup_chance": 0.05},
+  "threads": [
+    {"id": "cheat_aftermath", "on": "breakup", "when": {"cause": "cheating"}, "delay_days": [1, 3], "action": "revenge_or_forgive", "forgive": 0.4},
+    {"id": "ex_returns", "on": "breakup", "when": {"other_is_townie": true}, "delay_days": [3, 8], "action": "visit_from_other",
+     "text": "{other}, an ex, turned up at the door, awkwardly."},
+    {"id": "thanks_visit", "on": "chronicle", "when": {"kinds": ["townie_stomach_bug", "catch_cold", "catch_flu"], "subject_is_townie": true, "known": true},
+     "delay_days": [2, 4], "action": "visit_from_subject", "text": "{subject} dropped by to say thanks for the kindness."}
+  ]
+}

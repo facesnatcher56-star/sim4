@@ -1,4 +1,4 @@
-class_name FireFolk
+﻿class_name FireFolk
 extends RefCounted
 ## What people do when a lot is on fire (called every game minute from Fire.on_minute): the smoke alarm wakes sleepers, folk notice (sooner
 ## in the same room), then each aware person in turn rescues a baby, calls the fire department, fights a small fire (extinguisher, bare hands)
@@ -80,11 +80,12 @@ static func _tick(b: Dictionary, f, fires: Array, now: int) -> void:
 	var helpless: bool = FireRules.helpless(f)
 	var near: int = 1 << 20
 	var room_stage: int = 0
+	var lv: int = int(f.level)
 	for fi in fires:
-		near = mini(near, FireRules.dist(f.tile, fi["tile"]))
-		if FireRules.same_room(f.tile, fi["tile"]):
+		near = mini(near, FireRules.dist(f.tile, fi["tile"]) + 4 * absi(lv - int(fi.get("level", 0))))      # another floor counts as far
+		if int(fi.get("level", 0)) == lv and FireRules.same_room(f.tile, fi["tile"], lv):
 			room_stage = maxi(room_stage, int(fi["stage"]))
-	var here: float = FireSmoke.at(b, f.tile)
+	var here: float = FireSmoke.at(b, f.tile, lv)
 	f.add_buff("fire_nearby")
 	if here >= FireRules.num("smoky_at", 0.25):
 		f.add_buff("fire_smoke")
@@ -225,10 +226,10 @@ static func _flee(b: Dictionary, f, r: Dictionary) -> void:
 		r["state"] = "safe"
 		_keep_waiting(f)
 		return
-	var path: Array = WorldIface.find_path(f.tile, exit)
+	var path: Array = FireLevels.escape_route(f, exit)          # stairs / fire escape, never the lift (switched off while it burns)
 	var blocked: bool = path.is_empty()
-	for t in path:
-		var fi: Dictionary = Fire.fire_at(t)
+	for p in path:
+		var fi: Dictionary = Fire.fire_at(Vector2i(p.x, p.y), p.z)
 		if not fi.is_empty() and int(fi["stage"]) >= 3:
 			blocked = true
 	if blocked:
@@ -242,6 +243,7 @@ static func _flee(b: Dictionary, f, r: Dictionary) -> void:
 	if ir == null:
 		return
 	ir.goto_tile = exit
+	ir.goto_level = 0
 	f.enqueue(ir)
 	var w := Interaction.create("watch_fire", f, -1, false)
 	if w != null:
@@ -253,6 +255,7 @@ static func _trapped(b: Dictionary, f, r: Dictionary) -> void:
 	r["trap"] = int(r["trap"]) + 1
 	if int(r["trap"]) >= int(FireRules.num("trapped_escape_after", 8.0)) and Fire.rng.randf() < FireRules.num("trapped_escape_chance", 0.06):
 		f.tile = FireRules.blaze_exit(b, f.tile)
+		FireLevels.land(f, true)
 		r["state"] = "safe"
 		r["expo"] = maxf(float(r["expo"]), FireRules.num("hurt_min", 9.0))
 		SimEnv.emit("thought", int(f.id), "I got out through a window!")
@@ -271,7 +274,7 @@ static func _rescue_dependants(b: Dictionary, f, now: int) -> bool:
 		any = true
 		var heavy: bool = false
 		for fi in Fire.fires_in(lot):
-			if int(fi["stage"]) >= 3 and FireRules.same_room(d.tile, fi["tile"]):
+			if int(fi["stage"]) >= 3 and int(fi.get("level", 0)) == int(d.level) and FireRules.same_room(d.tile, fi["tile"], int(d.level)):
 				heavy = true
 		if Fire.rng.randf() < (0.4 if heavy else 0.85):
 			carry_out(b, d, dr)
@@ -283,6 +286,7 @@ static func carry_out(b: Dictionary, d, dr: Dictionary) -> void:
 	d.cancel_current("rescued")
 	d.clear_queue()
 	d.tile = FireRules.blaze_exit(b, d.tile)
+	FireLevels.land(d)
 	dr["state"] = "safe"
 	dr["aware"] = true
 	if not (b["rescued"] as Array).has(int(d.id)):
@@ -312,7 +316,7 @@ static func _exposure(b: Dictionary, f, r: Dictionary, room_stage: int, asleep: 
 	elif room_stage == 2:
 		d = 1.0
 	else:
-		var lvl: float = FireSmoke.at(b, f.tile)
+		var lvl: float = FireSmoke.at(b, f.tile, int(f.level))
 		d = 0.8 if lvl >= 0.6 else (0.4 if lvl >= 0.35 else (0.15 if lvl >= 0.2 else 0.0))
 	if d > 0.0 and FireSmoke.near_vent(f):
 		d *= FireRules.num("near_vent_dose", 0.6)

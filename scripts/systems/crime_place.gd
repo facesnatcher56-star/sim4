@@ -1,11 +1,24 @@
-class_name CrimePlace
+﻿class_name CrimePlace
 extends RefCounted
 ## ALL spatial logic of the crime and justice track lives here (so the coming multi-floor world is a one-file change: every position
 ## will get a level). Other crime files never do raw tile math: they ask where someone was, who can see whom, and where burglars enter.
 ## Location strings: "home:<hid>" (a household lot), "town:<n>" (a townie lot), "venue:<lot id>", "work", "street", "away", "unknown".
 
+## Floor of a person (0 for ground level and for far townies, who are inside a lot without floors).
+static func level_of(pid: int) -> int:
+	var f = CrimePerson.folk(pid)
+	return int(f.level) if f != null else 0
+
+
 ## Where is this person right now (a location string)? Folk use their tile; far townies follow a simple daily pattern.
-static func where_now(pid: int) -> String:
+## `with_level`: add "#<level>" for a floor other than the ground floor ("home:1#2" = the 2nd floor of the home).
+static func where_now(pid: int, with_level: bool = false) -> String:
+	var loc := _where_now(pid)
+	var lv := level_of(pid)
+	return loc if (not with_level or lv == 0) else "%s#%d" % [loc, lv]
+
+
+static func _where_now(pid: int) -> String:
 	var f = CrimePerson.folk(pid)
 	if f != null:
 		if SysUtil.is_away(f):
@@ -24,8 +37,13 @@ static func where_now(pid: int) -> String:
 		return "work"
 	return "town:%d" % int(t.get("lot", 0)) if (pid + SysUtil.day() + int(h)) % 3 == 0 else "street"
 
-## The recorded whereabouts at an absolute game minute (hourly log), or "unknown".
-static func where_was(pid: int, minute: int) -> String:
+## The recorded whereabouts at an absolute game minute (hourly log), or "unknown". `with_level` keeps the "#<level>" suffix.
+static func where_was(pid: int, minute: int, with_level: bool = false) -> String:
+	var loc := _where_was(pid, minute)
+	return loc if with_level else loc.get_slice("#", 0)
+
+
+static func _where_was(pid: int, minute: int) -> String:
 	var log: Array = JusticeState.whereabouts.get(pid, [])
 	if log.is_empty():
 		return "unknown"
@@ -48,7 +66,7 @@ static func record_now(pid: int, loc: String = "") -> void:
 			if log[i] == null:
 				log[i] = ""
 	var hour_idx: int = SysUtil.now() / 60
-	log[hour_idx % log.size()] = "%d|%s" % [hour_idx, loc if loc != "" else where_now(pid)]
+	log[hour_idx % log.size()] = "%d|%s" % [hour_idx, loc if loc != "" else where_now(pid, true)]
 	JusticeState.whereabouts[pid] = log
 
 ## Force a person's log entry for the current hour (the culprit really was at the scene).
@@ -58,12 +76,19 @@ static func place_at_scene(pid: int, scene: String) -> void:
 static func same_place(a: String, b: String) -> bool:
 	return a == b and a != "unknown" and a != "street" and a != "away"
 
-## Could `witness` see `subject`? Same lot (or both on the street near each other). Floors will refine this later.
+## Could `witness` see `subject`? Same lot, within 8 tiles, and on the same floor (nothing in between) or through a stairwell.
 static func can_witness(witness_pid: int, subject_pid: int) -> bool:
 	var a = CrimePerson.folk(witness_pid)
 	var b = CrimePerson.folk(subject_pid)
 	if a != null and b != null:
-		return Vector2(a.tile - b.tile).length() <= 8.0 and Neighborhood.lot_of(a) == Neighborhood.lot_of(b)
+		if Vector2(a.tile - b.tile).length() > 8.0 or Neighborhood.lot_of(a) != Neighborhood.lot_of(b):
+			return false
+		if int(a.level) == 0 and int(b.level) == 0:
+			return true
+		var w = WorldIface.world()
+		if w == null or not ("levels" in w):
+			return int(a.level) == int(b.level)
+		return WorldRoomsLevels.can_see(w, Vector3i(a.tile.x, a.tile.y, int(a.level)), Vector3i(b.tile.x, b.tile.y, int(b.level)))
 	return where_now(witness_pid) == where_now(subject_pid)
 
 ## Residents (player household) who are in the home lot right now and awake: they can notice a break-in.
@@ -89,11 +114,11 @@ static func at_home(hid: int) -> Array:
 			out.append(f)
 	return out
 
-## Where a burglar gets in: the ground-floor doors and windows of the lot (tiles). Falls back to the lot entrance.
+## Where a burglar gets in: the GROUND-floor doors and windows of the lot (tiles; nobody climbs to the 3rd floor window). Falls back to the lot entrance.
 static func entry_points(hid: int) -> Array:
 	var out: Array = []
 	for o in SysUtil.all_world_objects():
-		if str(o.def_id) in ["door", "window"]:
+		if str(o.def_id) in ["door", "window"] and LevelInfo.lv(o) == 0:
 			if Economy.owner.get(int(o.id), hid) == hid:
 				out.append(o.tile)
 	if out.is_empty():

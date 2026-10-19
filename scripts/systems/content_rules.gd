@@ -1,4 +1,4 @@
-class_name ContentRules
+﻿class_name ContentRules
 extends RefCounted
 ## Data-driven daily rules for the extra content (data/content_rules.json + state-spec keys in data/objects.json).
 ## Called once per game day from Careers.on_day. Object state specs may carry:
@@ -29,12 +29,19 @@ static func _all_objects() -> Array:
 		return (w.objects as Dictionary).values()
 	return []
 
+static var _last_spoil_toast: int = -99
+
 static func on_day(_day: int) -> void:
 	var spoiled_total: int = 0
 	for o in _all_objects():
 		spoiled_total += apply_object_day(o)
 	if spoiled_total > 0:
-		SysUtil.notify("Some food in the fridge went bad.", "warn")
+		var st: Dictionary = cfg().get("spoil_toast", {})
+		if spoiled_total >= int(st.get("min_items", 4)) and _day - _last_spoil_toast >= int(st.get("gap_days", 3)):
+			_last_spoil_toast = _day
+			SysUtil.notify("A lot of food in the fridge went bad.", "warn")
+		else:
+			ChronicleHook.note("spoilage", "Some food in the fridge went bad.", [], "", 1, false)
 
 ## Apply the daily rules to one object. Returns the number of items that spoiled.
 static func apply_object_day(o) -> int:

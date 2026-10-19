@@ -1,4 +1,4 @@
-class_name JusticeAppeal
+﻿class_name JusticeAppeal
 extends RefCounted
 ## Appeals, exonerations and pardons. Every day a convicted person may get new evidence: an innocent one far more often than a guilty one.
 ## A successful appeal for an innocent person is an EXONERATION (freed, compensated, in the news). Model prisoners are rarely pardoned.
@@ -42,7 +42,7 @@ static func resolve(c: Dictionary, new_evidence: bool) -> String:
 			if int(r.get("case", -1)) == int(c["id"]):
 				recs.erase(r)
 		JusticeState.records[pid] = recs
-		var text: String = "%s was cleared of %s. The court admitted it had the wrong person." % [CrimePerson.name_of(pid), str(c["charge"])]
+		var text: String = "%s was cleared of %s. The court admitted it had the wrong person." % [CrimePerson.name_of(pid), CaseText.neutral(c)]
 		CaseStore.note(c, text, "exonerated", 4)
 		if CrimePerson.is_player(pid) or CaseStore.household_involved(c):
 			SysUtil.notify(text, "good")

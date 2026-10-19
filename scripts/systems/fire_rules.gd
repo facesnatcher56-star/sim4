@@ -1,4 +1,4 @@
-class_name FireRules
+﻿class_name FireRules
 extends RefCounted
 ## Fire data and lookups shared by the Fire* classes: config.fire (data/incidents/03_fire.json), flammability of objects and floors,
 ## the safety objects of a lot (smoke alarm, extinguisher, sprinkler), who is asleep / helpless, rooms, exits and object tooltips.
@@ -45,20 +45,20 @@ static func room_of(tile: Vector2i) -> int:
 	return 0
 
 ## Same room (real World) or close enough (stub: no rooms).
-static func same_room(a: Vector2i, b: Vector2i) -> bool:
+static func same_room(a: Vector2i, b: Vector2i, level: int = 0) -> bool:
 	var w = _world()
 	if w != null and w.has_method("room_id"):
-		var ra: int = int(w.room_id(a))
-		return ra != -1 and ra == int(w.room_id(b))
+		var ra: int = int(w.room_id(a, level))
+		return ra != -1 and ra == int(w.room_id(b, level))
 	return absi(a.x - b.x) + absi(a.y - b.y) <= 6
 
-static func edge_open(a: Vector2i, b: Vector2i) -> bool:
+static func edge_open(a: Vector2i, b: Vector2i, level: int = 0) -> bool:
 	var w = _world()
 	if w == null or not w.has_method("edge_open"):
 		return true
 	if a.x == b.x or a.y == b.y:
-		return bool(w.edge_open(a, b))
-	return (bool(w.edge_open(a, Vector2i(b.x, a.y))) and bool(w.edge_open(Vector2i(b.x, a.y), b))) or (bool(w.edge_open(a, Vector2i(a.x, b.y))) and bool(w.edge_open(Vector2i(a.x, b.y), b)))
+		return bool(w.edge_open(a, b, level))
+	return (bool(w.edge_open(a, Vector2i(b.x, a.y), level)) and bool(w.edge_open(Vector2i(b.x, a.y), b, level))) or (bool(w.edge_open(a, Vector2i(a.x, b.y), level)) and bool(w.edge_open(Vector2i(a.x, b.y), b, level)))
 
 static func dist(a: Vector2i, b: Vector2i) -> int:
 	return maxi(absi(a.x - b.x), absi(a.y - b.y))
@@ -90,10 +90,10 @@ static func footprint(o) -> Array:
 		return o.footprint()
 	return [o.tile]
 
-static func object_at(t: Vector2i):
+static func object_at(t: Vector2i, level: int = 0):
 	var w = _world()
 	if w != null and w.has_method("object_at"):
-		var o = w.object_at(t)
+		var o = w.object_at(t, level)
 		if o != null and not o.is_wall_mounted():
 			return o
 		return null
@@ -136,7 +136,7 @@ static func flammability(o, tile: Vector2i = Vector2i(-1, -1)) -> float:
 		m = maxf(m, float(tags.get(str(t), 0.0)))
 	return m
 
-static func floor_flammability(t: Vector2i) -> float:
+static func floor_flammability(t: Vector2i, level: int = 0) -> float:
 	if t.x < 0:
 		return 0.0
 	if int((Fire.scorch.get(Fire.key(t), {}) as Dictionary).get("lv", 0)) >= 2:
@@ -144,7 +144,7 @@ static func floor_flammability(t: Vector2i) -> float:
 	var w = _world()
 	if w == null or not w.has_method("get_floor"):
 		return 0.0
-	return float((cfg().get("flam_floors", {}) as Dictionary).get(str(w.get_floor(t)), 0.0))
+	return float((cfg().get("flam_floors", {}) as Dictionary).get(str(w.get_floor(t, level)), 0.0))
 
 # ------------------------------------------------------------------ safety objects
 static func working_alarm(lot: String) -> bool:

@@ -1,4 +1,4 @@
-class_name LevelPortals
+﻿class_name LevelPortals
 extends RefCounted
 ## Ways between levels (`World.portals`): stairs, ladders, elevators, fire escapes. Every object whose def has a `portal` block
 ## is registered here when it is placed (WorldObjects calls on_created / on_removed) and becomes edges of the routing graph.
@@ -108,6 +108,9 @@ func _mark_geometry(rec: Dictionary, o, on: bool) -> void:
 			if int(rec["dz"]) > 0:
 				for p in rec["run"]:
 					tiles_upper.append(LPos.tile(p))
+			else:
+				for p in rec["run"]:                       # stairs going DOWN: the flight is an opening in this floor
+					_mark_tile(o.level, LPos.tile(p), o.id, on, true)
 		"ladder":
 			upper_level = o.level + int(rec["dz"])
 			if int(rec["dz"]) > 0:
@@ -129,6 +132,7 @@ func _mark_tile(level: int, t: Vector2i, oid: int, on: bool, hole: bool) -> void
 			world._blocked.erase(t)
 			world.levels.ground_holes.erase(t)
 		world.nav.touch_tile(t)
+		world.regions.mark_floor_dirty(t)                  # the ground mesh leaves a gap here
 		return
 	var lay := world.levels.layer(level)
 	if on:

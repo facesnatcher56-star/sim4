@@ -1,4 +1,4 @@
-class_name Commute
+﻿class_name Commute
 extends RefCounted
 ## Real commutes (task 11): a household folk with a shift (or school) leaves home early enough, WALKS the road graph to the
 ## workplace door (a `go_here` tagged params.commute), goes in (staff and students are exempt from fees / opening hours) and only
@@ -26,9 +26,13 @@ static func on_shift(fid: int) -> bool:
 static func active(fid: int) -> bool:
 	return str((trips.get(fid, {}) as Dictionary).get("state", "")) in ["out", "in"]
 
-## Staff / students go through their own workplace without fees or opening hours.
+## Staff / students go through their own workplace without fees or opening hours; so do people who live in a flat of that lot (it is their home).
 static func exempt(f, lot_id: String) -> bool:
-	return f != null and trips.has(int(f.id)) and str(trips[int(f.id)]["lot"]) == lot_id
+	if f == null:
+		return false
+	if trips.has(int(f.id)) and str(trips[int(f.id)]["lot"]) == lot_id:
+		return true
+	return int(f.household_id) > 0 and ApartmentUnits.lives_in(int(f.household_id), lot_id)
 
 # ------------------------------------------------------------------ leaving
 ## Planned lead time in hours before the shift start at which the folk has to set off (route + weather + injury + buffer).
@@ -136,10 +140,11 @@ static func _arrive(f, t: Dictionary, now: int) -> void:
 		return
 	var late: int = maxi(0, now - int(t["due_min"]))
 	var inside: bool = work and Workplace.visible_job(str(t["career"])) != ""
-	var spot: Vector2i = VisibleWork.post_tile(f, lot, str(t["career"])) if inside else Workplace.desk_tile(lot, f)
+	var floor_lv: int = Workplace.floor_of(lot, str(t["career"])) if work and not inside else 0          # office jobs sit on their floor of the tower
+	var spot: Vector2i = VisibleWork.post_tile(f, lot, str(t["career"])) if inside else Workplace.desk_tile(lot, f, floor_lv)
 	f.tile = spot
 	if "level" in f:
-		f.level = 0                       # multi-floor hook: Workplace.entry_tile(career).level will put office jobs on their floor
+		f.level = floor_lv
 	NeighborhoodLots.mark_inside(f, lot)
 	Neighborhood.refresh_view(fid)
 	t["state"] = "in"

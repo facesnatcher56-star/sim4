@@ -55,9 +55,8 @@ static func recent_news(n: int = 10) -> Array:
 	return news.slice(maxi(news.size() - n, 0))
 
 static func _new_name() -> String:
-	var c: Dictionary = cfg()
 	for _i in 40:
-		var nm: String = "%s %s" % [str(SysUtil.pick(c.get("first_names", ["Sam"]))), str(SysUtil.pick(c.get("last_names", ["Doe"])))]
+		var nm: String = "%s %s" % [Names.pick_first(), Names.pick_last()]
 		var taken: bool = false
 		for id in townies:
 			if townies[id]["name"] == nm:
@@ -106,7 +105,7 @@ static func generate_townies(count: int = -1) -> void:
 	# a teen and an elder for variety
 	if count >= 4:
 		var ids: Array = townies.keys()
-		(townies[ids[0]] as Dictionary)["age_days"] = SysUtil.rng.randf_range(float(Aging.stage_def("teen").get("from_day", 28)) + 1.0, 42.0)
+		(townies[ids[0]] as Dictionary)["age_days"] = SysUtil.rng.randf_range(float(Aging.stage_def("teen").get("from_day", 50)) + 1.0, float(Aging.stage_def("adult").get("from_day", 76)) - 2.0)
 		(townies[ids[0]] as Dictionary)["career"] = ""
 		var tt: Dictionary = townies[ids[0]]
 		tt["appearance"] = FolkOutfits.dress(tt["appearance"], "student", GeneticsUnique.registry_without(tt["appearance"]), Genetics.rng)

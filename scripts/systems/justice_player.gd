@@ -1,4 +1,4 @@
-class_name JusticePlayer
+﻿class_name JusticePlayer
 extends RefCounted
 ## Everything where the PLAYER's folk meets the justice system: clear prompts with choices (robbery reaction, a dangerous grudge, a plea,
 ## a lawyer, testimony) and being held away from the lot (custody, court, jail, prison, community service) through Away, like the hospital.
@@ -86,5 +86,10 @@ static func status_chips(f) -> Array:
 	if JusticeState.probation.has(pid) and int(JusticeState.probation[pid]) >= SysUtil.day():
 		out.append({"text": "On probation", "color": Color("#c9b037"), "tip": "Any new crime is punished harder until day %d." % (int(JusticeState.probation[pid]) + 1)})
 	if JusticeState.service.has(pid):
-		out.append({"text": "Community service", "color": Color("#4aa3a2"), "tip": "%d days of service left." % int(JusticeState.service[pid]["days_left"])})
+		out.append({"text": "Anger-management course" if bool(JusticeState.service[pid].get("course", false)) else "Community service", "color": Color("#4aa3a2"), "tip": "%d days of service left." % int(JusticeState.service[pid]["days_left"])})
+	for co in JusticeState.courses.get(pid, []):
+		out.append({"text": "Course: " + str((JusticeGuideline.cfg().get("course_labels", {}) as Dictionary).get(str(co["kind"]), "a course")).trim_prefix("an ").trim_prefix("a "), "color": Color("#4aa3a2"),
+			"tip": "%d sessions left. Finishing it is part of the sentence." % int(co["days_left"])})
+	for o in JusticeOrders.orders_against(pid):
+		out.append({"text": "Protective order", "color": Color("#c0392b"), "tip": "Must stay away from %s until day %d." % [CrimePerson.name_of(int(o["victim"])), int(o["until"]) + 1]})
 	return out

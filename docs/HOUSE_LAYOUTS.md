@@ -1,4 +1,4 @@
-# Generated house layouts (no two homes alike)
+﻿# Generated house layouts (no two homes alike)
 
 Rule: every home in the neighbourhood (player home options, townie homes, any generated house) has its own floor plan, and venues
 do not look like copies of homes. `HouseGenerator` builds the lots procedurally (deterministic per seed), validates them with the
@@ -79,9 +79,24 @@ windows in every habitable room with an exterior wall, nothing on doorways, obje
 22 homes -> 22 distinct floor plans (plus 4 hand-made, all different), 43 lots -> 43 distinct layouts (plus 11 hand-made), most similar pair of homes (interior walls + furniture
 Jaccard over the best symmetry) 0.26, venue alternates vs original and each other at most 0.15.
 
+## Multi-floor buildings (`BuildingGen`)
+Houses with an upstairs / cellar, apartment blocks, towers, a hospital, school, courthouse, police station and a car park come from `scripts/world/bldg_*.gd`
+(see ARCHITECTURE.md "Multi-floor buildings, part B"). They are NOT in `generated_lots.json` (that file keeps its fixed single-storey footprints and tests).
+| File | What |
+|---|---|
+| `data/building_specs.json` | the 15 specs: id, kind, shell, axis `ew|ns`, band depth `da`, corridor `corr` (3), `flip`, `lift`, `levels` (`"0"`, `"1-3"`, `"-1"` -> `{name, corr, front, a: [cells], b: [cells]}`), `career_floors`, `floor_types`, `fire_escape` |
+| `data/building_rules.json` | room types (lobby, waiting, ward, er_bay, surgery, maternity, nurse_station, exam, morgue, records, storage, lab, exec_suite, cell, custody, squad_room, courtroom, clerk, parking, den, shelter, unit_main, unit_studio_main) in the home item language + cloned objects + interactions |
+| `scripts/world/bldg_frame.gd` / `bldg_level.gd` / `bldg_export.gd` / `bldg_gen.gd` | frame + stair core / one level (cells -> rooms -> walls, doors, furniture, windows) / template assembly / API + uniqueness registry |
+| `data/generated_buildings.json`, `tools/gen_buildings.gd` | OUTPUT, regenerate with `Godot --headless --path . --script res://tools/gen_buildings.gd` (`-- --dry`, `-- --only=hospital_01`, `-- --seed=N`) |
+A cell is `room_type`, `room_type:width` or `room_type!` (the front door opens into it; level `front: "corr"` = into the corridor); `unit_studio` / `unit_1br` / `unit_2br`
+expand into a main room (living + kitchen) with bedroom(s) and a bath behind it, one entrance door from the corridor (the template's `units` list). Every
+level keeps the entry rules of the homes: every door tile and object slot reachable from the stair core (`HousePlan.valid`), windows on exterior walls. Template extras:
+`levels`, `roof`, `floor_names`, `stops` (level -> landing tile), `career_floors`, `units`, `fire_escape` (the ring side of the outside fire escape). Distinct signatures (`HouseSignature.layout_sig` covers the upper floors) and
+reachability of every object of every floor are checked by `tests/bldg_gen_test.gd`.
+
 ## Rough edges
 - Furniture is placed by rules, so rooms are tidy rather than quirky; "cluttered" (townie_b) is just more items via `extras` / `decor`.
-- No multi-storey, curved or L-shaped shells; the footprint is fixed by the template class. Halls are straight 1-2 tile strips.
+- Single-storey homes have no upstairs (see the floored homes above); no curved or L-shaped shells; the footprint is fixed by the template class. Halls are straight 1-2 tile strips.
 - No garage door / driveway: the garage is a concrete-floored workshop room with a bench.
 - Yard pieces hug fences and walls; no landscaping beyond path, garden plots, patio.
 - The `park` alternates change the path network and zones but keep the pond as two fishing spots (no water floor tile exists).

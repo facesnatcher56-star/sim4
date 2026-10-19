@@ -193,7 +193,7 @@ func _offers(f: Array) -> void:
 func _school(f: Array) -> void:
 	var w := K.setup()
 	var kid := K.make_folk(w, "Kid", [], 1, Vector2i(12, 12), "child")
-	Aging.set_age_days(kid, 15.0)
+	Aging.set_age_days(kid, 25.6)
 	var dir = K.director()
 	K.set_time(1, 6)
 	Careers.on_day(1)
@@ -214,7 +214,7 @@ func _school(f: Array) -> void:
 func _retirement(f: Array) -> void:
 	var w := K.setup()
 	var a := K.make_folk(w, "Old", [], 1, Vector2i(12, 12), "elder")
-	Aging.set_age_days(a, 150.0)
+	Aging.set_age_days(a, 182.0)
 	Careers.hire(a, "painter", 3)
 	WorldIface.coins[1] = 0
 	Careers.on_day(5)

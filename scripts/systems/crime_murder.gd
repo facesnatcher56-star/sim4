@@ -1,4 +1,4 @@
-class_name CrimeMurder
+﻿class_name CrimeMurder
 extends RefCounted
 ## Murder: never random. It needs a MOTIVE built over days (RAGE per ordered pair from tension, grudges, hatred, cheating, money), TRAITS
 ## (hot-headed, jealous, grudge-holding push it; forgiving, empathic, easy-going almost forbid it) and an OPPORTUNITY (alone together, at night).
@@ -120,6 +120,7 @@ static func _warn(a: int, b: int) -> void:
 	var holders: Array = CrimePerson.friends(a).slice(0, 2) + CrimePerson.friends(b).slice(0, 2)
 	for h in holders:
 		RelationshipKnowledge.add_gossip(int(h), a, "%s has been glaring at %s lately." % [an, bn], "murder_threat", -1, b)
+	JusticeState.count("murder_warning")
 	SysUtil.game_event("murder_warning", {"folk_id": a, "target_id": b})
 	if CrimePerson.is_player(a) or CrimePerson.is_player(b):
 		var pid: int = a if CrimePerson.is_player(a) else b
@@ -156,9 +157,16 @@ static func _begin(a: int, b: int) -> void:
 			"%s has made up their mind about %s and is going to find them tonight. Step in now, or it will be too late." % [an, bn],
 			[{"id": "step_in", "label": "Step in now"}, {"id": "ignore", "label": "Let it happen"}],
 			_step_choice.bind(a, b), "ignore")
-		JusticeState.queue({"kind": "murder_due", "culprit": a, "victim": b, "due_min": SysUtil.now() + lead})
-	else:
-		execute(a, b)
+	JusticeState.queue({"kind": "murder_due", "culprit": a, "victim": b, "due_min": _when(lead)})
+
+## A random moment, never the moment of the daily tick: `lead` minutes from now plus up to four hours, and when that lands in the daytime the
+## coming night (22:00 to 05:00) instead, so it is when the two are likely alone together.
+static func _when(lead: int) -> int:
+	var t: int = SysUtil.now() + maxi(lead, 30) + JusticeState.rng.randi_range(0, 240)
+	var mod: int = t % 1440
+	if mod >= 360 and mod < 1320:
+		t += (1320 - mod) + JusticeState.rng.randi_range(0, 420)
+	return t
 
 ## The final countdown ended: still enraged and still the chance? Then it happens.
 static func due(p: Dictionary) -> void:

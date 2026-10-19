@@ -1,4 +1,4 @@
-extends RefCounted
+﻿extends RefCounted
 ## Save / load: calendar, seed, chain, snow, bill accumulators, holiday state survive a JSON round trip deterministically.
 
 const W = preload("res://tests/weather_kit.gd")
@@ -26,7 +26,7 @@ func _roundtrip(f: Array) -> void:
 	Economy.next_bill_day = 10000          # bills reset the weather bill period; keep them out of this comparison
 	Seasons.set_length(5)
 	SimEnv.clock().total_minutes = W.at(2, 6)
-	W.run_min(TestFixture.pick(13, 5) * 1440 + 400)                         # long enough for snow / bills / holidays state
+	W.run_coarse(TestFixture.pick(13, 5) * 1440 + 400)                         # long enough for snow / bills / holidays state
 	var before_sig: Array = _signature()
 	var before: Dictionary = Weather.to_dict()
 	var json: String = JSON.stringify(before)
@@ -44,11 +44,11 @@ func _roundtrip(f: Array) -> void:
 	var d2: Array = []
 	W.expect(f, K.deep_eq(before_sig, after_sig, "sig", d2), "behaviour identical after round trip: %s" % str(d2.slice(0, 4)))
 	# the future is still the same after continuing the game from the loaded state
-	W.run_min(TestFixture.pick(3, 1) * 1440)
+	W.run_coarse(TestFixture.pick(3, 1) * 1440)
 	var cont_a: Array = _signature()
 	Weather.from_dict(JSON.parse_string(json))
 	SimEnv.clock().total_minutes = W.at(2, 6) + TestFixture.pick(13, 5) * 1440 + 400
-	W.run_min(TestFixture.pick(3, 1) * 1440)
+	W.run_coarse(TestFixture.pick(3, 1) * 1440)
 	var cont_b: Array = _signature()
 	var d3: Array = []
 	W.expect(f, K.deep_eq(cont_a, cont_b, "cont", d3), "continuing from a loaded state matches the uninterrupted run: %s" % str(d3.slice(0, 4)))
@@ -62,7 +62,7 @@ func _full_save(f: Array) -> void:
 	K.make_folk(w, "Ann")
 	Seasons.set_length(6)
 	SimEnv.clock().total_minutes = W.at(5, 9)
-	W.run_min(TestFixture.pick(5, 2) * 1440)
+	W.run_coarse(TestFixture.pick(5, 2) * 1440)
 	var snap: Dictionary = SaveLoad.snapshot("t")
 	W.expect(f, (snap["systems"] as Dictionary).has("weather"), "SaveLoad snapshot has a weather block")
 	var json: String = JSON.stringify(snap)

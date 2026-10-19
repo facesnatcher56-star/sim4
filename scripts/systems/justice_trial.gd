@@ -1,4 +1,4 @@
-class_name JusticeTrial
+﻿class_name JusticeTrial
 extends RefCounted
 ## The trial: a SCORED verdict, not a coin flip. z = k * (evidence + testimony + jury - doubt - defence); P(guilty) = logistic(z).
 ##   evidence   CaseEvidence.strength(accused): hard evidence only the culprit leaves + a share of motive/alibi/record
@@ -108,19 +108,22 @@ static func run(c: Dictionary) -> String:
 	return verdict
 
 static func _announce(c: Dictionary, verdict: String) -> void:
-	var nm: String = CrimePerson.name_of(int(c["accused"]))
-	var ch: String = str(JusticeProcess.charge_def(str(c["charge"])).get("label", "the charge")).to_lower()
-	var text: String = {"guilty": "%s was found guilty of %s." % [nm, ch], "plea": "%s pleaded guilty to %s." % [nm, ch],
-		"not_guilty": "%s was found not guilty of %s." % [nm, ch], "mistrial": "The trial of %s ended in a mistrial: the jury could not agree." % nm}.get(verdict, "")
+	if verdict in ["guilty", "plea"]:
+		return                                  # one notice with charge, victim and sentence: JusticeSentence.impose
+	var pid: int = int(c["accused"])
+	var text: String = CaseText.acquitted(c, pid) if verdict == "not_guilty" else CaseText.mistrial(c, pid)
 	CaseStore.note(c, text, "verdict", 4 if verdict != "mistrial" else 3)
 	if CaseStore.household_involved(c):
 		SysUtil.notify(text, "story")
-		var pid: int = int(c["accused"])
 		if CrimePerson.is_player(pid):
 			JusticePlayer.tell(pid, "The verdict", text)
 
 static func _acquit(c: Dictionary) -> void:
 	var pid: int = int(c["accused"])
+	JusticeOrders.lift(c)
+	var acq: Array = SysUtil.to_ints(c.get("acquitted", []))
+	acq.append(pid)
+	c["acquitted"] = acq
 	JusticeState.inmates.erase(pid)
 	JusticePlayer.release(CrimePerson.folk(pid))
 	c["state"] = "closed" if bool(c["wrongful"]) else "cold"

@@ -1,0 +1,10 @@
+{
+  "half_life_days": 1.0,
+  "per_interaction": 0.35,
+  "per_object_kind": 0.10,
+  "min_mult": 0.12,
+  "exempt_tags": ["sleep", "toilet", "meal", "food", "hygiene", "prepare", "work", "emergency"],
+  "exempt_ids": ["use_toilet", "eat_meal", "prep_food", "sleep_bed", "take_shower", "brush_teeth", "wash_hands"],
+  "social_scale": 0.6,
+  "fed_up": {"threshold": 5.0, "chance": 0.35, "buff": "fed_up"}
+}

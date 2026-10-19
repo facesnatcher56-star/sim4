@@ -1,4 +1,4 @@
-class_name HelpDialog
+﻿class_name HelpDialog
 extends UIDialog
 ## Controls reference (F1 or the "?" button).
 const KEYS := [
@@ -30,6 +30,10 @@ func build() -> void:
 			d.custom_minimum_size = Vector2(260, 0)
 			d.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			row.add_child(d)
+	var law := Button.new()
+	law.text = "Town Law: every charge and sentence"
+	law.pressed.connect(func(): TownLawDialog.open_from(self))
+	body.add_child(law)
 	var again := Button.new()
 	again.text = "Show the welcome tips again"
 	again.pressed.connect(func():

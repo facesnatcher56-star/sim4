@@ -19,6 +19,7 @@ var skills_box: VBoxContainer
 var rel_box: VBoxContainer
 var rel_scroll: ScrollContainer
 var _rel_pending := false
+var record_box: VBoxContainer          # "Record" tab: criminal record, sentences and orders in force (RecordView)
 var family_box: VBoxContainer          # "Family" tab: partner / parents / children / siblings + action buttons
 var family_buttons: Dictionary = {}    # action id -> Button
 var goal_label: Label
@@ -100,6 +101,14 @@ func _ready() -> void:
 	family_box = VBoxContainer.new()
 	family_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	fam_scroll.add_child(family_box)
+	var rec_scroll := ScrollContainer.new()
+	rec_scroll.name = "Record"
+	rec_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	tabs.add_child(rec_scroll)
+	record_box = VBoxContainer.new()
+	record_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	rec_scroll.add_child(record_box)
+	tabs.tab_changed.connect(func(_i): _refresh_record())
 	var why_box := VBoxContainer.new()
 	why_box.name = "Thinking"
 	tabs.add_child(why_box)
@@ -138,9 +147,14 @@ func show_folk(f) -> void:
 	_build_skills()
 	_build_relationships()
 	_build_family()
+	_refresh_record()
 	_refresh_mood()
 	_refresh_goal()
 	_refresh_why()
+
+func _refresh_record() -> void:
+	if record_box != null and tabs != null and tabs.get_current_tab_control() != null and tabs.get_current_tab_control().name == "Record":
+		RecordView.fill(record_box, folk_id)
 
 ## Portrait colour: the registry colour picked on the title screen when there is one, else the folk's shirt (Genetics).
 static func portrait_color(f) -> Color:
@@ -577,7 +591,7 @@ func _on_family_event(ev: String, _payload: Dictionary = {}) -> void:
 		call_deferred("_build_relationships")
 
 func _family_line(n: Dictionary, extra: String = "") -> String:
-	var s := "%s  (%s, %d)" % [str(n.get("name", "?")), str(n.get("stage", "")).capitalize(), int(n.get("age_years", 0))]
+	var s := "%s  (%s)" % [str(n.get("name", "?")), str(n.get("stage_text", n.get("stage", ""))).capitalize()]
 	if not bool(n.get("alive", true)):
 		s += "  [passed away]"
 	elif not bool(n.get("on_lot", false)):

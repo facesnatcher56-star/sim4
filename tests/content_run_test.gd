@@ -1,4 +1,4 @@
-extends RefCounted
+﻿extends RefCounted
 ## Every extra interaction runs end-to-end through the real Interaction / Cond / Loot engine on a stub world,
 ## plus behavioural checks: cooking tiers, spoilage, garden growth, fireplace reset, trait refusals and autonomy weights.
 
@@ -196,6 +196,7 @@ func _traits_decide(f: Array) -> void:
 	Kit.expect(f, not bool(_score(normal, "buy_snack", vend)["skipped"]), "ordinary folk will buy a snack")
 	Kit.expect(f, bool(_score(germ, "soak_hot_tub", tub)["skipped"]) and bool(_score(germ, "buy_snack", vend)["skipped"]), "germaphobes avoid the hot tub and the vending machine")
 	Kit.expect(f, not bool(_score(normal, "soak_hot_tub", tub)["skipped"]), "ordinary folk soak in the hot tub")
+	Kit.set_time(1, 14)          # not the small hours (those discourage skill practice)
 	musical.add_skill_xp("guitar", 10.0)
 	normal.add_skill_xp("guitar", 10.0)
 	var sm: float = float(_score(musical, "play_guitar", gs)["score"])

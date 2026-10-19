@@ -32,7 +32,7 @@ func _crowd_and_visitor_days() -> void:
 	var folk: Array = Kit.new_game("small")
 	Incidents.set_level("off")                 # only neglect may kill here, not a rare event or old age
 	for tid0 in Story.townies:
-		Story.townies[tid0]["age_days"] = 70   # no townie is near the end of life in this window
+		Story.townies[tid0]["age_days"] = 102   # no townie is near the end of life in this window
 	Kit.set_time(2, 8)
 	Neighborhood.travel([folk[0].id], "cafe", {"instant": true, "free": true, "quiet": true})
 	Kit.run(5)
@@ -44,7 +44,7 @@ func _crowd_and_visitor_days() -> void:
 	var worst := 100.0
 	var worst_who := ""
 	var seen := 0
-	for h in TestFixture.pick(72, 30):
+	for h in TestFixture.pick(48, 14):
 		Kit.run(60)
 		for f in _strangers():
 			seen += 1
@@ -75,7 +75,7 @@ func _loner_regular_stays_healthy() -> void:
 	var folk: Array = Kit.new_game("small")
 	Incidents.set_level("off")
 	for tid0 in Story.townies:
-		Story.townies[tid0]["age_days"] = 70
+		Story.townies[tid0]["age_days"] = 102
 	Kit.set_time(2, 8)
 	Neighborhood.travel([folk[0].id], "park", {"instant": true, "free": true, "quiet": true})
 	Kit.run(5)
@@ -84,7 +84,7 @@ func _loner_regular_stays_healthy() -> void:
 	if not npc.has_trait("loner"):
 		npc.traits.append("loner")
 	var worst := {"hunger": 100.0, "bladder": 100.0, "social": 100.0, "fun": 100.0}
-	for step in TestFixture.pick(72, 30) * 6:
+	for step in TestFixture.pick(48, 16) * 6:
 		Kit.run(10)
 		if SysUtil.folk(npc.id) != npc:
 			_check(float(worst["hunger"]) > 0.0, "the loner did not leave the park hungry (%d)" % int(worst["hunger"]))

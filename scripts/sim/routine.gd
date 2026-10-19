@@ -34,7 +34,7 @@ static func evaluate(folk, def_id: String, tags: Array, active: Variant = null) 
 	for pair in active:
 		var rid = pair[0]
 		var r: Dictionary = pair[1]
-		if bool(r.get("once", false)) and folk.routine_log.has(_log_key(str(rid), def_id)):
+		if bool(r.get("once", false)) and not folk.routine_log.is_empty() and folk.routine_log.has(_log_key(str(rid), def_id)):
 			continue
 		var hit := false
 		var tm: Dictionary = r.get("tag_mult", {})
@@ -73,6 +73,8 @@ static func _active(folk, r: Dictionary) -> bool:
 			"no_job":
 				if folk.has_job():
 					return false
+	if r.has("circadian") and not Circadian.in_phase(folk, str(r["circadian"])):
+		return false
 	var h: float = SimEnv.hour_f()
 	if r.has("before_work_hours"):
 		if not folk.has_job():

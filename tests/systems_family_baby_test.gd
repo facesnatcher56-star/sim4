@@ -17,8 +17,8 @@ func run() -> Array:
 static func _couple(w: StubWorld) -> Array:
 	var a := K.make_folk(w, "Ann Rowe", ["creative", "social"])
 	var b := K.make_folk(w, "Bo Rowe", ["gamer", "active"], 1, Vector2i(13, 12))
-	Aging.set_age_days(a, 60.0)
-	Aging.set_age_days(b, 60.0)
+	Aging.set_age_days(a, 92.0)
+	Aging.set_age_days(b, 92.0)
 	RelationshipService.add_both(a.id, b.id, "romance", 60.0)
 	RelationshipService.add_both(a.id, b.id, "friendship", 60.0)
 	RelationshipBits.set_flag(a.id, b.id, "sweetheart", true, false)
@@ -60,7 +60,7 @@ func _pregnancy(f: Array) -> void:
 	var a: Folk = pair[0]
 	var b: Folk = pair[1]
 	var c := K.make_folk(w, "Cy", ["lazy"], 1, Vector2i(15, 12))
-	Aging.set_age_days(c, 60.0)
+	Aging.set_age_days(c, 92.0)
 	RelationshipService.add_both(a.id, c.id, "romance", 60.0)
 	K.expect(f, Aging.try_for_baby(a.id, c.id)["reason"] == "not_a_couple", "try for baby needs a sweetheart bond or better")
 	K.set_time(1, 8)
@@ -112,9 +112,9 @@ func _care(f: Array) -> void:
 	var a: Folk = pair[0]
 	var b: Folk = pair[1]
 	var teen := K.make_folk(w, "Teen", [], 1, Vector2i(14, 12), "teen")
-	Aging.set_age_days(teen, 30.0)
+	Aging.set_age_days(teen, 53.2)
 	var kid := K.make_folk(w, "Kid", [], 1, Vector2i(15, 12), "child")
-	Aging.set_age_days(kid, 15.0)
+	Aging.set_age_days(kid, 25.6)
 	var baby := _make_baby(w, pair)
 	var fridge = w.add_object("fridge", Vector2i(12, 16))
 	var bed = w.add_object("bed", Vector2i(18, 12))
@@ -268,7 +268,7 @@ func _toddler(f: Array) -> void:
 	var pair: Array = _couple(w)
 	var a: Folk = pair[0]
 	var baby := _make_baby(w, pair)
-	Aging.set_age_days(baby, 5.0)         # toddler (from day 4)
+	Aging.set_age_days(baby, 7.8)         # toddler (from day 4)
 	K.expect(f, baby.age_stage == "toddler", "toddler stage")
 	# the daily routine grows the three skills a little
 	for d in range(2, 5):
@@ -292,7 +292,7 @@ func _toddler(f: Array) -> void:
 	# growing into a child with all skills >= 1 makes the parents proud
 	for s in ["walking", "talking", "potty"]:
 		baby.add_skill_xp(s, 150.0)
-	Aging.set_age_days(baby, 11.9)
+	Aging.set_age_days(baby, 19.8)
 	K.set_time(10, 0)
 	Aging.on_day(10)
 	K.expect(f, baby.age_stage == "child", "grows into a child (%s)" % baby.age_stage)

@@ -1,4 +1,4 @@
-class_name CrimePerson
+﻿class_name CrimePerson
 extends RefCounted
 ## One view of "a person" for the crime and justice code: a real Folk (household member, or a townie standing on the map) or a Story townie
 ## record. Everything is addressed by person id (Folk ids and townie ids never collide). Full versus statistical is decided per action.
@@ -23,6 +23,8 @@ static func name_of(pid: int) -> String:
 		return str(f.name)
 	if Story.townies.has(pid):
 		return str(Story.townies[pid].get("name", "Someone"))
+	if Family.people.has(pid):                  # the dead and the moved away are still remembered by name
+		return Family.name_of(pid)
 	return "Someone"
 
 ## Household resident of the player (not a visiting townie).
@@ -123,7 +125,7 @@ static func in_custody(pid: int) -> bool:
 	return JusticeState.inmates.has(pid)
 
 static func record_count(pid: int) -> int:
-	return (JusticeState.records.get(pid, []) as Array).size()
+	return JusticeRecords.visible(pid).size()
 
 static func has_record(pid: int) -> bool:
 	return record_count(pid) > 0

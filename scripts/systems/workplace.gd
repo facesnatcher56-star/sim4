@@ -1,4 +1,4 @@
-class_name Workplace
+﻿class_name Workplace
 extends RefCounted
 ## Where a career (or school) happens on the map. Data: career.workplace = lot id in data/careers.json (school = the "school" lot),
 ## career.visible_work = interaction id of a job done ON the lot (data/commute.json, see VisibleWork).
@@ -44,11 +44,28 @@ static func lot_of_folk(f) -> String:
 		return SCHOOL if (map_ready() and not Neighborhood.lot(SCHOOL).is_empty()) else ""
 	return ""
 
+## `tile` = the door of the workplace lot; `level` = the floor of the building where this career works (a template's `career_floors`,
+## e.g. coders on the 1st floor of the office tower), 0 for single-storey lots.
 static func entry_tile(career_id: String) -> Dictionary:
 	var lot: String = lot_for(career_id)
 	if lot == "":
 		return {"tile": Vector2i(-1, -1), "level": 0}
-	return {"tile": NeighborhoodLots.entry_tile(lot), "level": 0}
+	return {"tile": NeighborhoodLots.entry_tile(lot), "level": floor_of(lot, career_id)}
+
+## Floor of a career inside its lot's building (0 when the template has no `career_floors` entry; "school" = the teacher's floor).
+static func floor_of(lot_id: String, career_id: String) -> int:
+	var cf: Dictionary = LotLoader.template(Neighborhood.template_of(lot_id)).get("career_floors", {})
+	return int(cf.get(career_id, 0))
+
+## Entry tile of the floor `level` of a lot's building (the stair / lift landing, world coordinates), or the lot door for level 0.
+static func landing_tile(lot_id: String, level: int) -> Vector2i:
+	if level == 0:
+		return NeighborhoodLots.entry_tile(lot_id)
+	var stops: Dictionary = LotLoader.template(Neighborhood.template_of(lot_id)).get("stops", {})
+	if not stops.has(str(level)):
+		return NeighborhoodLots.entry_tile(lot_id)
+	var s: Array = stops[str(level)]
+	return Vector2i(int(s[0]), int(s[1])) + NeighborhoodLots.rect_of(lot_id).position
 
 static func visible_job(career_id: String) -> String:
 	return str(Careers.career_def(career_id).get("visible_work", ""))
@@ -61,20 +78,23 @@ static func staff_tile(lot_id: String) -> Vector2i:
 	var t: Array = staff[0]["tile"]
 	return Vector2i(int(t[0]), int(t[1])) + NeighborhoodLots.rect_of(lot_id).position
 
-## Where a hidden worker stands inside the building: a desk of the lot (different folk, different desks), else the staff post, else the door.
-static func desk_tile(lot_id: String, f) -> Vector2i:
+## Where a hidden worker stands inside the building: a desk of the lot ON HIS FLOOR (different folk, different desks), else any desk of
+## the lot, else the staff post, else the door. `level` = the floor wanted (0 for single-storey lots).
+static func desk_tile(lot_id: String, f, level: int = 0) -> Vector2i:
 	var w = WorldIface.world()
 	var desks: Array = []
 	if w != null:
 		for o in w.all_objects():
-			if (o.def_id == "computer" or o.def_id == "desk") and NeighborhoodLots.lot_at(o.tile) == lot_id:
+			if (o.def_id == "computer" or o.def_id == "desk") and NeighborhoodLots.lot_at(o.tile) == lot_id and o.level == level:
 				desks.append(o)
 	if not desks.is_empty():
 		desks.sort_custom(func(a, b): return a.id < b.id)
 		var o2 = desks[int(f.id) % desks.size()]
 		var t: Vector2i = WorldIface.use_tile(o2, 0)
-		if w.is_walkable(t):
+		if w.is_walkable(t, level):
 			return t
+	if level != 0:
+		return landing_tile(lot_id, level)
 	var st: Vector2i = staff_tile(lot_id)
 	return st if st.x >= 0 else NeighborhoodLots.entry_tile(lot_id)
 

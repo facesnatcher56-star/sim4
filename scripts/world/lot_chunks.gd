@@ -1,4 +1,4 @@
-extends "res://scripts/world/lot_models.gd"
+﻿extends "res://scripts/world/lot_models.gd"
 ## LotView layer: CHUNKED static terrain. The map is cut into 16x16 chunks (WorldRegions.CHUNK). Each chunk owns
 ##   * one floor ArrayMesh (vertex colours; road centre lines + crosswalk bars are baked in as flat quads),
 ##   * a grass-tint and a snow overlay mesh (materials shared with WeatherView, see overlay_*_mat),
@@ -171,11 +171,14 @@ func _build_chunk(c: Vector2i) -> void:
 	var sa := _MeshArrays.new()
 	var floors := World.floors
 	var w := World.width
+	var holes: Dictionary = World.levels.ground_holes
 	var big := World.regions.has_regions()
 	for y in range(rc.position.y, rc.end.y):
 		for x in range(rc.position.x, rc.end.x):
 			var t := Vector2i(x, y)
 			var ft: String = floors[y * w + x]
+			if not holes.is_empty() and holes.has(t):
+				continue                                     # an opening (stairs down to the basement): no floor here
 			var col := _floor_color(ft, t)
 			fa.quad(x, y, x + 1, y + 1, 0.0, col)
 			if ft == "crosswalk":

@@ -1,4 +1,4 @@
-extends "res://scripts/world/folk_look.gd"
+﻿extends "res://scripts/world/folk_look.gd"
 ## FolkView layer: path following, facing, social partner alignment.
 
 
@@ -209,7 +209,7 @@ func _move(delta: float) -> void:
 	if mult <= 0.0:
 		_moving = false
 		return
-	var speed := BASE_SPEED * mult * (1.0 + 0.4 * float(_waypoints.size())) * Weather.walk_speed_mult_at(Vector2i(int(floor(position.x)), int(floor(position.z))))
+	var speed := BASE_SPEED * mult * (1.0 + 0.4 * float(_waypoints.size())) * Weather.walk_speed_mult_at(Vector2i(int(floor(position.x)), int(floor(position.z))), _last_level)
 	var goal: Vector3 = _waypoints[0] if not _waypoints.is_empty() else _target
 	var gy: float = goal.y if not _waypoints.is_empty() else _level_y
 	var to := goal - position

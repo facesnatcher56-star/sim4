@@ -1,4 +1,4 @@
-class_name DisasterDamage
+﻿class_name DisasterDamage
 extends RefCounted
 ## What a disaster does to the HOME lot, FULL mode (real objects, real folk). Numbers are in config.disasters.damage[kind]
 ## (arrays indexed by power 1..3). Preparation: shield objects (shutters, sandbags) lower the power by one; the shelter and
@@ -35,7 +35,7 @@ static func has_object(hid: int, def_id: String) -> bool:
 static func is_outdoor(o) -> bool:
 	var w = WorldIface.world()
 	if w != null and w.has_method("is_outdoor"):
-		return bool(w.is_outdoor(o.tile))
+		return bool(w.is_outdoor(o.tile, LevelInfo.lv(o)))
 	return tags_of(o).has("outdoor")
 
 ## Power after the household's preparations (shutters, sandbags ...). 0 = the lot got away with it.
@@ -102,7 +102,7 @@ static func strike(hid: int, kind: String, power: int) -> Dictionary:
 	for o in objects(hid):
 		if not _in_scope(o, scope):
 			continue
-		var pp: float = p * (1.5 if scope == "furniture" and float(def_of(o).get("height", 1.0)) >= 1.4 else 1.0)
+		var pp: float = p * (1.5 if scope == "furniture" and float(def_of(o).get("height", 1.0)) >= 1.4 else 1.0) * LevelDisasters.hit_mult(kind, o)   # floors: flood hits the basement first, quakes the upper floors
 		if Incidents.rng.randf() >= pp:
 			continue
 		var od: Dictionary = def_of(o)
@@ -148,8 +148,10 @@ static func exposure(f, hid: int) -> String:
 		return "cover"
 	if WeatherFolk.is_outside(f):
 		return "out"
+	if LevelDisasters.in_basement(f):
+		return "cover"                                      # the basement / storm-shelter room
 	for o in objects(hid):
-		if (tags_of(o).has("bathroom") or str(o.def_id) == "storm_shelter") and absi(o.tile.x - f.tile.x) + absi(o.tile.y - f.tile.y) <= 2:
+		if (tags_of(o).has("bathroom") or str(o.def_id) == "storm_shelter") and LevelInfo.lv(o) == LevelInfo.lv(f) and LevelInfo.lv(f) <= 0 				and absi(o.tile.x - f.tile.x) + absi(o.tile.y - f.tile.y) <= 2:
 			return "cover"
 	return "in"
 
@@ -161,7 +163,7 @@ static func hurt_people(hid: int, kind: String, power: int) -> Dictionary:
 		return res
 	for f in folk_on_lot(hid):
 		var ex: String = exposure(f, hid)
-		var hurt: float = at(d.get("cover_hurt" if ex == "cover" else ("out_hurt" if ex == "out" else "in_hurt"), []), power)
+		var hurt: float = at(d.get("cover_hurt" if ex == "cover" else ("out_hurt" if ex == "out" else "in_hurt"), []), power) * (LevelDisasters.folk_mult(kind, f) if ex == "in" else 1.0)
 		var kill: float = 0.0 if ex == "cover" else at(d.get("out_kill" if ex == "out" else "in_kill", []), power)
 		var nm: String = str(f.name)
 		if kill > 0.0 and Incidents.rng.randf() < kill:

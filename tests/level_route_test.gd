@@ -1,4 +1,4 @@
-extends RefCounted
+﻿extends RefCounted
 ## Multi-floor routing: stairs, lift, mixed, unreachable levels, out-of-order lift, lift capacity, cross-building, level-0 untouched.
 
 const Kit := preload("res://tests/level_kit.gd")
@@ -105,7 +105,7 @@ func _unreachable() -> void:
 	var len3: float = W.route_length(Vector3i(5, 6, 0), Vector3i(10, 8, 3))
 	var ms := float(Time.get_ticks_usec() - t0) / 1000.0
 	_check(len3 < 0.0, "levels above a missing stair are unreachable")
-	_check(ms < 3.0, "unreachable floors fail fast (%.2f ms)" % ms)
+	_check(ms < 3.0 * TestFixture.SLACK, "unreachable floors fail fast (%.2f ms)" % ms)
 	_check(W.find_route(Vector3i(5, 6, 0), Vector3i(10, 8, 3)).is_empty(), "no route entries")
 	_check(W.has_route(Vector3i(5, 6, 0), Vector3i(10, 8, 1)), "floor 1 still reachable")
 	# a level that does not exist at all

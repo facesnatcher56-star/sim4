@@ -1,4 +1,4 @@
-class_name Incidents
+﻿class_name Incidents
 extends RefCounted
 ## Rare events for the WHOLE town. Data: data/incidents.json + data/incidents/*.json (IncidentDefs). Every incident applies to every
 ## person and lot: the player's household and folk on the map run the FULL version (real handlers, toasts per notify_policy); far
@@ -166,7 +166,7 @@ static func _timed_checkup(f) -> void:
 # ------------------------------------------------------------------ save
 static func to_dict() -> Dictionary:
 	return {"level": level_id(), "rng_seed": rng.seed, "rng_state": str(rng.state), "counters": counters.duplicate(true), "pending": pending.duplicate(true),
-		"history": _history.duplicate(true), "hospital": Hospital.to_dict(), "health": Health.to_dict(), "graves": Graves.to_dict(), "disasters": DisasterState.to_dict()}
+		"history": _history.duplicate(true), "hospital": Hospital.to_dict(), "levels": LevelAccidents.to_dict(), "health": Health.to_dict(), "graves": Graves.to_dict(), "disasters": DisasterState.to_dict()}
 
 static func from_dict(d: Dictionary) -> void:
 	reset()
@@ -187,6 +187,7 @@ static func from_dict(d: Dictionary) -> void:
 		pending.append(q)
 	_history = (d.get("history", []) as Array).duplicate(true)
 	Hospital.from_dict(d.get("hospital", {}))
+	LevelAccidents.from_dict(d.get("levels", {}))
 	Health.from_dict(d.get("health", {}))
 	Graves.from_dict(d.get("graves", {}))
 	DisasterState.from_dict(d.get("disasters", {}))

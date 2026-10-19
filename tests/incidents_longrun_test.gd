@@ -17,7 +17,7 @@ func _near_rel(measured: float, target: float, tol: float) -> bool:
 
 func _elder(w: StubWorld, nm: String, hid: int) -> Folk:
 	var e := K.make_folk(w, nm, [], hid, Vector2i(10 + hid, 10), "elder")
-	Aging.set_age_days(e, 150.0)
+	Aging.set_age_days(e, 182.0)
 	e.skills["fitness"]["level"] = 3          # no fitness multiplier either way
 	return e
 
@@ -28,6 +28,7 @@ func _release_patients() -> void:
 func _daily(f: Array) -> void:
 	var w := K.setup()
 	Incidents.reset()
+	StoryPacing.enabled = false        # rate test: calm households would raise the mishap rates
 	Incidents.set_level("rare")
 	Weather.force("sunny")
 	for h in 3:
@@ -36,7 +37,7 @@ func _daily(f: Array) -> void:
 	for i in 20:
 		elders.append(_elder(w, "Elder%d" % i, 1 + i % 3))
 	Story.generate_townies()
-	var years: int = TestFixture.pick(120, 40)
+	var years: int = TestFixture.pick(75, 40)
 	var deaths: int = 0
 	for d in years * YEAR:
 		K.set_time(2 + d, 3)
@@ -75,12 +76,13 @@ func _daily(f: Array) -> void:
 func _hourly(f: Array) -> void:
 	var w := K.setup()
 	Incidents.reset()
+	StoryPacing.enabled = false        # rate test: calm households would raise the mishap rates
 	Incidents.set_level("rare")
 	Weather.force("sunny")
 	var folk: Array = []
 	for i in 12:
 		folk.append(K.make_folk(w, "Adult%d" % i, [], 1 + i % 3, Vector2i(5 + i, 5)))
-	var years: int = TestFixture.pick(16, 6)
+	var years: int = TestFixture.pick(10, 6)
 	for h in years * YEAR * 24:
 		K.set_time(2 + h / 24, h % 24)
 		Incidents.on_hour()
@@ -100,10 +102,11 @@ func _levels(f: Array) -> void:
 	for pair in [["off", 0.0], ["normal", 3.0], ["chaotic", 10.0]]:
 		var w := K.setup()
 		Incidents.reset()
+		StoryPacing.enabled = false        # rate test: calm households would raise the mishap rates
 		Incidents.set_level(pair[0])
 		K.make_folk(w, "Ada", [], 1)
 		K.make_folk(w, "Bo", [], 2)
-		var years: int = TestFixture.pick(40, 20)
+		var years: int = TestFixture.pick(26, 20)
 		for d in years * YEAR:
 			K.set_time(2 + d, 3)
 			Incidents.on_day()

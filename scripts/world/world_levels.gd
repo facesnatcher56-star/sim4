@@ -1,4 +1,4 @@
-class_name WorldLevels
+﻿class_name WorldLevels
 extends RefCounted
 ## Multi-floor data of the map (`World.levels`). Level 0 (the ground) stays in the World's own grid / dictionaries exactly as
 ## before; every OTHER level (1.. above, -1.. basements, no limit) is a sparse LevelLayer. A BUILDING is a record
@@ -26,6 +26,7 @@ func _init(w: WorldGrid) -> void:
 func reset() -> void:
 	buildings.clear()
 	layers.clear()
+	ground_holes.clear()
 	_next_bid = 1
 	gen += 1
 
@@ -55,6 +56,12 @@ func add_building(rect: Rect2i, lo: int = 0, hi: int = 0, extra: Dictionary = {}
 
 func building(id: int) -> Dictionary:
 	return buildings.get(id, {})
+
+
+## Player-facing name of a floor: the template's own ("Emergency", "Software") or "3rd floor" / "Basement 1".
+func level_name(bid: int, level: int) -> String:
+	var names: Dictionary = (buildings.get(bid, {}) as Dictionary).get("names", {})
+	return str(names.get(str(level), LPos.level_name(level)))
 
 
 ## Building whose footprint covers the tile (-1 none). Few buildings: a linear scan beats any index.
@@ -238,7 +245,7 @@ func to_dict() -> Dictionary:
 	for b in buildings.values():
 		var rc: Rect2i = b["rect"]
 		bl.append({"id": b["id"], "rect": [rc.position.x, rc.position.y, rc.size.x, rc.size.y], "min": b["min"], "max": b["max"],
-			"roof": b["roof"], "label": b["label"], "region": b["region"]})
+			"roof": b["roof"], "label": b["label"], "region": b["region"], "names": b.get("names", {})})
 	var ll: Array = []
 	for lv in active_levels():
 		var lay: LevelLayer = layers[lv]
@@ -252,7 +259,8 @@ func from_dict(d: Dictionary) -> void:
 	for bd in d.get("buildings", []):
 		var a: Array = bd["rect"]
 		add_building(Rect2i(int(a[0]), int(a[1]), int(a[2]), int(a[3])), int(bd.get("min", 0)), int(bd.get("max", 0)),
-			{"id": int(bd["id"]), "roof": str(bd.get("roof", "flat")), "label": str(bd.get("label", "")), "region": int(bd.get("region", -1))})
+			{"id": int(bd["id"]), "roof": str(bd.get("roof", "flat")), "label": str(bd.get("label", "")), "region": int(bd.get("region", -1)),
+			"names": (bd.get("names", {}) as Dictionary).duplicate()})
 	for ld in d.get("layers", []):
 		var lay := layer(int(ld["level"]))
 		lay.load_dict(ld)

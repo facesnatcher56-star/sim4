@@ -1,7 +1,7 @@
 class_name Loot
 extends RefCounted
 ## Applies reward/effect dictionaries. Each entry may include "chance": 0..1 (default 1).
-## ctx keys: "folk" (actor), "object", "target" (Folk or null).
+## ctx keys: "folk" (actor), "object", "target" (Folk or null), "reason" (ledger text for coins_add).
 
 static var rng: RandomNumberGenerator = null
 
@@ -61,7 +61,8 @@ static func _apply_one(d: Dictionary, ctx: Dictionary) -> void:
 					WorldIface.state_set(obj, str(v), not bool(WorldIface.state_get(obj, str(v), false)))
 			"coins_add":
 				if folk != null:
-					WorldIface.add_coins(int(folk.household_id), int(v))
+					# household money goes through the Economy ledger (money history, crime pressure, legacy score); NPC pocket money (-1) is not ledgered
+					Economy.record(int(folk.household_id), int(v), str(ctx.get("reason", "reward")))
 			"relationship_add":
 				if folk != null and target != null:
 					folk.add_rel(int(target.id), str(v[0]), float(v[1]))

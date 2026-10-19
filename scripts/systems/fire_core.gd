@@ -1,4 +1,4 @@
-class_name Fire
+﻿class_name Fire
 extends RefCounted
 ## Fire in the house. State + public API; the parts live in FireRules (data, lookups), FireSpread (growth, burning, spread), FireFolk (panic,
 ## smoke, harm), FireBrigade (the fire department), FireEvents (the sources, armed by the incidents in data/incidents/03_fire.json) and
@@ -65,25 +65,26 @@ static func lots_burning() -> Array:
 static func smoke_of(lot: String) -> float:
 	return float((blazes.get(lot, {}) as Dictionary).get("smoke", 0.0))
 
-static func fire_at(t: Vector2i) -> Dictionary:
+## The fire on a tile of a floor (`level`, default the ground floor).
+static func fire_at(t: Vector2i, level: int = 0) -> Dictionary:
 	for f in fires.values():
-		if (f["tiles"] as Array).has(t):
+		if int(f.get("level", 0)) == level and (f["tiles"] as Array).has(t):
 			return f
 	return {}
 
 static func is_burning(target) -> bool:
 	var r: Dictionary = _resolve(target)
-	return not r.is_empty() and not fire_at(r["tile"]).is_empty()
+	return not r.is_empty() and not fire_at(r["tile"], int(r.get("level", 0))).is_empty()
 
 static func hover_text(o) -> String:
 	return FireRules.hover_text(o)
 
-static func _resolve(target) -> Dictionary:
+static func _resolve(target, level: int = 0) -> Dictionary:
 	var o = null
 	var tile := Vector2i(-1, -1)
 	if target is Vector2i:
 		tile = target
-		o = FireRules.object_at(tile)
+		o = FireRules.object_at(tile, level)
 	elif target is int:
 		o = WorldIface.get_object(int(target))
 	elif target is Dictionary:
@@ -92,20 +93,22 @@ static func _resolve(target) -> Dictionary:
 		o = target
 	if o != null:
 		tile = o.tile
-	return {"tile": tile, "obj": o} if tile.x >= 0 else {}
+		level = int(o.level) if "level" in o else level
+	return {"tile": tile, "obj": o, "level": level} if tile.x >= 0 else {}
 
 # ------------------------------------------------------------------ ignite
 static func ignite(target, source: String = "unknown", opts: Dictionary = {}) -> bool:
-	var r: Dictionary = _resolve(target)
+	var r: Dictionary = _resolve(target, int(opts.get("level", 0)))
 	if r.is_empty():
 		return false
 	var o = r["obj"]
 	var tile: Vector2i = r["tile"]
+	var lvl: int = int(r.get("level", 0))
 	var tiles: Array = FireRules.footprint(o) if o != null else [tile]
 	for t in tiles:
-		if not fire_at(t).is_empty():
+		if not fire_at(t, lvl).is_empty():
 			return false
-	var flam: float = FireRules.flammability(o, tile)
+	var flam: float = FireRules.flammability(o, tile) if lvl == 0 or o != null else FireRules.floor_flammability(tile, lvl)
 	if flam <= 0.0 and not bool(opts.get("force", ["arson", "wildfire", "lightning"].has(source))):
 		return false
 	var lot: String = FireRules.lot_of(tile)
@@ -114,7 +117,7 @@ static func ignite(target, source: String = "unknown", opts: Dictionary = {}) ->
 		burn = FireRules.num("burn_min_floor", 5.0) * rng.randf_range(0.8, 1.2)
 	var stage: int = clampi(int(opts.get("stage", 1)), 1, 3)
 	var age: float = 0.0 if stage == 1 else FireRules.at("stage_age", stage - 2, 4.0)
-	var f := {"id": _seq, "tile": tile, "tiles": tiles, "obj": int(o.id) if o != null else -1, "def": str(o.def_id) if o != null else "", "lot": lot,
+	var f := {"id": _seq, "level": lvl, "tile": tile, "tiles": tiles, "obj": int(o.id) if o != null else -1, "def": str(o.def_id) if o != null else "", "lot": lot,
 		"born": SysUtil.now(), "age": age, "stage": stage, "burn": burn, "next_spread": SysUtil.now() + int(FireRules.num("spread_min", 4.0) + FireRules.num("first_spread_delay", 1.0)),
 		"source": source, "culprit": int(opts.get("culprit", -1))}
 	_seq += 1
@@ -125,6 +128,7 @@ static func ignite(target, source: String = "unknown", opts: Dictionary = {}) ->
 		b = _new_blaze(lot, source, int(opts.get("culprit", -1)))
 		blazes[lot] = b
 		_stat("blazes")
+		FireLevels.on_blaze_start(b, tile)
 		_announce(b, f, bool(opts.get("quiet", false)))
 	b["peak"] = maxi(int(b["peak"]), fires_in(lot).size())
 	SysUtil.game_event("fire_started", {"lot": lot, "tile": [tile.x, tile.y], "source": source, "object": str(f["def"]), "folk_id": -1})
@@ -151,7 +155,7 @@ static func extinguish(target, by: String = "") -> bool:
 	var r: Dictionary = _resolve(target)
 	if r.is_empty():
 		return false
-	var f: Dictionary = fire_at(r["tile"])
+	var f: Dictionary = fire_at(r["tile"], int(r.get("level", 0)))
 	if f.is_empty():
 		return false
 	end_fire(int(f["id"]), "out", by)
@@ -232,6 +236,7 @@ static func _close_finished(now: int) -> void:
 		b["out_min"] = now
 		FireFolk.release(b)
 		FireBrigade.finish(b)
+		FireLevels.on_blaze_end(b)
 		FireEvents.summarize(b)
 		blazes.erase(lot)
 
@@ -260,7 +265,7 @@ static func from_dict(d: Dictionary) -> void:
 		for t in c["tiles"]:
 			ts.append(Vector2i(int(t[0]), int(t[1])))
 		f["tiles"] = ts
-		SysUtil.ints_in(f, ["id", "obj", "born", "stage", "next_spread", "culprit"])
+		SysUtil.ints_in(f, ["id", "obj", "born", "stage", "next_spread", "culprit", "level"])
 		f["age"] = float(f.get("age", 0.0))
 		f["burn"] = float(f.get("burn", 10.0))
 		fires[int(f["id"])] = f

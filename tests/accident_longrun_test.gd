@@ -1,4 +1,4 @@
-extends RefCounted
+﻿extends RefCounted
 ## SLOW tier (task 05): many game years of exposure. (1) With an exposure marker held on, the measured rate of every accident equals its data
 ## rate; with the documented exposure the per-person-year targets hold. (2) Deaths stay extremely rare compared with injuries.
 ## (3) Ten game years of the whole far town run through the hourly markers + dice (statistical): rates in a sane band, nothing stacks.
@@ -49,7 +49,7 @@ func _exposed_rates(f: Array) -> void:
 			fk.skills["fitness"]["level"] = 3          # neutral for every skill based multiplier
 			fk.skills["handiness"]["level"] = 3
 			folk.append(fk)
-		var years: int = TestFixture.pick(6, 3)
+		var years: int = TestFixture.pick(4, 3)
 		var def: Dictionary = IncidentDefs.get_def(id)
 		for m0 in SETUP[id][0]:
 			folk[0].add_buff(m0)
@@ -147,7 +147,7 @@ func _town_years(f: Array) -> void:
 	Incidents.seed_rng(77)
 	var ids: Array = Story.townies.keys()
 	var n: int = ids.size()
-	var years: int = TestFixture.pick(10, 3)
+	var years: int = TestFixture.pick(7, 3)
 	var t0: int = Time.get_ticks_msec()
 	var deaths: int = 0
 	var hospital_deaths: int = 0

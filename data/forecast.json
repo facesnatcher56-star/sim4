@@ -1,0 +1,15 @@
+{
+  "min_chance": 0.01,
+  "tiers": [
+    {"below": 0.05, "words": "a slight chance of"},
+    {"below": 0.2, "words": "a chance of"},
+    {"below": 0.4, "words": "a good chance of"},
+    {"below": 2.0, "words": "likely:"}
+  ],
+  "kinds": {
+    "blizzard": {"incidents": ["blizzard"], "what": {"blizzard": "a blizzard"}, "tip": "Stock up, fuel the generator and keep warm."},
+    "flood": {"incidents": ["flood"], "what": {"flood": "flooding"}, "tip": "Sandbags and moving valuables up will help."},
+    "wildfire": {"incidents": ["wildfire"], "what": {"wildfire": "wildfire"}, "tip": "Keep clear of the park."},
+    "storm": {"incidents": ["tornado", "hailstorm"], "what": {"tornado": "a tornado", "hailstorm": "hail"}, "tip": "Check the shutters and know where to take cover."}
+  }
+}

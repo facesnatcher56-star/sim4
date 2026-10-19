@@ -1,4 +1,4 @@
-extends RefCounted
+﻿extends RefCounted
 ## The demo building: the office venue template is a 3-storey building with a basement (lift, stairs, pillars). End to end on the
 ## plain lot AND on the real map: placement report, reachability of every object on every floor, a Folk walking from the ground
 ## floor to the 3rd floor by the stairs and by the lift, rooms per floor, save / load.
@@ -121,17 +121,22 @@ func _on_the_map() -> void:
 	var W := _w()
 	Neighborhood.start_game("classic")
 	var r: Dictionary = W.regions.by_lot("office")
-	_check(not r.is_empty() and str(r["template"]) == "office", "the office lot is on the map")
+	_check(not r.is_empty() and (str(r["template"]) == "office" or BuildingGen.venue_pool("office").has(str(r["template"]))), "the office lot is on the map (the office or a tower)")
+	var tpl: Dictionary = LotLoader.template(str(r["template"]))
 	var bid: int = W.levels.building_of_region(int(r["id"]))
 	_check(bid >= 0, "its building is linked to the lot region")
 	var rc: Rect2i = r["rect"]
 	var street := Vector2i(rc.position.x + 15, rc.end.y)             # just south of the lot, on the sidewalk side
-	var inside := Vector3i(rc.position.x + 12, rc.position.y + 7, 2)
+	var top_level: int = 2 if str(r["template"]) == "office" else 1
+	var inside := Vector3i(rc.position.x + 12, rc.position.y + 7, top_level)
+	if tpl.has("stops"):
+		var stop: Array = tpl["stops"][str(top_level)]
+		inside = Vector3i(rc.position.x + int(stop[0]), rc.position.y + int(stop[1]), top_level)
 	var len_up: float = W.route_length(Vector3i(5, 5, 0), inside)
 	_check(len_up > 0.0, "from the far side of the map to the 3rd floor of the office (%f)" % len_up)
 	var route: Array = W.find_route(Vector3i(5, 5, 0), inside)
 	_check(not route.is_empty() and route[-1] == inside, "map route ends on the 3rd floor")
 	var levels := _levels(route)
-	_check(levels == [0, 2] or levels == [0, 1, 2], "it goes through the building: %s" % str(levels))
+	_check(levels == [0, top_level] or levels == [0, 1, top_level] or levels == [0, 1], "it goes through the building: %s" % str(levels))
 	_check(W.route_length(Vector3i(5, 5, 0), Vector3i(inside.x, inside.y, 0)) < len_up, "going upstairs adds to the distance")
 	_check(street.x >= 0, "n/a")

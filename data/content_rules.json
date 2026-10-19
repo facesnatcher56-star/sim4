@@ -1,4 +1,5 @@
-{
+﻿{
+  "spoil_toast": {"min_items": 4, "gap_days": 3},
   "version": 1,
   "notes": "Registry for extra content. Skills listed here need no code registration (Folk.add_skill_xp creates them). Daily object rules live in data/objects.json state specs (daily_add / daily_requires / daily_reset / spoil_per_day), applied by scripts/systems/content_rules.gd from Careers.on_day.",
   "skills": {

@@ -1,4 +1,4 @@
-class_name FireBrigade
+﻿class_name FireBrigade
 extends RefCounted
 ## The fire department. Somebody calls (a folk who noticed the fire, the player, or a neighbour after config.fire.neighbor_call_min), a crew of
 ## uniformed NPC firefighters (the same kind of visitor Folk the Crowd uses for staff) turns up at the lot gate after a delay (shorter with a
@@ -50,11 +50,10 @@ static func _arrive(b: Dictionary, now: int) -> void:
 	var lot: String = str(b["lot"])
 	b["here"] = true
 	b["here_min"] = now
-	var names: Array = Story.cfg().get("first_names", ["Sam"])
 	for i in int(FireRules.num("brigade_crew", 2.0)):
 		_seq += 1
 		var keep_next: int = Folk._next_id
-		var f := Folk.create("Firefighter %s" % str(names[(_seq * 5) % names.size()]), [], ID_BASE + _seq)
+		var f := Folk.create("Firefighter %s" % Names.pick_first([], _name_rng(_seq)), [], ID_BASE + _seq)
 		Folk._next_id = keep_next
 		f.household_id = -1
 		f.age_stage = "adult"
@@ -133,3 +132,8 @@ static func finish(b: Dictionary) -> void:
 	for c in Fire.crew:
 		if str(c["lot"]) == str(b["lot"]) and int(c["leave_min"]) < 0:
 			c["leave_min"] = now + int(FireRules.num("brigade_clean_min", 4.0))
+
+static func _name_rng(seq: int) -> RandomNumberGenerator:
+	var r := RandomNumberGenerator.new()
+	r.seed = seq * 104729 + 17
+	return r

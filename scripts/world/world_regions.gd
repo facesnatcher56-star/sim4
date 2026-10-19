@@ -1,4 +1,4 @@
-class_name WorldRegions
+﻿class_name WorldRegions
 extends RefCounted
 ## Regions of the one continuous map (lots, parks, roads), the 16x16 chunk grid and "who may build where".
 ## Back-references the World autoload as `world` (`World.regions`).
@@ -36,6 +36,7 @@ func _init(w: WorldGrid) -> void:
 ## Called by World.reset(): forget every region and chunk, size the lookup for the new grid.
 func reset() -> void:
 	regions.clear()
+	_lot_index_valid = false
 	home_id = NONE
 	enforce = true
 	_next_id = 1
@@ -67,6 +68,7 @@ func add_region(d: Dictionary) -> int:
 	r["owner"] = str(r.get("owner", "public"))
 	r["entry"] = r.get("entry", Vector2i(-1, -1))
 	regions[id] = r
+	_lot_index_valid = false
 	var clip := rc.intersection(Rect2i(0, 0, world.width, world.height))
 	for y in range(clip.position.y, clip.end.y):
 		var base := y * world.width
@@ -97,11 +99,18 @@ func kind_at(tile: Vector2i) -> String:
 	return str(region_of(tile).get("kind", ""))
 
 
+var _lot_index: Dictionary = {}           # lot id -> first region of that lot (rebuilt after add_region / reset)
+var _lot_index_valid := false
+
 func by_lot(lot_id: String) -> Dictionary:
-	for r in regions.values():
-		if str(r["lot"]) == lot_id:
-			return r
-	return {}
+	if not _lot_index_valid:
+		_lot_index.clear()
+		for r in regions.values():
+			var key: String = str(r["lot"])
+			if not _lot_index.has(key):
+				_lot_index[key] = r
+		_lot_index_valid = true
+	return _lot_index.get(lot_id, {})
 
 
 func of_kind(kind: String) -> Array:

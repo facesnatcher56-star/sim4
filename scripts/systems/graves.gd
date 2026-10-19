@@ -1,4 +1,4 @@
-class_name Graves
+﻿class_name Graves
 extends RefCounted
 ## Memorials. Aging.kill / DeathCauses.kill_townie call place_for(): a `grave` (tombstone) or `urn` object (data/incidents.json content) is
 ## placed on a free yard tile of the household's home lot, or in the park for townies, and a record {name, born, died, cause, ...} is kept
@@ -36,7 +36,7 @@ static func place_for(legacy: Dictionary, folk, cdef: Dictionary) -> Dictionary:
 	var key: int = oid if oid >= 0 else -int(legacy.get("folk_id", 0)) - 1
 	var born: int = int(legacy.get("born_day", 0))
 	var rec: Dictionary = {"object_id": oid, "folk_id": int(legacy.get("folk_id", -1)), "name": str(legacy.get("name", "")), "born": born,
-		"died": int(legacy.get("day", SysUtil.day())), "years": int(legacy.get("years", 0)), "cause": str(legacy.get("cause", "")),
+		"died": int(legacy.get("day", SysUtil.day())), "years": int(legacy.get("years", 0)), "stage": str(legacy.get("stage", "adult")), "cause": str(legacy.get("cause", "")),
 		"cause_id": str(legacy.get("cause_id", "")), "style": style, "def": def_id, "park": townie, "tile": [tile.x, tile.y], "visits": 0}
 	records[key] = rec
 	legacy["grave"] = key
@@ -125,7 +125,8 @@ static func hover_text(obj) -> String:
 	var r: Dictionary = record_for_object(int(obj.id))
 	if r.is_empty():
 		return ""
-	return "%s\nAged %d, died on day %d\n%s" % [r["name"], int(r["years"]), int(r["died"]), r["cause"]]
+	var st: String = str(r.get("stage", "adult"))
+	return "%s\nDied as %s %s on day %d\n%s" % [r["name"], Aging.article(st), str(Aging.stage_def(st).get("label", st)).to_lower(), int(r["died"]), r["cause"]]
 
 # ------------------------------------------------------------------ interactions
 static func on_game_event(ev: String, payload: Dictionary) -> void:

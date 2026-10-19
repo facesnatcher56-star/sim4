@@ -1,4 +1,4 @@
-class_name WorldGrid
+﻿class_name WorldGrid
 extends Node
 ## World autoload: grid, edge walls, floors, objects, pathfinding, rooms, folk registry,
 ## build tools (with undo), save/load. No rendering here.
@@ -18,7 +18,7 @@ const StarterHouse := preload("res://scripts/world/starter_house.gd")
 const DEFAULT_W := 32            # legacy single lot
 const DEFAULT_H := 24
 const MAP_W := 160               # the one continuous neighbourhood (MapBuilder): change the size HERE only
-const MAP_H := 120
+const MAP_H := 136
 const BLOCKING_WALLS := ["wall", "window", "fence"]
 const WALL_TYPES := ["wall", "door", "window", "fence"]
 const WALL_PRICE := 5
@@ -371,9 +371,9 @@ func paint_floor(t: Vector2i, type: String, household_id: int = -1, level: int =
 func paint_floor_rect(a: Vector2i, b: Vector2i, type: String, household_id: int = -1, level: int = 0) -> int: return edit.paint_floor_rect(a, b, type, household_id) if level == 0 else lbuild.paint_floor_rect(a, b, type, household_id, level)
 func _create_object(def_id: String, tile: Vector2i, rot: int, force_id: int, level: int = 0, span: int = 0) -> int: return objs._create_object(def_id, tile, rot, force_id, level, span)
 func place_object(def_id: String, tile: Vector2i, rot: int = 0, level: int = 0) -> int: return objs.place_object(def_id, tile, rot, level)
-func objects_in_radius(tile: Vector2i, r: float) -> Array: return objs.objects_in_radius(tile, r)
+func objects_in_radius(tile: Vector2i, r: float, level: int = LPos.ALL) -> Array: return objs.objects_in_radius(tile, r, level)
 func all_objects() -> Array: return objs.all_objects()
-func objects_in_lot_of(tile: Vector2i, r: float) -> Array: return objs.objects_in_lot_of(tile, r)
+func objects_in_lot_of(tile: Vector2i, r: float, level: int = LPos.ALL) -> Array: return objs.objects_in_lot_of(tile, r, level)
 func object_at(t: Vector2i, level: int = 0): return objs.object_at(t, level)
 func objects_of_def(def_id: String) -> Array: return objs.objects_of_def(def_id)
 func set_object_state(object_id: int, key: String, value: Variant) -> void: objs.set_object_state(object_id, key, value)

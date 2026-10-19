@@ -1,4 +1,4 @@
-class_name HouseSignature
+﻿class_name HouseSignature
 extends RefCounted
 ## Layout fingerprints that ignore position, mirroring and rotation (a flipped copy of a home counts as a duplicate).
 ##   plan_sig   - wall geometry only (the floor plan: where rooms are)
@@ -124,7 +124,14 @@ static func plan_sig(t: Dictionary) -> String:
 
 
 static func layout_sig(t: Dictionary) -> String:
-	return _canon(parse(t), true, true)
+	var sig := _canon(parse(t), true, true)
+	if t.has("levels"):           # multi-floor: the upper floors count too (walls / floors / objects of other levels)
+		var upper: Array = []
+		for o in t.get("objects", []):
+			if int(o.get("level", 0)) != 0:
+				upper.append("%s%s%d%d" % [o["def"], str(o["tile"]), int(o.get("rot", 0)), int(o["level"])])
+		sig = (sig + JSON.stringify(t["levels"]) + ";".join(upper)).sha1_text().substr(0, 16)
+	return sig
 
 
 ## Best overlap (Jaccard) of interior walls + furniture cells over all symmetries; 0 when the footprints differ.

@@ -277,6 +277,7 @@ func finish(p_success: bool = true) -> void:
 	success = p_success
 	state = "finished" if p_success else "cancelled"
 	var ctx := ctx_for(actor)
+	ctx["reason"] = str(def.get("label", def_id))          # ledger text for any coins this interaction moves (Loot coins_add)
 	if p_success:
 		Loot.apply(def.get("on_finish", []), ctx)
 	else:

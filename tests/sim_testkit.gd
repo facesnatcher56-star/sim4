@@ -1,4 +1,4 @@
-extends RefCounted
+﻿extends RefCounted
 ## Shared helpers for sim_* tests (no run() method, so the runner skips it).
 
 static func setup(seed_value: int = 12345) -> StubWorld:
@@ -8,6 +8,7 @@ static func setup(seed_value: int = 12345) -> StubWorld:
 	WorldIface.stub = w
 	WorldIface.coins.clear()
 	Autonomy.last_debug.clear()
+	Autonomy.full_debug = true          # tests may inspect a row for every candidate (the game keeps only the useful ones)
 	Autonomy.rng = RandomNumberGenerator.new()
 	Autonomy.rng.seed = seed_value
 	Loot.rng = RandomNumberGenerator.new()

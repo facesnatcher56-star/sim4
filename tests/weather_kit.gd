@@ -1,4 +1,4 @@
-extends RefCounted
+﻿extends RefCounted
 ## Shared helpers for weather_* tests (no run() method, so the runner skips it).
 
 const K = preload("res://tests/systems_kit.gd")
@@ -20,6 +20,18 @@ static func at(day: int, hour: int = 0, minute: int = 0) -> int:
 
 static func run_min(n: int) -> void:
 	SimEnv.clock().advance_minutes(n)
+
+## Like run_min, but only the hour and day signals fire (no per-minute systems): for tests whose subject lives in the hourly / daily
+## hooks (weather steps, bills, crops, snow), 10x cheaper than minute by minute.
+static func run_coarse(n: int) -> void:
+	var c = SimEnv.clock()
+	for i in n:
+		var old_day: int = c.day()
+		c.total_minutes += 1
+		if c.minute() == 0:
+			c.hour_passed.emit(c.hour())
+		if c.day() != old_day:
+			c.day_passed.emit(c.day())
 
 static func outdoors(f, on: bool = true) -> void:
 	f.set_meta("outdoors", on)

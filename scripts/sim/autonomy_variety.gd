@@ -1,0 +1,67 @@
+class_name AutonomyVariety
+extends RefCounted
+## "Bored of it": a decaying count per Folk of how often they did each interaction (and each kind of object) recently. Autonomy
+## multiplies a candidate's score by mult(): repeats get diminishing returns that recover over days. Needs-meeting interactions
+## (sleep, eat, toilet, shower...) are exempt. Numbers in data/autonomy_variety.json. Not saved (it decays within days anyway).
+
+static var mem: Dictionary = {}       # folk_id -> {key: [value, minute]}
+
+static func reset() -> void:
+	mem.clear()
+
+static func cfg() -> Dictionary:
+	return SysUtil.table("autonomy_variety")
+
+static func _value(fid: int, key: String, now: int) -> float:
+	var e: Variant = (mem.get(fid, {}) as Dictionary).get(key, null)
+	if e == null:
+		return 0.0
+	var half: float = maxf(float(cfg().get("half_life_days", 1.0)), 0.05) * 1440.0
+	return float(e[0]) * pow(0.5, float(now - int(e[1])) / half)
+
+static func exempt(iid: String, d: Dictionary) -> bool:
+	var c: Dictionary = cfg()
+	if (c.get("exempt_ids", []) as Array).has(iid):
+		return true
+	for t in d.get("tags", []):
+		if (c.get("exempt_tags", []) as Array).has(t):
+			return true
+	return false
+
+## Score multiplier in (min_mult, 1].
+static func mult(folk, iid: String, d: Dictionary, obj) -> float:
+	if mem.is_empty() or not mem.has(int(folk.id)) or exempt(iid, d):
+		return 1.0
+	var c: Dictionary = cfg()
+	var now: int = SimEnv.now_min()
+	var a_i: float = float(c.get("per_interaction", 0.35))
+	if str(d.get("target", "object")) == "folk":
+		a_i *= float(c.get("social_scale", 0.6))
+	var m: float = 1.0 / (1.0 + a_i * _value(int(folk.id), "i:" + iid, now))
+	if obj != null:
+		m /= 1.0 + float(c.get("per_object_kind", 0.1)) * _value(int(folk.id), "o:" + str(obj.def_id), now)
+	return maxf(m, float(c.get("min_mult", 0.12)))
+
+static func _add(fid: int, key: String, now: int) -> float:
+	var m: Dictionary = mem.get(fid, {})
+	var v: float = _value(fid, key, now) + 1.0
+	m[key] = [v, now]
+	mem[fid] = m
+	return v
+
+## SystemsManager: interaction_started hook.
+static func on_started(folk_id: int, iid: String, target_id: int) -> void:
+	var d: Dictionary = SimEnv.data().interaction_def(iid)
+	if d.is_empty() or exempt(iid, d):
+		return
+	var now: int = SimEnv.now_min()
+	var v: float = _add(folk_id, "i:" + iid, now)
+	if str(d.get("target", "object")) == "object":
+		var o = WorldIface.get_object(target_id)
+		if o != null:
+			_add(folk_id, "o:" + str(o.def_id), now)
+	var fu: Dictionary = cfg().get("fed_up", {})
+	if v >= float(fu.get("threshold", 5.0)) and SysUtil.chance(float(fu.get("chance", 0.35))):
+		var f = SysUtil.folk(folk_id)
+		if f != null and SysUtil.is_resident(f):
+			f.add_buff(str(fu.get("buff", "fed_up")))

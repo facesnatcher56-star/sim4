@@ -1,4 +1,4 @@
-class_name CaseBoard
+﻿class_name CaseBoard
 extends UIDialog
 ## The police case board (F10, action `sim_case_board`): the town's crime rate, open and cold cases (a detective's view), cases that involve the
 ## household, who is locked away (with a Visit button for folk the household knows), civil cases, and recent verdicts. Plain words only.
@@ -17,6 +17,10 @@ func _ready() -> void:
 
 func build() -> void:
 	title_label.text = "Police case board"
+	var law := Button.new()
+	law.text = "Town Law (every charge and sentence)"
+	law.pressed.connect(func(): TownLawDialog.open_from(self))
+	body.add_child(law)
 	line("Crime in town: %s (%d)%s" % [CrimeRate.label(), int(JusticeState.rate_now), "   |   neighbourhood watch active" if CrimeRate.watch_active() else ""], 14)
 	if Police.is_uneasy():
 		line("Folk are uneasy after dark until the case is solved.", 12, UITheme.MUTED)
@@ -70,6 +74,9 @@ func _case_row(c: Dictionary) -> void:
 	if str(c["state"]) == "closed" and str(c["verdict"]) != "":
 		s += ", " + {"guilty": "found guilty", "plea": "pleaded guilty", "not_guilty": "not guilty", "mistrial": "mistrial", "petty": "dealt with"}.get(str(c["verdict"]), str(c["verdict"]))
 	var l := line(s, 13)
+	var det: String = CaseBoard.details(c)
+	if det != "":
+		line(det, 11, UITheme.MUTED)
 	var tips: PackedStringArray = []
 	for n in (c["notes"] as Array).slice(maxi((c["notes"] as Array).size() - 4, 0)):
 		tips.append("Day %d: %s" % [int(n["day"]) + 1, str(n["text"])])
@@ -82,3 +89,30 @@ func _visitor_for(inmate: int) -> int:
 		if not SysUtil.is_away(r) and RelationshipService.knows(int(r.id), inmate) and RelationshipService.value(int(r.id), inmate, "friendship") >= 20.0:
 			return int(r.id)
 	return -1
+
+## Charges, who is held or accused, evidence and the outcome of a case, in one plain line. Cold cases keep their names ("Death of Ivo, open: no suspect").
+static func details(c: Dictionary) -> String:
+	var bits: Array = []
+	if str(c.get("charge", "")) != "":
+		bits.append("Charges: " + CaseText.phrases(c))
+	var acc: int = int(c.get("accused", -1))
+	match str(c["state"]):
+		"cold": bits.append("cold case, no suspect" if acc < 0 else "cold case")
+		"open": bits.append("open, no suspect yet" if acc < 0 else "open")
+	if acc >= 0:
+		bits.append("accused: " + CrimePerson.name_of(acc))
+	var acq: Array = SysUtil.to_ints(c.get("acquitted", []))
+	if not acq.is_empty():
+		bits.append("%s was found not guilty; the case stays open" % CrimePerson.name_of(int(acq[acq.size() - 1])))
+	var ev: Array = []
+	if bool(c.get("witnessed", false)):
+		ev.append("a witness")
+	if float(c.get("trace", 0.0)) >= 0.3:
+		ev.append("physical traces")
+	if bool(c.get("recovered", false)):
+		ev.append("recovered goods")
+	if not ev.is_empty():
+		bits.append("evidence: " + ", ".join(ev))
+	if c.get("sentence", {}) is Dictionary and not (c["sentence"] as Dictionary).is_empty() and str(c.get("verdict", "")) in ["guilty", "plea"]:
+		bits.append("sentence: " + CaseText.sentence(c["sentence"]))
+	return "; ".join(bits)

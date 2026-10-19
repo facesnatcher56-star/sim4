@@ -1,4 +1,4 @@
-extends RefCounted
+﻿extends RefCounted
 ## Perf probe: a 15-storey tower on the full 160x120 map. Route costs (budgets: cached path_length < 0.2 ms, uncached cross-level < 5 ms),
 ## save size, and the map without any tower is not slower for ordinary ground paths. Prints the numbers.
 
@@ -63,8 +63,8 @@ func run() -> Array:
 		results[mode + " avg"] = total / n
 		print("  [levels] uncached map -> floors 3..14 of a 15-storey tower, router caches dropped, %s: avg %.2f ms, worst %.2f ms (%d routes)" % [mode, total / n, worst, n])
 	print("  [levels] search stats for floor 14: %s" % str(W.router.last_stats))
-	_check(float(results["warm nav avg"]) < 3.0 and float(results["warm nav"]) < 8.0, "uncached cross-level route is a few ms at most with a warm street graph (avg %.2f, worst %.2f: the first one also builds the tower's portal graph)" % [float(results["warm nav avg"]), float(results["warm nav"])])
-	_check(float(results["cold nav"]) < 12.0, "even with every street cache cold (%.2f)" % float(results["cold nav"]))
+	_check(float(results["warm nav avg"]) < 3.0 * TestFixture.SLACK and float(results["warm nav"]) < 8.0 * TestFixture.SLACK, "uncached cross-level route is a few ms at most with a warm street graph (avg %.2f, worst %.2f: the first one also builds the tower's portal graph)" % [float(results["warm nav avg"]), float(results["warm nav"])])
+	_check(float(results["cold nav"]) < 12.0 * TestFixture.SLACK, "even with every street cache cold (%.2f)" % float(results["cold nav"]))
 	# stairs-only (lift out of order): a long chain of floors
 	for o in W.objects_of_def("elevator"):
 		W.set_object_state(o.id, "out_of_order", true)
@@ -73,7 +73,7 @@ func run() -> Array:
 	var c2: float = W.route_length(Vector3i(foot.position.x + 4, foot.position.y + 8, 0), top)
 	var ms2 := float(Time.get_ticks_usec() - t1) / 1000.0
 	print("  [levels] stairs only, ground -> floor 14: %.2f ms, cost %.0f" % [ms2, c2])
-	_check(c2 > 0.0 and ms2 < 25.0, "a 14-flight climb is planned in %.2f ms" % ms2)
+	_check(c2 > 0.0 and ms2 < 25.0 * TestFixture.SLACK, "a 14-flight climb is planned in %.2f ms" % ms2)
 	for o in W.objects_of_def("elevator"):
 		W.set_object_state(o.id, "out_of_order", false)
 	# route entries (the real walk) once
@@ -90,13 +90,13 @@ func run() -> Array:
 		W.route_length(far, top)
 	var per := float(Time.get_ticks_usec() - t3) / 1000.0 / 2000.0
 	print("  [levels] cached route_length: %.4f ms per call" % per)
-	_check(per < 0.2, "cached path_length under 0.2 ms (%.4f)" % per)
+	_check(per < 0.2 * TestFixture.SLACK, "cached path_length under 0.2 ms (%.4f)" % per)
 	var t4 := Time.get_ticks_usec()
 	for i in 2000:
 		WorldIface.path_length(Vector2i(3, 3), Vector2i(foot.position.x + 8, foot.position.y + 8), 0, 14)
 	var per2 := float(Time.get_ticks_usec() - t4) / 1000.0 / 2000.0
 	print("  [levels] WorldIface.path_length (autonomy) cached: %.4f ms per call" % per2)
-	_check(per2 < 0.2, "autonomy distance cached under 0.2 ms (%.4f)" % per2)
+	_check(per2 < 0.2 * TestFixture.SLACK, "autonomy distance cached under 0.2 ms (%.4f)" % per2)
 	# ground paths unchanged by the tower
 	W.nav.touch_tile(Vector2i(0, 0))
 	var t5 := Time.get_ticks_usec()

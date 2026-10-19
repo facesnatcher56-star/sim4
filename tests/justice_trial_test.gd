@@ -1,4 +1,4 @@
-extends RefCounted
+﻿extends RefCounted
 ## Task 09: arrest -> charges -> bail -> lawyer -> trial -> verdict -> sentence -> prison / parole / visits / release -> appeal.
 ## Forced cases with fixed evidence give the expected verdict probabilities (strong evidence ~85% guilty, weak evidence on an innocent < 5%).
 
@@ -100,19 +100,22 @@ func _plea_and_sentences(f: Array) -> void:
 	murder["charge"] = "murder"
 	var full: int = 0
 	var life: int = 0
+	var spree: Dictionary = murder.duplicate(true)
+	spree["counts"] = 2                          # more than one victim
 	for i in 40:
 		var s: Dictionary = JusticeSentence.pick(murder, false)
-		if str(s["type"]) == "prison":
+		if str(s["type"]) == "prison" and not bool(s.get("life", false)):
 			full += 1
-		if bool(s.get("life", false)):
+		if bool(JusticeSentence.pick(spree, false).get("life", false)):
 			life += 1
-	K.expect(f, full == 40 and life > 0, "murder means prison, sometimes for life (%d of 40 life)" % life)
+	K.expect(f, full == 40 and life == 40, "murder means prison, and life for more than one victim (%d of 40 life)" % life)
 	var theft: Dictionary = _case("theft", a, a, 0.9, 0.5)
 	theft["charge"] = "theft"
 	var types: Dictionary = {}
 	for i in 60:
 		types[str(JusticeSentence.pick(theft, false)["type"])] = true
-	K.expect(f, types.has("fine") and types.has("service") and not types.has("prison"), "theft gets fines / community service / probation: %s" % str(types.keys()))
+	K.expect(f, types.has("fine") or types.has("service") or types.has("probation"), "a first theft gets fines / community service / probation: %s" % str(types.keys()))
+	K.expect(f, not types.has("prison") and not types.has("jail"), "and no custody")
 	var plea_days: float = 0.0
 	var trial_days: float = 0.0
 	for i in 80:

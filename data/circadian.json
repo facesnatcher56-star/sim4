@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "stages": {
+    "child":   {"bed": [20.0, 21.0],  "sleep_h": [9.5, 10.5]},
+    "teen":    {"bed": [22.5, 24.0],  "sleep_h": [8.0, 9.0]},
+    "adult":   {"bed": [22.0, 23.5],  "sleep_h": [7.0, 8.5]},
+    "elder":   {"bed": [21.0, 22.5],  "sleep_h": [7.0, 8.0]}
+  },
+  "trait_shift_h": {"early_bird": -1.0, "night_owl": 1.5},
+  "wind_down_before_h": 1.0,
+  "curfew_from": 1.5,
+  "curfew_until": 6.0,
+  "bed_window_after_h": 1.5,
+  "work_wake_before_h": 2.25,
+  "sleepy_anywhere_energy": 25,
+  "bed_ok_energy": 92
+}

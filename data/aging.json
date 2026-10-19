@@ -1,23 +1,24 @@
-{
+﻿{
   "version": 1,
   "days_per_year": 4,
+  "birthday_toast": true,
   "lifespan": {
     "setting": "normal",
     "age_rate": {"short": 1.6, "normal": 1.0, "long": 0.6, "epic": 0.3}
   },
   "stages": [
     {"id": "baby",    "label": "Baby",    "from_day": 0,   "trait_slots": 0, "allow_tags": ["sleep", "rest", "emergency"]},
-    {"id": "toddler", "label": "Toddler", "from_day": 4,   "trait_slots": 1, "forbid_tags": ["work", "exercise", "flirt", "cook", "game", "conflict", "chore"]},
-    {"id": "child",   "label": "Child",   "from_day": 12,  "trait_slots": 2, "forbid_tags": ["work", "flirt", "cook"]},
-    {"id": "teen",    "label": "Teen",    "from_day": 28,  "trait_slots": 3, "forbid_tags": ["work"]},
-    {"id": "adult",   "label": "Adult",   "from_day": 44,  "trait_slots": 4, "forbid_tags": []},
-    {"id": "elder",   "label": "Elder",   "from_day": 140, "trait_slots": 4, "forbid_tags": ["exercise"]}
+    {"id": "toddler", "label": "Toddler", "from_day": 6,   "trait_slots": 1, "forbid_tags": ["work", "exercise", "flirt", "cook", "game", "conflict", "chore"]},
+    {"id": "child",   "label": "Child",   "from_day": 20,  "trait_slots": 2, "forbid_tags": ["work", "flirt", "cook"]},
+    {"id": "teen",    "label": "Teen",    "from_day": 50,  "trait_slots": 3, "forbid_tags": ["work"]},
+    {"id": "adult",   "label": "Adult",   "from_day": 76,  "trait_slots": 4, "forbid_tags": []},
+    {"id": "elder",   "label": "Elder",   "from_day": 172, "trait_slots": 4, "forbid_tags": ["exercise"]}
   ],
   "death": {
-    "start_day": 170,
+    "start_day": 202,
     "chance_per_day": 0.03,
     "ramp_per_day": 0.004,
-    "max_day": 230
+    "max_day": 262
   },
   "pregnancy": {
     "days": 3,

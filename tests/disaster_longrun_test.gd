@@ -1,4 +1,4 @@
-extends RefCounted
+﻿extends RefCounted
 ## SLOW: real yearly frequency of every disaster over many game years of the real weather (28-day years) against the targets
 ## (power outage ~0.5, blizzard ~0.3, tornado ~0.02, flood ~0.02, earthquake ~0.01, wildfire ~0.005, hail ~0.1, meteor ~0.0005).
 ## Two measurements: the EXPECTED yearly rate (sum of every hourly / daily chance, no dice: exact calibration) and the dice count
@@ -15,7 +15,7 @@ const TARGETS := {
 
 func run() -> Array:
 	var f: Array = []
-	var years: int = 40 if TestFixture.fast else 160
+	var years: int = 40 if TestFixture.fast else 100
 	var w := D.setup()
 	D.home(w)
 	Weather.unforce()

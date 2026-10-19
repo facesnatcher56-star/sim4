@@ -20,7 +20,7 @@ func _roundtrip(f: Array) -> void:
 	var other := K.make_folk(w, "Eli Park", ["lazy"], 1, Vector2i(14, 12))
 	var fiancee := K.make_folk(w, "Fay Park", [], 1, Vector2i(15, 12))
 	for p in [mum, dad, other, fiancee]:
-		Aging.set_age_days(p, 62.0)
+		Aging.set_age_days(p, 94.0)
 	RelationshipService.add_both(mum.id, dad.id, "romance", 80.0)
 	RelationshipService.add_both(mum.id, dad.id, "friendship", 80.0)
 	RelationshipBits.set_flag(mum.id, dad.id, "partner", true, false)
@@ -51,7 +51,7 @@ func _roundtrip(f: Array) -> void:
 	# the second pregnancy, half way through
 	K.set_time(1, 8)
 	var fresh := K.make_folk(w, "Gwen Rowe", ["neat"], 1, Vector2i(17, 12))
-	Aging.set_age_days(fresh, 62.0)
+	Aging.set_age_days(fresh, 94.0)
 	RelationshipService.add_both(fresh.id, dad.id, "romance", 60.0)
 	RelationshipBits.set_flag(fresh.id, dad.id, "sweetheart", true, false)
 	K.expect(f, Aging.try_for_baby(fresh.id, dad.id)["ok"], "precondition: a pregnancy begins")

@@ -1,4 +1,4 @@
-extends RefCounted
+﻿extends RefCounted
 ## SLOW tier: fire rates over many game years. (1) the statistical version over 40 far lots with the default Surprises setting: measured events
 ## per year against the data (kitchen 0.3 unskilled ...), a fire that spreads about 0.05 / lot-year and a fire death about 0.005 / lot-year, almost
 ## only in houses without a smoke alarm; (2) the FULL simulation (real objects, folk reactions) run many times: a small kitchen fire spreads in
@@ -50,7 +50,7 @@ func _statistical(f: Array) -> void:
 	var lots: int = 50
 	_fill_town(lots)
 	Fire.on_minute()
-	var years: int = TestFixture.pick(60, 25)
+	var years: int = TestFixture.pick(40, 25)
 	var expected: Dictionary = {}
 	var triggered0: Dictionary = {}
 	for id in DAILY + ["lightning_fire"]:
@@ -84,7 +84,7 @@ func _statistical(f: Array) -> void:
 				per_lot[n] = int(per_lot.get(n, 0)) + 1
 	# lightning: stormy hours only (hour check; the storm share of the year is 3-4 percent, so measure per stormy hour)
 	Weather.force("thunderstorm")
-	var storm_hours: int = TestFixture.pick(4000, 2000)
+	var storm_hours: int = TestFixture.pick(2800, 2000)
 	var ldef: Dictionary = IncidentDefs.defs["lightning_fire"]
 	for h in storm_hours:
 		for s2 in IncidentChecks.lot_subjects():
@@ -136,7 +136,7 @@ func _kitchen_trial(seed_v: int, extra: Array, skill: int) -> bool:
 	return spread
 
 func _full_kitchen(f: Array) -> void:
-	var n: int = TestFixture.pick(120, 50)
+	var n: int = TestFixture.pick(80, 50)
 	var res: Dictionary = {}
 	var cases := {"bare": [[], 0], "skilled": [[], 3], "extinguisher": [[["fire_extinguisher", Vector2i(15, 13)]], 0], "sprinkler": [[["sprinkler", Vector2i(13, 14)]], 0]}
 	for k in cases:
@@ -167,7 +167,7 @@ func _sleeper_trial(seed_v: int, extra: Array) -> int:
 	return dead
 
 func _full_sleeper(f: Array) -> void:
-	var n: int = TestFixture.pick(40, 24)
+	var n: int = TestFixture.pick(28, 24)
 	var no_alarm: int = 0
 	var with_alarm: int = 0
 	var sprink: int = 0

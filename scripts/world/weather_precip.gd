@@ -1,4 +1,4 @@
-extends "res://scripts/world/weather_scenery.gd"
+﻿extends "res://scripts/world/weather_scenery.gd"
 ## WeatherView layer: rain / snow particles and lightning.
 
 
@@ -118,6 +118,33 @@ func _on_game_event(ev_name: String, _payload: Dictionary) -> void:
 		_flash_timer = maxf(_flash_timer, 4.0)
 
 
+var _tower_top: float = -1.0          # tallest building of the map (m); the sky the precipitation falls from follows it
+var _rain_y: float = 17.0
+var _snow_y: float = 12.0
+
+
+## Rain and snow start ABOVE the tallest roof (a 15-storey tower is 45 m): lifetime and amount grow with the fall so the density stays the same.
+func _fit_to_buildings() -> void:
+	if rain == null or snow == null:
+		return
+	var top := 0.0
+	for b in World.levels.buildings.values():
+		top = maxf(top, World.levels.height_of(int(b["id"])))
+	top = minf(top, 80.0)
+	if is_equal_approx(top, _tower_top):
+		return
+	_tower_top = top
+	_rain_y = maxf(17.0, top + 5.0)
+	_snow_y = maxf(12.0, top + 4.0)
+	rain.lifetime = maxf(0.8, (_rain_y + 3.0) / 26.0)
+	rain.amount = int(2200.0 * rain.lifetime / 0.8)
+	rain.visibility_aabb = AABB(Vector3(-45, -_rain_y - 4.0, -45), Vector3(90, _rain_y + 12.0, 90))
+	snow.lifetime = maxf(9.0, (_snow_y + 3.0) / 1.5)
+	snow.preprocess = snow.lifetime
+	snow.amount = mini(int(5000.0 * snow.lifetime / 9.0), 14000)
+	snow.visibility_aabb = AABB(Vector3(-45, -_snow_y - 4.0, -45), Vector3(90, _snow_y + 12.0, 90))
+
+
 func _update_particles(_delta: float) -> void:
 	var target = lot.get("_target")
 	var zoom: float = float(lot.get("_zoom"))
@@ -129,8 +156,9 @@ func _update_particles(_delta: float) -> void:
 			continue
 		var pm: ParticleProcessMaterial = ps.process_material
 		pm.emission_box_extents = Vector3(half, 0.5, half)
-	rain.position = Vector3(ctr.x, 17.0, ctr.z)
-	snow.position = Vector3(ctr.x, 12.0, ctr.z)
+	_fit_to_buildings()
+	rain.position = Vector3(ctr.x, _rain_y, ctr.z)
+	snow.position = Vector3(ctr.x, _snow_y, ctr.z)
 	var q: float = [0.0, 0.5, 1.0][clampi(GameSettings.effects_quality(), 0, 2)]
 	var rp: float = float(p["rain"]) * q
 	var sp: float = float(p["snow"]) * q

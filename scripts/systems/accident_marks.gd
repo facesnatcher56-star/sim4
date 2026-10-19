@@ -49,14 +49,28 @@ static func on_minute() -> void:
 	var c: Dictionary = cfg()
 	if c.is_empty():
 		return
+	var t := PerfProf.start()
 	var water: Variant = _water_objects(c)
+	var now: int = SysUtil.now()
 	for f in WorldIface.all_folk():
 		if Hospital.is_in(f) or str(f.age_stage) == "baby":
 			continue
-		_scan(f, c, water)
+		var period := 1
+		if int(f.household_id) <= 0 and f.has_meta("visitor"):      # strangers (crowd, townies, visitors): one scan per STRANGER_PERIOD, staggered by id
+			if (now + int(f.id)) % STRANGER_PERIOD != 0:
+				continue
+			period = STRANGER_PERIOD
+		_scan(f, c, water, period)
+	PerfProf.stop("accident/scan", t)
+	t = PerfProf.start()
 	AccidentRescue.on_minute()
+	PerfProf.stop("accident/rescue", t)
 
-static func _scan(f, c: Dictionary, water: Variant) -> void:
+## Strangers are scanned every STRANGER_PERIOD minutes (the markers last 10-45 min), and the per-minute road dice are scaled to
+## 1 - (1 - risk)^period so the chance of being marked over those minutes is unchanged.
+const STRANGER_PERIOD := 5
+
+static func _scan(f, c: Dictionary, water: Variant, period: int = 1) -> void:
 	if SysUtil.is_away(f):
 		return                       # job markers are set only around the hourly dice (on_hour / after_hour), never while a save can see them
 	var hour: float = SimEnv.hour_f()
@@ -77,7 +91,7 @@ static func _scan(f, c: Dictionary, water: Variant) -> void:
 	var kind: String = Traffic.road_kind(f.tile)
 	if kind != "":
 		var risk: float = Traffic.risk_at(f.tile, hour)
-		if risk > 0.0 and _u(f, 1) < risk:
+		if risk > 0.0 and _u(f, 1) < (risk if period <= 1 else 1.0 - pow(1.0 - risk, float(period))):
 			mark(f, "acc_on_road")
 			if kind == "crosswalk":
 				mark(f, "acc_crosswalk")
@@ -134,10 +148,23 @@ static func _water_objects(c: Dictionary) -> Variant:      # null = this world c
 		return null
 	if kinds.is_empty():
 		return out
+	# the list only changes when an object is added or removed: object count + the world's next id identify that
+	var stamp: Array = [w, kinds, w.objects.size() if "objects" in w else -1, w._next_id if "_next_id" in w else -1]
+	if not _water_stamp.is_empty() and is_same(_water_stamp[0], stamp[0]) and is_same(_water_stamp[1], stamp[1]) and _water_stamp[2] == stamp[2] and _water_stamp[3] == stamp[3]:
+		return _water_list
 	for o in w.all_objects():
 		if kinds.has(str(o.def_id)):
 			out.append(o)
+	_water_stamp = stamp
+	_water_list = out
 	return out
+
+static var _water_stamp: Array = []
+static var _water_list: Array = []
+
+static func reset_cache() -> void:
+	_water_stamp = []
+	_water_list = []
 
 static func _near_water(f, c: Dictionary, water: Variant) -> bool:
 	var r: int = int(c.get("near_water_tiles", 4))

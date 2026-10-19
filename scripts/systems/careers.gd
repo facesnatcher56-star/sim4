@@ -1,4 +1,4 @@
-class_name Careers
+﻿class_name Careers
 extends RefCounted
 ## Jobs, shifts, performance, promotions, school and retirement. Data: data/careers.json.
 ## At shift start a folk with a job is routed off-lot through Away ("left_for_work"), and comes back at shift end
@@ -283,7 +283,7 @@ static func on_day(day: int) -> void:
 				continue
 		# offers
 		if not jobs.has(fid) and not offers.has(fid) and stage == min_stage and Aging.stage_index(stage) >= Aging.stage_index(min_stage):
-			if SysUtil.chance(float(s.get("offer_chance_per_day", 0.3))):
+			if SysUtil.chance(float(s.get("offer_chance_per_day", 0.3)) * StoryPacing.mult("job", int(f.household_id))):
 				make_offer(f)
 
 static func _retire(f) -> void:

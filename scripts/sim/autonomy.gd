@@ -20,6 +20,9 @@ static var last_debug: Dictionary = {}   # folk_id -> debug breakdown (see choos
 static var path_queries: int = 0            # path_length queries made by evaluate() (perf tests count them)
 static var rng: RandomNumberGenerator = null
 static var debug_enabled: bool = true
+## true = last_debug lists a row for EVERY candidate (never-examined ones with their bound score, tests use this: TestFixture.reset); false = only
+## closed, examined and best rows (the game: building ~150 rows per decision is a large part of its cost).
+static var full_debug: bool = false
 
 static func get_rng() -> RandomNumberGenerator:
 	if rng == null:
@@ -140,18 +143,45 @@ static func _closed_reason(folk, iid: String, d: Dictionary, obj_def: String, ca
 	if cache.has(key):
 		return cache[key]
 	var why := ""
-	if folk.on_cooldown(iid):
+	var cds: Dictionary = folk.cooldowns
+	if not cds.is_empty() and SimEnv.now_min() < int(cds.get(iid, -1)):
 		why = "cooldown"
-	elif refuses(folk, iid, d, null if obj_def == "" else {"def_id": obj_def}):
+	elif not _never_refuses(folk, cache) and refuses(folk, iid, d, null if obj_def == "" else {"def_id": obj_def}):
 		why = last_refusal
 	else:
-		var ctx := {"folk": folk, "object": null, "target": null}
-		for c in _actor_only_tests(iid, d):
-			if not Cond.check_one(c, ctx):
-				why = "tests failed / reserved / broken"
-				break
+		# the target-independent tests belong to the interaction, not to the kind of object: decided once per interaction
+		var ok: Dictionary = cache.get("#tests", {})
+		cache["#tests"] = ok
+		if not ok.has(iid):
+			var ctx: Dictionary = cache.get("#ctx", {})
+			if ctx.is_empty():
+				ctx = {"folk": folk, "object": null, "target": null, "#mood": null}      # one mood computation for all the tests of this decision
+				cache["#ctx"] = ctx
+			var pass_all := true
+			for c in _actor_only_tests(iid, d):
+				if not Cond.check_one(c, ctx):
+					pass_all = false
+					break
+			ok[iid] = pass_all
+		if not ok[iid]:
+			why = "tests failed / reserved / broken"
 	cache[key] = why
 	return why
+
+## True when none of the folk's traits refuses anything (the usual case): the per-interaction refusal lookups are skipped.
+static func _never_refuses(folk, cache: Dictionary) -> bool:
+	if cache.has("#nr"):
+		return cache["#nr"]
+	var memo := _memo_for(folk)
+	var v: Variant = memo.get("#never_refuses", null)
+	if v == null:
+		v = true
+		for td in folk.trait_defs():
+			if not (td.get("refuses", []) as Array).is_empty():
+				v = false
+		memo["#never_refuses"] = v
+	cache["#nr"] = v
+	return v
 
 ## All (interaction, target) pairs that exist in the world for this folk, before any test is applied.
 ## With `closed` (an Array), interactions that are ruled out for every target (see _closed_reason) are not expanded; one
@@ -162,7 +192,8 @@ static func gather(folk, closed = null) -> Array:
 	var defs: Dictionary = SimEnv.data().interactions()
 	var cache: Dictionary = {}
 	var offered: Dictionary = {}      # object def id -> interaction ids (computed once per kind of object)
-	for o in WorldIface.objects_near(folk.tile, NEAR_RADIUS):
+	var near_objs := WorldIface.objects_for(folk, NEAR_RADIUS)          # level aware: own floor (+ other floors in a home), never somebody else's flat
+	for o in near_objs:
 		var def_id := str(o.def_id)
 		if not offered.has(def_id):
 			var open_ids: Array = []
@@ -174,39 +205,79 @@ static func gather(folk, closed = null) -> Array:
 					closed.append(_closed_row(iid, defs[iid], def_id, "object", why))
 			offered[def_id] = open_ids
 		for iid in offered[def_id]:
-			out.append({"id": iid, "target_id": int(o.id), "kind": "object", "obj": o, "folk": null})
+			out.append({"id": iid, "target_id": int(o.id), "kind": "object", "obj": o, "folk": null, "pk": iid + "|" + def_id})
 	var others: Array = WorldIface.folk_near(folk)
+	for e in _folk_self_defs(defs):
+		var iid: String = e[0]
+		var d2: Dictionary = e[1]
+		var is_self: bool = e[2]
+		if closed != null:
+			var why2: String = _closed_reason(folk, iid, d2, "", cache)
+			if why2 != "":
+				closed.append(_closed_row(iid, d2, "", "none" if is_self else "folk", why2))
+				continue
+		var pk: String = e[3]
+		if is_self:
+			out.append({"id": iid, "target_id": -1, "kind": "none", "obj": null, "folk": null, "pk": pk})
+		else:
+			for f2 in others:
+				if f2.id != folk.id:
+					out.append({"id": iid, "target_id": int(f2.id), "kind": "folk", "obj": null, "folk": f2, "pk": pk})
+	return out
+
+static var _fs_src: Dictionary = {}
+static var _fs_n: int = -1
+static var _fs_list: Array = []        # [iid, def, is_self, "iid|"] of every autonomous interaction aimed at a person / at the actor
+
+## The autonomous folk / self interactions, in table order (static data: rebuilt when the table or one of its entries is replaced).
+static func _folk_self_defs(defs: Dictionary) -> Array:
+	var ok: bool = is_same(_fs_src, defs) and _fs_n == defs.size()
+	if ok:
+		for e in _fs_list:
+			if not is_same(defs.get(e[0], null), e[1]):
+				ok = false
+				break
+	if ok:
+		return _fs_list
+	var out: Array = []
 	for iid in defs:
 		var d2: Dictionary = defs[iid]
 		if not bool(d2.get("autonomous", true)):
 			continue
 		var tk: String = str(d2.get("target", "object"))
-		if tk != "folk" and tk != "self":
-			continue
-		if closed != null:
-			var why2: String = _closed_reason(folk, iid, d2, "", cache)
-			if why2 != "":
-				closed.append(_closed_row(iid, d2, "", "folk" if tk == "folk" else "none", why2))
-				continue
-		if tk == "self":
-			out.append({"id": iid, "target_id": -1, "kind": "none", "obj": null, "folk": null})
-		else:
-			for f2 in others:
-				if f2.id != folk.id:
-					out.append({"id": iid, "target_id": int(f2.id), "kind": "folk", "obj": null, "folk": f2})
+		if tk == "folk" or tk == "self":
+			out.append([str(iid), d2, tk == "self", str(iid) + "|"])
+	_fs_src = defs
+	_fs_n = defs.size()
+	_fs_list = out
 	return out
 
+static var _closed_rows: Dictionary = {}     # iid -> {object kind -> [why, def, row]}: closed rows are the same every decision, shared (read-only)
+
 static func _closed_row(iid: String, d: Dictionary, obj_def: String, kind: String, why: String) -> Dictionary:
-	return {"interaction": iid, "label": str(d.get("label", iid)), "target_id": -1, "kind": kind, "object": obj_def,
+	var per: Dictionary = _closed_rows.get(iid, {})
+	_closed_rows[iid] = per
+	var c: Variant = per.get(obj_def, null)
+	if c != null and c[0] == why and is_same(c[1], d):
+		return c[2]
+	var row := {"interaction": iid, "label": str(d.get("label", iid)), "target_id": -1, "kind": kind, "object": obj_def,
 		"skipped": true, "skip_reason": why, "score": 0.0, "sub": {}}
+	per[obj_def] = [why, d, row]
+	return row
 
 # ---------------------------------------------------------------- scoring
 ## The part of a score that does not depend on WHICH target an interaction is aimed at: advertised needs, buff / trait
 ## multipliers, likes and the routine boost. Cached per (interaction, kind of object) for the duration of one choose().
-static func _profile(folk, iid: String, d: Dictionary, obj, cache: Dictionary) -> Dictionary:
-	var key: String = iid + "|" + (str(obj.def_id) if obj != null else "")
+static func _profile(folk, iid: String, d: Dictionary, obj, cache: Dictionary, pk: String = "") -> Dictionary:
+	var key: String = pk if pk != "" else iid + "|" + (str(obj.def_id) if obj != null else "")
 	if cache.has(key):
 		return cache[key]
+	if not cache.has("#tmemo"):          # validate the memos and find this folk's trait memo once per decision
+		_validate_memo()
+		var m := _memo_for(folk)
+		if not m.has("#t"):
+			m["#t"] = {}
+		cache["#tmemo"] = m["#t"]
 	var info: Array = _static_info(key, d, obj)
 	var tags: Array = info[0]
 	var adv: Dictionary = info[1]
@@ -214,8 +285,17 @@ static func _profile(folk, iid: String, d: Dictionary, obj, cache: Dictionary) -
 	var base := 0.0
 	var top_need := ""
 	var top_val := -1.0
+	var needs: Dictionary = folk.needs
 	for need in adv:
-		var part: float = urgency(folk, str(need)) * float(adv[need])
+		var u: float = FLAT_URGENCY
+		var st: Variant = needs.get(need, null)
+		if st != null:
+			var span: float = st.max - st.min
+			u = 0.0
+			if span > 0.0:
+				var x: float = (st.max - st.value) / span
+				u = x * x * URGENCY_SCALE
+		var part: float = u * float(adv[need])
 		base += part
 		if part > top_val:
 			top_val = part
@@ -228,9 +308,20 @@ static func _profile(folk, iid: String, d: Dictionary, obj, cache: Dictionary) -
 			if token_matches(str(k), iid, tags, obj, adv_keys):
 				buff_mult *= float(am[k])
 				buff_notes.append("%s x%.2f" % [b[0], float(am[k])])
-	var tp: Array = _trait_part(folk, iid, tags, obj, adv_keys)
+	var tp: Array = _trait_part(folk, iid, tags, obj, adv_keys, key, cache["#tmemo"])
 	var p := {"base": base, "adv": adv, "top_need": top_need, "buff_mult": buff_mult, "buff_notes": buff_notes,
 		"trait_mult": tp[0], "like": tp[1], "trait_notes": tp[2], "rt": Routine.evaluate(folk, iid, tags, _active_routines(folk, cache))}
+	# everything of the score except the distance penalty and the memory bias (shared by every target of this kind)
+	var rt: Dictionary = p["rt"]
+	var c0: float = base * float(p["buff_mult"]) * float(p["trait_mult"]) * float(rt["mult"]) + float(p["like"])
+	if base > 0.0 or float(rt["bonus"]) > 0.0:
+		c0 += float(rt["bonus"])
+	var variety: float = AutonomyVariety.mult(folk, iid, d, obj) * StoryPacing.interaction_mult(folk, d)      # "bored of it" (data/autonomy_variety.json)
+	p["variety"] = variety
+	if c0 > 0.0:
+		c0 *= variety
+	p["c0"] = c0
+	p["label"] = str(d.get("label", iid))
 	cache[key] = p
 	return p
 
@@ -254,8 +345,7 @@ static func _buff_mults(folk, cache: Dictionary) -> Array:
 	return cache["#buffs"]
 
 ## [tags, advertised needs, their keys] of an (interaction, object kind): static data, memoised.
-static func _static_info(key: String, d: Dictionary, obj) -> Array:
-	_validate_memo()
+static func _static_info(key: String, d: Dictionary, obj) -> Array:      # callers have validated the memos (_profile)
 	var c: Variant = _memo_info.get(key, null)
 	if c != null:
 		return c
@@ -290,9 +380,7 @@ static func _memo_for(folk) -> Dictionary:
 		_memo[th] = {}
 	return _memo[th]
 
-static func _trait_part(folk, iid: String, tags: Array, obj, adv_keys: Array) -> Array:
-	var memo := _memo_for(folk)
-	var key: String = "t|" + iid + "|" + (str(obj.def_id) if obj != null else "")
+static func _trait_part(folk, iid: String, tags: Array, obj, adv_keys: Array, key: String, memo: Dictionary) -> Array:
 	if memo.has(key):
 		return memo[key]
 	var trait_mult := 1.0
@@ -380,6 +468,8 @@ static func evaluate(folk, cand: Dictionary, profiles: Dictionary = {}, detail: 
 	score += float(p["like"])
 	if base > 0.0 or float(rt["bonus"]) > 0.0:
 		score += float(rt["bonus"])
+	if score > 0.0:
+		score *= float(p["variety"])
 	var dist_pen: float = DISTANCE_PENALTY * float(dist)
 	score -= dist_pen
 	var mem_key: String = _memory_key(cand, iid)
@@ -418,38 +508,6 @@ static func evaluate(folk, cand: Dictionary, profiles: Dictionary = {}, detail: 
 	rec["reason"] = "%s%s: %s" % [rec["label"], tgt, "; ".join(parts)]
 	return rec
 
-## Cheap first pass of choose(): the candidate's score with the straight-line lower bound as its distance (steps >= Chebyshev
-## distance), no interaction tests, no path query. It is an UPPER bound of the real score (evaluate()), returned as a row with
-## "estimated" = true; choose() replaces the rows that matter by the real evaluation.
-static func _bound_row(folk, cand: Dictionary, profiles: Dictionary, bias_map: Dictionary) -> Dictionary:
-	var iid: String = cand["id"]
-	var d: Dictionary = SimEnv.data().interaction_def(iid)
-	var obj = cand["obj"]
-	var row := {
-		"interaction": iid, "label": str(d.get("label", iid)), "target_id": cand["target_id"], "kind": cand["kind"],
-		"object": str(obj.def_id) if obj != null else "", "skipped": false, "skip_reason": "", "score": 0.0, "sub": {}, "estimated": true,
-	}
-	if d.is_empty():
-		row["skipped"] = true
-		row["skip_reason"] = "unknown interaction"
-		return row
-	var dest: Vector2i = folk.tile
-	if obj != null:
-		dest = obj.slot_tile(0) if obj.has_method("slot_tile") else WorldIface.use_tile(obj, 0)
-	elif cand["kind"] == "folk":
-		dest = (cand["folk"] as Folk).tile
-	var p: Dictionary = _profile(folk, iid, d, obj, profiles)
-	var base: float = p["base"]
-	var rt: Dictionary = p["rt"]
-	var score := base * float(p["buff_mult"]) * float(p["trait_mult"]) * float(rt["mult"]) + float(p["like"])
-	if base > 0.0 or float(rt["bonus"]) > 0.0:
-		score += float(rt["bonus"])
-	score -= DISTANCE_PENALTY * float(maxi(absi(folk.tile.x - dest.x), absi(folk.tile.y - dest.y)))
-	if not bias_map.is_empty():
-		score *= 1.0 + clampf(clampf(float(bias_map.get(_memory_key(cand, iid), 0.0)), -Folk.MEMORY_BIAS_LIMIT, Folk.MEMORY_BIAS_LIMIT), -0.5, 0.5)
-	row["score"] = score
-	return row
-
 ## Choose what `folk` should do next. Returns {} when nothing is possible, else
 ## {interaction_id, target_id, target_kind, score, reason, label}.
 static func choose(folk) -> Dictionary:
@@ -459,40 +517,101 @@ static func choose(folk) -> Dictionary:
 	# 1. distance-free pass: every candidate gets a score with the straight-line lower bound as its distance (an UPPER bound
 	#    of the real score); no path query yet.
 	var bias_map: Dictionary = folk.memory_bias_map()
+	var bias_obj: Dictionary = {}          # target id -> memory bias (clamped), by kind of key
+	var bias_folk: Dictionary = {}
+	var bias_int: Dictionary = {}
+	for k in bias_map:
+		var b: float = clampf(clampf(float(bias_map[k]), -Folk.MEMORY_BIAS_LIMIT, Folk.MEMORY_BIAS_LIMIT), -0.5, 0.5)
+		var ks: String = str(k)
+		if ks.begins_with("obj:"):
+			bias_obj[int(ks.substr(4))] = b
+		elif ks.begins_with("folk:"):
+			bias_folk[int(ks.substr(5))] = b
+		elif ks.begins_with("int:"):
+			bias_int[ks.substr(4)] = b
 	var pending: Array = []
-	for cand in _budget(folk, gather(folk, all_rec)):
-		var row := _bound_row(folk, cand, profiles, bias_map)
-		all_rec.append(row)
-		if not row["skipped"]:
-			if float(row["score"]) > 0.0:
-				pending.append([row, cand, all_rec.size() - 1])
+	var gathered := gather(folk, all_rec)
+	var fx: int = folk.tile.x
+	var fy: int = folk.tile.y
+	var native_slot := true
+	var first_obj := true
+	for cand in _budget(folk, gathered):
+		var iid: String = cand["id"]
+		var obj = cand["obj"]
+		var p: Variant = profiles.get(cand["pk"], null)
+		if p == null:
+			var d: Dictionary = SimEnv.data().interaction_def(iid)
+			if d.is_empty():
+				all_rec.append({"interaction": iid, "label": iid, "target_id": cand["target_id"], "kind": cand["kind"],
+					"object": str(obj.def_id) if obj != null else "", "skipped": true, "skip_reason": "unknown interaction", "score": 0.0, "sub": {}, "estimated": true})
+				continue
+			p = _profile(folk, iid, d, obj, profiles, cand["pk"])
+		var dx: int
+		var dy: int
+		var bias := 0.0
+		if obj != null:
+			if first_obj:
+				first_obj = false
+				native_slot = obj.has_method("slot_tile")
+			var dest: Vector2i = obj.slot_tile(0) if native_slot else WorldIface.use_tile(obj, 0)
+			dx = dest.x
+			dy = dest.y
+			bias = bias_obj.get(int(cand["target_id"]), 0.0)
+		elif cand["kind"] == "folk":
+			var ft: Vector2i = (cand["folk"] as Folk).tile
+			dx = ft.x
+			dy = ft.y
+			bias = bias_folk.get(int(cand["target_id"]), 0.0)
+		else:
+			dx = fx
+			dy = fy
+			bias = bias_int.get(iid, 0.0)
+		var score: float = float(p["c0"]) - DISTANCE_PENALTY * float(maxi(absi(fx - dx), absi(fy - dy)))
+		if bias != 0.0:
+			score *= 1.0 + bias
+		if full_debug:
+			var row := {"interaction": iid, "label": p["label"], "target_id": cand["target_id"], "kind": cand["kind"],
+				"object": str(obj.def_id) if obj != null else "", "skipped": false, "skip_reason": "", "score": score, "sub": {}, "estimated": true}
+			all_rec.append(row)
+			if score > 0.0:
+				pending.append([score, cand, all_rec.size() - 1])
 			else:
 				row["skipped"] = true
 				row["skip_reason"] = "score <= 0"
-	pending.sort_custom(func(a, b): return float(a[0]["score"]) > float(b[0]["score"]))
+		elif score > 0.0:
+			pending.append([score, cand, -1])
+	pending.sort_custom(func(a, b): return float(a[0]) > float(b[0]))
 	# 2. real path lengths, best bound first, until the bound of the next candidate cannot beat the DETAIL_N-th real score:
 	#    the result is exactly what scoring every candidate would give, with a handful of path queries.
+	var need: int = DETAIL_N if full_debug else TOP_N       # the pick only depends on the best TOP_N; the debug report wants DETAIL_N
 	var kth := -INF
 	for e in pending:
-		if scored.size() >= DETAIL_N and float(e[0]["score"]) <= kth:
+		if scored.size() >= need and float(e[0]) <= kth:
 			break
 		var rec := evaluate(folk, e[1], profiles, false, true)
-		all_rec[e[2]] = rec
+		var ri: int = e[2]
+		if ri >= 0:
+			all_rec[ri] = rec
+		else:
+			ri = all_rec.size()
+			all_rec.append(rec)
 		if not rec["skipped"]:
 			if float(rec["score"]) > 0.0:
-				scored.append([rec, e[1], e[2]])
-				if scored.size() >= DETAIL_N:
+				scored.append([rec, e[1], ri])
+				if scored.size() >= need:
 					scored.sort_custom(func(a, b): return float(a[0]["score"]) > float(b[0]["score"]))
-					kth = float(scored[DETAIL_N - 1][0]["score"])
+					kth = float(scored[need - 1][0]["score"])
 			else:
 				rec["skipped"] = true
 				rec["skip_reason"] = "score <= 0"
 	scored.sort_custom(func(a, b): return float(a[0]["score"]) > float(b[0]["score"]))
 	# the debug breakdown is only built for the best DETAIL_N candidates
 	var best: Array = []
-	for k in mini(scored.size(), DETAIL_N):
+	var best_idx: Dictionary = {}
+	for k in mini(scored.size(), need):
 		var full := evaluate(folk, scored[k][1], profiles, true, true)
 		all_rec[scored[k][2]] = full
+		best_idx[scored[k][2]] = true
 		best.append(full)
 	scored = best
 	var top: Array = scored.slice(0, TOP_N)
@@ -516,10 +635,11 @@ static func choose(folk) -> Dictionary:
 			"score": picked["score"], "reason": picked["reason"], "label": picked["label"],
 		}
 	if debug_enabled:
-		var rows: Array = []
-		for r in all_rec:
-			rows.append(r)
-		rows.sort_custom(func(a, b): return float(a["score"]) > float(b["score"]))
+		# the best candidates first (sorted: nothing else can outscore them, see the bound above), then every other row in gather order
+		var rows: Array = best.duplicate()
+		for ri in all_rec.size():
+			if not best_idx.has(ri):
+				rows.append(all_rec[ri])
 		last_debug[folk.id] = {
 			"folk": folk.name, "time": SimEnv.clock().time_string(), "candidates": rows,
 			"top": top, "picked": picked, "reason": picked.get("reason", "nothing to do"),

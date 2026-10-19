@@ -1,4 +1,4 @@
-class_name Aging
+﻿class_name Aging
 extends RefCounted
 ## Life stages, birthdays, trait slots, pregnancy/birth, death, grief, inheritance and legacy summaries.
 ## Data: data/aging.json. The current stage is stored in Folk.age_stage and mirrored by a permanent marker buff
@@ -71,17 +71,26 @@ static func register(f, age_days: float = -1.0, parents: Array = []) -> void:
 	if records.has(fid):
 		return
 	if age_days < 0.0:
-		var sd: Dictionary = stage_def(str(f.age_stage))
-		var start: float = float(sd.get("from_day", 44))
-		var idx: int = stage_index(str(f.age_stage))
-		var nxt: float = start + 8.0
-		if idx >= 0 and idx + 1 < stage_table().size():
-			nxt = float(stage_table()[idx + 1]["from_day"])
-		age_days = start + (nxt - start) * 0.35
+		age_days = AgingStart.default_age(f)
 	records[fid] = {"age_days": age_days, "last_year": int(floor(age_days / days_per_year())), "parents": parents.duplicate(),
-		"inherited": [], "children": [], "born_day": SysUtil.day() - int(age_days)}
+		"inherited": [], "children": [], "born_day": SysUtil.day() - int(age_days), "birth_doy": _new_birth_doy(age_days)}
 	f.age_stage = stage_for_days(age_days)
 	apply_stage_buff(f)
+
+## Born folk (age 0) have their birthday today; starting folk get a random date nobody else has.
+static func _new_birth_doy(age: float) -> int:
+	if age < 1.0:
+		return doy(SysUtil.day())
+	var used: Array = []
+	for rec in records.values():
+		used.append(int((rec as Dictionary).get("birth_doy", -1)))
+	var yd: int = year_days()
+	var start: int = absi(hash("%d:%d" % [records.size(), int(age * 10.0)])) % yd
+	for k in yd:
+		var d: int = (start + k) % yd
+		if not used.has(d):
+			return d
+	return start
 
 static func apply_stage_buff(f) -> void:
 	for sid in stage_ids():
@@ -129,20 +138,59 @@ static func on_day(_day: int) -> void:
 			continue
 		var rec: Dictionary = records[fid]
 		rec["age_days"] = float(rec["age_days"]) + rate
-		var years: int = int(floor(float(rec["age_days"]) / days_per_year()))
-		if years > int(rec["last_year"]):
-			rec["last_year"] = years
-			_birthday(f, years)
+		if is_birthday_today(int(fid)):
+			_birthday(f)
 		var nw: String = stage_for_days(float(rec["age_days"]))
 		if nw != str(f.age_stage):
 			_age_up(f, nw)
 	_check_births()
 	_check_deaths()
 
-static func _birthday(f, years: int) -> void:
-	SysUtil.notify("It's %s's birthday! They are now %d." % [f.name, years], "birthday")
-	SysUtil.game_event("birthday", {"folk_id": f.id, "age": years})
+## The small yearly celebration (once per calendar year, no age number); growing into a new life stage is the big birthday (_age_up).
+static func _birthday(f) -> void:
+	if SysUtil.is_resident(f) and bool(cfg().get("birthday_toast", true)):
+		SysUtil.notify("It's %s's birthday today!" % f.name, "birthday")
+	SysUtil.game_event("birthday", {"folk_id": f.id})
 	f.add_buff("cheered_up")
+
+static func year_days() -> int:
+	return maxi(4 * Seasons.length(), 4)
+
+static func doy(day: int) -> int:
+	return posmod(day - 1, year_days())
+
+## Day of the calendar year (0-based) of this folk's own birthday.
+static func birth_doy(folk_id: int) -> int:
+	var rec: Dictionary = records.get(folk_id, {})
+	if rec.is_empty():
+		return -1
+	if not rec.has("birth_doy"):
+		rec["birth_doy"] = doy(int(rec.get("born_day", 0)))      # old saves
+	return int(rec["birth_doy"])
+
+static func is_birthday_today(folk_id: int) -> bool:
+	return birth_doy(folk_id) == doy(SysUtil.day())
+
+## "Early" / "mid" / "late" part of the life stage, from age_days.
+static func stage_part(age: float, stage: String) -> String:
+	var idx: int = stage_index(stage)
+	if idx < 0:
+		return ""
+	var start: float = float(stage_def(stage).get("from_day", 0))
+	var nxt: float = float(stage_table()[idx + 1]["from_day"]) if idx + 1 < stage_table().size() else start + 90.0
+	var u: float = (age - start) / maxf(nxt - start, 1.0)
+	return "early" if u < 0.34 else ("mid" if u < 0.67 else "late")
+
+## Player-facing age: "Late adult" (never a number of years).
+static func stage_text(folk_id: int, stage: String = "") -> String:
+	var st: String = stage if stage != "" else str((Family.person_info(folk_id) as Dictionary).get("stage", "adult"))
+	var lbl: String = str(stage_def(st).get("label", st))
+	if st in ["baby", "toddler"] or not records.has(folk_id):
+		return lbl
+	return "%s %s" % [stage_part(age_days(folk_id), st).capitalize(), lbl.to_lower()]
+
+static func article(stage: String) -> String:
+	return "an" if stage in ["adult", "elder"] else "a"
 
 static func _age_up(f, new_stage: String) -> void:
 	var old: String = str(f.age_stage)
@@ -151,6 +199,8 @@ static func _age_up(f, new_stage: String) -> void:
 	var label: String = str(stage_def(new_stage).get("label", new_stage))
 	SysUtil.notify("%s grew up into a %s!" % [f.name, label.to_lower()], "birthday")
 	SysUtil.game_event("aged_up", {"folk_id": f.id, "from": old, "to": new_stage})
+	if SysUtil.is_resident(f):
+		ChronicleHook.note("aged_up", "%s grew up into %s %s." % [f.name, article(new_stage), label.to_lower()], [int(f.id)], "home:%d" % int(f.household_id), 2)
 	# New stage, new trait: first the ones inherited at birth, then a random one.
 	if can_add_trait(f) and new_stage != "elder":
 		_grow_trait(f)
@@ -216,8 +266,7 @@ static func _birth(mother_id: int, father_id: int) -> void:
 	var gen: Dictionary = Genetics.inherit(Family.person_info(mother_id), Family.person_info(father_id), null,
 		{"chance": float(pc.get("inherit_chance", 0.35)), "cap": int(pc.get("max_inherited", 2))})
 	var inherited: Array = gen["traits"]
-	var names: Array = cfg().get("name_pool", ["Pip"])
-	var baby_name: String = str(SysUtil.pick(names)) + " " + _surname(str(m.name))
+	var baby_name: String = Names.pick_first([], SysUtil.rng) + " " + _surname(str(m.name))
 	var baby := Folk.create(baby_name, [])
 	baby.appearance = gen["appearance"]
 	baby.household_id = int(m.household_id)
@@ -228,14 +277,16 @@ static func _birth(mother_id: int, father_id: int) -> void:
 		if records.has(pid):
 			(records[pid]["children"] as Array).append(int(baby.id))
 	SysUtil.world_add_folk(baby, m.tile)
+	baby.level = int(m.level)                      # born on the mother's floor
 	m.remove_buff("pregnant")
 	Family.on_birth(baby, mother_id, father_id)
 	for pid2 in [mother_id, father_id]:
 		RelationshipBits.set_flag(int(baby.id), int(pid2), "family", true, false)
 		RelationshipService.add_both(int(baby.id), int(pid2), "friendship", 40.0)
 	RelationshipBits.set_flag(mother_id, father_id, "family", true, false)
-	SysUtil.notify("%s was born to %s!" % [baby_name, m.name], "birthday")
-	SysUtil.game_event("baby_born", {"folk_id": mother_id, "baby_id": baby.id, "target_id": father_id})
+	var in_hospital: bool = HospitalWard.lot_id() != "" and SysUtil.chance(float(Hospital.cfg().get("birth", {}).get("chance", 0.7))) and HospitalWard.birth(m, baby)
+	SysUtil.notify("%s was born to %s%s!" % [baby_name, m.name, " at the hospital" if in_hospital else ""], "birthday")
+	SysUtil.game_event("baby_born", {"folk_id": mother_id, "baby_id": baby.id, "target_id": father_id, "hospital": in_hospital})
 
 static func _surname(full: String) -> String:
 	var parts: PackedStringArray = full.split(" ")
@@ -345,6 +396,7 @@ static func legacy_summary(folk_id: int) -> Dictionary:
 	var f = SysUtil.folk(folk_id)
 	var nm: String = str(f.name) if f != null else SysUtil.folk_name(folk_id)
 	var years: int = age_years(folk_id)
+	var stage_now: String = str(f.age_stage) if f != null else "adult"
 	var career_txt: String = "never held a steady job"
 	if Careers.jobs.has(folk_id):
 		career_txt = "worked as a %s (level %d)" % [Careers.title_of(folk_id), Careers.level_of(folk_id)]
@@ -360,14 +412,14 @@ static func legacy_summary(folk_id: int) -> Dictionary:
 	var friends: int = RelationshipBits.count_bit(folk_id, "friend", true)
 	var kids: int = children_of(folk_id).size()
 	var asp: String = Goals.aspiration_label(folk_id)
-	var summary: String = "%s lived %d years, %s, " % [nm, years, career_txt]
+	var summary: String = "%s passed away as %s %s, %s, " % [nm, article(stage_now), str(stage_def(stage_now).get("label", stage_now)).to_lower(), career_txt]
 	if best_skill != "":
 		summary += "mastered %s %d, " % [best_skill, best_lvl]
 	summary += "left %d friends and %d children." % [friends, kids]
 	var desc: int = FamilyTree.descendants_of(folk_id).size()
 	if desc > kids:
 		summary += " %d descendants in all." % desc
-	return {"folk_id": folk_id, "name": nm, "years": years, "career": career_txt, "best_skill": best_skill, "best_skill_level": best_lvl,
+	return {"folk_id": folk_id, "name": nm, "years": years, "stage": stage_now, "career": career_txt, "best_skill": best_skill, "best_skill_level": best_lvl,
 		"friends": friends, "children": kids, "aspiration": asp, "summary": summary,
 		"lifetime_points": Goals.lifetime_points(folk_id), "descendants": desc,
 		"spouse": Family.name_of(FamilyTree.spouse_of(folk_id)) if FamilyTree.spouse_of(folk_id) >= 0 else "", "traits": f.traits.duplicate() if f != null else []}

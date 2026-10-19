@@ -1,4 +1,4 @@
-extends RefCounted
+﻿extends RefCounted
 ## SLOW tier: many game years of the whole town with the default Surprises setting. Checks the crime rates against the task targets (burglary
 ## around half a year per house, street robbery ~0.1 a year for a night-walker, murder < 0.01 a year per household), that wrongful convictions stay
 ## under 5%, that a forced serial killer is always caught within the victim cap, and that nothing grows without bound (cases, pending, civil).
@@ -61,7 +61,8 @@ func _town_years(f: Array) -> void:
 		years, elapsed, burg, rob, JusticeState.counter("murder"), murder_rate, JusticeState.counter("assault"), JusticeState.counter("arrests"),
 		JusticeState.counter("wrongful_arrests"), JusticeState.counter("trials"), JusticeState.counter("convictions"), JusticeState.counter("innocent_convicted"),
 		JusticeState.counter("innocent_tried"), JusticeState.civil.size(), JusticeState.cases.size()])
-	K.expect(f, burg > 0.15 and burg < 1.0, "burglary is rare but real: %.2f a year per house" % burg)
+	var band: Array = JusticeState.sect("targets").get("burglary_per_lot_year", [0.04, 0.22])
+	K.expect(f, burg > float(band[0]) * 0.6 and burg < float(band[1]) * 1.6, "burglary is rare but real (targets %s): %.2f a year per house" % [str(band), burg])
 	K.expect(f, rob < 0.4, "street robbery stays rare: %.3f a year per townie" % rob)
 	var exposure: float = float(JusticeState.counters.get("exposure_hh", 0.0))
 	K.expect(f, JusticeState.counter("murder") <= int(ceil(0.02 * exposure)), "murder stays rare, about 0.01 a year per household (limit 0.02 x %.0f household-years = %d): %.4f (%d)" % [exposure, int(ceil(0.02 * exposure)), murder_rate, murders])

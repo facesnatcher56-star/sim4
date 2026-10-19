@@ -1,4 +1,4 @@
-class_name NeighborhoodContent
+﻿class_name NeighborhoodContent
 extends RefCounted
 ## Runtime content injected into the shared Data tables (idempotent, like SysContent / FamilyContent). Everything comes from
 ## data/venues.json "content": cloned object defs (park_bench, cafe_counter, grocery_cooler), venue interactions
@@ -10,6 +10,7 @@ const MARK := "_hood_content"
 static func install() -> void:
 	var cfg: Dictionary = (SimEnv.data().get_table("venues") as Dictionary).get("content", {})
 	ContentMerge.install(cfg, MARK, {"_sys_gate": true})      # _sys_gate: keep SysContent from re-gating these
+	BuildingContent.install()                                  # multi-floor building objects (hospital bed, ...)
 
 ## Ids of every venue buff the crowd/ambient code may apply.
 static func buff_ids() -> Array:

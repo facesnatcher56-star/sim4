@@ -30,8 +30,9 @@ func run() -> Array:
 	w.add_folk(ann, Vector2i(12, 12))
 	w.add_folk(bo, Vector2i(13, 12))
 	K.mgr.new_game([1], "short")
-	Aging.set_age_days(ann, 60.0)
-	Aging.set_age_days(bo, 60.0)
+	StoryPacing.enabled = false          # this test counts the pregnancies it asked for
+	Aging.set_age_days(ann, 92.0)
+	Aging.set_age_days(bo, 92.0)
 	RelationshipService.add_both(ann.id, bo.id, "romance", 80.0)
 	RelationshipService.add_both(ann.id, bo.id, "friendship", 80.0)
 	RelationshipBits.set_flag(ann.id, bo.id, "partner", true, false)

@@ -1,4 +1,4 @@
-class_name Economy
+﻿class_name Economy
 extends RefCounted
 ## Household funds, weekly bills, late fees, repossession, buying/selling objects and grocery restock.
 ## Balances live in WorldIface.coins (the same numbers Cond `coins_at_least` / Loot `coins_add` use).
@@ -39,11 +39,22 @@ static func balance(hid: int) -> int:
 static func can_afford(hid: int, n: int) -> bool:
 	return balance(hid) >= n
 
-static func _log(hid: int, amount: int, reason: String) -> void:
+static func _log(hid: int, amount: int, reason: String, merge: bool = false) -> void:
 	if not ledger.has(hid):
 		ledger[hid] = []
 	var l: Array = ledger[hid]
-	l.append({"day": SysUtil.day(), "amount": amount, "reason": reason, "balance": balance(hid)})
+	if merge and not l.is_empty():
+		var last: Dictionary = l[l.size() - 1]
+		if bool(last.get("merged", false)) and last["reason"] == reason and int(last["day"]) == SysUtil.day():
+			last["amount"] = int(last["amount"]) + amount          # the same small purchase again today: one line with a count
+			last["balance"] = balance(hid)
+			last["count"] = int(last.get("count", 1)) + 1
+			return
+	var row := {"day": SysUtil.day(), "amount": amount, "reason": reason, "balance": balance(hid)}
+	if merge:
+		row["merged"] = true
+		row["count"] = 1
+	l.append(row)
 	var cap: int = int(cfg().get("ledger_size", 60))
 	while l.size() > cap:
 		l.pop_front()
@@ -53,6 +64,16 @@ static func deposit(hid: int, n: int, reason: String = "") -> void:
 		return
 	WorldIface.add_coins(hid, n)
 	_log(hid, n, reason)
+
+## Money moved by an interaction (a snack, medicine, a coffee: Loot `coins_add`, in either direction). It always happens (no affordability
+## test, like Loot), is written to the ledger under `reason`, and repeats of the same reason on the same day share one line so small
+## purchases do not push bills and wages out of the capped history. Household money only: NPC pocket money (-1) is never ledgered.
+static func record(hid: int, n: int, reason: String) -> void:
+	if n == 0:
+		return
+	WorldIface.add_coins(hid, n)
+	if hid > 0:
+		_log(hid, n, reason, true)
 
 ## Spend `n` coins if affordable. Emits coins_changed through WorldIface. Returns false when too poor.
 static func spend(hid: int, n: int, reason: String = "") -> bool:

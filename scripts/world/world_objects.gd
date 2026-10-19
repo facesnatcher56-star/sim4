@@ -1,4 +1,4 @@
-class_name WorldObjects
+﻿class_name WorldObjects
 extends RefCounted
 ## Object placement, removal, queries and state.
 ## Back-references the World autoload as `world`; World keeps one-line delegates for the public API.
@@ -207,9 +207,11 @@ func objects_of_def(def_id: String) -> Array:
 			out.append(o)
 	return out
 
-func objects_in_radius(tile: Vector2i, r: float) -> Array:
+func objects_in_radius(tile: Vector2i, r: float, level: int = LPos.ALL) -> Array:
 	var scored: Array = []
 	for o in world.objects.values():
+		if level != LPos.ALL and o.level != level:
+			continue
 		var best := INF
 		if o.is_wall_mounted():
 			best = Vector2(o.tile).distance_to(Vector2(tile))
@@ -229,7 +231,7 @@ func objects_in_radius(tile: Vector2i, r: float) -> Array:
 ## on the road never wanders into a lot by itself (that is an explicit player errand, see NeighborhoodTravel).
 const STREET_REACH := 12.0
 
-func objects_in_lot_of(tile: Vector2i, r: float) -> Array:
+func objects_in_lot_of(tile: Vector2i, r: float, level: int = LPos.ALL) -> Array:
 	var rg: WorldRegions = world.regions
 	var rid := rg.region_at(tile)
 	if rid == WorldRegions.NONE or not rg.is_lot(rid):
@@ -239,7 +241,7 @@ func objects_in_lot_of(tile: Vector2i, r: float) -> Array:
 	for c in rg.chunks_in_rect(rc):
 		for oid in rg.chunk_objects(c):
 			var o = world.objects.get(oid, null)
-			if o == null or not rc.has_point(o.tile):
+			if o == null or not rc.has_point(o.tile) or (level != LPos.ALL and o.level != level):
 				continue
 			var best := INF
 			if o.is_wall_mounted():

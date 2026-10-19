@@ -1,4 +1,4 @@
-extends RefCounted
+﻿extends RefCounted
 ## Economy: funds, spend, bills / late fees / repossession, buy & sell with depreciation, grocery restock.
 
 const K = preload("res://tests/systems_kit.gd")
@@ -28,6 +28,16 @@ func _funds(f: Array) -> void:
 	K.expect(f, Economy.balance(1) == 85, "Loot coins_add must change Economy balance")
 	K.expect(f, Economy.ledger_for(1).size() >= 2, "ledger should record transactions")
 	K.expect(f, not Economy.spend(1, -5, "neg"), "negative spend must be refused")
+	# interaction money goes through the ledger under the interaction's label; repeats the same day share a line; NPC pocket money stays out
+	var n0: int = Economy.ledger_for(1).size()
+	Loot.apply([{"coins_add": -3}], {"folk": a, "reason": "Buy a snack"})
+	Loot.apply([{"coins_add": -4}], {"folk": a, "reason": "Buy a snack"})
+	var led: Array = Economy.ledger_for(1)
+	K.expect(f, led.size() == n0 + 1 and led[-1]["reason"] == "Buy a snack" and int(led[-1]["amount"]) == -7 and int(led[-1]["count"]) == 2 and int(led[-1]["balance"]) == Economy.balance(1), "Loot coins_add is ledgered by reason, merged per day: %s" % str(led[-1]))
+	var npc := K.make_folk(w, "Npc")
+	npc.household_id = -1
+	Loot.apply([{"coins_add": -2}], {"folk": npc, "reason": "Buy a snack"})
+	K.expect(f, Economy.ledger_for(-1).is_empty() and WorldIface.get_coins(-1) == -2, "NPC pocket money (household -1) is not ledgered")
 	K.teardown()
 
 func _buy_sell(f: Array) -> void:

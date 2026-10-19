@@ -171,7 +171,7 @@ func _townie_coworker() -> void:
 func _school_teen() -> void:
 	var folk: Array = Kit.new_game("small")
 	var kid: Folk = folk[1]
-	Aging.set_age_days(kid, 50.0)
+	Aging.set_age_days(kid, 82.0)
 	kid.age_stage = "teen"
 	Careers.enroll_school()
 	Kit.set_time(2, 7, 0)

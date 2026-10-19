@@ -3,6 +3,8 @@ extends RefCounted
 ## Condition evaluator. A condition list is AND'd; each dictionary may carry several keys (also AND'd).
 ## ctx keys: "folk" (Folk), "object" (WorldObject or null), "target" (Folk or null).
 
+static var _warned: Dictionary = {}
+
 static func check(conds: Array, ctx: Dictionary) -> bool:
 	for c in conds:
 		if not check_one(c, ctx):
@@ -40,7 +42,16 @@ static func check_one(c: Variant, ctx: Dictionary) -> bool:
 				if folk == null or folk.has_buff(str(v)):
 					return false
 			"mood_is":
-				if folk == null or str(folk.get_mood().get("mood", "")) != str(v):
+				if folk == null:
+					return false
+				var mood_now: String
+				if ctx.has("#mood"):                   # opt-in per-evaluation cache (Autonomy.gather): Mood.compute is expensive
+					if ctx["#mood"] == null:
+						ctx["#mood"] = str(folk.get_mood().get("mood", ""))
+					mood_now = ctx["#mood"]
+				else:
+					mood_now = str(folk.get_mood().get("mood", ""))
+				if mood_now != str(v):
 					return false
 			"skill_at_least":
 				if folk == null or folk.skill_level(str(v[0])) < int(v[1]):
@@ -61,6 +72,12 @@ static func check_one(c: Variant, ctx: Dictionary) -> bool:
 					return false
 			"time_between":
 				if not _time_between(float(v[0]), float(v[1])):
+					return false
+			"pair_flag_absent":
+				if folk == null or target == null or RelationshipBits.has_flag(int(folk.id), int(target.id), str(v)):
+					return false
+			"circadian":
+				if folk == null or not Circadian.in_phase(folk, str(v)):
 					return false
 			"coins_at_least":
 				if folk == null or WorldIface.get_coins(int(folk.household_id)) < int(v):
@@ -91,13 +108,15 @@ static func check_one(c: Variant, ctx: Dictionary) -> bool:
 				if not ok:
 					return false
 			_:
-				push_warning("Cond: unknown condition key '%s'" % str(key))
+				if not _warned.has(str(key)):          # once per key: a warning per evaluation costs ~2 ms each in autonomy's hot path
+					_warned[str(key)] = true
+					push_warning("Cond: unknown condition key '%s'" % str(key))
 				return false
 	return true
 
 ## Does this condition look at the target folk / the object? (If not, it can be decided from the actor alone.)
 static func uses_target(c: Variant) -> bool:
-	return _mentions(c, ["relationship_above"])
+	return _mentions(c, ["relationship_above", "pair_flag_absent"])
 
 static func uses_object(c: Variant) -> bool:
 	return _mentions(c, ["object_state_eq", "object_state_above", "object_state_below"])

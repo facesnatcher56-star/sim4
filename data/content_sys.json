@@ -79,7 +79,12 @@
      "fire_event": "job_search"
     }
    ],
-   "autonomous": false,
+   "autonomous": true,
+   "advertises": {
+    "ambition": 1.6
+   },
+   "cooldown_min": 720,
+   "thought": "I should find some work.",
    "priority": "normal",
    "tags": [
     "skill",
@@ -107,6 +112,12 @@
       {
        "has_buff": "stage_elder"
       }
+     ]
+    },
+    {
+     "relationship_above": [
+      "bond",
+      0.5
      ]
     }
    ],
@@ -138,8 +149,13 @@
    "tags": [
     "social",
     "flirt",
-    "baby"
-   ]
+    "baby",
+    "commitment"
+   ],
+   "advertises": {
+    "ambition": 1.6
+   },
+   "cooldown_min": 4320
   },
   "apologize": {
    "label": "Apologize",
@@ -175,8 +191,17 @@
     {
      "relationship_above": [
       "romance",
-      44
+      60
      ]
+    },
+    {
+     "relationship_above": [
+      "bond",
+      0.5
+     ]
+    },
+    {
+     "pair_flag_absent": "spouse"
     }
    ],
    "on_finish": [
@@ -184,12 +209,17 @@
      "fire_event": "propose"
     }
    ],
-   "autonomous": false,
+   "autonomous": true,
    "priority": "normal",
    "tags": [
     "social",
-    "flirt"
-   ]
+    "flirt",
+    "commitment"
+   ],
+   "advertises": {
+    "ambition": 1.6
+   },
+   "cooldown_min": 4320
   }
  },
  "buffs": {

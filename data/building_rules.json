@@ -1,0 +1,198 @@
+{
+  "version": 1,
+  "notes": "Room types of the multi-floor buildings (BuildingGen) in the same item language as data/house_rules.json, plus the cloned objects they use (merged by HousePlan.defs and BuildingContent). The hospital's `hospital_stay` interaction is what a patient does in a ward bed.",
+  "rooms": {
+    "lobby": {"area": 14, "min_dim": 3, "floor": ["stone", "tile"], "hab": false, "win": 0.8, "items": [{"d": "reception_desk", "at": "wall", "n": [1, 2], "req": 1}, {"d": "computer", "at": "wall", "p": 0.8}, {"d": "sofa", "at": "wall", "n": [1, 2], "p": 0.9}, {"d": "armchair", "at": "corner", "n": [1, 2], "p": 0.8}, {"d": "plant", "at": "corner", "n": [1, 3]}, {"d": "lamp", "at": "corner", "p": 0.6}, {"d": "vending_machine", "at": "wall", "p": 0.6}, {"d": "fire_extinguisher", "at": "wall", "p": 0.7}]},
+    "waiting": {"area": 14, "min_dim": 3, "floor": ["tile"], "hab": false, "win": 1.0, "items": [{"d": "sofa", "at": "wall", "n": [2, 4], "req": 1}, {"d": "armchair", "at": "corner", "n": [1, 2]}, {"d": "table", "at": "free", "pref": "spread", "p": 0.7}, {"d": "plant", "at": "corner", "n": [1, 2]}, {"d": "vending_machine", "at": "wall", "p": 0.7}, {"d": "tv", "at": "wall", "p": 0.5}, {"d": "trash_bin", "at": "corner"}]},
+    "ward": {"area": 18, "min_dim": 3, "floor": ["tile"], "hab": true, "win": 1.2, "items": [{"d": "hospital_bed", "at": "wall", "n": [3, 4], "req": 1}, {"d": "nightstand", "at": "beside", "ref": "hospital_bed", "n": [1, 3], "p": 0.8}, {"d": "sink", "at": "wall", "p": 0.6}, {"d": "armchair", "at": "corner", "p": 0.6}, {"d": "plant", "at": "corner", "p": 0.6}, {"d": "smoke_alarm", "at": "ceil", "p": 0.8}, {"d": "trash_bin", "at": "corner", "p": 0.6}]},
+    "er_bay": {"area": 20, "min_dim": 3, "floor": ["tile"], "hab": false, "win": 0.8, "items": [{"d": "hospital_bed", "at": "wall", "n": [3, 5], "req": 1}, {"d": "sink", "at": "wall", "n": [1, 2]}, {"d": "counter", "at": "wall", "n": [1, 2]}, {"d": "fire_extinguisher", "at": "wall"}, {"d": "trash_bin", "at": "corner"}, {"d": "computer", "at": "wall", "p": 0.6}]},
+    "surgery": {"area": 20, "min_dim": 4, "floor": ["tile"], "hab": false, "win": 0.4, "items": [{"d": "operating_table", "at": "free", "pref": "spread", "req": 1}, {"d": "sink", "at": "wall", "n": [1, 2]}, {"d": "counter", "at": "wall", "n": [1, 3]}, {"d": "computer", "at": "wall"}, {"d": "lamp", "at": "corner"}, {"d": "fire_extinguisher", "at": "wall"}]},
+    "maternity": {"area": 20, "min_dim": 3, "floor": ["tile"], "hab": true, "win": 1.2, "items": [{"d": "birth_bed", "at": "wall", "n": [2, 3], "req": 1}, {"d": "crib", "at": "wall", "n": [1, 2]}, {"d": "armchair", "at": "corner", "n": [1, 2]}, {"d": "nightstand", "at": "beside", "ref": "birth_bed", "n": [1, 2], "p": 0.8}, {"d": "plant", "at": "corner", "n": [1, 2]}, {"d": "lamp", "at": "corner"}, {"d": "sink", "at": "wall", "p": 0.6}]},
+    "nurse_station": {"area": 12, "min_dim": 3, "floor": ["tile"], "hab": false, "win": 0.6, "items": [{"d": "desk", "at": "wall", "n": [1, 2], "req": 1}, {"d": "computer", "at": "wall", "n": [1, 2], "req": 1}, {"d": "coffee_maker", "at": "wall"}, {"d": "fridge", "at": "wall", "p": 0.7}, {"d": "counter", "at": "wall", "p": 0.7}, {"d": "trash_bin", "at": "corner"}, {"d": "plant", "at": "corner", "p": 0.5}]},
+    "exam": {"area": 14, "min_dim": 3, "floor": ["tile"], "hab": false, "win": 0.8, "items": [{"d": "hospital_bed", "at": "wall", "req": 1}, {"d": "desk", "at": "wall", "req": 1}, {"d": "computer", "at": "wall"}, {"d": "sink", "at": "wall"}, {"d": "trash_bin", "at": "corner"}]},
+    "morgue": {"area": 16, "min_dim": 3, "floor": ["tile", "concrete"], "hab": false, "win": 0.0, "items": [{"d": "counter", "at": "wall", "n": [2, 4], "req": 1}, {"d": "sink", "at": "wall"}, {"d": "bookcase_tall", "at": "wall", "n": [1, 3]}, {"d": "lamp", "at": "corner"}, {"d": "trash_bin", "at": "corner"}]},
+    "records": {"area": 16, "min_dim": 3, "floor": ["carpet", "tile"], "hab": false, "win": 0.5, "items": [{"d": "bookcase_tall", "at": "wall", "n": [4, 7], "req": 1}, {"d": "desk", "at": "wall", "n": [1, 2]}, {"d": "computer", "at": "wall"}, {"d": "plant", "at": "corner", "p": 0.5}]},
+    "storage": {"area": 12, "min_dim": 3, "floor": ["concrete"], "hab": false, "win": 0.3, "items": [{"d": "bookcase_tall", "at": "wall", "n": [3, 6], "req": 1}, {"d": "workbench", "at": "wall", "p": 0.6}, {"d": "washing_machine", "at": "wall", "p": 0.4}, {"d": "trash_bin", "at": "corner"}, {"d": "fire_extinguisher", "at": "wall", "p": 0.5}]},
+    "lab": {"area": 18, "min_dim": 3, "floor": ["tile"], "hab": false, "win": 1.0, "items": [{"d": "computer", "at": "wall", "n": [3, 5], "req": 1}, {"d": "workbench", "at": "free", "pref": "spread", "n": [1, 2]}, {"d": "desk", "at": "wall", "n": [1, 2]}, {"d": "bookcase_tall", "at": "wall", "n": [1, 2]}, {"d": "sink", "at": "wall"}, {"d": "fire_extinguisher", "at": "wall"}, {"d": "plant", "at": "corner", "p": 0.5}]},
+    "exec_suite": {"area": 18, "min_dim": 3, "floor": ["wood", "carpet"], "hab": true, "win": 1.2, "items": [{"d": "desk", "at": "wall", "req": 1}, {"d": "computer", "at": "wall", "req": 1}, {"d": "armchair", "at": "corner", "n": [1, 2]}, {"d": "bookcase_tall", "at": "wall", "n": [1, 2]}, {"d": "sofa", "at": "wall", "p": 0.6}, {"d": "plant", "at": "corner", "n": [1, 2]}, {"d": "lamp", "at": "corner"}]},
+    "cell": {"area": 10, "min_dim": 3, "floor": ["concrete"], "hab": false, "win": 0.0, "items": [{"d": "cell_bunk", "at": "wall", "req": 1}, {"d": "toilet", "at": "wall", "req": 1}, {"d": "sink", "at": "wall"}]},
+    "custody": {"area": 14, "min_dim": 3, "floor": ["concrete", "tile"], "hab": false, "win": 0.0, "items": [{"d": "desk", "at": "wall", "n": [1, 2], "req": 1}, {"d": "computer", "at": "wall", "req": 1}, {"d": "sofa", "at": "wall", "p": 0.7}, {"d": "trash_bin", "at": "corner"}, {"d": "fire_extinguisher", "at": "wall"}]},
+    "squad_room": {"area": 20, "min_dim": 3, "floor": ["carpet", "tile"], "hab": false, "win": 1.0, "items": [{"d": "desk", "at": "wall", "n": [2, 4], "req": 1}, {"d": "computer", "at": "wall", "n": [2, 4], "req": 1}, {"d": "table", "at": "free", "pref": "spread", "p": 0.8}, {"d": "dining_chair", "at": "seat", "ref": "table", "n": [2, 4]}, {"d": "coffee_maker", "at": "wall"}, {"d": "bookcase_tall", "at": "wall", "n": [1, 2]}, {"d": "plant", "at": "corner"}, {"d": "trash_bin", "at": "corner"}]},
+    "courtroom": {"area": 40, "min_dim": 5, "floor": ["wood"], "hab": false, "win": 1.0, "items": [{"d": "judge_bench", "at": "wall", "req": 1}, {"rows": "pew", "step_y": 2, "len": [2, 3], "n_rows": [3, 4], "rot": 0, "off": [1, 2]}, {"d": "table", "at": "free", "pref": "spread", "n": [1, 2]}, {"d": "dining_chair", "at": "seat", "ref": "table", "n": [2, 4]}, {"d": "plant", "at": "corner", "n": [1, 2]}, {"d": "bookcase_tall", "at": "wall", "n": [1, 2]}]},
+    "clerk": {"area": 12, "min_dim": 3, "floor": ["carpet", "wood"], "hab": false, "win": 1.0, "items": [{"d": "desk", "at": "wall", "n": [1, 3], "req": 1}, {"d": "computer", "at": "wall", "n": [1, 2], "req": 1}, {"d": "bookcase_tall", "at": "wall", "n": [1, 3]}, {"d": "plant", "at": "corner"}]},
+    "parking": {"area": 60, "min_dim": 5, "floor": ["concrete"], "hab": false, "win": 0.2, "items": [{"rows": "parking_bay", "step_y": 3, "len": [3, 5], "n_rows": [3, 4], "rot": 0, "off": [1, 1]}, {"d": "parking_bay", "at": "wall", "n": [3, 6]}, {"d": "fire_extinguisher", "at": "wall", "n": [1, 2]}, {"d": "trash_bin", "at": "corner"}, {"d": "vending_machine", "at": "wall", "p": 0.5}]},
+    "den": {"area": 20, "min_dim": 3, "floor": ["carpet", "concrete"], "hab": false, "win": 0.1, "items": [{"d": "sofa", "at": "wall", "req": 1}, {"d": "tv", "at": "wall"}, {"d": "pool_table", "at": "free", "pref": "spread", "big": 24, "p": 0.6}, {"d": "armchair", "at": "corner", "n": [1, 2]}, {"d": "bookshelf", "at": "wall", "p": 0.7}, {"d": "lamp", "at": "corner"}, {"d": "plant", "at": "corner", "p": 0.5}, {"d": "smoke_alarm", "at": "ceil", "p": 0.8}]},
+    "shelter": {"area": 10, "min_dim": 3, "floor": ["concrete"], "hab": false, "win": 0.0, "items": [{"d": "sofa", "at": "wall", "req": 1}, {"d": "bookshelf", "at": "wall", "n": [1, 2]}, {"d": "fridge", "at": "wall", "p": 0.8}, {"d": "lamp", "at": "corner"}, {"d": "fire_extinguisher", "at": "wall"}, {"d": "smoke_alarm", "at": "ceil"}]},
+    "unit_main": {"area": 24, "min_dim": 4, "floor": ["wood", "carpet"], "hab": true, "win": 1.3, "items": [{"run": [["fridge", "counter", "stove", "sink"], ["sink", "stove", "counter", "fridge"], ["fridge", "stove", "sink"], ["sink", "stove", "fridge"]]}, {"d": "tv", "at": "wall", "p": 0.9}, {"d": "sofa", "at": "facing", "ref": "tv", "dist": [2, 4], "p": 0.9}, {"d": "table", "at": "free", "pref": "spread", "p": 0.7}, {"d": "dining_chair", "at": "seat", "ref": "table", "n": [1, 3]}, {"d": "coffee_table", "at": "front", "ref": "sofa", "p": 0.6}, {"d": "bookcase_tall", "at": "wall", "p": 0.6}, {"d": "plant", "at": "corner", "n": [1, 2], "p": 0.8}, {"d": "lamp", "at": "corner", "p": 0.6}, {"d": "rug", "at": "rug", "ref": "coffee_table", "p": 0.5}, {"d": "smoke_alarm", "at": "ceil", "p": 0.9}, {"d": "trash_bin", "at": "corner", "p": 0.6}]},
+    "unit_studio_main": {"area": 30, "min_dim": 4, "floor": ["wood", "carpet"], "hab": true, "win": 1.3, "items": [{"run": [["fridge", "counter", "stove", "sink"], ["sink", "stove", "counter", "fridge"], ["fridge", "stove", "sink"], ["sink", "stove", "fridge"]]}, {"d": "bed", "at": "wall", "pref": "corner", "req": 1}, {"d": "wardrobe", "at": "wall", "p": 0.8}, {"d": "tv", "at": "wall", "p": 0.9}, {"d": "sofa", "at": "facing", "ref": "tv", "dist": [2, 4], "p": 0.9}, {"d": "table", "at": "free", "pref": "spread", "p": 0.7}, {"d": "dining_chair", "at": "seat", "ref": "table", "n": [1, 3]}, {"d": "coffee_table", "at": "front", "ref": "sofa", "p": 0.6}, {"d": "bookcase_tall", "at": "wall", "p": 0.6}, {"d": "plant", "at": "corner", "n": [1, 2], "p": 0.8}, {"d": "lamp", "at": "corner", "p": 0.6}, {"d": "rug", "at": "rug", "ref": "coffee_table", "p": 0.5}, {"d": "smoke_alarm", "at": "ceil", "p": 0.9}, {"d": "trash_bin", "at": "corner", "p": 0.6}]}
+  },
+  "content": {
+    "objects": {
+      "hospital_bed": {
+        "clone": "single_bed",
+        "override": {
+          "label": "Hospital Bed",
+          "price": 900,
+          "tags": [
+            "bedroom",
+            "bed",
+            "furniture",
+            "hospital"
+          ],
+          "color": "#dfe8ee",
+          "interactions": [
+            "hospital_stay"
+          ]
+        }
+      },
+      "birth_bed": {
+        "clone": "single_bed",
+        "override": {
+          "label": "Delivery Bed",
+          "price": 1100,
+          "tags": [
+            "bedroom",
+            "bed",
+            "furniture",
+            "hospital",
+            "maternity"
+          ],
+          "color": "#e6d9e8",
+          "interactions": [
+            "hospital_stay"
+          ]
+        }
+      },
+      "operating_table": {
+        "clone": "single_bed",
+        "override": {
+          "label": "Operating Table",
+          "price": 2400,
+          "tags": [
+            "furniture",
+            "hospital",
+            "surgery"
+          ],
+          "color": "#b9cdd8",
+          "interactions": [],
+          "slots": []
+        }
+      },
+      "cell_bunk": {
+        "clone": "single_bed",
+        "override": {
+          "label": "Cell Bunk",
+          "price": 300,
+          "tags": [
+            "bedroom",
+            "bed",
+            "furniture",
+            "cell"
+          ],
+          "color": "#8b8f96",
+          "interactions": [
+            "sleep_bed",
+            "nap_bed"
+          ]
+        }
+      },
+      "pew": {
+        "clone": "sofa",
+        "override": {
+          "label": "Pew",
+          "price": 200,
+          "tags": [
+            "seat",
+            "furniture",
+            "court"
+          ],
+          "color": "#7a5a3a",
+          "interactions": [
+            "sit_sofa"
+          ]
+        }
+      },
+      "judge_bench": {
+        "clone": "desk",
+        "override": {
+          "label": "Judge's Bench",
+          "price": 1500,
+          "tags": [
+            "furniture",
+            "court"
+          ],
+          "color": "#5a3e26",
+          "interactions": []
+        }
+      },
+      "reception_desk": {
+        "clone": "counter",
+        "override": {
+          "label": "Reception Desk",
+          "price": 600,
+          "tags": [
+            "furniture",
+            "office",
+            "reception"
+          ],
+          "color": "#a9b4bf",
+          "interactions": [
+            "clean_object"
+          ]
+        }
+      },
+      "parking_bay": {
+        "clone": "rug",
+        "override": {
+          "label": "Parking Bay",
+          "price": 40,
+          "tags": [
+            "floor",
+            "parking"
+          ],
+          "color": "#4a4f57",
+          "interactions": []
+        }
+      }
+    },
+    "interactions": {
+      "stuck_in_lift": {"label": "Stuck in the Lift", "kind": "super", "target": "self", "duration_min": 40, "posture": "stand", "interruptible": false, "hidden": true,
+        "tags": ["emergency"], "tests": [], "per_min": {"fun": -0.1}, "on_finish": [], "on_cancel": [], "autonomous": false, "priority": "urgent", "advertises": {}, "thought": "Waiting for the lift to move again..."},
+      "hospital_stay": {
+        "label": "Rest in Hospital",
+        "kind": "super",
+        "target": "object",
+        "objects": [
+          "hospital_bed",
+          "birth_bed"
+        ],
+        "duration_min": 600,
+        "posture": "lie",
+        "interruptible": false,
+        "hidden": true,
+        "tags": [
+          "rest",
+          "hospital"
+        ],
+        "tests": [],
+        "per_min": {
+          "energy": 0.1,
+          "comfort": 0.1
+        },
+        "need_decay_mult": {
+          "hunger": 0.4,
+          "bladder": 0.5,
+          "social": 0.4,
+          "fun": 0.3,
+          "hygiene": 0.5
+        },
+        "on_finish": [],
+        "on_cancel": [],
+        "autonomous": false,
+        "priority": "high",
+        "advertises": {},
+        "thought": "Resting. The nurses are kind."
+      }
+    }
+  }
+}

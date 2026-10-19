@@ -1,4 +1,4 @@
-class_name JusticeState
+﻿class_name JusticeState
 extends RefCounted
 ## All state of the crime and justice track (tasks 04 / 09 / 09b) in one place, plus the data accessor and the save round trip.
 ## Data: data/justice.json (table "justice"). The CASE RECORD lives in `cases` (see CaseStore for the fields); everything else is
@@ -8,7 +8,7 @@ extends RefCounted
 const DEFAULT_SEED := 40404
 const INT_FIELDS := ["id", "day", "minute", "culprit", "victim", "hid", "disc_day", "reporter", "accused", "serial", "reopened", "last_work_day",
 	"vhid", "arrest_day", "trial_day", "closed_day", "lawyer", "bail", "stolen_coins", "loot_value"]
-const INT_ARRAYS := ["witnesses", "suspect_ids"]
+const INT_ARRAYS := ["witnesses", "suspect_ids", "acquitted"]
 
 static var rng: RandomNumberGenerator = RandomNumberGenerator.new()
 static var cases: Dictionary = {}         # case id -> case record (JSON safe)
@@ -33,6 +33,13 @@ static var relief: Dictionary = {}        # person id -> {amount, until}: a loan
 static var watch_until: int = -1          # neighbourhood watch active until this day
 static var rate_now: float = 0.0          # town crime rate 0..100
 static var rate_hist: Array = []          # [{day, rate}] one entry per season check
+static var violence: Dictionary = {}      # "lo>hi" pair key -> {last, n, shoves, hits, until}: incidents and the cooldown after them (CrimeAssault)
+static var calm: Dictionary = {}          # person id -> day until which they start no fights (released from custody, finished a course)
+static var coursed: Dictionary = {}       # person id -> day until which an anger-management course dampens their temper
+static var orders: Array = []             # protective orders [{id, offender, victim, vhid, home, since, until, case, violations}] (JusticeOrders)
+static var next_order: int = 1
+static var abuse: Dictionary = {"carers": {}, "kids": {}, "hist": {}, "parenting": {}, "watched": {}}         # child abuse path (CrimeChildAbuse / ChildServices): carers {pid: {score, warned, last}}, kids {child: {...}}, hist {pid: true}, parenting {pid: day}, watched {pid: day}
+static var courses: Dictionary = {}       # person id -> [{kind, days_left, last_day}] mandatory courses (anger_management, parenting)
 static var enabled: bool = true
 
 static func cfg() -> Dictionary:
@@ -64,6 +71,13 @@ static func reset() -> void:
 	watch_until = -1
 	rate_now = 0.0
 	rate_hist.clear()
+	violence.clear()
+	calm.clear()
+	coursed.clear()
+	orders.clear()
+	courses.clear()
+	abuse = {"carers": {}, "kids": {}, "hist": {}, "parenting": {}, "watched": {}}
+	next_order = 1
 	enabled = true
 	seed_rng(DEFAULT_SEED)
 
@@ -110,7 +124,14 @@ static func to_dict() -> Dictionary:
 		"serial": serial.duplicate(true), "civil": civil.duplicate(true), "probation": SysUtil.str_keys(probation), "service": SysUtil.str_keys(service).duplicate(true),
 		"uneasy_until": uneasy_until, "fresh_start": SysUtil.str_keys(fresh_start), "lawyers": SysUtil.str_keys(lawyers).duplicate(true),
 		"year_log": year_log.duplicate(true), "blackmail": blackmail.duplicate(true), "revenge": revenge.duplicate(true),
-		"relief": SysUtil.str_keys(relief).duplicate(true), "watch_until": watch_until, "rate_now": rate_now, "rate_hist": rate_hist.duplicate(true)}
+		"relief": SysUtil.str_keys(relief).duplicate(true), "watch_until": watch_until, "rate_now": rate_now, "rate_hist": rate_hist.duplicate(true),
+		"violence": violence.duplicate(true), "calm": SysUtil.str_keys(calm), "coursed": SysUtil.str_keys(coursed), "orders": orders.duplicate(true), "next_order": next_order, "courses": SysUtil.str_keys(courses).duplicate(true), "abuse": _abuse_out()}
+
+static func _abuse_out() -> Dictionary:
+	var out: Dictionary = {}
+	for k in abuse:
+		out[k] = SysUtil.str_keys(abuse[k]).duplicate(true)
+	return out
 
 static func fix_case(c: Dictionary) -> void:
 	SysUtil.ints_in(c, INT_FIELDS)
@@ -166,3 +187,14 @@ static func from_dict(d: Dictionary) -> void:
 	watch_until = int(d.get("watch_until", -1))
 	rate_now = float(d.get("rate_now", 0.0))
 	rate_hist = (d.get("rate_hist", []) as Array).duplicate(true)
+	violence = (d.get("violence", {}) as Dictionary).duplicate(true)
+	calm = SysUtil.int_keys(d.get("calm", {}))
+	coursed = SysUtil.int_keys(d.get("coursed", {}))
+	orders = (d.get("orders", []) as Array).duplicate(true)
+	for o in orders:
+		SysUtil.ints_in(o, ["id", "offender", "victim", "vhid", "since", "until", "case", "violations"])
+	next_order = int(d.get("next_order", 1))
+	courses = SysUtil.int_keys((d.get("courses", {}) as Dictionary).duplicate(true))
+	var ab: Dictionary = d.get("abuse", {}) as Dictionary
+	for k4 in ["carers", "kids", "hist", "parenting", "watched"]:
+		abuse[k4] = SysUtil.int_keys((ab.get(k4, {}) as Dictionary).duplicate(true))

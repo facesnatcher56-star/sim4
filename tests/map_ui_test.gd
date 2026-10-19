@@ -1,4 +1,4 @@
-extends RefCounted
+﻿extends RefCounted
 ## The "Go to..." panel on the one map: open / closed + walking minutes from the selected folk, who is where (derived from
 ## tiles), Go walks (a go_here to the lot's door), Fast travel hides the folk for a short trip, a click on a lot moves the camera.
 
@@ -20,7 +20,7 @@ func run() -> Array:
 	var panel := TravelPanel.new()
 	Kit.root().add_child(panel)
 	panel.open_panel()
-	_check(panel.is_open() and panel.tiles.size() == 11, "panel lists the 11 lots (%d)" % panel.tiles.size())
+	_check(panel.is_open() and panel.tiles.size() == 15, "panel lists the 15 lots (%d)" % panel.tiles.size())
 	var cafe_txt: String = (panel.tiles["cafe"] as Button).text
 	_check(cafe_txt.find("Open") >= 0 and cafe_txt.find("min walk") >= 0, "cafe tile: open + walking time (%s)" % cafe_txt.replace("\n", " | "))
 	_check((panel.tiles["home"] as Button).text.find("You are here") >= 0, "home tile says you are here")

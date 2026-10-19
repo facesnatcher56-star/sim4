@@ -105,6 +105,7 @@ func _ready() -> void:
 	UIU.connect_ev("coins_changed", _on_coins_changed)
 	UIU.connect_ev("folk_added", func(_i): rebuild_folk_row())
 	UIU.connect_ev("folk_removed", func(_i): rebuild_folk_row())
+	UIU.connect_ev("game_event", func(n, _p): if n == "open_town_law": TownLawDialog.open_from(case_board))
 	UIU.connect_ev("game_event", func(n, _p): if n in ["left_for_work", "returned_from_work", "left_for_school", "returned_from_school", "left_lot", "returned_to_lot", "moved_in", "moved_out", "adopted", "married", "divorced"]: rebuild_folk_row())
 	if Clock.has_signal("minute_passed"):
 		Clock.connect("minute_passed", _update_clock)

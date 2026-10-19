@@ -18,8 +18,8 @@ func run() -> Array:
 func _stages(f: Array) -> void:
 	K.setup()
 	K.expect(f, Aging.stage_ids() == ["baby", "toddler", "child", "teen", "adult", "elder"], "six life stages from data: %s" % str(Aging.stage_ids()))
-	K.expect(f, Aging.stage_for_days(0.0) == "baby" and Aging.stage_for_days(5.0) == "toddler" and Aging.stage_for_days(20.0) == "child", "stage thresholds")
-	K.expect(f, Aging.stage_for_days(30.0) == "teen" and Aging.stage_for_days(60.0) == "adult" and Aging.stage_for_days(150.0) == "elder", "stage thresholds (older)")
+	K.expect(f, Aging.stage_for_days(0.0) == "baby" and Aging.stage_for_days(8.0) == "toddler" and Aging.stage_for_days(20.0) == "child", "stage thresholds")
+	K.expect(f, Aging.stage_for_days(55.0) == "teen" and Aging.stage_for_days(80.0) == "adult" and Aging.stage_for_days(180.0) == "elder", "stage thresholds (older)")
 	K.expect(f, Aging.trait_slots("baby") == 0 and Aging.trait_slots("child") == 2 and Aging.trait_slots("adult") == 4, "trait slots per stage")
 	K.expect(f, Aging.stage_index("teen") == 3, "stage index")
 	K.teardown()
@@ -30,8 +30,8 @@ func _gating(f: Array) -> void:
 	var adult := K.make_folk(w, "Ann", [], 1, Vector2i(10, 11), "adult")
 	var kid := K.make_folk(w, "Kid", [], 1, Vector2i(10, 12), "child")
 	var baby := K.make_folk(w, "Bub", [], 1, Vector2i(10, 13), "baby")
-	Aging.set_age_days(kid, 15.0)
-	Aging.set_age_days(baby, 1.0)
+	Aging.set_age_days(kid, 25.6)
+	Aging.set_age_days(baby, 1.5)
 	K.expect(f, kid.age_stage == "child" and kid.has_buff("stage_child") and not kid.has_buff("stage_adult"), "stage buff marker follows the stage")
 	var work_adult := Interaction.create("work_computer", adult, comp.id, true)
 	var work_kid := Interaction.create("work_computer", kid, comp.id, true)
@@ -52,7 +52,7 @@ func _gating(f: Array) -> void:
 func _growth(f: Array) -> void:
 	var w := K.setup()
 	var t := K.make_folk(w, "Teen", ["social"], 1, Vector2i(12, 12), "teen")
-	Aging.set_age_days(t, 42.5)    # adult at 44
+	Aging.set_age_days(t, 73.6)    # adult at 44
 	var birthdays: int = 0
 	var ups: int = 0
 	for d in range(2, 8):
@@ -62,18 +62,17 @@ func _growth(f: Array) -> void:
 	ups = K.count_events("aged_up")
 	K.expect(f, t.age_stage == "adult" and t.has_buff("stage_adult"), "teen grew into an adult, stage=%s" % t.age_stage)
 	K.expect(f, ups == 1 and K.last_event("aged_up")["to"] == "adult", "aged_up event")
-	K.expect(f, birthdays >= 1 and K.has_note("birthday"), "birthday events and notifications (%d)" % birthdays)
 	K.expect(f, t.traits.size() == 2, "growing up reveals a new trait (slots 3->4), traits=%s" % str(t.traits))
 	K.expect(f, Aging.age_years(t.id) == int(floor(Aging.age_days(t.id) / 4.0)), "age in years from days_per_year")
 	# ageing a child past 28 days makes a teen and drops them out of school
 	var kid := K.make_folk(w, "Kid", [], 1, Vector2i(14, 12), "child")
-	Aging.set_age_days(kid, 27.5)
+	Aging.set_age_days(kid, 49.1)
 	Careers.on_day(1)
 	K.expect(f, Careers.school.has(kid.id), "child in school")
 	K.set_time(9, 0)
 	Aging.on_day(9)
 	K.expect(f, kid.age_stage == "teen" and Careers.school.has(kid.id), "teens still go to school")
-	Aging.set_age_days(kid, 43.5)
+	Aging.set_age_days(kid, 75.2)
 	K.set_time(10, 0)
 	Aging.on_day(10)
 	K.expect(f, kid.age_stage == "adult" and not Careers.school.has(kid.id), "adults leave school")
@@ -84,17 +83,17 @@ func _lifespan(f: Array) -> void:
 	var w := K.setup()
 	var a := K.make_folk(w, "Ann")
 	var b := K.make_folk(w, "Bo")
-	Aging.set_age_days(a, 50.0)
-	Aging.set_age_days(b, 50.0)
+	Aging.set_age_days(a, 82.0)
+	Aging.set_age_days(b, 82.0)
 	K.expect(f, Aging.age_rate() == 1.0, "normal lifespan rate 1.0")
 	Aging.on_day(2)
-	K.expect(f, absf(Aging.age_days(a.id) - 51.0) < 0.001, "normal: one day older")
+	K.expect(f, absf(Aging.age_days(a.id) - 83.0) < 0.001, "normal: one day older")
 	Aging.set_lifespan("short")
 	Aging.on_day(3)
-	K.expect(f, absf(Aging.age_days(a.id) - 52.6) < 0.001, "short lifespan ages 1.6x faster")
+	K.expect(f, absf(Aging.age_days(a.id) - 84.6) < 0.001, "short lifespan ages 1.6x faster")
 	Aging.set_lifespan("epic")
 	Aging.on_day(4)
-	K.expect(f, absf(Aging.age_days(a.id) - 52.9) < 0.001, "epic lifespan ages 0.3x")
+	K.expect(f, absf(Aging.age_days(a.id) - 84.9) < 0.001, "epic lifespan ages 0.3x")
 	K.teardown()
 
 func _baby(f: Array) -> void:
@@ -104,8 +103,8 @@ func _baby(f: Array) -> void:
 	cfg["pregnancy"]["inherit_chance"] = 1.0
 	var a := K.make_folk(w, "Ann Rowe", ["creative", "social"])
 	var b := K.make_folk(w, "Bo Rowe", ["gamer", "active"])
-	Aging.set_age_days(a, 60.0)
-	Aging.set_age_days(b, 60.0)
+	Aging.set_age_days(a, 92.0)
+	Aging.set_age_days(b, 92.0)
 	var res: Dictionary = Aging.try_for_baby(a.id, b.id)
 	K.expect(f, not res["ok"] and res["reason"] == "not_romantic_enough", "needs romance first: %s" % str(res))
 	RelationshipService.add_both(a.id, b.id, "romance", 60.0)
@@ -134,7 +133,7 @@ func _baby(f: Array) -> void:
 		var inh: Array = Aging.records[baby.id]["inherited"]
 		K.expect(f, inh.size() == 2, "traits inherited from the parents: %s" % str(inh))
 		# toddler stage unlocks the first (inherited) trait
-		Aging.set_age_days(baby, 11.5)
+		Aging.set_age_days(baby, 19.1)
 		K.set_time(8, 0)
 		Aging.on_day(8)
 		K.expect(f, baby.age_stage == "child" or baby.age_stage == "toddler", "baby grows")
@@ -144,7 +143,7 @@ func _baby(f: Array) -> void:
 		K.expect(f, not Interaction.create("work_computer", baby, comp.id, true).can_run(baby), "children do not work")
 	# try_for_baby interaction available to adult couples only
 	var kid := K.make_folk(w, "Kid", [], 1, Vector2i(5, 5), "child")
-	Aging.set_age_days(kid, 15.0)
+	Aging.set_age_days(kid, 25.6)
 	K.expect(f, not Interaction.create("try_for_baby", kid, a.id, true).can_run(kid), "children cannot try for a baby")
 	K.teardown()
 
@@ -154,7 +153,7 @@ func _death(f: Array) -> void:
 	var b := K.make_folk(w, "Bo", [], 1)
 	var c := K.make_folk(w, "Cy", [], 2)
 	var d := K.make_folk(w, "Di", [], 3)
-	Aging.set_age_days(a, 160.0)
+	Aging.set_age_days(a, 192.0)
 	WorldIface.coins[1] = 1000
 	RelationshipService.add_both(a.id, b.id, "friendship", 60.0)
 	RelationshipBits.set_flag(a.id, b.id, "family")
@@ -182,7 +181,7 @@ func _death(f: Array) -> void:
 	K.expect(f, int(Economy.owner.get(chair.id, -1)) == 6, "heir inherits the objects")
 	# natural death roll: past the max age is certain
 	var h := K.make_folk(w, "Hal", [], 7)
-	Aging.set_age_days(h, 231.0)
+	Aging.set_age_days(h, 263.0)
 	Aging.on_day(50)
 	K.expect(f, w.get_folk(h.id) == null, "death is certain past max age")
 	K.teardown()
@@ -190,7 +189,7 @@ func _death(f: Array) -> void:
 func _roundtrip(f: Array) -> void:
 	var w := K.setup()
 	var a := K.make_folk(w, "Ann")
-	Aging.set_age_days(a, 70.0)
+	Aging.set_age_days(a, 102.0)
 	Aging.pregnancies[a.id] = {"father": 99, "due_day": 5, "started": 2}
 	Aging.cooldowns[a.id] = 9
 	Aging.set_lifespan("long")

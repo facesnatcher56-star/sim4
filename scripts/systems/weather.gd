@@ -100,10 +100,12 @@ static func reset(new_seed: int = -1) -> void:
 	Seasons.reset()
 	Holidays.reset()
 
-## Fresh game: random seed when a window exists, the fixed default seed when headless (keeps tests deterministic).
+## Fresh game: seeded from the game's world seed (Neighborhood.world_seed, saved), else random when a window exists, else the fixed default seed (tests).
 static func new_game() -> void:
 	reset()
-	if DisplayServer.get_name() != "headless":
+	if Neighborhood.world_seed > 0:
+		seed_value = _mix(int(settings().get("default_seed", 1337)), Neighborhood.world_seed)      # each game's world seed gives its own weather
+	elif DisplayServer.get_name() != "headless":
 		seed_value = int(Time.get_unix_time_from_system()) ^ int(Time.get_ticks_usec())
 	_last_weather = current()
 	_last_season = Seasons.current()
@@ -331,9 +333,16 @@ static func walk_speed_mult() -> float:
 	var m: float = _prop("walk_speed", 1.0)
 	return clampf(m * lerpf(1.0, 0.94, snow_cover()), 0.5, 1.0)
 
-static func walk_speed_mult_at(tile: Vector2i) -> float:
+## Is the tile of that floor open to the sky (rain, snow and wind reach it)? Only the top roof of a building is rained on; floors below
+## it are indoors. Worlds without rooms (stubs): everything is outdoors.
+static func is_outdoor(tile: Vector2i, level: int = 0) -> bool:
 	var w = WorldIface.world()
-	if w != null and w.has_method("is_outdoor") and not bool(w.is_outdoor(tile)):
+	if w != null and w.has_method("is_outdoor"):
+		return bool(w.is_outdoor(tile, level))
+	return true
+
+static func walk_speed_mult_at(tile: Vector2i, level: int = 0) -> float:
+	if not is_outdoor(tile, level):
 		return 1.0
 	return walk_speed_mult()
 

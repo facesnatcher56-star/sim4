@@ -1,4 +1,4 @@
-extends SceneTree
+﻿extends SceneTree
 ## Reusable profiler (not a unit test): boots the real game (main.start_new_game), advances N game days minute by minute and
 ## times every Clock listener (minute / hour / day) separately, plus SimDirector's inner phases.
 ##   godot --headless --path . --script res://tests/perf_probe.gd -- [days=2]
@@ -50,6 +50,8 @@ func _process(_d: float) -> bool:
 		SystemsManager.instance.prof.clear()
 		SystemsManager.instance.prof_on = true
 		dir.prof_on = true
+		PerfProf.totals.clear()
+		PerfProf.on = true
 		var t0 := Time.get_ticks_msec()
 		var folk_ticks := 0
 		for m in range(_days * 1440):
@@ -57,6 +59,7 @@ func _process(_d: float) -> bool:
 			clock.advance_minutes(1)
 		var total := Time.get_ticks_msec() - t0
 		dir.prof_on = false
+		PerfProf.on = false
 		SystemsManager.instance.prof_on = false
 		print("== perf_probe: %d game days in %d ms (avg folk per minute %.1f)" % [_days, total, float(folk_ticks) / float(_days * 1440)])
 		var rows: Array = []
@@ -67,6 +70,8 @@ func _process(_d: float) -> bool:
 			rows.append(["  systems/" + k, sp[k][0] / 1000.0, sp[k][1]])
 		for k in dir.prof:
 			rows.append(["  director/" + k, dir.prof[k][0] / 1000.0, dir.prof[k][1]])
+		for k in PerfProf.totals:
+			rows.append(["    " + k, PerfProf.totals[k][0] / 1000.0, PerfProf.totals[k][1]])
 		rows.sort_custom(func(a, b): return a[1] > b[1])
 		for r in rows:
 			if r[1] >= 20.0:

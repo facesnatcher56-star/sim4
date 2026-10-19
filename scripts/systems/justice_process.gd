@@ -1,4 +1,4 @@
-class_name JusticeProcess
+﻿class_name JusticeProcess
 extends RefCounted
 ## The road from suspicion to a courtroom (task 09): ARREST -> CHARGES -> BAIL or remand -> LAWYER -> a trial date a few days later.
 ## Used for every person in town: a townie accused is processed with dice and records, a player folk gets prompts and is held away (Away).
@@ -14,7 +14,30 @@ static func charge_def(charge: String) -> Dictionary:
 static func charge_for(c: Dictionary) -> String:
 	match str(c["kind"]):
 		"serial": return "murder"
-		_: return str(c["kind"]) if not charge_def(str(c["kind"])).is_empty() else "theft"
+		"assault":
+			if bool(c.get("domestic", false)):
+				return "domestic_violence"
+			return "aggravated_assault" if int(c.get("severity", 1)) >= 2 else "assault"
+		_:
+			if str(c.get("charge_hint", "")) != "" and not charge_def(str(c["charge_hint"])).is_empty():
+				return str(c["charge_hint"])
+			return str(c["kind"]) if not charge_def(str(c["kind"])).is_empty() else "theft"
+
+## Every charge the incident brings: the main one, a probation violation when the accused is on probation, a breach when a protective order
+## covers the victim, plus whatever the crime code listed in c["also"].
+static func charges_for(c: Dictionary) -> Array:
+	var main: String = charge_for(c)
+	var list: Array = [main]
+	var pid: int = int(c.get("accused", -1))
+	if not bool(charge_def(main).get("petty", false)):
+		if JusticeState.probation.has(pid) and int(JusticeState.probation[pid]) >= SysUtil.day() and main != "probation_violation":
+			list.append("probation_violation")
+		if main != "order_violation" and int(c.get("victim", -1)) >= 0 and not JusticeOrders.between(pid, int(c["victim"])).is_empty() and bool(c.get("domestic", false)):
+			list.append("order_violation")
+	for extra in (c.get("also", []) as Array):
+		if not list.has(str(extra)) and not charge_def(str(extra)).is_empty():
+			list.append(str(extra))
+	return list
 
 # ------------------------------------------------------------------ arrest
 static func arrest(c: Dictionary, pid: int) -> void:
@@ -30,8 +53,11 @@ static func arrest(c: Dictionary, pid: int) -> void:
 	if wrongful:
 		JusticeState.count("wrongful_arrests")
 	JusticeState.count("arrests")
+	JusticeState.count("arrest_" + str(c["kind"]))
 	var nm: String = CrimePerson.name_of(pid)
-	var text: String = "%s was arrested over the %s." % [nm, CaseStore.title(c).to_lower()]
+	if CrimePerson.has_trait(pid, "hot_headed") and JusticeState.chance(0.04) and not (c.get("also", []) as Array).has("resisting_arrest"):
+		c["also"] = (c.get("also", []) as Array) + ["resisting_arrest"]
+	var text: String = CaseText.arrested(c, pid)
 	CaseStore.note(c, text, "arrest", 3)
 	if CrimePerson.is_player(pid) or CaseStore.household_involved(c):
 		SysUtil.notify(text, "bad" if CrimePerson.is_player(pid) else "story")
@@ -40,8 +66,9 @@ static func arrest(c: Dictionary, pid: int) -> void:
 	JusticeState.inmates[pid] = {"case": int(c["id"]), "kind": "custody", "since": SysUtil.day(), "until": SysUtil.day() + 1, "behaviour": 50, "parole_day": -1}
 	if CrimePerson.is_player(pid) and f != null:
 		JusticePlayer.hold(f, 6.0 * 60.0, "custody", "In custody")
-		JusticePlayer.tell(pid, "Arrested", "%s has been arrested over the %s.%s" % [nm, CaseStore.title(c).to_lower(),
-			" They insist they did nothing wrong." if wrongful else ""])
+		JusticePlayer.tell(pid, "Arrested", "%s%s" % [text, " They insist they did nothing wrong." if wrongful else ""])
+	if bool(c.get("domestic", false)):
+		JusticeOrders.issue(c, int(JusticeState.sect("domestic").get("order_bail_days", 10)))
 	file_charges(c)
 
 # ------------------------------------------------------------------ charges, bail, lawyer
@@ -50,14 +77,17 @@ static func file_charges(c: Dictionary) -> void:
 	var ch: String = charge_for(c)
 	var d: Dictionary = charge_def(ch)
 	c["charge"] = ch
+	c["charges"] = charges_for(c)
 	c["bail"] = int(d.get("bail", 100))
+	for extra in c["charges"]:
+		c["bail"] = maxi(int(c["bail"]), int(charge_def(str(extra)).get("bail", 0)))
 	if bool(d.get("petty", false)):
 		JusticeState.inmates.erase(pid)
 		JusticePlayer.release(CrimePerson.folk(pid))
 		CrimePetty.settle(c)                       # small offences: a fine or service on the spot, no trial
 		return
 	c["state"] = "charged"
-	CaseStore.note(c, "%s was charged with %s." % [CrimePerson.name_of(pid), str(d.get("label", ch)).to_lower()], "charged", 2)
+	CaseStore.note(c, CaseText.charged(c, pid), "charged", 3)
 	arrange_lawyer(c)
 	var tday: int = SysUtil.day() + JusticeState.rng.randi_range(int(cfg().get("trial_delay", [3, 5])[0]), int(cfg().get("trial_delay", [3, 5])[1]))
 	c["trial_day"] = tday
@@ -68,6 +98,8 @@ static func decide_bail(c: Dictionary) -> void:
 	var pid: int = int(c["accused"])
 	var sev: int = int(charge_def(str(c["charge"])).get("severity", 2))
 	var granted: bool = sev <= int(cfg().get("bail_max_severity", 3)) and not (JusticeState.probation.has(pid) and sev >= 3)
+	if bool(c.get("domestic", false)) and JusticeGuideline.prior_same(pid, str(c["charge"])) >= int(JusticeState.sect("domestic").get("no_bail_prior", 1)):
+		granted = false                        # a repeat domestic offender stays in until the trial
 	var amount: int = int(c["bail"])
 	if not granted or CrimePerson.coins(pid) < amount:
 		_remand(c, "Bail was refused." if not granted else "Bail was set at %d coins, more than they can pay." % amount)

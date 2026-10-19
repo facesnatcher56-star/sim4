@@ -1,5 +1,5 @@
-extends RefCounted
-## All 11 lots of data/neighborhood.json are placed on the one continuous map at their region rectangles (MapLots): every
+﻿extends RefCounted
+## All 15 lots of data/neighborhood.json are placed on the one continuous map at their region rectangles (MapLots): every
 ## object sits inside its lot, every usable object is reachable from the lot's entry tile, the venues' staff posts are
 ## standable, only the home lot is buildable, ownership is per object (home = household, everything else community).
 
@@ -17,7 +17,7 @@ func _check(cond: bool, msg: String) -> void:
 
 func run() -> Array:
 	fails = []
-	for i in SEEDS.size():       # real new-game path, five world seeds, every scenario
+	for i in TestFixture.pick(SEEDS.size(), 3):       # real new-game path, five world seeds (three in the fast tier), every scenario
 		var sc: String = SCENARIOS[i]
 		SKit.new_game(sc, "normal", {}, -1, {"world_seed": SEEDS[i]})
 		_whole_map("%s/%d" % [sc, SEEDS[i]])
@@ -29,7 +29,7 @@ func run() -> Array:
 	Kit.teardown()
 	return fails
 
-## All 11 lots pairwise distinct layouts; home from the scenario's pool; seed saved.
+## All 15 lots pairwise distinct layouts; home from the scenario's pool; seed saved.
 func _distinct(sc: String, wseed: int) -> void:
 	var seen: Dictionary = {}
 	var rg: WorldRegions = Kit.world().regions
@@ -43,10 +43,10 @@ func _distinct(sc: String, wseed: int) -> void:
 	_check(rg.home()["template"] == home and Neighborhood.world_seed == wseed, "%s: home template / seed recorded" % sc)
 	for lid in ["townie_a", "townie_b", "townie_c"]:
 		var t: String = Neighborhood.template_of(lid)
-		_check(HouseGenerator.pool({"townie_a": "medium", "townie_b": "small", "townie_c": "large"}[lid]).has(t) or t == lid, "%s: %s got %s" % [sc, lid, t])
+		_check(HouseGenerator.pool({"townie_a": "medium", "townie_b": "small", "townie_c": "large"}[lid]).has(t) or BuildingGen.pool({"townie_a": "medium", "townie_b": "small", "townie_c": "large"}[lid]).has(t) or t == lid, "%s: %s got %s" % [sc, lid, t])
 	for l in Neighborhood.lots():          # venues: an alternate of their own type
-		if str(l.get("type", "")) in ["park", "cafe", "gym", "library", "market", "office", "school"]:
-			_check(HouseGenerator.venue_pool(str(l["type"])).has(Neighborhood.template_of(str(l["id"]))), "%s: venue %s wrong template" % [sc, l["id"]])
+		if str(l.get("type", "")) in ["park", "cafe", "gym", "library", "market", "office", "school", "hospital", "police", "courthouse"]:
+			_check(HouseGenerator.venue_pool(str(l["type"])).has(Neighborhood.template_of(str(l["id"]))) or BuildingGen.venue_pool(str(l["type"])).has(Neighborhood.template_of(str(l["id"]))), "%s: venue %s wrong template" % [sc, l["id"]])
 	# save -> new game with another seed -> restore: template ids and seed come back, same layouts
 	var before: Dictionary = {}
 	for l in Neighborhood.lots():
@@ -77,7 +77,7 @@ func _whole_map(start: String) -> void:
 		var g: Dictionary = LotLoader.template(str(gid))
 		min_objects[gid] = {"small": 14, "medium": 30, "large": 50, "classic": 40}.get(str(g.get("size", "")), 10) if str(g.get("kind", "")) == "home" else int(min_objects.get(str(g.get("venue", "")), 10))
 	var lots: Array = Neighborhood.lots()
-	_check(lots.size() == 11, "%s: 11 lots (%d)" % [start, lots.size()])
+	_check(lots.size() == 15, "%s: 15 lots (%d)" % [start, lots.size()])
 	var per_lot: Dictionary = {}
 	for o in W.all_objects():
 		var l: String = Neighborhood.lot_at(o.tile)

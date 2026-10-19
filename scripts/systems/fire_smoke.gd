@@ -1,4 +1,4 @@
-class_name FireSmoke
+﻿class_name FireSmoke
 extends RefCounted
 ## Smoke PER ROOM. Fires fill their own room (a big room dilutes it: config.fire.room_ref_tiles), smoke leaks to neighbouring rooms through
 ## doors (a closed door lets only a little through, one somebody just walked through lets much more) and out through windows (venting). Rooms
@@ -8,18 +8,25 @@ extends RefCounted
 
 static var _nodes: Dictionary = {}      # room id -> {size, links {rid -> [door edge keys]}, wins [tiles], tile, built}
 static var _open: Dictionary = {}       # door edge key -> game minute until which it stands open
+static var _lv: Dictionary = {}         # room id -> floor level (room ids are unique over all floors of the world)
 
 static func reset() -> void:
 	_nodes.clear()
 	_open.clear()
+	_lv.clear()
 
 static func _w():
 	var w = WorldIface.world()
 	return w if (w != null and w.has_method("room_tiles") and w.has_method("wall_at")) else null
 
-static func room_of(tile: Vector2i) -> int:
+static func room_of(tile: Vector2i, level: int = 0) -> int:
 	var w = _w()
-	return int(w.room_id(tile)) if w != null else 0
+	if w == null:
+		return 0
+	var rid: int = int(w.room_id(tile, level))
+	if level != 0 and rid >= 0:
+		_lv[rid] = level
+	return rid
 
 ## Room node (built lazily, cached 20 game minutes): size, doors to neighbours, window tiles.
 static func node(rid: int, tile: Vector2i) -> Dictionary:
@@ -34,17 +41,20 @@ static func node(rid: int, tile: Vector2i) -> Dictionary:
 		n["size"] = 40
 		_nodes[rid] = n
 		return n
-	var tiles: Array = w.room_tiles(tile)
+	var lvl: int = int(_lv.get(rid, 0))
+	var tiles: Array = w.room_tiles(tile, lvl)
 	n["outdoor"] = tiles.is_empty()
 	n["size"] = maxi(tiles.size(), 1)
 	for t in tiles:
 		for d in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
 			var nb: Vector2i = t + d
-			var rn: int = int(w.room_id(nb))
+			var rn: int = int(w.room_id(nb, lvl))
 			if rn == rid:
 				continue
 			var e: Vector3i = w.edge_between(t, nb)
-			var kind: String = str(w.wall_at(e))
+			var kind: String = str(w.wall_at(e)) if lvl == 0 else str(w.levels.wall_at(e, lvl))
+			if lvl != 0 and rn >= 0:
+				_lv[rn] = lvl
 			if kind == "door":
 				if not (n["links"] as Dictionary).has(rn):
 					(n["links"] as Dictionary)[rn] = {"keys": [], "tile": nb}
@@ -86,7 +96,7 @@ static func step(b: Dictionary, fires: Array) -> void:
 	var full: float = FireRules.num("smoke_full_at", 3.0)
 	var gen: Dictionary = {}
 	for f in fires:
-		var rid: int = room_of(f["tile"])
+		var rid: int = room_of(f["tile"], int(f.get("level", 0)))
 		gen[rid] = float(gen.get(rid, 0.0)) + FireRules.at("smoke_weight", int(f["stage"]) - 1, 1.0)
 		if not rs.has(rid):
 			rs[rid] = 0.0
@@ -120,6 +130,7 @@ static func step(b: Dictionary, fires: Array) -> void:
 				delta[rn] = float(delta.get(rn, 0.0)) + flow
 	for k in delta:
 		rs[k] = clampf(float(rs.get(k, 0.0)) + float(delta[k]), 0.0, 1.0)
+	FireLevels.smoke_up(rs, fires)                      # smoke rises into the rooms above a burning room
 	# windows vent, rooms without a fire clear slowly
 	var vent: bool = _windows_vent()
 	var worst: float = 0.0
@@ -136,7 +147,7 @@ static func step(b: Dictionary, fires: Array) -> void:
 
 static func _tile_of(fires: Array, rid: int) -> Vector2i:
 	for f in fires:
-		if room_of(f["tile"]) == rid:
+		if room_of(f["tile"], int(f.get("level", 0))) == rid:
 			return f["tile"]
 	return Vector2i.ZERO
 
@@ -147,9 +158,9 @@ static func _any_tile(rid: int, fires: Array) -> Vector2i:
 	return _tile_of(fires, rid)
 
 ## Smoke level in the room of `tile` (0 when the smoke has not reached it).
-static func at(b: Dictionary, tile: Vector2i) -> float:
+static func at(b: Dictionary, tile: Vector2i, level: int = 0) -> float:
 	var rs: Dictionary = b.get("rs", {})
-	return float(rs.get(room_of(tile), 0.0))
+	return float(rs.get(room_of(tile, level), 0.0))
 
 ## Rooms between two tiles through DOORS (0 = same room); 99 when only walls separate them. Without rooms: 1 per 6 tiles.
 static func hops(a: Vector2i, c: Vector2i) -> int:

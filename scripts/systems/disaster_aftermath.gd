@@ -1,17 +1,22 @@
-class_name DisasterAftermath
+﻿class_name DisasterAftermath
 extends RefCounted
 ## After the storm (task 06): take-cover orders, status markers, the cleanup / repair / insurance / scrub interactions (their
 ## game events land here), mould that creeps on, neighbours who visit and give gifts, and the town's shared grief.
 
 # ------------------------------------------------------------------ warning: take cover
 static func send_to_cover(hid: int) -> int:
-	var spots: Array = []
-	for o in DisasterDamage.objects(hid):
-		if ["storm_shelter", "bathtub", "shower", "toilet"].has(str(o.def_id)):
-			spots.append(o)
+	var all: Array = DisasterDamage.objects(hid)
+	var spots: Array = LevelDisasters.cover_spots(all)          # basement fixtures, else the ground floor (never upstairs)
+	var cellar: Array = LevelDisasters.basement_spot(all) if spots.is_empty() else []
 	var sent: int = 0
 	for f in DisasterDamage.folk_on_lot(hid):
 		f.add_buff("siren_alert")
+		if spots.is_empty() and not cellar.is_empty() and not LevelDisasters.in_basement(f):      # no fixture: wait in the basement
+			var go := Interaction.create_goto(f, cellar[0], false, int(cellar[1]))
+			if go != null:
+				f.enqueue(go)
+				sent += 1
+			continue
 		if spots.is_empty() or (f.current != null and str(f.current.def_id) == "take_cover"):
 			continue
 		var best = spots[0]

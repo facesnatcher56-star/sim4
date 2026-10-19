@@ -1,4 +1,4 @@
-class_name FireSpread
+﻿class_name FireSpread
 extends RefCounted
 ## How fires live: grow with age (stage 1 small .. 3 raging), may be stopped by a sprinkler, spread to flammable neighbours every few minutes
 ## (walls stop it, open doors do not) and finally burn their object away (value lost, burnt remains left behind). Smoke builds up per lot.
@@ -29,11 +29,13 @@ static func _step_one(f: Dictionary, now: int) -> void:
 	if now >= int(f["next_spread"]):
 		f["next_spread"] = now + int(round(FireRules.num("spread_min", 4.0) * Fire.rng.randf_range(0.75, 1.25)))
 		_spread(f)
+		FireLevels.climb(f)                                  # a growing fire also climbs (faster than it spreads sideways)
 
 # ------------------------------------------------------------------ spread
 static func _neighbors(f: Dictionary) -> Array:
 	var out: Array = []
 	var seen: Dictionary = {}
+	var lvl: int = int(f.get("level", 0))
 	var r: int = 2 if int(f["stage"]) >= 3 else 1
 	var own: Array = f["tiles"]
 	for t in own:
@@ -43,17 +45,17 @@ static func _neighbors(f: Dictionary) -> Array:
 				if n == t or own.has(n) or seen.has(n):
 					continue
 				if maxi(absi(dx), absi(dy)) == 1:
-					if not FireRules.edge_open(t, n):
+					if not FireRules.edge_open(t, n, lvl):
 						continue
 				else:
 					var mid: Vector2i = t + Vector2i(signi(dx), signi(dy))
-					if not FireRules.edge_open(t, mid) or not FireRules.edge_open(mid, n):
+					if not FireRules.edge_open(t, mid, lvl) or not FireRules.edge_open(mid, n, lvl):
 						continue
 				seen[n] = true
-				if not Fire.fire_at(n).is_empty():
+				if not Fire.fire_at(n, lvl).is_empty():
 					continue
-				var o = FireRules.object_at(n)
-				var flam: float = FireRules.flammability(o, n)
+				var o = FireRules.object_at(n, lvl)
+				var flam: float = FireRules.flammability(o, n) if (o != null or lvl == 0) else FireRules.floor_flammability(n, lvl)
 				if flam <= 0.0:
 					continue
 				if o != null:
@@ -79,7 +81,7 @@ static func _spread(f: Dictionary) -> void:
 		if Fire.rng.randf() >= p:
 			continue
 		var target = c["obj"] if c["obj"] != null else c["tile"]
-		if Fire.ignite(target, str(f["source"]), {"culprit": int(f["culprit"]), "quiet": true}):
+		if Fire.ignite(target, str(f["source"]), {"culprit": int(f["culprit"]), "quiet": true, "level": int(f.get("level", 0))}):
 			budget -= 1
 			var b: Dictionary = Fire.blazes.get(str(f["lot"]), {})
 			if not b.is_empty():

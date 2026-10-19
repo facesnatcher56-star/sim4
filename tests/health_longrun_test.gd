@@ -18,6 +18,7 @@ func _illness(f: Array) -> void:
 	var w := K.setup()
 	SysContent.install_all()
 	Incidents.reset()
+	StoryPacing.enabled = false        # rate test: calm households would raise the mishap rates
 	Weather.force("sunny")
 	var hh_n: int = 8
 	var members: Array = []
@@ -29,11 +30,11 @@ func _illness(f: Array) -> void:
 		members.append(K.make_folk(w, "B%d" % h, [], hid, base + Vector2i(2, 0)))
 		if h % 3 == 0:
 			var e := K.make_folk(w, "E%d" % h, [], hid, base + Vector2i(4, 0), "elder")
-			Aging.set_age_days(e, 150.0)
+			Aging.set_age_days(e, 182.0)
 			members.append(e)
 		else:
 			members.append(K.make_folk(w, "C%d" % h, [], hid, base + Vector2i(4, 0), "child"))
-	var years: int = TestFixture.pick(14, 5)
+	var years: int = TestFixture.pick(9, 5)
 	var deaths: Dictionary = {}
 	var d0: int = 2
 	for d in years * YEAR:
@@ -59,7 +60,7 @@ func _illness(f: Array) -> void:
 			if w.get_folk(m.id) == null:
 				var nm := K.make_folk(w, "R%d_%d" % [i, d], [], m.household_id, m.tile, m.age_stage)
 				if m.age_stage == "elder":
-					Aging.set_age_days(nm, 150.0)
+					Aging.set_age_days(nm, 182.0)
 				members[i] = nm
 	var hh_years: float = float(hh_n * years)
 	var cold: int = int(Incidents.stat("catch_cold")["triggered"])

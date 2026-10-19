@@ -15,7 +15,7 @@ func _build(w: StubWorld) -> Dictionary:
 	K.make_folk(w, "Ann", ["glutton", "neat"])
 	var bo := K.make_folk(w, "Bo", ["lazy"])
 	var kid := K.make_folk(w, "Kid", [], 1, Vector2i(14, 12), "child")
-	Aging.set_age_days(kid, 15.0)
+	Aging.set_age_days(kid, 25.6)
 	var ann = w.get_folk(1) if w.get_folk(1) != null else null
 	var folks: Array = w.all_folk()
 	ann = folks[0]

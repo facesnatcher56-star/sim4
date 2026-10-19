@@ -1,4 +1,4 @@
-class_name MapBuilder
+﻿class_name MapBuilder
 extends RefCounted
 ## Builds the deterministic starter neighbourhood on the World's big grid (World.MAP_W x World.MAP_H), from data/map_layout.json:
 ## a grid of 6-wide roads (4 asphalt + a sidewalk each side, crosswalks at every junction arm, centre lines as region `lines`),
@@ -14,6 +14,8 @@ const GATE_X := 15                    # street-side gate tile column inside ever
 
 static var _layout: Dictionary = {}
 static var _hood: Dictionary = {}
+## Benchmarks only (tests/perf_town.gd): a bigger generated map. Vector2i.ZERO = the game's World.MAP_W x MAP_H. Never set by the game.
+static var size_override: Vector2i = Vector2i.ZERO
 
 
 static func layout() -> Dictionary:
@@ -69,7 +71,10 @@ static func lot_rect(lot_id: String) -> Rect2i:
 static func build(w) -> Dictionary:
 	var t0 := Time.get_ticks_usec()
 	var lay := layout()
-	w.reset(w.MAP_W, w.MAP_H)
+	if size_override != Vector2i.ZERO:
+		w.reset(size_override.x, size_override.y)
+	else:
+		w.reset(w.MAP_W, w.MAP_H)
 	w.regions.enforce = false
 	_paint_lots(w)
 	_paint_green(w, lay)

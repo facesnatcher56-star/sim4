@@ -1,4 +1,4 @@
-class_name LotLoader
+﻿class_name LotLoader
 extends RefCounted
 ## Places a lot template into the World: floors, walls, wall-mounted doors/windows, objects and spawn tiles.
 ## A template id comes from data/lot_templates.json (hand made) OR data/generated_lots.json (HouseGenerator; the file may be
@@ -11,6 +11,7 @@ extends RefCounted
 
 const CLASSIC := "classic"
 const GENERATED_PATH := "res://data/generated_lots.json"
+const BUILDINGS_PATH := "res://data/generated_buildings.json"
 const DEFAULT_ENTRY := Vector2i(15, 19)      # yard in front of the door (templates without an explicit "entry")
 
 static var report: Dictionary = {}
@@ -31,7 +32,8 @@ static func _templates() -> Dictionary:
 
 static func _generated() -> Dictionary:
 	if not _gen_loaded:
-		_gen = (_read(GENERATED_PATH).get("lots", {}) as Dictionary)
+		_gen = (_read(GENERATED_PATH).get("lots", {}) as Dictionary).duplicate()
+		_gen.merge(_read(BUILDINGS_PATH).get("lots", {}) as Dictionary)          # multi-floor buildings (BuildingGen)
 		_gen_loaded = true
 	return _gen
 
@@ -118,6 +120,7 @@ static func place(template_id: String, w, origin: Vector2i) -> bool:
 	if t.is_empty():
 		(report["failed"] as Array).append("unknown template %s" % template_id)
 		return false
+	BuildingContent.install()                                  # hospital beds, cell bunks, ... (idempotent)
 	for fl in t.get("floors", []):
 		var r: Array = fl["rect"]
 		w.set_floor_rect_raw(Vector2i(int(r[0]), int(r[1])) + origin, Vector2i(int(r[2]), int(r[3])) + origin, str(fl["type"]))

@@ -320,7 +320,7 @@ func _statistical(f: Array) -> void:
 	var tid: int = int(alive[0]["id"])
 	var t: Dictionary = Story.townies[tid]
 	t["buffs"] = ["acc_eating"]
-	t["age_days"] = 100.0
+	t["age_days"] = 132.0
 	t["traits"] = []
 	var subj := IncidentSubject.of_townie(tid)
 	var base: float = float(IncidentDefs.get_def("choking")["base_rate_per_year"])
@@ -332,7 +332,7 @@ func _statistical(f: Array) -> void:
 	var alive_ids: Array = Story.alive_townies().map(func(x): return int(x["id"]))
 	# one-line summaries for every accident, no crash
 	t["buffs"] = ["acc_alone", "acc_unsupervised"]
-	t["age_days"] = 10.0
+	t["age_days"] = 16.5
 	for id in ["drowning_scare", "kids_near_water", "choking", "electric_shock", "slip_fall", "traffic_hit", "kids_near_road", "workout_injury", "workplace_injury"]:
 		var outs: Array = IncidentDefs.get_def(id)["statistical"]["outcomes"]
 		for i in outs.size():

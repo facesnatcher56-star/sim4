@@ -1,4 +1,4 @@
-extends RefCounted
+﻿extends RefCounted
 ## Regions, chunk index, build rules, rooms-at-scale and MapBuilder. Convention: run() -> Array of failure strings.
 
 var fails: Array = []
@@ -48,11 +48,11 @@ func _test_legacy_mode() -> void:
 func _test_map_layout() -> void:
 	var rep: Dictionary = MapBuilder.build(W)
 	_check(W.width == W.MAP_W and W.height == W.MAP_H, "map size")
-	_check(int(rep["lots"]) == 11, "11 lots expected, got %s" % str(rep["lots"]))
+	_check(int(rep["lots"]) == 15, "15 lots expected, got %s" % str(rep["lots"]))
 	var lots: Array = []
 	for k in ["home", "venue", "townie_home"]:
 		lots.append_array(W.regions.of_kind(k))
-	_check(lots.size() == 11, "lot regions %d" % lots.size())
+	_check(lots.size() == 15, "lot regions %d" % lots.size())
 	var map_rc := Rect2i(0, 0, W.width, W.height)
 	for i in lots.size():
 		var a: Rect2i = lots[i]["rect"]
@@ -69,7 +69,7 @@ func _test_map_layout() -> void:
 		_check(W.region_at(a.position) == lots[i]["id"] and W.region_at(a.end - Vector2i.ONE) == lots[i]["id"], "%s region lookup" % lots[i]["lot"])
 	_check(W.regions.home_id != -1 and str(W.regions.home()["owner"]) == "player", "home region")
 	var hrc: Rect2i = W.regions.home()["rect"]
-	_check(hrc.position.y > W.height / 2 and absi(hrc.get_center().x - W.width / 2) < 40, "home should sit centre-south, got %s" % str(hrc))
+	_check(hrc.position.y > W.height * 4 / 10 and absi(hrc.get_center().x - W.width / 2) < 40, "home should sit centre-south, got %s" % str(hrc))
 	_check(W.get_floor(Vector2i(0, 0)) == "grass", "map margin is grass")
 	var counts := {}
 	for t in W.floors:
@@ -131,7 +131,7 @@ func _test_chunks() -> void:
 	W.paint_floor(t + Vector2i(1, 0), "wood", 0)
 	var dirty: Array = W.regions.take_dirty_floor_chunks()
 	_check(dirty.size() == 1 and dirty[0] == W.chunk_of(t + Vector2i(1, 0)), "dirty floor chunk set %s" % str(dirty))
-	_check(W.regions.chunk_count() == Vector2i(10, 8), "chunk count %s" % str(W.regions.chunk_count()))
+	_check(W.regions.chunk_count() == Vector2i(W.MAP_W / 16, (W.MAP_H + 15) / 16), "chunk count %s" % str(W.regions.chunk_count()))
 
 
 func _test_rooms_at_scale() -> void:
@@ -139,7 +139,7 @@ func _test_rooms_at_scale() -> void:
 	var hrc: Rect2i = W.regions.home()["rect"]
 	var o := hrc.position + Vector2i(6, 6)
 	_check(W.is_outdoor(Vector2i(2, 2)) and W.is_outdoor(Vector2i(80, 4)), "roads / open ground are outdoor")
-	_check(W.room_id(Vector2i(2, 2)) == 0 and W.room_id(Vector2i(100, 110)) == 0, "street is one room (id 0)")
+	_check(W.room_id(Vector2i(2, 2)) == 0 and W.room_id(Vector2i(100, 130)) == 0, "street is one room (id 0)")
 	_check(W.is_outdoor(o), "an empty lot is outdoor (touches the lot border)")
 	# a closed 6x5 room inside the home lot
 	W.set_wall_line(o, o + Vector2i(6, 0), "wall", 0)
@@ -163,7 +163,7 @@ func _test_rooms_at_scale() -> void:
 		total += el
 		_check(rid != -1, "room query")
 	print("  [rooms] wall edit + room query at %dx%d: avg %.2f ms, worst %.2f ms" % [W.width, W.height, total / 6.0, worst])
-	_check(total / 6.0 < 5.0 and worst < 10.0, "room query after a wall edit: avg %.2f worst %.2f ms (budget 5)" % [total / 6.0, worst])
+	_check(total / 6.0 < 5.0 * TestFixture.SLACK and worst < 10.0 * TestFixture.SLACK, "room query after a wall edit: avg %.2f worst %.2f ms (budget 5)" % [total / 6.0, worst])
 	# other lots are untouched by an edit in the home lot (their partition stays cached)
 	var venue_t: Vector2i = W.regions.by_lot("cafe")["rect"].position + Vector2i(4, 4)
 	var r0: int = W.room_id(venue_t)
@@ -182,7 +182,7 @@ func _test_save_roundtrip() -> void:
 	W.load_dict(JSON.parse_string(txt))
 	var ms := float(Time.get_ticks_usec() - t0) / 1000.0
 	print("  [save] json %d chars, load_dict %.1f ms" % [txt.length(), ms])
-	_check(ms < 150.0, "load_dict took %.1f ms" % ms)
+	_check(ms < 150.0 * TestFixture.SLACK, "load_dict took %.1f ms" % ms)
 	_check(W.regions.regions.size() == d["regions"]["regions"].size(), "regions lost on load")
 	_check(W.regions.home_id != -1 and W.can_build(W.regions.home()["rect"].position), "home region after load")
 	_check(not W.is_walkable(_first_tile("water")), "water blocks after load")
@@ -190,7 +190,7 @@ func _test_save_roundtrip() -> void:
 	_check(JSON.stringify(d2["floors_rle"]) == JSON.stringify(d["floors_rle"]), "floors changed over save/load")
 	_check(JSON.stringify(d2["regions"]) == JSON.stringify(d["regions"]), "regions changed over save/load")
 	var road: Dictionary = W.regions.region_of(Vector2i(4, 40))
-	_check(str(road.get("axis", "")) == "v" and (road.get("lines", []) as Array).size() == 3, "road markings lost: %s" % str(road.get("lines")))
+	_check(str(road.get("axis", "")) == "v" and (road.get("lines", []) as Array).size() == 4, "road markings lost: %s" % str(road.get("lines")))
 
 
 func _test_determinism() -> void:

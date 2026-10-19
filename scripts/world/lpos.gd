@@ -1,9 +1,10 @@
-class_name LPos
+﻿class_name LPos
 extends RefCounted
 ## Level-aware position helper. A position on a level is a Vector3i(x, y, level): x / y are the usual tile coordinates,
 ## z is the LEVEL (0 = ground, negative = basements, no upper limit). A plain Vector2i tile always means level 0.
 ## Routes (World.find_route) are Arrays of Vector3i. Folk / WorldObject keep `tile: Vector2i` and `level: int` side by side.
 
+const ALL := -999                 # "every level" in queries that take an optional level filter (objects_near ...)
 const H := 3.0                    # metres from one floor surface to the next (slab 0.2 + walls 2.6 + gap)
 const SLAB := 0.2
 

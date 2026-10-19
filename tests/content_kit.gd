@@ -1,9 +1,9 @@
-extends RefCounted
+﻿extends RefCounted
 ## Shared helpers for content_* tests (no run(), so the runner skips it).
 
 const Kit = preload("res://tests/sim_testkit.gd")
 
-const COND_KEYS := ["stat_below", "stat_above", "has_trait", "lacks_trait", "has_buff", "lacks_buff", "mood_is", "skill_at_least",
+const COND_KEYS := ["circadian", "pair_flag_absent", "stat_below", "stat_above", "has_trait", "lacks_trait", "has_buff", "lacks_buff", "mood_is", "skill_at_least",
 	"object_state_eq", "object_state_above", "object_state_below", "time_between", "coins_at_least", "relationship_above",
 	"has_job", "posture_is", "posture_not", "not", "any"]
 const SYS_COND_KEYS := ["friends_at_least", "bit_count", "career_is", "career_level_at_least", "age_stage_is", "skill_below", "in_school", "pregnant"]
@@ -97,6 +97,9 @@ static func satisfy(f: Folk, obj, conds: Array, other: Folk = null) -> void:
 		for key in c:
 			var v2: Variant = c[key]
 			match str(key):
+				"circadian":
+					if str(v2) == "sleep_ok":
+						(f.needs["energy"] as Stat).set_value(5.0)
 				"stat_below":
 					if f.needs.has(str(v2[0])) and f.get_stat_value(str(v2[0])) >= float(v2[1]):
 						(f.needs[str(v2[0])] as Stat).set_value(float(v2[1]) - 15.0)

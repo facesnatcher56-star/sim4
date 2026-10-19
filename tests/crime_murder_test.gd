@@ -1,4 +1,4 @@
-extends RefCounted
+﻿extends RefCounted
 ## Murder is never random: a built-up motive + traits + opportunity. Warning signs (thought, gossip, a clear prompt for a player folk who is the
 ## culprit or the target) and the chance to step in. Kind folk never do it. Assault from a screaming argument. Street robbery. The serial killer:
 ## isolated targets, pattern detection, caught within the victim cap.
@@ -27,10 +27,12 @@ func _feud_ends_in_murder(f: Array) -> void:
 	var warned: bool = false
 	var days_to: int = -1
 	K.set_time(2, 12, 0)
+	JusticeState.sect("murder")["daily_chance"] = 0.3          # the real rate is tiny; here we only follow the story once it happens
 	for d in 200:
 		C.feud(a, b, 60.0)                           # the feud is kept alive (no time to cool off in a headless sim)
 		SimEnv.clock().total_minutes += 1440
 		CrimeMurder.on_day()
+		C.drain_pending()
 		warned = warned or RelationshipKnowledge.gossip_for(int(RelationshipBits.all_known(a)[0])).size() > 0 or K.count_events("murder_warning") > 0
 		if JusticeState.counter("murder") > 0:
 			days_to = d
@@ -109,7 +111,7 @@ func _assault(f: Array) -> void:
 	var made: int = 0
 	JusticeState.sect("assault")["police_called"] = 1.0
 	for i in 400:
-		CrimeAssault.on_argument(a, b, 3)
+		CrimeAssault.on_argument(a, b, 4)
 		if JusticeState.counter("assault") > 0:
 			made += 1
 			break

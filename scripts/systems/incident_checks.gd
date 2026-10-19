@@ -1,4 +1,4 @@
-class_name IncidentChecks
+﻿class_name IncidentChecks
 extends RefCounted
 ## The hourly / daily dice. For every incident of the given `check` frequency, every candidate subject whose conditions hold gets one
 ## roll with chance = 1 - exp(-effective_rate / checks_per_year). Candidates per scope (all deterministic: sorted by id):
@@ -35,7 +35,7 @@ static func _roll(id: String, def: Dictionary, s) -> void:
 	var c: Dictionary = Incidents._counter(id)
 	c["checks"] = int(c["checks"]) + 1
 	c["exposure"] = float(c["exposure"]) + 1.0 / IncidentRisk.checks_per_year(check)
-	var p: float = IncidentRisk.rate_to_chance(IncidentRisk.effective_rate(def, s), check)
+	var p: float = IncidentRisk.rate_to_chance(IncidentRisk.effective_rate(def, s) * StoryPacing.incident_mult(id, s), check)
 	if p > 0.0 and Incidents.rng.randf() < p:
 		IncidentFlow.start(id, s)
 

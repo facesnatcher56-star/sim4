@@ -5,7 +5,7 @@ extends SceneTree
 ##   Godot --headless --path . --script res://tests/run_all.gd -- --slow           fast tier + the long simulations (~5 min)
 ##   Godot --headless --path . --script res://tests/run_all.gd -- --shuffle        random file order (prints the seed)
 ##   Godot --headless --path . --script res://tests/run_all.gd -- --shuffle=123    reproducible shuffled order
-##   Godot --headless --path . --script res://tests/run_all.gd -- --only=sim_basic,world_test
+##   Godot --headless --path . --script res://tests/run_all.gd -- --only=sim_basic,world_test   (use `+` instead of `,` when the command goes through tools/godot_guard.ps1)
 ##   Godot --headless --path . --script res://tests/run_all.gd -- --list           print the file list and exit
 ##   Godot --headless --path . --script res://tests/run_one.gd -- <test file base name>      a single test file
 ##
@@ -18,7 +18,7 @@ extends SceneTree
 ## Long simulations: only run with --slow / --all.
 const SLOW := [
 	"systems_family_integration_test.gd", "systems_integration_test.gd", "hood_sim_test.gd", "weather_longrun_test.gd",
-	"social_autonomy_test.gd", "sim_longrun.gd", "incidents_longrun_test.gd", "crime_longrun_test.gd", "accident_longrun_test.gd", "health_longrun_test.gd", "disaster_longrun_test.gd", "fire_longrun_test.gd", "commute_longrun_test.gd", "econ_longrun_test.gd",
+	"social_autonomy_test.gd", "sim_longrun.gd", "incidents_longrun_test.gd", "crime_longrun_test.gd", "accident_longrun_test.gd", "health_longrun_test.gd", "disaster_longrun_test.gd", "fire_longrun_test.gd", "commute_longrun_test.gd", "econ_longrun_test.gd", "crime_rates_test.gd", "crime_child_abuse_rates_test.gd", "bldg_apartments_run_test.gd", "story_pacing_longrun_test.gd",
 ]
 
 const Watchdog := preload("res://tests/watchdog.gd")
@@ -60,7 +60,7 @@ func _discover(slow: bool, only: Array) -> Array[String]:
 			if only.has(f.get_basename()) or only.has(f):
 				files.append(f)
 			continue
-		if SLOW.has(f) and not slow:
+		if (SLOW.has(f) or f.ends_with("_longrun_test.gd")) and not slow:      # any *_longrun_test.gd is slow by name
 			continue
 		files.append(f)
 	files.sort()
@@ -69,7 +69,7 @@ func _discover(slow: bool, only: Array) -> Array[String]:
 func _run(args: PackedStringArray) -> int:
 	var slow := _has_flag(args, "--slow") or _has_flag(args, "--all")
 	var only_arg := _arg_value(args, "--only")
-	var only: Array = [] if only_arg == "\u0000" or only_arg == "" else Array(only_arg.split(","))
+	var only: Array = [] if only_arg == "\u0000" or only_arg == "" else Array(only_arg.replace("+", ",").split(","))
 	var files := _discover(slow, only)
 	var fixture := _arg_value(args, "--fixture")   # run only tests/fixtures/<name>.gd (watchdog tests); never discovered otherwise
 	if fixture != "\u0000" and fixture != "":

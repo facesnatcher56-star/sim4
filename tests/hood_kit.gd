@@ -1,4 +1,4 @@
-extends RefCounted
+﻿extends RefCounted
 ## Shared helpers for hood_* tests (no run(), so the runner skips it). They drive the REAL autoloads (World, Clock,
 ## SimDirector) plus a SystemsManager, exactly like the game does.
 
@@ -17,7 +17,7 @@ static func clock() -> Node:
 	return root().get_node("Clock")
 
 ## Fresh game on the real World: lot template `start`, three folk, systems manager listening.
-static func new_game(start_id: String = "classic", seed_value: int = 777) -> Array:
+static func new_game(start_id: String = "classic", seed_value: int = 777, world_seed: int = 1, home_template: String = "") -> Array:
 	SimEnv.release_standalone()
 	WorldIface.stub = null
 	WorldIface.coins.clear()
@@ -38,7 +38,7 @@ static func new_game(start_id: String = "classic", seed_value: int = 777) -> Arr
 		_wired = true
 	W.current_household_id = 1
 	var sd: Dictionary = Neighborhood.start_def(start_id)
-	Neighborhood.start_game(str(sd.get("template", "classic")))
+	Neighborhood.start_game(home_template if home_template != "" else str(sd.get("template", "classic")), world_seed)
 	var folk: Array = []
 	var spawns: Array = W.starter_spawn_tiles
 	var i := 0
@@ -88,6 +88,15 @@ static func set_time(day: int, hour: int, minute: int = 0) -> void:
 ## Advance the real clock (director + systems tick through its signals).
 static func run(minutes: int) -> void:
 	clock().advance_minutes(minutes)
+
+## Advance minute by minute until `done` returns true (at most `max_minutes`); returns whether it did. Same as run(max_minutes) when the
+## condition only comes true at the end, but stops early when the thing a test waits for has already happened.
+static func run_until(done: Callable, max_minutes: int) -> bool:
+	for i in max_minutes:
+		if done.call():
+			return true
+		clock().advance_minutes(1)
+	return bool(done.call())
 
 static func has_note(fragment: String) -> bool:
 	for n in notes:

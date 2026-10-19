@@ -1,4 +1,4 @@
-extends RefCounted
+﻿extends RefCounted
 ## Helpers for crime_* / justice_* tests (no run(): the runner skips it).
 
 const K = preload("res://tests/systems_kit.gd")
@@ -62,3 +62,16 @@ static func feud(a: int, b: int, power: float = 90.0) -> void:
 	RelationshipService.set_value(a, b, "friendship", -70.0)
 	for i in 4:
 		RelationshipService.add_history(a, b, "insult", -1.0, b)
+
+## Run every queued event that is due within `within` minutes (jump the clock to it): for tests that do not step minute by minute.
+static func drain_pending(within: int = 1440) -> void:
+	var guard: int = 0
+	while not JusticeState.pending.is_empty() and guard < 30:
+		guard += 1
+		var due: int = 999999999
+		for p in JusticeState.pending:
+			due = mini(due, int(p["due_min"]))
+		if due > SysUtil.now() + within:
+			return
+		SimEnv.clock().total_minutes = maxi(due, SysUtil.now())
+		CrimeFlow.on_minute()

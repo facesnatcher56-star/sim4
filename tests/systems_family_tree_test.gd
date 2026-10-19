@@ -90,8 +90,8 @@ func _relations(f: Array) -> void:
 func _pair(w: StubWorld, hid_b: int = 1, romance: float = 85.0) -> Array:
 	var a := K.make_folk(w, "Ann Rowe", [], 1, Vector2i(12, 12))
 	var b := K.make_folk(w, "Bo Vale", [], hid_b, Vector2i(13, 12))
-	Aging.set_age_days(a, 60.0)
-	Aging.set_age_days(b, 60.0)
+	Aging.set_age_days(a, 92.0)
+	Aging.set_age_days(b, 92.0)
 	RelationshipService.add_both(a.id, b.id, "romance", romance)
 	RelationshipService.add_both(a.id, b.id, "friendship", 70.0)
 	RelationshipBits.set_flag(a.id, b.id, "partner", true, false)
@@ -194,7 +194,7 @@ func _households(f: Array) -> void:
 	Story.generate_townies(6)
 	var t: Dictionary = Story.alive_townies()[3]
 	var tid: int = int(t["id"])
-	t["age_days"] = 60.0
+	t["age_days"] = 92.0
 	RelationshipService.add_both(a.id, tid, "friendship", 50.0)
 	K.expect(f, w.get_folk(tid) == null, "the townie is off the lot")
 	var app_before: Dictionary = (t["appearance"] as Dictionary).duplicate(true)
@@ -205,7 +205,7 @@ func _households(f: Array) -> void:
 		K.expect(f, nf.name == t["name"] and nf.traits == t["traits"] and nf.age_stage == "adult", "keeps name / traits / stage")
 		K.expect(f, nf.appearance["skin"] == app_before["skin"], "keeps the appearance")
 		K.expect(f, RelationshipService.value(nf.id, a.id, "friendship") >= 49.0, "relationships carry over (%.0f)" % RelationshipService.value(nf.id, a.id, "friendship"))
-		K.expect(f, Aging.records.has(tid) and absf(Aging.age_days(tid) - 60.0) < 0.5, "registered with the townie's age")
+		K.expect(f, Aging.records.has(tid) and absf(Aging.age_days(tid) - float(t["age_days"])) < 0.5, "registered with the townie's age")
 		K.expect(f, not bool(t["alive"]) and bool(t.get("moved_in", false)), "townie entry retired")
 		K.expect(f, Folk._next_id < 900, "folk id counter is not pushed into the townie id range (%d)" % Folk._next_id)
 		K.expect(f, SysUtil.is_resident(nf) and K.has_note("moved in"), "now a resident")
@@ -217,7 +217,7 @@ func _households(f: Array) -> void:
 	# a visitor on the lot asks to move in (interaction -> event -> service)
 	var vt: Dictionary = Story.alive_townies()[4]
 	var vid: int = int(vt["id"])
-	vt["age_days"] = 70.0
+	vt["age_days"] = 102.0
 	var keep: int = Folk._next_id
 	var v := Folk.create(str(vt["name"]), (vt["traits"] as Array).duplicate(), vid)
 	Folk._next_id = keep
@@ -270,11 +270,11 @@ func _adoption(f: Array) -> void:
 		K.expect(f, Genetics.is_valid(kid.appearance), "has an appearance")
 	K.expect(f, FamilyHousehold.adoptable().size() == 2 and K.has_note("was adopted"), "adoptable list shrinks, adoption announced")
 	# teens / adults cannot be adopted; kids cannot adopt
-	var teen: Dictionary = Story.add_townie(35.0)
+	var teen: Dictionary = Story.add_townie(61.4)
 	teen["orphan"] = true
 	K.expect(f, FamilyHousehold.adopt(int(teen["id"]), a.id)["reason"] == "too_old", "teens are too old")
 	var kid2 := K.make_folk(w, "Kid", [], 1, Vector2i(14, 12), "child")
-	Aging.set_age_days(kid2, 15.0)
+	Aging.set_age_days(kid2, 25.6)
 	K.expect(f, FamilyHousehold.adopt(int(list[1]["id"]), kid2.id)["reason"] == "too_young", "children cannot adopt")
 	# the self interaction, via the event bus
 	var dir = K.director()
@@ -299,7 +299,7 @@ func _death(f: Array) -> void:
 	Family.link_parent(kid.id, a.id)
 	Family.link_parent(kid.id, b.id)
 	Family.link_parent(gkid.id, kid.id)
-	Aging.set_age_days(a, 150.0)
+	Aging.set_age_days(a, 182.0)
 	var legacy: Dictionary = Aging.kill(a.id, "old age")
 	K.expect(f, b.has_buff("widowed") and not b.has_buff("married"), "the spouse is widowed")
 	K.expect(f, kid.has_buff("bereaved") and b.has_buff("grieving"), "children are bereaved, everyone close grieves")

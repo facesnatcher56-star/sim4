@@ -1,4 +1,4 @@
-class_name LotPicker
+﻿class_name LotPicker
 extends RefCounted
 ## Which template every lot of a new game gets: drawn WITHOUT replacement from the generated pools, seeded by the world seed,
 ## so no two lots share a layout and the same seed gives the same map. The result goes into the regions (saved), so a loaded
@@ -11,20 +11,27 @@ extends RefCounted
 static func home_pool(start_id: String) -> Array:
 	var kind := str(Neighborhood.start_def(start_id).get("pool", start_id))
 	var out: Array = HouseGenerator.pool(kind)
+	out.append_array(BuildingGen.pool(kind))               # homes with an upstairs / basement of the same size class
 	if kind == "classic":
 		out.push_front(LotLoader.CLASSIC)
 	return out
 
 ## Pool of a lot: its own pool kind (townie homes: same footprint class), its default template, and its venue alternates.
+## A lot whose own template is a multi-floor building only draws other multi-floor buildings of its type (towers for the office, ...).
 static func lot_pool(lot: Dictionary) -> Array:
 	var out: Array = []
 	var tpl := str(lot.get("template", ""))
+	var multi: bool = tpl != "" and LotLoader.template(tpl).has("levels")
 	if tpl != "":
 		out.append(tpl)
-	if str(lot.get("pool", "")) != "":
-		out.append_array(HouseGenerator.pool(str(lot["pool"])))
+	var kind := str(lot.get("pool", ""))
+	if kind != "":
+		for id in HouseGenerator.pool(kind) + BuildingGen.pool(kind):
+			if not out.has(id):
+				out.append(id)
 	if str(lot.get("type", "")) != "townie_home":
-		for id in HouseGenerator.pool(str(lot.get("type", ""))):
+		var vt := str(lot.get("type", ""))
+		for id in (BuildingGen.venue_pool(vt) if multi else HouseGenerator.pool(vt) + BuildingGen.venue_pool(vt)):
 			if not out.has(id):
 				out.append(id)
 	return out
@@ -60,8 +67,8 @@ static func pick(seed_value: int, start_id: String, home: String = "") -> Dictio
 			continue
 		salt += 1
 		var t := _draw(lot_pool(l), taken, _rng(seed_value, salt))
-		if t == "" or LotLoader.template(str(l.get("template", ""))).has("levels"):
-			t = str(l.get("template", ""))          # a lot whose own template is a multi-floor building keeps it (generated venues are single-storey for now)
+		if t == "":
+			t = str(l.get("template", ""))
 		out[lid] = t
 		taken[t] = true
 	return out

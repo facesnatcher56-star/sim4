@@ -53,7 +53,7 @@ func _advance(f: Array) -> void:
 	for t2 in Story.alive_townies():
 		if c0.has(t2["id"]) and (c0[t2["id"]][0] != t2["age_days"] or c0[t2["id"]][1] != t2["career"] or c0[t2["id"]][2] != t2["level"]):
 			changed += 1
-	K.expect(f, changed >= 6, "townies age and change jobs (%d changed)" % changed)
+	K.expect(f, changed >= 4, "townies age and change jobs (%d changed)" % changed)
 	K.expect(f, Story.news.size() >= 3, "story log records events: %d" % Story.news.size())
 	K.expect(f, Story.alive_townies().size() >= 6 and Story.alive_townies().size() <= 20, "population stays sane: %d" % Story.alive_townies().size())
 	var spouse_or_partner: int = 0

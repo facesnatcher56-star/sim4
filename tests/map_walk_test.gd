@@ -138,12 +138,16 @@ func _save_mid_walk() -> void:
 	Kit.run(int(r["minutes"]) + 15)
 	_check(Neighborhood.where(mira.id) == "market", "the walk resumed and finished (%s)" % Neighborhood.where(mira.id))
 	# No bill/fee/fine may hit the ledger. Once she has arrived, autonomy may legitimately pick a small market interaction (a snack or a
-	# drink, loot "coins_add" -2..-5 on finish, never through Economy), so the coins can dip a few below 500 depending on the random pick.
+	# drink, loot "coins_add" -2..-5 on finish): those now go through the ledger under the interaction's label (repeats the same day share one
+	# line), so every coin that left is in the ledger, and nothing but those small purchases is there.
 	var charged := 0
+	var ledger_sum := 0
 	for e in Economy.ledger_for(1):
 		if str(e["reason"]) != "starting funds":
 			charged += 1
-	_check(Neighborhood.pantry == 0 and charged == 0 and Economy.balance(1) <= 500 and Economy.balance(1) >= 480, "no stray charges (%d, %d ledgered)" % [Economy.balance(1), charged])
+			ledger_sum += int(e["amount"])
+			_check(int(e["amount"]) <= 0 and not str(e["reason"]).begins_with("entry:") and not str(e["reason"]).begins_with("bill"), "only small market purchases are ledgered (%s %d)" % [str(e["reason"]), int(e["amount"])])
+	_check(Neighborhood.pantry == 0 and Economy.balance(1) <= 500 and Economy.balance(1) >= 480 and Economy.balance(1) == 500 + ledger_sum, "no stray charges (%d, %d ledgered, sum %d)" % [Economy.balance(1), charged, ledger_sum])
 
 ## A townie who lives in another lot appears on the road (at most MAX_GUEST_WALK tiles from the door) and walks to the host.
 func _visitors_walk_in() -> void:

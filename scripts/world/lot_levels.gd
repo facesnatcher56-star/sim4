@@ -1,4 +1,4 @@
-class_name LotLevels
+﻿class_name LotLevels
 extends RefCounted
 ## Multi-floor part of a lot template (called by LotLoader.place). A template with a `levels` block is a building with several floors:
 ##
@@ -22,7 +22,8 @@ static func prepare(t: Dictionary, w, origin: Vector2i, template_id: String) -> 
 	var br := LotLoader.building_rect(template_id)
 	var rc := Rect2i(br.position + origin, br.size).grow(1)
 	var rid: int = w.regions.region_at(rc.position + rc.size / 2) if w.regions.has_regions() else -1
-	var bid: int = w.levels.add_building(rc, lo, hi, {"roof": str(t.get("roof", "flat")), "region": rid, "label": str(t.get("label", ""))})
+	var bid: int = w.levels.add_building(rc, lo, hi, {"roof": str(t.get("roof", "flat")), "region": rid, "label": str(t.get("label", "")),
+		"names": (t.get("floor_names", {}) as Dictionary).duplicate()})
 	for key in lv:
 		var level := int(key)
 		var ld: Dictionary = lv[key]

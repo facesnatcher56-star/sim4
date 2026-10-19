@@ -69,7 +69,8 @@ func tick_folk(f: Folk, minutes: float = 1.0, passive_minutes: float = -1.0) -> 
 	if prof_on:
 		_prof(hh + "needs/buffs/mood", t0)
 		t0 = Time.get_ticks_usec()
-	_check_emergencies(f)
+	if pm > 0.0 or passive_minutes < 0.0:           # emergencies follow the needs: strangers look at them when their needs change (every STRANGER_PERIOD)
+		_check_emergencies(f)
 	if f.current != null:
 		f.current.tick(minutes)
 	if prof_on:

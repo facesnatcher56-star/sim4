@@ -56,6 +56,8 @@ static func on_folk_added(f) -> void:
 	Holidays.sync_folk(f)
 
 # ------------------------------------------------------------------ minute tick
+const STRANGER_PERIOD := 5
+
 static func on_minute() -> void:
 	WeatherContent.install()
 	var cur: String = Weather.current()
@@ -73,12 +75,18 @@ static func on_minute() -> void:
 	var dl: float = Weather.daylight()
 	var air_range: Array = e.get("fresh_air_temp", [10.0, 27.0])
 	var severe: bool = (wd.get("markers", []) as Array).has("wx_severe")
+	var now: int = SysUtil.now()
 	for f in WorldIface.all_folk():
 		var fid: int = int(f.id)
 		if str(Weather._marker_sig.get(fid, "")) != sig or not Weather._marker_sig.has(fid):
 			sync_markers(f)
 		if SysUtil.is_away(f):
 			continue
+		var k := 1.0           # minutes of exposure this pass covers: strangers (crowd, townies, visitors) are done once per STRANGER_PERIOD minutes
+		if int(f.household_id) <= 0 and f.has_meta("visitor"):
+			if (now + fid) % STRANGER_PERIOD != 0:
+				continue
+			k = float(STRANGER_PERIOD)
 		var outside: bool = is_outside(f)
 		_set_marker(f, "wx_outside", outside)
 		var ex: Dictionary = Weather._exposure.get(fid, {})
@@ -88,49 +96,49 @@ static func on_minute() -> void:
 		if outside:
 			var per: Dictionary = wd.get("outdoor_per_min", {})
 			for need in per:
-				f.add_to_stat(str(need), float(per[need]))
+				f.add_to_stat(str(need), float(per[need]) * k)
 			# cold
 			if feels < float(e.get("cold_temp", 5.0)):
-				ex["cold"] = float(ex["cold"]) + (2.0 if feels < float(e.get("freezing_temp", -4.0)) else 1.0)
+				ex["cold"] = float(ex["cold"]) + (2.0 if feels < float(e.get("freezing_temp", -4.0)) else 1.0) * k
 			else:
-				ex["cold"] = maxf(float(ex["cold"]) - 1.0, 0.0)
+				ex["cold"] = maxf(float(ex["cold"]) - k, 0.0)
 			if float(ex["cold"]) >= float(e.get("cold_exposure_min", 12)):
 				_give_timed(f, "cold")
 				f.add_to_stat("comfort", -0.1)
 			# heat
 			if feels > float(e.get("hot_temp", 29.0)):
-				ex["hot"] = float(ex["hot"]) + 1.0
+				ex["hot"] = float(ex["hot"]) + k
 			else:
-				ex["hot"] = maxf(float(ex["hot"]) - 1.0, 0.0)
+				ex["hot"] = maxf(float(ex["hot"]) - k, 0.0)
 			if float(ex["hot"]) >= float(e.get("hot_exposure_min", 15)):
 				_give_timed(f, "hot")
 			# sun
 			if clear_sky and dl > 0.6 and Weather.temperature() > 18.0:
-				ex["sun"] = float(ex["sun"]) + 1.0
+				ex["sun"] = float(ex["sun"]) + k
 				if float(ex["sun"]) >= float(e.get("sunburn_exposure_min", 120)):
 					_give_timed(f, "sunburn")
 					ex["sun"] = 0.0
 			# wet
 			if kind != "":
-				ex["wet"] = float(ex["wet"]) + 1.0
+				ex["wet"] = float(ex["wet"]) + k
 				if float(ex["wet"]) >= float(e.get("soak_exposure_min", 8)):
 					_give_timed(f, "soaked")
 			else:
-				ex["wet"] = maxf(float(ex["wet"]) - 0.5, 0.0)
+				ex["wet"] = maxf(float(ex["wet"]) - 0.5 * k, 0.0)
 			# fresh air
 			if kind == "" and not severe and feels >= float(air_range[0]) and feels <= float(air_range[1]):
-				ex["air"] = float(ex["air"]) + 1.0
+				ex["air"] = float(ex["air"]) + k
 				if float(ex["air"]) >= float(e.get("fresh_air_exposure_min", 30)):
 					_give_timed(f, "fresh_air")
 					ex["air"] = 0.0
 			else:
 				ex["air"] = 0.0
 		else:
-			for k in ["cold", "hot", "sun", "wet", "air"]:
-				ex[k] = maxf(float(ex[k]) - 1.0, 0.0)
-			_shorten(f, "soaked", float(e.get("indoor_dry_extra_min", 2.0)))
-			_shorten(f, "cold", float(e.get("indoor_warm_extra_min", 2.0)))
-			_shorten(f, "hot", float(e.get("indoor_warm_extra_min", 2.0)))
+			for ek in ["cold", "hot", "sun", "wet", "air"]:
+				ex[ek] = maxf(float(ex[ek]) - k, 0.0)
+			_shorten(f, "soaked", float(e.get("indoor_dry_extra_min", 2.0)) * k)
+			_shorten(f, "cold", float(e.get("indoor_warm_extra_min", 2.0)) * k)
+			_shorten(f, "hot", float(e.get("indoor_warm_extra_min", 2.0)) * k)
 
 static func _give_timed(f, buff_id: String) -> void:
 	if _has_def(buff_id):

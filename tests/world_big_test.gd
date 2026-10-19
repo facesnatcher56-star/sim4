@@ -1,4 +1,4 @@
-extends RefCounted
+﻿extends RefCounted
 ## 160x120 world: reset / path / build budgets. Convention: run() -> Array of failure strings.
 
 var fails: Array = []
@@ -31,19 +31,19 @@ func _test_reset() -> void:
 	W.reset(W.MAP_W, W.MAP_H)
 	var ms := _ms(t0)
 	print("  [big] reset %dx%d: %.2f ms" % [W.MAP_W, W.MAP_H, ms])
-	_check(W.width == 160 and W.height == 120 and W.floors.size() == 19200, "size")
-	_check(ms < 60.0, "reset took %.1f ms" % ms)
-	_check(W.get_floor(Vector2i(159, 119)) == "grass" and W.get_floor(Vector2i(160, 0)) == "", "floors")
+	_check(W.width == W.MAP_W and W.height == W.MAP_H and W.floors.size() == W.MAP_W * W.MAP_H, "size")
+	_check(ms < 60.0 * TestFixture.SLACK, "reset took %.1f ms" % ms)
+	_check(W.get_floor(Vector2i(W.MAP_W - 1, W.MAP_H - 1)) == "grass" and W.get_floor(Vector2i(W.MAP_W, 0)) == "", "floors")
 
 
 func _test_paths() -> void:
 	W.reset(W.MAP_W, W.MAP_H)
 	var t0 := Time.get_ticks_usec()
-	var p: Array[Vector2i] = W.find_path(Vector2i(0, 0), Vector2i(159, 119))
+	var p: Array[Vector2i] = W.find_path(Vector2i(0, 0), Vector2i(W.MAP_W - 1, W.MAP_H - 1))
 	var ms := _ms(t0)
 	print("  [big] open path corner to corner: %d steps, %.1f ms" % [p.size(), ms])
-	_check(p.size() == 159 and p[p.size() - 1] == Vector2i(159, 119), "corner path size %d" % p.size())
-	_check(ms < 80.0, "corner path %.1f ms" % ms)
+	_check(p.size() == W.MAP_W - 1 and p[p.size() - 1] == Vector2i(W.MAP_W - 1, W.MAP_H - 1), "corner path size %d" % p.size())
+	_check(ms < 80.0 * TestFixture.SLACK, "corner path %.1f ms" % ms)
 	# windowed result still avoids walls: a long wall with a gap far from both ends
 	W.add_wall(Vector2i(80, 0), Vector2i(80, 110))
 	t0 = Time.get_ticks_usec()
@@ -59,7 +59,7 @@ func _test_paths() -> void:
 			through = true
 		prev = s
 	_check(through, "detour should pass the gap below y=110")
-	_check(ms < 500.0, "detour path %.1f ms" % ms)
+	_check(ms < 500.0 * TestFixture.SLACK, "detour path %.1f ms" % ms)
 	# unreachable: boxed-in goal
 	W.reset(W.MAP_W, W.MAP_H)
 	W.add_wall(Vector2i(100, 50), Vector2i(104, 50))
@@ -71,7 +71,7 @@ func _test_paths() -> void:
 	ms = _ms(t0)
 	print("  [big] unreachable goal: %.1f ms" % ms)
 	_check(r.is_empty(), "boxed-in goal should be unreachable")
-	_check(ms < 1500.0, "unreachable search %.1f ms" % ms)
+	_check(ms < 1500.0 * TestFixture.SLACK, "unreachable search %.1f ms" % ms)
 	_check(W.path_length(Vector2i(5, 5), Vector2i(60, 5)) == 55.0, "path_length")
 
 
@@ -80,9 +80,9 @@ func _test_map_build() -> void:
 	var rep: Dictionary = MapBuilder.build(W)
 	var ms := _ms(t0)
 	print("  [big] MapBuilder.build: %.1f ms (%d regions)" % [ms, int(rep["regions"])])
-	_check(ms < 400.0, "MapBuilder.build took %.1f ms" % ms)
+	_check(ms < 400.0 * TestFixture.SLACK, "MapBuilder.build took %.1f ms" % ms)
 	t0 = Time.get_ticks_usec()
 	var p: Array[Vector2i] = W.find_path(W.regions.by_lot("school")["entry"] + Vector2i(0, 1), W.regions.by_lot("townie_b")["entry"] + Vector2i(0, 1))
 	ms = _ms(t0)
 	print("  [big] school gate -> townie_b gate: %d steps, %.1f ms" % [p.size(), ms])
-	_check(not p.is_empty() and ms < 100.0, "street path %d steps %.1f ms" % [p.size(), ms])
+	_check(not p.is_empty() and ms < 100.0 * TestFixture.SLACK, "street path %d steps %.1f ms" % [p.size(), ms])

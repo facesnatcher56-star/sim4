@@ -235,14 +235,27 @@ static func _witness(actor: int, target: int, iid: String, d: Dictionary) -> voi
 			RelationshipKnowledge.add_gossip(int(f.id), actor, "%s and %s were %s" % [SysUtil.folk_name(actor), SysUtil.folk_name(target), kinds[iid]], "observed", -1, target)
 
 # ------------------------------------------------------------------ clock / events
+const STRANGER_PERIOD := 5
+
 static func on_minute(_total: int = 0) -> void:
+	var t := PerfProf.start()
+	var now: int = SysUtil.now()
 	for f in WorldIface.all_folk():
-		Emotions.sync(f)
 		if SysUtil.is_resident(f):
+			Emotions.sync(f)
 			Emotions.record_minute(f)
+		elif int(f.household_id) > 0 or not f.has_meta("visitor") or (now + int(f.id)) % STRANGER_PERIOD == 0:
+			Emotions.sync(f)             # strangers' moods only change when SimDirector ticks them (every STRANGER_PERIOD minutes)
+	PerfProf.stop("social/sync+record", t)
+	t = PerfProf.start()
 	Emotions.contagion_tick()
+	PerfProf.stop("social/contagion", t)
+	t = PerfProf.start()
 	Conversation.on_minute()
+	PerfProf.stop("social/conversation", t)
+	t = PerfProf.start()
 	SocialGatherings._tick_gatherings()
+	PerfProf.stop("social/gatherings", t)
 
 static func on_hour(_hour: int = 0) -> void:
 	for f in WorldIface.all_folk():

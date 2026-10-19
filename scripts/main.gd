@@ -1,4 +1,4 @@
-extends Node
+﻿extends Node
 ## Boot: title -> new-game screen (StartPicker: scenario + difficulty + household) -> home lot -> Folk -> gameplay.
 ## Pass `-- --autostart` to skip the menus (3 roommates in the classic house, no scenario).
 const LOT_VIEW_PATH := "res://scenes/world/lot_view.tscn"
@@ -51,7 +51,9 @@ func _ready() -> void:
 		show_title()
 
 func default_household() -> Dictionary:
-	var names := ["Mira", "Tobin", "Wren"]
+	var names: Array = []          # random names per game from the big pool (the picker lets the player type their own)
+	for _i in 3:
+		names.append(HouseholdSetup.random_name(names))
 	var colors := [Color("#e07a5f"), Color("#3d85c6"), Color("#81b29a")]
 	var trait_ids: Array = UIU.tbl("traits").keys()
 	trait_ids.sort()

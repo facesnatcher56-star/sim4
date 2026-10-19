@@ -1,4 +1,4 @@
-class_name CrimeFlow
+﻿class_name CrimeFlow
 extends RefCounted
 ## The one door of the crime and justice track into the rest of the game. SystemsManager calls reset / on_minute / on_hour / on_day /
 ## on_game_event; everything else is routed from here so the hooks in shared files stay one line each.
@@ -37,6 +37,9 @@ static func on_day(_day: int) -> void:
 	CrimeRevenge.on_day()
 	CrimeMurder.on_day()
 	CrimeAssault.on_day()
+	JusticeOrders.on_day()
+	CrimeChildAbuse.on_day()
+	ChildServices.on_day()
 	CrimeSerial.on_day()
 	CaseDiscovery.on_day()
 	CaseInvestigation.on_day()
@@ -68,6 +71,10 @@ static func on_game_event(ev: String, p: Dictionary) -> void:
 	match ev:
 		"argument":
 			CrimeAssault.on_argument(int(p.get("folk_id", -1)), int(p.get("target_id", -1)), int(p.get("level", 0)))
+		"admitted":
+			ChildServices.on_treated(int(p.get("folk_id", -1)))
+		"anger_course":
+			CrimeAssault.on_course_done(int(p.get("folk_id", -1)))
 		"confront_intruder":
 			CrimeBurglary.on_confront(int(p.get("folk_id", -1)), int(p.get("target_id", -1)))
 		"call_police":
@@ -89,6 +96,8 @@ static func on_game_event(ev: String, p: Dictionary) -> void:
 				if not g.is_empty():
 					g["rage"] = float(g["rage"]) * 0.7
 		"accident_on_property", "divorced", "died":
+			if ev == "died":
+				CaseStore.on_death(int(p.get("folk_id", -1)))
 			JusticeCivil.on_game_event(ev, p)
 		"visit_prison":
 			Prison.visit(int(p.get("folk_id", -1)), int(p.get("target_id", -1)))

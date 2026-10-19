@@ -1,4 +1,4 @@
-{
+﻿{
  "_doc": "Crime (task 04): burglary, street robbery, assault, murder, serial killer, theft by guests. Rates are per household / person / town per game year at the Rare default. The hour-limited ones are multiplied up because only the night hours pass the condition (burglary 2.4 x 6/24 = 0.6 a year; robbery 2.2 while out at night ~0.1 a year for a night-walker). Murder and assault have rate 0 on purpose: they come from motive (scripts/systems/crime_murder.gd, crime_assault.gd); the incidents exist for the F9 force button. The case record and all follow-up (discovery, police, trial) live in data/justice.json + scripts/systems/case_*.gd, justice_*.gd.",
  "handlers": {
   "crime_burglary": {
@@ -111,6 +111,57 @@
     },
     "duration_min": 20160,
     "thought": "They know. They will tell, unless I pay."
+   },
+   "calm_mind": {
+    "label": "Calm Mind",
+    "mood": {
+     "happy": 1
+    },
+    "duration_min": 10080,
+    "thought": "Breathe. Count to ten. It helps."
+   },
+   "shaken": {
+    "label": "Shaken",
+    "mood": {
+     "tense": 2,
+     "sad": 1
+    },
+    "duration_min": 2880,
+    "thought": "I did not think it would come to this."
+   },
+   "afraid_at_home": {
+    "label": "Afraid at Home",
+    "mood": {
+     "tense": 2,
+     "sad": 1
+    },
+    "duration_min": 10080,
+    "thought": "I do not feel safe."
+   },
+   "at_the_end_of_rope": {
+    "label": "At the End of Their Rope",
+    "mood": {
+     "tense": 2,
+     "uncomfortable": 1
+    },
+    "duration_min": 4320,
+    "thought": "I cannot keep this up."
+   },
+   "safe_again": {
+    "label": "Safe Again",
+    "mood": {
+     "happy": 1
+    },
+    "duration_min": 10080,
+    "thought": "Home is quiet again."
+   },
+   "in_therapy": {
+    "label": "In Therapy",
+    "mood": {
+     "happy": 1
+    },
+    "duration_min": 20160,
+    "thought": "Talking about it helps."
    }
   },
   "objects": {
@@ -511,6 +562,61 @@
     "autonomous": false,
     "priority": "normal",
     "thought": "If we look out for each other, the street gets safer."
+   },
+   "anger_course": {
+    "label": "Anger-Management Course",
+    "kind": "super",
+    "target": "object",
+    "objects": [
+     "computer"
+    ],
+    "tags": [
+     "skill",
+     "social"
+    ],
+    "duration_min": 60,
+    "posture": "sit",
+    "tests": [
+     {
+      "has_trait": "hot_headed"
+     }
+    ],
+    "per_min": {
+     "fun": -0.02
+    },
+    "on_finish": [
+     {
+      "fire_event": "anger_course"
+     }
+    ],
+    "autonomous": false,
+    "priority": "normal",
+    "thought": "Breathe in. Breathe out. Count to ten."
+   },
+   "read_town_law": {
+    "label": "Read the Town Law",
+    "kind": "super",
+    "target": "object",
+    "objects": [
+     "computer",
+     "bookcase_tall",
+     "bookshelf"
+    ],
+    "tags": [
+     "skill"
+    ],
+    "duration_min": 10,
+    "posture": "stand",
+    "tests": [],
+    "per_min": {},
+    "on_finish": [
+     {
+      "fire_event": "open_town_law"
+     }
+    ],
+    "autonomous": false,
+    "priority": "normal",
+    "thought": "What does the law say about this?"
    }
   },
   "object_interactions": {
@@ -534,7 +640,7 @@
    "label": "Burglary",
    "scope": "lot",
    "check": "hour",
-   "base_rate_per_year": 2.4,
+   "base_rate_per_year": 1.0,
    "notify_policy": "household",
    "severity": 3,
    "conditions": [
@@ -635,7 +741,7 @@
    "label": "Street robbery",
    "scope": "folk",
    "check": "hour",
-   "base_rate_per_year": 2.2,
+   "base_rate_per_year": 0.65,
    "notify_policy": "known",
    "severity": 2,
    "conditions": [

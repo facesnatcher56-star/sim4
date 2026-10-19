@@ -31,7 +31,7 @@ func _causes(f: Array) -> void:
 		var w := K.setup()
 		Incidents.reset()
 		var a := K.make_folk(w, "Tobin Rowe", [], 1, Vector2i(12, 12), "adult")
-		Aging.set_age_days(a, 80.0)
+		Aging.set_age_days(a, 112.0)
 		var cdef: Dictionary = DeathCauses.def(cause)
 		K.notes.clear()
 		K.events.clear()
@@ -110,7 +110,7 @@ func _townie(f: Array) -> void:
 	K.expect(f, graves.size() == 1 and bool(graves[0]["park"]), "townie grave is a park grave")
 	K.expect(f, Aging.kill(friend, "old age").is_empty(), "cannot die twice")
 	# old-age townie death through Story keeps working
-	Story.townies[int(ids[2])]["age_days"] = 400.0
+	Story.townies[int(ids[2])]["age_days"] = 432.0
 	Story.on_day(3)
 	K.expect(f, not bool(Story.townies[int(ids[2])]["alive"]), "Story's natural townie death goes through Aging.kill")
 	K.teardown()

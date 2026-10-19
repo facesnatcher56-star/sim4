@@ -1,4 +1,4 @@
-extends RefCounted
+﻿extends RefCounted
 ## WorldNav / NavGraph on the real map: every lot street gate reaches every other, roads are crossed on crosswalks only,
 ## walkers stay on sidewalks / crosswalks / their own lot, routes are not silly, blocked or unreachable targets fail fast, and
 ## a wall / fence edit changes the route (cache invalidation).
@@ -30,7 +30,7 @@ func _ports(W) -> Dictionary:
 
 func _connectivity(W) -> void:
 	var ports: Dictionary = _ports(W)
-	_check(ports.size() == 11, "every lot has a street gate on the sidewalk (%d)" % ports.size())
+	_check(ports.size() == 15, "every lot has a street gate on the sidewalk (%d)" % ports.size())
 	var ids: Array = ports.keys()
 	var bad := 0
 	for a in ids:
@@ -40,13 +40,13 @@ func _connectivity(W) -> void:
 				if n < 0.0:
 					bad += 1
 					fails.append("no way from the %s door to the %s door" % [a, b])
-	_check(bad == 0, "all 11 lot doors reach each other")
+	_check(bad == 0, "all 15 lot doors reach each other")
 	# the park and the woods are reachable too
 	var green: Dictionary = W.regions.by_lot("green")
 	var gt: Vector2i = (green["rect"] as Rect2i).position + Vector2i(2, 2)
 	_check(W.path_length(Neighborhood.entry_tile("home"), gt) > 0.0, "the green is reachable from home")
 	var woods: Dictionary = W.regions.by_lot("south")
-	var wt: Vector2i = (woods["rect"] as Rect2i).position + Vector2i(60, 10)
+	var wt: Vector2i = (woods["rect"] as Rect2i).position + Vector2i(60, 4)
 	_check(W.path_length(Neighborhood.entry_tile("home"), wt) > 0.0, "the woods are reachable from home")
 
 ## Floors under a path: only the start / end lots, sidewalk, crosswalk (and the walker's own legs in open ground).
@@ -96,7 +96,7 @@ func _fail_fast(W) -> void:
 	var n: float = W.path_length(a, box)
 	var ms := float(Time.get_ticks_usec() - t0) / 1000.0
 	print("  [nav] boxed-in target: %.1f ms" % ms)
-	_check(n < 0.0 and ms < 20.0, "a walled-in target is unreachable and fails fast (%.1f ms, %s)" % [ms, str(n)])
+	_check(n < 0.0 and ms < 20.0 * TestFixture.SLACK, "a walled-in target is unreachable and fails fast (%.1f ms, %s)" % [ms, str(n)])
 	for e in [Vector3i(box.x, box.y, 0), Vector3i(box.x, box.y + 1, 0), Vector3i(box.x, box.y, 1), Vector3i(box.x + 1, box.y, 1)]:
 		W.set_edge(e, "none")
 	# fence the gate of the market: nobody gets in or out
@@ -109,7 +109,7 @@ func _fail_fast(W) -> void:
 	var n2: float = W.path_length(a, inside)
 	var n3: float = W.path_length(inside, a)
 	ms = float(Time.get_ticks_usec() - t0) / 1000.0
-	_check(n2 < 0.0 and n3 < 0.0 and ms < 20.0, "a fenced gate closes the lot both ways, fast (%.1f ms)" % ms)
+	_check(n2 < 0.0 and n3 < 0.0 and ms < 20.0 * TestFixture.SLACK, "a fenced gate closes the lot both ways, fast (%.1f ms)" % ms)
 	W.set_edge(Vector3i(g.x, g.y + 1, 0), "none")
 	_check(W.path_length(a, inside) > 0.0, "reachable again after the fence is removed")
 	t0 = Time.get_ticks_usec()
@@ -117,7 +117,7 @@ func _fail_fast(W) -> void:
 	var np: float = W.path_length(a, pond)
 	ms = float(Time.get_ticks_usec() - t0) / 1000.0
 	print("  [nav] pond tile: %s steps in %.1f ms" % [str(np), ms])
-	_check(ms < 20.0, "pond target answered fast (%.1f ms)" % ms)
+	_check(ms < 20.0 * TestFixture.SLACK, "pond target answered fast (%.1f ms)" % ms)
 
 ## Blocking a whole sidewalk stretch (or fencing a gate) must change the cached route.
 func _invalidation(W) -> void:

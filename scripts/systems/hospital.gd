@@ -1,4 +1,4 @@
-class_name Hospital
+﻿class_name Hospital
 extends RefCounted
 ## The hospital rabbit hole. No map lot: a patient simply leaves through Away (reason "hospital", hidden on the map) for N hours,
 ## carries the hidden `in_hospital` buff, and comes back with a bill (scaled by severity; Incidents.insurance_cover() pays part).
@@ -59,6 +59,9 @@ static func admit(folk_id: int, severity: int, reason: String = "") -> bool:
 	Health.on_admitted(f)                        # a collapsed patient is brought round first (the lying-down interaction would block the stay)
 	patients[folk_id] = rec
 	f.add_buff("in_hospital")
+	if HospitalWard.lot_id() != "" and HospitalWard.place(f, rec):        # a real bed in the hospital building (task 10): full simulation
+		SysUtil.game_event("admitted", {"folk_id": folk_id, "severity": severity, "reason": reason})
+		return true
 	if not Away.send(f, mins, "hospital", {"label": "In hospital", "severity": severity}):
 		patients.erase(folk_id)
 		f.remove_buff("in_hospital")
@@ -76,6 +79,9 @@ static func discharge(folk_id: int) -> bool:
 		return true
 	if Away.is_away(folk_id):
 		return Away.recall(folk_id, "discharged")
+	var ward: Dictionary = patients.get(folk_id, {})
+	if bool(ward.get("ward", false)):                              # a real bed: leave it and go home first
+		HospitalWard.release(f, ward)
 	on_returned(f, {"reason": "hospital", "completed": false})   # still queued, never left
 	for q in f.queue.duplicate():
 		if (q as Interaction).def_id == Away.IID:
@@ -114,13 +120,26 @@ static func charge(hid: int, amount: int, who: String = "") -> int:
 # ------------------------------------------------------------------ far townies
 static func on_hour() -> void:
 	var due: Array = []
+	var ward_due: Array = []
 	for id in patients:
 		var p: Dictionary = patients[id]
 		if bool(p["townie"]) and SysUtil.now() >= int(p["until_min"]):
 			due.append(int(id))
+		elif bool(p.get("ward", false)):
+			if SysUtil.now() >= int(p["until_min"]):
+				ward_due.append(int(id))
+			else:
+				var f = SysUtil.folk(int(id))
+				if f != null and not HospitalWard.has_stay(f):         # after a load the stay interaction is gone: lie back down
+					var bed = WorldIface.get_object(int(p.get("bed", -1)))
+					if bed != null:
+						HospitalWard._queue_stay(f, bed, float(int(p["until_min"]) - SysUtil.now()))
 	due.sort()
+	ward_due.sort()
 	for id in due:
 		_finish_townie(id)
+	for id2 in ward_due:
+		discharge(id2)
 
 static func _finish_townie(tid: int) -> void:
 	var p: Dictionary = patients.get(tid, {})
@@ -159,5 +178,5 @@ static func from_dict(d: Dictionary) -> void:
 	var src: Dictionary = d.get("patients", {})
 	for k in src:
 		var r: Dictionary = (src[k] as Dictionary).duplicate(true)
-		SysUtil.ints_in(r, ["severity", "admitted_min", "until_min", "bill", "hid"])
+		SysUtil.ints_in(r, ["severity", "admitted_min", "until_min", "bill", "hid", "bed", "baby"])
 		patients[int(str(k))] = r

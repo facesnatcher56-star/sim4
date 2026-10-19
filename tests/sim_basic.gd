@@ -67,7 +67,7 @@ func _test_stat(f: Array) -> void:
 	var before: float = (folk.needs["hunger"] as Stat).value
 	folk.tick_needs(100.0)
 	var after: float = (folk.needs["hunger"] as Stat).value
-	Kit.expect(f, Kit.near(before - after, 7.0, 0.05), "folk: hunger should drop 0.07*100=7, dropped %f" % (before - after))
+	Kit.expect(f, Kit.near(before - after, 7.5, 0.05), "folk: hunger should drop 0.075*100=7.5, dropped %f" % (before - after))
 
 func _test_thresholds(f: Array) -> void:
 	var folk := Folk.create("T")
@@ -92,9 +92,9 @@ func _test_mood(f: Array) -> void:
 	var m := Mood.compute(folk)
 	Kit.expect(f, m["mood"] == "neutral" and m["intensity"] == 0, "mood: no buffs -> neutral/0")
 	folk.add_buff("entertained")   # happy 2
-	folk.add_buff("well_rested")   # happy 1, energized 2
+	folk.add_buff("well_rested")   # happy 0.5, energized 2
 	m = Mood.compute(folk)
-	Kit.expect(f, m["mood"] == "happy" and m["intensity"] == 2, "mood: happy(3) beats energized(2), intensity 2, got %s" % str(m))
+	Kit.expect(f, m["mood"] == "playful" and m["intensity"] == 2, "mood: playful(3) beats happy(2.5), intensity 2, got %s" % str(m))
 	var g := Folk.create("G")
 	g.buffs.clear()
 	g.add_buff("starving")    # sad 2, uncomfortable 2

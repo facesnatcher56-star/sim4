@@ -1,0 +1,27 @@
+{
+ "_doc": "Task 10 part B: numbers for the multi-floor hooks (scripts/systems/level_accidents.gd, fire_levels.gd). All optional; defaults live in the scripts.",
+ "config": {
+  "levels": {
+   "_doc": "Stairs and lifts. fall_per_min = chance per game minute standing on a flight of stairs (multiplied by the age / state multipliers); severity = weights of a light / bad / very bad fall; stuck_per_rider_min = chance per rider and minute that a lift stops; rescue_min / repair_min = [min, max] minutes until help arrives / until the lift is repaired.",
+   "fall_per_min": 0.0016,
+   "elder_mult": 6.0,
+   "toddler_mult": 6.0,
+   "child_mult": 1.6,
+   "injured_mult": 4.0,
+   "tired_mult": 2.0,
+   "soaked_mult": 3.0,
+   "severity": [0.78, 0.2, 0.02],
+   "fall_cooldown_min": 240,
+   "stuck_per_rider_min": 0.0012,
+   "rescue_min": [25, 60],
+   "repair_min": [120, 300]
+  },
+  "fire": {
+   "up_chance": 0.45,
+   "up_stairwell_mult": 2.2,
+   "up_min_stage": 2,
+   "smoke_rise": 0.8,
+   "jump_hurt_level": 2
+  }
+ }
+}

@@ -1,4 +1,4 @@
-class_name WorldIface
+﻿class_name WorldIface
 extends RefCounted
 ## Adapter between the sim and the World. Uses `stub` when set (tests), else the World autoload if it
 ## exists, else harmless defaults. All sim code goes through here, never through World directly.
@@ -36,13 +36,36 @@ static func get_object(id: int):
 	return null
 
 ## Objects a folk standing on `tile` may use. On the big map (regions defined) that is the objects of its own lot only.
-static func objects_near(tile: Vector2i, r: int = 64) -> Array:
+## `level` (default LPos.ALL = every floor of the lot): only the objects of that floor.
+static func objects_near(tile: Vector2i, r: int = 64, level: int = LPos.ALL) -> Array:
 	var w = world()
 	if w != null and w.has_method("objects_in_lot_of") and w.regions.has_regions():
-		return w.objects_in_lot_of(tile, r)
+		return w.objects_in_lot_of(tile, r, level)
 	if w != null and w.has_method("objects_in_radius"):
-		return w.objects_in_radius(tile, r)
+		return w.objects_in_radius(tile, r) if level == LPos.ALL else w.objects_in_radius(tile, r, level)
 	return []
+
+## Objects a FOLK may use (what autonomy offers). A lot without floors: objects_near. A venue with floors (office, hospital, school ...): the
+## folk's own floor only (they are put on their floor). A single-household home: every floor (the bed is upstairs). A block of flats: the folk's
+## own floor and the floor(s) of the flat(s) its household holds, never somebody else's flat (LevelInfo.usable).
+static func objects_for(f, r: int = 64) -> Array:
+	if not LevelInfo.lot_is_multi(f.tile):
+		return objects_near(f.tile, r)
+	if not LevelInfo.home_kind(f.tile):
+		return objects_near(f.tile, r, int(f.level))
+	var units: Array = ApartmentUnits.units_of(NeighborhoodLots.lot_at(f.tile))
+	if units.is_empty():
+		return objects_near(f.tile, r)
+	var levels: Array = [int(f.level)]
+	for u in units:
+		if int(u["level"]) not in levels and ApartmentUnits.owner_of(u) == int(f.household_id):
+			levels.append(int(u["level"]))
+	var out: Array = []
+	for lv in levels:
+		for o in objects_near(f.tile, r, lv):
+			if LevelInfo.usable(f, o, units):
+				out.append(o)
+	return out
 
 ## Folk a folk can interact with: everyone on a plain world; on the big map the folk of its own lot (on a street: the other folk on streets within 12 tiles).
 static func folk_near(f) -> Array:

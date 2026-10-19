@@ -1,4 +1,4 @@
-extends RefCounted
+﻿extends RefCounted
 ## Flood: floor-level things get wet / broken, sandbags hold it back, mould follows the flood and spreads until it is scrubbed,
 ## the forecast watch and the rain-streak conditions.
 
@@ -51,7 +51,7 @@ func run() -> Array:
 	DisasterState.reset()
 	Weather.force("rain")
 	DisasterState.rain_days = 3
-	K.expect(f, DisasterForecast.watches().any(func(x): return x["kind"] == "flood"), "the forecast warns of flooding after days of rain")
+	K.expect(f, DisasterOdds.day_chance("flood", "rain", "spring") > 0.0 and DisasterOdds.day_chance("flood", "sunny", "spring") == 0.0, "flood chance exists only after days of rain")
 	Weather.unforce()
 	K.teardown()
 	return f

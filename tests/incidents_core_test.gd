@@ -31,7 +31,7 @@ func _world() -> StubWorld:
 
 func _elder(w: StubWorld, nm: String, hid: int = 1, traits: Array = []) -> Folk:
 	var e := K.make_folk(w, nm, traits, hid, Vector2i(12, 12), "elder")
-	Aging.set_age_days(e, 150.0)
+	Aging.set_age_days(e, 182.0)
 	return e
 
 func _rate_maths(f: Array) -> void:
@@ -56,19 +56,21 @@ func _levels(f: Array) -> void:
 		K.expect(f, _near(Incidents.effective_rate("found_money", IncidentSubject.of_household(1)), 1.0 * want[lv], 0.0001), "found_money effective rate follows the level (%s)" % lv)
 	# Off: nothing ever happens; Chaotic: lots happen
 	Incidents.set_level("off")
-	for d in 120:
+	var days: int = TestFixture.pick(120, 40)
+	for d in days:
 		K.set_time(2 + d, 3)
 		Incidents.on_day()
-	K.expect(f, int(Incidents.stat("found_money")["triggered"]) == 0 and Incidents.history(5).is_empty(), "Off: no incident in 120 days")
+	K.expect(f, int(Incidents.stat("found_money")["triggered"]) == 0 and Incidents.history(5).is_empty(), "Off: no incident in %d days" % days)
 	Incidents.set_level("chaotic")
-	for d2 in 120:
+	var chaotic_days: int = TestFixture.pick(120, 50)           # expected hits ~ days x 0.34 (10/yr over a 28-day year): 41 in the full run, 17 in the short one
+	for d2 in chaotic_days:
 		K.set_time(200 + d2, 3)
 		Incidents.on_day()
-	K.expect(f, int(Incidents.stat("found_money")["triggered"]) > 20, "Chaotic: found_money often (%d)" % int(Incidents.stat("found_money")["triggered"]))
+	K.expect(f, int(Incidents.stat("found_money")["triggered"]) > TestFixture.pick(20, 8), "Chaotic: found_money often (%d)" % int(Incidents.stat("found_money")["triggered"]))
 	# old age ignores the setting
 	Incidents.set_level("off")
 	var old := _elder(w, "Olga", 2)
-	Aging.set_age_days(old, 231.0)
+	Aging.set_age_days(old, 263.0)
 	Aging.on_day(500)
 	K.expect(f, w.get_folk(old.id) == null, "old age still kills with Surprises Off")
 	K.teardown()
@@ -200,9 +202,9 @@ func _statistical(f: Array) -> void:
 	t["level"] = 2
 	K.expect(f, subj.skill_level("cooking") == 3 and IncidentCond.check([{"skill_at_least": ["cooking", 3]}], subj), "townie career skill feeds conditions")
 	var base: float = 0.5
-	t["age_days"] = 100.0
+	t["age_days"] = 132.0
 	K.expect(f, _near(Incidents.effective_rate("minor_fall", subj), base * 2.5, 0.0001), "clumsy townie has the same x2.5 fall risk as a Folk")
-	t["age_days"] = 150.0
+	t["age_days"] = 182.0
 	K.expect(f, _near(Incidents.effective_rate("minor_fall", subj), base * 2.5 * 3.0, 0.0001), "elder townie x3 as well")
 	# statistical resolve: summary, determinism, chronicle
 	K.events.clear()
@@ -239,7 +241,7 @@ func _statistical(f: Array) -> void:
 	# hourly/daily checks reach far townies
 	Incidents.reset()
 	Incidents.set_level("chaotic")
-	for d in 60:
+	for d in TestFixture.pick(60, 25):
 		K.set_time(2 + d, 3)
 		Incidents.on_day()
 	K.expect(f, int(Incidents.stat("townie_mishap")["statistical"]) > 0, "far townies roll for their own incidents")
@@ -292,7 +294,7 @@ func _history_run(seed_v: int) -> String:
 	Story.generate_townies()
 	Incidents.set_level("chaotic")
 	Incidents.seed_rng(seed_v)
-	for d in 90:
+	for d in TestFixture.pick(90, 30):
 		K.set_time(2 + d, 3)
 		Incidents.on_day()
 		for h in 3:

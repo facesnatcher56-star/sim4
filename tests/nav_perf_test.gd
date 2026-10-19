@@ -1,4 +1,4 @@
-extends RefCounted
+﻿extends RefCounted
 ## Pathfinding budgets on the big map (WorldNav): cross-lot path_length, full find_path, in-lot lookups, unreachable targets.
 ## Timings are generous multiples of the measured values (the machine may be busy); the printed numbers are the real ones.
 
@@ -54,12 +54,12 @@ func run() -> Array:
 	var pond := green.position + Vector2i(14, 10)
 	var unreach: float = _avg_ms(5, func(_k): W.path_length(home, pond))
 	print("  [perf] path_length door->door cold %.3f ms, warm %.4f ms, new dest in a known lot %.3f ms; find_path %.3f ms (cold first %.2f ms); in-lot (%d objs) %.3f ms; unreachable %.3f ms" % [cold, warm, mixed, full, full_cold, objs.size(), inlot, unreach])
-	_check(cold < 2.0, "cold cross-lot path_length stays small (%.3f ms)" % cold)
-	_check(warm < 0.2, "cached path_length < 0.2 ms (%.4f ms)" % warm)
-	_check(mixed < 1.0, "path_length to a new tile of a known lot < 1 ms (%.3f ms)" % mixed)
-	_check(full < 5.0 and full_cold < 40.0, "full find_path < 5 ms (%.3f ms, cold %.2f ms)" % [full, full_cold])
-	_check(inlot < 2.0, "in-lot path_length is cheap (%.3f ms)" % inlot)
-	_check(unreach < 5.0, "unreachable targets fail fast (%.3f ms)" % unreach)
+	_check(cold < 2.0 * TestFixture.SLACK, "cold cross-lot path_length stays small (%.3f ms)" % cold)
+	_check(warm < 0.2 * TestFixture.SLACK, "cached path_length < 0.2 ms (%.4f ms)" % warm)
+	_check(mixed < 1.0 * TestFixture.SLACK, "path_length to a new tile of a known lot < 1 ms (%.3f ms)" % mixed)
+	_check(full < 5.0 * TestFixture.SLACK and full_cold < 40.0 * TestFixture.SLACK, "full find_path < 5 ms (%.3f ms, cold %.2f ms)" % [full, full_cold])
+	_check(inlot < 2.0 * TestFixture.SLACK, "in-lot path_length is cheap (%.3f ms)" % inlot)
+	_check(unreach < 5.0 * TestFixture.SLACK, "unreachable targets fail fast (%.3f ms)" % unreach)
 	if not TestFixture.fast:
 		_tick_cost()          # before / after comparison (slow tier only: ~2.5 s)
 	Kit.teardown()
@@ -88,7 +88,7 @@ func _tick_cost() -> void:
 		Kit.run(20)
 		var ms := float(Time.get_ticks_usec() - t0) / 1000.0 / 20.0
 		rows.append("%s: %.2f ms/game-minute, Autonomy.choose %.1f ms (%d NPCs, %d candidates for one folk)" % [mode, ms, choose_ms, npcs, cands])
-		_check(ms < 60.0, "%s: a game minute stays cheap (%.2f ms)" % [mode, ms])
+		_check(ms < 60.0 * TestFixture.SLACK, "%s: a game minute stays cheap (%.2f ms)" % [mode, ms])
 	WorldNav.enabled = true
 	Autonomy.max_scored = 120
 	print("  [tick] ", " | ".join(rows))

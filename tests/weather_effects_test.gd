@@ -1,4 +1,4 @@
-extends RefCounted
+﻿extends RefCounted
 ## Gameplay effects: marker + comfort buffs, shelter, interaction gating, autonomy weights, crops, bills, lightning, fishing, walking.
 
 const W = preload("res://tests/weather_kit.gd")
@@ -147,7 +147,7 @@ func _crops(f: Array) -> void:
 		g.state["growth"] = 0.0
 		SimEnv.clock().total_minutes = W.at(2, 1)       # spring, mild
 		Weather.force(mode)
-		W.run_min(23 * 60 + 5)                              # through midnight into day 3
+		W.run_coarse(23 * 60 + 5)                              # through midnight into day 3 (hourly / daily hooks only)
 		results.append([float(g.state["growth"]), float(g.state["water"])])
 		W.teardown()
 	W.expect(f, float(results[1][0]) > float(results[0][0]) + 0.5, "rain makes crops grow faster (sunny %s, rain %s)" % [str(results[0]), str(results[1])])
@@ -164,7 +164,7 @@ func _frost(f: Array) -> void:
 	g.state["water"] = 8.0
 	SimEnv.clock().total_minutes = W.at(23, 1)          # winter: nights well below zero
 	Weather.force("cold_snap")
-	W.run_min(23 * 60 + 5)
+	W.run_coarse(23 * 60 + 5)
 	W.expect(f, float(g.state["growth"]) == 0.0, "frost kills the crops (growth %f)" % float(g.state["growth"]))
 	W.expect(f, K.count_events("crops_frozen") >= 1, "crops_frozen event fired")
 	W.teardown()
@@ -176,7 +176,7 @@ func _bills(f: Array) -> void:
 	W.expect(f, Weather.bill_multiplier() == 1.0, "no history -> bill multiplier 1")
 	SimEnv.clock().total_minutes = W.at(23, 0)          # winter
 	Weather.force("cold_snap")
-	W.run_min(48 * 60)
+	W.run_coarse(48 * 60)
 	var winter: float = Weather.bill_multiplier()
 	W.expect(f, winter > 1.12 and winter <= 1.5, "heating raises the bill multiplier (%f)" % winter)
 	var plain: int = int(round(float(Economy.compute_bill(1)) / winter))
@@ -189,7 +189,7 @@ func _bills(f: Array) -> void:
 	Economy.next_bill_day = 10000
 	SimEnv.clock().total_minutes = W.at(2, 0)           # mild spring
 	Weather.force("sunny")
-	W.run_min(48 * 60)
+	W.run_coarse(48 * 60)
 	var mild: float = Weather.bill_multiplier()
 	W.expect(f, mild < winter, "a mild spell costs less than a cold snap (%f vs %f)" % [mild, winter])
 	W.teardown()
@@ -238,7 +238,7 @@ func _walk_and_events(f: Array) -> void:
 	# weather_changed fires as steps pass
 	SimEnv.clock().total_minutes = W.at(1, 0)
 	var before: int = K.count_events("weather_changed")
-	var days: int = TestFixture.pick(10, 4)
+	var days: int = TestFixture.pick(10, 3)
 	W.run_min(days * 24 * 60)
 	var n: int = K.count_events("weather_changed") - before
 	W.expect(f, n >= days - 2, "weather_changed events over %d days: %d" % [days, n])

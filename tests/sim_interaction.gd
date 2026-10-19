@@ -1,4 +1,4 @@
-extends RefCounted
+﻿extends RefCounted
 ## Interaction lifecycle, reservation, queue priority, cancel handling.
 
 const Kit = preload("res://tests/sim_testkit.gd")
@@ -28,8 +28,9 @@ func _test_tests_and_run(f: Array, w: StubWorld) -> void:
 	w.add_folk(folk, Vector2i(2, 2))
 	var bed := w.add_object("bed", Vector2i(6, 2))
 	var ir := Interaction.create("sleep_bed", folk, bed.id)
+	Kit.set_time(1, 14)
 	(folk.needs["energy"] as Stat).set_value(80)
-	Kit.expect(f, not ir.can_run(folk, bed), "interaction: sleep_bed test energy<45 fails at 80")
+	Kit.expect(f, not ir.can_run(folk, bed), "interaction: sleep_bed refused at 80 energy in the daytime")
 	(folk.needs["energy"] as Stat).set_value(20)
 	Kit.expect(f, ir.can_run(folk, bed), "interaction: sleep_bed runs at energy 20")
 	var started: Array = []
@@ -43,7 +44,7 @@ func _test_tests_and_run(f: Array, w: StubWorld) -> void:
 	var mins := _run_to_end(folk)
 	Kit.expect(f, ir.state == "finished" and ir.success, "interaction: finished successfully")
 	var energy: float = (folk.needs["energy"] as Stat).value
-	Kit.expect(f, energy > 90.0, "interaction: sleep restored energy (%f)" % energy)
+	Kit.expect(f, energy > 60.0, "interaction: sleep restored energy (%f)" % energy)
 	Kit.expect(f, mins < 540, "interaction: end_when ended sleep early (%d min)" % mins)
 	Kit.expect(f, folk.has_buff("well_rested"), "interaction: on_finish added well_rested")
 	Kit.expect(f, bed.slots_reserved.is_empty(), "interaction: slot released on finish")

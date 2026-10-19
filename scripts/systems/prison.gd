@@ -1,4 +1,4 @@
-class_name Prison
+﻿class_name Prison
 extends RefCounted
 ## Jail (short) and prison (long): a rabbit hole like the hospital. A player folk is away (Away reason "jail"/"prison") with a status chip; a
 ## townie is simply marked in JusticeState.inmates. Behaviour decides early PAROLE (good) or extra time (fights). Friends and family can VISIT,
@@ -65,6 +65,7 @@ static func release(pid: int, early: bool) -> void:
 	var ins: Dictionary = JusticeState.inmates.get(pid, {})
 	if ins.is_empty():
 		return
+	JusticeRecords.note_served(pid, SysUtil.day() - int(ins.get("since", SysUtil.day())))
 	JusticeState.inmates.erase(pid)
 	var f = CrimePerson.folk(pid)
 	JusticePlayer.release(f)
@@ -73,6 +74,8 @@ static func release(pid: int, early: bool) -> void:
 	var k: Dictionary = cfg()
 	RelationshipKnowledge.add_reputation(pid, -float(k.get("release_reputation", 6)))
 	JusticeState.fresh_start[pid] = SysUtil.day()
+	CrimeAssault.calm_for(pid, int(JusticeState.sect("assault").get("release_calm_days", 14)))
+	JusticeOrders.on_released(pid)
 	if f != null:
 		f.add_buff("fresh_start")
 		f.remove_buff("in_custody")
@@ -107,13 +110,7 @@ static func visit(visitor: int, inmate: int) -> bool:
 static func job_ok(pid: int, career: String) -> bool:
 	if not (cfg().get("record_blocks", []) as Array).has(career):
 		return true
-	var forgive: int = int(cfg().get("forgive_days", 56))
-	for r in JusticeState.records.get(pid, []):
-		if str(r.get("result", "")) in ["guilty", "plea"] and SysUtil.day() - int(r.get("day", 0)) < forgive:
-			return false
-		if int(JusticeProcess.charge_def(str(r.get("charge", ""))).get("severity", 1)) >= 4:
-			return false
-	return true
+	return not JusticeRecords.bans(pid, career)
 
 static func on_returned(f, _rec: Dictionary) -> void:
 	f.remove_buff("in_custody")

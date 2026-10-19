@@ -1,4 +1,4 @@
-class_name HousePlan
+﻿class_name HousePlan
 extends RefCounted
 ## Working model of one lot while a layout is generated (no World needed). Same conventions as WorldGrid:
 ## tile = Vector2i, edge key Vector3i(x, y, 0) = NORTH edge of tile (x,y), Vector3i(x, y, 1) = WEST edge,
@@ -35,16 +35,17 @@ static func defs() -> Dictionary:
 	var base: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://data/objects.json"))
 	if base is Dictionary:
 		_defs = (base as Dictionary).duplicate(true)
-	var ven: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://data/venues.json"))
-	if ven is Dictionary:
-		var objs: Dictionary = (ven.get("content", {}) as Dictionary).get("objects", {})
-		for k in objs:
-			var e: Dictionary = objs[k]
-			var d: Dictionary = (_defs.get(str(e.get("clone", "")), {}) as Dictionary).duplicate(true)
-			for ok in (e.get("override", {}) as Dictionary):
-				d[ok] = e["override"][ok]
-			if not d.is_empty():
-				_defs[k] = d
+	for path in ["res://data/venues.json", "res://data/building_rules.json"]:        # cloned objects of the venues and of the multi-floor buildings
+		var ven: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+		if ven is Dictionary:
+			var objs: Dictionary = (ven.get("content", {}) as Dictionary).get("objects", {})
+			for k in objs:
+				var e: Dictionary = objs[k]
+				var d: Dictionary = (_defs.get(str(e.get("clone", "")), {}) as Dictionary).duplicate(true)
+				for ok in (e.get("override", {}) as Dictionary):
+					d[ok] = e["override"][ok]
+				if not d.is_empty():
+					_defs[k] = d
 	return _defs
 
 

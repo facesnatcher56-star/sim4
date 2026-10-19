@@ -1,9 +1,13 @@
-class_name TestFixture
+﻿class_name TestFixture
 extends RefCounted
 ## Resets every piece of shared static state so each test file starts from the same world no matter what ran before it
 ## (or in what order). The runner calls reset() before and after each test; the kits call it from setup().
 
 const SEED := 4242
+
+## Wall-clock budgets in tests are multiplied by this: they only catch a return of the old (10x+) behaviour, never a busy machine.
+## Load-independent checks (counts of path queries, A* runs) are preferred where a test can count.
+const SLACK := 5.0
 
 ## true in the runner's default (fast) tier: long tests shorten their simulations. false = full length (--slow, run_one).
 static var fast: bool = false
@@ -18,6 +22,7 @@ static func reset() -> void:
 	Genetics.seed_rng(SEED)
 	Autonomy.rng = null
 	Autonomy.last_debug.clear()
+	Autonomy.full_debug = true          # tests may inspect a row for every candidate (the game keeps only the useful ones)
 	Loot.rng = null
 	WorldIface.stub = null
 	WorldIface.coins.clear()

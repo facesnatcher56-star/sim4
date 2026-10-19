@@ -1,4 +1,4 @@
-class_name CaseInvestigation
+﻿class_name CaseInvestigation
 extends RefCounted
 ## The daily detective work on every open case (09b section 2). Work (`progress`) reveals the physical trace; connections (grudges, alibis from
 ## where folk really were, record, reputation, gossip) are looked at through CaseEvidence. The best suspect over the arrest threshold is
@@ -43,12 +43,15 @@ static func work(c: Dictionary) -> int:
 		var top: Dictionary = rows[0]
 		var thr: float = float(k.get("arrest_threshold", 0.62))
 		var score: float = float(top["score"]) + JusticeState.rng.randf_range(0.0, float(k.get("noise", 0.05)))
-		if score >= thr:
+		if score >= thr and not SysUtil.to_ints(c.get("acquitted", [])).has(int(top["pid"])):      # no second trial for the same case
 			JusticeProcess.arrest(c, int(top["pid"]))
 			return int(top["pid"])
 	if age >= int(k.get("cold_after_days", 30)):
 		c["state"] = "cold"
-		CaseStore.note(c, "The case has gone cold. The police are still checking new leads.", "cold_case", 3)
+		if not bool(c.get("cold_noted", false)):                 # said once; a case that is reopened and cools again stays quiet
+			c["cold_noted"] = true
+			var big: bool = str(c["kind"]) in ["murder", "serial", "manslaughter"] or CaseStore.household_involved(c)
+			CaseStore.note(c, "The case has gone cold. The police are still checking new leads.", "cold_case" if big else "", 3 if big else 1)
 	return -1
 
 static func reopen(c: Dictionary, why: String) -> void:
@@ -56,8 +59,9 @@ static func reopen(c: Dictionary, why: String) -> void:
 		c["state"] = "open"
 		c["reopened"] = int(c["reopened"]) + 1
 		c["disc_day"] = SysUtil.day() - 2
-		CaseStore.note(c, "%s The case was reopened." % why, "case_reopened", 3)
-		CaseStore.toast(c, "The police reopened the case: %s" % CaseStore.title(c), "warn")
+		CaseStore.note(c, "%s The case was reopened." % why, "case_reopened" if CaseStore.household_involved(c) else "", 3)
+		if CaseStore.household_involved(c):                       # notify policy: only cases that touch the household
+			SysUtil.notify("The police reopened the case: %s" % CaseStore.title(c), "warn")
 
 ## Gossip and rumours feed the investigation: somebody is whispering about a person with a grudge.
 static func feed_gossip(c: Dictionary) -> void:

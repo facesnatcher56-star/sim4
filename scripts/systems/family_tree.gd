@@ -1,4 +1,4 @@
-class_name FamilyTree
+﻿class_name FamilyTree
 extends RefCounted
 ## Family graph queries (parents, siblings, relation labels) and the tree view data.
 
@@ -160,7 +160,7 @@ static func is_kin(a: int, b: int) -> bool:
 static func node(id: int) -> Dictionary:
 	var info: Dictionary = Family.person_info(id)
 	var ay: int = int(floor(float(info["age_days"]) / Aging.days_per_year()))
-	return {"id": id, "name": info["name"], "stage": info["stage"], "age_years": ay, "alive": info["alive"], "on_lot": info["on_lot"],
+	return {"id": id, "name": info["name"], "stage": info["stage"], "age_years": ay, "stage_text": Aging.stage_text(id, str(info["stage"])), "alive": info["alive"], "on_lot": info["on_lot"],
 		"household_id": info["household_id"]}
 
 static func _up(id: int, depth: int) -> Dictionary:

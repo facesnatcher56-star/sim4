@@ -1,4 +1,4 @@
-extends RefCounted
+﻿extends RefCounted
 ## Travel on the real World with every lot present at once: fast travel + walking home, folk bookkeeping from tiles (nobody is
 ## parked or hidden because of where they are), travel time, venue hours / fees block entry, closing time, the per-lot crowd cap
 ## and ambient NPCs (only near the player), groceries pantry, townie-home residents.
@@ -117,7 +117,7 @@ func _hours_and_fees() -> void:
 	_check(Neighborhood.where(mira.id) == "gym", "gym still open at 21:35")
 	Kit.run(45)
 	_check(Neighborhood.heading_to(mira.id) == "home" or Neighborhood.where(mira.id) == "home", "closing time sends the folk home (lot=%s)" % Neighborhood.where(mira.id))
-	Kit.run(120)
+	Kit.run_until(func(): return Neighborhood.where(mira.id) == "home", 120)
 	_check(Neighborhood.where(mira.id) == "home", "and she walks all the way (lot=%s)" % Neighborhood.where(mira.id))
 	_check(Kit.has_note("closes in") and Kit.has_note("closed"), "closing notices were shown")
 
@@ -173,11 +173,14 @@ func _staff_and_meetings() -> void:
 	for t in Story.alive_townies():
 		if RelationshipService.knows(mira.id, int(t["id"])):
 			known_before += 1
-	Kit.run(240)
-	var known_after := 0
-	for t in Story.alive_townies():
-		if RelationshipService.knows(mira.id, int(t["id"])):
-			known_after += 1
+	var count_known := func() -> int:
+		var n := 0
+		for t in Story.alive_townies():
+			if RelationshipService.knows(mira.id, int(t["id"])):
+				n += 1
+		return n
+	Kit.run_until(func(): return int(count_known.call()) > known_before or Kit.count_events("met_townie") > met_before, 240)
+	var known_after: int = count_known.call()
 	_check(known_after > known_before or Kit.count_events("met_townie") > met_before, "chance meetings at the park create introductions (%d -> %d)" % [known_before, known_after])
 	# hangout invitation
 	var tid: int = int(Story.alive_townies()[0]["id"])
@@ -187,11 +190,11 @@ func _staff_and_meetings() -> void:
 	_check(not rec.is_empty(), "invite_to_venue returns a record")
 	var fr_before: float = RelationshipService.value(mira.id, tid, "friendship")
 	Neighborhood.travel([mira.id], "park", {"quiet": true, "instant": true})
-	Kit.run(45)
+	Kit.run_until(func(): return SysUtil.folk(tid) != null and SysUtil.folk(tid).has_meta("meetup"), 45)
 	_check(Kit.count_events("venue_invite") == 1, "invite event emitted")
 	var host_npc = SysUtil.folk(tid)
 	_check(host_npc != null and host_npc.has_meta("meetup"), "the invited townie turned up at the park")
-	Kit.run(110)
+	Kit.run_until(func(): return Kit.count_events("hangout_done") >= 1, 110)
 	_check(Kit.count_events("hangout_done") == 1, "hangout finished")
 	_check(RelationshipService.value(mira.id, tid, "friendship") > fr_before, "hangout raised friendship")
 

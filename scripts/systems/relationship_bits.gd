@@ -1,4 +1,4 @@
-class_name RelationshipBits
+﻿class_name RelationshipBits
 extends RefCounted
 ## Relationship bits (labels), flags/status changes, compatibility and the describe text.
 
@@ -123,7 +123,7 @@ static func _refresh_bits(a: int, b: int) -> void:
 		SysUtil.game_event("relationship_bit_changed", {"folk_id": x, "target_id": y, "bit": now_bit, "old": old_bit})
 		if now_bit in ["friend", "best_friend", "enemy", "sweetheart", "partner", "spouse"] and SysUtil.folk(x) != null:
 			if _bit_rank(now_bit) > _bit_rank(old_bit) or now_bit == "enemy":
-				SysUtil.notify("%s now sees %s as: %s" % [SysUtil.folk_name(x), SysUtil.folk_name(y), bit_label(now_bit)], "relationship")
+				RelationshipToasts.announce(x, y, now_bit)
 
 # ------------------------------------------------------------------ flags / status changes
 static func set_flag(a: int, b: int, flag: String, on: bool = true, announce: bool = true) -> void:

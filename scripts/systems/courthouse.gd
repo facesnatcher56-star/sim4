@@ -1,4 +1,4 @@
-class_name Courthouse
+﻿class_name Courthouse
 extends RefCounted
 ## The courthouse: a rabbit hole (no map lot yet). On the trial day the accused and any player witnesses are away for a few hours (Away "court"),
 ## then the verdict is scored (JusticeTrial). Player folk who know the accused or the victim are called as WITNESSES: speak for them, against
@@ -13,7 +13,7 @@ static func open(c: Dictionary) -> void:
 		return
 	var pid: int = int(c["accused"])
 	if not CrimePerson.alive(pid):
-		c["state"] = "closed"
+		CaseStore.close_for_death(c, pid)
 		return
 	c["state"] = "trial"
 	var hours: float = float(cfg().get("court_hours", 3))
@@ -31,6 +31,11 @@ static func open(c: Dictionary) -> void:
 		SysUtil.notify("The trial of %s has begun." % CrimePerson.name_of(pid), "story")
 
 static func verdict_day(c: Dictionary) -> void:
+	if str(c["state"]) == "closed":
+		return
+	if not CrimePerson.alive(int(c.get("accused", -1))):
+		CaseStore.close_for_death(c, int(c.get("accused", -1)))
+		return
 	JusticeTrial.run(c)
 
 ## Player folk who may be called: they know the accused or the victim, or saw the crime.

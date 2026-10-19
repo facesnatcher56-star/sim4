@@ -1,4 +1,4 @@
-class_name FloorSelector
+﻿class_name FloorSelector
 extends PanelContainer
 ## Floor controls (right edge): one button per level of the building you are looking at (top floor first), up / down arrows, a
 ## "Follow" box (the view follows the selected Folk's floor) and dots for the Folk on each floor, so you always know where everybody is.
@@ -7,6 +7,8 @@ extends PanelContainer
 
 var lot_view = null
 var _box: VBoxContainer
+var _scroll: ScrollContainer
+var _list: VBoxContainer
 var _rows: Dictionary = {}
 var _follow: CheckBox
 var _clock: float = 0.0
@@ -53,7 +55,7 @@ func refresh() -> void:
 	if not visible:
 		return
 	offset_right = -332.0 if building_mode else -12.0      # beside the build panel, not under it
-	offset_left = offset_right - 106.0
+	offset_left = offset_right - 168.0
 	var by_level: Dictionary = lv.folk_by_level()
 	var sel_id := int(lot_view.get("selected_id")) if str(lot_view.get("selected_kind")) == "folk" else -1
 	var sig := "%d|%d|%d|%s|%s" % [r.x, r.y, lv.viewed, str(by_level), str(lv.follow)] + "|%d" % sel_id
@@ -63,6 +65,7 @@ func refresh() -> void:
 	for c in _box.get_children():
 		c.queue_free()
 	_rows.clear()
+	var bid: int = int(lv.get("building"))
 	_box.add_child(UIU.make_label("Floor", 13, UITheme.MUTED))
 	var up := Button.new()
 	up.text = "Up"
@@ -70,8 +73,17 @@ func refresh() -> void:
 	up.disabled = lv.viewed >= r.y
 	up.pressed.connect(func(): lv.step(1))
 	_box.add_child(up)
+	# the floors scroll when there are many (a tower): the list is at most ~45% of the window tall, Up / Down / Follow stay in reach
+	_scroll = ScrollContainer.new()
+	_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_scroll.custom_minimum_size = Vector2(160, minf(float(r.y - r.x + 1) * 40.0, get_viewport_rect().size.y * 0.45))
+	_list = VBoxContainer.new()
+	_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_scroll.add_child(_list)
+	_box.add_child(_scroll)
 	for l in range(r.y, r.x - 1, -1):
 		var b := Button.new()
+		b.clip_text = true
 		b.toggle_mode = true
 		b.button_pressed = l == lv.viewed
 		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
@@ -80,10 +92,11 @@ func refresh() -> void:
 		var you := sel_id >= 0 and folk.has(sel_id)
 		for i in mini(folk.size() - (1 if you else 0), 5):
 			dots += "o"
-		b.text = "%s  %s%s" % [LPos.level_label(l), "*" if you else "", dots]
-		b.tooltip_text = "%s - %d Folk here" % [LPos.level_name(l), folk.size()]
+		var nm: String = World.levels.level_name(bid, l)
+		b.text = "%s  %s%s  %s" % [LPos.level_label(l), "*" if you else "", dots, nm if (l == 0 or nm != LPos.level_name(l)) else ""]
+		b.tooltip_text = "%s (%s) - %d Folk here" % [nm, LPos.level_name(l), folk.size()]
 		b.pressed.connect(func(): lv.set_viewed(l))
-		_box.add_child(b)
+		_list.add_child(b)
 		_rows[l] = b
 	var dn := Button.new()
 	dn.text = "Down"
@@ -97,3 +110,5 @@ func refresh() -> void:
 	_follow.button_pressed = lv.follow
 	_follow.toggled.connect(func(on): lv.set_follow(on))
 	_box.add_child(_follow)
+	if _rows.has(lv.viewed):
+		_scroll.ensure_control_visible.call_deferred(_rows[lv.viewed])

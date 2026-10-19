@@ -1,4 +1,4 @@
-class_name StoryVisits
+﻿class_name StoryVisits
 extends RefCounted
 ## Townie visits, party invites and situations.
 
@@ -8,7 +8,7 @@ static func _visits_and_invites(day: int) -> void:
 	if residents.is_empty():
 		return
 	# schedule a visit
-	if SysUtil.chance(float(v.get("daily_chance", 0.55))):
+	if SysUtil.chance(float(v.get("daily_chance", 0.55)) * StoryPacing.mult("visit", int(residents[0].household_id))):
 		var cands: Array = []
 		var weights: Array = []
 		for t in Story.alive_townies():
@@ -22,7 +22,7 @@ static func _visits_and_invites(day: int) -> void:
 			weights.append(w)
 		var pick = SysUtil.pick_weighted(cands, weights)
 		var host = SysUtil.pick(residents)
-		if pick != null and host != null:
+		if pick != null and host != null and not JusticeOrders.bars(int(pick["id"]), int(host.id)):          # a protective order keeps them away
 			var hour: float = SysUtil.rng.randf_range(float(v.get("hour_min", 10)), float(v.get("hour_max", 19)))
 			var dur: Array = v.get("duration_min", [120, 240])
 			var arrive: int = (day - 1) * 1440 + int(hour * 60.0)
@@ -113,7 +113,7 @@ static func on_minute() -> void:
 				if now >= int(sit["arrive_min"]) + 10:
 					sit["state"] = "mingle"
 			"mingle":
-				if now >= int(sit["end_min"]):
+				if now >= int(sit["end_min"]) or Circadian.guests_curfew():
 					sit["state"] = "leave"
 					_begin_leave(sit)
 			"leave":

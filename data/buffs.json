@@ -1,4 +1,9 @@
-{
+﻿{
+ "fed_up": {"label": "Fed Up", "mood": {"bored": 2, "tense": 1}, "duration_min": 240, "autonomy_mult": {"fun": 1.2}, "thought": "I've done this to death."},
+ "groggy": {"label": "Groggy", "mood": {"uncomfortable": 2, "angry": 1}, "duration_min": 240, "thought": "I did not sleep well."},
+ "work_stress": {"label": "Work Stress", "mood": {"tense": 3, "anxious": 1}, "duration_min": 480, "thought": "Work is getting to me."},
+ "off_day": {"label": "Off Day", "mood": {"sad": 2, "uncomfortable": 1}, "duration_min": 600, "thought": "Just one of those days."},
+
  "starving": {"label": "Starving", "mood": {"sad": 2, "uncomfortable": 2}, "duration_min": 0, "need_decay_mult": {"fun": 1.2}, "autonomy_mult": {"hunger": 1.6, "food": 1.2}, "thought": "I'm starving!"},
  "hungry": {"label": "Hungry", "mood": {"uncomfortable": 1}, "duration_min": 0, "need_decay_mult": {"fun": 1.1}, "autonomy_mult": {"hunger": 1.4}, "thought": "I'm hungry..."},
  "exhausted": {"label": "Exhausted", "mood": {"sad": 1, "uncomfortable": 2}, "duration_min": 0, "need_decay_mult": {"fun": 1.2}, "autonomy_mult": {"energy": 1.8}, "thought": "I can barely keep my eyes open."},
@@ -14,10 +19,10 @@
  "achy": {"label": "Achy", "mood": {"uncomfortable": 2}, "duration_min": 0, "autonomy_mult": {"comfort": 1.5}, "thought": "My back hurts. Somewhere comfy, please."},
  "well_fed": {"label": "Well Fed", "mood": {"happy": 1}, "duration_min": 240, "need_decay_mult": {"hunger": 0.8}, "thought": "That hit the spot."},
  "meal_ready": {"label": "Meal Ready", "mood": {}, "duration_min": 120, "autonomy_mult": {"meal": 2.5}, "thought": "Food's ready!"},
- "well_rested": {"label": "Well Rested", "mood": {"happy": 1, "energized": 2}, "duration_min": 480, "need_decay_mult": {"energy": 0.8}, "thought": "I feel great."},
+ "well_rested": {"label": "Well Rested", "mood": {"happy": 0.5, "energized": 2}, "duration_min": 480, "need_decay_mult": {"energy": 0.8}, "thought": "I feel great."},
  "nap_refreshed": {"label": "Refreshed", "mood": {"energized": 1}, "duration_min": 120},
- "fresh": {"label": "Fresh", "mood": {"happy": 1, "energized": 1}, "duration_min": 360, "need_decay_mult": {"hygiene": 0.7}, "thought": "Squeaky clean."},
- "minty": {"label": "Minty Breath", "mood": {"happy": 1}, "duration_min": 240},
+ "fresh": {"label": "Fresh", "mood": {"happy": 0.5, "energized": 1}, "duration_min": 360, "need_decay_mult": {"hygiene": 0.7}, "thought": "Squeaky clean."},
+ "minty": {"label": "Minty Breath", "mood": {"happy": 0.5}, "duration_min": 240},
  "relaxed": {"label": "Relaxed", "mood": {"happy": 2, "content": 3}, "duration_min": 240, "need_decay_mult": {"fun": 0.8}, "thought": "Ahh, lovely."},
  "cozy": {"label": "Cosy", "mood": {"happy": 1, "content": 2}, "duration_min": 120},
  "entertained": {"label": "Entertained", "mood": {"happy": 2, "playful": 3}, "duration_min": 120, "need_decay_mult": {"fun": 0.7}, "thought": "That was fun!"},
@@ -41,7 +46,7 @@
  "fresh_catch": {"label": "Fresh Catch", "mood": {"happy": 1}, "duration_min": 480, "autonomy_mult": {"gourmet": 1.6}, "thought": "Dinner swims again!"},
  "fresh_produce": {"label": "Fresh Produce", "mood": {"happy": 1}, "duration_min": 720, "autonomy_mult": {"cook": 1.2}, "thought": "Straight from the garden."},
  "green_thumb": {"label": "Green Thumb", "mood": {"happy": 2, "focused": 1}, "duration_min": 360, "autonomy_mult": {"garden": 1.5}, "thought": "Everything grows for me."},
- "dapper": {"label": "Looking Sharp", "mood": {"happy": 1, "flirty": 1}, "duration_min": 480, "autonomy_mult": {"social": 1.15}, "thought": "I look great."},
+ "dapper": {"label": "Looking Sharp", "mood": {"happy": 0.5, "flirty": 0.5}, "duration_min": 480, "autonomy_mult": {"social": 1.15}, "thought": "I look great."},
  "reassured": {"label": "Reassured", "mood": {"happy": 1, "content": 2}, "duration_min": 720, "thought": "Safe and sound."},
  "fresh_laundry": {"label": "Fresh Laundry", "mood": {"happy": 1, "energized": 1}, "duration_min": 360, "need_decay_mult": {"hygiene": 0.9}, "thought": "Clean clothes!"},
  "warmed_by_fire": {"label": "Warmed by the Fire", "mood": {"happy": 2}, "duration_min": 180, "need_decay_mult": {"comfort": 0.7}, "thought": "So warm and cosy."},

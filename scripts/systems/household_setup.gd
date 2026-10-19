@@ -1,4 +1,4 @@
-class_name HouseholdSetup
+﻿class_name HouseholdSetup
 extends RefCounted
 ## Builds, validates and wires up the starting household of a new game (no UI).
 ##
@@ -14,8 +14,6 @@ const REL_LABELS := {"none": "Unrelated", "partner": "Partner", "spouse": "Spous
 	"parent": "Parent of the first Folk", "sibling": "Sibling of the first Folk"}
 const REL_ORDER := ["none", "partner", "spouse", "child", "parent", "sibling"]
 const MAX_FOLK := 6
-const NAMES := ["Mira", "Tobin", "Wren", "Pip", "Juno", "Rowan", "Sage", "Bram", "Luma", "Ember", "Kit", "Nia", "Odin", "Tess", "Vale",
-	"Wilder", "Zadie", "Arlo", "Mabel", "Ivo", "Calla", "Fenn", "Sorrel", "Hale"]
 const SIBLING_PARENT_BASE := 880000
 
 static func trait_count(stage: String) -> int:
@@ -29,11 +27,7 @@ static func rng_or_new(r: RandomNumberGenerator) -> RandomNumberGenerator:
 	return n
 
 static func random_name(used: Array, r: RandomNumberGenerator = null) -> String:
-	var g := rng_or_new(r)
-	var pool: Array = NAMES.filter(func(n): return not used.has(n))
-	if pool.is_empty():
-		return "Folk %d" % (used.size() + 1)
-	return str(pool[g.randi_range(0, pool.size() - 1)])
+	return Names.pick_first(used, rng_or_new(r))
 
 ## `count` distinct traits that do not conflict with each other.
 static func random_traits(count: int, r: RandomNumberGenerator = null) -> Array:
@@ -183,11 +177,13 @@ static func apply(h: Dictionary, folk: Array) -> void:
 			"partner":
 				_bond(a, b)
 				RelationshipBits.set_flag(a, b, "partner", true, false)
+				AgingStart.settle_partner(folk[0], folk[i])
 			"spouse":
 				_bond(a, b)
 				FamilyMarriage.marry(a, b, "", true)
 				folk[0].remove_buff("newlywed")
 				folk[i].remove_buff("newlywed")
+				AgingStart.settle_partner(folk[0], folk[i])
 			"parent":
 				Family.link_parent(a, b)
 			"sibling":

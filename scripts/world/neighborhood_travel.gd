@@ -1,4 +1,4 @@
-class_name NeighborhoodTravel
+﻿class_name NeighborhoodTravel
 extends RefCounted
 ## Getting residents from lot to lot on the one map. Neighborhood.travel / can_travel / movable / go_home delegate here.
 ##   walk (default)   each folk gets a player "go here" to the lot's entry tile and walks there on the street graph; the trip
@@ -82,6 +82,7 @@ static func travel(folk_ids: Array, lot_id: String, opts: Dictionary = {}) -> Di
 			var m: int = 0 if instant else Neighborhood.travel_minutes(from_lot, lot_id)
 			minutes = maxi(minutes, m)
 			f.tile = dest
+			f.level = 0
 			NeighborhoodLots.mark_inside(f, lot_id)
 			f.remove_meta("walk_to")
 			Neighborhood.loc.erase(int(id))

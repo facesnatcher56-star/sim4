@@ -1,4 +1,4 @@
-{
+﻿{
  "fridge": {
   "label": "Fridge",
   "size": [
@@ -28,7 +28,7 @@
     "min": 0,
     "max": 10,
     "start": 10,
-    "spoil_per_day": 0.12,
+    "spoil_per_day": 0.05,
     "spoiled_key": "spoiled",
     "spoil_dirt_key": "dirtiness"
    },

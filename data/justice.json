@@ -1,9 +1,44 @@
-{
+﻿{
  "_doc": "Crime and justice (tasks 04 / 09 / 09b), read by scripts/systems/justice_state.gd (table 'justice'). Sections: general, evidence, discovery, investigation, police, burglary, robbery, assault, murder, serial, process, lawyers, trial, charges (severity, bail, weighted sentence options), sentences, prison, appeal, civil, careers. Days are game days (a game year = 28). Tune rates here, not in code.",
  "general": {
   "case_cap": 160,
   "log_hours": 72,
   "staff_min_pop": 7
+ },
+ "targets": {
+  "_doc": "Measured by tests/crime_rates_test.gd over many town-years (a town = the player household, two neighbours and 12 townies; a year = 28 days). [lo, hi] bands; the test allows `tolerance` (share) beyond each end because the runs are random.",
+  "tolerance": 0.3,
+  "burglary_per_lot_year": [
+   0.04,
+   0.22
+  ],
+  "robbery_per_townie_year": [
+   0.005,
+   0.05
+  ],
+  "murder_per_household_year_max": 0.01,
+  "assault_per_town_year": [
+   0.0,
+   1.2
+  ],
+  "petty_per_town_year": [
+   0.5,
+   5.0
+  ],
+  "fraud_per_town_year": [
+   0.0,
+   1.0
+  ],
+  "arrests_per_town_year": [
+   0.2,
+   1.8
+  ],
+  "convictions_per_town_year": [
+   0.1,
+   1.4
+  ],
+  "feud_victim_dead_max": 0.1,
+  "murder_warnings_per_town_year_max": 0.6
  },
  "evidence": {
   "witness_weight": 0.7,
@@ -102,13 +137,13 @@
   "report": 0.85
  },
  "assault": {
-  "min_level": 3,
-  "min_tension": 45,
-  "base": 0.06,
+  "min_level": 4,
+  "min_tension": 70,
+  "base": 0.012,
   "traits": {
-   "hot_headed": 3.0,
-   "jealous": 1.5,
-   "competitive": 1.2,
+   "hot_headed": 2.0,
+   "jealous": 1.3,
+   "competitive": 1.1,
    "easygoing": 0.3,
    "forgiving": 0.3,
    "empath": 0.4,
@@ -125,7 +160,20 @@
   "reputation": 5,
   "police_called": 0.5,
   "far_anger": 0.5,
-  "far_daily": 0.02
+  "far_daily": 0.004,
+  "trait_cap": 3.0,
+  "course_mult": 0.25,
+  "hit_base": 0.12,
+  "hit_per_prior": 0.5,
+  "hit_cap": 0.45,
+  "memory_days": 28,
+  "cooldown_shove": 7,
+  "cooldown_hit": 21,
+  "release_calm_days": 14,
+  "course_days": 28,
+  "cool_off_tension": 35,
+  "shove_loss_mult": 0.5,
+  "_doc": "Violence is RARE and escalates in steps: arguments first (SocialConflict); only a screaming argument (level min_level) between people with tension >= min_tension can turn physical, at `base` x tension x temper; then a shove, and a hit only with chance hit_base (more after earlier incidents of the pair within memory_days). Cooldown per pair after a shove / hit (days), and `release_calm_days` for the aggressor after release from custody. Never against babies, toddlers or children. An anger-management course multiplies the temper by course_mult for course_days."
  },
  "murder": {
   "tension_w": 0.5,
@@ -143,13 +191,13 @@
    "generous": 0.7,
    "optimist": 0.8
   },
-  "start_at": 0.55,
-  "build_per_day": 12.0,
+  "start_at": 0.7,
+  "build_per_day": 8.0,
   "decay": 0.88,
   "warn_at": 45.0,
-  "vow_at": 75.0,
-  "min_days": 6,
-  "daily_chance": 0.02,
+  "vow_at": 80.0,
+  "min_days": 10,
+  "daily_chance": 0.004,
   "far_opportunity": 0.5,
   "player_lead_min": 180,
   "witness_public": 0.45,
@@ -216,320 +264,2790 @@
   "court_hours": 3
  },
  "charges": {
-  "theft": {
-   "label": "Theft",
-   "severity": 1,
-   "bail": 40,
-   "sentences": [
-    {
-     "type": "fine",
-     "weight": 5,
-     "fine": 60
-    },
-    {
-     "type": "service",
-     "weight": 3,
-     "min": 2,
-     "max": 4
-    },
-    {
-     "type": "probation",
-     "weight": 2,
-     "min": 7,
-     "max": 14
-    }
-   ]
-  },
-  "burglary": {
-   "label": "Burglary",
-   "severity": 2,
-   "bail": 120,
-   "sentences": [
-    {
-     "type": "service",
-     "weight": 2,
-     "min": 3,
-     "max": 5
-    },
-    {
-     "type": "probation",
-     "weight": 3,
-     "min": 10,
-     "max": 20
-    },
-    {
-     "type": "jail",
-     "weight": 4,
-     "min": 2,
-     "max": 6
-    },
-    {
-     "type": "fine",
-     "weight": 1,
-     "fine": 150
-    }
-   ]
-  },
-  "assault": {
-   "label": "Assault",
-   "severity": 2,
-   "bail": 100,
-   "sentences": [
-    {
-     "type": "fine",
-     "weight": 3,
-     "fine": 90
-    },
-    {
-     "type": "service",
-     "weight": 3,
-     "min": 2,
-     "max": 5
-    },
-    {
-     "type": "jail",
-     "weight": 2,
-     "min": 2,
-     "max": 4
-    },
-    {
-     "type": "probation",
-     "weight": 2,
-     "min": 8,
-     "max": 14
-    }
-   ]
-  },
-  "robbery": {
-   "label": "Robbery",
-   "severity": 3,
-   "bail": 250,
-   "sentences": [
-    {
-     "type": "jail",
-     "weight": 5,
-     "min": 4,
-     "max": 9
-    },
-    {
-     "type": "prison",
-     "weight": 3,
-     "min": 12,
-     "max": 25
-    },
-    {
-     "type": "probation",
-     "weight": 1,
-     "min": 14,
-     "max": 14
-    }
-   ]
-  },
-  "arson": {
-   "label": "Arson",
-   "severity": 3,
-   "bail": 300,
-   "sentences": [
-    {
-     "type": "jail",
-     "weight": 3,
-     "min": 6,
-     "max": 10
-    },
-    {
-     "type": "prison",
-     "weight": 5,
-     "min": 15,
-     "max": 30
-    }
-   ]
-  },
-  "perjury": {
-   "label": "Perjury",
-   "severity": 1,
-   "bail": 50,
-   "sentences": [
-    {
-     "type": "fine",
-     "weight": 1,
-     "fine": 150
-    }
-   ]
-  },
-  "manslaughter": {
-   "label": "Manslaughter",
-   "severity": 4,
-   "bail": 600,
-   "sentences": [
-    {
-     "type": "prison",
-     "weight": 6,
-     "min": 20,
-     "max": 45
-    },
-    {
-     "type": "jail",
-     "weight": 1,
-     "min": 8,
-     "max": 10
-    }
-   ]
-  },
-  "murder": {
-   "label": "Murder",
-   "severity": 5,
-   "bail": 2000,
-   "sentences": [
-    {
-     "type": "prison",
-     "weight": 6,
-     "min": 70,
-     "max": 160
-    },
-    {
-     "type": "prison",
-     "weight": 2,
-     "life": true,
-     "min": 9999,
-     "max": 9999
-    }
-   ]
-  },
   "vandalism": {
    "label": "Vandalism",
+   "class": "petty",
+   "grade": 1,
    "severity": 1,
    "bail": 30,
+   "phrase": "vandalism",
+   "description": "Damaging someone else's property.",
+   "elements": [
+    "damage to another person's property"
+   ],
+   "guideline": {
+    "fine": [
+     20,
+     60
+    ],
+    "service": [
+     1,
+     2
+    ],
+    "custody_at": 1.1,
+    "prison_at": 1.1
+   },
    "petty": true,
-   "sentences": [
-    {
-     "type": "fine",
-     "weight": 1,
-     "fine": 40
-    }
-   ]
+   "jury": false,
+   "aggravating": [
+    "prior_record",
+    "same_charge_prior",
+    "on_probation",
+    "repeat_victim"
+   ],
+   "mitigating": [
+    "first_offence",
+    "plea",
+    "remorse"
+   ],
+   "record": {
+    "job_bans": [],
+    "expunge_days": 56
+   },
+   "restitution": true,
+   "family": "vandalism",
+   "order": false,
+   "courses": [],
+   "custody_loss": false,
+   "consecutive": false,
+   "stub": false
   },
   "trespassing": {
    "label": "Trespassing",
+   "class": "petty",
+   "grade": 1,
    "severity": 1,
    "bail": 20,
+   "phrase": "trespassing",
+   "description": "Being on private property without permission.",
+   "elements": [
+    "on private property",
+    "without permission"
+   ],
+   "guideline": {
+    "fine": [
+     15,
+     45
+    ],
+    "service": [
+     1,
+     2
+    ],
+    "custody_at": 1.1,
+    "prison_at": 1.1
+   },
    "petty": true,
-   "sentences": [
-    {
-     "type": "fine",
-     "weight": 1,
-     "fine": 30
-    }
-   ]
+   "jury": false,
+   "aggravating": [
+    "prior_record",
+    "same_charge_prior",
+    "on_probation",
+    "repeat_victim"
+   ],
+   "mitigating": [
+    "first_offence",
+    "plea",
+    "remorse"
+   ],
+   "record": {
+    "job_bans": [],
+    "expunge_days": 56
+   },
+   "family": "trespassing",
+   "order": false,
+   "restitution": false,
+   "courses": [],
+   "custody_loss": false,
+   "consecutive": false,
+   "stub": false
   },
   "disturbance": {
    "label": "Public disturbance",
+   "class": "petty",
+   "grade": 1,
    "severity": 1,
    "bail": 20,
+   "phrase": "a public disturbance",
+   "description": "Shouting, brawling or keeping the street awake.",
+   "elements": [
+    "loud or disorderly behaviour in public"
+   ],
+   "guideline": {
+    "fine": [
+     10,
+     40
+    ],
+    "service": [
+     1,
+     2
+    ],
+    "custody_at": 1.1,
+    "prison_at": 1.1
+   },
    "petty": true,
-   "sentences": [
-    {
-     "type": "fine",
-     "weight": 1,
-     "fine": 25
-    }
-   ]
+   "jury": false,
+   "aggravating": [
+    "prior_record",
+    "same_charge_prior",
+    "on_probation",
+    "repeat_victim"
+   ],
+   "mitigating": [
+    "first_offence",
+    "plea",
+    "remorse"
+   ],
+   "record": {
+    "job_bans": [],
+    "expunge_days": 56
+   },
+   "family": "disturbance",
+   "order": false,
+   "restitution": false,
+   "courses": [],
+   "custody_loss": false,
+   "consecutive": false,
+   "stub": false
   },
   "shoplifting": {
    "label": "Shoplifting",
+   "class": "petty",
+   "grade": 1,
    "severity": 1,
    "bail": 20,
+   "phrase": "shoplifting",
+   "description": "Taking goods from a shop without paying.",
+   "elements": [
+    "took goods from a shop",
+    "meant not to pay"
+   ],
+   "guideline": {
+    "fine": [
+     15,
+     50
+    ],
+    "service": [
+     1,
+     3
+    ],
+    "custody_at": 1.1,
+    "prison_at": 1.1
+   },
    "petty": true,
-   "sentences": [
-    {
-     "type": "fine",
-     "weight": 1,
-     "fine": 30
-    }
-   ]
+   "jury": false,
+   "aggravating": [
+    "prior_record",
+    "same_charge_prior",
+    "on_probation",
+    "repeat_victim"
+   ],
+   "mitigating": [
+    "first_offence",
+    "plea",
+    "remorse"
+   ],
+   "record": {
+    "job_bans": [],
+    "expunge_days": 56
+   },
+   "restitution": true,
+   "family": "shoplifting",
+   "order": false,
+   "courses": [],
+   "custody_loss": false,
+   "consecutive": false,
+   "stub": false
+  },
+  "public_intoxication": {
+   "label": "Public intoxication",
+   "class": "petty",
+   "grade": 1,
+   "severity": 1,
+   "bail": 20,
+   "phrase": "public intoxication",
+   "description": "Being drunk and disorderly in a public place.",
+   "elements": [
+    "drunk in public",
+    "a nuisance or a danger to others"
+   ],
+   "guideline": {
+    "fine": [
+     10,
+     35
+    ],
+    "service": [
+     1,
+     2
+    ],
+    "custody_at": 1.1,
+    "prison_at": 1.1
+   },
+   "petty": true,
+   "jury": false,
+   "aggravating": [
+    "prior_record",
+    "same_charge_prior"
+   ],
+   "mitigating": [
+    "first_offence",
+    "plea",
+    "remorse"
+   ],
+   "record": {
+    "job_bans": [],
+    "expunge_days": 56
+   },
+   "stub": true,
+   "family": "public_intoxication",
+   "order": false,
+   "restitution": false,
+   "courses": [],
+   "custody_loss": false,
+   "consecutive": false
+  },
+  "theft": {
+   "label": "Theft",
+   "class": "misdemeanour",
+   "grade": 1,
+   "severity": 1,
+   "bail": 40,
+   "phrase": "theft",
+   "description": "Taking something that belongs to someone else.",
+   "elements": [
+    "took property",
+    "belonging to another",
+    "meant to keep it"
+   ],
+   "guideline": {
+    "fine": [
+     40,
+     120
+    ],
+    "service": [
+     2,
+     5
+    ],
+    "probation": [
+     7,
+     14
+    ],
+    "jail": [
+     1,
+     3
+    ],
+    "custody_at": 0.6,
+    "prison_at": 1.1
+   },
+   "petty": false,
+   "jury": true,
+   "aggravating": [
+    "prior_record",
+    "same_charge_prior",
+    "on_probation",
+    "repeat_victim"
+   ],
+   "mitigating": [
+    "first_offence",
+    "plea",
+    "provocation",
+    "remorse",
+    "reputation",
+    "lawyer"
+   ],
+   "record": {
+    "job_bans": [],
+    "expunge_days": 112
+   },
+   "restitution": true,
+   "family": "theft",
+   "order": false,
+   "courses": [],
+   "custody_loss": false,
+   "consecutive": false,
+   "stub": false
+  },
+  "assault": {
+   "label": "Assault",
+   "class": "misdemeanour",
+   "grade": 2,
+   "severity": 2,
+   "bail": 100,
+   "phrase": "assault on {victim}",
+   "description": "Hitting or hurting another person.",
+   "elements": [
+    "intentional force",
+    "against another person",
+    "caused pain or minor injury"
+   ],
+   "guideline": {
+    "fine": [
+     60,
+     150
+    ],
+    "service": [
+     2,
+     5
+    ],
+    "probation": [
+     8,
+     14
+    ],
+    "jail": [
+     2,
+     4
+    ],
+    "custody_at": 0.45,
+    "prison_at": 1.1
+   },
+   "petty": false,
+   "jury": true,
+   "aggravating": [
+    "prior_record",
+    "same_charge_prior",
+    "injury",
+    "child_victim",
+    "elder_victim",
+    "domestic",
+    "repeat_victim",
+    "order_breach",
+    "cruelty",
+    "on_probation"
+   ],
+   "mitigating": [
+    "first_offence",
+    "plea",
+    "provocation",
+    "remorse",
+    "reputation",
+    "lawyer"
+   ],
+   "record": {
+    "job_bans": [
+     "police_officer"
+    ],
+    "expunge_days": 112
+   },
+   "courses": [
+    "anger_management"
+   ],
+   "course_at": 0.3,
+   "restitution": true,
+   "family": "assault",
+   "order": false,
+   "custody_loss": false,
+   "consecutive": false,
+   "stub": false
+  },
+  "domestic_violence": {
+   "label": "Domestic violence",
+   "class": "misdemeanour",
+   "grade": 3,
+   "severity": 2,
+   "bail": 100,
+   "phrase": "domestic violence against {victim}",
+   "description": "A shove or a hit against a partner, a relative or someone who lives in the same home.",
+   "elements": [
+    "intentional force",
+    "against a household member, partner or relative"
+   ],
+   "guideline": {
+    "fine": [
+     60,
+     150
+    ],
+    "service": [
+     2,
+     4
+    ],
+    "probation": [
+     10,
+     20
+    ],
+    "jail": [
+     3,
+     10
+    ],
+    "custody_at": 0.38,
+    "prison_at": 1.1
+   },
+   "petty": false,
+   "jury": true,
+   "aggravating": [
+    "prior_record",
+    "same_charge_prior",
+    "injury",
+    "child_victim",
+    "elder_victim",
+    "domestic",
+    "repeat_victim",
+    "order_breach",
+    "cruelty",
+    "on_probation"
+   ],
+   "mitigating": [
+    "first_offence",
+    "plea",
+    "provocation",
+    "remorse",
+    "reputation",
+    "lawyer"
+   ],
+   "record": {
+    "job_bans": [
+     "police_officer",
+     "detective",
+     "lawyer",
+     "judge"
+    ],
+    "expunge_days": 168
+   },
+   "courses": [
+    "anger_management"
+   ],
+   "course_at": 0.2,
+   "order": true,
+   "family": "assault",
+   "restitution": false,
+   "custody_loss": false,
+   "consecutive": false,
+   "stub": false
+  },
+  "aggravated_assault": {
+   "label": "Aggravated assault",
+   "class": "felony",
+   "grade": 1,
+   "severity": 3,
+   "bail": 250,
+   "phrase": "aggravated assault on {victim}",
+   "description": "An attack that causes serious injury, uses a weapon, or targets someone vulnerable.",
+   "elements": [
+    "intentional force",
+    "serious injury, a weapon or a vulnerable victim"
+   ],
+   "guideline": {
+    "fine": [
+     100,
+     300
+    ],
+    "probation": [
+     14,
+     28
+    ],
+    "jail": [
+     5,
+     10
+    ],
+    "prison": [
+     12,
+     30
+    ],
+    "custody_at": 0.3,
+    "prison_at": 0.65
+   },
+   "petty": false,
+   "jury": true,
+   "aggravating": [
+    "prior_record",
+    "same_charge_prior",
+    "injury",
+    "child_victim",
+    "elder_victim",
+    "domestic",
+    "repeat_victim",
+    "order_breach",
+    "cruelty",
+    "on_probation"
+   ],
+   "mitigating": [
+    "first_offence",
+    "plea",
+    "provocation",
+    "remorse",
+    "reputation",
+    "lawyer"
+   ],
+   "record": {
+    "job_bans": [
+     "police_officer",
+     "detective",
+     "lawyer",
+     "judge"
+    ],
+    "expunge_days": 0
+   },
+   "courses": [
+    "anger_management"
+   ],
+   "course_at": 0.25,
+   "order": true,
+   "family": "assault",
+   "restitution": true,
+   "custody_loss": false,
+   "consecutive": false,
+   "stub": false
+  },
+  "threats": {
+   "label": "Threats and intimidation",
+   "class": "misdemeanour",
+   "grade": 2,
+   "severity": 2,
+   "bail": 80,
+   "phrase": "threatening {victim}",
+   "description": "Frightening someone with threats of harm.",
+   "elements": [
+    "a threat of harm",
+    "meant to frighten"
+   ],
+   "guideline": {
+    "fine": [
+     50,
+     120
+    ],
+    "service": [
+     2,
+     4
+    ],
+    "probation": [
+     8,
+     14
+    ],
+    "jail": [
+     2,
+     4
+    ],
+    "custody_at": 0.55,
+    "prison_at": 1.1
+   },
+   "petty": false,
+   "jury": true,
+   "aggravating": [
+    "prior_record",
+    "same_charge_prior",
+    "injury",
+    "child_victim",
+    "elder_victim",
+    "domestic",
+    "repeat_victim",
+    "order_breach",
+    "cruelty",
+    "on_probation"
+   ],
+   "mitigating": [
+    "first_offence",
+    "plea",
+    "provocation",
+    "remorse",
+    "reputation",
+    "lawyer"
+   ],
+   "record": {
+    "job_bans": [],
+    "expunge_days": 112
+   },
+   "courses": [
+    "anger_management"
+   ],
+   "course_at": 0.4,
+   "order": true,
+   "stub": true,
+   "family": "threats",
+   "restitution": false,
+   "custody_loss": false,
+   "consecutive": false
+  },
+  "harassment": {
+   "label": "Harassment or stalking",
+   "class": "misdemeanour",
+   "grade": 3,
+   "severity": 2,
+   "bail": 120,
+   "phrase": "harassing {victim}",
+   "description": "Following, watching or pestering someone who wants to be left alone.",
+   "elements": [
+    "repeated unwanted contact",
+    "caused fear or distress"
+   ],
+   "guideline": {
+    "fine": [
+     60,
+     160
+    ],
+    "probation": [
+     10,
+     20
+    ],
+    "jail": [
+     3,
+     8
+    ],
+    "custody_at": 0.5,
+    "prison_at": 1.1
+   },
+   "petty": false,
+   "jury": true,
+   "aggravating": [
+    "prior_record",
+    "same_charge_prior",
+    "injury",
+    "child_victim",
+    "elder_victim",
+    "domestic",
+    "repeat_victim",
+    "order_breach",
+    "cruelty",
+    "on_probation"
+   ],
+   "mitigating": [
+    "first_offence",
+    "plea",
+    "provocation",
+    "remorse",
+    "reputation",
+    "lawyer"
+   ],
+   "record": {
+    "job_bans": [],
+    "expunge_days": 168
+   },
+   "order": true,
+   "stub": true,
+   "family": "harassment",
+   "restitution": false,
+   "courses": [],
+   "custody_loss": false,
+   "consecutive": false
+  },
+  "child_abuse": {
+   "label": "Child abuse",
+   "class": "felony",
+   "grade": 2,
+   "severity": 4,
+   "bail": 800,
+   "phrase": "child abuse of {victim}",
+   "description": "A carer harming a child in their care.",
+   "elements": [
+    "a child under their care",
+    "harm to the child"
+   ],
+   "guideline": {
+    "fine": [
+     200,
+     500
+    ],
+    "probation": [
+     20,
+     40
+    ],
+    "jail": [
+     10,
+     10
+    ],
+    "prison": [
+     30,
+     90
+    ],
+    "custody_at": 0.0,
+    "prison_at": 0.35
+   },
+   "petty": false,
+   "jury": true,
+   "aggravating": [
+    "prior_record",
+    "same_charge_prior",
+    "injury",
+    "child_victim",
+    "repeat_victim",
+    "order_breach",
+    "cruelty",
+    "on_probation"
+   ],
+   "mitigating": [
+    "plea",
+    "remorse",
+    "lawyer"
+   ],
+   "record": {
+    "job_bans": [
+     "police_officer",
+     "detective",
+     "lawyer",
+     "judge",
+     "teacher",
+     "doctor"
+    ],
+    "expunge_days": 0
+   },
+   "courses": [
+    "parenting"
+   ],
+   "course_at": 0.0,
+   "order": true,
+   "custody_loss": true,
+   "family": "child_harm",
+   "restitution": false,
+   "consecutive": false,
+   "stub": false
+  },
+  "child_endangerment": {
+   "label": "Child endangerment",
+   "class": "felony",
+   "grade": 1,
+   "severity": 3,
+   "bail": 400,
+   "phrase": "endangering {victim}",
+   "description": "Leaving a child in danger: alone at night, near a fire, or in the care of someone who is drunk.",
+   "elements": [
+    "a child in their care",
+    "put at risk of harm"
+   ],
+   "guideline": {
+    "fine": [
+     100,
+     300
+    ],
+    "probation": [
+     14,
+     28
+    ],
+    "jail": [
+     4,
+     10
+    ],
+    "prison": [
+     12,
+     24
+    ],
+    "custody_at": 0.35,
+    "prison_at": 0.75
+   },
+   "petty": false,
+   "jury": true,
+   "aggravating": [
+    "prior_record",
+    "same_charge_prior",
+    "injury",
+    "child_victim",
+    "repeat_victim",
+    "on_probation"
+   ],
+   "mitigating": [
+    "first_offence",
+    "plea",
+    "remorse",
+    "lawyer"
+   ],
+   "record": {
+    "job_bans": [
+     "police_officer",
+     "detective",
+     "lawyer",
+     "judge",
+     "teacher",
+     "doctor"
+    ],
+    "expunge_days": 0
+   },
+   "courses": [
+    "parenting"
+   ],
+   "course_at": 0.0,
+   "order": true,
+   "custody_loss": true,
+   "family": "child_harm",
+   "restitution": false,
+   "consecutive": false,
+   "stub": false
+  },
+  "child_neglect": {
+   "label": "Child neglect",
+   "class": "misdemeanour",
+   "grade": 3,
+   "severity": 2,
+   "bail": 150,
+   "phrase": "neglecting {victim}",
+   "description": "Failing to feed, clothe or look after a child in their care.",
+   "elements": [
+    "a child in their care",
+    "basic needs not met for days"
+   ],
+   "guideline": {
+    "fine": [
+     60,
+     200
+    ],
+    "service": [
+     3,
+     6
+    ],
+    "probation": [
+     14,
+     28
+    ],
+    "jail": [
+     2,
+     6
+    ],
+    "custody_at": 0.6,
+    "prison_at": 1.1
+   },
+   "petty": false,
+   "jury": true,
+   "aggravating": [
+    "prior_record",
+    "same_charge_prior",
+    "child_victim",
+    "repeat_victim",
+    "on_probation"
+   ],
+   "mitigating": [
+    "first_offence",
+    "plea",
+    "remorse",
+    "lawyer"
+   ],
+   "record": {
+    "job_bans": [
+     "police_officer",
+     "detective",
+     "lawyer",
+     "judge",
+     "teacher",
+     "doctor"
+    ],
+    "expunge_days": 168
+   },
+   "courses": [
+    "parenting"
+   ],
+   "course_at": 0.2,
+   "family": "child_harm",
+   "order": false,
+   "restitution": false,
+   "custody_loss": false,
+   "consecutive": false,
+   "stub": false
+  },
+  "elder_abuse": {
+   "label": "Elder abuse",
+   "class": "felony",
+   "grade": 1,
+   "severity": 3,
+   "bail": 300,
+   "phrase": "elder abuse of {victim}",
+   "description": "Harming or exploiting an older person in their care.",
+   "elements": [
+    "an older person in their care",
+    "harm or exploitation"
+   ],
+   "guideline": {
+    "fine": [
+     100,
+     300
+    ],
+    "probation": [
+     14,
+     28
+    ],
+    "jail": [
+     4,
+     10
+    ],
+    "prison": [
+     12,
+     28
+    ],
+    "custody_at": 0.3,
+    "prison_at": 0.7
+   },
+   "petty": false,
+   "jury": true,
+   "aggravating": [
+    "prior_record",
+    "same_charge_prior",
+    "injury",
+    "child_victim",
+    "elder_victim",
+    "domestic",
+    "repeat_victim",
+    "order_breach",
+    "cruelty",
+    "on_probation"
+   ],
+   "mitigating": [
+    "first_offence",
+    "plea",
+    "provocation",
+    "remorse",
+    "reputation",
+    "lawyer"
+   ],
+   "record": {
+    "job_bans": [
+     "police_officer",
+     "detective",
+     "lawyer",
+     "judge",
+     "teacher",
+     "doctor"
+    ],
+    "expunge_days": 0
+   },
+   "order": true,
+   "stub": true,
+   "family": "elder_abuse",
+   "restitution": false,
+   "courses": [],
+   "custody_loss": false,
+   "consecutive": false
+  },
+  "attempted_murder": {
+   "label": "Attempted murder",
+   "class": "felony",
+   "grade": 3,
+   "severity": 5,
+   "bail": 1500,
+   "phrase": "the attempted murder of {victim}",
+   "description": "Trying to kill someone and failing.",
+   "elements": [
+    "meant to kill",
+    "took a real step to do it"
+   ],
+   "guideline": {
+    "fine": [
+     200,
+     500
+    ],
+    "prison": [
+     40,
+     100
+    ],
+    "custody_at": 0.0,
+    "prison_at": 0.0
+   },
+   "petty": false,
+   "jury": true,
+   "aggravating": [
+    "prior_record",
+    "same_charge_prior",
+    "injury",
+    "child_victim",
+    "elder_victim",
+    "domestic",
+    "repeat_victim",
+    "order_breach",
+    "cruelty",
+    "on_probation"
+   ],
+   "mitigating": [
+    "plea",
+    "provocation",
+    "remorse",
+    "lawyer"
+   ],
+   "record": {
+    "job_bans": [
+     "police_officer",
+     "detective",
+     "lawyer",
+     "judge",
+     "teacher",
+     "doctor"
+    ],
+    "expunge_days": 0
+   },
+   "order": true,
+   "stub": true,
+   "family": "attempted_murder",
+   "restitution": false,
+   "courses": [],
+   "custody_loss": false,
+   "consecutive": false
+  },
+  "custodial_interference": {
+   "label": "Custodial interference",
+   "class": "misdemeanour",
+   "grade": 3,
+   "severity": 2,
+   "bail": 120,
+   "phrase": "taking a child against a custody order",
+   "description": "Taking a child away from the person who has custody.",
+   "elements": [
+    "a child",
+    "taken against a custody order"
+   ],
+   "guideline": {
+    "fine": [
+     80,
+     200
+    ],
+    "probation": [
+     10,
+     20
+    ],
+    "jail": [
+     3,
+     8
+    ],
+    "custody_at": 0.5,
+    "prison_at": 1.1
+   },
+   "petty": false,
+   "jury": true,
+   "aggravating": [
+    "prior_record",
+    "child_victim",
+    "on_probation"
+   ],
+   "mitigating": [
+    "first_offence",
+    "plea",
+    "provocation",
+    "remorse",
+    "reputation",
+    "lawyer"
+   ],
+   "record": {
+    "job_bans": [
+     "police_officer",
+     "detective",
+     "lawyer",
+     "judge",
+     "teacher",
+     "doctor"
+    ],
+    "expunge_days": 168
+   },
+   "stub": true,
+   "family": "custodial_interference",
+   "order": false,
+   "restitution": false,
+   "courses": [],
+   "custody_loss": false,
+   "consecutive": false
+  },
+  "kidnapping": {
+   "label": "Kidnapping",
+   "class": "felony",
+   "grade": 3,
+   "severity": 4,
+   "bail": 1000,
+   "phrase": "kidnapping {victim}",
+   "description": "Taking or holding a person against their will.",
+   "elements": [
+    "took or held a person",
+    "against their will"
+   ],
+   "guideline": {
+    "fine": [
+     200,
+     500
+    ],
+    "prison": [
+     30,
+     90
+    ],
+    "custody_at": 0.0,
+    "prison_at": 0.0
+   },
+   "petty": false,
+   "jury": true,
+   "aggravating": [
+    "prior_record",
+    "same_charge_prior",
+    "injury",
+    "child_victim",
+    "elder_victim",
+    "domestic",
+    "repeat_victim",
+    "order_breach",
+    "cruelty",
+    "on_probation"
+   ],
+   "mitigating": [
+    "plea",
+    "remorse",
+    "lawyer"
+   ],
+   "record": {
+    "job_bans": [
+     "police_officer",
+     "detective",
+     "lawyer",
+     "judge",
+     "teacher",
+     "doctor"
+    ],
+    "expunge_days": 0
+   },
+   "order": true,
+   "stub": true,
+   "family": "kidnapping",
+   "restitution": false,
+   "courses": [],
+   "custody_loss": false,
+   "consecutive": false
+  },
+  "dui": {
+   "label": "Driving under the influence",
+   "class": "misdemeanour",
+   "grade": 2,
+   "severity": 2,
+   "bail": 100,
+   "phrase": "driving under the influence",
+   "description": "Driving after drinking.",
+   "elements": [
+    "drove a vehicle",
+    "impaired by drink"
+   ],
+   "guideline": {
+    "fine": [
+     80,
+     250
+    ],
+    "service": [
+     2,
+     6
+    ],
+    "probation": [
+     10,
+     20
+    ],
+    "jail": [
+     2,
+     6
+    ],
+    "custody_at": 0.55,
+    "prison_at": 1.1
+   },
+   "petty": false,
+   "jury": true,
+   "aggravating": [
+    "prior_record",
+    "same_charge_prior",
+    "injury",
+    "on_probation"
+   ],
+   "mitigating": [
+    "first_offence",
+    "plea",
+    "provocation",
+    "remorse",
+    "reputation",
+    "lawyer"
+   ],
+   "record": {
+    "job_bans": [],
+    "expunge_days": 168
+   },
+   "stub": true,
+   "family": "dui",
+   "order": false,
+   "restitution": false,
+   "courses": [],
+   "custody_loss": false,
+   "consecutive": false
+  },
+  "reckless_driving": {
+   "label": "Reckless driving",
+   "class": "misdemeanour",
+   "grade": 1,
+   "severity": 1,
+   "bail": 60,
+   "phrase": "reckless driving",
+   "description": "Driving in a way that endangers others.",
+   "elements": [
+    "drove a vehicle",
+    "with disregard for safety"
+   ],
+   "guideline": {
+    "fine": [
+     50,
+     150
+    ],
+    "service": [
+     2,
+     4
+    ],
+    "probation": [
+     7,
+     14
+    ],
+    "jail": [
+     1,
+     3
+    ],
+    "custody_at": 0.65,
+    "prison_at": 1.1
+   },
+   "petty": false,
+   "jury": true,
+   "aggravating": [
+    "prior_record",
+    "same_charge_prior",
+    "injury",
+    "on_probation"
+   ],
+   "mitigating": [
+    "first_offence",
+    "plea",
+    "provocation",
+    "remorse",
+    "reputation",
+    "lawyer"
+   ],
+   "record": {
+    "job_bans": [],
+    "expunge_days": 112
+   },
+   "stub": true,
+   "family": "reckless_driving",
+   "order": false,
+   "restitution": false,
+   "courses": [],
+   "custody_loss": false,
+   "consecutive": false
+  },
+  "vehicular_manslaughter": {
+   "label": "Vehicular manslaughter",
+   "class": "felony",
+   "grade": 3,
+   "severity": 4,
+   "bail": 800,
+   "phrase": "the death of {victim} on the road",
+   "description": "Causing a death by driving carelessly or drunk.",
+   "elements": [
+    "drove a vehicle",
+    "caused a death"
+   ],
+   "guideline": {
+    "fine": [
+     200,
+     500
+    ],
+    "prison": [
+     20,
+     50
+    ],
+    "jail": [
+     8,
+     10
+    ],
+    "custody_at": 0.0,
+    "prison_at": 0.2
+   },
+   "petty": false,
+   "jury": true,
+   "aggravating": [
+    "prior_record",
+    "same_charge_prior",
+    "on_probation",
+    "cruelty"
+   ],
+   "mitigating": [
+    "first_offence",
+    "plea",
+    "remorse",
+    "lawyer"
+   ],
+   "record": {
+    "job_bans": [
+     "police_officer",
+     "detective",
+     "lawyer",
+     "judge",
+     "teacher",
+     "doctor"
+    ],
+    "expunge_days": 0
+   },
+   "stub": true,
+   "family": "vehicular_manslaughter",
+   "order": false,
+   "restitution": false,
+   "courses": [],
+   "custody_loss": false,
+   "consecutive": false
+  },
+  "hit_and_run": {
+   "label": "Hit and run",
+   "class": "felony",
+   "grade": 1,
+   "severity": 3,
+   "bail": 300,
+   "phrase": "leaving the scene of a crash",
+   "description": "Driving away after a crash that hurt someone.",
+   "elements": [
+    "a crash",
+    "someone hurt",
+    "left the scene"
+   ],
+   "guideline": {
+    "fine": [
+     100,
+     300
+    ],
+    "probation": [
+     14,
+     28
+    ],
+    "jail": [
+     4,
+     10
+    ],
+    "prison": [
+     12,
+     24
+    ],
+    "custody_at": 0.4,
+    "prison_at": 0.8
+   },
+   "petty": false,
+   "jury": true,
+   "aggravating": [
+    "prior_record",
+    "injury",
+    "on_probation"
+   ],
+   "mitigating": [
+    "first_offence",
+    "plea",
+    "remorse",
+    "lawyer"
+   ],
+   "record": {
+    "job_bans": [],
+    "expunge_days": 0
+   },
+   "stub": true,
+   "family": "hit_and_run",
+   "order": false,
+   "restitution": false,
+   "courses": [],
+   "custody_loss": false,
+   "consecutive": false
+  },
+  "car_theft": {
+   "label": "Car theft",
+   "class": "felony",
+   "grade": 1,
+   "severity": 3,
+   "bail": 250,
+   "phrase": "car theft",
+   "description": "Taking someone's vehicle.",
+   "elements": [
+    "took a vehicle",
+    "belonging to another"
+   ],
+   "guideline": {
+    "fine": [
+     100,
+     250
+    ],
+    "probation": [
+     14,
+     28
+    ],
+    "jail": [
+     3,
+     10
+    ],
+    "prison": [
+     12,
+     24
+    ],
+    "custody_at": 0.4,
+    "prison_at": 0.85
+   },
+   "petty": false,
+   "jury": true,
+   "aggravating": [
+    "prior_record",
+    "same_charge_prior",
+    "on_probation",
+    "repeat_victim"
+   ],
+   "mitigating": [
+    "first_offence",
+    "plea",
+    "provocation",
+    "remorse",
+    "reputation",
+    "lawyer"
+   ],
+   "record": {
+    "job_bans": [],
+    "expunge_days": 0
+   },
+   "restitution": true,
+   "stub": true,
+   "family": "car_theft",
+   "order": false,
+   "courses": [],
+   "custody_loss": false,
+   "consecutive": false
+  },
+  "order_violation": {
+   "label": "Breach of a protective order",
+   "class": "misdemeanour",
+   "grade": 3,
+   "severity": 2,
+   "bail": 150,
+   "phrase": "breaking the protective order protecting {victim}",
+   "description": "Going near someone a court has ordered the person to stay away from.",
+   "elements": [
+    "a protective order in force",
+    "went near the protected person or their home"
+   ],
+   "guideline": {
+    "fine": [
+     80,
+     200
+    ],
+    "probation": [
+     10,
+     18
+    ],
+    "jail": [
+     3,
+     10
+    ],
+    "custody_at": 0.3,
+    "prison_at": 1.1
+   },
+   "petty": false,
+   "jury": true,
+   "aggravating": [
+    "prior_record",
+    "same_charge_prior",
+    "repeat_victim",
+    "cruelty",
+    "on_probation"
+   ],
+   "mitigating": [
+    "plea",
+    "remorse",
+    "lawyer"
+   ],
+   "record": {
+    "job_bans": [
+     "police_officer",
+     "detective",
+     "lawyer",
+     "judge"
+    ],
+    "expunge_days": 168
+   },
+   "consecutive": true,
+   "order": true,
+   "family": "order_violation",
+   "restitution": false,
+   "courses": [],
+   "custody_loss": false,
+   "stub": false
+  },
+  "probation_violation": {
+   "label": "Probation violation",
+   "class": "misdemeanour",
+   "grade": 1,
+   "severity": 2,
+   "bail": 100,
+   "phrase": "breaking probation",
+   "description": "Breaking the conditions of probation, usually by committing a new offence.",
+   "elements": [
+    "on probation",
+    "broke a condition or committed a new offence"
+   ],
+   "guideline": {
+    "fine": [
+     50,
+     120
+    ],
+    "probation": [
+     10,
+     20
+    ],
+    "jail": [
+     2,
+     6
+    ],
+    "custody_at": 0.4,
+    "prison_at": 1.1
+   },
+   "petty": false,
+   "jury": true,
+   "aggravating": [
+    "prior_record",
+    "same_charge_prior"
+   ],
+   "mitigating": [
+    "plea",
+    "remorse"
+   ],
+   "record": {
+    "job_bans": [],
+    "expunge_days": 112
+   },
+   "consecutive": true,
+   "family": "probation_violation",
+   "order": false,
+   "restitution": false,
+   "courses": [],
+   "custody_loss": false,
+   "stub": false
+  },
+  "resisting_arrest": {
+   "label": "Resisting arrest",
+   "class": "misdemeanour",
+   "grade": 1,
+   "severity": 2,
+   "bail": 80,
+   "phrase": "resisting arrest",
+   "description": "Fighting or running from the police.",
+   "elements": [
+    "a lawful arrest",
+    "resisted or ran"
+   ],
+   "guideline": {
+    "fine": [
+     50,
+     120
+    ],
+    "service": [
+     2,
+     4
+    ],
+    "jail": [
+     1,
+     4
+    ],
+    "custody_at": 0.6,
+    "prison_at": 1.1
+   },
+   "petty": false,
+   "jury": true,
+   "aggravating": [
+    "prior_record",
+    "injury"
+   ],
+   "mitigating": [
+    "first_offence",
+    "plea",
+    "remorse"
+   ],
+   "record": {
+    "job_bans": [
+     "police_officer"
+    ],
+    "expunge_days": 112
+   },
+   "consecutive": true,
+   "family": "resisting_arrest",
+   "order": false,
+   "restitution": false,
+   "courses": [],
+   "custody_loss": false,
+   "stub": false
+  },
+  "escape": {
+   "label": "Escape",
+   "class": "felony",
+   "grade": 1,
+   "severity": 3,
+   "bail": 400,
+   "phrase": "escaping custody",
+   "description": "Getting out of jail or prison, or running from custody.",
+   "elements": [
+    "in lawful custody",
+    "left without permission"
+   ],
+   "guideline": {
+    "fine": [
+     100,
+     200
+    ],
+    "jail": [
+     5,
+     10
+    ],
+    "prison": [
+     12,
+     30
+    ],
+    "custody_at": 0.0,
+    "prison_at": 0.5
+   },
+   "petty": false,
+   "jury": true,
+   "aggravating": [
+    "prior_record",
+    "injury"
+   ],
+   "mitigating": [
+    "plea",
+    "remorse"
+   ],
+   "record": {
+    "job_bans": [
+     "police_officer",
+     "detective",
+     "lawyer",
+     "judge"
+    ],
+    "expunge_days": 0
+   },
+   "consecutive": true,
+   "stub": true,
+   "family": "escape",
+   "order": false,
+   "restitution": false,
+   "courses": [],
+   "custody_loss": false
+  },
+  "perjury": {
+   "label": "Perjury",
+   "class": "misdemeanour",
+   "grade": 3,
+   "severity": 1,
+   "bail": 50,
+   "phrase": "lying under oath",
+   "description": "Lying on the stand in court.",
+   "elements": [
+    "under oath",
+    "a false statement"
+   ],
+   "guideline": {
+    "fine": [
+     100,
+     250
+    ],
+    "probation": [
+     10,
+     20
+    ],
+    "jail": [
+     2,
+     6
+    ],
+    "custody_at": 0.7,
+    "prison_at": 1.1
+   },
+   "petty": false,
+   "jury": true,
+   "aggravating": [
+    "prior_record",
+    "same_charge_prior"
+   ],
+   "mitigating": [
+    "first_offence",
+    "plea",
+    "remorse"
+   ],
+   "record": {
+    "job_bans": [
+     "lawyer",
+     "judge",
+     "police_officer"
+    ],
+    "expunge_days": 168
+   },
+   "family": "perjury",
+   "order": false,
+   "restitution": false,
+   "courses": [],
+   "custody_loss": false,
+   "consecutive": false,
+   "stub": false
+  },
+  "false_report": {
+   "label": "Obstruction or false report",
+   "class": "misdemeanour",
+   "grade": 2,
+   "severity": 1,
+   "bail": 60,
+   "phrase": "obstructing the police",
+   "description": "Lying to the police or getting in the way of an investigation.",
+   "elements": [
+    "false statement or interference",
+    "to the police"
+   ],
+   "guideline": {
+    "fine": [
+     60,
+     160
+    ],
+    "service": [
+     2,
+     5
+    ],
+    "probation": [
+     8,
+     14
+    ],
+    "jail": [
+     1,
+     4
+    ],
+    "custody_at": 0.6,
+    "prison_at": 1.1
+   },
+   "petty": false,
+   "jury": true,
+   "aggravating": [
+    "prior_record",
+    "same_charge_prior",
+    "on_probation"
+   ],
+   "mitigating": [
+    "first_offence",
+    "plea",
+    "provocation",
+    "remorse",
+    "reputation",
+    "lawyer"
+   ],
+   "record": {
+    "job_bans": [
+     "police_officer",
+     "detective",
+     "lawyer",
+     "judge"
+    ],
+    "expunge_days": 112
+   },
+   "stub": true,
+   "family": "false_report",
+   "order": false,
+   "restitution": false,
+   "courses": [],
+   "custody_loss": false,
+   "consecutive": false
+  },
+  "contempt": {
+   "label": "Contempt of court",
+   "class": "misdemeanour",
+   "grade": 1,
+   "severity": 1,
+   "bail": 0,
+   "phrase": "contempt of court",
+   "description": "Disrespecting or disobeying the court.",
+   "elements": [
+    "in court",
+    "disobeyed or disrupted"
+   ],
+   "guideline": {
+    "fine": [
+     40,
+     120
+    ],
+    "jail": [
+     1,
+     3
+    ],
+    "custody_at": 0.7,
+    "prison_at": 1.1
+   },
+   "petty": false,
+   "jury": true,
+   "aggravating": [
+    "prior_record",
+    "same_charge_prior"
+   ],
+   "mitigating": [
+    "first_offence",
+    "remorse"
+   ],
+   "record": {
+    "job_bans": [],
+    "expunge_days": 112
+   },
+   "stub": true,
+   "family": "contempt",
+   "order": false,
+   "restitution": false,
+   "courses": [],
+   "custody_loss": false,
+   "consecutive": false
+  },
+  "bribery": {
+   "label": "Bribery",
+   "class": "felony",
+   "grade": 1,
+   "severity": 3,
+   "bail": 300,
+   "phrase": "bribery",
+   "description": "Offering or taking money to bend the rules.",
+   "elements": [
+    "offered or took money",
+    "to influence an official"
+   ],
+   "guideline": {
+    "fine": [
+     150,
+     400
+    ],
+    "probation": [
+     14,
+     28
+    ],
+    "jail": [
+     4,
+     10
+    ],
+    "prison": [
+     12,
+     24
+    ],
+    "custody_at": 0.4,
+    "prison_at": 0.8
+   },
+   "petty": false,
+   "jury": true,
+   "aggravating": [
+    "prior_record",
+    "same_charge_prior",
+    "on_probation"
+   ],
+   "mitigating": [
+    "first_offence",
+    "plea",
+    "provocation",
+    "remorse",
+    "reputation",
+    "lawyer"
+   ],
+   "record": {
+    "job_bans": [
+     "police_officer",
+     "detective",
+     "lawyer",
+     "judge"
+    ],
+    "expunge_days": 0
+   },
+   "stub": true,
+   "family": "bribery",
+   "order": false,
+   "restitution": false,
+   "courses": [],
+   "custody_loss": false,
+   "consecutive": false
+  },
+  "receiving_stolen": {
+   "label": "Receiving stolen goods",
+   "class": "misdemeanour",
+   "grade": 3,
+   "severity": 2,
+   "bail": 100,
+   "phrase": "receiving stolen goods",
+   "description": "Keeping or selling things known to be stolen.",
+   "elements": [
+    "stolen goods",
+    "knew or should have known"
+   ],
+   "guideline": {
+    "fine": [
+     60,
+     180
+    ],
+    "service": [
+     2,
+     5
+    ],
+    "probation": [
+     8,
+     16
+    ],
+    "jail": [
+     2,
+     5
+    ],
+    "custody_at": 0.55,
+    "prison_at": 1.1
+   },
+   "petty": false,
+   "jury": true,
+   "aggravating": [
+    "prior_record",
+    "same_charge_prior",
+    "on_probation",
+    "repeat_victim"
+   ],
+   "mitigating": [
+    "first_offence",
+    "plea",
+    "provocation",
+    "remorse",
+    "reputation",
+    "lawyer"
+   ],
+   "record": {
+    "job_bans": [],
+    "expunge_days": 112
+   },
+   "restitution": true,
+   "stub": true,
+   "family": "receiving_stolen",
+   "order": false,
+   "courses": [],
+   "custody_loss": false,
+   "consecutive": false
+  },
+  "forgery": {
+   "label": "Forgery",
+   "class": "felony",
+   "grade": 1,
+   "severity": 2,
+   "bail": 150,
+   "phrase": "forgery",
+   "description": "Faking a document or a signature.",
+   "elements": [
+    "a false document",
+    "meant to deceive"
+   ],
+   "guideline": {
+    "fine": [
+     100,
+     300
+    ],
+    "probation": [
+     14,
+     28
+    ],
+    "jail": [
+     3,
+     8
+    ],
+    "prison": [
+     12,
+     20
+    ],
+    "custody_at": 0.45,
+    "prison_at": 0.85
+   },
+   "petty": false,
+   "jury": true,
+   "aggravating": [
+    "prior_record",
+    "same_charge_prior",
+    "on_probation",
+    "repeat_victim"
+   ],
+   "mitigating": [
+    "first_offence",
+    "plea",
+    "provocation",
+    "remorse",
+    "reputation",
+    "lawyer"
+   ],
+   "record": {
+    "job_bans": [
+     "lawyer",
+     "judge",
+     "police_officer"
+    ],
+    "expunge_days": 0
+   },
+   "stub": true,
+   "family": "forgery",
+   "order": false,
+   "restitution": false,
+   "courses": [],
+   "custody_loss": false,
+   "consecutive": false
+  },
+  "identity_theft": {
+   "label": "Identity theft",
+   "class": "felony",
+   "grade": 1,
+   "severity": 3,
+   "bail": 250,
+   "phrase": "identity theft",
+   "description": "Using someone else's name or papers to get money or goods.",
+   "elements": [
+    "used another person's identity",
+    "for gain"
+   ],
+   "guideline": {
+    "fine": [
+     100,
+     300
+    ],
+    "probation": [
+     14,
+     28
+    ],
+    "jail": [
+     4,
+     10
+    ],
+    "prison": [
+     12,
+     24
+    ],
+    "custody_at": 0.4,
+    "prison_at": 0.8
+   },
+   "petty": false,
+   "jury": true,
+   "aggravating": [
+    "prior_record",
+    "same_charge_prior",
+    "on_probation",
+    "repeat_victim"
+   ],
+   "mitigating": [
+    "first_offence",
+    "plea",
+    "provocation",
+    "remorse",
+    "reputation",
+    "lawyer"
+   ],
+   "record": {
+    "job_bans": [],
+    "expunge_days": 0
+   },
+   "restitution": true,
+   "stub": true,
+   "family": "identity_theft",
+   "order": false,
+   "courses": [],
+   "custody_loss": false,
+   "consecutive": false
+  },
+  "insurance_fraud": {
+   "label": "Insurance fraud",
+   "class": "felony",
+   "grade": 1,
+   "severity": 3,
+   "bail": 250,
+   "phrase": "insurance fraud",
+   "description": "Lying to an insurer to be paid for a loss that never happened.",
+   "elements": [
+    "a false claim",
+    "meant to be paid"
+   ],
+   "guideline": {
+    "fine": [
+     150,
+     400
+    ],
+    "probation": [
+     14,
+     28
+    ],
+    "jail": [
+     4,
+     10
+    ],
+    "prison": [
+     12,
+     24
+    ],
+    "custody_at": 0.45,
+    "prison_at": 0.8
+   },
+   "petty": false,
+   "jury": true,
+   "aggravating": [
+    "prior_record",
+    "same_charge_prior",
+    "on_probation",
+    "repeat_victim"
+   ],
+   "mitigating": [
+    "first_offence",
+    "plea",
+    "provocation",
+    "remorse",
+    "reputation",
+    "lawyer"
+   ],
+   "record": {
+    "job_bans": [],
+    "expunge_days": 0
+   },
+   "restitution": true,
+   "stub": true,
+   "family": "insurance_fraud",
+   "order": false,
+   "courses": [],
+   "custody_loss": false,
+   "consecutive": false
+  },
+  "burglary": {
+   "label": "Burglary",
+   "class": "felony",
+   "grade": 1,
+   "severity": 2,
+   "bail": 120,
+   "phrase": "the break-in at {place}",
+   "description": "Breaking into a home to take things.",
+   "elements": [
+    "entered a home",
+    "without permission",
+    "meant to steal"
+   ],
+   "guideline": {
+    "fine": [
+     100,
+     250
+    ],
+    "service": [
+     3,
+     5
+    ],
+    "probation": [
+     10,
+     20
+    ],
+    "jail": [
+     2,
+     6
+    ],
+    "prison": [
+     12,
+     25
+    ],
+    "custody_at": 0.4,
+    "prison_at": 0.8
+   },
+   "petty": false,
+   "jury": true,
+   "aggravating": [
+    "prior_record",
+    "same_charge_prior",
+    "on_probation",
+    "repeat_victim",
+    "injury"
+   ],
+   "mitigating": [
+    "first_offence",
+    "plea",
+    "provocation",
+    "remorse",
+    "reputation",
+    "lawyer"
+   ],
+   "record": {
+    "job_bans": [
+     "police_officer",
+     "detective",
+     "lawyer",
+     "judge"
+    ],
+    "expunge_days": 0
+   },
+   "restitution": true,
+   "family": "burglary",
+   "order": false,
+   "courses": [],
+   "custody_loss": false,
+   "consecutive": false,
+   "stub": false
+  },
+  "robbery": {
+   "label": "Robbery",
+   "class": "felony",
+   "grade": 2,
+   "severity": 3,
+   "bail": 250,
+   "phrase": "the robbery of {victim}",
+   "description": "Taking something from a person by force or threat.",
+   "elements": [
+    "took property",
+    "from a person",
+    "by force or threat"
+   ],
+   "guideline": {
+    "fine": [
+     100,
+     300
+    ],
+    "probation": [
+     14,
+     14
+    ],
+    "jail": [
+     4,
+     9
+    ],
+    "prison": [
+     12,
+     25
+    ],
+    "custody_at": 0.3,
+    "prison_at": 0.55
+   },
+   "petty": false,
+   "jury": true,
+   "aggravating": [
+    "prior_record",
+    "same_charge_prior",
+    "injury",
+    "child_victim",
+    "elder_victim",
+    "domestic",
+    "repeat_victim",
+    "order_breach",
+    "cruelty",
+    "on_probation"
+   ],
+   "mitigating": [
+    "first_offence",
+    "plea",
+    "provocation",
+    "remorse",
+    "reputation",
+    "lawyer"
+   ],
+   "record": {
+    "job_bans": [
+     "police_officer",
+     "detective",
+     "lawyer",
+     "judge"
+    ],
+    "expunge_days": 0
+   },
+   "restitution": true,
+   "family": "robbery",
+   "order": false,
+   "courses": [],
+   "custody_loss": false,
+   "consecutive": false,
+   "stub": false
+  },
+  "arson": {
+   "label": "Arson",
+   "class": "felony",
+   "grade": 2,
+   "severity": 3,
+   "bail": 300,
+   "phrase": "arson at {place}",
+   "description": "Setting a fire on purpose.",
+   "elements": [
+    "started a fire",
+    "on purpose"
+   ],
+   "guideline": {
+    "fine": [
+     150,
+     400
+    ],
+    "jail": [
+     6,
+     10
+    ],
+    "prison": [
+     15,
+     30
+    ],
+    "custody_at": 0.0,
+    "prison_at": 0.4
+   },
+   "petty": false,
+   "jury": true,
+   "aggravating": [
+    "prior_record",
+    "same_charge_prior",
+    "injury",
+    "child_victim",
+    "elder_victim",
+    "domestic",
+    "repeat_victim",
+    "order_breach",
+    "cruelty",
+    "on_probation"
+   ],
+   "mitigating": [
+    "first_offence",
+    "plea",
+    "provocation",
+    "remorse",
+    "reputation",
+    "lawyer"
+   ],
+   "record": {
+    "job_bans": [
+     "police_officer",
+     "detective",
+     "lawyer",
+     "judge",
+     "teacher",
+     "doctor"
+    ],
+    "expunge_days": 0
+   },
+   "restitution": true,
+   "family": "arson",
+   "order": false,
+   "courses": [],
+   "custody_loss": false,
+   "consecutive": false,
+   "stub": false
   },
   "fraud": {
    "label": "Fraud",
+   "class": "felony",
+   "grade": 1,
    "severity": 2,
    "bail": 120,
-   "sentences": [
-    {
-     "type": "fine",
-     "weight": 3,
-     "fine": 180
-    },
-    {
-     "type": "service",
-     "weight": 2,
-     "min": 3,
-     "max": 6
-    },
-    {
-     "type": "probation",
-     "weight": 3,
-     "min": 10,
-     "max": 20
-    },
-    {
-     "type": "jail",
-     "weight": 2,
-     "min": 2,
-     "max": 6
-    }
-   ]
+   "phrase": "fraud against {victim}",
+   "description": "Tricking someone out of money.",
+   "elements": [
+    "a deception",
+    "money or goods lost"
+   ],
+   "guideline": {
+    "fine": [
+     120,
+     300
+    ],
+    "service": [
+     3,
+     6
+    ],
+    "probation": [
+     10,
+     20
+    ],
+    "jail": [
+     2,
+     6
+    ],
+    "prison": [
+     12,
+     20
+    ],
+    "custody_at": 0.45,
+    "prison_at": 0.85
+   },
+   "petty": false,
+   "jury": true,
+   "aggravating": [
+    "prior_record",
+    "same_charge_prior",
+    "on_probation",
+    "repeat_victim"
+   ],
+   "mitigating": [
+    "first_offence",
+    "plea",
+    "provocation",
+    "remorse",
+    "reputation",
+    "lawyer"
+   ],
+   "record": {
+    "job_bans": [
+     "lawyer",
+     "judge",
+     "police_officer"
+    ],
+    "expunge_days": 0
+   },
+   "restitution": true,
+   "family": "fraud",
+   "order": false,
+   "courses": [],
+   "custody_loss": false,
+   "consecutive": false,
+   "stub": false
   },
   "embezzlement": {
    "label": "Embezzlement",
+   "class": "felony",
+   "grade": 2,
    "severity": 3,
    "bail": 300,
-   "sentences": [
-    {
-     "type": "probation",
-     "weight": 2,
-     "min": 14,
-     "max": 21
-    },
-    {
-     "type": "jail",
-     "weight": 5,
-     "min": 5,
-     "max": 10
-    },
-    {
-     "type": "prison",
-     "weight": 3,
-     "min": 12,
-     "max": 24
-    }
-   ]
+   "phrase": "missing money at work",
+   "description": "Taking money you were trusted to look after.",
+   "elements": [
+    "trusted with money",
+    "took it for themselves"
+   ],
+   "guideline": {
+    "fine": [
+     150,
+     400
+    ],
+    "probation": [
+     14,
+     21
+    ],
+    "jail": [
+     5,
+     10
+    ],
+    "prison": [
+     12,
+     24
+    ],
+    "custody_at": 0.35,
+    "prison_at": 0.7
+   },
+   "petty": false,
+   "jury": true,
+   "aggravating": [
+    "prior_record",
+    "same_charge_prior",
+    "on_probation",
+    "repeat_victim"
+   ],
+   "mitigating": [
+    "first_offence",
+    "plea",
+    "provocation",
+    "remorse",
+    "reputation",
+    "lawyer"
+   ],
+   "record": {
+    "job_bans": [
+     "lawyer",
+     "judge",
+     "police_officer"
+    ],
+    "expunge_days": 0
+   },
+   "restitution": true,
+   "family": "embezzlement",
+   "order": false,
+   "courses": [],
+   "custody_loss": false,
+   "consecutive": false,
+   "stub": false
   },
   "blackmail": {
    "label": "Blackmail",
+   "class": "felony",
+   "grade": 1,
    "severity": 2,
    "bail": 150,
-   "sentences": [
-    {
-     "type": "jail",
-     "weight": 4,
-     "min": 3,
-     "max": 8
-    },
-    {
-     "type": "probation",
-     "weight": 3,
-     "min": 10,
-     "max": 20
-    },
-    {
-     "type": "fine",
-     "weight": 2,
-     "fine": 200
-    }
-   ]
+   "phrase": "blackmailing {victim}",
+   "description": "Demanding money to keep a secret.",
+   "elements": [
+    "a secret",
+    "a demand for money",
+    "a threat to tell"
+   ],
+   "guideline": {
+    "fine": [
+     150,
+     300
+    ],
+    "probation": [
+     10,
+     20
+    ],
+    "jail": [
+     3,
+     8
+    ],
+    "custody_at": 0.3,
+    "prison_at": 1.1
+   },
+   "petty": false,
+   "jury": true,
+   "aggravating": [
+    "prior_record",
+    "same_charge_prior",
+    "injury",
+    "child_victim",
+    "elder_victim",
+    "domestic",
+    "repeat_victim",
+    "order_breach",
+    "cruelty",
+    "on_probation"
+   ],
+   "mitigating": [
+    "first_offence",
+    "plea",
+    "provocation",
+    "remorse",
+    "reputation",
+    "lawyer"
+   ],
+   "record": {
+    "job_bans": [
+     "police_officer",
+     "detective",
+     "lawyer",
+     "judge"
+    ],
+    "expunge_days": 0
+   },
+   "family": "blackmail",
+   "order": false,
+   "restitution": false,
+   "courses": [],
+   "custody_loss": false,
+   "consecutive": false,
+   "stub": false
+  },
+  "extortion": {
+   "label": "Extortion",
+   "class": "felony",
+   "grade": 2,
+   "severity": 3,
+   "bail": 300,
+   "phrase": "extortion",
+   "description": "Forcing someone to pay by threatening them.",
+   "elements": [
+    "a threat of harm or ruin",
+    "money demanded"
+   ],
+   "guideline": {
+    "fine": [
+     150,
+     400
+    ],
+    "probation": [
+     14,
+     28
+    ],
+    "jail": [
+     5,
+     10
+    ],
+    "prison": [
+     12,
+     28
+    ],
+    "custody_at": 0.3,
+    "prison_at": 0.7
+   },
+   "petty": false,
+   "jury": true,
+   "aggravating": [
+    "prior_record",
+    "same_charge_prior",
+    "injury",
+    "child_victim",
+    "elder_victim",
+    "domestic",
+    "repeat_victim",
+    "order_breach",
+    "cruelty",
+    "on_probation"
+   ],
+   "mitigating": [
+    "first_offence",
+    "plea",
+    "provocation",
+    "remorse",
+    "reputation",
+    "lawyer"
+   ],
+   "record": {
+    "job_bans": [
+     "police_officer",
+     "detective",
+     "lawyer",
+     "judge"
+    ],
+    "expunge_days": 0
+   },
+   "stub": true,
+   "family": "extortion",
+   "order": false,
+   "restitution": false,
+   "courses": [],
+   "custody_loss": false,
+   "consecutive": false
+  },
+  "manslaughter": {
+   "label": "Manslaughter",
+   "class": "felony",
+   "grade": 3,
+   "severity": 4,
+   "bail": 600,
+   "phrase": "the manslaughter of {victim}",
+   "description": "Causing a death without meaning to kill.",
+   "elements": [
+    "caused a death",
+    "no plan to kill"
+   ],
+   "guideline": {
+    "fine": [
+     100,
+     300
+    ],
+    "jail": [
+     8,
+     10
+    ],
+    "prison": [
+     20,
+     45
+    ],
+    "custody_at": 0.0,
+    "prison_at": 0.1
+   },
+   "petty": false,
+   "jury": true,
+   "aggravating": [
+    "prior_record",
+    "same_charge_prior",
+    "injury",
+    "child_victim",
+    "elder_victim",
+    "domestic",
+    "repeat_victim",
+    "order_breach",
+    "cruelty",
+    "on_probation"
+   ],
+   "mitigating": [
+    "plea",
+    "provocation",
+    "remorse",
+    "lawyer"
+   ],
+   "record": {
+    "job_bans": [
+     "police_officer",
+     "detective",
+     "lawyer",
+     "judge",
+     "teacher",
+     "doctor"
+    ],
+    "expunge_days": 0
+   },
+   "family": "manslaughter",
+   "order": false,
+   "restitution": false,
+   "courses": [],
+   "custody_loss": false,
+   "consecutive": false,
+   "stub": false
+  },
+  "murder": {
+   "label": "Murder",
+   "class": "felony",
+   "grade": 4,
+   "severity": 5,
+   "bail": 2000,
+   "phrase": "the murder of {victim}",
+   "description": "Killing someone on purpose.",
+   "elements": [
+    "caused a death",
+    "meant to kill"
+   ],
+   "guideline": {
+    "prison": [
+     70,
+     160
+    ],
+    "custody_at": 0.0,
+    "prison_at": 0.0,
+    "life_at": 0.92
+   },
+   "petty": false,
+   "jury": true,
+   "aggravating": [
+    "prior_record",
+    "same_charge_prior",
+    "injury",
+    "child_victim",
+    "elder_victim",
+    "domestic",
+    "repeat_victim",
+    "order_breach",
+    "cruelty",
+    "on_probation",
+    "multiple_victims"
+   ],
+   "mitigating": [
+    "plea",
+    "provocation",
+    "remorse",
+    "lawyer"
+   ],
+   "record": {
+    "job_bans": [
+     "police_officer",
+     "detective",
+     "lawyer",
+     "judge",
+     "teacher",
+     "doctor"
+    ],
+    "expunge_days": 0
+   },
+   "family": "murder",
+   "order": false,
+   "restitution": false,
+   "courses": [],
+   "custody_loss": false,
+   "consecutive": false,
+   "stub": false
+  },
+  "animal_cruelty": {
+   "label": "Animal cruelty",
+   "class": "misdemeanour",
+   "grade": 2,
+   "severity": 2,
+   "bail": 80,
+   "phrase": "animal cruelty",
+   "description": "Hurting or neglecting an animal.",
+   "elements": [
+    "an animal in their care",
+    "harm or neglect"
+   ],
+   "guideline": {
+    "fine": [
+     60,
+     200
+    ],
+    "service": [
+     3,
+     6
+    ],
+    "probation": [
+     10,
+     20
+    ],
+    "jail": [
+     2,
+     5
+    ],
+    "custody_at": 0.6,
+    "prison_at": 1.1
+   },
+   "petty": false,
+   "jury": true,
+   "aggravating": [
+    "prior_record",
+    "same_charge_prior",
+    "cruelty"
+   ],
+   "mitigating": [
+    "first_offence",
+    "plea",
+    "provocation",
+    "remorse",
+    "reputation",
+    "lawyer"
+   ],
+   "record": {
+    "job_bans": [],
+    "expunge_days": 112
+   },
+   "stub": true,
+   "family": "animal_cruelty",
+   "order": false,
+   "restitution": false,
+   "courses": [],
+   "custody_loss": false,
+   "consecutive": false
   }
  },
  "sentences": {
-  "plea_mult": 0.6,
-  "probation_mult": 1.5,
   "jail_max_days": 10,
   "long_warning_days": 80
  },
@@ -1096,7 +3614,14 @@
    "vandalism": 0.3,
    "trespassing": 0.2,
    "disturbance": 0.2,
-   "shoplifting": 0.3
+   "shoplifting": 0.3,
+   "order_violation": 2,
+   "domestic_violence": 3,
+   "aggravated_assault": 4,
+   "child_abuse": 8,
+   "child_endangerment": 4,
+   "child_neglect": 2,
+   "probation_violation": 0.3
   }
  },
  "traits_townie_chance": {
@@ -1201,6 +3726,235 @@
    "social": {
     "arg_mult": 1.2
    }
+  },
+  "anxious": {
+   "label": "Anxious",
+   "need_decay_mult": {},
+   "autonomy_mult": {
+    "party": 0.7
+   },
+   "likes": [],
+   "dislikes": [],
+   "refuses": [],
+   "buffs_on": {},
+   "description": "Worries first and acts second. Grew up expecting the worst.",
+   "conflicts": [
+    "easygoing"
+   ],
+   "affinities": [
+    "shy"
+   ],
+   "social": {}
+  },
+  "mistrustful": {
+   "label": "Mistrustful",
+   "need_decay_mult": {},
+   "autonomy_mult": {},
+   "likes": [],
+   "dislikes": [],
+   "refuses": [],
+   "buffs_on": {},
+   "description": "Slow to trust anyone. It was learned the hard way.",
+   "conflicts": [
+    "generous"
+   ],
+   "affinities": [
+    "loner"
+   ],
+   "social": {
+    "give": {
+     "all": -0.02
+    }
+   }
+  }
+ },
+ "domestic": {
+  "_doc": "Domestic violence consequences (task 19.1). A hit or shove between household members, family or partners is domestic. Protective order: the offender must keep away from the victim's home for order_days (+ order_repeat_days per earlier assault conviction, capped by order_max_days), issued when they are arrested (order_bail_days, until the trial) and again on a conviction. A cohabiting offender moves out. Breaking it is a crime (order_violation). victim_leaves: chance the victim (not the player's) ends the relationship / leaves. domestic_report: chance a townie victim calls the police. Repeat offenders: bail refused, jail weight x (1 + repeat_jail per earlier conviction of the same charge), days x (1 + repeat_days).",
+  "order_days": 28,
+  "order_bail_days": 10,
+  "order_repeat_days": 28,
+  "order_max_days": 112,
+  "violation_daily": 0.012,
+  "violation_extend": 14,
+  "victim_leaves": {
+   "hit": 0.4,
+   "shove": 0.1
+  },
+  "domestic_report": 0.6,
+  "repeat_jail": 1.0,
+  "repeat_days": 0.5,
+  "repeat_cap": 3,
+  "no_bail_prior": 1
+ },
+ "sentencing": {
+  "_doc": "Sentences come from the charge's guideline (charges.<id>.guideline), not from dice (task 20). The sentence SCORE (0..1) = base + aggravating factors - mitigating factors + a small judge spread. Below the charge's custody_at the sentence is non-custodial (fine, service, probation, rising with the score); at or above it jail (prison above prison_at), each interpolated between the guideline's low and high. Fines and probation are added when the guideline has them; a mandatory course from course_at; restitution = what was stolen; a protective order when the charge is order:true and there is a victim. Several charges from one incident: concurrent (the longest term counts) except charges flagged consecutive, which add on.",
+  "base": 0.3,
+  "spread": 0.04,
+  "life_score": 0.92,
+  "aggravating": {
+   "prior_record": {
+    "label": "a criminal record",
+    "weight": 0.07,
+    "cap": 4
+   },
+   "same_charge_prior": {
+    "label": "a repeat offence",
+    "weight": 0.12,
+    "cap": 3
+   },
+   "injury": {
+    "label": "serious injury",
+    "weight": 0.12
+   },
+   "child_victim": {
+    "label": "a child victim",
+    "weight": 0.25
+   },
+   "elder_victim": {
+    "label": "an older victim",
+    "weight": 0.15
+   },
+   "domestic": {
+    "label": "violence at home",
+    "weight": 0.08
+   },
+   "repeat_victim": {
+    "label": "a repeat offence against the same person",
+    "weight": 0.12,
+    "cap": 3
+   },
+   "order_breach": {
+    "label": "a broken protective order",
+    "weight": 0.2
+   },
+   "cruelty": {
+    "label": "cruelty",
+    "weight": 0.15
+   },
+   "on_probation": {
+    "label": "offending while on probation",
+    "weight": 0.1
+   },
+   "multiple_victims": {
+    "label": "more than one victim",
+    "weight": 0.75
+   }
+  },
+  "mitigating": {
+   "first_offence": {
+    "label": "a first offence",
+    "weight": 0.1
+   },
+   "plea": {
+    "label": "a guilty plea",
+    "weight": 0.12
+   },
+   "provocation": {
+    "label": "provocation",
+    "weight": 0.12
+   },
+   "remorse": {
+    "label": "remorse",
+    "weight": 0.05
+   },
+   "reputation": {
+    "label": "a good name in town",
+    "weight": 0.05
+   },
+   "lawyer": {
+    "label": "a strong lawyer",
+    "weight": 0.1
+   }
+  },
+  "course_days": {
+   "anger_management": [
+    3,
+    5
+   ],
+   "parenting": [
+    5,
+    8
+   ]
+  },
+  "course_labels": {
+   "anger_management": "an anger management course",
+   "parenting": "a parenting course"
+  }
+ },
+ "child_abuse": {
+  "_doc": "Child abuse (task 20.4): its OWN rare path, never the fight loop. Each day a carer's RISK is the sum of risk factors minus protective factors (raw, 0..1.2). While raw is above min_raw a hidden SCORE builds (build_per_day x the excess); below it the score fades (decay). At warn_at the child shows fearful moods and the player's own folk get a prompt; only at act_at is there a daily chance (daily_chance x score) of an incident: an EVENT ONLY (the child is injured, frightened, a hidden case is opened). Discovery by a teacher / doctor (mandatory reporters, high chance), a relative or neighbour, or the child telling a trusted adult; then CHILD SERVICES visit and may place the child. Data below; keep every text non-graphic.",
+  "risk": {
+   "money": 0.25,
+   "jobless": 0.08,
+   "grief": 0.12,
+   "hot_headed": 0.2,
+   "vengeful": 0.15,
+   "grudgeholder": 0.05,
+   "stubborn": 0.04,
+   "pessimist": 0.04,
+   "drunk": 0.12,
+   "abused_as_child": 0.22,
+   "child_tension": 0.2,
+   "no_support": 0.15
+  },
+  "protect": {
+   "support_one": 0.12,
+   "support_many": 0.22,
+   "therapy": 0.3,
+   "easygoing": 0.15,
+   "empath": 0.15,
+   "forgiving": 0.1,
+   "optimist": 0.05,
+   "generous": 0.04,
+   "calm_cap": 0.3,
+   "parenting_course": 0.3,
+   "parenting_days": 56,
+   "watched": 0.2,
+   "partner": 0.05
+  },
+  "min_raw": 0.35,
+  "build_per_day": 0.05,
+  "decay": 0.9,
+  "score_cap": 1.5,
+  "warn_at": 0.55,
+  "warn_cooldown": 7,
+  "act_at": 0.9,
+  "daily_chance": 0.03,
+  "incident_cooldown": 10,
+  "relief_after_incident": 0.5,
+  "serious": 0.3,
+  "trauma": {
+   "per_incident": 0.5,
+   "decay": 0.01,
+   "safe_mult": 3.0,
+   "therapy_mult": 4.0,
+   "afraid_at": 0.2,
+   "trait_chance": 0.3,
+   "school_penalty": 8
+  },
+  "discovery": {
+   "visible_days": 10,
+   "teacher_per_day": 0.3,
+   "teacher_report": 0.85,
+   "doctor_report": 0.95,
+   "relative_per_day": 0.08,
+   "relative_report": 0.55,
+   "tells_per_day": 0.05,
+   "tells_report": 0.7,
+   "late_per_day": 0.008
+  },
+  "services": {
+   "visit_delay": 1,
+   "substantiated_base": 0.5,
+   "per_incident": 0.2,
+   "injury_bonus": 0.2,
+   "removal_incidents": 2,
+   "removal_serious": true,
+   "arrest_evidence": 0.5,
+   "monitor_days": 28,
+   "follow_up_course": true,
+   "return_min_days": 14,
+   "fine_none": 0
   }
  }
 }

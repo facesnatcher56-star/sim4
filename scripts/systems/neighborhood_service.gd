@@ -1,4 +1,4 @@
-class_name NeighborhoodService
+﻿class_name NeighborhoodService
 extends RefCounted
 ## Per-minute / per-hour glue for the neighbourhood layer (called from SystemsManager). Every lot exists at once on the map, so
 ## all of this works PER LOT, using each folk's tile (Neighborhood.lot_of):
@@ -20,12 +20,20 @@ static func before_minute() -> void:
 	_postpone_visits()
 
 static func after_minute() -> void:
+	var t := PerfProf.start()
 	NeighborhoodLots.on_minute()
+	PerfProf.stop("after/NeighborhoodLots", t)
+	t = PerfProf.start()
 	Crowd.update()
+	PerfProf.stop("after/Crowd.update", t)
+	t = PerfProf.start()
 	_ambient()
 	_meetings()
 	_meetups()
+	PerfProf.stop("after/ambient+meetings+meetups", t)
+	t = PerfProf.start()
 	_closing()
+	PerfProf.stop("after/closing", t)
 
 ## Visits scheduled for the home lot cannot start while nobody is home to receive the guests.
 static func _postpone_visits() -> void:
@@ -89,11 +97,20 @@ static func _meetings() -> void:
 
 # ------------------------------------------------------------------ closing time
 static func _closing() -> void:
+	var by_lot: Dictionary = {}           # lot id -> resident ids standing there (one pass over the residents, not one per lot)
+	for r in SysUtil.residents():
+		var rl: String = Neighborhood.lot_of_folk(r)
+		if rl != "" and rl != Neighborhood.HOME:
+			if not by_lot.has(rl):
+				by_lot[rl] = []
+			(by_lot[rl] as Array).append(int(r.id))
+	if by_lot.is_empty():
+		return
 	for lot_id in Neighborhood.lot_ids():
-		if lot_id == Neighborhood.HOME:
+		if lot_id == Neighborhood.HOME or not by_lot.has(lot_id):
 			continue
 		var here: Array = []
-		for id in Neighborhood.folk_at(lot_id):
+		for id in by_lot[lot_id]:
 			if not Neighborhood.traveling(int(id)) and not SysUtil.is_away(SysUtil.folk(int(id))) and not Commute.exempt(SysUtil.folk(int(id)), lot_id):
 				here.append(int(id))
 		if here.is_empty():

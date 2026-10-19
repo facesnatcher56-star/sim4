@@ -1,4 +1,4 @@
-class_name CaseStore
+﻿class_name CaseStore
 extends RefCounted
 ## The shared CASE RECORD. One dictionary per crime, JSON safe, kept in JusticeState.cases:
 ##   id, kind (burglary | robbery | assault | murder | theft | arson | manslaughter | serial), scene ("home:1" | "town:3" | "street"), day, minute,
@@ -110,7 +110,7 @@ static func _household_knows(c: Dictionary) -> bool:
 
 static func kind_label(kind: String) -> String:
 	return {"burglary": "burglary", "robbery": "robbery", "assault": "assault", "murder": "murder", "theft": "theft", "arson": "arson",
-		"manslaughter": "manslaughter", "serial": "murder"}.get(kind, kind)
+		"manslaughter": "manslaughter", "serial": "murder", "order_violation": "breach of a protective order"}.get(kind, kind)
 
 ## One short player-facing title for lists: "Murder of Ada Finch (open)".
 static func title(c: Dictionary) -> String:
@@ -124,6 +124,7 @@ static func title(c: Dictionary) -> String:
 		"murder", "serial": base = "Death of %s" % v
 		"arson": base = "Arson at %s" % house_label(str(c["scene"]))
 		"manslaughter": base = "Death of %s" % v
+		"order_violation": base = "Broken protective order (%s)" % v
 		"fraud": base = "Fraud against %s" % v
 		"embezzlement": base = "Missing money at work"
 		"blackmail": base = "Blackmail of %s" % v
@@ -146,3 +147,20 @@ static func house_label(scene: String) -> String:
 static func state_label(c: Dictionary) -> String:
 	return {"hidden": "Unnoticed", "open": "Open", "cold": "Cold", "arrested": "Suspect held", "charged": "Charged", "trial": "In court",
 		"closed": "Closed"}.get(str(c["state"]), str(c["state"]))
+
+## The accused died before the trial (or before the sentence ended): the case is closed with a plain line in the notes and the Chronicle.
+static func close_for_death(c: Dictionary, pid: int) -> void:
+	if str(c["state"]) in ["closed"] or int(c.get("accused", -1)) != pid:
+		return
+	c["state"] = "closed"
+	c["closed_day"] = SysUtil.day()
+	c["verdict"] = ""
+	c["died_before_trial"] = true
+	JusticeState.inmates.erase(pid)
+	note(c, "%s died before the trial. The case is closed." % CrimePerson.name_of(pid), "case_closed", 3)
+
+## Called when somebody dies: any case that was waiting for their trial is closed.
+static func on_death(pid: int) -> void:
+	for c in in_state(["arrested", "charged", "trial"]):
+		if int(c.get("accused", -1)) == pid:
+			close_for_death(c, pid)

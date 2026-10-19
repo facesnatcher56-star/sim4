@@ -1,4 +1,4 @@
-class_name LevelBuild
+﻿class_name LevelBuild
 extends RefCounted
 ## Build mode for multi-floor buildings (`World.lbuild`): add a floor above / a basement below, paint floors and draw walls on a level,
 ## roof styles, the STRUCTURE RULES and their prices. Objects are placed with World.buy_place(..., level) as always.
@@ -204,6 +204,7 @@ func add_level(bid: int, above: bool, household_id: int = -1) -> int:
 		_extend_lifts(bid, new_level)
 	else:
 		world.levels.set_range(bid, new_level, old_hi)
+		_extend_lifts_down(bid, new_level)
 	world.rooms.invalidate_all()
 	world._emit("walls_changed")
 	world._emit("floors_changed")
@@ -275,12 +276,38 @@ func _extend_lifts(bid: int, new_top: int) -> void:
 		world.portals.on_created(o)
 
 
+## Lifts that started at the old lowest level now start in the new basement (same object id, state and owner).
+func _extend_lifts_down(bid: int, new_bottom: int) -> void:
+	for rec in world.portals.portals.values().duplicate():
+		if str(rec["kind"]) != "elevator" or world.levels.building_at(rec["tile"]) != bid or int(rec["base"]) != new_bottom + 1:
+			continue
+		var o = world.objects.get(int(rec["id"]), null)
+		if o == null:
+			continue
+		var lay := world.levels.layer(new_bottom)
+		if not lay.floors.has(o.tile) or lay.occ.has(o.tile) or lay.holes.has(o.tile):
+			continue
+		_move_lift(o, new_bottom, int(rec["top"]))
+
+
+## Re-create a lift (same id, tile, state) with another base level and top level.
+func _move_lift(o, base: int, top: int) -> void:
+	var data: Dictionary = o.to_dict()
+	var oid: int = o.id
+	world.remove_object(oid)
+	var nid: int = world._create_object(str(data["def_id"]), o.tile, int(data["rot"]), oid, base, top - base)
+	if nid != -1:
+		world.objects[nid].state = (data["state"] as Dictionary).duplicate(true)
+
+
 ## Remove the top / bottom level again (undo of add_level; also a player "remove floor" when it is empty).
 func remove_level(bid: int, level: int, lo: int, hi: int) -> void:
 	world.levels.layers.erase(level)
 	world.levels.set_range(bid, lo, hi)
 	for o in world.objects.values().duplicate():
-		if o.level == level:
+		if o.level == level and o.span > 0 and level < 0 and lo >= level + 1:          # a lift that reached down to the removed basement: shorten it
+			_move_lift(o, level + 1, o.level + o.span)
+		elif o.level == level:
 			world.remove_object(o.id)
 		elif o.span > 0 and o.level + o.span >= level and o.level < level:
 			world.portals.on_removed(o)
@@ -423,6 +450,11 @@ func portal_fits(d: Dictionary, tile: Vector2i, rot: int, level: int) -> bool:
 	var dz := int(pd.get("dz", 1))
 	if kind == "elevator":
 		for m in range(level + 1, int(b["max"]) + 1):
+			if m == 0:                       # a lift that starts in a basement passes the ground floor (not stored in a layer)
+				if not world.is_walkable(tile):
+					world.last_error = "The lift shaft needs floor and free space on every floor above."
+					return false
+				continue
 			var lay := world.levels.layer(m, false)
 			if lay == null or not lay.floors.has(tile) or lay.occ.has(tile) or lay.holes.has(tile):
 				world.last_error = "The lift shaft needs floor and free space on every floor above."
