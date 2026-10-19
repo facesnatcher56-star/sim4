@@ -28,6 +28,7 @@ func run() -> Array:
 		Family.link_parent(cast[i].id, cast[0].id)
 		Family.link_parent(cast[i].id, cast[1].id)
 	Family.link_parent(cast[4].id, cast[0].id)
+	Family.link_parent(cast[4].id, cast[1].id)      # both parents: with only the mother linked, Dad and Aunt were strangers until Mum and Dad paired up (a step relation formed AFTER the romance)
 	Careers.auto_accept_offers = false
 	for a in cast:                       # everyone knows everyone: the kind of household where trouble would start
 		for b in cast:
