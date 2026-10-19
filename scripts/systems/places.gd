@@ -56,11 +56,20 @@ static func schedule(pid: String) -> Array:
 static func _day_ok(days: Array, wd: int) -> bool:
 	return days.is_empty() or SysUtil.has_int(days, wd)
 
+static var _hol_day: int = -1
+static var _hol_on: bool = false
+
+static func _holiday_on(day: int) -> bool:
+	if day != _hol_day:
+		_hol_day = day
+		_hol_on = not Holidays.today(day).is_empty()
+	return _hol_on
+
 ## Does this schedule row apply on game day `day`? Weekdays (`days`), days of the year (`doy`, the block party) and holidays (`holiday`, the parade).
 static func _row_day_ok(row: Dictionary, day: int) -> bool:
 	if row.has("doy") and not SysUtil.has_int(row["doy"], Aging.doy(day)):
 		return false
-	if bool(row.get("holiday", false)) and Holidays.today(day).is_empty():
+	if bool(row.get("holiday", false)) and not _holiday_on(day):
 		return false
 	return _day_ok(row.get("days", []), SysUtil.weekday(day))
 
@@ -121,13 +130,17 @@ const HOME := "@home"          # a place in the person's own house (the radio, t
 
 static var _hosted: Dictionary = {}          # venue type -> [place ids]
 static var _hosted_n: int = -1               # number of lots when it was built
+static var _xcache: Dictionary = {}          # venue type -> {game minute: open because of a place}
 
 static func reset() -> void:
 	_hosted = {}
 	_hosted_n = -1
+	_xcache.clear()
+	_hol_day = -1
 
 static func _build_hosted() -> void:
 	_hosted = {}
+	_xcache.clear()
 	_hosted_n = Neighborhood.lots().size()
 	for pid in all():
 		var lot: Dictionary = Neighborhood.lot(lot_of(pid))
@@ -142,10 +155,22 @@ static func _build_hosted() -> void:
 static func extra_open(vtype: String, at_min: int) -> bool:
 	if _hosted_n != Neighborhood.lots().size():
 		_build_hosted()
-	for pid in _hosted.get(vtype, []):
+	var places: Array = _hosted.get(vtype, [])
+	if places.is_empty():
+		return false
+	var cache: Dictionary = _xcache.get(vtype, {})
+	if cache.has(at_min):
+		return bool(cache[at_min])
+	var open := false
+	for pid in places:
 		if open_at(str(pid), at_min):
-			return true
-	return false
+			open = true
+			break
+	if cache.size() > 600:
+		cache.clear()
+	cache[at_min] = open
+	_xcache[vtype] = cache
+	return open
 
 ## Is the host lot really on the map (a test world or the classic single lot has none: then nobody has to walk anywhere)?
 static func on_map(lot: String) -> bool:
