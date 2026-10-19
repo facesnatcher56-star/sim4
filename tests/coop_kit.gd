@@ -16,6 +16,7 @@ class FakeNet:
 	func _init() -> void:
 		host = CoopHost.new()
 		host.snapshot_fn = _snap
+		host.live_enabled = false          # these tests have no world to describe; coop_players_test / coop_net_test cover the live deltas
 		host.send_fn = func(id: int, b: PackedByteArray, _ch: int):
 			if not to_client.has(id):
 				to_client[id] = []
@@ -40,6 +41,7 @@ class FakeNet:
 		c.send_fn = func(b: PackedByteArray, _ch: int): to_host.append([id, b])
 		c.load_fn = func(_text: String) -> String: return ""
 		c.hash_fn = func() -> String: return snap_hash
+		c.view_fn = func(_d: Dictionary) -> String: return ""
 		clients[id] = c
 		to_client[id] = []
 		host.peer_connected(id, now)

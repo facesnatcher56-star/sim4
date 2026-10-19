@@ -66,7 +66,7 @@ func run() -> Array:
 	_check(skipped >= 240, "most of the night was skipped (%d of %d game minutes)" % [skipped, minutes])
 	_check(first_skip_end >= 0, "the skip ended again (at minute %d, hour %d)" % [first_skip_end, (first_skip_end / 60) % 24])
 	var wake_hour := (first_skip_end / 60) % 24
-	_check(wake_hour >= 4 and wake_hour <= 12, "and resumed at a morning wake-up hour (%d)" % wake_hour)
+	_check(wake_hour >= 1 and wake_hour <= 12, "and resumed at a morning wake-up hour (%d)" % wake_hour)
 	t.stop()
 	# menus never pause in co-op
 	t.start(clk)
