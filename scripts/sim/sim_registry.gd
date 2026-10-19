@@ -32,6 +32,7 @@ static func systems_rows(sm: Object) -> Array:
 	var autosave_on := Callable(sm, "autosave_active")
 	return [
 		# --- minute layer (was SystemsManager._minute_steps)
+		["Tiers", "Tiers", 1, 90, C, "total", Tiers.refresh, null, "assigns ACTIVE / NEAR per person (hysteresis, cap); loops the world's folk only, cached by position"],
 		["NeighborhoodService.before", "NeighborhoodService", 1, 210, N, "", NeighborhoodService.before_minute, null, "ACTIVE: lots with folk; far lots summarised"],
 		["CareerShifts", "CareerShifts", 1, 220, N, "", CareerShifts.on_minute, null, "ACTIVE: people with a shift today (timed wake-up candidate)"],
 		["Away", "Away", 1, 230, N, "", Away.on_minute, null, "people currently away only"],
@@ -105,6 +106,7 @@ static func install(sched: SimScheduler, group: String, rows: Array) -> void:
 
 static func install_systems(sched: SimScheduler, sm: Object) -> void:
 	install(sched, systems_group(sm), systems_rows(sm))
+	TownSim.install(sched, systems_group(sm))
 
 static func install_director(sched: SimScheduler, dir: Object) -> void:
 	install(sched, director_group(dir), director_rows(dir))

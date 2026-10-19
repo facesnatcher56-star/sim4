@@ -1,0 +1,23 @@
+{
+  "_doc": "Level-of-detail tiers (task 17.3). Radii in tiles (Chebyshev), times in game minutes. See scripts/sim/tiers.gd and docs/PERFORMANCE.md.",
+  "active_radius": 24,
+  "adjacent_rect": 8,
+  "near_radius": 64,
+  "town_radius": 96,
+  "demote_min": 10,
+  "active_cap": 60,
+  "stickiness": 4,
+  "near_period": 5,
+  "far_near_period": 10,
+  "far_near_dist": 44,
+  "town_period": 15,
+  "open_lot_types": ["park"],
+  "town": {
+    "fresh_min": 120,
+    "relax_hours": 6.0,
+    "leisure_from": 17.0,
+    "leisure_to": 21.5,
+    "leisure_chance": 0.35,
+    "need_noise": 6.0
+  }
+}

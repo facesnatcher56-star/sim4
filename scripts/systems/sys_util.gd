@@ -84,6 +84,7 @@ static func world_remove_folk(id: int) -> void:
 		w.remove_folk(id)
 	elif "folk" in w and w.folk is Dictionary:
 		(w.folk as Dictionary).erase(id)
+		Tiers.on_removed(id)
 		SimEnv.emit("folk_removed", id)
 
 static func world_add_folk(f, tile: Vector2i) -> void:

@@ -55,6 +55,7 @@ func objects_in_radius(tile: Vector2i, r: int) -> Array:
 func add_folk(f, tile: Vector2i = Vector2i.ZERO) -> void:
 	f.tile = tile
 	folk[f.id] = f
+	Tiers.on_added(f)
 
 func get_folk(id: int):
 	return folk.get(id, null)

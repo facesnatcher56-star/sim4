@@ -309,6 +309,7 @@ func add_folk(f, tile: Vector2i, level: int = 0) -> void:
 	f.tile = tile
 	f.level = level
 	folk[f.id] = f
+	Tiers.on_added(f)
 	_emit("folk_added", f.id)
 
 
@@ -317,6 +318,7 @@ func remove_folk(folk_id: int) -> void:
 		return
 	release_all(folk_id)
 	folk.erase(folk_id)
+	Tiers.on_removed(folk_id)
 	folk_pose.erase(folk_id)
 	_emit("folk_removed", folk_id)
 
