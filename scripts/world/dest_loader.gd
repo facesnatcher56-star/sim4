@@ -16,7 +16,9 @@ static func zone_count() -> int:
 static func zone_rect(i: int) -> Rect2i:
 	var z: Dictionary = DestDefs.zone_config()
 	var xs: Array = z.get("xs", [6])
-	return Rect2i(int(xs[clampi(i, 0, xs.size() - 1)]), int(z.get("y", 97)), int(z.get("w", 32)), int(z.get("h", 22)))
+	# the zones sit in the woods strip below the lots: its top row (data/map_layout.json south_strip.y) + `below_strip`
+	var y: int = int((MapBuilder.layout().get("south_strip", {}) as Dictionary).get("y", 127)) + int(z.get("below_strip", 2))
+	return Rect2i(int(xs[clampi(i, 0, xs.size() - 1)]), y, int(z.get("w", 32)), int(z.get("h", 22)))
 
 static func _world():
 	return WorldIface.world()

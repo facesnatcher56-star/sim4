@@ -1,4 +1,4 @@
-﻿class_name Crowd
+class_name Crowd
 extends RefCounted
 ## Ambient NPCs of the venue lots: townies (with their Genetics appearance) who are tuned to the venue by their starting needs
 ## and a hidden "regular" buff, plus uniformed staff (barista, trainer, cashier...) that stand at their post. Every venue lot of
@@ -101,7 +101,7 @@ static func update(force: bool = false) -> void:
 	t = PerfProf.start()
 	var seen: Array = []                  # tiles of the visible residents, listed once (not once per lot)
 	for r in SysUtil.residents():
-		if not SysUtil.is_away(r):
+		if not SysUtil.is_away(r) and not r.has_meta("trip_zone"):      # task 22: travellers parked in a holiday zone do not wake the town
 			seen.append(r.tile)
 	for lot_id in Neighborhood.lot_ids():
 		if lot_id == Neighborhood.HOME:

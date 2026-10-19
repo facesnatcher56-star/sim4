@@ -1,7 +1,7 @@
 {
  "_doc": "Task 22: vacations. config = numbers, destinations = the four holiday places (the cruise is data/cruise_ship.json), content = ContentMerge block (objects / interactions / buffs) installed by VacationContent. Every price in coins, every length in game days / minutes.",
  "config": {
-  "zones": {"y": 97, "w": 32, "h": 22, "xs": [6, 42, 78, 114]},
+  "zones": {"below_strip": 2, "w": 32, "h": 22, "xs": [6, 42, 78, 114]},
   "depart_delay_min": 30,
   "arrival_spread": 2,
   "max_guests": 3,

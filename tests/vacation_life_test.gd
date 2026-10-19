@@ -47,6 +47,9 @@ func _beach_with_autonomy() -> void:
 	for lot in Neighborhood.lot_ids():
 		if lot != Neighborhood.HOME:
 			venue_crowd += Crowd.count(lot)
+	for lot2 in Neighborhood.lot_ids():
+		if Crowd.count(lot2) > 0:
+			print("   crowd in ", lot2, ": ", Crowd.count(lot2), " ", NeighborhoodLots.distance_to(folk[0].tile, lot2))
 	_check(venue_crowd == 0, "the town's venues stay empty while the party is away at the zone (%d crowd NPCs)" % venue_crowd)
 	_check(VacationLife.present_ids(t).size() >= 3, "locals are about")
 	var driven := 0

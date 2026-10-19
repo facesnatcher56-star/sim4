@@ -36,6 +36,8 @@ func _storm_and_bug() -> void:
 	_check(bool(r["ok"]), "storm forced")
 	_check(int(t["cruise"]["storm_until"]) > K.now() and str(t["cruise"]["sea"]) == "rough", "the storm is on")
 	_check(VacationLog.count("incident") >= 1, "the storm is in the story")
+	for _i in 8:                                              # 55% each per roll: a few rolls make the check independent of the dice
+		CruiseLife._seasick(t)
 	var seasick := 0
 	for f in VacationTrip.members(t):
 		if f.has_buff("seasick"):

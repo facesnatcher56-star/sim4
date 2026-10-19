@@ -159,12 +159,9 @@ static func restore(d: Dictionary) -> bool:
 	MarketTick.from_dict(sy.get("econ", {}), sy.has("econ"))
 	MarketTick.install()
 	ShareState.deliver_pending()      # gifts and letters left in a shared town arrive once
-	return true
-
-## Autosave (slot 0) Ã¢â‚¬â€ SystemsManager calls this each game day.
 	Vacation.from_dict(sy.get("vacation", {}))
 	return true
 
-## Autosave (slot 0) ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â SystemsManager calls this each game day.
+## Autosave (slot 0): SystemsManager calls this each game day.
 static func autosave() -> bool:
 	return save(autosave_slot, "Autosave")

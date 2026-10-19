@@ -48,6 +48,10 @@ static func home_tile() -> Vector2i:
 
 # ------------------------------------------------------------------ the machine
 static func step(t: Dictionary, now: int) -> void:
+	if str(t["state"]) in ["outbound", "there", "inbound"]:
+		for f in members(t):
+			if Hospital.is_in(int(f.id)):
+				detach_to_hospital(t, f)
 	match str(t["state"]):
 		"booked":
 			if now >= int(t["depart_min"]):
@@ -149,6 +153,20 @@ static func place_one(f, tile: Vector2i, level: int, lot: String, zone: int) -> 
 	NeighborhoodLots.mark_inside(f, lot)
 	f.idle_until_min = 0
 	Neighborhood.refresh_view(int(f.id))
+
+## A traveller taken ill enough for the hospital (HospitalWard moves them to the ward, Hospital.admit recalls any Away) leaves the trip:
+## the hospital owns them now and sends them home when they are discharged.
+static func detach_to_hospital(t: Dictionary, f) -> void:
+	var fid: int = int(f.id)
+	f.remove_meta("trip_id")
+	f.remove_meta("trip_zone")
+	f.remove_buff("on_trip")
+	f.remove_buff("on_cruise")
+	(t["folk"] as Array).erase(fid)
+	(t["left"] as Array).append(fid)
+	Vacation._by_folk.erase(fid)
+	SysUtil.notify("%s was taken to hospital and the holiday is over for them." % f.name, "warn")
+	VacationLog.note(t, "incident", "%s was taken to hospital and left the trip." % f.name, [fid], 3, true)
 
 ## A traveller who got home on their own (flown home after missing the ship): the holiday is over for them.
 static func send_home_early(t: Dictionary, f) -> void:
