@@ -442,6 +442,14 @@
     "rot": 0
    },
    {
+    "def": "buffet_table",
+    "tile": [
+     22,
+     10
+    ],
+    "rot": 0
+   },
+   {
     "def": "sunbed",
     "tile": [
      29,

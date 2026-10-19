@@ -471,7 +471,7 @@
     "rot": 0
    },
    {
-    "def": "bar_counter",
+    "def": "buffet_table",
     "tile": [
      15,
      3
@@ -479,7 +479,7 @@
     "rot": 0
    },
    {
-    "def": "fridge",
+    "def": "holiday_fridge",
     "tile": [
      9,
      3

@@ -266,5 +266,9 @@ static func after_load(t: Dictionary) -> void:
 		if str(t["dest"]) == "cruise":
 			Cruise.after_load(t)
 	elif str(t["state"]) in ["outbound", "inbound"]:
+		var left: int = (int(t["arrive_min"]) if str(t["state"]) == "outbound" else int(t["return_min"])) - SysUtil.now()
 		for f2 in members(t):
 			f2.set_meta("trip_id", int(t["id"]))
+			var fid: int = int(f2.id)
+			if not Away.active.has(fid) and not Away.pending.has(fid):       # saved before the hidden journey had started: start it now
+				Away.send(f2, float(maxi(left, 2)), "vacation", {"label": "Travelling", "trip": int(t["id"])})

@@ -75,23 +75,14 @@ static func quote(hid: int, dest: String, opts: Dictionary = {}) -> Dictionary:
 	for f3 in members:
 		if not who.has(f3):
 			stay.append(f3)
-	var minders: int = 0
-	var little: int = 0
-	for f4 in who:
-		if str(f4.age_stage) in ["baby", "toddler", "child"]:
-			little += 1
-	for s in stay:
-		if str(s.age_stage) in ["adult", "elder"]:
-			minders += 1
-		if str(s.age_stage) in ["baby", "toddler", "child"] and minders == 0:
-			pass
-	var grown_going: int = who.size() - little
-	if little > 0 and grown_going - 0 <= 0:
+	var young: Callable = func(x): return str(x.age_stage) in ["baby", "toddler", "child"]
+	var little_going: int = who.filter(young).size()
+	if little_going > 0 and who.size() - little_going <= 0:
 		return _fail("Children cannot travel without a grown-up.")
-	for s2 in stay:
-		if str(s2.age_stage) in ["baby", "toddler", "child"] and minders == 0:
-			return _fail("%s would be home alone. Take them along or leave a grown-up behind." % s2.name)
-	var guests: Array = []
+	var grown_home: int = stay.filter(func(x): return str(x.age_stage) in ["adult", "elder"]).size()
+	for s in stay:
+		if young.call(s) and grown_home == 0:
+			return _fail("%s would be home alone. Take them along or leave a grown-up behind." % s.name)	var guests: Array = []
 	for g in opts.get("guests", []):
 		if Story.townies.has(int(g)) and bool(Story.townies[int(g)].get("alive", false)) and not CrimePerson.in_custody(int(g)) \
 				and Story.stage_of(Story.townies[int(g)]) in ["teen", "adult", "elder"]:
@@ -105,6 +96,10 @@ static func quote(hid: int, dest: String, opts: Dictionary = {}) -> Dictionary:
 	var q: Dictionary = _prices(dest, people, days, opts)
 	if not bool(q.get("ok", true)):
 		return q
+	if dest == "cruise":
+		var need: String = str((cruise_cfg().get("packages", {}) as Dictionary).get(str(q.get("package_id", "")), {}).get("needs", ""))
+		if need != "" and not _package_ok(who, need):
+			return _fail("The %s package is for %s." % [str(q["package_id"]), "a married couple" if need == "married" else "a couple"])
 	var lines: Array = q["lines"]
 	var sitter: int = 0
 	if bool(opts.get("sitter", false)):
@@ -133,6 +128,18 @@ static func quote(hid: int, dest: String, opts: Dictionary = {}) -> Dictionary:
 		res["ok"] = false
 		res["reason"] = "That costs %d coins, and the bills still to come need %d. The household has %d." % [total, reserve, Economy.balance(hid)]
 	return res
+
+## Honeymoon = two of the party are married to each other, anniversary = any couple.
+static func _package_ok(who: Array, need: String) -> bool:
+	for a in who:
+		for b in who:
+			if int(a.id) < int(b.id):
+				var bit: String = RelationshipBits.bit_for(int(a.id), int(b.id))
+				if need == "married" and bit == "spouse":
+					return true
+				if need == "couple" and bit in ["spouse", "partner", "sweetheart"]:
+					return true
+	return false
 
 static func _day_start(minute: int) -> int:
 	return (minute / 1440) * 1440

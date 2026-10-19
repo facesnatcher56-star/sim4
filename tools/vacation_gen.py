@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env python3
+#!/usr/bin/env python3
 """Generates the destination maps and the cruise ship (data/destinations/*.json, data/cruise_ship.json).
 Run:  python tools/vacation_gen.py     (from the repo root; output is committed, the game never runs this)
 Templates use the lot template format (LotLoader) in a 32 x 22 zone; the ship is a multi-floor `levels` template.
@@ -109,6 +109,7 @@ def beach():
     t.obj("bar_counter", 25, 8)
     t.obj("table", 26, 6)
     t.obj("souvenir_stand", 28, 10)
+    t.obj("buffet_table", 22, 10)
     t.obj("sunbed", 29, 5)
     t.obj("hot_tub", 2, 9)
     t.obj("plant", 1, 13)
@@ -132,7 +133,7 @@ def mountain():
     t.window(14, 12, 2)
     t.window(4, 8, 3)
     t.window(17, 8, 1)
-    t.obj("fridge", 5, 5)
+    t.obj("holiday_fridge", 5, 5)
     t.obj("stove", 6, 5)
     t.obj("counter", 7, 5)
     t.obj("sink", 8, 5)
@@ -188,8 +189,8 @@ def city():
     t.obj("table", 13, 3)
     t.obj("table", 10, 5)
     t.obj("table", 13, 5)
-    t.obj("bar_counter", 15, 3)
-    t.obj("fridge", 9, 3)
+    t.obj("buffet_table", 15, 3)
+    t.obj("holiday_fridge", 9, 3)
     # hotel
     t.obj("bed", 18, 3)
     t.obj("wardrobe", 22, 3)
@@ -272,15 +273,15 @@ def cabin(t, level, x0, x1, north, kind, cabins, cid):
     xm = (x0 + x1) // 2
     t.door(xm, door_y, door_rot, level)
     t.obj("bed", x0, bed_y, 0, level)
-    t.obj("wardrobe", x1, wy, rot, level)
-    t.obj("toilet", x1 - 1, wy, rot, level)
-    t.obj("sink", x1 - 2, wy, rot, level)
+    t.obj("toilet", x1, wy, rot, level)
+    t.obj("sink", x1 - 1, wy, rot, level)
+    t.obj("wardrobe", x1 - 2, wy, rot, level)
+    t.obj("shower", x1, (y0 + 2) if north else (y1 - 2), 0, level)
     t.obj("lamp", x0 + 3, (y0 + 2) if north else (y1 - 2), 0 if north else 2, level)
     cabins.append({"id": cid, "class": kind, "level": level, "tile": [x0 + 2, (y0 + 2) if north else (y1 - 2)]})
     if kind != "inside":
         t.window(xm - 1, HY0 if north else HY1, 0 if north else 2, level)
     if kind == "suite":
-        t.obj("shower", x1 - 3, wy, rot, level)
         t.obj("sofa", x0 + 3, (y0 + 4) if north else (y1 - 4), 0, level)
         t.obj("tv", x1, (y0 + 4) if north else (y1 - 4), 0, level)
         t.obj("armchair", x0 + 6, (y0 + 4) if north else (y1 - 4), 0, level)
@@ -339,7 +340,7 @@ def ship():
     t.obj("souvenir_stand", 5, 4); t.obj("computer", 7, 4); t.obj("vending_machine", 9, 4); t.obj("plant", 4, 8, 2)
     for x in (11, 14, 17, 20):
         t.obj("table", x, 6); t.obj("table", x, 8)
-    t.obj("bar_counter", 11, 4); t.obj("fridge", 20, 4)
+    t.obj("bar_counter", 11, 4); t.obj("holiday_fridge", 20, 4)
     t.obj("buffet_table", 23, 4); t.obj("buffet_table", 25, 4); t.obj("table", 23, 7); t.obj("table", 25, 7)
     t.obj("shop_stall", 5, 13); t.obj("shop_stall", 7, 13); t.obj("souvenir_stand", 9, 13)
     t.obj("sofa", 11, 13); t.obj("sofa", 18, 13); t.obj("piano", 14, 13); t.obj("tv", 20, 13)
@@ -394,7 +395,7 @@ def ship():
         cabin(t, -1, a, b, True, "inside", cabins, "c1n%d" % ci)
     for (a, b) in rooms_s[-1]:
         s_door(-1, a, b)
-    t.obj("stove", 5, 13, 0, -1); t.obj("counter", 6, 13, 0, -1); t.obj("fridge", 7, 13, 0, -1); t.obj("table", 6, 16, 0, -1); t.obj("table", 9, 16, 0, -1)
+    t.obj("stove", 5, 13, 0, -1); t.obj("counter", 6, 13, 0, -1); t.obj("holiday_fridge", 7, 13, 0, -1); t.obj("table", 6, 16, 0, -1); t.obj("table", 9, 16, 0, -1)
     t.obj("bunk_bed", 13, 13, 0, -1); t.obj("bunk_bed", 15, 13, 0, -1); t.obj("bunk_bed", 17, 13, 0, -1); t.obj("wardrobe", 13, 17, 2, -1)
     t.obj("terminal", 21, 13, 0, -1); t.obj("workbench", 23, 13, 0, -1); t.obj("desk", 26, 13, 0, -1); t.obj("single_bed", 26, 16, 0, -1)
     t.obj("fire_extinguisher", 20, 16, 2, -1)

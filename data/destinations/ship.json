@@ -384,7 +384,7 @@
     "rot": 0
    },
    {
-    "def": "fridge",
+    "def": "holiday_fridge",
     "tile": [
      20,
      4
@@ -1102,7 +1102,7 @@
     "level": 3
    },
    {
-    "def": "wardrobe",
+    "def": "toilet",
     "tile": [
      15,
      4
@@ -1111,7 +1111,7 @@
     "level": 3
    },
    {
-    "def": "toilet",
+    "def": "sink",
     "tile": [
      14,
      4
@@ -1120,10 +1120,19 @@
     "level": 3
    },
    {
-    "def": "sink",
+    "def": "wardrobe",
     "tile": [
      13,
      4
+    ],
+    "rot": 0,
+    "level": 3
+   },
+   {
+    "def": "shower",
+    "tile": [
+     15,
+     6
     ],
     "rot": 0,
     "level": 3
@@ -1141,15 +1150,6 @@
     "def": "window",
     "tile": [
      8,
-     4
-    ],
-    "rot": 0,
-    "level": 3
-   },
-   {
-    "def": "shower",
-    "tile": [
-     12,
      4
     ],
     "rot": 0,
@@ -1201,7 +1201,7 @@
     "level": 3
    },
    {
-    "def": "wardrobe",
+    "def": "toilet",
     "tile": [
      27,
      4
@@ -1210,7 +1210,7 @@
     "level": 3
    },
    {
-    "def": "toilet",
+    "def": "sink",
     "tile": [
      26,
      4
@@ -1219,10 +1219,19 @@
     "level": 3
    },
    {
-    "def": "sink",
+    "def": "wardrobe",
     "tile": [
      25,
      4
+    ],
+    "rot": 0,
+    "level": 3
+   },
+   {
+    "def": "shower",
+    "tile": [
+     27,
+     6
     ],
     "rot": 0,
     "level": 3
@@ -1240,15 +1249,6 @@
     "def": "window",
     "tile": [
      20,
-     4
-    ],
-    "rot": 0,
-    "level": 3
-   },
-   {
-    "def": "shower",
-    "tile": [
-     24,
      4
     ],
     "rot": 0,
@@ -1300,7 +1300,7 @@
     "level": 3
    },
    {
-    "def": "wardrobe",
+    "def": "toilet",
     "tile": [
      9,
      17
@@ -1309,7 +1309,7 @@
     "level": 3
    },
    {
-    "def": "toilet",
+    "def": "sink",
     "tile": [
      8,
      17
@@ -1318,12 +1318,21 @@
     "level": 3
    },
    {
-    "def": "sink",
+    "def": "wardrobe",
     "tile": [
      7,
      17
     ],
     "rot": 2,
+    "level": 3
+   },
+   {
+    "def": "shower",
+    "tile": [
+     9,
+     15
+    ],
+    "rot": 0,
     "level": 3
    },
    {
@@ -1363,7 +1372,7 @@
     "level": 3
    },
    {
-    "def": "wardrobe",
+    "def": "toilet",
     "tile": [
      15,
      17
@@ -1372,7 +1381,7 @@
     "level": 3
    },
    {
-    "def": "toilet",
+    "def": "sink",
     "tile": [
      14,
      17
@@ -1381,12 +1390,21 @@
     "level": 3
    },
    {
-    "def": "sink",
+    "def": "wardrobe",
     "tile": [
      13,
      17
     ],
     "rot": 2,
+    "level": 3
+   },
+   {
+    "def": "shower",
+    "tile": [
+     15,
+     15
+    ],
+    "rot": 0,
     "level": 3
    },
    {
@@ -1426,7 +1444,7 @@
     "level": 3
    },
    {
-    "def": "wardrobe",
+    "def": "toilet",
     "tile": [
      21,
      17
@@ -1435,7 +1453,7 @@
     "level": 3
    },
    {
-    "def": "toilet",
+    "def": "sink",
     "tile": [
      20,
      17
@@ -1444,12 +1462,21 @@
     "level": 3
    },
    {
-    "def": "sink",
+    "def": "wardrobe",
     "tile": [
      19,
      17
     ],
     "rot": 2,
+    "level": 3
+   },
+   {
+    "def": "shower",
+    "tile": [
+     21,
+     15
+    ],
+    "rot": 0,
     "level": 3
    },
    {
@@ -1489,7 +1516,7 @@
     "level": 3
    },
    {
-    "def": "wardrobe",
+    "def": "toilet",
     "tile": [
      27,
      17
@@ -1498,7 +1525,7 @@
     "level": 3
    },
    {
-    "def": "toilet",
+    "def": "sink",
     "tile": [
      26,
      17
@@ -1507,12 +1534,21 @@
     "level": 3
    },
    {
-    "def": "sink",
+    "def": "wardrobe",
     "tile": [
      25,
      17
     ],
     "rot": 2,
+    "level": 3
+   },
+   {
+    "def": "shower",
+    "tile": [
+     27,
+     15
+    ],
+    "rot": 0,
     "level": 3
    },
    {
@@ -1552,7 +1588,7 @@
     "level": -1
    },
    {
-    "def": "wardrobe",
+    "def": "toilet",
     "tile": [
      9,
      4
@@ -1561,7 +1597,7 @@
     "level": -1
    },
    {
-    "def": "toilet",
+    "def": "sink",
     "tile": [
      8,
      4
@@ -1570,10 +1606,19 @@
     "level": -1
    },
    {
-    "def": "sink",
+    "def": "wardrobe",
     "tile": [
      7,
      4
+    ],
+    "rot": 0,
+    "level": -1
+   },
+   {
+    "def": "shower",
+    "tile": [
+     9,
+     6
     ],
     "rot": 0,
     "level": -1
@@ -1606,7 +1651,7 @@
     "level": -1
    },
    {
-    "def": "wardrobe",
+    "def": "toilet",
     "tile": [
      15,
      4
@@ -1615,7 +1660,7 @@
     "level": -1
    },
    {
-    "def": "toilet",
+    "def": "sink",
     "tile": [
      14,
      4
@@ -1624,10 +1669,19 @@
     "level": -1
    },
    {
-    "def": "sink",
+    "def": "wardrobe",
     "tile": [
      13,
      4
+    ],
+    "rot": 0,
+    "level": -1
+   },
+   {
+    "def": "shower",
+    "tile": [
+     15,
+     6
     ],
     "rot": 0,
     "level": -1
@@ -1660,7 +1714,7 @@
     "level": -1
    },
    {
-    "def": "wardrobe",
+    "def": "toilet",
     "tile": [
      21,
      4
@@ -1669,7 +1723,7 @@
     "level": -1
    },
    {
-    "def": "toilet",
+    "def": "sink",
     "tile": [
      20,
      4
@@ -1678,10 +1732,19 @@
     "level": -1
    },
    {
-    "def": "sink",
+    "def": "wardrobe",
     "tile": [
      19,
      4
+    ],
+    "rot": 0,
+    "level": -1
+   },
+   {
+    "def": "shower",
+    "tile": [
+     21,
+     6
     ],
     "rot": 0,
     "level": -1
@@ -1714,7 +1777,7 @@
     "level": -1
    },
    {
-    "def": "wardrobe",
+    "def": "toilet",
     "tile": [
      27,
      4
@@ -1723,7 +1786,7 @@
     "level": -1
    },
    {
-    "def": "toilet",
+    "def": "sink",
     "tile": [
      26,
      4
@@ -1732,10 +1795,19 @@
     "level": -1
    },
    {
-    "def": "sink",
+    "def": "wardrobe",
     "tile": [
      25,
      4
+    ],
+    "rot": 0,
+    "level": -1
+   },
+   {
+    "def": "shower",
+    "tile": [
+     27,
+     6
     ],
     "rot": 0,
     "level": -1
@@ -1795,7 +1867,7 @@
     "level": -1
    },
    {
-    "def": "fridge",
+    "def": "holiday_fridge",
     "tile": [
      7,
      13
