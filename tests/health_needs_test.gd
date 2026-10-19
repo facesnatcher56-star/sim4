@@ -12,6 +12,7 @@ func run() -> Array:
 	_exhaustion(f)
 	_doctor(f)
 	_neglect(f)
+	_town_help(f)
 	return f
 
 func _world() -> StubWorld:
@@ -51,7 +52,8 @@ func _starvation(f: Array) -> void:
 	K.expect(f, a.current != null and a.current.def_id == "collapse_floor" and a.posture == "lie", "collapsed folk lie on the floor (emergency interaction)")
 	K.expect(f, Health.stage_of(a)["hunger"] == 3, "stage 3")
 	K.expect(f, Hospital.status_chips(a).any(func(c): return c["text"] == "Collapsed"), "folk panel chip says Collapsed")
-	# nobody to help: no death before 3 days, even with a certain death chance
+	# nobody to help and no ambulance in time: no death before 3 days, even with a certain death chance
+	IncidentDefs.config["health"]["rescue"]["town_help_min"] = 100000
 	IncidentDefs.config["health"]["needs"]["hunger"]["death_per_hour"] = 1.0
 	r["hunger_min"] = 4000.0
 	_pin(dir, a, "hunger", -100.0, 200)
@@ -190,4 +192,20 @@ func _neglect(f: Array) -> void:
 		K.run(dir, 1)
 	K.expect(f, not kid.has_buff("neglected"), "cared for again: the flag clears")
 	Health.neglect_hooks.clear()
+	K.teardown()
+
+func _town_help(f: Array) -> void:
+	var w := _world()
+	var a := K.make_folk(w, "Lone", [], 1)
+	K.make_folk(w, "Faraway", [], 1)
+	Health.collapse(a, "hunger")
+	var r: Dictionary = Health.rec_of(a.id)
+	a.needs["hunger"].set_value(-100.0)
+	r["hunger_min"] = 2900.0
+	var t0: int = int(r["collapse_min"])
+	HealthCollapse.tick(a, r, t0 + 200)
+	K.expect(f, Health.is_collapsed(a), "after a few hours with no help they are still down")
+	HealthCollapse.tick(a, r, t0 + 250)
+	K.expect(f, not Health.is_collapsed(a) and a.needs["hunger"].value > 0.0, "passers-by call an ambulance: awake and no longer at the bottom (%.0f)" % a.needs["hunger"].value)
+	K.expect(f, float(r.get("hunger_min", 1.0)) == 0.0 and Hospital.patients.has(a.id), "taken to hospital, the starvation clock reset")
 	K.teardown()

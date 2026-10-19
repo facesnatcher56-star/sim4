@@ -59,7 +59,8 @@
      "toddler",
      "child"
     ],
-    "dependent_hospital_min": 360
+    "dependent_hospital_min": 360,
+    "town_help_min": 240
    },
    "exposure": {
     "cold": {

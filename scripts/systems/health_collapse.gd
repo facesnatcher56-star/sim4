@@ -97,12 +97,21 @@ static func tick(f, r: Dictionary, now: int) -> void:
 	if int(r.get("help_try", 0)) <= now:
 		r["help_try"] = now + 10
 		_auto_help(f)
+	_town_help(f, r, now, kind)
+
+## Nobody stays collapsed for days: if no housemate helped, passers-by / the town call an ambulance after a few hours (children sooner or
+## later per `dependent_hospital_min`). They are brought round and taken to hospital (rescue also lifts the needs off the floor).
+static func _town_help(f, r: Dictionary, now: int, kind: String) -> void:
 	var rc: Dictionary = Health.cfg("rescue")
-	if Health.cfg("rescue").get("dependent_stages", []).has(str(f.age_stage)) and now - int(r.get("collapse_min", now)) >= int(rc.get("dependent_hospital_min", 360)):
-		rescue(f, null)                       # a neighbour called for help
-		Hospital.admit(int(f.id), 2, "neglect")
-		SysUtil.game_event("neglect_emergency", {"folk_id": int(f.id), "kind": kind})
-		Health.count("neglect_emergency")
+	var wait: int = int(rc.get("town_help_min", 240))
+	if (rc.get("dependent_stages", []) as Array).has(str(f.age_stage)):
+		wait = int(rc.get("dependent_hospital_min", 360))
+	if now - int(r.get("collapse_min", now)) < wait:
+		return
+	rescue(f, null)
+	Hospital.admit(int(f.id), 2, "neglect")
+	SysUtil.game_event("neglect_emergency", {"folk_id": int(f.id), "kind": kind})
+	Health.count("neglect_emergency")
 
 ## Send the nearest capable housemate to help.
 static func _auto_help(f) -> void:
