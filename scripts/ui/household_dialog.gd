@@ -80,4 +80,4 @@ static func _reason_text(r: String, gain: bool) -> String:
 		return "Income" if gain else "Spending"
 	if r.begins_with("perk: "):
 		return "Perk reward"
-	return r.replace("_", " ").replace("/", " and ").capitalize()
+	return UIU.sentence(r.replace("_", " ").replace("/", " and "))

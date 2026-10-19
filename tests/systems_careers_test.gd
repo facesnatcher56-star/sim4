@@ -135,6 +135,8 @@ func _skips(f: Array) -> void:
 	var tv = w.add_object("tv", Vector2i(14, 15))
 	Careers.hire(c, "coder", 1)
 	var pc: float = CareerProgress.performance_of(int(c.id))
+	Careers.cfg()["skip"]["base_work"] = 1.0                # skipping is a decision now (SkipRules): make it certain here
+	Careers.cfg()["skip"]["max"] = 1.0
 	K.set_time(3, 8, 40)
 	dir.command(c.id, "watch_tv", tv.id)
 	K.run(dir, 25)

@@ -27,7 +27,7 @@ static var permit_day: Dictionary = {}     # str(household) -> day a building pe
 static func reset() -> void:
 	tax = float(cfg().get("tax", {}).get("default", 1.0))
 	alloc = (cfg().get("alloc", {}) as Dictionary).duplicate()
-	treasury = 0.0
+	treasury = float(cfg().get("start_treasury", 0.0))      # a starting reserve, so the first outage or project is not blocked
 	funding_now.clear()
 	income_last = 0.0
 	next_budget_day = 0

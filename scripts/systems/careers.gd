@@ -28,6 +28,7 @@ static func reset() -> void:
 	homemakers.clear()
 	changed_day.clear()
 	seeking.clear()
+	SkipRules.reset()
 	auto_accept_offers = false
 
 # ------------------------------------------------------------------ data access
@@ -139,7 +140,7 @@ static func qualify(f, cid: String, level: int, branch: String = "") -> Dictiona
 		if f.traits.has(str(t2)):
 			missing.append("not %s" % str(t2))
 	if req.has("friends") and RelationshipBits.count_bit(int(f.id), "friend", true) < int(req["friends"]):
-		missing.append("%d friends" % int(req["friends"]))
+		missing.append(SysUtil.count_text(int(req["friends"]), "friend"))
 	return {"ok": missing.is_empty(), "missing": missing}
 
 static func trait_bonus(f, cid: String) -> float:
@@ -177,7 +178,7 @@ static func why_not_work(f, cid: String = "", level: int = 1) -> String:
 	var stage: String = str(f.age_stage)
 	if stage in ["adult", "elder"]:
 		return ""
-	if stage == "teen" and cid != "" and level <= 1 and (settings().get("teen_careers", ["barista", "gardener", "handyperson"]) as Array).has(cid):
+	if stage == "teen" and cid != "" and level <= 1 and CareerSpread.teen_careers().has(cid):
 		return ""
 	return "too young for that job"
 
@@ -228,7 +229,9 @@ static func make_offer(f, cid: String = "", level: int = 0) -> Dictionary:
 		if str(f.age_stage) != "teen" or why_not_work(f, "x") == "not one of the household":
 			return {}
 		if cid == "":
-			cid = str((settings().get("teen_careers", ["barista", "gardener", "handyperson"]) as Array)[0])
+			cid = CareerSpread.pick(f, CareerSpread.teen_careers())
+			if cid == "":
+				return {}
 		level = 1
 		if why_not_work(f, cid, 1) != "":
 			return {}
@@ -266,16 +269,7 @@ static func decline_offer(folk_id: int) -> void:
 	offers.erase(folk_id)
 
 static func _best_career_for(f) -> String:
-	var ids: Array = career_ids()
-	var weights: Array = []
-	for cid in ids:
-		var w: float = 1.0 + float(skill_for(f, str(cid))) * 1.5 + trait_bonus(f, str(cid))
-		if not bool(qualify(f, str(cid), 1)["ok"]):
-			weights.append(0.0)
-		else:
-			weights.append(maxf(w, 0.2))
-	var pick = SysUtil.pick_weighted(ids, weights)
-	return str(pick) if pick != null else ""
+	return CareerSpread.pick(f, career_ids())
 
 ## The computer's "Look for Jobs" interaction fires game_event job_search.
 static func on_job_search(folk_id: int) -> void:
@@ -322,6 +316,9 @@ static func on_day(day: int) -> void:
 			if jobs.has(fid):
 				_retire(f)
 				continue
+		if jobs.has(fid):
+			CareerSpread.maybe_switch(f)                  # a young adult may change careers (friction: back to level 1)
+			continue
 		# offers
 		if not jobs.has(fid) and not offers.has(fid) and not homemakers.has(fid) and JobSeeking.cooled_down(f) and stage == min_stage and Aging.stage_index(stage) >= Aging.stage_index(min_stage):
 			if SysUtil.chance(float(s.get("offer_chance_per_day", 0.3)) * StoryPacing.mult("job", int(f.household_id))):
@@ -384,7 +381,8 @@ static func to_dict() -> Dictionary:
 	return {"jobs": SysUtil.str_keys(jobs).duplicate(true), "school": SysUtil.str_keys(school).duplicate(true),
 		"offers": SysUtil.str_keys(offers).duplicate(true), "retired": SysUtil.str_keys(retired).duplicate(true),
 		"skip_flags": SysUtil.str_keys(skip_flags), "shift_log": shift_log.duplicate(true), "auto_accept": auto_accept_offers,
-		"homemakers": SysUtil.str_keys(homemakers), "changed_day": SysUtil.str_keys(changed_day), "seeking": SysUtil.str_keys(seeking)}
+		"homemakers": SysUtil.str_keys(homemakers), "changed_day": SysUtil.str_keys(changed_day), "seeking": SysUtil.str_keys(seeking),
+		"skip_rules": SkipRules.to_dict()}
 
 static func from_dict(d: Dictionary) -> void:
 	reset()
@@ -398,6 +396,7 @@ static func from_dict(d: Dictionary) -> void:
 	homemakers = SysUtil.int_keys(d.get("homemakers", {}))
 	changed_day = SysUtil.int_keys(d.get("changed_day", {}))
 	seeking = SysUtil.int_keys(d.get("seeking", {}))
+	SkipRules.from_dict(d.get("skip_rules", {}))
 	for fid in jobs:
 		var f = SysUtil.folk(int(fid))
 		if f != null:

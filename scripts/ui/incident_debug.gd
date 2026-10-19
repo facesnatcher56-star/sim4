@@ -27,7 +27,7 @@ func build() -> void:
 	ob.name = "Surprises"
 	var levels: Array = (IncidentDefs.cfg("levels", {}) as Dictionary).keys()
 	for lv in levels:
-		ob.add_item("%s (x%s)" % [str(lv).capitalize(), str((IncidentDefs.cfg("levels", {}) as Dictionary)[lv])])
+		ob.add_item("%s (x%s)" % [UIU.sentence(str(lv)), str((IncidentDefs.cfg("levels", {}) as Dictionary)[lv])])
 		ob.set_item_metadata(ob.item_count - 1, lv)
 		if lv == Incidents.level_id():
 			ob.select(ob.item_count - 1)

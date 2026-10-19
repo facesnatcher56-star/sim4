@@ -27,13 +27,13 @@
   },
   "interactions": {
    "shut_off_gas": {"label": "Shut Off the Gas", "kind": "super", "target": "object", "objects": ["stove"], "tags": ["chore", "repair", "safety"],
-    "duration_min": 3, "posture": "stand", "tests": [{"has_buff": "gas_smell"}], "per_min": {}, "works_when_broken": true, "on_finish": [{"fire_event": "shut_off_gas"}],
+    "duration_min": 3, "posture": "stand", "tests": [{"age_stage_is": ["adult", "elder"]}, {"has_buff": "gas_smell"}], "per_min": {}, "works_when_broken": true, "on_finish": [{"fire_event": "shut_off_gas"}],
     "autonomous": true, "priority": "urgent", "advertises": {"tidy": 6.0}, "thought": "Turn the gas off at the valve."},
    "call_gas_company": {"label": "Call the Gas Company", "kind": "super", "target": "object", "objects": ["mailbox"], "tags": ["repair", "chore"],
-    "duration_min": 3, "posture": "stand", "tests": [{"has_buff": "gas_smell"}], "per_min": {}, "on_finish": [{"fire_event": "call_gas_company"}],
+    "duration_min": 3, "posture": "stand", "tests": [{"age_stage_is": ["teen", "adult", "elder"]}, {"has_buff": "gas_smell"}], "per_min": {}, "on_finish": [{"fire_event": "call_gas_company"}],
     "autonomous": false, "priority": "urgent", "advertises": {}, "thought": "Call the gas company, quickly."},
    "report_identity_theft": {"label": "Report Identity Theft", "kind": "super", "target": "object", "objects": ["computer", "mailbox"], "tags": ["paperwork"],
-    "duration_min": 8, "posture": "sit", "tests": [{"has_buff": "identity_theft"}], "per_min": {}, "on_finish": [{"fire_event": "report_identity_theft"}],
+    "duration_min": 8, "posture": "sit", "tests": [{"age_stage_is": ["adult", "elder"]}, {"has_buff": "identity_theft"}], "per_min": {}, "on_finish": [{"fire_event": "report_identity_theft"}],
     "autonomous": false, "priority": "normal", "advertises": {}, "thought": "I have to tell the police."}
   },
   "object_interactions": {

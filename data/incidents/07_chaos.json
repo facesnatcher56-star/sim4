@@ -11,6 +11,7 @@
    "pests": {"start": 0.25, "seen": 0.01, "infested": 0.5, "swarm": 0.85, "grow_per_day": 0.1, "decay_per_day": 0.06, "messy_at": 2, "dirty_at": 6.0, "bin_full": 7.0,
              "fridge_spoil": 1.0, "sick_chance": 0.15, "exterminator_fee": 80, "free_days": 14, "trap_effect": 0.3, "far_messy_pct": 25},
    "jobs": {"plumber": [40, 90], "exterminator": [60, 120], "handy": [30, 70]},
+   "counterplay_stages": {"_doc": "who may do the repair / call / paperwork interactions (also gated by tests in the interaction defs): never babies, toddlers or children", "default": ["teen", "adult", "elder"], "fix_leak": ["adult", "elder"], "shut_off_gas": ["adult", "elder"], "report_identity_theft": ["adult", "elder"]},
    "targets": {"burst_pipe": 0.18, "toilet_overflow": 0.35, "appliance_breakdown": 0.9, "roach_infestation": 1.2}
   }
  },
@@ -29,22 +30,22 @@
   },
   "interactions": {
    "fix_leak": {"label": "Stop the Leak", "kind": "super", "target": "object", "objects": ["sink", "toilet", "bathtub", "shower", "washing_machine"], "tags": ["chore", "repair", "skill"],
-    "duration_min": 25, "posture": "stand", "tests": [{"has_buff": "plumbing_trouble"}], "per_min": {"energy": -0.1, "hygiene": -0.2}, "skill_xp_per_min": {"handiness": 1.0},
+    "duration_min": 25, "posture": "stand", "tests": [{"age_stage_is": ["adult", "elder"]}, {"has_buff": "plumbing_trouble"}], "per_min": {"energy": -0.1, "hygiene": -0.2}, "skill_xp_per_min": {"handiness": 1.0},
     "works_when_broken": true, "on_finish": [{"fire_event": "fix_leak"}], "autonomous": true, "priority": "urgent", "advertises": {"tidy": 4.0}, "thought": "Shut the water off and fix the pipe."},
    "check_pipes": {"label": "Check the Pipes", "kind": "super", "target": "object", "objects": ["sink", "bathtub", "shower"], "tags": ["chore", "repair", "safety"],
-    "duration_min": 10, "posture": "stand", "tests": [{"lacks_buff": "pipes_checked"}], "per_min": {}, "skill_xp_per_min": {"handiness": 0.5},
+    "duration_min": 10, "posture": "stand", "tests": [{"age_stage_is": ["teen", "adult", "elder"]}, {"lacks_buff": "pipes_checked"}], "per_min": {}, "skill_xp_per_min": {"handiness": 0.5},
     "on_finish": [{"add_buff": "pipes_checked"}, {"fire_event": "check_pipes"}], "autonomous": false, "priority": "normal", "advertises": {}, "thought": "Better check these pipes.", "cooldown_min": 2880},
    "call_plumber": {"label": "Call a Plumber", "kind": "super", "target": "object", "objects": ["mailbox"], "tags": ["repair", "chore"],
-    "duration_min": 5, "posture": "stand", "tests": [{"has_buff": "plumbing_trouble"}], "per_min": {}, "on_finish": [{"fire_event": "call_plumber"}],
+    "duration_min": 5, "posture": "stand", "tests": [{"age_stage_is": ["teen", "adult", "elder"]}, {"has_buff": "plumbing_trouble"}], "per_min": {}, "on_finish": [{"fire_event": "call_plumber"}],
     "autonomous": false, "priority": "normal", "advertises": {}, "thought": "We need a plumber."},
    "call_handyperson": {"label": "Call a Handyperson", "kind": "super", "target": "object", "objects": ["mailbox"], "tags": ["repair", "chore"],
-    "duration_min": 5, "posture": "stand", "tests": [{"has_buff": "broken_things"}], "per_min": {}, "on_finish": [{"fire_event": "call_handyperson"}],
+    "duration_min": 5, "posture": "stand", "tests": [{"age_stage_is": ["teen", "adult", "elder"]}, {"has_buff": "broken_things"}], "per_min": {}, "on_finish": [{"fire_event": "call_handyperson"}],
     "autonomous": false, "priority": "normal", "advertises": {}, "thought": "Somebody needs to fix all this."},
    "call_exterminator": {"label": "Call the Exterminator", "kind": "super", "target": "object", "objects": ["mailbox"], "tags": ["repair", "chore"],
-    "duration_min": 5, "posture": "stand", "tests": [{"has_buff": "roaches_seen"}], "per_min": {}, "on_finish": [{"fire_event": "call_exterminator"}],
+    "duration_min": 5, "posture": "stand", "tests": [{"age_stage_is": ["teen", "adult", "elder"]}, {"has_buff": "roaches_seen"}], "per_min": {}, "on_finish": [{"fire_event": "call_exterminator"}],
     "autonomous": false, "priority": "normal", "advertises": {}, "thought": "Time to call pest control."},
    "set_roach_traps": {"label": "Set Roach Traps", "kind": "super", "target": "object", "objects": ["trash_bin"], "tags": ["chore", "clean"],
-    "duration_min": 6, "posture": "stand", "tests": [{"has_buff": "roaches_seen"}, {"coins_at_least": 5}], "per_min": {}, "skill_xp_per_min": {"handiness": 0.3},
+    "duration_min": 6, "posture": "stand", "tests": [{"age_stage_is": ["teen", "adult", "elder"]}, {"has_buff": "roaches_seen"}, {"coins_at_least": 5}], "per_min": {}, "skill_xp_per_min": {"handiness": 0.3},
     "on_finish": [{"coins_add": -5}, {"fire_event": "set_roach_traps"}], "autonomous": true, "priority": "normal", "advertises": {"tidy": 2.5}, "thought": "I'll set some traps.", "cooldown_min": 480}
   },
   "object_interactions": {

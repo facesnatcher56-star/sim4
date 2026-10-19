@@ -167,7 +167,7 @@ static func finish(handler: String, f, pid: String, sid: String, svc: Dictionary
 					if str(b["id"]).begins_with("grieving") and float(b["remaining"]) > 0.0:
 						b["remaining"] = float(b["remaining"]) * (1.0 - cut)
 			_cheer(came4, id, 2.0, 8.0)
-			var text4 := "A funeral was held for %s at %s. %d people came to say goodbye." % [str(rec["name"]), place, came4.size() + 1]
+			var text4 := "A funeral was held for %s at %s. %s came to say goodbye." % [str(rec["name"]), place, SysUtil.count_text(came4.size() + 1, "person", "people")]
 			LifeNote.say("funeral", text4, [id, dead], 2, true, "info")
 			return {"text": text4}
 		"reunion":

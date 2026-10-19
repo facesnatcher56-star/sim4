@@ -23,10 +23,10 @@ static func is_never(reason: String) -> bool:
 	return false
 
 static func label_of_trait(id: String) -> String:
-	return str(UIU.tbl("traits").get(id, {}).get("label", id.capitalize()))
+	return str(UIU.tbl("traits").get(id, {}).get("label", UIU.sentence(id)))
 
 static func label_of_mood(id: String) -> String:
-	return Emotions.label(id) if Emotions.mood_defs().has(id) else id.capitalize()
+	return Emotions.label(id) if Emotions.mood_defs().has(id) else UIU.sentence(id)
 
 ## Rewrites reasons built from raw ids ("needs trait glutton", "not in the mood (hunger too high)").
 static func polish_reason(r: String) -> String:
@@ -51,7 +51,7 @@ static func polish_reason(r: String) -> String:
 	rx = RegEx.create_from_string("needs (\\w+) skill (\\d+)")
 	m = rx.search(r)
 	if m != null:
-		return r.replace(m.get_string(0), "needs %s skill level %s" % [m.get_string(1).capitalize(), m.get_string(2)])
+		return r.replace(m.get_string(0), "needs %s skill level %s" % [UIU.sentence(m.get_string(1)), m.get_string(2)])
 	rx = RegEx.create_from_string("only while (\\w+)")
 	m = rx.search(r)
 	if m != null:

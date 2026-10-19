@@ -271,7 +271,9 @@ func _missed_shift() -> void:
 	Kit.run(8)
 	_check(Commute.trips.has(mira.id), "on the way")
 	var p0: float = CareerProgress.performance_of(mira.id)
-	# the player calls her away mid-walk: counts as a skipped shift
+	# the player calls her away mid-walk: counts as a skipped shift (skipping is a decision now, SkipRules; make it certain here)
+	Careers.cfg()["skip"]["base_work"] = 1.0
+	Careers.cfg()["skip"]["max"] = 1.0
 	var sofa_cmd := Interaction.create_goto(mira, mira.tile + Vector2i(1, 0), true)
 	mira.enqueue(sofa_cmd)
 	Kit.run(2)

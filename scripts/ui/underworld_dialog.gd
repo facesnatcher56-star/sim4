@@ -74,11 +74,11 @@ func _status(pid: int) -> void:
 		for sk in (r.get("skills", {}) as Dictionary):
 			need.append("%s %d" % [ContentRules.skill_label(str(sk)), int(r["skills"][sk])])
 		if int(r.get("jobs", 0)) > 0:
-			need.append("%d jobs done" % int(r["jobs"]))
+			need.append("%s done" % SysUtil.count_text(int(r["jobs"]), "job"))
 		if int(r.get("heists", 0)) > 0:
 			need.append("%d heist%s" % [int(r["heists"]), "" if int(r["heists"]) == 1 else "s"])
 		if int(r.get("fenced", 0)) > 0:
-			need.append("%d lots fenced" % int(r["fenced"]))
+			need.append("%s fenced" % SysUtil.count_text(int(r["fenced"]), "lot"))
 		line("Next: %s - needs %s." % [str(r["label"]), ", ".join(need)], 12, UITheme.MUTED)
 
 func _jobs(pid: int) -> void:
@@ -105,7 +105,7 @@ func _jobs(pid: int) -> void:
 		row.add_child(ob)
 		var go := Button.new()
 		go.text = "Go"
-		go.tooltip_text = "Takes about %d minutes away from home." % int(j.get("minutes", 30))
+		go.tooltip_text = "Takes about %s away from home." % SysUtil.count_text(int(j.get("minutes", 30)), "minute")
 		go.pressed.connect(func(): _cmd({"action": "job", "job": str(jid), "target": ts[idx]}))
 		row.add_child(go)
 		if bool(j.get("casable", false)):
@@ -126,7 +126,7 @@ func _heist(pid: int) -> void:
 		var ob := OptionButton.new()
 		var ids: Array = CrimeLifeHeist.target_ids()
 		for t in ids:
-			ob.add_item(str(CrimeLifeHeist.target_def(str(t)).get("label", t)).capitalize())
+			ob.add_item(UIU.sentence(str(CrimeLifeHeist.target_def(str(t)).get("label", t))))
 		ob.select(maxi(ids.find(_heist_target), 0))
 		ob.item_selected.connect(func(i): _heist_target = str(ids[i]))
 		body.add_child(ob)

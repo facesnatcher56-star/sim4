@@ -47,6 +47,7 @@ func run() -> Array:
 	var txt: String = _all_text(dlg)
 	_check(txt.contains("Mayor " + str(CityGov.mayor["name"])), "the mayor is named")
 	_check(txt.contains("Taxes:") and txt.contains("percent"), "taxes are shown")
+	_check(txt.contains("Water, power and phones:") and txt.contains("The ambulances and hospital:") and not txt.contains(" And "), "budget labels are in sentence case")
 	_check(_find(dlg, "TaxSlider") != null and _find(dlg, "Alloc_fire") != null and _find(dlg, "Alloc_police") != null, "taxes and every part of the budget are sliders")
 	_check(not (_find(dlg, "TaxSlider") as HSlider).editable and not (_find(dlg, "Alloc_fire") as HSlider).editable, "a folk who is not the mayor can see the sliders but not move them")
 	_check(txt.contains("next election") or txt.contains("campaign"), "the next election is shown")

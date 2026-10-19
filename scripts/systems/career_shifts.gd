@@ -86,7 +86,7 @@ static func _start_shift(f, j: Dictionary, h: float) -> void:
 	if int(Careers.skip_flags.get(fid, -1)) == SysUtil.day():
 		_record_skip(f, j, float(s.get("skip_penalty", 15)), "chose to skip work")
 		return
-	if _player_busy(f):
+	if _player_busy(f) and SkipRules.chooses_to_skip(f, "work"):
 		_record_skip(f, j, float(s.get("skip_penalty", 15)), "was busy with something else and skipped work")
 		return
 	if _critical(f):
@@ -216,7 +216,7 @@ static func grade_of(folk_id: int) -> float:
 	return float((Careers.school.get(folk_id, {}) as Dictionary).get("grade", 0.0))
 
 static func _start_school(f, st: Dictionary, h: float, sc: Dictionary) -> void:
-	if _player_busy(f):
+	if _player_busy(f) and SkipRules.chooses_to_skip(f, "school"):
 		st["skipped"] = int(st["skipped"]) + 1
 		st["grade"] = clampf(float(st["grade"]) - float(sc.get("skip_penalty", 12)), 0.0, 100.0)
 		SysUtil.notify("%s skipped school (-%d grade)." % [f.name, int(sc.get("skip_penalty", 12))], "warn")

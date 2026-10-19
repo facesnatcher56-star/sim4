@@ -12,6 +12,29 @@
     "broke_below": 300,
     "min_days_between_changes": 7
   },
+  "first_job": {
+    "_doc": "Who gets offered what (task 19j): a first job or a new offer is a weighted pick over the careers the person qualifies for, so children do not all become baristas. weight = base + skill x skill_w + trait bonus x trait_w + aspiration match + the job board (openings, hot demand), then divided down for each housemate already in that career. teen_careers are the ones with a part-time level 1 (teens only, level 1).",
+    "teen_careers": ["barista", "cook", "gardener", "handyperson", "fitness_coach", "painter", "writer"],
+    "base": 1.0, "skill_w": 1.5, "trait_w": 0.6, "aspiration_w": 2.0, "floor": 0.2,
+    "board": {"open_mult": 1.4, "closed_mult": 0.7, "hot_mult": 1.2},
+    "housemate_penalty": 0.7,
+    "aspiration_careers": {
+      "master_chef": ["cook", "chef"], "gourmet_legend": ["chef", "cook"], "gracious_host": ["barista", "chef"], "athlete": ["athlete", "fitness_coach"], "iron_will": ["athlete", "fitness_coach", "factory_worker"],
+      "social_butterfly": ["barista", "teacher"], "family_folk": ["teacher", "doctor"], "artist": ["painter", "writer"], "wordsmith": ["writer", "teacher"], "melody_maker": ["musician"],
+      "garden_guardian": ["gardener"], "master_angler": ["gardener"], "home_hero": ["handyperson", "mechanic", "construction_worker"], "curious_mind": ["scientist", "coder", "doctor"],
+      "fortune_seeker": ["coder", "chef", "warehouse_worker"]
+    }
+  },
+  "skip": {
+    "_doc": "When something else of the player's queued at shift time counts as 'chose to skip' (task 19j): a decision per person, day and kind, not an automatic skip. chance = base_<kind> x trait_mult x mood_mult (max), and a housemate who already skipped today makes it almost impossible (housemate_mult) unless a skipping trait AND a bad mood give a strong reason. The 'skip work today' command is not touched.",
+    "base_school": 0.06, "base_work": 0.04, "max": 0.35, "housemate_mult": 0.15,
+    "trait_mult": {"lazy": 2.2, "hot_headed": 1.7, "stubborn": 1.4, "gamer": 1.2, "night_owl": 1.2, "workaholic": 0.3, "perfectionist": 0.5, "competitive": 0.7, "honest": 0.8, "early_bird": 0.8},
+    "mood_mult": {"bored": 1.7, "sad": 1.5, "angry": 2.0, "tense": 1.3, "anxious": 1.3, "jealous": 1.2, "happy": 0.6, "energized": 0.6, "focused": 0.4, "content": 0.8, "inspired": 0.6, "confident": 0.7}
+  },
+  "switch": {
+    "_doc": "A young adult may change careers (with friction): only in the first young_days of adulthood, only in the first max_level levels, never within min_days_in_job of being hired or min_days_between_changes of the last change. The daily chance rises when the job fits badly (performance under unhappy_below) and the new career must fit clearly better (better_by x). They start the new career at level 1 with start_performance_penalty less performance, and lose the old level.",
+    "young_days": 60, "max_level": 2, "min_days_in_job": 12, "chance_per_day": 0.012, "unhappy_mult": 3.0, "unhappy_below": 40, "better_by": 1.6, "start_performance_penalty": 12
+  },
   "settings": {
     "start_performance": 50,
     "promote_at": 100,

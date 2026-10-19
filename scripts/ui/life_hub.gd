@@ -1,6 +1,6 @@
 class_name LifeHub
 extends UIDialog
-## "Town Life" (task 14): one window for the places of the town (school, college, clinic, restaurants, cinema ...), what the selected person is studying,
+## "Town life" (task 14): one window for the places of the town (school, college, clinic, restaurants, cinema ...), what the selected person is studying,
 ## their health, and the job board. Everything here is OPTIONAL. The tabs are small builders (LifeHubPlaces, LifeHubStudy, LifeHubJobs); every action is a
 ## command through the command layer (Commands.run action "life"), never a change made by the UI. Opened from the top bar "Town" button.
 
@@ -15,7 +15,7 @@ func _ready() -> void:
 	super._ready()
 
 func build() -> void:
-	title_label.text = "Town Life"
+	title_label.text = "Town life"
 	var row := HBoxContainer.new()
 	body.add_child(row)
 	for t in TABS:

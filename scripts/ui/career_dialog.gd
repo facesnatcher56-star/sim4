@@ -15,7 +15,7 @@ static func nice_requirement(r: String) -> String:
 	var rx := RegEx.create_from_string("^([a-z_]+) (\\d+)$")
 	var m := rx.search(r)
 	if m != null:
-		return "%s skill level %s" % [m.get_string(1).capitalize(), m.get_string(2)]
+		return "%s skill level %s" % [UIU.sentence(m.get_string(1)), m.get_string(2)]
 	if r.begins_with("trait: "):
 		var parts: Array = []
 		for t in r.substr(7).split(" or "):

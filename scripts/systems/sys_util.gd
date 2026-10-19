@@ -40,6 +40,10 @@ static func folk_name(id: int) -> String:
 		return str(f.name)
 	return Story.name_of(id)
 
+## "1 friend", "2 friends", "0 friends" (irregular plurals: count_text(n, "child", "children")). Every count in player text goes through this.
+static func count_text(n: int, one: String, many: String = "") -> String:
+	return "%d %s" % [n, one if n == 1 else (many if many != "" else one + "s")]
+
 static func chance(p: float) -> bool:
 	return rng.randf() < p
 

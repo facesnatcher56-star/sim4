@@ -17,7 +17,7 @@ static func build(dlg: BankHub) -> void:
 	dlg.line("Credit score %d (%s): %d bills paid on time, %d late." % [score, BankAccounts.score_label(score), int(hist["on_time"]), int(hist["late"])], 13)
 	for l in BankAccounts.loans_of(h):
 		var lid: int = int(l["id"])
-		dlg.row_with("%s: %d left, %d coins a week at %.1f%%." % [str(l["kind"]).capitalize(), int(l["balance"]), int(l["payment"]), float(l["rate"]) * 100.0],
+		dlg.row_with("%s: %d left, %d coins a week at %.1f%%." % [UIU.sentence(str(l["kind"])), int(l["balance"]), int(l["payment"]), float(l["rate"]) * 100.0],
 			[dlg.button("Pay 200", "", func(): dlg.act("loan_repay", {"loan": lid, "amount": 200}), Economy.balance(h) >= 200),
 			dlg.button("Pay off", "", func(): dlg.act("loan_repay", {"loan": lid, "amount": int(ceil(float(l["balance"])))}), Economy.balance(h) >= int(ceil(float(l["balance"]))))])
 	var lim: int = BankAccounts.loan_limit(h)

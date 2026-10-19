@@ -173,7 +173,7 @@ static func _prices(dest: String, people: int, days: int, opts: Dictionary) -> D
 			return _fail("There is no such package.")
 		var extra: int = int(pkg.get("extra", 0))
 		lines.append({"label": "Fares and port fees (%d)" % people, "amount": travel})
-		lines.append({"label": "%s x%d (%d nights)" % [str(cd.get("label", klass)), cabins, days], "amount": lodging})
+		lines.append({"label": "%s x%d (%s)" % [str(cd.get("label", klass)), cabins, SysUtil.count_text(days, "night")], "amount": lodging})
 		lines.append({"label": "Service charge", "amount": service})
 		lines.append({"label": "Onboard spending money (unspent part comes back)", "amount": spending})
 		if extra > 0:
@@ -186,6 +186,6 @@ static func _prices(dest: String, people: int, days: int, opts: Dictionary) -> D
 	var lodging2: int = int(d.get("lodging_per_day", 50)) * days * rooms
 	var spending2: int = int(d.get("spending_per_day", 30)) * days * people
 	lines.append({"label": "Travel (%d)" % people, "amount": travel2})
-	lines.append({"label": "Lodging (%d room%s, %d nights)" % [rooms, "" if rooms == 1 else "s", days], "amount": lodging2})
+	lines.append({"label": "Lodging (%s, %s)" % [SysUtil.count_text(rooms, "room"), SysUtil.count_text(days, "night")], "amount": lodging2})
 	lines.append({"label": "Spending money (unspent part comes back)", "amount": spending2})
 	return {"ok": true, "lines": lines, "travel": travel2, "lodging": lodging2, "spending": spending2, "cabins": rooms, "travel_min": int(d.get("travel_min", 90))}

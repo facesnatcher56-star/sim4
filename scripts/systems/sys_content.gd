@@ -30,6 +30,14 @@ static func install_all() -> void:
 	IncidentContent.install()
 	CityGov.install()                  # task 12: the politician career, the mayor and election interactions
 	VacationContent.install()          # idempotent; also runs inside install() before the tag patches
+	gate_late_content()                # the content merged above arrived after install()'s stage gates: gate it too
+
+## Stage-gates (by aging.json tags) every interaction merged after install(): family, pregnancy, life, weather, incident and city content.
+## Idempotent (gated defs carry GATE_MARK); content that brings its own gate sets `_sys_gate` and is left alone.
+static func gate_late_content() -> void:
+	var inter: Dictionary = SimEnv.data().interactions()
+	if not inter.is_empty():
+		_patch_stage_gates(inter)
 
 ## Buffs derived from other tables: the hidden stage_<id> markers (data/aging.json) and the goals' perk buffs.
 static func _add_marker_buffs(buffs: Dictionary) -> void:
