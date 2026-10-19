@@ -194,6 +194,7 @@ static func on_returned(f, rec: Dictionary) -> void:
 			if completed:
 				gd = float(sc.get("base_gain", 1)) + float(Careers.settings().get("mood_gain", {}).get(str(f.mood_name), 0.0)) * float(sc.get("mood_scale", 0.8))
 				st["days"] = int(st["days"]) + 1
+				SkillInterest.school_day(f)
 			else:
 				gd = -float(sc.get("skip_penalty", 12))
 				st["skipped"] = int(st["skipped"]) + 1

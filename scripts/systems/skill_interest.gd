@@ -65,3 +65,27 @@ static func mult(folk, iid: String, d: Dictionary, memo: Dictionary = {}) -> flo
 		total += skill_mult(folk, str(s), interest)
 		n += 1
 	return total / float(n) if n > 0 else 1.0
+
+## Subjects a pool of study (homework, school) is spread over -> share of the XP (adds to 1). Interests pull towards their subjects,
+## mastered ones count for less, so nobody studies only logic and writing.
+static func pool_shares(folk, pool: String) -> Dictionary:
+	var subjects: Array = cfg().get("pools", {}).get(pool, {}).get("skills", [])
+	var interest: Dictionary = interests(folk)
+	var weights: Dictionary = {}
+	var total: float = 0.0
+	for s in subjects:
+		var w: float = skill_mult(folk, str(s), interest) * float(interest.get(str(s), 1.0))
+		weights[str(s)] = w
+		total += w
+	if total <= 0.0:
+		return {}
+	for s2 in weights:
+		weights[s2] = float(weights[s2]) / total
+	return weights
+
+## A finished school day teaches a bit of every subject (spread by pool_shares).
+static func school_day(folk) -> void:
+	var xp: float = float(cfg().get("pools", {}).get("school", {}).get("school_day_xp", 0.0))
+	var shares: Dictionary = pool_shares(folk, "school")
+	for s in shares:
+		folk.add_skill_xp(str(s), xp * float(shares[s]))

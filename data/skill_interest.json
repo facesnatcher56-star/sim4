@@ -1,7 +1,8 @@
 {
   "version": 1,
   "ignore_skills": ["charisma", "cooking", "handiness"],
-  "fatigue": {"from_level": 4, "per_level": 0.16, "min": 0.2, "interest_levels": 3},
+  "fatigue": {"from_level": 3, "per_level": 0.2, "min": 0.12, "interest_levels": 3},
+  "pools": {"school": {"skills": ["logic", "writing", "painting", "fitness", "gardening"], "school_day_xp": 30}},
   "interest": {"trait": 1.5, "aspiration": 1.8, "career": 1.8, "max_boost": 2.6, "boost_until_level": 8},
   "traits": {
     "outdoorsy": ["fitness", "gardening", "fishing"],

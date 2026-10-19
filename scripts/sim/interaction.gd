@@ -268,6 +268,11 @@ func _apply_rates(m: float) -> void:
 	var xp: Dictionary = def.get("skill_xp_per_min", {})
 	for s in xp:
 		actor.add_skill_xp(str(s), float(xp[s]) * m)
+	var pool: Dictionary = def.get("skill_xp_pool", {})
+	if not pool.is_empty():
+		var shares: Dictionary = SkillInterest.pool_shares(actor, str(pool.get("pool", "")))
+		for s2 in shares:
+			actor.add_skill_xp(str(s2), float(pool.get("per_min", 0.0)) * m * float(shares[s2]))
 	if target_folk != null:
 		var tpm: Dictionary = def.get("target_per_min", {})
 		for k in tpm:
