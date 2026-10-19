@@ -110,6 +110,7 @@ old signal order. To add a system's hook: add ONE row to `systems_rows()` (name,
 | day | 210 | day/Holidays.on_day | Holidays | day | NORMAL | world-level |
 | day | 220 | day/Aging.on_day | Aging | day | NORMAL | residents + townies: O(people) cheap comparisons |
 | day | 230 | day/Family.on_day | Family | day | NORMAL | residents + townie family records (small) |
+| day | 235 | day/Succession.on_day | Succession | day | NORMAL | players whose household has nobody left (normally none) |
 | day | 240 | day/Careers.on_day | Careers | day | NORMAL | residents' jobs; townie careers by daily comparison |
 | day | 250 | day/WeatherWorld.on_day | WeatherWorld | day | NORMAL | garden plots + the rain catch-up of far plants (sliced over the day) |
 | day | 260 | day/Economy.on_day | Economy | day | NORMAL | bills per household |

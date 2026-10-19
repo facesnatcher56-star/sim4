@@ -64,6 +64,7 @@ static func systems_rows(sm: Object) -> Array:
 		["day/ensure_registered", "SystemsManager", 1440, 200, N, "", ens, null, "residents only"],
 		["day/Holidays.on_day", "Holidays", 1440, 210, N, "day", Holidays.on_day, null, "world-level"],
 		["day/Aging.on_day", "Aging", 1440, 220, N, "day", Aging.on_day, null, "residents + townies: O(people) cheap comparisons"],
+		["day/Succession.on_day", "Succession", 1440, 235, N, "day", Succession.on_day, null, "players whose household has nobody left (normally none)"],
 		["day/Family.on_day", "Family", 1440, 230, N, "day", Family.on_day, null, "residents + townie family records (small)"],
 		["day/Careers.on_day", "Careers", 1440, 240, L, "day", Careers.on_day, null, "residents' jobs; townie careers by daily comparison"],
 		["day/WeatherWorld.on_day", "WeatherWorld", 1440, 250, L, "day", WeatherWorld.on_day_sched, null, "garden plots + the rain catch-up of far plants (sliced over the day)"],

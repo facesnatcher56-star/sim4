@@ -110,6 +110,7 @@ func _ready() -> void:
 	UIU.connect_ev("folk_added", func(_i): rebuild_folk_row())
 	UIU.connect_ev("folk_removed", func(_i): rebuild_folk_row())
 	UIU.connect_ev("game_event", func(n, _p): if n == "open_town_law": TownLawDialog.open_from(case_board))
+	UIU.connect_ev("game_event", func(n, p): if n == "head_changed" and int(p.get("player_id", 1)) == Players.local_id: _follow_new_head(int(p.get("folk_id", -1))))
 	UIU.connect_ev("game_event", func(n, _p): if n in ["left_for_work", "returned_from_work", "left_for_school", "returned_from_school", "left_lot", "returned_to_lot", "moved_in", "moved_out", "adopted", "married", "divorced"]: rebuild_folk_row())
 	if Clock.has_signal("minute_passed"):
 		Clock.connect("minute_passed", _update_clock)
@@ -362,6 +363,14 @@ func _resolve(id: int):
 	if folk_resolver.is_valid():
 		return folk_resolver.call(id)
 	return UIU.get_folk(id)
+
+## Task 15: control passed to somebody new (the head died): select them and bring the camera along.
+func _follow_new_head(fid: int) -> void:
+	if fid < 0 or _resolve(fid) == null:
+		return
+	select_folk(fid)
+	if lot_view != null and lot_view.has_method("focus_on"):
+		lot_view.call("focus_on", "folk", fid)
 
 func select_folk(id: int) -> void:
 	selected_folk_id = id

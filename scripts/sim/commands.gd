@@ -8,7 +8,7 @@ extends RefCounted
 ## Actions (args): interact {interaction_id, target_id, extra, strict} | build_place {def_id, tile, rot, level} | build_sell {object_id} |
 ## build_wall {a, b, type, level} | build_floor {a, b, type, level} | build_undo | career_accept | career_decline | career_skip | career_unskip |
 ## travel {folk_ids, lot_id, opts} | go_home {folk_ids, opts} | pay_bill {household_id} | set_aspiration {aspiration} | invite_to_venue {townie_id, lot_id} |
-## prison_visit {inmate} | market {action, args} (MarketCommand) | vacation {action, args} (Vacation.command).
+## prison_visit {inmate} | market {action, args} (MarketCommand) | vacation {action, args} (Vacation.command) | set_heir {heir_id} | choose_successor {choice, household} (SuccessionCmd).
 ## Not commands: speed / pause (host policy), settings, save / load slots, camera and selection (view state).
 
 const LOG_CAP := 500

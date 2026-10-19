@@ -9,6 +9,10 @@ extends RefCounted
 ## household 1; tests/hood_kit and start_kit create household 1; ScenarioGoals pays the primary household. Everything else asks Players.
 
 const LOCAL := 1
+## Succession facts kept per player entry (task 15) with their defaults: head = folk id of the head of the household (-1 = not chosen yet), heir = the
+## heir the player picked (-1 none), pending = nobody is left and the player has yet to choose, late = name of the head who died, since = the day
+## that began, gone = the dead head's folk id (-1).
+const EXTRA := {"head": -1, "heir": -1, "pending": false, "late": "", "since": -1, "gone": -1}
 const COLORS := [Color("#3d85c6"), Color("#e07a5f"), Color("#81b29a"), Color("#c77dbb")]     # name tag / ring colour per player id 1..4
 
 ## The player id of THIS machine: LOCAL (the host / a solo game) or, on a co-op client, the id the host gave us. UI and `primary_household()` follow it.
@@ -20,7 +24,13 @@ static func reset() -> void:
 	local_id = LOCAL
 
 static func set_player(player_id: int, household_id: int, name: String = "") -> void:
-	table[player_id] = {"household_id": household_id, "name": name if name != "" else "Player %d" % player_id}
+	var keep: Dictionary = table.get(player_id, {})
+	var e: Dictionary = {"household_id": household_id, "name": name if name != "" else "Player %d" % player_id}
+	for k in EXTRA:
+		e[k] = keep.get(k, EXTRA[k])
+	if int(keep.get("household_id", -1)) != household_id:
+		e["head"] = -1
+	table[player_id] = e
 
 static func remove_player(player_id: int) -> void:
 	table.erase(player_id)
@@ -81,6 +91,14 @@ static func _fallback_household() -> int:
 	hs.sort()
 	return int(hs[0]) if not hs.is_empty() else 1
 
+## Succession facts of a player (see EXTRA).
+static func field(player_id: int, key: String, default = -1):
+	return (table.get(player_id, {}) as Dictionary).get(key, default)
+
+static func set_field(player_id: int, key: String, value) -> void:
+	if table.has(player_id):
+		(table[player_id] as Dictionary)[key] = value
+
 static func to_dict() -> Dictionary:
 	var out: Dictionary = {}
 	for pid in ids():
@@ -91,4 +109,9 @@ static func from_dict(d: Dictionary) -> void:
 	table.clear()
 	var t: Dictionary = d.get("table", {})
 	for k in t:
-		table[int(k)] = {"household_id": int((t[k] as Dictionary).get("household_id", 1)), "name": str((t[k] as Dictionary).get("name", "Player %s" % k))}
+		var src: Dictionary = t[k]
+		var e: Dictionary = {"household_id": int(src.get("household_id", 1)), "name": str(src.get("name", "Player %s" % k))}
+		for x in EXTRA:
+			var v = src.get(x, EXTRA[x])
+			e[x] = bool(v) if EXTRA[x] is bool else (str(v) if EXTRA[x] is String else int(v))
+		table[int(k)] = e

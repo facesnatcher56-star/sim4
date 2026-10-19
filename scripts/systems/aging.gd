@@ -337,6 +337,7 @@ static func kill(folk_id: int, cause: String = "old age") -> Dictionary:
 			mourners.append(int(o.id))
 			DeathCauses.grieve(o, folk_id, str(f.name), cdef, close)
 	legacy["mourners"] = mourners
+	var succession: Dictionary = Succession.begin(folk_id)          # task 15: the head of a player household? (the spouse link is still there)
 	FamilyHousehold.on_death(folk_id, mourners)
 	legacy["inheritance"] = _inherit(f, mourners)
 	RelationshipService.sync_folk(f)
@@ -359,6 +360,7 @@ static func kill(folk_id: int, cause: String = "old age") -> Dictionary:
 	ChronicleHook.note("death", "%s died (%s)." % [f.name, str(cdef["label"]).to_lower()], [folk_id], "home:%d" % int(f.household_id), int(cdef.get("severity", 3)), true)
 	SysUtil.game_event("died", {"folk_id": folk_id, "cause": str(cdef["id"])})
 	DeadPools.purge(folk_id)
+	Succession.finish(succession)
 	return legacy
 
 static func _inherit(f, mourners: Array) -> Dictionary:

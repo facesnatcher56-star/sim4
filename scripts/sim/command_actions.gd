@@ -8,6 +8,7 @@ const HANDLERS := {
 	"build_undo": "_build_undo", "career_accept": "_career_accept", "career_decline": "_career_decline", "career_skip": "_career_skip",
 	"career_unskip": "_career_unskip", "travel": "_travel", "go_home": "_go_home", "pay_bill": "_pay_bill", "set_aspiration": "_set_aspiration",
 	"invite_to_venue": "_invite", "prison_visit": "_prison_visit", "market": "_market", "vacation": "_vacation",
+	"set_heir": "_set_heir", "choose_successor": "_choose_successor",
 }
 
 static func has_action(action: String) -> bool:
@@ -127,6 +128,12 @@ static func _prison_visit(e: Dictionary) -> Dictionary:
 static func _market(e: Dictionary) -> Dictionary:
 	var a: Dictionary = e["args"]
 	return MarketCommand.run(int(e["player_id"]), int(e["folk_id"]), str(a.get("action", "")), a.get("args", {}))
+
+static func _set_heir(e: Dictionary) -> Dictionary:
+	return SuccessionCmd.set_heir(e)
+
+static func _choose_successor(e: Dictionary) -> Dictionary:
+	return SuccessionCmd.choose_successor(e)
 
 static func _vacation(e: Dictionary) -> Dictionary:
 	var a: Dictionary = e["args"]

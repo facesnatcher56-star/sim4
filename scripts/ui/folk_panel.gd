@@ -652,6 +652,29 @@ func _build_family() -> void:
 	_family_button(row, "try_for_baby", "Try for Baby", grown and here and pst in ["sweetheart", "partner", "spouse", "fiance"], pid, "Needs a partner who is here.")
 	_family_button(row, "have_wedding", "Hold Wedding", grown and here and pst == "fiance", pid, "Needs a fiance(e) who is here.")
 	_family_button(row, "adopt_child", "Adopt a Child", grown, -1, "Adults only.")
+	_heir_row()
+
+## Task 15: who plays on when the head of the family dies, and a button to pick the heir.
+func _heir_row() -> void:
+	var pid: int = Players.local_id
+	if not Players.owns(pid, int(UIU.prop(folk, "household_id", 0))):
+		return
+	var head: int = Succession.head_of(pid)
+	var line: Array = HeirLine.candidates(head, Players.household_of(pid), pid)
+	family_box.add_child(UIU.make_label("HEAD OF THE FAMILY: %s" % Family.name_of(head), 12, UITheme.ACCENT))
+	var heir_txt := "Next in line: %s" % str(line[0]["label"]) if not line.is_empty() else "Nobody is next in line. You would choose who to play."
+	var lab := UIU.make_label("  " + heir_txt, 13)
+	lab.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	family_box.add_child(lab)
+	var b := Button.new()
+	var is_heir: bool = Succession.heir_of(pid) == folk_id
+	b.text = "Heir: yes (click to clear)" if is_heir else "Make Heir"
+	b.disabled = folk_id == head
+	b.tooltip_text = "The head of the family cannot be their own heir." if folk_id == head else "This person plays on when the head of the family dies."
+	b.pressed.connect(func():
+		Commands.run({"player_id": pid, "folk_id": folk_id, "action": "set_heir", "args": {"heir_id": -1 if is_heir else folk_id}})
+		_build_family())
+	family_box.add_child(b)
 
 func _family_button(row: Control, iid: String, text: String, enabled: bool, target: int, why_not: String) -> void:
 	var b := Button.new()
