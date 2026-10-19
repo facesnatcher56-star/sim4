@@ -101,7 +101,7 @@ static func _announce(o: Dictionary) -> void:
 		SysUtil.notify(text, "warn")
 		o["told"] = true
 	var hours: float = float(int(o["end"]) - int(o["start"])) / 60.0
-	if hours >= float(cfg().get("chronicle_hours", 3)) or str(o["util"]) == "water":
+	if hours >= float(cfg().get("chronicle_hours", 3)) or (str(o["util"]) == "water" and hours >= 3.0):
 		ChronicleHook.note("utility", text, [], "", 2, true)
 
 ## The old town-wide power cut (a disaster incident, which handles the homes itself): every zone is without power for `minutes`.

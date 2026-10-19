@@ -45,8 +45,6 @@ static func on_day(_day: int) -> void:
 		if spoiled_total >= int(st.get("min_items", 4)) and _day - _last_spoil_toast >= int(st.get("gap_days", 3)):
 			_last_spoil_toast = _day
 			SysUtil.notify("A lot of food in the fridge went bad.", "warn")
-		else:
-			ChronicleHook.note("spoilage", "Some food in the fridge went bad.", [], "", 1, false)
 
 static var _daily_memo: Dictionary = {}        # object def id -> does any state key carry a daily rule?
 

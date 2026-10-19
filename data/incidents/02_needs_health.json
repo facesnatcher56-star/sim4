@@ -807,6 +807,7 @@
    "check": "hour",
    "base_rate_per_year": 0.6,
    "notify_policy": "household",
+   "chronicle_min_severity": 2,
    "severity": 1,
    "public": false,
    "conditions": [
@@ -1330,6 +1331,7 @@
    "base_rate_per_year": 0.4,
    "notify_policy": "known",
    "severity": 1,
+   "chronicle_min_severity": 2,
    "public": false,
    "conditions": [
     {

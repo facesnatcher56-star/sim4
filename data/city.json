@@ -239,7 +239,7 @@
   ],
   "history_cap": 40,
   "townie_lot_cap": 6,
-  "chronicle_hours": 3
+  "chronicle_hours": 6
  },
  "gov": {
   "term_days": 84,

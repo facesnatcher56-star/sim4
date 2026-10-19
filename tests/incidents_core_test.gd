@@ -227,6 +227,7 @@ func _statistical(f: Array) -> void:
 	t["age_days"] = 182.0
 	K.expect(f, _near(Incidents.effective_rate("minor_fall", subj), base * 2.5 * 3.0, 0.0001), "elder townie x3 as well")
 	# statistical resolve: summary, determinism, chronicle
+	IncidentDefs.get_def("minor_fall").erase("chronicle_min_severity")      # the shipped data keeps everyday falls out of the chronicle (19i); this checks the hook itself
 	K.events.clear()
 	Incidents.seed_rng(5)
 	var s1: Array = []

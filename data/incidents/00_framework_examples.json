@@ -30,7 +30,7 @@
   },
   "minor_fall": {
    "label": "Fall", "scope": "folk", "check": "hour", "base_rate_per_year": 0.5,
-   "notify_policy": "household",
+   "notify_policy": "household", "chronicle_min_severity": 4,
    "conditions": [{"lacks_buff": "away"}, {"lacks_buff": "in_hospital"}, {"lacks_buff": "stage_baby"}],
    "risk_mults": [
     {"label": "Elder", "when": [{"age_stage_is": "elder"}], "mult": 3.0},
@@ -54,7 +54,7 @@
   },
   "found_money": {
    "label": "Found money", "scope": "lot", "check": "day", "base_rate_per_year": 1.0,
-   "notify_policy": "household",
+   "notify_policy": "household", "chronicle_min_severity": 2,
    "outcomes": [
     {"weight": 1, "effects": [{"coins_range": [15, 60]}, {"add_buff": "lucky_day"}], "text": "{name} found {amount} coins tucked inside an old coat.", "kind": "good"}
    ],
