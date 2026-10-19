@@ -65,6 +65,7 @@ func _no_churn(f: Array) -> void:
 	var w := K.setup(5, true)
 	var a := K.make_folk(w, "Una Rowe", [], 1)
 	K.mgr.new_game([1])
+	WorldIface.coins[1] = 20          # short of money: looking for work
 	Careers.confirm_offers = true
 	var hires: Array = []
 	for d in range(2, 80):
