@@ -31,6 +31,22 @@ After adding / removing a `class_name` file run `Godot --headless --path . --imp
 - **Determinism**: `SimSeed.apply(seed)` seeds every random stream; `NewGame.start` calls it with the world seed. Reset every static counter / cache / once-only flag in
   `SystemsManager.reset_all` (tests/determinism_diag.gd finds the ones that leak between games). Tests: determinism_test, command_replay_test, players_test.
 
+## Level of detail: tiers for people and places (task 17.3)
+- **Tiers** (`scripts/sim/tiers.gd`, `tier_sets.gd`, `interest_area.gd`, data `data/tiers.json`): every person is ACTIVE (visible / near the controlled households:
+  full sim every minute), NEAR (same area off screen: full sim every 5 / 10 minutes with the elapsed minutes applied), TOWN (cheap schedule-driven record) or STATISTICAL
+  (only daily dice). Anchors = the non-away folk of every household in the `Players` table + the camera focus (`Tiers.set_focus`); positions are classified by lot / street /
+  distance with building footprints as line-of-sight blockers; promote at once, demote after `demote_min` (hysteresis); a global ACTIVE cap with the surplus NEAR by distance.
+  The ambient crowd / staff are the tiered population; residents, visitors, responders ... are always ACTIVE. API: `Tiers.of(folk_or_id)`, `active()`, `near()`, `town()`,
+  `statistical()`, `set_of(tier)`, `counts()`, `period_of(id)`, `due_folk(minute)`, `lot_distances()`, `add_listener(callable)`. The sets change only on assignments
+  (hooks in `World.add_folk/remove_folk`); saved in the `tiers` block (hysteresis survives a load), everything else is derived.
+- **TownSim** (`scripts/systems/town_sim.gd`): `where(townie, minute)` (sleep / shift / school / evening outing / home, pure function), needs as closed-form curves, an hourly
+  BUCKETED job that stores the TOWN record (needs, place, act, minute inside the townie record), promotion (`apply_to_folk`) and demotion (`on_demoted`) used by `Crowd`.
+- **Slicing**: `IncidentSlices` (hourly / daily incident dice in 60 / 96 slices), `DaySlices` (daily passes over pairs spread over 24 hours), the bucketed daily job
+  `CrimeFlow.person_day`. Direct calls of the old entry points (tests) still run everything at once; the scheduler rows (`*_sched`, `*_sliced`) slice.
+- **Places**: weather rain on plants only near an anchor (far lots count owed rain hours, caught up daily); crowd lots only near an anchor (`Tiers.lot_distances`);
+  `World.release_all` visits only the objects a folk reserved; `Neighborhood.lot()` is a dictionary lookup.
+- Every system declares its tier behaviour: docs/PERFORMANCE.md "What every system declares".
+
 ## Signals on `Events` (exact names Ã¢â‚¬â€ all agents must use these)
 ```
 signal folk_added(folk_id: int)

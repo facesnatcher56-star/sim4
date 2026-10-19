@@ -23,8 +23,9 @@ const SLACK := 4.0                       # wall-clock FAIL at SLACK x budget (WA
 # "OVER BUDGET" line and a red row in docs/PERF_SCALE_RESULTS.md); the ceiling only catches a regression. Tighten them as steps 17.2+ land, never loosen.
 # A profile's FAIL limit is max(SLACK x budget, its ceiling).
 const CEIL := {
-	"today": {"frame_avg": 16.0, "worst": 600.0, "town": 4.0, "choose": 12.0},
-	"big": {"frame_avg": 24.0, "worst": 20000.0, "town": 18.0, "choose": 18.0},
+	"today": {"frame_avg": 6.0, "worst": 300.0, "town": 2.5, "choose": 12.0},       # tightened with the tiers (17.3)
+	"big": {"frame_avg": 12.0, "worst": 2500.0, "town": 8.0, "choose": 18.0},
+	"mini": {"frame_avg": 6.0, "worst": 300.0, "town": 2.5, "choose": 12.0},
 }
 # ---- load-independent limits
 const MAX_PATHS_PER_CHOOSE := 25
@@ -89,6 +90,7 @@ func measure(profile: String, minutes: int) -> Dictionary:
 	var crowd_n := 0
 	var tier_sum: Array = [0, 0, 0, 0]
 	var tier_n := 0
+	var active_max := 0
 	var node_max := 0
 	var mem_day1 := 0
 	var nodes_day1 := 0
@@ -109,6 +111,7 @@ func measure(profile: String, minutes: int) -> Dictionary:
 		t_all += dt
 		day_t += dt
 		var nf: int = W.folk.size()
+		active_max = maxi(active_max, Tiers.set_of(Tiers.ACTIVE).size())
 		folk_sum += nf
 		folk_max = maxi(folk_max, nf)
 		if m % 10 == 0:
@@ -144,6 +147,13 @@ func measure(profile: String, minutes: int) -> Dictionary:
 	res["median_min_ms"] = float(sorted[sorted.size() / 2]) / 1000.0
 	res["folk_avg"] = float(folk_sum) / float(minutes)
 	res["folk_max"] = folk_max
+	res["active_max"] = active_max
+	res["active_cap"] = int(Tiers.cfg().get("active_cap", 60))
+	var ticked := 0
+	for pk in dir.prof:
+		if str(pk).ends_with("needs/buffs/mood"):
+			ticked += int((dir.prof[pk] as Array)[1])
+	res["folk_ticked_per_min"] = float(ticked) / float(minutes)
 	res["tiers_avg"] = tier_sum.map(func(x): return float(x) / float(maxi(tier_n, 1)))
 	res["tiers_end"] = Tiers.counts()
 	res["crowd_avg"] = float(crowd_sum) / float(maxi(crowd_n, 1))
@@ -306,6 +316,8 @@ func check(res: Dictionary, strict: bool, wall: bool = true) -> void:
 		if pf > MAX_PATHS_PER_FILL:
 			fails.append("%.2f path queries per fill (max %.1f)" % [pf, MAX_PATHS_PER_FILL])
 	if strict:
+		if int(res["active_max"]) > int(res["active_cap"]):
+			fails.append("%d ACTIVE people at once (tier cap %d)" % [res["active_max"], res["active_cap"]])
 		var cap: int = int(Town.PROFILES.get(res["profile"], {}).get("active_cap", 0))
 		if cap > 0 and int(res["folk_max"]) > cap:
 			fails.append("%d folk in the world at once (active-set cap %d): crowd / visitors are no longer bounded" % [res["folk_max"], cap])
@@ -334,7 +346,7 @@ func print_report(res: Dictionary) -> void:
 	print("== SCALE '%s': %d game minutes (%.1f days) in %.0f ms (%.2f ms/game-min; per frame at speed 3: avg %.2f ms, worst minute %.1f ms, p99 %.1f, median %.2f)" % [res["profile"], minutes, m / 1440.0, res["total_ms"], res["total_ms"] / m, frame_avg_ms(res), res["worst_min_ms"], res["p99_min_ms"], res["median_min_ms"]])
 	print("   ms/game-min by day: %s" % ", ".join((res["day_ms_per_min"] as Array).map(func(x): return "%.2f" % x)))
 	print("   folk in world avg %.1f max %d, crowd+staff avg %.1f max %d, townies alive %d, path queries %d (%.2f per game-min)" % [res["folk_avg"], res["folk_max"], res["crowd_avg"], res["crowd_max"], res["townies_end"], res["paths_run"], float(res["paths_run"]) / m])
-	print("   tiers (avg active/near/town/statistical): %s; end %s; %s" % [str((res["tiers_avg"] as Array).map(func(x): return snappedf(x, 0.1))), str(res["tiers_end"]), Tiers.describe()])
+	print("   tiers (avg active/near/town/statistical): %s; at the end %s; ACTIVE max %d (cap %d); folk ticked per game minute %.1f" % [str((res["tiers_avg"] as Array).map(func(x): return snappedf(x, 0.1))), str(res["tiers_end"]), res["active_max"], res["active_cap"], res["folk_ticked_per_min"]])
 	print("   nodes max %d end %d (day 1: %d), orphans %d, objects %d, resources %d, static mem %.0f MB (day 1: %.0f MB)" % [res["nodes_max"], res["nodes_end"], res["nodes_day1"], res["orphans_end"], res["objects_end"], res["resources_end"], float(res["mem_end"]) / 1048576.0, float(res["mem_day1"]) / 1048576.0])
 	for k in res["choose"]:
 		var c: Dictionary = res["choose"][k]
@@ -367,6 +379,8 @@ func append_results(res: Dictionary) -> void:
 	var info: Dictionary = res["info"]
 	var s := "\n## %s  %s  (%d lots, %d townies, map %s, %.1f days)\n\n" % [res["date"], res["profile"], info["lots"], res["townies_end"], str(info["map"]), m / 1440.0]
 	s += "- **ms/game-min %.2f** | frame avg %.2f ms (budget %.0f) | worst minute %.1f ms (budget %.0f) | p99 %.1f | median %.2f | town-level %.2f ms/frame (budget %.0f) | by day: %s\n" % [res["total_ms"] / m, frame_avg_ms(res), BUDGET_FRAME_AVG_MS, res["worst_min_ms"], BUDGET_FRAME_WORST_MS, res["p99_min_ms"], res["median_min_ms"], town_frame_ms(res), BUDGET_TOWN_FRAME_MS, ", ".join((res["day_ms_per_min"] as Array).map(func(x): return "%.2f" % x))]
+	s += "- tiers (avg active / near / town / statistical): %s; ACTIVE max %d (cap %d); folk ticked per game minute %.1f; at the end %s
+" % [str((res["tiers_avg"] as Array).map(func(x): return snappedf(x, 0.1))), res["active_max"], res["active_cap"], res["folk_ticked_per_min"], str(res["tiers_end"])]
 	s += "- folk in world avg %.1f / max %d; crowd+staff avg %.1f / max %d; path queries %d (%.2f/game-min, %d fills); " % [res["folk_avg"], res["folk_max"], res["crowd_avg"], res["crowd_max"], res["paths_run"], float(res["paths_run"]) / m, res["fills"]]
 	for k in res["choose"]:
 		var c: Dictionary = res["choose"][k]

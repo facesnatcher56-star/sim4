@@ -67,7 +67,7 @@ static func forget(t: Dictionary) -> void:
 	for key in RelationshipService.pairs.keys():
 		var pr: Dictionary = RelationshipService.pairs[key]
 		if ids.has(int(pr.get("lo", -1))) or ids.has(int(pr.get("hi", -1))):
-			RelationshipService.pairs.erase(key)
+			RelationshipService.erase_pair(key)
 
 static func after_load(t: Dictionary) -> void:
 	ensure_npcs(t, 6)

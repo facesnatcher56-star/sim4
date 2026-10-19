@@ -76,9 +76,11 @@ static func _do_slice(check: String) -> void:
 		if str(def["check"]) != check:
 			continue
 		var scope: String = str(def["scope"])
+		var tdef := PerfProf.start()
 		if scope == "town":
 			if k == 0:
 				IncidentChecks._town(id, def)
+			PerfProf.stop("incdef/" + str(id), tdef)
 			continue
 		var arr: Array = lists["folk" if scope == "folk" else ("townie" if scope == "townie" else "lot")]
 		var i: int = k
@@ -90,6 +92,7 @@ static func _do_slice(check: String) -> void:
 				IncidentChecks._roll(id, def, s)
 			else:
 				stats["skipped"] = int(stats["skipped"]) + 1
+		PerfProf.stop("incdef/" + str(id), tdef)
 	if check == "hour":
 		AccidentMarks.slice_markers(false)
 	IncidentChecks.end_slice()

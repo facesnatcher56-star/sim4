@@ -59,7 +59,7 @@ static func bit_color(bit: String) -> String:
 static func count_bit(a: int, bit: String, at_least_rank: bool = false) -> int:
 	var n: int = 0
 	var rank: int = _bit_rank(bit)
-	for key in RelationshipService.pairs:
+	for key in RelationshipService.keys_of(a):
 		var p: Dictionary = RelationshipService.pairs[key]
 		var other: int = -1
 		if int(p["lo"]) == a:
@@ -88,7 +88,7 @@ static func _bit_rank(bit: String) -> int:
 
 static func others_with_bit(a: int, bit: String) -> Array:
 	var out: Array = []
-	for key in RelationshipService.pairs:
+	for key in RelationshipService.keys_of(a):
 		var p: Dictionary = RelationshipService.pairs[key]
 		var other: int = -1
 		if int(p["lo"]) == a:
@@ -101,7 +101,7 @@ static func others_with_bit(a: int, bit: String) -> Array:
 
 static func all_known(a: int) -> Array:
 	var out: Array = []
-	for key in RelationshipService.pairs:
+	for key in RelationshipService.keys_of(a):
 		var p: Dictionary = RelationshipService.pairs[key]
 		if int(p["lo"]) == a:
 			out.append(int(p["hi"]))
@@ -162,7 +162,7 @@ static func set_flag(a: int, b: int, flag: String, on: bool = true, announce: bo
 ## Who is `a` bonded to romantically (spouse > partner > sweetheart)?
 static func romantic_partners(a: int) -> Array:
 	var out: Array = []
-	for key in RelationshipService.pairs:
+	for key in RelationshipService.keys_of(a):
 		var p: Dictionary = RelationshipService.pairs[key]
 		var other: int = -1
 		if int(p["lo"]) == a:

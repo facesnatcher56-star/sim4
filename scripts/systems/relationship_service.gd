@@ -21,8 +21,41 @@ static var reputation_map: Dictionary = {}   # folk_id -> -100..100 standing in 
 static var gossip_items: Dictionary = {} # folk_id -> [{about, other, text, kind, sid, day, told:[ids]}]
 static var affairs: Array = []           # [{cheater, other, victim, day}] undiscovered cheating
 
+## Pair keys per person (task 17.3): who a person knows is a lookup, not a scan of every pair of the town. Maintained where pairs are created / erased / loaded
+## (`_pair`, `erase_pair`, `from_dict`, `reset`); insertion order = the order the pairs were created, as in `pairs`.
+static var _by_person: Dictionary = {}     # person id -> {pair key: true}
+
+static var _indexed: int = 0                # pairs the index knows; a mismatch with pairs.size() (a test or a tool edited `pairs` directly) rebuilds it
+
+static func keys_of(a: int) -> Array:
+	if _indexed != pairs.size():
+		_by_person.clear()
+		_indexed = 0
+		for key in pairs:
+			_index_pair(str(key), int((pairs[key] as Dictionary)["lo"]), int((pairs[key] as Dictionary)["hi"]))
+	return (_by_person.get(a, {}) as Dictionary).keys()
+
+static func _index_pair(key: String, lo: int, hi: int) -> void:
+	_indexed += 1
+	for pid in [lo, hi]:
+		if not _by_person.has(pid):
+			_by_person[pid] = {}
+		(_by_person[pid] as Dictionary)[key] = true
+
+static func erase_pair(key) -> void:
+	if not pairs.has(key):
+		return
+	var p: Dictionary = pairs[key]
+	for pid in [int(p["lo"]), int(p["hi"])]:
+		if _by_person.has(pid):
+			(_by_person[pid] as Dictionary).erase(key)
+	pairs.erase(key)
+	_indexed -= 1
+
 static func reset() -> void:
 	pairs.clear()
+	_by_person.clear()
+	_indexed = 0
 	_targets.clear()
 	_bit_cache.clear()
 	secrets.clear()
@@ -47,6 +80,7 @@ static func _pair(a: int, b: int, create: bool = true) -> Dictionary:
 		var hi: int = maxi(a, b)
 		pairs[key] = {"lo": lo, "hi": hi, "flags": {}, "since": {}, "history": [], "last_contact": SysUtil.day(),
 			"vals": {"%d>%d" % [lo, hi]: {"friendship": 0.0, "romance": 0.0}, "%d>%d" % [hi, lo]: {"friendship": 0.0, "romance": 0.0}}}
+		_index_pair(key, lo, hi)
 	return pairs[key]
 
 static func knows(a: int, b: int) -> bool:
@@ -107,10 +141,8 @@ static func sync_folk(f) -> void:
 ## Push stored values onto a folk that just (re)appeared in the world.
 static func restore_folk(f) -> void:
 	var fid: int = int(f.id)
-	for key in pairs:
+	for key in keys_of(fid):
 		var p: Dictionary = pairs[key]
-		if int(p["lo"]) != fid and int(p["hi"]) != fid:
-			continue
 		var other: int = int(p["hi"]) if int(p["lo"]) == fid else int(p["lo"])
 		var vals: Dictionary = (p["vals"] as Dictionary).get("%d>%d" % [fid, other], {})
 		if not f.relationships.has(other):
@@ -369,6 +401,7 @@ static func from_dict(d: Dictionary) -> void:
 		p["lo"] = int(p["lo"])
 		p["hi"] = int(p["hi"])
 		p["last_contact"] = int(p["last_contact"])
+		_index_pair(key, int(p["lo"]), int(p["hi"]))
 		for ev in p["history"]:
 			ev["day"] = int(ev["day"])
 			ev["by"] = int(ev["by"])

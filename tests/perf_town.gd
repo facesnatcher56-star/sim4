@@ -23,7 +23,8 @@ const BLOCK_H := 30
 const PROFILES := {
 	"mini": {"cols": 4, "rows": 3, "map": Vector2i(160, 106), "townies": 24, "strip_y": 97,
 		"compose": {"home": 1, "cafe": 1, "market": 1, "office": 1, "school": 1, "townie_a": 1, "townie_b": 1, "apartments": 1, "hospital": 1, "police": 1, "tower": 1}, "active_cap": 45},
-	"big": {"cols": 8, "rows": 8, "map": Vector2i(320, 272), "townies": 200, "strip_y": 247, "active_cap": 150,
+	"big": {"cols": 8, "rows": 8, "map": Vector2i(320, 272), "townies": 200, "strip_y": 247, "active_cap": 220,      # folk IN THE WORLD (the crowd is capped per lot, not globally); the ACTIVE tier has its own cap (data/tiers.json active_cap)
+		
 		"compose": {"home": 1, "hospital": 1, "police": 1, "courthouse": 1, "park": 3, "cafe": 7, "gym": 3, "library": 3, "market": 4, "school": 3, "office": 9,
 			"townie_a": 8, "townie_b": 8, "townie_c": 4, "apartments": 4, "tower": 3}},
 }

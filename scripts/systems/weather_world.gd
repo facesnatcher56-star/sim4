@@ -59,23 +59,36 @@ static var _ix_next: int = 0
 static var _ix: Dictionary = {}           # kind -> {object id: object}
 
 static func reset_index() -> void:
+	_def_match = {}
 	_ix_world = null
 	_ix_next = 0
 	_ix = {}
 	_catch = {}
 
+static var _def_match: Dictionary = {}     # kind -> {def id: bool}: the object definitions decide, so the answer is memoised per definition
+
 static func _matches(kind: String, o) -> bool:
+	var dm: Dictionary = _def_match.get(kind, {})
+	if not _def_match.has(kind):
+		_def_match[kind] = dm
+	var did: String = str(o.def_id)
+	if dm.has(did):
+		return bool(dm[did])
 	var d: Dictionary = _def_of(o)
 	var tags: Array = d.get("tags", [])
+	var yes := false
 	match kind:
 		"rain":
-			return str(o.def_id) == "garden_plot" or (tags.has("plant") and (d.get("state", {}) as Dictionary).has("water"))
+			yes = did == "garden_plot" or (tags.has("plant") and (d.get("state", {}) as Dictionary).has("water"))
 		"plot":
-			return str(o.def_id) == "garden_plot"
-	for t in kind.split(","):
-		if tags.has(t):
-			return true
-	return false
+			yes = did == "garden_plot"
+		_:
+			for t in kind.split(","):
+				if tags.has(t):
+					yes = true
+					break
+	dm[did] = yes
+	return yes
 
 static func _indexed(kind: String) -> Array:
 	var w = WorldIface.world()

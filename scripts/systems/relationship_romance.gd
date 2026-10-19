@@ -57,7 +57,7 @@ static func _update_bond_tracks(a: int, b: int) -> void:
 ## Folk `a` is romantically attached to (spouse / partner / sweetheart / dating). romantic_partners() keeps its old meaning.
 static func exclusive_partners(a: int) -> Array:
 	var out: Array = []
-	for key in RelationshipService.pairs:
+	for key in RelationshipService.keys_of(a):
 		var p: Dictionary = RelationshipService.pairs[key]
 		var other: int = -1
 		if int(p["lo"]) == a:

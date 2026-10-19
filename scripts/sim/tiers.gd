@@ -108,6 +108,9 @@ static func add_listener(c: Callable) -> void:
 	if not _listeners.has(c):
 		_listeners.append(c)
 
+static func remove_listener(c: Callable) -> void:
+	_listeners.erase(c)
+
 static func set_focus(tile: Vector2i) -> void:
 	_focus = tile
 	_has_focus = true
@@ -130,7 +133,9 @@ static func on_added(f) -> void:
 	_kind.erase(id)
 	_cand.erase(id)
 	if not _sets.has(id):
-		_sets.put(id, ACTIVE, f)          # until the next refresh classifies it
+		# until the next refresh classifies it: simulated-in-full people are ACTIVE, the tiered crowd starts NEAR (a spawn wave must not blow the ACTIVE cap);
+		# its cadence stays every minute (no period yet) so nothing is skipped in between
+		_sets.put(id, NEAR if _classify_kind(f) == 1 else ACTIVE, f)
 	else:
 		(_sets.sets[_sets.tier_of[id]] as Dictionary)[id] = f
 
@@ -220,7 +225,8 @@ static func refresh(_total: int = 0) -> void:
 	var p_town: int = int(c.get("town_period", 15))
 	var demote: int = int(c.get("demote_min", 10))
 	var stick: int = int(c.get("stickiness", 4))
-	var ranked: Array = []            # tiered ACTIVE people for the cap: [score, id]
+	var todo: Array = []              # tiered people: [id, folk, tier now (-1 = new), tier decided, distance]
+	var ranked: Array = []            # tiered people who are ACTIVE after the hysteresis, for the cap: [score, index into todo]
 	var active_n := fixed_active
 	for id2 in _world:
 		var f2 = _world[id2]
@@ -239,49 +245,51 @@ static func refresh(_total: int = 0) -> void:
 		else:
 			stats["reused"] = int(stats["reused"]) + 1
 		var want: int = int(cd[0])
+		var fin: int = cur
 		if _new.has(id2):
 			_new.erase(id2)
 			if _saved.has(id2):
-				cur = int(_saved[id2])
-				if cur != want and want > cur:      # a saved higher tier: keep it and let the hysteresis timer run
+				fin = int(_saved[id2])
+				if want > fin:                  # a saved higher tier: keep it and let the hysteresis timer run
 					_below[id2] = now
-				_assign(id2, cur, f2, int(_sets.tier_of.get(id2, -1)))
 			else:
-				cur = want
-				_assign(id2, want, f2, int(_sets.tier_of.get(id2, -1)))
+				fin = want
 		elif want < cur:
 			_below.erase(id2)
-			_assign(id2, want, f2, cur)
-			cur = want
+			fin = want
 		elif want > cur:
 			var since: int = int(_below.get(id2, now))
 			_below[id2] = since
 			if now - since >= demote:
 				_below.erase(id2)
-				_assign(id2, want, f2, cur)
-				cur = want
+				fin = want
 		else:
 			_below.erase(id2)
-		if cur == ACTIVE:
-			_period.erase(id2)
-		elif cur == NEAR:
-			_period[id2] = p_far if int(cd[1]) >= p_far_d else p_near
-		else:
-			_period[id2] = p_town
-		if cur == ACTIVE:
+		todo.append([id2, f2, cur, fin, int(cd[1])])
+		if fin == ACTIVE:
 			active_n += 1
-			ranked.append([int(cd[1]) - (stick if int(_sets.tier_of.get(id2, -1)) == ACTIVE else 0), int(id2)])
+			ranked.append([int(cd[1]) - (stick if cur == ACTIVE else 0), todo.size() - 1])
 	_saved.clear()
 	var cap: int = int(c.get("active_cap", 60))
-	if active_n > cap:
-		ranked.sort_custom(func(a, b): return a[0] < b[0] or (a[0] == b[0] and a[1] < b[1]))
+	if active_n > cap:                             # the surplus is decided BEFORE anything is assigned, so a capped person does not flip each minute
+		ranked.sort_custom(func(a, b): return a[0] < b[0] or (a[0] == b[0] and int(todo[a[1]][0]) < int(todo[b[1]][0])))
 		var keep: int = maxi(cap - fixed_active, 0)
 		for i in range(keep, ranked.size()):
-			var cid: int = int(ranked[i][1])
-			_below.erase(cid)
+			var e: Array = todo[int(ranked[i][1])]
+			e[3] = NEAR
+			_below.erase(int(e[0]))
 			stats["capped"] = int(stats["capped"]) + 1
-			_assign(cid, NEAR, _world[cid], ACTIVE)
-			_period[cid] = p_near
+	for e2 in todo:
+		var tid: int = int(e2[0])
+		var ft: int = int(e2[3])
+		if ft != int(e2[2]):
+			_assign(tid, ft, e2[1], int(e2[2]))
+		if ft == ACTIVE:
+			_period.erase(tid)
+		elif ft == NEAR:
+			_period[tid] = p_far if int(e2[4]) >= p_far_d else p_near
+		else:
+			_period[tid] = p_town
 	stats["refresh"] = int(stats["refresh"]) + 1
 	stats["usec"] = int(stats["usec"]) + Time.get_ticks_usec() - t0
 
