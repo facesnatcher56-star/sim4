@@ -79,6 +79,44 @@
   "event_decay_per_day": 0.5,
   "multiples_points": 1.0
  },
+ "loss": {
+  "_doc": "Per-day chances by trimester (index 0..2) at risk multiplier 1; PregnancyRisk.multiplier scales them. Only with Mature life events on.",
+  "miscarriage_per_day": [0.03, 0.006, 0.0],
+  "stillbirth_per_day": [0.0, 0.0, 0.002],
+  "grief_strength": {"mother": 1.5, "father": 1.3, "stillbirth_mother": 2.0, "stillbirth_father": 1.8},
+  "grief_days": {"miscarriage": 4, "stillbirth": 7},
+  "rest_days": 5,
+  "support_cut": 0.25,
+  "friend_min": 30,
+  "counselling_cost": 30,
+  "counselling_cut": 0.5,
+  "termination": {
+   "until": 0.4,
+   "cost": 60,
+   "clinic_minutes": 180,
+   "ask_every_day": true,
+   "ai_base": 0.03,
+   "planned": -0.025,
+   "unplanned": 0.1,
+   "poor": 0.1,
+   "poor_coins": 80,
+   "single": 0.08,
+   "married": -0.05,
+   "young_days": 100,
+   "young": 0.04,
+   "kids2": 0.1,
+   "trait_add": {"workaholic": 0.04, "pessimist": 0.03, "romantic": -0.03, "optimist": -0.02, "generous": -0.01},
+   "max": 0.6
+  },
+  "reaction": {
+   "base": 0.1,
+   "supportive_traits": {"empath": 0.25, "easygoing": 0.15, "forgiving": 0.15, "generous": 0.1},
+   "upset_traits": {"stubborn": -0.2, "hot_headed": -0.2, "grudgeholder": -0.1, "romantic": -0.05},
+   "friend_delta": 4.0,
+   "upset_delta": -4.0
+  },
+  "memory": {"planned": -0.5, "unplanned": -0.15, "later_days": 6, "later_value": 0.1}
+ },
  "townie": {
   "daily_chance": 0.012,
   "max_kids": 3,

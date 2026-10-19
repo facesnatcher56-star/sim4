@@ -106,6 +106,20 @@
    "tags": ["pregnancy", "rest"],
    "thought": "Time to take it easy."
   },
+  "seek_counselling": {
+   "label": "Talk to a Counsellor",
+   "kind": "super",
+   "target": "self",
+   "duration_min": 60,
+   "posture": "sit",
+   "tests": [{"any": [{"has_buff": "grieving"}, {"has_buff": "grieving_heavy"}, {"has_buff": "grieving_shattered"}]}],
+   "on_finish": [{"fire_event": "counselling_session"}],
+   "autonomous": false,
+   "priority": "normal",
+   "cooldown_min": 1440,
+   "tags": ["health", "social"],
+   "thought": "It might help to talk."
+  },
   "fertility_treatment": {
    "label": "Fertility Clinic Treatment",
    "kind": "super",
@@ -135,6 +149,12 @@
    "duration_min": 1440,
    "need_decay_mult": {"energy": 0.6, "fun": 1.3},
    "thought": "Taking it easy for the baby."
+  },
+  "mixed_feelings": {
+   "label": "Mixed Feelings",
+   "mood": {"uncomfortable": 1, "sad": 1},
+   "duration_min": 2880,
+   "thought": "It was my choice, and it is still hard."
   },
   "expecting_joy": {
    "label": "Over the Moon",

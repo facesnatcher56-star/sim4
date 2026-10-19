@@ -13,6 +13,7 @@ static func setup(seed_value: int = 4242, with_manager: bool = true) -> StubWorl
 	var w: StubWorld = Kit.setup(seed_value)
 	SysUtil.seed_rng(seed_value)
 	SystemsManager.reset_all()
+	PregnancyLoss.mature_on = 0            # tests that are not about loss or the early-pregnancy choice stay free of random events
 	notes.clear()
 	events.clear()
 	SimEnv.events().notification.connect(func(t, k): notes.append([t, k]))

@@ -25,6 +25,9 @@ static func consider(ta: Dictionary, tb: Dictionary, base_chance: float) -> bool
 	var p: float = base_chance * Conception.couple_fertility(cid, int(other["id"]))
 	if Fertility.resting(cid) or Pregnancy.rng.randf() >= p:
 		return false
+	if PregnancyChoice.townie_ends(carrier, other, Pregnancy.rng.randf() < 0.6):
+		Fertility.rest_for(cid, int(PregnancyLoss.cfg().get("rest_days", 5)))
+		return false                               # a private choice: nothing to see in the town
 	var kids: int = Pregnancy.roll_kids(cid)
 	var sexes: Array = []
 	for _i in kids:

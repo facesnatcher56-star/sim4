@@ -16,6 +16,12 @@ static func cfg() -> Dictionary:
 
 ## Called when she knows. Decides openness, then schedules telling the partner.
 static func on_known(id: int) -> void:
+	if PregnancyChoice.intercept(id):                 # the early-pregnancy choice comes first (only with Mature life events on)
+		return
+	open_up(id)
+
+## She keeps the pregnancy: decide how open she is, then tell the partner.
+static func open_up(id: int) -> void:
 	var r: Dictionary = Pregnancy.rec(id)
 	if r.is_empty():
 		return

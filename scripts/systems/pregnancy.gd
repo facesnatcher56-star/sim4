@@ -111,6 +111,7 @@ static func on_hour() -> void:
 
 ## Daily: births at the due date, risks, noticing, loss dice.
 static func on_day() -> void:
+	PregnancyLoss.daily_pending()
 	for mid in Aging.pregnancies.keys():
 		if not Aging.pregnancies.has(mid):
 			continue
@@ -118,6 +119,7 @@ static func on_day() -> void:
 		PregnancyRisk.on_day(int(mid), r)
 		_ai_care(int(mid), r)
 		PregnancyTell.on_day(int(mid), r)
+		PregnancyChoice.on_day(int(mid), r)
 		PregnancyLoss.on_day(int(mid), r)
 		if Aging.pregnancies.has(mid) and SysUtil.day() >= int(r["due_day"]):
 			PregnancyBirth.deliver(int(mid), int(r["father"]))
@@ -132,6 +134,7 @@ static func _ai_care(id: int, r: Dictionary) -> void:
 
 static func on_game_event(ev: String, payload: Dictionary) -> void:
 	PregnancyRisk.on_game_event(ev, payload)
+	PregnancyLoss.on_game_event(ev, payload)
 
 ## A person is gone (died, moved out): their pregnancy and fertility state go with them.
 static func forget(id: int) -> void:
