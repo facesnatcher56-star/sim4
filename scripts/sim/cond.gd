@@ -90,6 +90,9 @@ static func check_one(c: Variant, ctx: Dictionary) -> bool:
 					return false
 				if not (folk.get_rel(int(target.id), str(v[0])) > float(v[1])):
 					return false
+			"homemaker":
+				if folk == null or Careers.homemakers.has(int(folk.id)) != bool(v):
+					return false
 			"has_job":
 				if folk == null or (folk.has_job() != bool(v)):
 					return false

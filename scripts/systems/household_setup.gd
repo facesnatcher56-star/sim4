@@ -171,6 +171,8 @@ static func apply(h: Dictionary, folk: Array) -> void:
 		var asp: String = str(specs[i].get("aspiration", ""))
 		if asp != "":
 			Goals.set_aspiration(int(folk[i].id), asp)
+		if bool(specs[i].get("homemaker", false)):
+			Homemaker.set_role(folk[i], true)
 	var mate: int = _mate_index(specs)
 	var sib_parent: int = -1
 	for i in range(1, folk.size()):

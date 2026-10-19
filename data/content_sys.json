@@ -72,6 +72,9 @@
    "tests": [
     {
      "has_job": false
+    },
+    {
+     "homemaker": false
     }
    ],
    "on_finish": [
