@@ -174,9 +174,10 @@ func _vehicle_for(rec: Dictionary, fa: Dictionary, fb: Dictionary) -> Dictionary
 			r["path"] = path2
 		if existing.is_empty():
 			v = sim.add(kind, glb, path2, {"end": "park" if dest_bay >= 0 else "dead", "key": "car:%d" % int(rec["car"]) if mode == "car" else ""})
+			v["gate_yield"] = r["gate_yield"]
 		else:
 			v = existing
-			sim.restart(v, path2, r["visits"], "park" if dest_bay >= 0 else "dead")
+			sim.restart(v, path2, r["visits"], "park" if dest_bay >= 0 else "dead", r["gate_yield"])
 		if dest_bay >= 0:
 			view.ambient._occ(str(rec["to"]))[dest_bay] = int(v["id"])
 			v["dest_lot"] = str(rec["to"])

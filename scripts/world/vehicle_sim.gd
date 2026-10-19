@@ -79,7 +79,8 @@ func add_parked(kind: String, glb: String, pos: Vector2, dir: Vector2, opts: Dic
 
 
 ## Send a standing (or finished) vehicle along a new path.
-func restart(v: Dictionary, path: VehiclePath, visits: Array, end: String = "dead") -> void:
+func restart(v: Dictionary, path: VehiclePath, visits: Array, end: String = "dead", gate_yield: Dictionary = {}) -> void:
+	v["gate_yield"] = gate_yield
 	v["path"] = path
 	v["s"] = 0.0
 	v["v"] = 0.0
@@ -199,6 +200,12 @@ func _step_one(v: Dictionary, dt: float) -> void:
 		lim = minf(lim, maxf(_brake(dend), 0.7))
 	var obstructed: bool = false
 	v["wait_for"] = -1
+	var gy: Dictionary = v.get("gate_yield", {})
+	if not gy.is_empty():
+		if float(v["s"]) > float(gy["s"]) + 0.2:
+			v["gate_yield"] = {}
+		elif _lane_busy(v, gy):
+			lim = minf(lim, _brake(float(gy["s"]) - float(v["s"])))      # wait in the bay, never in the gateway, until the lane and the walkway are clear
 	if not bool(v["ignore_signals"]):
 		lim = minf(lim, _signals_limit(v, half))
 	var ol: float = _obstacle_limit(v, half)
@@ -252,6 +259,24 @@ func _signals_limit(v: Dictionary, half: float) -> float:
 		if d > -0.4:
 			break                                     # only the next junction matters
 	return lim
+
+
+## Traffic is coming along the lane past the gate (or stands in it): a vehicle leaving the lot must wait.
+func _lane_busy(v: Dictionary, gy: Dictionary) -> bool:
+	for o in vehicles:
+		if o == v or str(o["state"]) == "dead" or str(o["state"]) == "parked":
+			continue
+		var p: Vector2 = o["pos"]
+		if absf(p.y - float(gy["z"])) < 1.8 and p.x > float(gy["x"]) - 4.0 and p.x < float(gy["x"]) + 16.0:
+			return true
+		if (p - Vector2(float(gy["x"]), float(gy["z"]))).length() < 4.5:
+			return true
+	var gx: float = float(gy["x"])
+	var hyf: float = float(gy.get("hy", float(gy["z"]) - 2.0))
+	for p2 in folks:
+		if p2.x > gx - 5.0 and p2.x < gx + 5.0 and p2.y > hyf - 9.0 and p2.y < hyf + 1.5:
+			return true
+	return false
 
 
 ## Is there room for a vehicle of this size here (nobody's footprint within reach)?
@@ -393,16 +418,29 @@ func _obstacle_limit(v: Dictionary, half: float) -> float:
 				lim = bl
 				_blocker = o
 				v["wait_for"] = int(o["id"])
-	for p in folks:
-		var dp: Vector2 = p - pos
-		var al: float = dp.dot(h)
-		if al <= 0.0 or al > look + half:
-			continue
-		if absf(dp.dot(rt)) < wid * 0.5 + 0.45:
-			var fl: float = _brake(al - half - 0.55)
-			if fl < lim:
-				lim = fl
-				_blocker = {"kind": "folk", "state": "stand", "pos": p, "tag": "folk"}
+	if not folks.is_empty():
+		var vpath2: VehiclePath = v["path"]
+		var fm: float = wid * 0.5 + 0.35
+		var d2: float = 0.2
+		var hz: float = look + half
+		while d2 <= hz:
+			var sp2: float = float(v["s"]) + d2
+			if sp2 > vpath2.length + 0.5:
+				break
+			var c2: Vector2 = centre(vpath2, sp2, float(v["len"]))
+			var n2: Vector2 = vpath2.at(minf(sp2 + half * 0.9, vpath2.length))
+			var hit_f: Vector2 = Vector2.INF
+			for p in folks:
+				if p.distance_squared_to(n2) < fm * fm or p.distance_squared_to(c2) < fm * fm:
+					hit_f = p
+					break
+			if hit_f != Vector2.INF:
+				var fl: float = _brake(d2 - 0.4)
+				if fl < lim:
+					lim = fl
+					_blocker = {"kind": "folk", "state": "stand", "pos": hit_f, "tag": "folk"}
+				break
+			d2 += 0.7
 	return lim
 
 

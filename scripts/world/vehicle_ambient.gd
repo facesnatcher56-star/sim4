@@ -130,7 +130,7 @@ func _finish_arrivals() -> void:
 			v.erase("dest_lot")
 			v["stay_until"] = view.sim.vt + view.rng.randf_range(20.0, 90.0)
 			v["dir"] = (v["path"] as VehiclePath).dir_at(float((v["path"] as VehiclePath).length))
-		elif str(v["tag"]) == "ambient" and str(v["state"]) != "parked" and (view.beyond_drop(v["pos"]) or float(v["blocked_t"]) > 6.0):
+		elif str(v["tag"]) == "ambient" and str(v["state"]) != "parked" and (view.beyond_drop(v["pos"]) or float(v["blocked_t"]) > 2.5):
 			_cancel(v)                         # out of sight, or stuck behind somebody standing in the way: it simply is not there any more
 
 
@@ -225,7 +225,9 @@ func _leave(v: Dictionary) -> void:
 	var down: Dictionary = VehicleRoads.downstream_end(fr)
 	var pts: Array = [bay["pos"], Vector2(g - VehicleRoutes.GATE_LANE, (bay["pos"] as Vector2).y), Vector2(g - VehicleRoutes.GATE_LANE, float(fr["lane_z"])), down["pt"]]
 	_free_bay(v)
-	view.sim.restart(v, VehiclePath.make(pts, 1.8), down["visits"], "dead")
+	var lp: VehiclePath = VehiclePath.make(pts, 1.8)
+	var gyl: Dictionary = {"s": 0.3, "x": g, "z": float(fr["lane_z"]), "hy": float(fr["hy"])}
+	view.sim.restart(v, lp, down["visits"], "dead", gyl)
 
 
 func _send(v: Dictionary, dest_lot: String, dest_bay: int) -> bool:
@@ -240,5 +242,5 @@ func _send(v: Dictionary, dest_lot: String, dest_bay: int) -> bool:
 	_occ(dest_lot)[dest_bay] = int(v["id"])
 	v["dest_lot"] = dest_lot
 	v["dest_bay"] = dest_bay
-	view.sim.restart(v, r["path"], r["visits"], "park")
+	view.sim.restart(v, r["path"], r["visits"], "park", r["gate_yield"])
 	return true

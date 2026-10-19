@@ -44,7 +44,10 @@ static func trip(fa: Dictionary, a_pos: Vector2, fb: Dictionary, b_pos: Vector2,
 	var path: VehiclePath = VehiclePath.make(pts, _radius())
 	var s_pick: float = path.closest_s(Vector2(ga - STOP_X, float(fa["lane_z"])), 0.0, 80.0)
 	var s_drop: float = path.closest_s(Vector2(gb + STOP_X, float(fb["lane_z"])), s_pick + 1.0)
-	return {"path": path, "visits": r["visits"], "pickup_s": s_pick, "drop_s": s_drop,
+	var gate_y: Dictionary = {}
+	if a_pos != Vector2.ZERO:
+		gate_y = {"s": 0.3, "x": ga, "z": float(fa["lane_z"]), "hy": float(fa["hy"])}      # wait in the bay, not in the walkway, until the way out is clear
+	return {"path": path, "visits": r["visits"], "gate_yield": gate_y, "pickup_s": s_pick, "drop_s": s_drop,
 		"pickup_door": Vector2(ga - STOP_X, float(fa["hy"]) + 0.5), "drop_door": Vector2(gb + STOP_X, float(fb["hy"]) + 0.5)}
 
 
