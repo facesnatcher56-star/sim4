@@ -85,7 +85,7 @@ static func _open_through(f, pid: String, svc: Dictionary, now: int) -> bool:
 	if not Places.is_there(f, pid):
 		walk = maxi(NeighborhoodTravel.walk_minutes(int(f.id), Places.lot_of(pid)), 0)
 	var arrive: int = now + walk
-	return Places.is_open_for(pid, arrive, int(svc.get("minutes", 0))) and Venues.open_for(Places.lot_of(pid), arrive, int(svc.get("minutes", 0)))
+	return Places.is_open(pid, arrive) and Venues.open_for(Places.lot_of(pid), arrive, int(svc.get("minutes", 0)))
 
 ## Try to start a due plan. Returns true when it is finished with (started or dropped), false to keep waiting.
 static func _start(p: Dictionary, now: int) -> bool:

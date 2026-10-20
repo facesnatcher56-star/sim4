@@ -50,9 +50,6 @@ static func why_not(fid: int, pid: String, sid: String, target: int = -1) -> Str
 		return why
 	if not Places.exists(pid) or not Places.is_open(pid):
 		return "%s: %s." % [Places.label(pid), Places.status_text(pid)]
-	var mins: int = int(svc.get("minutes", 0))
-	if mins > 0 and not Places.is_open_for(pid, SysUtil.now(), mins):
-		return "%s closes before this would finish (%d min)." % [Places.label(pid), mins]          # it would be cut short and half the money given back
 	if not Places.is_there(f, pid):
 		return "Go to %s first." % Places.lot_label(pid)
 	if pending.has(fid) or SysUtil.is_away(f):
@@ -79,6 +76,9 @@ static func use(fid: int, pid: String, sid: String, opts: Dictionary = {}) -> Di
 		return {"ok": false, "reason": why}
 	var f = SysUtil.folk(fid)
 	var svc: Dictionary = Places.services(pid)[sid]
+	var mins_left: int = int(svc.get("minutes", 0))
+	if bool(opts.get("auto", false)) and mins_left > 0 and not Venues.open_for(Places.lot_of(pid), SysUtil.now(), mins_left):
+		return {"ok": false, "reason": "%s closes before this would finish (%d min)." % [Places.label(pid), mins_left]}          # closing time would cut it short and give half the money back
 	var cost: int = price(pid, sid, fid)
 	var net: int = cost
 	if cost > 0 and bool(svc.get("insurable", false)):
