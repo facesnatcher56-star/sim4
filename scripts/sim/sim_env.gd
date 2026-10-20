@@ -69,6 +69,10 @@ static func hour_f() -> float:
 
 static func emit(sig: String, a = null, b = null, c = null) -> void:
 	var ev = events()
+	if sig == "thought" and b is String:                 # view-only voice gate (rate, no repeats, variety); never touches sim state
+		b = ThoughtVoice.filter(a, b)
+		if b == "":
+			return
 	if a == null:
 		ev.emit_signal(sig)
 	elif b == null:
@@ -77,3 +81,5 @@ static func emit(sig: String, a = null, b = null, c = null) -> void:
 		ev.emit_signal(sig, a, b)
 	else:
 		ev.emit_signal(sig, a, b, c)
+	if sig == "game_event" and b is Dictionary:           # remembered for thought-bubble context (view-local)
+		ThoughtContext.note(str(a), b)

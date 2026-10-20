@@ -158,7 +158,7 @@ static func _start_scene(hid: int, culprit: int, forced: bool) -> Dictionary:
 			if CrimePlace.is_asleep(r):
 				r.cancel_current("woken")
 			r.add_buff("intruder_alert")
-			SimEnv.emit("thought", int(r.id), "Was that a noise downstairs?")
+			ThoughtVoice.urgent(int(r.id), "Was that a noise downstairs?")
 			seen.append(int(r.id))
 	c["witnesses"] = seen
 	if not seen.is_empty():

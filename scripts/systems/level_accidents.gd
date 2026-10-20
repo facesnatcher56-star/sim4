@@ -151,7 +151,7 @@ static func get_stuck(oid: int, now: int = -1) -> bool:
 			ir.def = ir.def.duplicate(true)
 			ir.def["duration_min"] = float(rescue_at - now) + 5.0
 			f2.enqueue(ir)
-		SimEnv.emit("thought", int(id), "The lift has stopped!")
+		ThoughtVoice.urgent(int(id), "The lift has stopped!")
 	SysUtil.game_event("lift_stuck", {"object": oid, "folk_ids": riders})
 	if not riders.is_empty() and SysUtil.is_resident(SysUtil.folk(int(riders[0]))):
 		SysUtil.notify("The lift has stuck between floors with %s inside. Help is on the way." % SysUtil.folk_name(int(riders[0])), "warn")

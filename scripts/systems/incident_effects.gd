@@ -106,7 +106,7 @@ static func _full_effect(eff: Dictionary, ctx: Dictionary) -> Dictionary:
 						res = r
 			"thought":
 				if f != null:
-					SimEnv.emit("thought", int(f.id), fill(str(v), ctx))
+					ThoughtVoice.urgent(int(f.id), fill(str(v), ctx))
 			"args", "chance":
 				pass
 			_:

@@ -94,7 +94,7 @@ static func grieve(mourner, dead_id: int, dead_name: String, cdef: Dictionary, c
 	Emotions.imprint(mourner, "folk:%d" % dead_id, float(mem.get("value", -0.5)) * closeness, "death", "sad", fill(str(mem.get("text", "")), dead_name, cdef, "", dead_id))
 	RelationshipService.add_history(int(mourner.id), dead_id, "death", float(mem.get("value", -0.5)), dead_id)
 	if CHILD_STAGES.has(str(mourner.age_stage)) and str(cdef.get("child_text", "")) != "":
-		SimEnv.emit("thought", int(mourner.id), Sexes.fill(str(cdef["child_text"]), dead_id))
+		ThoughtVoice.urgent(int(mourner.id), Sexes.fill(str(cdef["child_text"]), dead_id))
 
 ## Closeness of a resident to the dead (0 = does not mourn).
 static func closeness(resident_id: int, dead_id: int) -> float:

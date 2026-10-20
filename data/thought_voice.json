@@ -1,0 +1,924 @@
+{
+ "_doc": "Thought-bubble voice (view/flavour only; ThoughtVoice reads this). Every Events.thought line passes a gate: rate (gap_min game minutes between bubbles per folk, times speed_gap_mult[speed]), a per-day cap, and a lookback so a line is never repeated within lookback_days. Lines matching a category 'match' substring are replaced from that category's pool by tone (any + the folk's tone pool). 'context' pools name people, places and recent events ({friend} {partner} {child} {parent} {place} {subject} {other} {baby}); 'events' react to game events and are remembered for 'days' days; 'topics' are what two folk chat about.",
+ "config": {
+  "gap_min": 20,
+  "speed_gap_mult": [
+   1,
+   1,
+   2,
+   3
+  ],
+  "max_per_day": 16,
+  "lookback_days": 2,
+  "pass_lookback_days": 2,
+  "context_chance": 0.5,
+  "category_gap_frac": 0.5,
+  "urgent_repeat_min": 10,
+  "event_react_max": 2,
+  "event_gap_frac": 0.25
+ },
+ "tone_traits": {
+  "cheerful": [
+   "optimist",
+   "easygoing",
+   "charmer",
+   "social",
+   "generous",
+   "romantic"
+  ],
+  "grumpy": [
+   "pessimist",
+   "hot_headed",
+   "stubborn",
+   "grudgeholder",
+   "loner",
+   "jealous"
+  ],
+  "anxious": [
+   "shy",
+   "germaphobe",
+   "clumsy",
+   "perfectionist"
+  ]
+ },
+ "tone_moods": {
+  "cheerful": [
+   "happy",
+   "playful",
+   "content",
+   "energized",
+   "confident",
+   "inspired",
+   "flirty"
+  ],
+  "grumpy": [
+   "angry",
+   "tense",
+   "bored",
+   "jealous"
+  ],
+  "anxious": [
+   "sad",
+   "anxious"
+  ]
+ },
+ "categories": {
+  "toilet": {
+   "match": [
+    "bathroom",
+    "toilet",
+    "nature calls",
+    "bursting"
+   ],
+   "daily_cap": 3,
+   "lines": {
+    "any": [
+     "I should find a toilet.",
+     "I need the bathroom soon.",
+     "Better make a quick stop.",
+     "Nature is calling.",
+     "Where is the nearest loo?",
+     "I can't put this off much longer.",
+     "Time for a bathroom break.",
+     "I really should go.",
+     "Mustn't leave it too late.",
+     "A quick trip down the hall.",
+     "I need to go, and soon."
+    ],
+    "cheerful": [
+     "A little detour first, then back to the fun!",
+     "Bathroom break, then onwards!",
+     "Quick dash and I'm back."
+    ],
+    "grumpy": [
+     "Of course, now I need the loo.",
+     "Not again. Bathroom.",
+     "Why now? Typical."
+    ],
+    "anxious": [
+     "I can't hold on much longer!",
+     "Please let it be free.",
+     "Oh no, hurry hurry."
+    ]
+   }
+  },
+  "hunger": {
+   "match": [
+    "hungry",
+    "starving",
+    "to eat",
+    "a quick bite",
+    "snack",
+    "something hot",
+    "something fizzy",
+    "something fresh",
+    "could eat"
+   ],
+   "daily_cap": 4,
+   "lines": {
+    "any": [
+     "I'm hungry...",
+     "I could eat something.",
+     "My stomach is rumbling.",
+     "Time to find some food.",
+     "What's in the fridge?",
+     "I should have lunch soon.",
+     "Something tasty would hit the spot.",
+     "I'm getting peckish.",
+     "I wonder what's for dinner.",
+     "Is it nearly mealtime?",
+     "A bite to eat, I think.",
+     "I've been running on empty."
+    ],
+    "cheerful": [
+     "Ooh, snack time soon, I hope!",
+     "Food! Wonderful, wonderful food.",
+     "I could cook up something lovely."
+    ],
+    "grumpy": [
+     "I'm starving and nobody cares.",
+     "Nobody's made anything again.",
+     "Typical, an empty fridge."
+    ],
+    "anxious": [
+     "I shouldn't skip meals again.",
+     "Is there enough food in the house?",
+     "My head is swimming, I need to eat."
+    ]
+   }
+  },
+  "sleepy": {
+   "match": [
+    "sleepy",
+    "lie-down",
+    "a nap",
+    "did not sleep",
+    "time to get some sleep",
+    "lie down soon"
+   ],
+   "daily_cap": 3,
+   "lines": {
+    "any": [
+     "So sleepy...",
+     "I need to lie down soon.",
+     "Time to get some sleep.",
+     "My eyes keep closing.",
+     "A proper rest is overdue.",
+     "I could sleep for a week.",
+     "That bed is calling my name.",
+     "Another yawn, I'm done for.",
+     "I'm running out of steam.",
+     "Bedtime isn't far off.",
+     "Everything feels heavy."
+    ],
+    "cheerful": [
+     "A good sleep and I'll be as good as new.",
+     "Sweet dreams are waiting.",
+     "Sleep tight, me!"
+    ],
+    "grumpy": [
+     "I'm too tired for this.",
+     "Don't talk to me until I've slept.",
+     "Why is it always so early?"
+    ],
+    "anxious": [
+     "I hope I can sleep tonight.",
+     "So much on my mind, and I'm so tired.",
+     "I can't think straight."
+    ]
+   }
+  },
+  "lonely": {
+   "match": [
+    "talk to someone",
+    "talk to me",
+    "some company",
+    "wish someone",
+    "isolated"
+   ],
+   "daily_cap": 3,
+   "lines": {
+    "any": [
+     "I should talk to someone.",
+     "I'd love some company.",
+     "It's gone very quiet in here.",
+     "Where is everybody?",
+     "I could do with a chat.",
+     "Maybe someone fancies a natter.",
+     "I haven't spoken to anyone in ages.",
+     "A friendly face would be nice.",
+     "I might ring someone.",
+     "It's too quiet today.",
+     "I should go and say hello."
+    ],
+    "cheerful": [
+     "Who can I cheer up today?",
+     "Surely someone wants a chat!",
+     "Let's find a friendly face."
+    ],
+    "grumpy": [
+     "Nobody ever has time for me.",
+     "Fine, I'll just talk to myself.",
+     "Not that anybody asked."
+    ],
+    "anxious": [
+     "Does anyone even want to talk to me?",
+     "I hope I'm not being a bother.",
+     "I'm too shy to knock."
+    ]
+   }
+  },
+  "bored": {
+   "match": [
+    "something to do",
+    "what to do",
+    "restless",
+    "put something on",
+    "anything fun",
+    "need something"
+   ],
+   "daily_cap": 3,
+   "lines": {
+    "any": [
+     "I need something to do.",
+     "Hmm... what to do...",
+     "Restless... is anything fun around?",
+     "Nothing pressing. I'll daydream a little.",
+     "I'm at a loose end.",
+     "Let me just think for a moment.",
+     "What shall I get up to?",
+     "I could try something new.",
+     "Time is crawling.",
+     "Anything good on?",
+     "Maybe a little project?",
+     "I'll find a hobby for the afternoon."
+    ],
+    "cheerful": [
+     "So many things to try!",
+     "A new hobby, perhaps?",
+     "Today feels full of ideas."
+    ],
+    "grumpy": [
+     "Nothing ever happens here.",
+     "Dull, dull, dull.",
+     "I've seen everything on TV twice."
+    ],
+    "anxious": [
+     "Idle hands make me uneasy.",
+     "I should be doing something useful.",
+     "I can't settle."
+    ]
+   }
+  },
+  "rest_sit": {
+   "match": [
+    "time to sit",
+    "sofa time",
+    "armchair",
+    "sit for a bit",
+    "a good chair"
+   ],
+   "daily_cap": 3,
+   "lines": {
+    "any": [
+     "Time to sit for a bit.",
+     "My feet need a rest.",
+     "A seat sounds perfect.",
+     "I'll just take the weight off.",
+     "Five minutes in a chair.",
+     "I'll put my feet up.",
+     "That sofa looks inviting.",
+     "A short sit-down won't hurt.",
+     "Rest first, everything else later.",
+     "Where's the comfy chair?"
+    ],
+    "cheerful": [
+     "Cosy corner, here I come!",
+     "Putting my feet up, lovely."
+    ],
+    "grumpy": [
+     "My back is killing me.",
+     "Finally, a seat."
+    ],
+    "anxious": [
+     "I hope nobody needs me for a minute.",
+     "Just a moment to breathe."
+    ]
+   }
+  },
+  "coffee": {
+   "match": [
+    "coffee",
+    "cup of tea",
+    "nice cup",
+    "a brew"
+   ],
+   "daily_cap": 2,
+   "lines": {
+    "any": [
+     "A coffee would be lovely.",
+     "I need coffee.",
+     "A nice cup of tea.",
+     "The kettle is calling.",
+     "Something warm to drink, please.",
+     "Time for a hot drink.",
+     "I'd give anything for a brew.",
+     "A cuppa would sort me out.",
+     "I smell something brewing, I hope.",
+     "Let me put the kettle on."
+    ],
+    "cheerful": [
+     "Coffee time, my favourite time!",
+     "A cuppa and a smile."
+    ],
+    "grumpy": [
+     "No coffee, no conversation.",
+     "Coffee, now."
+    ],
+    "anxious": [
+     "Maybe a cup of tea will calm me down.",
+     "I'm a bit jittery. Tea, perhaps."
+    ]
+   }
+  },
+  "hygiene": {
+   "match": [
+    "wash",
+    "shower",
+    "freshen",
+    "brush",
+    "smell"
+   ],
+   "daily_cap": 3,
+   "lines": {
+    "any": [
+     "I could use a wash.",
+     "A shower would be nice.",
+     "Time to freshen up.",
+     "A shower, then I'll feel human.",
+     "I feel a bit grubby.",
+     "Fresh clothes would help.",
+     "I should tidy myself up.",
+     "Soap and hot water, please.",
+     "Let me clean up.",
+     "I'd better get a wash in."
+    ],
+    "cheerful": [
+     "A lovely shower will do wonders!",
+     "Fresh and fabulous, soon."
+    ],
+    "grumpy": [
+     "I'm a mess, and I know it.",
+     "Ugh, I stink."
+    ],
+    "anxious": [
+     "I hope nobody notices.",
+     "I can't stand feeling dirty."
+    ]
+   }
+  },
+  "weather": {
+   "match": [
+    "drenched",
+    "freezing",
+    "fresh air",
+    "lovely day",
+    "sunburn",
+    "puddle",
+    "blooming",
+    "outside"
+   ],
+   "daily_cap": 3,
+   "lines": {
+    "any": [
+     "I'm drenched.",
+     "Brr, I'm freezing.",
+     "Nothing like fresh air.",
+     "What a lovely day to be outside.",
+     "The weather's turning.",
+     "Look at that sky.",
+     "It's lovely out there.",
+     "I should have brought a coat.",
+     "Smells like rain.",
+     "The air feels different today.",
+     "Nice day to get out and about."
+    ],
+    "cheerful": [
+     "Sunshine on my face, brilliant!",
+     "I love days like this!"
+    ],
+    "grumpy": [
+     "This weather is dreadful.",
+     "Typical, it's raining again."
+    ],
+    "anxious": [
+     "I hope it doesn't turn nasty.",
+     "Is that a storm brewing?"
+    ]
+   }
+  },
+  "memory_good": {
+   "match": [
+    "takes me back",
+    "good memories",
+    "happy here",
+    "remember being happy"
+   ],
+   "daily_cap": 2,
+   "lines": {
+    "any": [
+     "This place brings back good memories.",
+     "This takes me back...",
+     "I remember being happy here.",
+     "Such sweet memories.",
+     "I smile every time I'm here.",
+     "Those were the days.",
+     "I could stay here a while.",
+     "So many good times in this spot."
+    ],
+    "cheerful": [
+     "What a wonderful memory!",
+     "Happy times, happy place."
+    ],
+    "grumpy": [
+     "Better than it is now, anyway.",
+     "They don't make days like that any more."
+    ],
+    "anxious": [
+     "I wish I could hold on to this feeling.",
+     "If only it could last."
+    ]
+   }
+  },
+  "memory_bad": {
+   "match": [
+    "bad memories",
+    "reminded of this",
+    "don't like being reminded",
+    "uneasy",
+    "done this to death"
+   ],
+   "daily_cap": 2,
+   "lines": {
+    "any": [
+     "Bad memories here...",
+     "I don't like being reminded of this.",
+     "I'd rather not be here.",
+     "Something about this place bothers me.",
+     "Let's not linger.",
+     "That was a rough day.",
+     "I'd like to forget this.",
+     "A shiver goes down my spine."
+    ],
+    "cheerful": [
+     "Never mind, new memories are on the way."
+    ],
+    "grumpy": [
+     "I can't stand this place.",
+     "Not this again."
+    ],
+    "anxious": [
+     "My stomach turns just standing here.",
+     "I'd like to leave."
+    ]
+   }
+  }
+ },
+ "context": {
+  "friend": [
+   "I should ring {friend}.",
+   "I wonder how {friend} is doing.",
+   "{friend} always makes me laugh.",
+   "I owe {friend} a visit.",
+   "Must catch up with {friend} soon.",
+   "{friend} would love this.",
+   "I haven't seen {friend} in a while.",
+   "Maybe {friend} fancies a walk.",
+   "I'll invite {friend} over.",
+   "What would {friend} say about this?"
+  ],
+  "partner": [
+   "{partner} is the best thing in my day.",
+   "I should do something nice for {partner}.",
+   "I wonder what {partner} is up to.",
+   "Dinner with {partner} tonight, perhaps.",
+   "{partner} makes this house a home.",
+   "I miss {partner} when we're apart.",
+   "A little surprise for {partner}, I think.",
+   "{partner} has been working so hard lately."
+  ],
+  "child": [
+   "I should check on {child}.",
+   "{child} is growing up so fast.",
+   "I hope {child} had a good day.",
+   "{child} needs a story tonight.",
+   "Is {child} getting enough sleep?",
+   "I'm so proud of {child}.",
+   "Time to play with {child}.",
+   "{child} will be hungry soon."
+  ],
+  "parent": [
+   "I should call {parent}.",
+   "{parent} always gave good advice.",
+   "I wonder what {parent} would say.",
+   "I should visit {parent} soon.",
+   "{parent} taught me that.",
+   "I hope {parent} is keeping well."
+  ],
+  "work": [
+   "That bus is always late.",
+   "Another day, another deadline.",
+   "I should get ready for work.",
+   "Work has been busy lately.",
+   "I hope today's shift goes quickly.",
+   "The commute never gets shorter.",
+   "I wonder if there's a promotion coming.",
+   "Pay day can't come soon enough.",
+   "I'll have to leave early to catch the bus."
+  ],
+  "venue": [
+   "I like it here at {place}.",
+   "{place} is busy today.",
+   "I could stay at {place} all afternoon.",
+   "Funny, I never noticed that at {place} before.",
+   "{place} always has a nice atmosphere.",
+   "I should come to {place} more often."
+  ],
+  "election": [
+   "Who will you vote for?",
+   "The mayor's race is the talk of the town.",
+   "I haven't decided who gets my vote.",
+   "Every vote counts in this election.",
+   "The campaign posters are everywhere.",
+   "I should read up on the candidates.",
+   "The election is all anyone talks about.",
+   "I'll vote, even if it rains."
+  ]
+ },
+ "events": [
+  {
+   "event": "died",
+   "who": "kin",
+   "days": 6,
+   "react": [
+    "I miss {subject}.",
+    "I can't believe {subject} is gone.",
+    "{subject} would have wanted us to carry on.",
+    "The house feels emptier without {subject}.",
+    "I keep thinking about {subject}.",
+    "I'll light a candle for {subject}."
+   ],
+   "recall": [
+    "I miss {subject}.",
+    "I still think about {subject} every day.",
+    "{subject} would have loved today.",
+    "It's so quiet without {subject}.",
+    "I found something that reminded me of {subject}.",
+    "Remembering {subject} makes me smile and cry."
+   ]
+  },
+  {
+   "event": "baby_born",
+   "who": "household",
+   "days": 4,
+   "react": [
+    "{baby} is perfect.",
+    "Welcome to the world, {baby}!",
+    "I can't stop looking at {baby}.",
+    "So tiny, so precious: {baby}."
+   ],
+   "recall": [
+    "{baby} is so tiny!",
+    "Shh, {baby} is sleeping.",
+    "I could watch {baby} all day.",
+    "Little {baby} has a whole life ahead.",
+    "I wonder who {baby} will take after."
+   ]
+  },
+  {
+   "event": "aged_up",
+   "filter": {
+    "to": "toddler"
+   },
+   "who": "household",
+   "days": 3,
+   "react": [
+    "{subject} took their first steps!",
+    "Look at {subject} go!",
+    "{subject} is walking!"
+   ],
+   "recall": [
+    "{subject} took their first steps!",
+    "{subject} is into everything now.",
+    "Our little {subject} is growing up."
+   ]
+  },
+  {
+   "event": "aged_up",
+   "filter": {
+    "to": "child"
+   },
+   "who": "household",
+   "days": 3,
+   "react": [
+    "{subject} is growing up so fast.",
+    "{subject} is a big kid now!"
+   ],
+   "recall": [
+    "{subject} is a big kid now!",
+    "School for {subject} soon, I suppose."
+   ]
+  },
+  {
+   "event": "birthday",
+   "who": "household",
+   "days": 1,
+   "react": [
+    "Happy birthday, {subject}!",
+    "Another year for {subject}. Cake time!",
+    "Is there a present for {subject}?"
+   ],
+   "recall": [
+    "Happy birthday, {subject}!",
+    "I hope {subject} liked the day."
+   ]
+  },
+  {
+   "event": "married",
+   "who": "kin",
+   "days": 5,
+   "react": [
+    "{subject} and {other} are married!",
+    "What a lovely day for {subject} and {other}.",
+    "Congratulations, {subject} and {other}!"
+   ],
+   "recall": [
+    "{subject} and {other} look so happy.",
+    "What a wedding that was.",
+    "{subject} and {other} make a lovely pair."
+   ]
+  },
+  {
+   "event": "promoted",
+   "who": "household",
+   "days": 3,
+   "react": [
+    "{subject} got a promotion!",
+    "Well done, {subject}!",
+    "{subject}'s hard work paid off."
+   ],
+   "recall": [
+    "{subject}'s promotion deserves a treat.",
+    "I'm proud of {subject}."
+   ]
+  },
+  {
+   "event": "fire_started",
+   "who": "all",
+   "days": 3,
+   "react": [
+    "Is that smoke?",
+    "I smell smoke.",
+    "Sirens... I hope everyone is safe."
+   ],
+   "recall": [
+    "Can't stop thinking about the fire.",
+    "I still smell smoke sometimes.",
+    "I hope everyone got out safely.",
+    "That fire was too close for comfort.",
+    "I should check the smoke alarm."
+   ]
+  },
+  {
+   "event": "fire_out",
+   "who": "all",
+   "days": 3,
+   "react": [
+    "The fire is out, thank goodness.",
+    "What a relief, the fire is out."
+   ],
+   "recall": [
+    "Can't stop thinking about the fire.",
+    "Thank goodness for the fire brigade."
+   ]
+  },
+  {
+   "event": "disaster",
+   "filter": {
+    "phase": "start"
+   },
+   "who": "all",
+   "days": 3,
+   "react": [
+    "Something is coming. Stay calm.",
+    "I don't like the look of this.",
+    "Better check on everyone."
+   ],
+   "recall": [
+    "That was quite a storm.",
+    "I hope the town recovers quickly.",
+    "I'm still a bit shaken."
+   ]
+  },
+  {
+   "event": "stormed_off",
+   "who": "all",
+   "days": 2,
+   "react": [
+    "Was that a shout?",
+    "Someone just stormed off."
+   ],
+   "recall": [
+    "{subject} and {other} are at it again.",
+    "I hope {subject} and {other} make up.",
+    "Those two, {subject} and {other}...",
+    "Trouble between {subject} and {other}, I hear."
+   ]
+  },
+  {
+   "event": "rumor_spread",
+   "who": "all",
+   "days": 2,
+   "react": [
+    "Did you hear what {subject} said?",
+    "The gossip is flying today."
+   ],
+   "recall": [
+    "Did you hear about {other}?",
+    "I heard something about {other}...",
+    "{subject} knows a story about {other}.",
+    "I don't believe a word about {other}."
+   ]
+  }
+ ],
+ "topics": {
+  "food": [
+   "Have you tried a new recipe lately?",
+   "I could talk about dinner all day.",
+   "What's your favourite meal?",
+   "I read about a lovely soup.",
+   "Do you cook much?",
+   "Nothing beats a home-cooked supper."
+  ],
+  "fitness": [
+   "I've been trying to get fitter.",
+   "Fancy a run tomorrow?",
+   "My legs ache, but in a good way.",
+   "Stretching every morning helps.",
+   "Did you do any exercise today?",
+   "I should join a class."
+  ],
+  "books": [
+   "Read anything good lately?",
+   "I stayed up too late with a book.",
+   "The ending surprised me.",
+   "Have you got a book to lend?",
+   "I love a good mystery.",
+   "Books are the best company."
+  ],
+  "games": [
+   "Did you beat the last level?",
+   "I almost had the high score.",
+   "Fancy a game tonight?",
+   "I was up all night playing.",
+   "The new game is so much fun.",
+   "Let's have a rematch."
+  ],
+  "music": [
+   "I can't get that tune out of my head.",
+   "Do you play anything?",
+   "What's your favourite song?",
+   "I could listen to that all day.",
+   "Music makes everything better.",
+   "Let's put a record on."
+  ],
+  "art": [
+   "I've been sketching again.",
+   "What do you think of that painting?",
+   "Colours matter more than people think.",
+   "I want to make something this week.",
+   "Have you seen the gallery?",
+   "Art is hard but worth it."
+  ],
+  "plants": [
+   "The garden is coming along nicely.",
+   "My tomatoes are ripening.",
+   "Did you water the plants?",
+   "Spring will bring so many flowers.",
+   "I'm trying a new seed.",
+   "Gardening is my quiet time."
+  ],
+  "work": [
+   "Work has been a lot lately.",
+   "My boss is in a good mood today.",
+   "Any news from the office?",
+   "I'm hoping for a promotion.",
+   "The commute is the worst part.",
+   "What do you do all day?",
+   "How's the job going?"
+  ],
+  "fixing": [
+   "I fixed the tap yesterday.",
+   "Got any tools I can borrow?",
+   "Something is always breaking.",
+   "Do you know how to mend that?",
+   "A little oil fixes most things.",
+   "I love a good repair job."
+  ],
+  "romance": [
+   "Have you met someone lately?",
+   "Love is a funny thing.",
+   "Are you seeing anyone?",
+   "I think I'm falling for someone.",
+   "Romance isn't dead, you know.",
+   "Tell me about your first date."
+  ],
+  "gossip": [
+   "Did you hear about {other}?",
+   "I heard something about {other}...",
+   "Have you seen {other} lately?",
+   "Between us, {other} has been odd lately.",
+   "What's the latest on {other}?",
+   "I shouldn't say, but {other}..."
+  ],
+  "feelings": [
+   "How are you really feeling?",
+   "I've been a bit low lately.",
+   "I'm glad we can talk.",
+   "Something's been on my mind.",
+   "Honestly, I'm doing okay.",
+   "Thanks for listening."
+  ],
+  "dreams": [
+   "Where do you see yourself in ten years?",
+   "I'd love to travel someday.",
+   "I've got big plans.",
+   "What would you do if you could do anything?",
+   "Some day I'll build my own house.",
+   "I dream about a quiet life."
+  ],
+  "humor": [
+   "Have you heard the one about the duck?",
+   "I can't stop laughing about earlier.",
+   "Tell me something funny.",
+   "That reminds me of a joke.",
+   "You should have seen my face!",
+   "Laughter is the best medicine."
+  ],
+  "the_party": [
+   "That party was something.",
+   "Who ate all the cake?",
+   "Did you see the dancing?",
+   "We should do that again.",
+   "What a night that was.",
+   "I'm still tired from the party."
+  ],
+  "weather": [
+   "Lovely weather, isn't it?",
+   "Looks like rain later.",
+   "It's colder than yesterday.",
+   "I love this time of year.",
+   "The forecast says sun tomorrow.",
+   "Typical weather for the season."
+  ],
+  "chores": [
+   "So much washing up.",
+   "Whose turn is it to clean?",
+   "I never finish tidying.",
+   "The laundry pile is huge.",
+   "We should share the chores.",
+   "A tidy house, a tidy mind."
+  ],
+  "election": [
+   "Have you decided who to vote for?",
+   "The election is getting tense.",
+   "I like the sound of the new candidate.",
+   "Will you go to the polls?",
+   "Everyone has an opinion on the mayor."
+  ],
+  "kids": [
+   "The kids are growing up fast.",
+   "{child} says the funniest things.",
+   "School runs are exhausting.",
+   "Our kids get on so well.",
+   "What did {child} get up to today?",
+   "Parenting is a full-time job."
+  ],
+  "_stranger": [
+   "Nice to meet you.",
+   "Haven't we met somewhere?",
+   "Lovely to see a new face.",
+   "So, what brings you here?",
+   "I don't think we've properly met.",
+   "Hello there!"
+  ],
+  "_default": [
+   "Fancy a chat?",
+   "So, how are things?",
+   "Nice to see you.",
+   "What's new with you?",
+   "Lovely day, isn't it?",
+   "I was hoping to run into you."
+  ]
+ }
+}
