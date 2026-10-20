@@ -19,6 +19,8 @@ var _started := false
 var _vv = null
 
 var _prev_on: Dictionary = {}       # id -> kind (on screen last frame)
+var _info: Dictionary = {}          # id -> [kind, tag, pos, state, speed, time] of the last frame it was on screen (for the report of a vanish)
+var _vanish_log: Array = []
 var _seen: Dictionary = {}          # id -> true
 var _vanish: Dictionary = {}        # kind -> count
 var _popin: Dictionary = {}         # kind -> count
@@ -85,6 +87,7 @@ func _check() -> void:
 		var on := shown and _on_screen(cam, v["pos"])
 		if on:
 			now_on[id] = kind
+			_info[id] = [kind, str(v["tag"]), v["pos"], str(v["state"]), snappedf(float(v["v"]), 0.1), _stamp(), bool(v.get("end_hold", false))]
 			_inview_frames[kind] = int(_inview_frames.get(kind, 0)) + 1
 			hr[1] += 1
 			if kind == "bus":
@@ -111,6 +114,8 @@ func _check() -> void:
 			if not still:
 				var k: String = str(_prev_on[id])
 				_vanish[k] = int(_vanish.get(k, 0)) + 1
+				if _vanish_log.size() < 8:
+					_vanish_log.append(_info.get(id, []))
 	_prev_on = now_on
 	if buses > 0:
 		_bus_any_frames += 1
@@ -199,6 +204,8 @@ func _process(_d: float) -> bool:
 		print("TRAFFIC buses: max %d at once, in view on %.0f%% of frames, avg %.2f" % [_bus_max, 100.0 * _bus_any_frames / fr, _bus_frames / fr])
 		print("TRAFFIC vanished while in view: %s" % str(_vanish))
 		print("TRAFFIC popped in while in view: %s" % str(_popin))
+		for vl in _vanish_log:
+			print("TRAFFIC   vanished: %s" % str(vl))
 		print("TRAFFIC ghosted (a vehicle faded through a jam; always 0 since task 37): %d" % int(_vv.sim.ghosted))
 		var causes := {}
 		for j in _vv.sim.jam_log:

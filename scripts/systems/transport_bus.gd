@@ -239,6 +239,9 @@ static func next_text(lot: String, from: int = -1) -> String:
 		if not ts.is_empty() and (best < 0 or int(ts[0]) < best):
 			best = int(ts[0])
 	if best < 0:
+		for r2 in routes():
+			if str((r2["stops"] as Array).back()) == lot and not is_loop(r2):
+				return "Last stop: the bus goes on out of town"
 		return "No buses"
 	var day_diff: int = best / 1440 - t / 1440
 	if day_diff <= 0:

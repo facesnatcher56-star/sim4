@@ -20,7 +20,7 @@ func run() -> Array:
 	var stops: Array = loop["stops"]
 	for need in ["market", "hospital", "school", "office", "apartments", "works"]:
 		K.expect(f, stops.has(need), "the loop serves %s" % need)
-	K.expect(f, TransportBus.is_loop(loop), "the route is a loop (it ends where it starts)")
+	K.expect(f, str(stops[0]) == "works" and str(stops[stops.size() - 1]) == "hospital", "a circuit through town: in at the works, out past the hospital (%s ... %s)" % [stops[0], stops[stops.size() - 1]])
 	# weekday timetable: gaps by band
 	var runs: Array = TransportBus.runs_day(loop, 2)
 	var worst_peak: float = 0.0
@@ -47,8 +47,8 @@ func run() -> Array:
 			if t >= int(d) and float(t) <= float(d) + run_min:
 				out += 1
 		most = maxi(most, out)
-	print("  [bus] loop takes %.0f min, most buses out at once on a weekday: %d" % [run_min, most])
-	K.expect(f, run_min >= 30.0 and run_min <= 200.0 and most <= 6, "a loop of %.0f minutes puts at most 6 buses on the road at once (%d)" % [run_min, most])
+	print("  [bus] the run takes %.0f min, most buses out at once on a weekday: %d" % [run_min, most])
+	K.expect(f, run_min >= 30.0 and run_min <= 150.0 and most <= 4, "a run of %.0f minutes puts at most 4 buses on the road at once (%d)" % [run_min, most])
 	# growth: the second route needs finished projects
 	K.expect(f, str((TransportBus.route("east")).get("requires_built", 0)) != "0", "the second route waits for town growth")
 	CityPlan.built["residential"] = 1

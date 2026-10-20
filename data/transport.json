@@ -60,19 +60,19 @@
   "tow": {"night_from": 1, "night_to": 6, "chance": 0.4, "fee": 60, "pound_per_day": 10, "street_ticket": 25, "ticket_chance": 0.15, "tow_types": ["cafe", "market", "office", "gym", "library", "school", "park"]}
  },
  "bus": {
-  "_doc": "A small town runs ONE bus loop (task 37). Real timetable: the first-stop departures per day type; later stops follow from the ride time. Cause: a bus runs at set times (more at the rush hours, hourly by day, none after 20:00, few on Sundays, one trip early for the Ironbridge Works dawn crew) because a town of this size cannot fill a bus every few minutes. A second route only runs once the town has grown (requires_built = finished CityPlan projects). The timetable is shown at the stop and in the Town window; TransportTrip uses the real wait to the next bus, so a long wait loses to walking.",
+  "_doc": "A small town runs ONE bus route (task 37): a one-way circuit through town (the lanes in front of lots flow one way, so a bus cannot turn back; it comes in from the east edge of the map at the works, serves the stops in order and drives out by the west edge past the hospital; the next run comes in again at its time). Real timetable: the first-stop departures per day type; later stops follow from the ride time. Cause: a bus runs at set times (more at the rush hours, hourly by day, none after 20:00, few on Sundays, one trip early for the Ironbridge Works dawn crew) because a town of this size cannot fill a bus every few minutes. A second route only runs once the town has grown (requires_built = finished CityPlan projects). The timetable is shown at the stop and in the Town window; TransportTrip uses the real wait to the next bus, so a long wait loses to walking.",
   "max_wait": 75,
   "tiles_per_min": 6.4,
   "detour": 1.25,
   "cut_below": 0.6,
   "routes": [
-   {"id": "loop", "name": "Town Loop", "offset": 0, "stops": ["works", "apartments", "office", "market", "school", "hospital", "works"],
+   {"id": "loop", "name": "Town Bus", "offset": 0, "stops": ["works", "apartments", "office", "market", "school", "hospital"],
     "runs": {
      "weekday": ["04:30", "06:30", "07:00", "07:30", "08:00", "08:30", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "16:30", "17:00", "17:30", "18:00", "19:00", "20:00"],
      "saturday": ["07:30", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00"],
      "sunday": ["09:00", "11:00", "13:00", "15:00", "17:00"]
     }},
-   {"id": "east", "name": "East Link", "offset": 0, "requires_built": 1, "stops": ["city_hall", "works", "apartments", "townie_b", "city_hall"],
+   {"id": "east", "name": "East Link", "offset": 0, "requires_built": 1, "stops": ["city_hall", "works", "apartments", "townie_b"],
     "runs": {
      "weekday": ["07:15", "08:15", "12:15", "16:45", "17:45"],
      "saturday": ["10:15", "14:15"],
