@@ -2,7 +2,11 @@
  "about": "Task 33.4: the progress ring over a folk's head while a timed action runs, and the bar on the queue chip. Modes live in Settings (progress_rings): 0 off, 1 selected folk only, 2 household (default), 3 everyone.",
  "min_duration_min": 3,
  "max_everyone": 14,
- "radius_px": 16,
+ "radius_px": 26,
+ "radius_min_px": 24,
+ "radius_max_px": 28,
+ "ref_folk_px": 110,
+ "arc_width_frac": 0.3,
  "icons": [
   {"ids": ["water_plant", "water_garden"], "shape": "drop", "color": "#6fc3ff"},
   {"tags": ["plant", "garden"], "shape": "leaf", "color": "#7fd16a"},

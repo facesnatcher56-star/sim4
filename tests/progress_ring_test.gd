@@ -41,6 +41,7 @@ func run() -> Array:
 	_layout()
 	_clear_of_name_tags()
 	_settings()
+	_size()
 	return fails
 
 
@@ -198,3 +199,15 @@ func _settings() -> void:
 	GameSettings.set_value("progress_rings", 3, false)
 	_check(GameSettings.progress_rings_mode() == 3, "mode read back")
 	GameSettings.set_value("progress_rings", old, false)
+
+
+## The ring stays readable: 24..28 px at 1280x720 whatever the zoom, bigger only with a bigger window, and the arc is thick.
+func _size() -> void:
+	for folk_px in [30.0, 70.0, 110.0, 160.0, 400.0]:
+		var r := ProgressRing.radius_for(folk_px, 720.0)
+		_check(r >= 24.0 and r <= 28.0, "radius %.1f at folk height %d px outside 24..28" % [r, int(folk_px)])
+	_check(ProgressRing.radius_for(110.0, 720.0) > ProgressRing.radius_for(60.0, 720.0) - 0.001, "zoomed in is not smaller than zoomed out")
+	var big := ProgressRing.radius_for(165.0, 1080.0)
+	_check(big > 28.0 and big <= 28.0 * sqrt(1.5) + 0.01, "1080p ring %.1f grows a little" % big)
+	_check(ProgressRing.radius_for(-1.0, 720.0) >= 24.0, "unknown folk size still gives a ring")
+	_check(ProgressRing.arc_width(24.0) >= 6.0, "arc is thick: %.1f" % ProgressRing.arc_width(24.0))
