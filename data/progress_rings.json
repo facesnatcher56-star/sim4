@@ -1,0 +1,22 @@
+{
+ "about": "Task 33.4: the progress ring over a folk's head while a timed action runs, and the bar on the queue chip. Modes live in Settings (progress_rings): 0 off, 1 selected folk only, 2 household (default), 3 everyone.",
+ "min_duration_min": 3,
+ "max_everyone": 14,
+ "radius_px": 16,
+ "icons": [
+  {"ids": ["water_plant", "water_garden"], "shape": "drop", "color": "#6fc3ff"},
+  {"tags": ["plant", "garden"], "shape": "leaf", "color": "#7fd16a"},
+  {"tags": ["cook", "prepare", "coffee", "tea"], "shape": "flame", "color": "#ff9a4a"},
+  {"tags": ["meal", "food", "snack", "drink"], "shape": "plate", "color": "#f2e3c4"},
+  {"tags": ["hygiene", "toilet"], "shape": "drop", "color": "#6fc3ff"},
+  {"tags": ["clean", "chore"], "shape": "star", "color": "#9fe8ff"},
+  {"tags": ["repair", "safety", "fire"], "shape": "bolt", "color": "#ffd84a"},
+  {"tags": ["sleep", "rest", "relax", "comfort"], "shape": "moon", "color": "#b8b2ff"},
+  {"tags": ["read", "write", "science", "skill", "work"], "shape": "book", "color": "#ffd9a0"},
+  {"tags": ["music", "perform", "dance", "party"], "shape": "note", "color": "#ff9ad0"},
+  {"tags": ["romance", "flirt", "kiss", "hug"], "shape": "heart", "color": "#ff6f8e"},
+  {"tags": ["exercise"], "shape": "bolt", "color": "#ffd84a"},
+  {"tags": ["fish", "outdoor"], "shape": "leaf", "color": "#7fd16a"},
+  {"shape": "dots", "color": "#e6edf5"}
+ ]
+}

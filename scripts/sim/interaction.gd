@@ -69,6 +69,15 @@ func label() -> String:
 func duration() -> float:
 	return float(def.get("duration_min", 10.0))
 
+## How far along a running timed action is, 0..1 (a pure read for the progress ring and the queue chip: it changes nothing). -1 while walking to it or when it has no length.
+func progress() -> float:
+	if state != "running":
+		return -1.0
+	var d := duration()
+	if d <= 0.0:
+		return -1.0
+	return clampf(elapsed_min / d, 0.0, 1.0)
+
 func effective_priority() -> int:
 	return int(PRIORITY.get(str(def.get("priority", "normal")), 1)) + (PLAYER_BONUS if player else 0)
 

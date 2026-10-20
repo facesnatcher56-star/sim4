@@ -1,9 +1,294 @@
-# One-character play: design, cost and risks (owner item 35)
+# One-character play: design, cost and risks (owner items 35 and 36)
 
 Status: DESIGN ONLY. No game code was changed. Written for the owner and the reviewer; the builder starts only after the owner decides.
-Source: the owner's decision in `coord/messages/2026-10-22T1430-reviewer-33-34-35-owner.md` (item 35) and a read of the real code (file names below).
+Revision 1 (task 35) source: `coord/messages/2026-10-22T1430-reviewer-33-34-35-owner.md` and a read of the real code. Revision 2 (task 36) is the section directly below and overrides Revision 1 wherever they differ.
 
-The owner's rule, restated so the plan can be checked against it:
+## Revision 2 (task 36): one character is THE game, not a mode
+
+Status of Revision 2: DESIGN ONLY, no game code changed. Source: the owner decision in `coord/messages/2026-10-22T1645-reviewer-36-owner-one-mode.md` and the four review additions in `coord/messages/2026-10-22T1730-reviewer-35-design-review.md`. Revision 1 (the rest of this file) is kept below and edited in place where Revision 2 overrides it; a line starting "REVISED (task 36)" marks every such place. If Revision 1 and Revision 2 disagree, Revision 2 wins.
+
+### R0. The short version
+
+1. There is no `Pawn.mode` flag and no second game. The pawn is simply "the head of the local player's household in the `Players` table" (`Pawn.of(player_id)`). Where nobody registered a player (almost every test fixture, `HoodKit`) there is no pawn and every folk stays an autonomous NPC. That one fact removes most of the test migration (R5).
+2. The start is one adult from the creator, alone, renting a cheap starter flat with a bathroom but no furniture, with 300 coins (Normal). Food comes from street food and a free evening supper at the community hall; sleep comes from the floor until a 120-coin sofa bed is bought. Details and numbers in R2.
+3. The existing "empty home" start (task 32d) is the right base but is far too rich and too safe: it gives 5,500 coins, an owned home, free infinite snacks from a welcome basket, and (measured) `AutoFurnish` spends 1,900 coins of furniture on day 2 for a player who does nothing. All three are removed or changed (R2.1).
+4. A real gap found while reading the code: the "survive with nothing" fallbacks (`sleep_floor`, `welcome_snack`, `cafe_restroom`) are `target: "self"` interactions that ONLY the autonomy picker can start. No menu lets a player order them. With the pawn silenced, the survival floor would be unreachable. A "self actions" menu is stage S2 work, not polish.
+5. Effort: about 20 agent-sessions (range 17 to 25), up from 14, because the start economy, rent/eviction, the new creator and the deletions are new work that Revision 1 did not have. Dropping the flag and the dual-mode test burden saves roughly one session. The game is playable end to end after S6 (about 15 sessions); S7 to S9 (storyteller growth and heirs, the family "Ask" system, moving up) follow and can ship later.
+
+### R1. What the owner decided, and what it removes
+
+| Decision | Consequence in this plan |
+|---|---|
+| No `Pawn.mode`, no Classic/household mode, no New Game choice of mode | Revision 1 section 10 (feature flag) is deleted. Revision 1 guards written as `Pawn.mode == "one"` become unconditional. A TEMPORARY build constant `Pawn.ENFORCE` (default false) lets stages S0 to S2 land without silencing every folk before the survival floor and warnings exist. It is deleted at the end of S3, is not a setting, and is not saved. This is a sequencing tool, not a mode. |
+| The start is one adult, alone, in a blank home | Creator makes exactly one adult. No presets, no relations, no `MAX_FOLK`. `NewGame.start` takes one folk dictionary. |
+| Family can still happen in play | NPCs with autonomy, the ask system (Revision 1 section 4), heir flow (task 15) all stay. Their priority is lower than the solo loop. |
+| "Just feasibly get by" is the balance target | R2 gives the numbers; R2.5 gives the `pawn_bot` test that pins them. |
+| Old saves | Load as they are. The head of the saved player household becomes the pawn; the rest become NPCs. No `SaveLoad.VERSION` bump. Scenario ids that no longer exist (couple, family, roommates, sandbox) simply show no checklist (`Scenario.goals()` already returns `[]` for an unknown id). |
+
+How a pawn exists without a flag: `Pawn.of(pid)` returns `Succession.head_of(pid)` only when `Players.table` has an entry for `pid`. With an empty table it returns -1 (it must NOT use the `Players.primary_household()` fallback to household 1). `HoodKit.new_game`, the sim test kit and most system kits never call `Players.set_player`, so they keep every folk autonomous. `NewGame.start`, `start_kit`, `succession_kit`, `coop_kit` do call it, so those have a pawn.
+
+### R2. The start balance (the main new work)
+
+All numbers are for Normal, in coins, per game day or week (a week is 7 game days; a game year is 28 days). Prices are today's `data/objects.json` values unless marked NEW. Every row has a cause line (the task 34 rule: "X happens because Y; it gets worse only if Z").
+
+#### R2.1 What the code does today (read and measured)
+
+I ran the real new-game path (`NewGame.start`, solo scenario, empty home, world seed 4242) headless, then 14 game days with autonomy off (a player doing nothing). Probe lived in the scratchpad.
+
+| Fact | Today | Why it matters |
+|---|---|---|
+| Starting coins | 5,500 (scenario 4,000 + 1,500 "moving-in allowance" for a small empty home, `data/start_home.json`) | About 18 times the target. |
+| Home | Owned outright (`HousingProps.ensure`: `owner = tenant = player`); rent machinery for a PLAYER TENANT exists but is only reached through foreclosure or a lease-back | A rented start needs a start-time tenancy; the machinery (rent bill, notice) is reusable. |
+| Bill of a bare studio | 128 a week: base 90, plus 2 percent of the value of everything "owned", which includes doors, windows and ceiling lights (about 1,900 coins of structure) | The structure should belong to the landlord. Bill base is the lever. |
+| Market rent of the home property | 203 a week (`HousingProps.market_rent`, base 14,000) | Far too dear for a starter flat; a separate small-flat property is needed (R2.2). |
+| Doing nothing for 14 days | Day 2: coins 5,500 to 3,600. That is `AutoFurnish` buying bed, toilet, fridge, shower, stove and seat (120+250+600+400+450+80 = 1,900). Hunger sits at -100 from day 2, bills go unpaid (autopay off), nobody dies, nothing is repossessed within 14 days | A do-nothing player is furnished for free and cannot lose. Both must go. |
+| Evicting a player tenant | `HousingRent._bill` only serves an "eviction notice" toast on the second late rent; `ChaosMoney.eviction` (07b) takes up to 3 belongings after a notice. Nothing ever ends the tenancy or locks the player out | "Eviction is a real risk" needs a defined outcome (R2.2, row "Eviction"). |
+| Welcome basket | `welcome_snack`: `hunger < 45`, no fridge, cooldown 150 min, +42 hunger, no stock, no price | Free food forever in a bare home. Must be finite. |
+| Self interactions | `sleep_floor`, `welcome_snack`, `cafe_restroom` are `target: "self"`. `InteractionQuery.entries_for` handles only `object` and `folk`; `Autonomy._folk_self_defs` is the only reader | The player has no way to order them. |
+| Home cooking | `cook_meal`, `prep_food`, `microwave_meal` use no ingredients (only `grab_snack` takes 1 fridge stock; `fridge_clean` is true when there is no fridge) | Unlimited free food once a stove or microwave exists. See R2.3 for the proposal. |
+| Odd jobs at the mailbox | 30 coins per 90 minutes, 2 a day, no skill, no application (`data/bank.json` `work.odd_job`) | 20 coins an hour beats the dishwasher (14 an hour). Too rich for "hardly any money". |
+| Job board | Town window, Jobs tab (`LifeHubJobs` / `EduJobs`): weekly openings per career (0 to 3, each career about 50 percent open), Apply hires at once, no computer needed | Day-1 income without a computer already works, if there are openings. |
+| Entry wages | 12 to 17 coins an hour for six-hour shifts (Dishwasher 14, Cashier 12, Weeder 13, Odd-Jobber 14, Street Busker 14), so about 70 to 100 a shift; pay is x0.8 to x1.2 by performance (start 50 gives x1.0) | Sets the whole ladder. |
+| Food | Zip Burger meal 9 coins (+45 hunger, 10:00 to 23:00), bakery croissant 3 (+22, 08:00 to 17:00), restaurant soup 7 (+14). Hunger falls 108 a day on a -100..100 scale | About 17 coins a day, 120 a week, if you eat only out. |
+| Autopay | Settings option "Pay bills automatically", default OFF (`data/economy.json` says `auto_pay: true` but the code and the setting use their own default) | Reviewer default is ON; flip the setting default and `NewGame`. |
+| Hospital | Bills 60 / 220 / 700 coins by severity (`data/incidents.json`); unpayable bills become ordinary bills | One hunger collapse can cost more than the whole starting purse. |
+
+#### R2.2 The start, part by part
+
+| Part | Proposal | Number (Normal) | Cause line |
+|---|---|---|---|
+| Starting coins | A small purse, not furniture money | 300 (Easy 500, Hard 150). The first week's rent is already paid by signing the lease and is NOT in the 300. | "You arrive with a bag and a few days of money: about a week of cheap food (120), the first bill (60) and 120 spare, which is exactly the price of the cheapest bed. Worse only if you spend it on the wrong thing first." |
+| The home | CONFIRMED: a cheap rented starter flat. It is the existing "Starter Studio" template (`small`: one room and a bathroom nook, running costs "Low"). Counter-proposal: none to the type, but the rent must be set on its own small property (base about 6,000, market rent about 75) and not on the 14,000 house, or the rent review (+8 percent every 28 days toward market) would drive it to 203. | Rent 70 a week, due every 7 days from day 8, three days to pay (as today's bills). Landlord is a townie (HousingAgent already picks the richest townie as buyer). | "A flat costs rent because somebody else owns it. The landlord pays water and council charges, so your bill is smaller; you pay for the power and phone you use. It gets worse only when you do not pay." |
+| Bills | Landlord covers water and council charges (shares 0.25 + 0.25 of the fixed charge) and the structure belongs to the landlord, not to you | About 60 a week (power 27 + phone 18 + about 15 of use), instead of 128 | "The flat's walls, windows and lights are the landlord's, so they are not your property to be taxed." |
+| Eviction | Real, in two tiers. TIER A (S3): late rent warns on the FIRST miss ("Pay by day N or the landlord starts eviction", week 2 for a do-nothing player); the second miss serves the notice (already exists); three days later the bailiffs clear the flat (`ChaosMoney.eviction` already takes belongings) and the lease ends; you can sign again by paying the arrears plus one week's deposit, and until then the front door is locked and you sleep rough (park bench = floor sleeping with a cold penalty; night shelter cot from TIER B). TIER B (S9, optional): the community hall runs a night shelter cot (21:00 to 07:00, free). Hard moves the notice to the first missed rent. | warn at 1 missed, notice at 2 missed, bailiffs 3 days after notice | "You lose the flat because the rent was not paid for two weeks; it gets worse only while the arrears stay unpaid." |
+| Floor sleeping | EXISTS (`sleep_floor`): energy +0.08 a minute against +0.125 and +0.1 comfort in a bed, "slept badly" (uncomfortable 1.5 for 8 h), only at home or when energy < 15 | needs the self-action menu (R2.6 gap 1) | "A hard floor gives poor rest; it never makes you ill." |
+| Tap / toilet / shower | Fixtures of the flat: toilet, shower and sink are kept when the lot is stripped (`StartHome.keep_defs`), owned by the landlord (community owner -1, never in your bill, never sold or repossessed) | 0 coins | "A rented flat comes with its bathroom; you do not buy a toilet to move in." |
+| Cheap food 1: street food | Bakery croissant 3, Zip Burger meal 9, soup 7 | about 17 a day, 120 a week | "Food costs money because somebody cooked it." |
+| Cheap food 2: welcome basket | Make it finite: 3 snacks, then it is empty (an object state on the flat, or a per-household counter) | 3 uses | "The landlord left three snacks; when they are gone they are gone." |
+| Cheap food 3: soup kitchen | NEW place in `data/life` on the existing library lot (the community hall): "Hollow Oak Community Supper", daily 18:00 to 19:00, price 0, +35 hunger, once a day per person, 20-minute service | 0 coins | "The town runs a free supper every evening for anyone who turns up; it is plain and you have to be there at six." |
+| Corner shop | Already: supermarket/market stalls (8:00 to 21:00) for pantry food once there is a fridge | n/a | |
+| Reach first income | See R2.4 | | |
+
+#### R2.3 The ladder: each purchase must noticeably help
+
+Honest note first: with today's rules a computer does not pay for itself fast in coins (freelance is 40 + 9 x skill per two-hour gig, cap two a day), but it does pay in time, in a higher hourly rate once skills grow, and in no commute. And kitchen appliances cost far more than the food they save, because cooking has no ingredient cost. Two proposals for the owner below.
+
+| Step | Item (price) | What the player feels | Money effect |
+|---|---|---|---|
+| 0 | Floor + street food | Poor sleep ("slept badly"), shopping runs for every meal | -17 a day food |
+| 1 | Sofa bed (120) | Sleep restores about 70 instead of about 35 per night (net of decay), no "slept badly", "well rested" buff (energy falls 20 percent slower for 8 h): you need fewer hours asleep and have more day | none |
+| 2 | Computer (900) | Look for jobs at home, freelance (2 gigs a day, 40 + 9 x best skill each, 4 hours in total, no commute), play (fun); study courses (whether the Study tab needs the computer is NOT verified) | freelance 80 a day on a rest day instead of odd jobs 40; the pay rises 9 per gig for each skill level |
+| 3 | Kitchen: microwave cart (260) + table (300) = 560; later fridge (600) + stove (450) | Hot meals at home (`well_fed`), no shopping run, no 20-minute queue | -17 a day becomes about -3 a day (today, free ingredients) |
+| 4 | Comfort: chair (80), single bed (380), TV (500), bookshelf (350) | Mood, fun, comfort need | none; bills +2 percent of value a week |
+| 5 | Better flat (S9) | More rooms, more rent | rent 140 |
+| 6 | A house | Mortgage: 20 percent down + 3 percent fee (machinery exists, `HousingAgent.buy`) | |
+
+Proposal A (recommended, small): `cook_meal`, `prep_food`, `microwave_meal` take 3 coins of ingredients on finish (`coins_add: -3`, with a `coins_at_least` test and "No money for ingredients" as the reason). A home meal then costs 3 against about 9 to 20 for street food, the cause line writes itself ("cooking costs ingredients"), and the fridge (`grab_snack` stock, groceries 6 a unit) matters again. It touches shared interaction data used by every household, so NPC wealth in `econ_longrun_test` and the long hash baseline will move.
+Proposal B: leave cooking free and accept that the kitchen is a pure time/mood upgrade.
+Proposal C (optional, 0.5 session, data only): a "Second-hand" stall in the market shops at 45 percent price for bed frames, fridge, stove, computer with a worse starting condition (the wear and repair system already exists). It makes the first computer reachable in about 10 days instead of about 20. I recommend A and leave C for after the playtest.
+
+Odd jobs: lower to 20 coins per 90 minutes, still 2 a day (13 an hour, below the dishwasher 14). Wages stay as they are.
+
+#### R2.4 First income on day 1 or 2 with no computer
+
+Four ways exist or are one small change away, none needs a computer:
+1. Town window, Jobs tab ("the notice board"): hire at once. Day-1 reality: each career has 0 to 3 openings a week (`EduJobs.refresh`, 0 about a quarter of the time), so about 10 of the 14 careers are open in a given week; the entry rung of Cook (Dishwasher), Barista (Cashier), Gardener (Weeder), Handyperson (Odd-Jobber), Musician (Street Busker), Painter, Writer, Teacher (Aide) and Fitness (Attendant) have no requirements. Make sure the first week of a NEW game always has at least two unrestricted entry openings (NEW, `EduJobs.refresh` hook; a new-game-only seed of the board). Newspaper ads: the Courier (2 coins, newsstand) lists the same openings as text; same data, no new system.
+2. Mailbox "Do Odd Jobs": 20 coins per 90 minutes, no application, 2 a day.
+3. Street busker (a career level): 17:00 to 23:00, 14 an hour, no skill.
+4. The first shift: UNVERIFIED whether someone hired at 08:30 works the same day (depends on `Careers.apply_schedule` and `Commute.lead_hours`); the bot test pins it. Target: first wage paid by the end of day 2.
+
+OpportunityTaker (a jobless folk with less than 300 coins "is seeking" and may auto-accept an offer) must skip the pawn: the offer waits as a card for the player.
+
+#### R2.5 Weekly budget and the balance test
+
+Steady state, Normal, a sensible player (job five weekdays, odd jobs on the two rest days):
+
+| Line | Per week |
+|---|---|
+| Wages: 5 shifts x 6 h x 14 (x1.0) | +420 |
+| Odd jobs: 2 days x 2 x 20 | +80 |
+| Rent | -70 |
+| Bills | -60 |
+| Street food (until a kitchen) | -120 |
+| Margin | about +250 (about +170 without odd jobs) |
+
+Paper simulation (Python, daily steps, not the real game): start 300, rent first due day 8, bills from day 4 (due +3 days), bed bought as soon as coins stay above a 150 reserve.
+
+| Player | Result (Normal, start 300) |
+|---|---|
+| Sensible, bed then computer | bed day 1 to 3, computer day about 22 |
+| Sensible, bed then kitchen then computer | bed day 1 to 3, kitchen day about 12, computer day about 30 |
+| Idle (eats street food, never works) | first late rent day 11 (week 2: the eviction warning), notice day 14 to 18 |
+| Same with start 350 | first problem not until day 14 and the notice day 18: so 300, not 350, meets "warning in week 2" |
+
+`pawn_bot` (deterministic, `tests/pawn_bot.gd`; Revision 1 section 3.4 describes the driver) plays the real game and these become asserts (slow tier, a 5-day fast variant):
+- Sensible bot, Normal, 3 seeds, 14 game days: alive; never two late bills in a row; coins below 0 on at most one day; first wage by end of day 2; bed owned by day 5 at the latest; with "bed, then computer" priority the computer is owned by day 24 at the latest; with kitchen first, by day 35.
+- Idle bot (street food, sleep, no job): alive at day 14; first "rent overdue / eviction warning" no later than day 14; eviction notice no later than day 21.
+- Starving bot (does nothing at all): first collapse by day 4, no death by day 14 on Normal and Easy (Hard may die, R3).
+- "Debt spiral" is defined as coins below 0 for 7 days in a row, or two consecutive bills late. One hospital bill of 220 at the 150-coin reserve is recoverable within a week; the test inserts one.
+
+Unknowns: real hospital severity of a hunger collapse (60 or 220); whether freelance and odd jobs fit around a six-hour shift in the time budget (a day has 24 h: 8 sleep, 1 commute, 6 work, 2 food, 1 hygiene leaves about 6; the bot will show whether energy holds); the effect of weather and holidays on shifts.
+
+#### R2.6 Gaps found that the plan must close (new in Revision 2)
+
+1. No way to order `target: "self"` interactions (R0 point 4). S2: a "Self" section in the pie/queue menu listing the pawn's self interactions with their reasons.
+2. Welcome basket infinite (R2.2).
+3. `AutoFurnish` buys for a player who does nothing (R2.1); gone.
+4. `OpportunityTaker` auto-accepts for a seeking pawn (R2.4).
+5. `BankGamble`: at addiction 40 "the person buys tickets on their own" (docs/ECONOMY.md): a pocket spend with the pawn as actor. Replace for the pawn with a strong urge buff and a warning; the player decides.
+6. Eviction has no end state and autopay is off by default (R2.2).
+7. `cafe_restroom` (restroom when "lacks a toilet") becomes dead because the flat has a toilet; keep for NPCs.
+
+### R3. Difficulty ladder (Normal is already difficult)
+
+Normal is "just feasibly get by". Easy gives a bed and slack; Hard removes the cushion. Existing ids (`relaxed`, `normal`, `hard`) stay for saves; only the label "Relaxed" becomes "Easy". This replaces the table in Revision 1 section 8 where they differ; the storyteller, hospital, grace, estate rows of that table stay.
+
+| Knob | Easy | Normal | Hard | Where |
+|---|---|---|---|---|
+| Starting coins | 500 | 300 | 150 | NEW `start_coins` in `difficulties` (replaces `funds_mult` for the start) |
+| First week's rent prepaid | yes | yes | no (due day 4) | NEW |
+| Flat rent per week | 55 | 70 | 85 | NEW |
+| A sofa bed already in the flat | yes | no | no | NEW |
+| Bills x | 0.8 | 1.0 | 1.3 | exists |
+| Wages x / shop and food prices x | 1.10 / 0.95 | 1.0 / 1.0 | 0.90 / 1.10 | NEW hook (Economy, same style as `bill_mult`) |
+| Odd job pay | 24 | 20 | 16 | NEW |
+| Entry openings on the first board | 3 or more | 2 or more | 1 | NEW |
+| Missed rents before the notice | 3 | 2 | 1 | NEW (`evict_after_missed` per difficulty) |
+| Hunger, energy, bladder decay | x0.8 | x1.0 | x1.2 | exists (`need_mult`) |
+| Starvation death, help clock | as Revision 1 table (6,500 / 4,320 / 3,000 min; 120 / 240 / 480 min) | | | `02_needs_health.json` |
+
+Alternative for Hard that I do NOT recommend for v1: start in the night shelter with no flat. It needs the lockout/shelter machinery of Tier B before anything else works. Keep it as a later "Hard+" idea.
+
+### R4. Revised plan: stages, effort, risks
+
+Replaces Revision 1 section 9. One session is a focused work block with design in hand, tests and report. S4 and S5 can run in parallel; so can S7 and S8.
+
+| Stage | Deliverable | New tests | Sessions | Risks |
+|---|---|---|---|---|
+| S0 Foundations | `Pawn` helper (`of`, `is_pawn`, from the `Players` table; no flag), `Pawn.ENFORCE` build constant (default false, deleted in S3), `origin` tags in data, `PawnLeaks` diff harness (R8.1), `Folk.enqueue` counters | `pawn_basics_test` | 1 | Low |
+| S1 Silence the pawn | Gates in `SimDirector._fill`, `DynLife`, `PlaceAuto*`, `BabyCare`, `Commute`/`CareerShifts`/`SkipRules`, `OpportunityTaker`, `BankGamble`, story/romance dice (7.3); the explain-or-fail leak test (R8.1) | `pawn_leak_test`, `pawn_alone_test`, `pawn_commute_test` | 2 | Hidden state changers; the 7.3 audit may find more than 10 sites |
+| S2 Survival floor | Self-action menu, finite welcome basket, fixtures (toilet, shower, sink landlord-owned), community supper, `PawnWarn` levels, reflexes with grace, cause lines (R8.3) | `pawn_floor_test`, `pawn_warn_test`, `pawn_reflex_fire_test` | 2 | UI; making warnings useful not noisy |
+| S3 The new start | Single-adult creator and New Game (presets and scenarios deleted), starter-flat tenancy (own small property, prepaid week, rent review), bills share (landlord pays water/rates), autopay default on, Tier A eviction and shut-off, difficulty ladder data (R3), tips and goals rewrite, `AutoFurnish` and `Pawn.ENFORCE` removed, folk row locked to the pawn | `start_flat_test`, `pawn_rent_test`, `pawn_difficulty_test` | 3 | Tenancy at start touches `HousingProps`/`Economy` ownership; old-save loading |
+| S4 Time | Solo auto-skip with the 2x batch margin (R8.2), vital vs lifestyle need multipliers for the pawn, co-op AFK hold | `pawn_skip_test`, `pawn_afk_test` | 2 | Skip rate on the big map (15 to 20 min/s possible) |
+| S5 Routines | Revision 1 section 2, unchanged | `pawn_rules_test`, `pawn_rules_replay_test` | 2 | Scope creep ("else", "if") |
+| S6 Balance and test migration | `pawn_bot`, tuning of R2 numbers by data only, test migration (R5), new pawn hash baseline, performance probe | `pawn_bot_balance_test` (slow) + a 5-day fast variant | 3 | Numbers are paper arithmetic until here; the owner may want a different feel |
+| S7 Storyteller, growth, heirs | Pawn focus and circle (Revision 1 section 8 "world grows"), heir dialog with the child/teen rules (R8.4), playable-heir rule | `pawn_storyteller_test`, `pawn_heir_test`, `pawn_child_test` | 2 | Rates feel wrong until played |
+| S8 Ask and the family strip | Revision 1 section 4, shown only once somebody else lives with the pawn | `pawn_ask_test`, `pawn_guard_test`, `pawn_suggest_test` | 1.5 | Odds tuning; prompt volume |
+| S9 Move up (optional) | Better flat or a house as a real move (claim a townie home; `PlayerLots.claim` exists for co-op and has no solo path), Tier B night shelter | `pawn_move_test` | 2 | Highest unknown: many systems assume one fixed home lot |
+| Total | | about 16 new files | about 20.5 (range 17 to 25) | |
+
+Playable one-character game after S6 (about 15 sessions). Serial length about 14 with S4/S5 parallel. Between S0 and S3 `main` stays playable because `Pawn.ENFORCE` is false.
+
+Cut order if time is short: S9, then S8, then routines depth, then the lifestyle-need multiplier, then Proposal A (ingredients).
+
+### R5. Test migration (counted by grep in `tests/`)
+
+Totals: 338 `*_test.gd` plus 10 `sim_*`/`world_*` files with a `run()` = 348 test files. The Revision 1 figure of 117 "sim-driving" files counted kits, shots and probes; the real number of test files that run the clock or autonomy is 80 (grep for `tick_minute`, `HoodKit`, `advance_minutes`, `autonomy_enabled`, `Autonomy.choose`, `sim_testkit` in `*_test.gd`, `sim_*`, `world_*`). Because a pawn exists only when the `Players` table has the local player (R1), the rest need no change.
+
+| Bucket | Files | What happens | Effort |
+|---|---|---|---|
+| A. No pawn in the fixture (NPC behaviour, autonomy, systems, UI that never registers a player) | about 313 of 348, including about 66 of the 80 sim-driving files and the old `coop_hash_baseline` (it plays through `HoodKit`, which registers no player) | Unchanged. They keep proving the NPC world. The existing hash baseline stays bit-identical unless a shared data change (ingredient cost, odd-job pay, welcome basket) moves NPC economics; if it moves, the baseline is regenerated once, on purpose, in S6, and the Windows hash is re-matched. | 0, plus 0.5 session for the baseline |
+| B. Updated: a pawn is present (they register a player or use the new-game path) | about 32: 8 `coop_*` (commands, home_lot, host, net, players, skip_run, waiting, hash), 6 `succession_*`, 7 misc (`players`, `command_replay`, `camera_focus`, `sleep_places`, `storyteller_core/longrun/play`), 2 kit users (`map_lots`, `romance_longrun`), 3 UI (`ui_hud`, `ui_flow`, `thought_voice_longrun`), 6 `start_*` rewritten | New fixture helper `TestFixture.with_pawn(player_id)` and `TestFixture.npc_household()`; each file picks one. `start_*` become the tests of the new start (`start_flat_test`, goals, difficulty, floor, solo 2-day run). Co-op tests assert the pawn per player. | about 2 sessions |
+| C. Deleted (tests of a controlled family or a removed feature) | about 3: `auto_furnish_test` (the `AutoFurnish` half; the `HomeBare` half moves to a new small `home_bare_test`), `logic_homemaker_test` (the "player told nobody brings money" rule is moot for a solo pawn), the family-preset parts of `start_scenarios_test` | Delete, with a commit note. | 0.2 |
+| D. NEW | about 16 `pawn_*` and start tests (table in R4) | In their stages | inside the stages |
+| E. Shots and probes (`*_shot.gd`, `*_probe.gd`, about 45 call `start_new_game`) | not in the tiers | Re-run by hand at S6; creator and New Game shots are redone. | 0.3 |
+
+New hash baseline: `tests/baseline/pawn_hash_3day.json`, played by `pawn_bot` through `NewGame.start` (a pawn present), with its own test. `CoopHash.canonical()` stays as it is.
+
+### R6. Dead code: removed, kept for NPCs, or changed
+
+| Piece | Where | Verdict |
+|---|---|---|
+| `AutoFurnish` (236 lines), its daily registry row (`sim_registry.gd`), `Economy` furnish block (`reset`, `to_dict`, `from_dict`), `Commands` `note_order`, `main.gd` and `settings_apply.gd` setting, `data/start_home.json` `auto_furnish` | `scripts/systems/auto_furnish.gd` | REMOVE. It exists only for a player household nobody orders. |
+| `Homemaker` | `scripts/systems/homemaker.gd` (86), `Careers` daily call, `Cond fridge_clean`, `command_actions.gd` role command | KEEP for NPCs (a homemaker spouse). REMOVE the pawn's "Stay at home" entry; a pawn simply has no job. `fridge_spoiled` and the cond stay. |
+| `HomeBare` | `home_bare.gd` (91) | KEEP: NPC housemates in a bare flat go out more. Make `_compute` accept any household that has a resident, not only played ones. |
+| `HouseholdSetup` presets (`make_household`, `rel`, `inherit_child_looks`, `MAX_FOLK`, multi-folk `validate`) | `household_setup.gd` (294) | REMOVE about 110 lines. KEEP `random_folk`, `random_traits`, `random_name`, `create_folk`, `apply` (NPC and heir creation, tests). |
+| `HouseholdCreator` | `household_creator.gd` (226) | CHANGE to one adult: name, sex, traits, aspiration, looks. Remove add/remove member, age group and relation pickers. |
+| `StartPicker` scenario cards, funds options, Free Play | `start_picker.gd` (299) | CHANGE: one "New Game" screen: creator, difficulty, storyteller, home-roll (flat look). About half the file goes. |
+| `coop_household_pick.gd` | 92 lines | CHANGE: each joining player makes one adult. |
+| `data/scenarios.json` couple, family, roommates, sandbox | 133 lines | REMOVE those four. Keep the `difficulties` block and one start block with tips and goals (rewritten: buy a bed, first wage, pay the rent, buy a computer, make a friend). Keep id `solo` so saves keep their checklist. |
+| `data/start_home.json` `furnished` option, `bonus_by_size` | 30 lines | REMOVE. Keep `keep_tags`/`keep_defs` (add toilet, shower, sink) and `basics` (feeds the "next step" tips). |
+| `welcome_snack`, `sleep_floor`, `cafe_restroom` | `data/interactions.json` | KEEP; make the first two finite/orderable for the pawn; `cafe_restroom` stays for NPCs. |
+| Folk row "control any folk" (`hud.gd` `select_folk`, `_on_selection_changed`, `folk_panel.gd` enqueue paths) | `scripts/ui/hud.gd` (556) | CHANGE: selecting another folk opens inspect/ask only. A `CommandActions._interact` guard rejects orders for anyone but the pawn. |
+| `Scenario.funds_for` / `funds_mult` | `scenario.gd` | CHANGE to `start_coins`. |
+| `PlaceAuto`, `DynLife`, `DynPlans`, `BabyCare` for NPCs | | KEEP, skip the pawn (Revision 1 table 7.2). |
+
+### R7. The reviewer's defaults: where I agree and where I do not
+
+| Default | My view |
+|---|---|
+| Routines: Full, literal, cap 8 | Agree. It matters more now: the first days are chore-heavy and a routine ("Sleep at 23:00") is the relief. |
+| Fire: flee after the grace period | Agree. |
+| Bills: autopay on by default, eviction and shut-off when money runs out | Agree, with two notes. (a) Autopay pays what it can; it must never hide rent: a missed payment still raises the warning. (b) "Shut-off" is new: after two late bills the household is disconnected (power and water off, so shower, toilet and lights stop) until paid, reusing the city utility outage plumbing. About 0.5 session in S3; cause line "the utility cut you off because two bills went unpaid; ends when you pay". The default flips in the setting and in `NewGame`, not in the static `Economy.auto_pay`, so NPC and test economics do not change. |
+| Pregnancy, marriage, move-ins only by order or accepted prompt | Agree. Note: an NPC partner starting "try for a baby" with the pawn as target is an NPC advance and goes through the prompt rule. |
+| Co-op: AFK hold | Agree, with a limit: after 10 real minutes the held pawn goes to bed (floor or bed) so an idle player cannot park a safe pawn forever while the others play. |
+| No playable heir: nobody-left choice plus recap | Agree. |
+| Hard can kill by starvation | Agree. It is only fair because the free supper and the corner shop always exist; the death cause text must say which warnings were ignored. |
+| Family strip shows mood and activity | Agree. It is empty and hidden for most of the early game (the pawn lives alone); show it only once somebody lives with the pawn. |
+| Pets self-care | Agree; pets still cost money to adopt and to vet (player decisions). |
+| Big NPC advances prompt, small ones happen | Agree, with a cap: at most 3 prompts per game day, and an unanswered prompt counts as "not now" after 2 hours. A lone pawn gets most of its story from NPCs, so prompt volume is the risk. |
+
+### R8. The four review additions, integrated
+
+#### R8.1 The leak test covers non-interaction changers
+
+`pawn_leak_test` becomes an explain-or-fail diff, not only an `interaction_started` check. Each game minute, for 14 game days, 3 seeds, an idle pawn and a `pawn_bot` pawn, it snapshots: lot and tile, coins, the set of owned objects, relationship values, job, household members, and the current interaction. Any change must be explained by one of: a command in the command log (player order, including a routine firing), an interaction whose definition has `origin` of `body`, `hazard` or `hold`, or a world consequence listed in `data/control.json` `allowed_sources` with its id. An unexplained change fails the test and names the minute and the changed value. This avoids instrumenting 40 call sites.
+
+Non-interaction changers to check (the list for section 7.3):
+
+| Changer | File | Pawn rule |
+|---|---|---|
+| Commute and stranded-home trips | `TransportTrip.start`, `Commute`, `NeighborhoodLots.stranded_home` | Only by `go_to_work`/`go_to_school` order or routine. Walking home after a shift is part of that order. `stranded_home` off for the pawn. |
+| Away holds (school, hospital, jail, vacation return) | `Away`, `Hospital`, `Justice*`, `Vacation` | World consequence (`hold`), allowed. |
+| Lot moves and teleports | `Neighborhood.travel`, `NeighborhoodTravel`, `PlaceAuto` | Only by order. |
+| Spending from the pawn's pocket | `Economy.record/spend` by systems | Bills/rent autopay and hospital charges are allowed standing orders; `AutoFurnish` deleted; `BankGamble` auto-tickets replaced by an urge buff. |
+| Buying and selling | `Economy.claim_bought`, `sell_object`, repossession | Only by command; repossession is a world consequence. |
+| Relationship changes from dice | `Straying`, `StoryThreads`, `SocialConflict`, decay | Allowed when an NPC acts toward the pawn and the pawn is the victim or target; NEVER when the pawn is the automatic actor. |
+| Job changes | `OpportunityTaker`, layoffs, `CareerShifts` missed shift | Auto-accept removed for the pawn; layoffs and missed shifts are world consequences. |
+| Life events | `Conception`, `Pregnancy`, `FamilyMarriage`, `StorySingles` move-in and adoption | By order or accepted prompt only. |
+| Crime with the pawn as actor | `CrimeForce`, `CrimeRevenge`, `CrimeMurder` rage, `CrimeDomestic`, `SocialConflict` | The 7.3 audit list; ask with `JusticePlayer.ask` or pick an NPC. |
+
+#### R8.2 The skip must stop with a margin
+
+Revision 1 section 3.3 already stops auto-skip on Amber. The Red text ("will pass out in about an hour") is only true if skip cannot cross the Red ETA inside one frame batch. Rule (`TimeFlow`): each skip frame advances at most `batch` game minutes (the achieved rate is a frame budget; `CoopTime` caps it at 6 per frame today). Before each frame compute `eta_red` = minutes until the first need, hazard or deadline crosses Red or a shift's leave-by time. If `eta_red < 2 x batch` (use the larger of the last batch and the cap), drop to 1x and show the banner. The margin is therefore at least 12 game minutes at today's cap and grows with the batch. Events with no ETA (a visitor, a phone ring, a fire) stop the skip on arrival as in Revision 1. `pawn_skip_test`: for needs at many offsets above Red, run a skip and assert it stopped at or before the Red threshold plus 2 batches of decay; also a shift leave-by case and a rent-due case.
+
+#### R8.3 Every reflex, warning and ask outcome has a cause line
+
+| Outcome | Cause line ("X because Y; worse only if Z") |
+|---|---|
+| `collapse_floor` | Because hunger or energy sat at the floor for 48 hours; ends in rest or hospital; worse only if it happens again (each hospital stay is billed). |
+| `pass_out` | Because energy hit the floor; lasts about 2 hours; worse only if it happens somewhere unsafe (a road). |
+| `have_accident` | Because the bladder was full and no toilet was reached; resets the bladder; mood penalty only. |
+| `flee_fire` | Because the room is burning; only after the grace window, and any order from the player wins; ends at the street. |
+| `take_cover` | Because of a disaster nearby; ends at the first safe spot. |
+| Smoke alarm wake | Because a loud alarm sounds; wakes the sleeper, does not walk. |
+| Info / Amber / Red warning | Because the need crossed the level; Red ETA is computed from the real decay so it stays true while skipping. |
+| Late-rent warning, notice, eviction | Because rent was unpaid N days; worse only while the arrears stay unpaid. |
+| Shut-off | Because two bills were unpaid; ends when paid. |
+| Skip stopped | Because a need, bill, visitor or hazard needs the player, with the reason on the banner. |
+| Ask: Yes / Later / No / Cannot | A "No" must name a reason the game can check: "too tired" only when energy is actually below the low mark, "at work" only when away at work, "you asked three times in three hours" only when nagging was counted, "does not like you" only when the relationship is below -50, "doesn't feel like it" only when the roll lost AND no stronger reason applied. |
+| Child told to come home | Because a child under 13 must be home by 21:00; worse only if ignored (told off, a small friendship cost). |
+
+#### R8.4 Child and teen pawns
+
+An heir can be 8. Rules (one line in S7, one test file):
+- Child (about 7 to 12): school by order (`go_to_school`; missing it is truancy with a school note, not a job penalty); no job; cannot use adult-only interactions (the `age_stage_is` tests that exist in the data; whether the stove is already closed to children is NOT verified and needs a check); cannot spend the household's money except on food and small things (whether `ShopBuy` has an age rule is NOT verified); parents are NPCs who feed, scold ("come home", "bedtime") and may refuse the child's asks with real reasons.
+- Teen: school by order, a part-time job by order (`bank.json` teen_job 15:00 to 19:00), curfew prompts from parents, no marriage, no pregnancy.
+- Playable heir rule: babies and toddlers are never playable; a child or teen heir needs an NPC adult guardian in the household. With none, the existing nobody-left flow (relative takes them in, then the child lives in that household with NPC guardians) runs.
+- Test case in `pawn_child_test`: an 8-year-old heir with a parent present (school order works, job order refused with a reason, stove refused with a reason) and without (nobody-left prompt).
+
+### R9. Questions I still have for the owner (few)
+
+1. Eviction outcome: is "the bailiffs clear the flat and you must pay arrears plus a deposit to sign again" (Tier A) enough for the first release, with the night shelter in a later stage? My recommendation: yes.
+2. Home cooking: ingredients at 3 coins a meal (Proposal A, recommended) or free (B)?
+3. Is a free evening supper at the community hall acceptable as the "soup kitchen" floor, or should it be a worse deal (a queue, a small mood penalty "embarrassed")?
+4. Is moving to a better flat or a house a must for the first release (S9, highest unknown) or can the first release end at "own a computer and a kitchen"?
+
+---
+
+# Revision 1 (task 35), edited where Revision 2 overrides it
+
+The owner's rule, restated so the plan can be checked against it (still true in Revision 2; the pawn is now simply the head of the local player's household, with no flag):
 
 - The player plays ONE folk (the "pawn") until that folk dies. No switching before death.
 - The pawn has NO autonomy: nothing happens to them unless the player ordered it. No need-driven picks, no idle fillers, no 14b outings, no 32c plans or reactions.
@@ -17,7 +302,7 @@ The owner's rule, restated so the plan can be checked against it:
 
 1. This is mostly a SUBTRACTION from the existing game, not a rewrite. Today's player household already runs on the same AI as the town. The whole job is: stop the AI from driving one folk, keep the body/world "consequence" rules that already exist, and give the player better tools to compensate (warnings, routines, requests, time skip).
 2. The most important design fact: every autonomous action of a folk ends up in ONE method, `Folk.enqueue(inter)` (`scripts/sim/folk.gd`), except the autonomy pick in `SimDirector._fill` (`scripts/sim/director.gd`) which calls `Interaction.start()` directly. Two doors, not forty. I counted about 50 `enqueue` call sites in 25 files that are NOT the player's UI (BabyCare, DynLife, Commute, CareerShifts via Commute, fire, health, social gatherings, story visits, crowd, ...). One choke point plus an allowlist (below) catches all of them, and a leak test proves it.
-3. A single mode switch ("control mode: household | one") is cheap and worth keeping: the 345 existing test files and the hash baseline stay untouched in `household` mode, and players who like the old game keep it.
+3. REVISED (task 36): there is NO mode switch. One character is the only game (R1). The test files and the old hash baseline mostly stay untouched for a different reason: a pawn exists only where the `Players` table registers the local player, so most fixtures have no pawn (R5).
 4. Measured: leave a character completely alone and the existing safety net (bladder accident, pass-out, hunger collapse, housemate help, ambulance, hospital stay) already keeps them alive for 8+ game days with no reflex at all. See section 1. So "no autonomy" does not require any new survival AI. It requires WARNINGS.
 5. Estimate: about 14 agent-sessions (range 11 to 18), 9 stages, of which two pairs can run in parallel. Biggest risks: hidden dice-based incidents where the pawn is the actor (section 7.3), the routine (rules) UI scope, and tuning the skip speed.
 
@@ -210,6 +495,8 @@ Also record the "leave alone" table of section 1.1 per difficulty so the timings
 
 ## 4. Q4 - The household: requests
 
+REVISED (task 36): the game starts with ONE adult living alone, so this section matters only once somebody moves in (a partner, a child, a roommate). It is stage S8, lower priority than the solo loop. The family strip is hidden while the pawn lives alone.
+
 ### 4.1 No switching before death
 
 The HUD folk row (`hud.gd`: `rebuild_folk_row`, `select_folk`, `_on_selection_changed`) lets you select any household member today, and clicking a same-household folk selects them. In `one` mode:
@@ -267,6 +554,8 @@ Fits well and gets simpler: each player has one pawn (`Players.table[pid].head`,
 
 ## 6. Q6 - UI
 
+REVISED (task 36): read the right-hand column as "the only game", not "one mode". The household strip, folk-row lock and heir dialog are unchanged; the New Game, creator and Start picker rows are replaced by R6.
+
 | Part | Today | In `one` mode |
 |---|---|---|
 | Camera | follows the selected folk on the big map (`LotView`, `focus_on`) | follows the pawn always; a "free look" key temporarily detaches and snaps back on any order |
@@ -285,17 +574,17 @@ Fits well and gets simpler: each player has one pawn (`Players.table[pid].head`,
 
 ## 7. Q7 - What changes in existing systems (complete list)
 
-### 7.1 The mode, the choke point, the helper
+### 7.1 The pawn helper, the choke point (REVISED task 36: there is no mode)
 
 New, small, each under 300 lines:
-- `Pawn` (`scripts/systems/pawn.gd`): `mode` ("household" | "one"), `of(player_id)`, `is_pawn(folk)`, `acts_alone(folk)` (= mode household, or not the pawn), `need_mult(folk)`. Saved in `Scenario.to_dict()` as `control` (default "household" for old saves). No `SaveLoad.VERSION` bump: additive.
+- `Pawn` (`scripts/systems/pawn.gd`): `of(player_id)` (the head from the `Players` table; -1 when no player is registered), `is_pawn(folk)`, `acts_alone(folk)` (= not the pawn), `need_mult(folk)`. REVISED (task 36): no `mode` field, nothing saved for it; a temporary build constant `Pawn.ENFORCE` is allowed until S3 (R1). No `SaveLoad.VERSION` bump: additive.
 - `Reflexes` (small): reads `origin` from the interaction def and the difficulty grace; `PawnLeaks` (counter of blocked enqueues for the debug UI and the leak test).
 - `PawnWarn`, `PawnRules` + `PawnRulesRun`, `Requests` + `RequestOdds` + `RequestCmd`, `TimeFlow` (solo skip, shares the logic with `CoopTime`).
 - Data: `data/control.json` (reflex graces, warning thresholds, rule caps, ask numbers, skip budget), `data/requests.json`, `data/rule_templates.json`, ladder keys in `data/scenarios.json`.
 - UI: `routines_panel.gd`, `ask_menu.gd`, `household_strip.gd`, `warn_banner.gd`, `agenda_card.gd`, `heir_dialog.gd`.
 - Save: new block `systems.pawn` (rules, pending asks, warn state, afk) AND its key added to `town_system_keys` in `data/share_schema.json` (`share_town_test` catches a miss).
 
-The enforcement line: `Folk.enqueue` returns without queuing when `Pawn.is_pawn(self)` and `inter.player` is false and `Reflexes.origin_of(inter) == "choice"`. `SimDirector._fill` returns before `Autonomy.choose` for the pawn. `Autonomy.choose` itself also returns `{}` for the pawn (defence for debug UI/tests).
+The enforcement line (REVISED: always on once `Pawn.ENFORCE` is gone): `Folk.enqueue` returns without queuing when `Pawn.is_pawn(self)` and `inter.player` is false and `Reflexes.origin_of(inter) == "choice"`. `SimDirector._fill` returns before `Autonomy.choose` for the pawn. `Autonomy.choose` itself also returns `{}` for the pawn (defence for debug UI/tests).
 
 ### 7.2 Systems to change, one by one
 
@@ -307,8 +596,8 @@ The enforcement line: `Folk.enqueue` returns without queuing when `Pawn.is_pawn(
 | `DynLife`, `DynPlans`, `DynReact`, `DynSocial` (32c) | hourly plans, reactions, family dinner, friends over for all residents | `DynLife.people()` excludes the pawn as ACTOR. Reactions: pawn is never made to look out of the window. Social: the buff and the invite become SUGGESTION toasts to the pawn (4.2). | `dyn_life_test` assumes household members get plans (household mode only) |
 | `PlaceAuto*` (14b: `place_auto.gd`, `_plan`, `_gate`, `_now`, `_trip`, `_time`, `_townies`) | plans outings for all residents, illness and pets hourly | `PlaceAuto.on_day` skips the pawn; `PlaceAutoNow.on_hour` illness/pet care skips the pawn (replaced by warnings); the Town window (`LifeCommand`) is the pawn's way, unchanged | Q: pets (see unknowns) |
 | `BabyCare` / `ChaosNeglect` / `ChildServices` | `assign_care` picks caregivers incl. the player's folk and pulls them off their own thing | `caregivers_for` excludes the pawn; babies still get cared for by NPC adults; if the pawn is alone with a baby the timeline of neglect (6 h warn, 12 h removal) applies with earlier Amber warnings | `baby_night_feed_test`, `systems_family_baby_test` are household tests, unchanged |
-| `Homemaker` (`homemaker.gd`) | role: no job, autonomy bonus for chores, a daily free cleaning/fridge bonus and kid bonus | NPC homemakers unchanged. Pawn: the role only means "no job"; no free daily bonus (it is invisible autonomy) | open question 4 |
-| `AutoFurnish` (32f) + `HomeBare` | buys basics for a player household nobody orders for 2 days; `HomeBare` also sends folk out (`out_gain`) | pawn household: off in `one` mode (it would buy on the pawn's behalf). `HomeBare` gains in DynPlans/PlaceAuto are moot for the pawn; kept for NPCs | `auto_furnish_test` is household-only |
+| `Homemaker` (`homemaker.gd`) | REVISED (task 36): see R6 (kept for NPCs; no pawn entry). Was: role: no job, autonomy bonus for chores, a daily free cleaning/fridge bonus and kid bonus | NPC homemakers unchanged. Pawn: the role only means "no job"; no free daily bonus (it is invisible autonomy) | open question 4 |
+| `AutoFurnish` (32f) + `HomeBare` | REVISED (task 36): `AutoFurnish` is REMOVED, `HomeBare` kept for NPCs (R6). Was: buys basics for a player household nobody orders for 2 days; `HomeBare` also sends folk out (`out_gain`) | pawn household: off in `one` mode (it would buy on the pawn's behalf). `HomeBare` gains in DynPlans/PlaceAuto are moot for the pawn; kept for NPCs | `auto_furnish_test` is household-only |
 | `Commute`, `CareerShifts`, `SkipRules`, `Away` (school) | leaves for work/school automatically at `lead_hours`; "chooses to skip" is a dice roll when the player has queued something | pawn: no automatic dispatch. New commands `go_to_work` / `go_to_school` call the same `Commute.begin`; the shift_leave rule calls it on time; no order and no rule = missed shift (existing penalty path). `SkipRules.chooses_to_skip` is bypassed for the pawn (the player decides). The walk home after the shift stays part of the trip order | `commute_test`, `commute_longrun_test`, `city_commute_test`, `bldg_commute_test`, `commute_factory_test` assume automatic dispatch (household mode only) |
 | `Careers` auto job search (`seeking`, offers) | offers arrive; accept is a player command already | offers fine. Auto-accept anywhere? (check `Careers` for NPC-only auto accept) | verify |
 | `StoryPacing`, `StoryThreads`, `StorySingles`, `Straying`, `OpportunityTaker` | per-household drama calming, nudged dates, move-ins | key stays the household (the pawn's), but `StorySingles` should nudge the PAWN and circle, not every single adult in the house; `Straying`/`StoryPacing.interaction_mult` act on NPC autonomy only | `story_pacing_test` (23 files reference StoryPacing) unchanged in household mode |
@@ -331,6 +620,8 @@ The `Folk.enqueue` choke point does not see incidents that change state directly
 
 ### 7.4 Tests
 
+REVISED (task 36): superseded by R5 (counts redone; 80 real sim-driving test files, about 32 need edits, about 3 are deleted, a pawn hash baseline is added). The text below is the Revision 1 reasoning for a flag and no longer applies.
+
 - Test-like files: 345 (334 `*_test.gd` plus `sim_*` and `world_*`). 117 of them drive the real clock, `SimDirector` or autonomy (grep for `tick_minute`, `HoodKit`, `advance_minutes`, `autonomy_enabled`, `Autonomy.choose`, `sim_testkit`); 25 use `HoodKit`, 29 the sim test kit, 52 call `advance_minutes`. These ASSUME an autonomous player household and must keep passing.
 - With the mode default `household` in `Pawn` and in `TestFixture.reset()`/`SystemsManager.reset_all()`, none of them changes. Only 3 files call `NewGame.start` (`start_difficulty_test`, `start_scenarios_test`, `start_kit`) and about 45 shot/probe scripts call `start_new_game` (not in the tiers). So: expected edits to existing tests, 0 to 3 files (the New Game option row).
 - Do NOT plan to run the 117 sim tests in `one` mode: they assert autonomous behaviour and would fail by design. Write dedicated tests instead (about 14 files, section 9). Add `tests/run_all.gd -- --control=one` only for that dedicated set.
@@ -340,6 +631,8 @@ The `Folk.enqueue` choke point does not see incidents that change state directly
 ---
 
 ## 8. Q8 - Difficulty ladder (Easy, Normal, Hard)
+
+REVISED (task 36): the start rows (coins, rent, bed, wages, prices, odd jobs, notice) are replaced by R3; the storyteller, hospital, grace, estate and ask rows below stay. Normal is already difficult, so every number below that says "Normal" is the baseline for "just feasibly get by".
 
 Existing: `data/scenarios.json` `difficulties` relaxed/normal/hard with `funds_mult` 1.5/1.0/0.7, `bill_mult` 0.8/1.0/1.3, `need_mult` 0.8/1.0/1.2, read by `Scenario`. Rename the label "Relaxed" to "Easy" (id stays so saves load). Storyteller personality (`data/storyteller.json`: calm, classic, chaotic) and the sliders already exist and become the ladder's defaults, still overridable ("Custom").
 
@@ -372,6 +665,8 @@ Proposed starting numbers (all data; tune with section 3.4 and with `storyteller
 
 ## 9. Stage plan, deliverables, tests, estimate and risks
 
+REVISED (task 36): SUPERSEDED by R4 (no flag, new start work, about 20.5 sessions). Kept for history; stage names differ.
+
 One agent-session = a focused work block like the recent tasks (design in hand, tests, report). Estimates include tests and the fast tier staying near its current time.
 
 | Stage | Deliverable | Tests (new, fast tier unless noted) | Sessions | Risks |
@@ -393,25 +688,15 @@ Order and parallelism: S0 -> S1 -> (S2) -> (S3 and S4 in parallel) -> (S5 and S6
 
 ## 10. One feature flag: keep the old game alive?
 
-Yes, and I recommend it. `Pawn.mode` = `household` (today's game, "Classic") or `one`. Per-game, chosen in New Game, saved in the save (`scenario.control`), readable by co-op host (host's choice for the whole session, shown in the lobby). Everything in section 7 is a guarded branch behind `Pawn.acts_alone(f)` / `Pawn.mode == "one"`, so with `household` the code path is today's code path (the hash baseline is the proof).
-
-What it buys:
-- Existing tests: 345 files unchanged, nothing to rewrite, nothing to re-baseline.
-- Players who prefer the household game keep it. Old saves load as `household`.
-- You can ship `one` as an option first and flip the default after the playtest (S8).
-
-What it costs:
-- Two behaviours to keep alive; every new feature must say what it does for the pawn (add it to the PR checklist: "pawn mode: ?").
-- Balance data split by mode (`data/control.json` keeps pawn numbers separate from the household ones).
-- A small chance of `household`-only bugs hiding behind `one`-mode work: mitigated by the hash baseline and by running the whole fast tier in `household` mode as today.
-
-I do not recommend running the sim tests in both modes (they assert autonomy). Instead the 14 dedicated tests cover `one`.
+REVISED (task 36): NO. The owner decided that one-character play is the game, not a mode. There is no `Pawn.mode`, no Classic game and no New Game choice. The reasons Revision 1 gave for a flag (existing tests untouched, players who like the old game keep it, ship as an option first) are answered differently: tests by the no-pawn-without-a-player rule (R1, R5), and the old household game is simply dropped (R6). Revision 1 text deleted to keep the file readable; the git history has it.
 
 ---
 
 ## 11. Recommendation
 
-Build it, as a mode, in the order above, and decide the default only after S8.
+REVISED (task 36): build it as THE game, in the order of R4, with the start economy of R2. The Revision 1 recommendation below said "as a mode, decide the default after S8"; read it without those words.
+
+Build it, in the order of R4.
 
 - Do: one pawn, hard "no autonomy" with the `Folk.enqueue` choke plus a data allowlist; keep today's body/world consequences (collapse, pass-out, accidents, ambulance, hospital, jail) as the safety net; fire/disaster flee with a pause and a grace window; literal routines (cap 8); asking family with explainable odds; solo auto time skip; difficulty ladder as in section 8; the household as real NPCs.
 - Do not: add any "default behaviour" for the pawn (no auto-eat, no auto-bed, no auto-work, no idle fillers). If the player does not want to micromanage, routines are the answer.
@@ -421,6 +706,8 @@ Build it, as a mode, in the order above, and decide the default only after S8.
 ---
 
 ## 12. Open questions for the owner
+
+REVISED (task 36): the reviewer answered these as defaults (`coord/messages/2026-10-22T1645-reviewer-36-owner-one-mode.md`, point 7). My view of each default is in R7; question 10 (default for new games) is moot; what is still open is R9.
 
 1. Routines (section 2): are literal player-written routines inside your "no autonomy" rule? If you want them restricted, which level: Off, Time-based only, or Full (my default)?
 2. Danger reflex: if the player does not react, should the pawn still run out of a fire after the grace window (my proposal), or should the game only pause and warn and let the pawn burn if ignored?
@@ -444,6 +731,10 @@ Build it, as a mode, in the order above, and decide the default only after S8.
 - Counts: grep of `tests/*.gd` (see 7.4); `Interaction.create`/`enqueue` sites in `scripts/` (see 7.1).
 - Time costs: `docs/PERFORMANCE.md` (budgets 20 ms per game minute; 22 ms today; big town about 38 ms), `scripts/net/coop_time.gd` (SKIP_RATE 45, COOP_MAX_PER_FRAME 6), `scripts/core/clock.gd` (MIN_PER_SEC 0/1/4/12).
 
+- Revision 2 probe (task 36): `NewGame.start` through `tests/start_kit.gd` (solo, `home_state: empty`, world seed 4242), then 14 game days with `SimDirector.autonomy_enabled = false`, sampled daily. Printed: starting coins 5,500; owned objects (2 doors, 10 windows, 3 pendant lights, a mailbox); `Economy.compute_bill` 128 (power 38, water 32, internet 26, rates 32); home property value 16,930 and market rent 203; object prices; need start values and daily decay; coins fell to 3,600 on day 2 (`AutoFurnish`, 1,900). Not committed (design task). Weekly-budget and bot timelines in R2.5 are Python arithmetic, not game runs.
+
 ## Appendix B - Files read for this design
 
-`CLAUDE.md`, `ARCHITECTURE.md`, `docs/INCIDENT_AGENT_BRIEF.md`, `docs/PERFORMANCE.md`, `docs/COOP.md`, the owner message; `scripts/sim/` (`director`, `autonomy`, `circadian`, `folk`, `interaction`, `commands`, `command_actions`, `tiers`); `scripts/systems/` (`players`, `succession`, `heir_line`, `dyn_life`, `dyn_plans`, `dyn_react`, `dyn_social`, `place_auto`, `baby_care`, `auto_furnish`, `homemaker`, `commute`, `career_shifts`, `skip_rules`, `story_pacing`, `story_singles`, `straying`, `storyteller*`, `health_collapse`, `fire_folk`, `scenario`, crime files for `is_player`); `scripts/net/` (`coop_time`, `coop_commands`); `scripts/ui/hud.gd`; `data/needs.json`, `data/scenarios.json`, `data/storyteller.json`, `data/storyteller_cards.json`, `data/incidents/02_needs_health.json`, `data/interactions.json`.
+Revision 2 added: `docs/ECONOMY.md`, `scripts/systems/` (`new_game`, `scenario`, `start_home`, `home_bare`, `household_setup`, `auto_furnish`, `economy`, `utility_bills`, `housing_props`, `housing_rent`, `housing_agent`, `player_lots`, `careers`, `job_seeking`, `opportunity_taker`, `edu_jobs`, `career_progress`, `hospital`), `scripts/ui/` (`start_picker`, `household_creator`, `life_hub_jobs`, `interaction_query`), `scripts/sim/autonomy.gd` (`_folk_self_defs`), `data/` (`scenarios`, `start_home`, `economy`, `housing`, `bank`, `careers`, `objects`, `interactions`, `life/30_food`, `life/40_culture`, `life/50_media`, `incidents`, `incidents/07b_chaos_more`, `incidents/13_economy`, `city`), `tests/` (`fixture`, `hood_kit`, `start_kit`, hash baseline files, grep counts).
+
+Revision 1: `CLAUDE.md`, `ARCHITECTURE.md`, `docs/INCIDENT_AGENT_BRIEF.md`, `docs/PERFORMANCE.md`, `docs/COOP.md`, the owner message; `scripts/sim/` (`director`, `autonomy`, `circadian`, `folk`, `interaction`, `commands`, `command_actions`, `tiers`); `scripts/systems/` (`players`, `succession`, `heir_line`, `dyn_life`, `dyn_plans`, `dyn_react`, `dyn_social`, `place_auto`, `baby_care`, `auto_furnish`, `homemaker`, `commute`, `career_shifts`, `skip_rules`, `story_pacing`, `story_singles`, `straying`, `storyteller*`, `health_collapse`, `fire_folk`, `scenario`, crime files for `is_player`); `scripts/net/` (`coop_time`, `coop_commands`); `scripts/ui/hud.gd`; `data/needs.json`, `data/scenarios.json`, `data/storyteller.json`, `data/storyteller_cards.json`, `data/incidents/02_needs_health.json`, `data/interactions.json`.

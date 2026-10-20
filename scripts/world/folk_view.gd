@@ -202,7 +202,9 @@ func _apply_pose(f, delta: float) -> void:
 	if _anim != null:
 		var played := _resolve_clip(wanted)
 		_play_clip_name(played)
-		FolkProps.update(self, (_partner_inter if _social_target(f) else f.current) if (_is_running(f) or _social_target(f)) else null, played)
+		var shown: Variant = (_partner_inter if _social_target(f) else f.current) if (_is_running(f) or _social_target(f)) else null
+		FolkProps.update(self, shown, played)
+		FolkFx.update(self, shown, played)
 		_anim.speed_scale = _anim_speed(wanted)
 		position.y = _ybase + (_elev + _sit_lift() if pose in ["sit", "lie"] else 0.0)
 		return

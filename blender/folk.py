@@ -631,6 +631,8 @@ CYCLIC = {  # name: (frames, fn)
     "Shower": (72, shower), "ToiletSit": (96, toilet_sit), "Swim_idle": (48, swim_idle),
     "Baby_Idle": (48, baby_idle), "Baby_Crawl": (32, baby_crawl),
 }
+from folk_action_poses import make as _make_action_poses   # task 33: watering, mopping, repairing, phone, ...
+CYCLIC.update(_make_action_poses(dict(Pose=Pose, sn=sn, cs=cs, pos=pos, sit_base=sit_base, TAU=TAU, PI=PI)))
 ONESHOT = {"Faint": faint_keys, "Fall": fall_keys}
 CLIP_NAMES = list(CYCLIC) + list(ONESHOT)
 
