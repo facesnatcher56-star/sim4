@@ -358,7 +358,9 @@
     "floor_dirt": 0.12,
     "stain_chance": 0.05,
     "stain_color": "#3a2f25",
-    "corner_dark": 0.1
+    "corner_dark": 0.1,
+    "shader_classes": ["wall", "wood"],
+    "wall_base": 0.12
    },
    "env": {
     "night_sky": "#05070f",

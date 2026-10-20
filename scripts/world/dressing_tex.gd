@@ -9,6 +9,8 @@ static var _cache: Dictionary = {}
 static func tex(name: String) -> ImageTexture:
 	if _cache.has(name):
 		return _cache[name]
+	if GraffitiTex.is_tag(name):           # task 41a: tags with outline, fill, highlight and shadow
+		return GraffitiTex.tex(name)
 	var rng := RandomNumberGenerator.new()
 	rng.seed = name.hash()
 	var img := Image.create(384 if name.begins_with("graffiti") else 256, 144 if name.begins_with("graffiti") else 256, false, Image.FORMAT_RGBA8)
@@ -19,6 +21,9 @@ static func tex(name: String) -> ImageTexture:
 		"grime": _blotch(img, rng, Color(0.05, 0.05, 0.04), 0.75)
 		"peel": _peel(img, rng)
 		"worn_mark": _blotch(img, rng, Color(0.18, 0.19, 0.21), 0.95)
+		"dead_grass": _blotch(img, rng, Color(0.4, 0.31, 0.17), 0.92)
+		"dirt_patch": _blotch(img, rng, Color(0.27, 0.2, 0.13), 0.9)
+		"oil": _blotch(img, rng, Color(0.03, 0.03, 0.035), 0.8)
 		"graffiti_a": _graffiti(img, rng, [Color(0.85, 0.15, 0.2), Color(0.95, 0.95, 0.9), Color(0.05, 0.05, 0.06)])
 		"graffiti_b": _graffiti(img, rng, [Color(0.15, 0.55, 0.85), Color(0.95, 0.8, 0.1), Color(0.05, 0.05, 0.06)])
 		"chainlink": _chainlink(img)

@@ -12,6 +12,7 @@ const PATH := "res://data/district_dressing.json"
 
 var _lights: Array = []          # {node, base, mode, phase}
 var _origin := Vector2.ZERO
+var _size := Vector2(32, 24)       # lot size in tiles (windows of this rect belong to the lot)
 var _t := 0.0
 var _mats: Dictionary = {}
 
@@ -37,6 +38,7 @@ static func apply(lv: Node3D, lot_id: String, groups: Array) -> DistrictDressing
 			reg = r
 	var o: Vector2i = (reg["rect"] as Rect2i).position
 	dd._origin = Vector2(o)
+	dd._size = Vector2((reg["rect"] as Rect2i).size)
 	var d := data().get("groups", {}) as Dictionary
 	for g in groups:
 		for item in (d.get(g, []) as Array):
@@ -54,6 +56,17 @@ func _process(delta: float) -> void:
 			if fmod(_t * 0.7 + ph, 4.0) > 3.55:
 				f *= 0.1                       # a dead moment
 			n.light_energy = float(l["base"]) * clampf(f, 0.0, 1.0)
+
+
+## For WearLot: a bare instance placed on a lot (no groups), to reuse `_boards`.
+func setup_for_lot(lot_id: String) -> void:
+	var rc := NeighborhoodLots.rect_of(lot_id)
+	_origin = Vector2(rc.position)
+	_size = Vector2(rc.size)
+
+
+func add_boards(it: Dictionary) -> void:
+	_boards(it)
 
 
 func _w(x: float, z: float) -> Vector2:
@@ -205,38 +218,17 @@ func _box(it: Dictionary) -> MeshInstance3D:
 
 func _litter(it: Dictionary) -> void:
 	var a: Array = it["area"]
-	var rng := RandomNumberGenerator.new()
-	rng.seed = int(it.get("seed", 3))
-	var cols := ["#c9c4b8", "#8a6d3b", "#b0302a", "#d8d2a0", "#4f6c8a", "#e8e8e8"]
-	for i in int(it.get("count", 20)):
-		var sz := rng.randf_range(0.1, 0.28)
-		_box({"pos": [rng.randf_range(float(a[0]), float(a[2])), rng.randf_range(float(a[1]), float(a[3]))], "size": [sz, 0.02 + rng.randf() * 0.05, sz * rng.randf_range(0.5, 1.2)],
-			"color": cols[rng.randi() % cols.size()], "yaw": rng.randf() * 180.0, "y": 0.02})
+	var w0 := _w(float(a[0]), float(a[1]))
+	var w1 := _w(float(a[2]), float(a[3]))
+	WearProps.build(self, WearProps.litter([w0.x, w0.y, w1.x, w1.y], int(it.get("count", 20)), int(it.get("seed", 3))), "Litter")
 
 
+## A neglected yard (WearYard): clusters of grass of mixed height, weeds, brown and dead patches; `tufts` is the clump count, `dead` the dead patches.
 func _weeds(it: Dictionary) -> void:
 	var a: Array = it["area"]
-	var rng := RandomNumberGenerator.new()
-	rng.seed = int(it.get("seed", 5))
-	var cols := ["#6b7340", "#7b7a3c", "#5d6a38", "#8a7a45"]
-	for i in int(it.get("tufts", 0)):            # overgrown yard: big dry grass tufts of the outdoor kit
-		var tp := _w(rng.randf_range(float(a[0]), float(a[2])), rng.randf_range(float(a[1]), float(a[3])))
-		var tuft := _glb({"model": "outdoor/grass_tuft", "pos": [tp.x - _origin.x, tp.y - _origin.y], "yaw": rng.randf() * 360.0, "scale": rng.randf_range(1.8, 3.2),
-			"tint": ["#9a9450", "#7d8a48", "#a08a50"][rng.randi() % 3], "tint_mix": 0.7})
-	for i in int(it.get("count", 30)):
-		var h := rng.randf_range(0.25, 0.55)
-		var mi := MeshInstance3D.new()
-		var cm := CylinderMesh.new()
-		cm.top_radius = 0.0
-		cm.bottom_radius = rng.randf_range(0.05, 0.11)
-		cm.height = h
-		cm.radial_segments = 5
-		mi.mesh = cm
-		mi.material_override = _mat(Color(cols[rng.randi() % cols.size()]), 1.0)
-		var p := _w(rng.randf_range(float(a[0]), float(a[2])), rng.randf_range(float(a[1]), float(a[3])))
-		mi.position = Vector3(p.x, h * 0.5, p.y)
-		mi.rotation = Vector3(rng.randf_range(-0.25, 0.25), rng.randf() * TAU, rng.randf_range(-0.25, 0.25))
-		add_child(mi)
+	var w0 := _w(float(a[0]), float(a[1]))
+	var w1 := _w(float(a[2]), float(a[3]))
+	WearYard.build(self, [w0.x, w0.y, w1.x, w1.y], {"seed": int(it.get("seed", 5)), "clumps": int(it.get("tufts", 18)), "weeds": int(it.get("count", 20)), "dead_patches": int(it.get("dead", 1))})
 
 
 func _chainlink(it: Dictionary) -> void:
@@ -282,7 +274,7 @@ func _window_edge(o) -> Vector3i:
 func _boards(it: Dictionary) -> void:
 	var wins: Array = []
 	for o in World.all_objects():
-		if str(o.def_id) == "window" and o.level == 0 and Rect2(_origin, Vector2(32, 24)).has_point(Vector2(o.tile)):
+		if str(o.def_id) == "window" and o.level == 0 and Rect2(_origin, _size).has_point(Vector2(o.tile)):
 			wins.append(o)
 	wins.sort_custom(func(a, b): return a.tile.x + a.tile.y * 64 < b.tile.x + b.tile.y * 64)
 	var board: Array = (it.get("board", []) as Array).map(func(v): return int(v))      # JSON numbers are floats

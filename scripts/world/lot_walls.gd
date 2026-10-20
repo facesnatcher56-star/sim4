@@ -73,6 +73,8 @@ func _build_wall_chunk(c: Vector2i) -> void:
 		var visual := _make_wall_visual(kind)
 		node.add_child(visual["root"])
 		root.add_child(node)
+		if kind != "fence" and not Looks.is_reference():
+			WearShader.set_wear(node, WearWalls.wear_of_edge(e))       # task 41a: grime of the wall (base course, streaks, peeling, soot on the cut top)
 		if visual.has("leaf") and visual["leaf"] != null:
 			(entry["doors"] as Array).append({"leaf": visual["leaf"], "pos": node.position, "open": 0.0})
 		var pts: Array = [Vector2i(e.x, e.y), Vector2i(e.x + 1, e.y)] if horizontal else [Vector2i(e.x, e.y), Vector2i(e.x, e.y + 1)]
@@ -82,6 +84,16 @@ func _build_wall_chunk(c: Vector2i) -> void:
 		(entry["walls"] as Array).append({"node": node, "e": e, "kind": kind, "pos": node.position, "axis": 0 if horizontal else 1,
 			"scale": init_scale, "free": free_standing})
 	_wall_nodes[c] = entry
+
+
+## Task 41a: a lot's wear / poverty changed (WearLayer): re-set the grime of the built walls.
+func _refresh_wall_wear() -> void:
+	if Looks.is_reference():
+		return
+	for ch in _wall_nodes.values():
+		for w in ch["walls"]:
+			if w["kind"] != "fence":
+				WearShader.set_wear(w["node"], WearWalls.wear_of_edge(w["e"]))
 
 
 func _update_walls(delta: float) -> void:
