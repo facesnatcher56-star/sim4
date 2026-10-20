@@ -106,6 +106,7 @@ func _ready() -> void:
 	tracker = ScenarioTracker.new()      # 'Getting Started' checklist (top-left), only visible with a scenario
 	tracker.goals_requested.connect(func(): goals_dialog.toggle_for(selected_folk_id))
 	add_child(tracker)
+	tips.tracker = tracker      # the tips stack under the checklist in the left column
 	var coop_hud := CoopHud.new()      # pace / why time is skipping / pause vote / alerts / name tags; invisible outside a co-op session
 	coop_hud.hud = self
 	add_child(coop_hud)
@@ -479,6 +480,8 @@ func _update_speed_buttons() -> void:
 
 func _on_build_mode(on: bool) -> void:
 	build_button.set_pressed_no_signal(on)
+	if lot_view != null:
+		lot_view.set("build_mode", on)       # wall-hung things (windows, doors) can be picked while building
 	pie.close()
 	if on:
 		prev_speed = maxi(UIU.get_speed(), 1)

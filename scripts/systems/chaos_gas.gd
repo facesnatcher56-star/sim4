@@ -81,7 +81,7 @@ static func _evacuate(hid: int, rec: Dictionary, folk: Array) -> void:
 				out[int(h.id)] = true
 		if not bool(rec["called"]):
 			rec["called"] = true
-			SimEnv.emit("thought", int(runner.id), "Everybody out! I'll call the gas company.")
+			ThoughtVoice.urgent(int(runner.id), "Everybody out! I'll call the gas company.")
 			ChaosClock.hire_gas(hid, true)
 
 static func _run(f, hid: int) -> void:
@@ -94,7 +94,7 @@ static func _run(f, hid: int) -> void:
 	var w := Interaction.create("watch_fire", f, -1, false)
 	if w != null:
 		f.enqueue(w)
-	SimEnv.emit("thought", int(f.id), "Get out, it's gas!")
+	ThoughtVoice.urgent(int(f.id), "Get out, it's gas!")
 
 static func inside(hid: int, rec: Dictionary) -> Array:
 	return _folk_of(hid).filter(func(f): return not (rec["out"] as Dictionary).has(int(f.id)))

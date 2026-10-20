@@ -1,6 +1,9 @@
 class_name FirstRunTips
 extends PanelContainer
-## Short, dismissible welcome tips shown once (flag stored in user://ui_prefs.cfg).
+## Short, dismissible welcome tips shown once (flag stored in user://ui_prefs.cfg). Docked in the top-left column UNDER the 'Getting Started'
+## checklist (never over the home in the middle of the screen). When the home started bare it then turns into a 'Next step' note that follows
+## what the household has bought (StartHome.next_basic: bed, toilet, fridge, shower, stove, seats) until the basics are covered.
+const WIDTH := 270.0
 const TIPS := [
 	"Click one of your Folk (the faces at the bottom-left) to see their needs and mood. Click a thing in the world to choose what they do with it.",
 	"Chosen tasks queue up along the bottom-left. Click a queued task to cancel it. Right-click the ground to send a Folk somewhere.",
@@ -10,53 +13,70 @@ const TIPS := [
 ]
 var index := 0
 var tips: Array = TIPS      # the active list (a scenario can bring its own)
+var title_label: Label
 var label: Label
 var next_btn: Button
+var skip_btn: Button
 var count_label: Label
+var basics_mode := false     # after the tips: follow the household's shopping list (bare-home start)
+var next_step_shown := false # the panel currently shows the 'Next step' note
+var tracker: Control         # the checklist this panel stacks under (set by the HUD)
 
 func _ready() -> void:
 	visible = false
-	anchor_left = 0.5
-	anchor_right = 0.5
-	anchor_top = 1.0
-	anchor_bottom = 1.0
-	offset_left = -230
-	offset_right = 230
-	offset_top = -170
-	offset_bottom = -14
-	grow_vertical = Control.GROW_DIRECTION_BEGIN
+	mouse_filter = Control.MOUSE_FILTER_STOP
+	anchor_left = 0.0
+	anchor_right = 0.0
+	anchor_top = 0.0
+	anchor_bottom = 0.0
+	offset_left = 12
+	offset_right = 12 + WIDTH
+	offset_top = 62
 	var v := VBoxContainer.new()
+	v.add_theme_constant_override("separation", 4)
 	add_child(v)
 	var head := HBoxContainer.new()
 	v.add_child(head)
-	var t := UIU.make_label("Welcome tips", 15, UITheme.ACCENT)
-	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	head.add_child(t)
+	title_label = UIU.make_label("Welcome tips", 15, UITheme.ACCENT)
+	title_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(title_label)
 	count_label = UIU.make_label("", 12, UITheme.MUTED)
 	head.add_child(count_label)
-	label = UIU.make_label("", 14)
-	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	label.custom_minimum_size = Vector2(420, 60)
-	v.add_child(label)
-	var row := HBoxContainer.new()
-	v.add_child(row)
-	var skip := Button.new()
-	skip.text = "Skip tips"
-	skip.pressed.connect(dismiss)
-	row.add_child(skip)
-	var sp := Control.new()
-	sp.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	row.add_child(sp)
 	next_btn = Button.new()
+	next_btn.flat = true
 	next_btn.pressed.connect(_next)
-	row.add_child(next_btn)
+	head.add_child(next_btn)
+	skip_btn = Button.new()
+	skip_btn.flat = true
+	skip_btn.text = "Skip"
+	skip_btn.tooltip_text = "Skip the welcome tips (Help brings them back)"
+	skip_btn.pressed.connect(dismiss)
+	head.add_child(skip_btn)
+	label = UIU.make_label("", 12)
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.custom_minimum_size = Vector2(WIDTH - 24, 0)
+	v.add_child(label)
+	UIU.connect_ev("game_event", _on_event)
 
 static func already_seen() -> bool:
 	return UIPrefs.get_flag("tips_seen", false)
 
+## Keep the panel in the left column, below the checklist (which grows and shrinks).
+func _process(_d: float) -> void:
+	if not visible:
+		return
+	var top := 62.0
+	if tracker != null and tracker.visible:
+		top = tracker.offset_top + tracker.size.y + 8.0
+	offset_top = top
+	offset_bottom = top + size.y
+
 ## Shows the tips unless the player has dismissed them before (force = ignore the flag). `list` = scenario-specific tips.
-func start(force: bool = false, list: Array = []) -> void:
-	if already_seen() and not force:
+## `basics` = the home started bare: keep a 'Next step' note after the tips (always shown for a bare start, even to a returning player).
+func start(force: bool = false, list: Array = [], basics: bool = false) -> void:
+	basics_mode = basics
+	next_step_shown = false
+	if (already_seen() and not force and not basics):
 		return
 	tips = list if not list.is_empty() else TIPS
 	index = 0
@@ -64,11 +84,18 @@ func start(force: bool = false, list: Array = []) -> void:
 	visible = true
 
 func _show() -> void:
+	next_step_shown = false
+	title_label.text = "Welcome tips"
+	skip_btn.visible = true
 	label.text = str(tips[index])
 	count_label.text = "%d / %d" % [index + 1, tips.size()]
 	next_btn.text = "Next" if index < tips.size() - 1 else "Got it"
 
 func _next() -> void:
+	if next_step_shown:
+		basics_mode = false
+		visible = false
+		return
 	if index >= tips.size() - 1:
 		dismiss()
 		return
@@ -76,5 +103,37 @@ func _next() -> void:
 	_show()
 
 func dismiss() -> void:
-	visible = false
 	UIPrefs.set_flag("tips_seen", true)
+	if basics_mode and _show_next_step():
+		return
+	visible = false
+
+## The shopping-list note: what to buy next, from the household's own belongings.
+func _show_next_step() -> bool:
+	var nb: Dictionary = StartHome.next_basic(Economy.primary_household())
+	if nb.is_empty():
+		return false
+	next_step_shown = true
+	visible = true
+	title_label.text = "Next step"
+	count_label.text = ""
+	label.text = str(nb["text"])
+	skip_btn.visible = false
+	next_btn.text = "Hide"
+	return true
+
+func _on_event(ev_name: String, _p: Dictionary) -> void:
+	if not next_step_shown or ev_name != "object_bought":
+		return
+	var nb: Dictionary = StartHome.next_basic(Economy.primary_household())
+	if nb.is_empty():
+		label.text = str(StartHome.cfg().get("done_text", "That is the basics covered."))
+		next_step_shown = false
+		basics_mode = false
+		title_label.text = "All set"
+		next_btn.text = "Got it"
+		skip_btn.visible = false
+		tips = [label.text]
+		index = 0
+	else:
+		label.text = str(nb["text"])

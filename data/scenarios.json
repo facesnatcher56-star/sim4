@@ -77,6 +77,7 @@
         {"id": "jobs", "label": "A parent finds work", "hint": "At the computer choose Look for Jobs and Accept the offer.",
           "check": {"jobs": 1}, "reward": {"coins": 200, "points": 30}},
         {"id": "fridge", "label": "Stock the fridge", "hint": "Click the fridge and choose Order Groceries.",
+          "label_no_fridge": "Buy a fridge and stock it", "hint_no_fridge": "Press B, buy a fridge, then click it and choose Order Groceries.",
           "check": {"event": "groceries_bought"}, "reward": {"coins": 100, "points": 20}},
         {"id": "school", "label": "Child goes to school", "hint": "On weekdays the child heads to school by themselves. Make sure they are rested and fed.",
           "check": {"event": "left_for_school"}, "reward": {"coins": 150, "points": 30}},

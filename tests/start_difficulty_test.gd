@@ -26,7 +26,7 @@ func _funds() -> void:
 	var amounts := {}
 	for start in ["small", "medium", "large", "classic"]:
 		Kit.new_game("solo", "normal")
-		NewGame.start(Kit.mgr, HouseholdSetup.make_household("solo"), start, {"scenario": "solo", "funds": Scenario.funds_for("solo", "normal")})
+		NewGame.start(Kit.mgr, HouseholdSetup.make_household("solo"), start, {"scenario": "solo", "funds": Scenario.funds_for("solo", "normal"), "home_state": "furnished"})
 		amounts[start] = Economy.balance(1)
 	_check(amounts.values().all(func(v): return v == 4000), "funds do not depend on home size: %s" % str(amounts))
 	for d in ["relaxed", "normal", "hard"]:

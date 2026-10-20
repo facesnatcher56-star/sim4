@@ -30,7 +30,7 @@ static func start(def_id: String, subj, immediate: bool = false) -> Dictionary:
 	var lead: int = int(w.get("lead_min", 0))
 	var ctx := {"subject": subj, "lot_key": subj.lot_key, "amount": 0}
 	if str(w.get("thought", "")) != "" and subj.folk != null:
-		SimEnv.emit("thought", int(subj.folk.id), str(w["thought"]))
+		ThoughtVoice.urgent(int(subj.folk.id), str(w["thought"]))
 	if lead > 0 and subj.is_full() and not immediate:
 		Incidents.pending.append({"id": def_id, "kind": subj.kind, "sid": subj.id, "lot_key": subj.lot_key, "due_min": SysUtil.now() + lead, "defused": false,
 			"help_min": SysUtil.now() + int(w.get("auto_help_min", 0)) if int(w.get("auto_help_min", 0)) > 0 else -1})

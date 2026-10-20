@@ -31,15 +31,20 @@ var why_toggle: CheckButton
 var tabs: TabContainer
 var mood_area: Control
 var _why_timer: Timer
+var expanded := false                  # compact by default (task 32d): the portrait, mood and need pips; click the header or Details to open everything
+var mini_box: HFlowContainer              # compact view: one thin bar per need
+var mini_bars: Dictionary = {}
+var details_btn: Button
+var goal_row: HBoxContainer
 
 func _ready() -> void:
-	custom_minimum_size = Vector2(360, 0)
+	custom_minimum_size = Vector2(320, 0)
 	var root := VBoxContainer.new()
 	add_child(root)
 	var head := HBoxContainer.new()
 	root.add_child(head)
 	portrait = FaceIcon.new()
-	portrait.custom_minimum_size = Vector2(64, 64)
+	portrait.custom_minimum_size = Vector2(48, 48)
 	head.add_child(portrait)
 	var hv := VBoxContainer.new()
 	hv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -56,12 +61,21 @@ func _ready() -> void:
 	mood_label.mouse_filter = Control.MOUSE_FILTER_PASS
 	mood_area.add_child(mood_label)
 	mood_area.mouse_filter = Control.MOUSE_FILTER_STOP
+	details_btn = Button.new()
+	details_btn.flat = true
+	details_btn.tooltip_text = "Show or hide needs, skills, people and goals"
+	details_btn.pressed.connect(func(): set_expanded(not expanded))
+	head.add_child(details_btn)
+	mini_box = HFlowContainer.new()
+	mini_box.add_theme_constant_override("h_separation", 4)
+	mini_box.add_theme_constant_override("v_separation", 3)
+	root.add_child(mini_box)
 	trait_box = HFlowContainer.new()
 	root.add_child(trait_box)
 	status_box = HFlowContainer.new()
 	status_box.name = "StatusChips"
 	root.add_child(status_box)
-	var goal_row := HBoxContainer.new()
+	goal_row = HBoxContainer.new()
 	root.add_child(goal_row)
 	goal_label = UIU.make_label("", 13, UITheme.MUTED)
 	goal_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -130,6 +144,8 @@ func _ready() -> void:
 	_why_timer.autostart = true
 	_why_timer.timeout.connect(_refresh_why)
 	add_child(_why_timer)
+	expanded = UIPrefs.get_flag("folk_panel_expanded", false)
+	set_expanded(expanded)
 	UIU.connect_ev("need_changed", _on_need_changed)
 	UIU.connect_ev("mood_changed", _on_mood_changed)
 	UIU.connect_ev("buff_added", _on_buff_event)
@@ -147,7 +163,8 @@ func show_folk(f) -> void:
 	folk_id = int(UIU.prop(f, "id", -1))
 	name_label.text = str(UIU.prop(f, "name", "?"))
 	portrait.color = portrait_color(f)
-	_build_needs()
+	_build_mini()
+	_build_needs()      # (fills the mini bars too)
 	_build_traits()
 	_build_status()
 	_build_skills()
@@ -215,6 +232,9 @@ func _update_need(nid: String, stat, raw_value = null) -> void:
 		var hi := float(UIU.prop(stat, "max", 100.0))
 		r = clampf((float(raw_value) - lo) / maxf(hi - lo, 0.001), 0.0, 1.0)
 	bar.value = r
+	if mini_bars.has(nid):
+		(mini_bars[nid] as ProgressBar).value = r
+		(mini_bars[nid] as ProgressBar).add_theme_stylebox_override("fill", UITheme.box(UIU.level_color(r), 3, Color(0, 0, 0, 0), 0, 0))
 	var num: Label = need_rows[nid].get_node_or_null("num")
 	if num != null:
 		num.visible = GameSettings.get_bool("need_numbers")
@@ -718,3 +738,42 @@ func _refresh_why() -> void:
 			lines.append("  %s  (score %.1f)" % [str(r.get("label", "?")), float(r.get("score", 0.0))])
 	why_label.text = "
 ".join(lines)
+
+# ---------------- compact / expanded (task 32d) ----------------
+## The panel starts compact so it does not cover the home: face, mood and a pip per need. Expanded = every tab as before.
+func set_expanded(on: bool) -> void:
+	expanded = on
+	UIPrefs.set_flag("folk_panel_expanded", on)
+	if details_btn != null:
+		details_btn.text = "Less" if on else "Details"
+	for n in [trait_box, goal_row, tabs]:
+		if n != null:
+			(n as Control).visible = on
+	if mini_box != null:
+		mini_box.visible = not on
+	custom_minimum_size = Vector2(360 if on else 320, 0)
+	size = Vector2(custom_minimum_size.x, 0)
+
+## One thin bar per need for the compact view; kept in step by _update_need.
+func _build_mini() -> void:
+	for c in mini_box.get_children():
+		c.queue_free()
+	mini_bars.clear()
+	var defs := UIU.tbl("needs")
+	for nid in UIU.prop(folk, "needs", {}):
+		var cell := VBoxContainer.new()
+		cell.add_theme_constant_override("separation", 0)
+		cell.tooltip_text = str((defs.get(nid, {}) as Dictionary).get("label", UIU.sentence(str(nid))))
+		var bar := ProgressBar.new()
+		bar.min_value = 0.0
+		bar.max_value = 1.0
+		bar.step = 0.001
+		bar.show_percentage = false
+		bar.custom_minimum_size = Vector2(36, 8)
+		bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		cell.add_child(bar)
+		var lab := UIU.make_label(str((defs.get(nid, {}) as Dictionary).get("label", UIU.sentence(str(nid)))).substr(0, 4), 10, UITheme.MUTED)
+		lab.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		cell.add_child(lab)
+		mini_box.add_child(cell)
+		mini_bars[nid] = bar

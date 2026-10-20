@@ -4,7 +4,6 @@ extends Control
 var lot_view = null
 var balloons: Array = []     # {node, folk_id}
 const MAX_BALLOONS := 5
-var _last: Dictionary = {}   # folk_id -> {text, t}
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -14,12 +13,7 @@ func _ready() -> void:
 func show_thought(folk_id: int, text: String) -> void:
 	if text.strip_edges() == "" or not GameSettings.get_bool("thought_bubbles"):
 		return
-	var now := Time.get_ticks_msec() / 1000.0
-	var prev: Dictionary = _last.get(folk_id, {})
-	if not prev.is_empty() and prev["text"] == text and now - float(prev["t"]) < ThoughtText.REPEAT_BLOCK_SEC:
-		return                   # same thought again and again is noise
-	_last[folk_id] = {"text": text, "t": now}
-	text = ThoughtText.vary(text)
+	# rate, variety and no-repeats are decided upstream (ThoughtVoice gate in SimEnv.emit), so every thought that arrives is shown
 	for b in balloons:
 		if b["folk_id"] == folk_id and is_instance_valid(b["node"]):
 			b["node"].queue_free()
@@ -48,11 +42,39 @@ func _process(_d: float) -> void:
 	balloons = balloons.filter(func(b): return is_instance_valid(b["node"]))
 	if lot_view == null or not lot_view.has_method("screen_pos"):
 		return
+	var items: Array = []
 	for b in balloons:
 		var pos = lot_view.call("screen_pos", "folk", b["folk_id"])
 		var n: Control = b["node"]
 		if pos is Vector2 and pos.x >= 0.0:
 			n.visible = true
-			n.position = pos + Vector2(-n.size.x / 2.0, -n.size.y - 8)
+			items.append({"id": b["folk_id"], "pos": pos + Vector2(-n.size.x / 2.0, -n.size.y - 8), "size": n.size, "node": n})
 		else:
 			n.visible = false
+	var placed := layout_rects(items)
+	for i in items.size():
+		items[i]["node"].position = placed[i]
+
+## View-only de-overlap: items {id, pos (top-left), size}. Returns top-left positions in the same order.
+## Balloons are processed by folk id (stable), each pushed up until it clears the ones already placed.
+static func layout_rects(items: Array) -> Array:
+	var order: Array = range(items.size())
+	order.sort_custom(func(a, b): return int(items[a]["id"]) < int(items[b]["id"]))
+	var out: Array = []
+	out.resize(items.size())
+	var placed: Array = []
+	for i in order:
+		var sz: Vector2 = items[i]["size"]
+		var p: Vector2 = items[i]["pos"]
+		var moved := true
+		var guard := 0
+		while moved and guard < 12:
+			moved = false
+			guard += 1
+			for r in placed:
+				if Rect2(p, sz).grow(2.0).intersects(r):
+					p.y = r.position.y - sz.y - 4.0
+					moved = true
+		out[i] = p
+		placed.append(Rect2(p, sz))
+	return out

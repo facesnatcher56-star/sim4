@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "notes": "New-game home state (task 32d). 'empty' strips the home lot of furniture and appliances (walls, doors, windows, floors, ceiling lights, the mailbox and the yard's pond/garden stay) and adds starter money by home size. Free Play and every scenario can use either. 'furnished' is the old start.",
+  "default": "empty",
+  "options": [
+    {"id": "empty", "label": "Empty home (furnish it yourself)", "desc": "Bare walls and floors plus extra coins for a bed, toilet, shower, fridge, stove and seats. Press B to buy."},
+    {"id": "furnished", "label": "Furnished home", "desc": "Move into a home that already has its furniture."}
+  ],
+  "keep_tags": ["structure", "door", "window", "ceiling"],
+  "keep_defs": ["mailbox", "fishing_spot", "garden_plot", "fire_extinguisher"],
+  "bonus_by_size": {"small": 1500, "medium": 2000, "classic": 2200, "large": 2500},
+  "bonus_default": 2000,
+  "basics": [
+    {"id": "bed", "defs": ["bed", "single_bed", "sofa_bed", "bunk_bed"], "per_folk": true, "text": "Buy a bed so your Folk can sleep properly: press B, open Bedroom, pick a bed and click a spot in the bedroom."},
+    {"id": "toilet", "defs": ["toilet"], "text": "Next, a toilet: press B, open Bathroom and place a Toilet in the bathroom."},
+    {"id": "fridge", "defs": ["fridge"], "text": "Now a fridge for food: press B, open Kitchen and place a Fridge. Then add a stove."},
+    {"id": "shower", "defs": ["shower", "bathtub"], "text": "A shower keeps everyone fresh: press B, open Bathroom and place a Shower."},
+    {"id": "stove", "defs": ["stove"], "text": "A stove lets your Folk cook: press B, open Kitchen and place a Stove."},
+    {"id": "seat", "defs": ["chair", "dining_chair", "sofa", "armchair", "bar_stool"], "per_folk": true, "text": "Everyone needs somewhere to sit: press B and add a chair or sofa."}
+  ],
+  "done_text": "That is the basics covered. Keep furnishing as your coins allow.",
+  "empty_tips": [
+    "This home is empty: your Folk will sleep on the floor and order in snacks until you furnish it. Press B to open Build / Buy.",
+    "Step one: buy a bed. Open Bedroom in the Build / Buy panel, pick a bed and click a spot in the bedroom.",
+    "Step two: a toilet, then a fridge. The Next Step note at the top-right tells you what to buy next.",
+    "Space pauses. Keys 1, 2 and 3 set the speed. Take your time: nobody is going hungry while you shop."
+  ],
+  "fallbacks_note": "Autonomy fallbacks live in data/interactions.json: sleep_floor (existing), welcome_snack, cafe_restroom."
+}

@@ -134,6 +134,15 @@ func object_shown(o) -> bool:
 	return o.span > 0 and viewed >= o.level and viewed <= o.level + o.span
 
 
+## The drawn node of an object on a viewed upper / lower floor (null when not drawn).
+func object_node(id: int):
+	for n in level_nodes.values():
+		var objs: Dictionary = n["objs"]
+		if objs.has(id):
+			return objs[id]
+	return null
+
+
 ## The shell of a building with this footprint must be open (we are looking inside a floor).
 func wants_open(rect: Rect2i) -> bool:
 	if building < 0 or viewed == 0:
@@ -290,25 +299,33 @@ func _sync_level(l: int, rc: Rect2i) -> void:
 	if sig != n["sig"]:
 		n["sig"] = sig
 		(n["floor"] as MeshInstance3D).mesh = LevelMesher.floors(World, l)
-		var centre := Vector2(rc.position) + Vector2(rc.size) * 0.5
 		var cut_mode: int = int(lot.get("wall_mode"))
 		var yaw_d: Vector3 = lot.call("_cam_dir")
 		var low := Callable()
 		if l == viewed and cut_mode != 0:
+			var wb := _wall_bounds(World.levels.layer(l, false))      # the far outer walls stay up, every other wall of the floor is cut
 			low = func(e: Vector3i) -> bool:
 				if cut_mode == 2:
 					return true
-				var horizontal: bool = e.z == 0
-				var comp: float = yaw_d.z if horizontal else yaw_d.x
-				var pos: float = (float(e.y) - centre.y) if horizontal else (float(e.x) - centre.x)
-				var rel: float = pos * signf(comp)
-				return absf(comp) > 0.25 and rel > -0.5
+				return not LotView.is_far_wall(e, wb, yaw_d)
 		var wm := LevelMesher.walls(World, l, low)
 		(n["walls"] as MeshInstance3D).mesh = wm[0]
 		(n["glass"] as MeshInstance3D).mesh = wm[1]
 	if int(n["obj_sig"]) != _objs_gen:
 		n["obj_sig"] = _objs_gen
 		_sync_objects(l, n)
+
+
+## Bounding rectangle of a layer's wall edges as LotView.is_far_wall wants it (position = smallest x / y, end = largest).
+func _wall_bounds(lay) -> Rect2i:
+	if lay == null or lay.walls.is_empty():
+		return Rect2i()
+	var lo := Vector2i(1 << 20, 1 << 20)
+	var hi := Vector2i(-(1 << 20), -(1 << 20))
+	for e in lay.walls:
+		lo = Vector2i(mini(lo.x, e.x), mini(lo.y, e.y))
+		hi = Vector2i(maxi(hi.x, e.x), maxi(hi.y, e.y))
+	return Rect2i(lo, hi - lo)
 
 
 func _sync_objects(l: int, n: Dictionary) -> void:

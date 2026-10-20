@@ -35,6 +35,7 @@ var show_names: bool = false:
 			fv.show_name = v
 
 var tool: String = "select"          # select | place | wall | floor | sell
+var build_mode: bool = false         # Build/Buy panel open (set by the HUD): wall-hung and ceiling things become pickable
 var tool_arg: String = ""
 var build_rot: int = 0
 var selected_kind: String = "none"
@@ -68,6 +69,11 @@ var _obj_nodes: Dictionary = {}      # object id -> Node3D
 var _folk_views: Dictionary = {}     # folk id -> FolkView
 var _walls: Array = []               # {node, e, kind, pos, axis, h}
 var _doors: Array = []               # {leaf, pos, open}
+var _shells: Dictionary = {}         # lot id -> {root, rect (tiles), open, lot, home, aabb, meshes, fade}: see lot_shells.gd
+var _shell_gen: int = 0              # bumped when the shells are rebuilt (walls re-find the building they belong to)
+var _wall_by_edge: Dictionary = {}   # wall edge (Vector3i) -> its entry in _walls (current cut scale for wall-hung picking)
+var _outlined: Dictionary = {}       # slot ("hover" | "sel") -> Node3D wearing an outline overlay
+var _outline_mats: Dictionary = {}   # slot -> StandardMaterial3D
 var _hl_box: MeshInstance3D
 var _hl_ring: MeshInstance3D
 var _sel_box: MeshInstance3D

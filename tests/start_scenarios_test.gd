@@ -114,7 +114,7 @@ func _sandbox() -> void:
 	_check(HouseholdSetup.validate(h) == "", "sandbox: six mixed-age Folk validate (%s)" % HouseholdSetup.validate(h))
 	Kit.new_game("sandbox", "normal", h.duplicate(true), 50000)
 	for start in ["small", "medium", "large", "classic"]:
-		var folk: Array = NewGame.start(Kit.mgr, h.duplicate(true), start, {"scenario": "sandbox", "funds": 50000})
+		var folk: Array = NewGame.start(Kit.mgr, h.duplicate(true), start, {"scenario": "sandbox", "funds": 50000, "home_state": "furnished"})
 		_check(SysUtil.residents().size() == 6, "sandbox on %s: 6 residents (%d)" % [start, SysUtil.residents().size()])
 		var seen := {}
 		for f in folk:

@@ -152,7 +152,7 @@ static func step(now: int) -> void:
 			continue
 		if not bool(a["warned"]) and now >= int(a["ignite_at"]) - 2 and int(a["culprit"]) >= 0:
 			a["warned"] = true
-			SimEnv.emit("thought", int(a["culprit"]), "Is something burning?")
+			ThoughtVoice.urgent(int(a["culprit"]), "Is something burning?")
 		if now >= int(a["ignite_at"]):
 			armed.erase(a)
 			if not start_now(str(a["source"]), int(a["hid"]), str(a["lot"]), int(a["culprit"]), int(a["obj"])):
