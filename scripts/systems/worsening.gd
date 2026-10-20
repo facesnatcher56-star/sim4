@@ -32,6 +32,13 @@ static func worsens(reason: String) -> bool:
 static func why(reason: String) -> String:
 	return str(cause(reason).get("why", ""))
 
+## Far townies in hospital: a slow ambulance only costs lives where waiting matters; a sprain or a cold is never fatal.
+static func townie_death_mult(reason: String) -> float:
+	var z: Dictionary = cause(reason)
+	if str(z.get("ambulance", "")) == "never":
+		return 0.0
+	return CityServices.death_mult() if bool(z.get("worsens", false)) else 1.0
+
 ## A person with a minor injury who keeps walking or working on it heals slower.
 static func strain_extra(f) -> float:
 	if f == null or f.current == null:

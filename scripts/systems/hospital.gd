@@ -165,7 +165,7 @@ static func _finish_townie(tid: int) -> void:
 	if t.is_empty() or p.is_empty():
 		return
 	t.erase("in_hospital")
-	if Incidents.rng.randf() < _by_sev("townie_death_chance", int(p["severity"]), 0.0) * CityServices.death_mult():      # task 12: slow ambulances cost lives
+	if Incidents.rng.randf() < _by_sev("townie_death_chance", int(p["severity"]), 0.0) * Worsening.townie_death_mult(str(p.get("reason", ""))):      # task 12: slow ambulances cost lives, but only where waiting matters (task 34)
 		Aging.kill(tid, "illness")
 	else:
 		Story._log("%s came home from hospital." % t["name"])

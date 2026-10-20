@@ -46,6 +46,8 @@ func run() -> Array:
 	bl["worsen_chance"] = keep_c
 	_check(int((Hospital.patients.get(int(ada.id), {}) as Dictionary).get("severity", 0)) == 3 and int(CityServices.stats.get("worsened", 0)) == 1, "bleeding got worse while waiting")
 	Hospital.discharge(int(ada.id))
+	# far townies: a slow ambulance is never fatal for a sprain, but it counts for a heart attack
+	_check(Worsening.townie_death_mult("a twisted ankle") == 0.0 and Worsening.townie_death_mult("a heart attack") == CityServices.death_mult(), "slow ambulances only cost far townies lives where waiting matters")
 	# walking on a sprain slows healing; resting does not
 	Health.heal(ada)
 	HealthInjury.injure(ada, 1, "a twisted ankle")
