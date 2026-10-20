@@ -119,7 +119,7 @@ func _update_sun(hour: float, dl: float, pos: float) -> void:
 	# ambient: cool and readable at night, bright and neutral by day, a touch richer when overcast (diffuse)
 	var amb_day: Color = Looks.ec("amb_day", Color(0.78, 0.8, 0.86))
 	var amb_night: Color = Looks.ec("amb_night", Color(0.2, 0.25, 0.46))
-	env.ambient_light_color = amb_night.lerp(amb_day, dl)
+	env.ambient_light_color = LightMood.ambient_color(amb_night, amb_day, dl, _nb())
 	var dim: float = lerpf(1.0, 0.72, clampf(1.0 - float(p["light"]), 0.0, 1.0) * 1.2)
 	var amb_dim: float = dim * float(LightMood.wet_mood(float(p["wet"]), 0.0)["dim"])
 	var snow_up: float = float(p["snowcover"]) * Looks.ef("snow_bounce", 0.0) * (1.0 - dl)       # snow bounces a little night light back up

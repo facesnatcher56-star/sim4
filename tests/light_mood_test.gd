@@ -23,7 +23,11 @@ func run() -> Array:
 	for nb in [0.0, 0.35, 0.7, 1.0]:
 		var e: float = LightMood.ambient_energy(night_look, 0.42, 0.0, 1.0, nb)
 		_check(e >= LightMood.floor_energy(nb) - 0.0001, "night ambient (setting %.2f) is at least the floor" % nb)
-		_check(e >= night_look - 0.0001, "the floor never darkens the look's own night")
+		_check(nb < LightMood.NB_DEFAULT or e >= night_look - 0.0001, "from the default up the setting never darkens the look's own night")
+		_check(e >= 0.05, "even true night keeps a floor (%.3f)" % e)
+	_check(is_equal_approx(LightMood.ambient_energy(night_look, 0.42, 0.0, 1.0, LightMood.NB_DEFAULT), night_look), "the default setting is the look's own night")
+	_check(LightMood.ambient_energy(night_look, 0.42, 0.0, 1.0, 0.0) < night_look * 0.5, "Night brightness 0 is a truer, darker night")
+	_check(LightMood.ambient_color(Color(0.13, 0.16, 0.27), Color.WHITE, 0.0, 1.0).b > 0.4 and LightMood.ambient_color(Color(0.13, 0.16, 0.27), Color.WHITE, 0.0, 0.35) == Color(0.13, 0.16, 0.27), "high Night brightness lifts the night colour, the default keeps it")
 	_check(LightMood.ambient_energy(0.05, 0.42, 0.0, 1.0, 1.0) >= 0.4, "a very dark look is lifted to the floor at full Night brightness")
 	_check(is_equal_approx(LightMood.ambient_energy(0.22, 0.42, 1.0, 1.0, 1.0), 0.42), "the floor does not touch full daylight")
 	_check(LightMood.ambient_energy(0.22, 0.42, 0.0, 0.5, 0.0) < LightMood.ambient_energy(0.22, 0.42, 1.0, 1.0, 0.0), "night is darker than day")

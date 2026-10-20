@@ -10,9 +10,22 @@ static func floor_energy(nb: float) -> float:
 	return lerpf(0.06, 0.40, clampf(nb, 0.0, 1.0))
 
 
+const NB_DEFAULT := 0.35        # the setting's default: the look's own night, untouched
+
+## How the setting scales the look's own night ambient: below the default it gets darker (down to 0.35x), above it the floor takes over.
+static func night_scale(nb: float) -> float:
+	return 1.0 if nb >= NB_DEFAULT else lerpf(0.35, 1.0, clampf(nb, 0.0, 1.0) / NB_DEFAULT)
+
+
+## Ambient colour: the look's night blue, drifting to a lighter neutral moonlit grey as Night brightness goes above its default (so the floor shows colour, not just grey).
+static func ambient_color(night_c: Color, day_c: Color, dl: float, nb: float) -> Color:
+	var lift := clampf((nb - NB_DEFAULT) / (1.0 - NB_DEFAULT), 0.0, 1.0) * 0.8
+	return night_c.lerp(Color(0.45, 0.5, 0.68), lift).lerp(day_c, clampf(dl, 0.0, 1.0))
+
+
 ## Ambient light energy: the look's own day / night blend, dimmed by overcast, but never below the readability floor at night.
 static func ambient_energy(night_e: float, day_e: float, dl: float, dim: float, nb: float) -> float:
-	var base := lerpf(night_e, day_e, clampf(dl, 0.0, 1.0)) * dim
+	var base := lerpf(night_e * night_scale(nb), day_e, clampf(dl, 0.0, 1.0)) * dim
 	return maxf(base, floor_energy(nb) * (1.0 - clampf(dl, 0.0, 1.0)))
 
 
