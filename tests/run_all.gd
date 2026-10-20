@@ -24,7 +24,7 @@ const SLOW := [
 const Watchdog := preload("res://tests/watchdog.gd")
 
 ## Seconds a file took on a quiet machine (2026-10-19); everything else counts as 2. Only used to balance the shards: a wrong guess costs balance, never correctness.
-const WEIGHT := {"coop_net_test.gd": 56, "cruise_needs_test.gd": 30, "romance_run_test.gd": 28, "townie_needs_test.gd": 25, "coop_skip_run_test.gd": 22,
+const WEIGHT := {"traffic_flow_test.gd": 36, "coop_net_test.gd": 56, "cruise_needs_test.gd": 30, "romance_run_test.gd": 28, "townie_needs_test.gd": 25, "coop_skip_run_test.gd": 22,
 	"circadian_test.gd": 16, "content_run_test.gd": 15, "determinism_test.gd": 14, "vacation_trip_test.gd": 13, "commute_test.gd": 12, "crowd_floor_test.gd": 11,
 	"hood_lots_test.gd": 11, "map_walk_test.gd": 10, "hood_travel_test.gd": 10, "weather_effects_test.gd": 10, "start_solo_run_test.gd": 9, "social_drama_test.gd": 9,
 	"bldg_gen_test.gd": 9, "map_lots_test.gd": 8, "coop_home_lot_test.gd": 8, "fire_survival_test.gd": 8, "vacation_life_test.gd": 7, "romance_autonomy_test.gd": 7,

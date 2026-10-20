@@ -68,7 +68,7 @@ static func audit(seconds: float, speed: int = 1) -> Dictionary:
 				var p: Vector2 = v["pos"]
 				var t := Vector2i(int(floorf(p.x)), int(floorf(p.y)))
 				var f: String = w.get_floor(t)
-				if f != "asphalt" and f != "crosswalk" and f != "sidewalk" and NeighborhoodLots.lot_at(t) == "":
+				if t.x >= 2 and t.y >= 2 and t.x < int(w.width) - 2 and t.y < int(w.height) - 2 and f != "asphalt" and f != "crosswalk" and f != "sidewalk" and NeighborhoodLots.lot_at(t) == "":
 					res["off_road"] += 1
 			for j in range(i + 1, vs.size()):
 				if VehicleSim.overlaps(v, vs[j]):

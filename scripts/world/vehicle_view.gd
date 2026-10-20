@@ -3,7 +3,8 @@ extends Node3D
 ## The vehicle layer (task 12b), added to the LotView by VehicleView.ensure_on(lot_view). VIEW ONLY: it reads the sim (Transport.active / cars, the bus timetable,
 ## VehicleFeed, folk positions, light outages) and draws cars, buses, taxis, emergency vehicles, tow trucks and bikes on the road graph; it never writes sim
 ## state and never draws from a sim rng (its dice are a local RandomNumberGenerator). Vehicles exist only near a focus (the camera, the players' folk): far trips
-## are just timings in the sim. At game speed 3 and above the layer is hidden (the folk it carries are shown again).
+## are just timings in the sim. At every game speed the vehicles stay drawn and move at the faster rate (data speed_scale). NOTHING appears or disappears on the picture:
+## spawn and removal only happen off screen (VehicleView.on_screen is the frustum of the camera plus a margin), at the map edge, into a bay or a garage.
 ## Parts: VehicleSim (movement), VehicleNodes (bodies), VehicleAmbient (parked and passing cars), VehicleTrips (riders of the players' trips),
 ## VehicleBuses (the timetable bus bodies), VehicleCalls (emergency units, crashes and the tow), VehicleSignals (traffic light heads).
 ##   view.advance(dt_real, speed)   one frame of work (also used by tests without a window)      view.sync()   the 0.4 s bookkeeping
@@ -19,14 +20,19 @@ var trips: VehicleTrips = null
 var buses: VehicleBuses = null
 var calls: VehicleCalls = null
 var signals: VehicleSignals = null
+var filler: VehicleFiller = null
+var walkers: VehicleWalkers = null
 var lot_view: Node3D = null
 var draw: bool = true                       # false: no meshes (tests)
 var forced_focus: Array = []                # Vector2 (world x, z) points that replace the camera and the anchors (tests)
 var active: bool = true
 var rng: RandomNumberGenerator = RandomNumberGenerator.new()      # the view's own dice, never the sim's
 var folk_nodes: Array = []                  # FolkView nodes near a focus, for the per-frame folk list
+var seeding: bool = true                    # the first bookkeeping after a (re)start: the road is filled in, so vehicles may appear in view this once
+var screen_fn: Callable = Callable()        # tests: (Vector2 world point, margin) -> bool "is on the picture"
 var _t: float = 0.0
 var _focus_cache: Array = []
+var _seed_syncs: int = 0
 
 
 static func ensure_on(lv: Node3D) -> VehicleView:
@@ -50,7 +56,10 @@ func _init() -> void:
 	buses = VehicleBuses.new(self)
 	calls = VehicleCalls.new(self)
 	signals = VehicleSignals.new(self)
+	filler = VehicleFiller.new(self)
+	walkers = VehicleWalkers.new(self)
 	sim.dark_fn = Callable(self, "_dark")
+	sim.retire_fn = Callable(self, "retire_ok")
 
 
 func _ready() -> void:
@@ -68,6 +77,10 @@ func reset() -> void:
 	calls.reset()
 	nodes.clear()
 	signals.clear()
+	filler.reset()
+	walkers.clear()
+	seeding = true
+	_seed_syncs = 0
 
 
 func _process(delta: float) -> void:
@@ -77,9 +90,10 @@ func _process(delta: float) -> void:
 ## One frame. `speed` is the game speed (0 paused .. 3).
 func advance(delta: float, speed: int) -> void:
 	var was_active: bool = active
-	active = speed <= int(cfg.get("max_speed", 2))
+	active = speed <= int(cfg.get("max_speed", 3))
 	if not active:
 		if was_active:
+			walkers.clear()
 			trips.release_all()
 			sim.vehicles.clear()
 			ambient.reset()
@@ -89,16 +103,18 @@ func advance(delta: float, speed: int) -> void:
 		visible = false
 		return
 	visible = true
-	var scale: float = float((cfg.get("speed_scale", [0.0, 1.0, 1.5]) as Array)[clampi(speed, 0, 2)])
+	var scale: float = speed_scale(speed)
 	_t += delta
 	if _t >= SYNC_EVERY or not was_active:
 		_t = 0.0
 		sync()
 	var dt: float = delta * scale
-	var steps: int = maxi(1, int(ceil(dt / 0.08)))
+	var steps: int = clampi(int(ceil(dt / 0.08)), 1, 8)           # fewer, larger steps when the frame is long; the sim copes with 0.08 s and a little more
 	_refresh_folks()
+	sim.hour = SysUtil.hour_f()
 	for _i in steps:
 		sim.step(dt / float(steps))
+	walkers.tick(dt)
 	trips.tick(dt)
 	calls.tick(dt)
 	buses.tick(dt)
@@ -111,6 +127,7 @@ func advance(delta: float, speed: int) -> void:
 func sync() -> void:
 	_focus_cache = _compute_focus()
 	ambient.sync()
+	filler.sync()
 	trips.sync()
 	buses.sync()
 	calls.sync()
@@ -120,13 +137,16 @@ func sync() -> void:
 
 
 func _cap() -> void:
-	var maxn: int = int(cfg.get("max_vehicles", 46))
+	_seed_syncs += 1
+	if _seed_syncs > 2:
+		seeding = false
+	var maxn: int = int(cfg.get("max_vehicles", 60))
 	if sim.vehicles.size() <= maxn:
 		return
 	for v in sim.vehicles.duplicate():
 		if sim.vehicles.size() <= maxn:
 			break
-		if str(v["tag"]) == "ambient" and str(v["state"]) == "parked" and not in_range(v["pos"], 0.4):
+		if str(v["tag"]) == "ambient" and str(v["state"]) == "parked" and not on_screen(v["pos"], 10.0):
 			ambient.remove(v)
 
 
@@ -160,12 +180,37 @@ func in_range(p: Vector2, k: float = 1.0) -> bool:
 	return false
 
 
+## Is the world point on the picture (the camera's frustum), grown by `margin` tiles? Without a camera (tests, headless) the part of the map around the
+## focus that you could see without panning counts as the picture.
+func on_screen(p: Vector2, margin: float = 6.0) -> bool:
+	if screen_fn.is_valid():
+		return bool(screen_fn.call(p, margin))
+	var cam: Camera3D = get_viewport().get_camera_3d() if is_inside_tree() and get_viewport() != null else null
+	if cam == null:
+		return in_range(p, 0.45)
+	for o in [Vector2.ZERO, Vector2(margin, 0), Vector2(-margin, 0), Vector2(0, margin), Vector2(0, -margin)]:
+		if cam.is_position_in_frustum(Vector3(p.x + o.x, 0.5, p.y + o.y)):
+			return true
+	return false
+
+
+## May a vehicle at `p` be taken out of the world? Only outside the drop radius of every focus AND off the picture (task 37: nothing vanishes in view).
 func beyond_drop(p: Vector2) -> bool:
 	var r: float = float(cfg.get("drop_radius", 80))
 	for f in focus_points():
 		if absf(p.x - (f as Vector2).x) <= r and absf(p.y - (f as Vector2).y) <= r:
 			return false
-	return true
+	return not on_screen(p, 10.0)
+
+
+## May a vehicle at the end of its path go (it is off the picture)?
+func retire_ok(p: Vector2) -> bool:
+	return not on_screen(p, 4.0)
+
+
+func speed_scale(speed: int) -> float:
+	var a: Array = cfg.get("speed_scale", [0.0, 1.0, 1.5, 3.0])
+	return float(a[clampi(speed, 0, a.size() - 1)])
 
 
 func _dark(i: int, j: int) -> bool:
@@ -218,7 +263,7 @@ func now_f() -> float:
 func vt_per_min(speed: int = -1) -> float:
 	var sp: int = Clock.speed if speed < 0 else speed
 	var rate: float = float(Clock.MIN_PER_SEC[clampi(sp, 0, 3)])
-	var scale: float = float((cfg.get("speed_scale", [0.0, 1.0, 1.5]) as Array)[clampi(sp, 0, 2)])
+	var scale: float = speed_scale(sp)
 	return scale / rate if rate > 0.0 else 1.0
 
 
