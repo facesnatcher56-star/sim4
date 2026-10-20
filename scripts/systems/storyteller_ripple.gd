@@ -54,9 +54,8 @@ static func _near(hid: int, p: Dictionary, ctx: Dictionary) -> bool:
 		return false
 	if buff != "" and not SimEnv.data().buff_def(buff).is_empty():
 		for f in res:
-			if not _can_notice(f):
-				continue
-			if Storyteller.rng.randf() < float(rcfg().get("near_buff_chance", 0.7)):
+			var rolled: bool = Storyteller.rng.randf() < float(rcfg().get("near_buff_chance", 0.7))      # (always rolled, so the stream does not depend on who was asleep)
+			if rolled and _can_notice(f):
 				f.add_buff(buff)
 	StorytellerLog.toast(hid, text)
 	StorytellerLog.add("ripple", text, "", "h%d" % hid, [hid], "home", "")
