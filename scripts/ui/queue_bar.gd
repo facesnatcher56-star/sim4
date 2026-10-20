@@ -35,7 +35,11 @@ func rebuild() -> void:
 	for i in q.size():
 		_add_chip(q[i], i)
 	if cur == null and q.size() == 0:
-		add_child(UIU.make_label("Idle. Click an object or a person to give an order.", 13, UITheme.MUTED))
+		var plate := PanelContainer.new()          # a backing plate: the hint is readable over any ground
+		plate.add_theme_stylebox_override("panel", UITheme.box(Color(UITheme.BG, 0.88), 6, Color(0, 0, 0, 0), 0, 5))
+		plate.add_child(UIU.make_label("Idle. Click something to give an order.", 13, UITheme.TEXT))
+		plate.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		add_child(plate)
 
 func _add_chip(it, idx: int) -> void:
 	var def_id := str(UIU.prop(it, "def_id", ""))

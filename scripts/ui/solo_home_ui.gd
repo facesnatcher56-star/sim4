@@ -1,49 +1,69 @@
 class_name SoloHomeUi
 extends RefCounted
-## The top of the "Homes" tab in one-character play: where you live (rent, deposit, notice), the ladder of places with what each costs and why
-## you can or cannot move there now, the council list and giving up the flat. Every button is the "solo" command (SoloCmd).
+## The top of the "Homes" tab in one-character play, in the panel style of docs/UI_STYLE.md: a CARD for where you live now and one per place you could move
+## to (key numbers as chips, requirements as tick / cross chips, one action, the reason under a disabled button, the flavour in the tooltip). Every
+## button is the "solo" command (SoloCmd).
 
 static func build(dlg: BankHub) -> void:
+	var w: float = dlg.dialog_width - 50.0
 	dlg.heading("Where you live")
-	dlg.line(_now_text(), 14)
-	var p: Dictionary = SoloHome.prop()
-	if bool(p.get("notice", false)):
-		dlg.line("EVICTION NOTICE: pay the overdue rent before the locks are changed (day %d + %d)." % [SoloHome.notice_day, int(SoloCfg.sect("start").get("notice_days", 3))], 14, Color("#e5534b"))
-	var owed: int = Economy.owed(dlg.hid())
-	if owed > 0:
-		dlg.line("You owe %d coins in unpaid bills. They block a new tenancy until paid." % owed, 13, UITheme.MUTED)
+	_now_card(dlg, w)
 	if SoloPressure.member:
-		dlg.row_with("You run errands for %s (standing %d, heat %d). Dues %d a day." % [SoloPressure.crew_name, int(SoloPressure.standing), int(SoloPressure.heat), int(SoloCfg.sect("pressure").get("dues_per_day", 3))], [
-			dlg.button("Leave the crew", "Costs a payoff of %d coins; if you cannot pay they may beat you." % int(SoloCfg.sect("pressure").get("leave_payoff", 150)), func(): _act(dlg, "leave_crew", {}))])
-	dlg.heading("Places to live")
+		_crew_card(dlg, w)
+	dlg.heading("Places to move to")
 	for r in SoloCfg.ladder():
-		_rung(dlg, r)
-	if not SoloHome.homeless:
-		dlg.row_with("Give up the flat and live on the street. You keep what you carry; everything in the flat is lost, your deposit comes back.", [
-			dlg.button("Give it up", "Only if the rent is beating you. The shelter and day labour are open to you after.", func(): _act(dlg, "give_up_home", {}))])
+		if str(r["id"]) in ["street", "shelter", SoloHome.rung]:
+			continue
+		_rung_card(dlg, w, r)
+	if SoloHome.homeless:
+		return
+	var inner: VBoxContainer = UICard.card(dlg.body, w, "Give up the flat", "", "You keep what you carry; everything in the flat is lost and your deposit comes back. The shelter and day labour are open to you after.")
+	UICard.note(inner, "Live on the street. Only if the rent is beating you.")
+	UICard.action(inner, "Give it up", func(): _act(dlg, "give_up_home", {}))
 
-static func _now_text() -> String:
+static func _now_card(dlg: BankHub, w: float) -> void:
 	var r: Dictionary = SoloHome.rung_def()
 	if SoloHome.homeless:
-		return "You have no home. Sleep rough (Myself menu) or use the night shelter (%d free nights left this week). Day labour at the Works pays 10 coins an hour." % SoloShelter.nights_left()
-	return "%s. Rent %d a week, bills about %d. Deposit held: %d." % [str(r.get("label", "Home")), SoloCfg.rung_rent(r), SoloCfg.rung_bills(r), SoloHome.deposit]
-
-static func _rung(dlg: BankHub, r: Dictionary) -> void:
-	var id: String = str(r["id"])
-	if id in ["street", "shelter"]:
-		dlg.line("%s: %s" % [str(r["label"]), str(r.get("cause", ""))], 12, UITheme.MUTED)
+		var inner: VBoxContainer = UICard.card(dlg.body, w, "No home", "HOMELESS", "Sleep rough (Myself menu), use the night shelter, take day labour at the Works.")
+		UICard.chips(inner, [["Shelter nights left", "%d this week" % SoloShelter.nights_left()], ["Day labour", "40 / 4 h"]])
+		var owed: int = Economy.owed(dlg.hid())
+		if owed > 0:
+			UICard.reqs(inner, [["Unpaid bills %d: they block a new tenancy" % owed, false]])
 		return
+	var p: Dictionary = SoloHome.prop()
+	var badge: String = "EVICTION NOTICE" if bool(p.get("notice", false)) else "YOU LIVE HERE"
+	var inner2: VBoxContainer = UICard.card(dlg.body, w, str(r.get("label", "Home")), badge, str(r.get("cause", "")))
+	UICard.chips(inner2, [["Rent", "%d/wk" % SoloCfg.rung_rent(r)], ["Bills", "%d/wk" % SoloCfg.rung_bills(r)], ["Deposit held", "%d" % SoloHome.deposit]])
+	if bool(p.get("notice", false)):
+		UICard.reqs(inner2, [["Pay the overdue rent to cancel the notice", false]])
+	var owed2: int = Economy.owed(dlg.hid())
+	if owed2 > 0:
+		UICard.reqs(inner2, [["Unpaid bills %d" % owed2, false]])
+
+static func _crew_card(dlg: BankHub, w: float) -> void:
+	var inner: VBoxContainer = UICard.card(dlg.body, w, SoloPressure.crew_name.capitalize() if SoloPressure.crew_name != "" else "Your crew", "IN A CREW", "Errands for the crew pay well and bring police attention. Leaving costs a payoff.")
+	UICard.chips(inner, [["Standing", "%d" % int(SoloPressure.standing)], ["Heat", "%d" % int(SoloPressure.heat)], ["Dues", "%d/day" % int(SoloCfg.sect("pressure").get("dues_per_day", 3))]])
+	var pay: int = int(SoloCfg.sect("pressure").get("leave_payoff", 150))
+	UICard.action(inner, "Leave (%d)" % pay, func(): _act(dlg, "leave_crew", {}), true, "")
+
+static func _rung_card(dlg: BankHub, w: float, r: Dictionary) -> void:
+	var id: String = str(r["id"])
 	var q: Dictionary = SoloLadder.quote(id)
-	var txt: String = "%s: rent %d + bills %d a week, deposit %d. %s" % [str(r["label"]), SoloCfg.rung_rent(r), SoloCfg.rung_bills(r), SoloCfg.rung_deposit(r), str(r.get("cause", ""))]
 	var tags: Array = Heritage.tags_for_lot(str(r.get("lot", "")), SysUtil.folk(Pawn.of()))
-	if not tags.is_empty():
-		txt += "  (%s)" % ", ".join(tags)
-	if not bool(q["ok"]) and str(q["reason"]) != "":
-		txt += "  [%s]" % str(q["reason"])
-	var bs: Array = [dlg.button("Move here", "Costs %d to move in (deposit, first week, movers)" % int(q["due"]), func(): _act(dlg, "move", {"rung": id}), bool(q["ok"]))]
+	var inner: VBoxContainer = UICard.card(dlg.body, w, str(r["label"]), "", str(r.get("cause", "")))
+	UICard.chips(inner, [["Rent", "%d/wk" % SoloCfg.rung_rent(r)], ["Bills", "%d/wk" % SoloCfg.rung_bills(r)], ["Deposit", "%d" % SoloCfg.rung_deposit(r)]])
+	UICard.reqs(inner, q.get("checks", []))
+	var did: String = SoloDistricts.district_of(str(r.get("lot", "")))
+	var line: Array = []
+	if did != "":
+		line.append(SoloDistricts.label_of(did))
+	line.append_array(tags)
+	if not line.is_empty():
+		UICard.note(inner, " · ".join(line))
 	if id == "council" and SoloHome.council_day < 0:
-		bs.append(dlg.button("Join the list", "The council list has a wait", func(): _act(dlg, "apply_council", {})))
-	dlg.row_with(txt, bs)
+		UICard.action(inner, "Join the list", func(): _act(dlg, "apply_council", {}))
+	else:
+		UICard.action(inner, "Move here", func(): _act(dlg, "move", {"rung": id}), bool(q["ok"]), str(q["reason"]))
 
 static func _act(dlg: BankHub, action: String, args: Dictionary) -> void:
 	var a: Dictionary = args.duplicate()

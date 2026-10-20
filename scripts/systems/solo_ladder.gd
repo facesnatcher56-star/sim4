@@ -28,10 +28,10 @@ static func income_week(hid: int) -> int:
 static func unpaid_total(hid: int) -> int:
 	return Economy.owed(hid)
 
-## {ok, reason, rent, bills, deposit, due (coins to pay now), fee, rung}.
+## {ok, reason, rent, bills, deposit, due (coins to pay now), fee, rung, checks: [[text, passed]]}. `reason` is the first failed check (or why the rung is not a move).
 static func quote(rung_id: String) -> Dictionary:
 	var r: Dictionary = SoloCfg.rung(rung_id)
-	var out: Dictionary = {"ok": false, "reason": "", "rung": rung_id, "rent": 0, "bills": 0, "deposit": 0, "due": 0, "fee": 0}
+	var out: Dictionary = {"ok": false, "reason": "", "rung": rung_id, "rent": 0, "bills": 0, "deposit": 0, "due": 0, "fee": 0, "checks": []}
 	if r.is_empty():
 		out["reason"] = "No such place."
 		return out
@@ -45,31 +45,42 @@ static func quote(rung_id: String) -> Dictionary:
 	if rung_id in ["street", "shelter"]:
 		out["reason"] = "You get there by losing your home, not by moving."
 		return out
-	if unpaid_total(hid) > 0:
-		out["reason"] = "Unpaid bills (%d coins) block a new tenancy: clear them first." % unpaid_total(hid)
-		return out
 	var fee: int = int(SoloMove.cfg().get("fee", 15)) if not SoloHome.homeless else 0
 	out["fee"] = fee
 	out["due"] = int(out["deposit"]) + int(out["rent"]) + fee
-	if int(r.get("income_min", 0)) > 0 and income_week(hid) < int(r["income_min"]):
-		out["reason"] = "The landlord wants proof of income: about %d a week (you made %d)." % [int(r["income_min"]), income_week(hid)]
-		return out
+	var checks: Array = out["checks"]
+	var owed: int = unpaid_total(hid)
+	checks.append(["No unpaid bills" if owed <= 0 else "Unpaid bills %d" % owed, owed <= 0])
+	var inc: int = income_week(hid)
+	if int(r.get("income_min", 0)) > 0:
+		checks.append(["Income %d/wk (you %d)" % [int(r["income_min"]), inc], inc >= int(r["income_min"])])
 	if rung_id == "council":
 		var wait: int = int((r.get("wait_days", {}) as Dictionary).get(SoloCfg.diff_id(), 14))
-		if SoloHome.council_day < 0:
-			out["reason"] = "Apply to the council list first (a %d day wait)." % wait
+		var waited: int = 0 if SoloHome.council_day < 0 else SysUtil.day() - SoloHome.council_day
+		checks.append(["On the list" if SoloHome.council_day < 0 else "Council list: day %d of %d" % [mini(waited, wait), wait], SoloHome.council_day >= 0 and waited >= wait])
+		var cap: int = int(r.get("income_max", 450))
+		checks.append(["Income under %d/wk" % cap, inc <= cap])
+	var have: int = Economy.balance(hid)
+	checks.append(["Move-in %d (you %d)" % [int(out["due"]), have], have >= int(out["due"])])
+	for c in checks:
+		if not bool(c[1]):
+			out["reason"] = _why(str(c[0]), rung_id)
 			return out
-		if SysUtil.day() - SoloHome.council_day < wait:
-			out["reason"] = "On the council list: %d more days." % (wait - (SysUtil.day() - SoloHome.council_day))
-			return out
-		if income_week(hid) > int(r.get("income_max", 450)):
-			out["reason"] = "The council lets flats only to people earning under %d a week." % int(r.get("income_max", 450))
-			return out
-	if Economy.balance(hid) < int(out["due"]):
-		out["reason"] = "You need %d coins to move in (deposit, first week, movers)." % int(out["due"])
-		return out
 	out["ok"] = true
 	return out
+
+static func _why(check: String, rung_id: String) -> String:
+	if check.begins_with("Unpaid"):
+		return "Clear your unpaid bills first."
+	if check.begins_with("Income under"):
+		return "You earn too much for council housing."
+	if check.begins_with("Income"):
+		return "The landlord wants proof of income."
+	if check.begins_with("Move-in"):
+		return "You cannot afford the move-in cost."
+	if rung_id == "council":
+		return "Join the council list and wait."
+	return check
 
 static func apply_council() -> Dictionary:
 	if SoloHome.council_day >= 0:

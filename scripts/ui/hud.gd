@@ -111,6 +111,10 @@ func _ready() -> void:
 	tracker.goals_requested.connect(func(): goals_dialog.toggle_for(selected_folk_id))
 	add_child(tracker)
 	tips.tracker = tracker      # the tips stack under the checklist in the left column
+	UIDialog.overlay_hook = func(open: bool):
+		var a: float = 0.0 if open else 1.0          # one overlay at a time: the tips and the checklist step aside for a window
+		tips.modulate.a = a
+		tracker.modulate.a = a
 	var coop_hud := CoopHud.new()      # pace / why time is skipping / pause vote / alerts / name tags; invisible outside a co-op session
 	coop_hud.hud = self
 	add_child(coop_hud)

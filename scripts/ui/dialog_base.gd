@@ -40,6 +40,8 @@ var _scroll: ScrollContainer
 
 # ---- pause time while a dialog is open (setting "Pause when a window is open"); the previous speed comes back when the last one closes
 static var _open: Dictionary = {}
+## The HUD hides its tips and checklist while any window is open (one overlay at a time, docs/UI_STYLE.md): called with true / false.
+static var overlay_hook: Callable = Callable()
 static var _resume_speed := 0
 
 func _track_pause() -> void:
@@ -59,6 +61,8 @@ static func track_open(id: int, vis: bool) -> void:
 	elif not vis and _open.has(id):
 		_open.erase(id)
 		_resume_if_none()
+	if overlay_hook.is_valid():
+		overlay_hook.call(not _open.is_empty())
 
 static func _resume_if_none() -> void:
 	if _open.is_empty() and _resume_speed > 0:
