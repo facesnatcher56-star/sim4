@@ -12,6 +12,7 @@ signal pose_changed(folk_id: int, pose: String)
 const BASE_SPEED := 2.4
 const SPEED_MULT := [0.0, 1.0, 1.8, 3.0]
 const MAP_PATH := "res://data/animation_map.json"
+const PROPS_PATH := "res://data/animation_props.json"   # "props" (hand props) and "fx" (particles): merged into the map
 const STAGES := ["baby", "toddler", "child", "teen", "adult", "elder"]
 const FADE := 0.25
 const DEFAULT_MAP := {
@@ -43,6 +44,9 @@ var show_mood: bool = true
 
 var _props: Dictionary = {}           # hand props built so far (FolkProps): name -> node, shown while its rule matches
 var _prop_sig: int = 0
+var _fx: Dictionary = {}              # particle effects built so far (FolkFx): name -> CPUParticles3D
+var _fx_sig: int = 0
+var _fx_last: Variant = null          # the interaction the effects last saw (a successful finish plays its burst)
 var _waypoints: Array[Vector3] = []
 var _last_tile: Vector2i = Vector2i(-999, -999)
 var _last_level: int = 0
@@ -100,6 +104,11 @@ static func anim_map() -> Dictionary:
 		if parsed is Dictionary:
 			for k in (parsed as Dictionary):
 				_map[k] = parsed[k]
+	if FileAccess.file_exists(PROPS_PATH):
+		var extra: Variant = JSON.parse_string(FileAccess.get_file_as_string(PROPS_PATH))
+		if extra is Dictionary:
+			for k in (extra as Dictionary):
+				_map[k] = extra[k]
 	return _map
 
 

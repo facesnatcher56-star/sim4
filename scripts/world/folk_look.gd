@@ -63,6 +63,7 @@ func _build_visual() -> void:
 	_arms.clear()
 	_props.clear()                         # the hand props hung on the old skeleton went with it
 	_prop_sig = 0
+	FolkFx.reset(self)
 	_xray_on = false
 	var f = World.get_folk(folk_id)
 	_styled = false
