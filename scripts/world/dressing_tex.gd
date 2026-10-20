@@ -13,7 +13,8 @@ static func tex(name: String) -> ImageTexture:
 		return GraffitiTex.tex(name)
 	var rng := RandomNumberGenerator.new()
 	rng.seed = name.hash()
-	var img := Image.create(384 if name.begins_with("graffiti") else 256, 144 if name.begins_with("graffiti") else 256, false, Image.FORMAT_RGBA8)
+	var side := 128 if name in ["stain", "grime", "worn_mark", "dead_grass", "dirt_patch", "oil"] else 256
+	var img := Image.create(384 if name.begins_with("graffiti") else side, 144 if name.begins_with("graffiti") else side, false, Image.FORMAT_RGBA8)
 	match name:
 		"crack": _crack(img, rng)
 		"pothole": _pothole(img, rng)
@@ -94,10 +95,12 @@ static func _blotch(img: Image, rng: RandomNumberGenerator, col: Color, alpha: f
 	n.seed = rng.randi()
 	n.frequency = 0.022
 	n.fractal_octaves = 4
-	for y in 256:
-		for x in 256:
-			var v := (n.get_noise_2d(x, y) + 1.0) * 0.5
-			var edge := clampf(1.0 - Vector2(x - 128, y - 128).length() / 128.0, 0.0, 1.0)
+	var sz := img.get_width()                          # 128 px blotches (a quarter of the pixels; decals scale them up softly): task 41a first-use hitch
+	var k := 256.0 / float(sz)
+	for y in sz:
+		for x in sz:
+			var v := (n.get_noise_2d(x * k, y * k) + 1.0) * 0.5
+			var edge := clampf(1.0 - Vector2(x - sz * 0.5, y - sz * 0.5).length() / (sz * 0.5), 0.0, 1.0)
 			var a := clampf((v - 0.5) * 4.0, 0.0, 1.0) * alpha * clampf(edge * 2.5, 0.0, 1.0)
 			img.set_pixel(x, y, Color(col.r, col.g, col.b, a))
 

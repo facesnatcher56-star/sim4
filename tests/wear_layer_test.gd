@@ -21,6 +21,7 @@ func run() -> Array:
 		return ["World autoload missing"]
 	_rules()
 	_variants_pure()
+	_merged_parts()
 	SKit.new_game("solo", "normal", {}, -1, {"world_seed": 11})
 	_variants_in_world()
 	_clutter()
@@ -84,6 +85,22 @@ func _variants_pure() -> void:
 	# everything still works with the old state-only call and the broken layer
 	var broken_tv := _look("tv", {"_poverty": 0.8, "_pick": 0, "broken": true})
 	_check("broken:broken" in (broken_tv["ids"] as Array), "a broken poor TV still shows broken")
+
+
+func _merged_parts() -> void:
+	var node := Node3D.new()
+	node.add_child(Node3D.new())
+	ObjectVisualNodes.apply(node, _look("bed", {"made": false, "_poverty": 0.85, "_pick": 0}))
+	var fx := node.get_node_or_null("StateFx")
+	var meshes := 0
+	if fx != null:
+		for c in fx.get_children():
+			if c is MeshInstance3D:
+				meshes += 1
+	_check(fx != null and meshes == 1, "the six parts of a poor bed are ONE mesh (draw call), got %d" % meshes)
+	ObjectVisualNodes.apply(node, {})
+	_check(node.get_node_or_null("StateFx") == null, "and it is gone when the look is gone")
+	node.free()
 
 
 func _variants_in_world() -> void:

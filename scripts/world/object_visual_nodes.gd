@@ -87,8 +87,11 @@ static func apply(node: Node3D, look: Dictionary) -> void:
 	near.name = NEAR
 	fx.add_child(near)
 	var has_near := false
+	var merged: MeshInstance3D = _merged_parts(look["parts"])         # task 41a: plain parts of one object become ONE mesh with vertex colours (a poor bed is 6 boxes)
+	if merged != null:
+		fx.add_child(merged)
 	for p in (look["parts"] as Array):
-		var mi := _part(p)
+		var mi := _part(p) if merged == null or not _mergeable(p) else null
 		if mi != null:
 			fx.add_child(mi)
 		var lg: Array = p["light"]
@@ -107,6 +110,51 @@ static func apply(node: Node3D, look: Dictionary) -> void:
 			near.add_child(ps)
 			has_near = true
 	node.set_meta("has_near", has_near)
+
+
+static func _mergeable(p: Dictionary) -> bool:
+	return float(p["emit"]) <= 0.0 and float(p["flicker"]) <= 0.0 and (p["light"] as Array).is_empty() and (p["color"] as Color).a >= 0.99
+
+
+## One mesh for all plain (not glowing, no light, opaque) parts when there are more than three; null otherwise. Cached by the parts' content.
+static func _merged_parts(parts: Array) -> MeshInstance3D:
+	var plain: Array = parts.filter(func(p): return _mergeable(p))
+	if plain.size() <= 3:
+		return null
+	var key := "merged%s" % var_to_str(plain).hash()
+	var mesh: ArrayMesh = _meshes.get(key)
+	if mesh == null:
+		var v := PackedVector3Array()
+		var n := PackedVector3Array()
+		var c := PackedColorArray()
+		var idx := PackedInt32Array()
+		for p in plain:
+			var pm: PrimitiveMesh = _shape_mesh(str(p["shape"]), p["size"]) as PrimitiveMesh
+			var a: Array = pm.get_mesh_arrays()
+			var xf := Transform3D(Basis.from_euler((p["rot"] as Vector3) * (PI / 180.0)), p["pos"])
+			var base := v.size()
+			var vs: PackedVector3Array = a[Mesh.ARRAY_VERTEX]
+			var ns: PackedVector3Array = a[Mesh.ARRAY_NORMAL]
+			for i in vs.size():
+				v.append(xf * vs[i])
+				n.append((xf.basis * ns[i]).normalized())
+				c.append(p["color"])
+			for i in (a[Mesh.ARRAY_INDEX] as PackedInt32Array):
+				idx.append(base + i)
+		var arr: Array = []
+		arr.resize(Mesh.ARRAY_MAX)
+		arr[Mesh.ARRAY_VERTEX] = v
+		arr[Mesh.ARRAY_NORMAL] = n
+		arr[Mesh.ARRAY_COLOR] = c
+		arr[Mesh.ARRAY_INDEX] = idx
+		mesh = ArrayMesh.new()
+		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+		mesh.surface_set_material(0, WearProps.material())
+		_meshes[key] = mesh
+	var mi := MeshInstance3D.new()
+	mi.mesh = mesh
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	return mi
 
 
 ## Particles and lights of an object are only live while it is near the camera.

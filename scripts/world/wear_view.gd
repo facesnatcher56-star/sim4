@@ -8,6 +8,8 @@ extends Node3D
 var lot = null
 var _built: Dictionary = {}          # lot id -> {node, wear}
 var _t := 0.0
+const WARM := ["crack", "stain", "grime", "dead_grass", "dirt_patch", "tag_rat", "tag_koz", "tag_six", "tag_nek", "tag_doa", "tag_vex"]
+var _warm := 0                       # procedural decal textures are made one per frame before the first lot is dressed (no hitch)
 var skip: Array = []                 # lot ids that get no generated dressing (the look-test shots hand-place theirs)
 
 
@@ -65,6 +67,10 @@ func _on_coins(hid: int, _amount: int) -> void:
 
 
 func _process(delta: float) -> void:
+	if _warm < WARM.size() and _wants_dressing:
+		DressingTex.tex(str(WARM[_warm]))
+		_warm += 1
+		return
 	_t -= delta
 	if _t > 0.0:
 		return
@@ -83,12 +89,16 @@ func lots_with_wear() -> Array:
 	return ids
 
 
+var _wants_dressing := false
+
+
 func _sync() -> void:
 	if lot == null or not World.regions.has_regions():
 		return
 	var near := float(WearRules.cfg().get("near_tiles", 44))
 	var tgt: Vector3 = lot._target if "_target" in lot else Vector3.ZERO
 	var far_view: bool = "_zoom" in lot and float(lot._zoom) > 70.0
+	var todo: Array = []
 	for id in lots_with_wear():
 		var wear := WearLayer.lot_wear(id)
 		var rc := NeighborhoodLots.rect_of(id)
@@ -100,8 +110,14 @@ func _sync() -> void:
 		if far_view or d > near * 1.3:
 			_free(id)
 		elif d <= near and not _built.has(id):
-			var plan := WearLot.plan(id, wear)
-			_built[id] = {"node": WearLot.build(self, plan), "wear": wear}
+			todo.append([id, wear])
+	if todo.is_empty():
+		return
+	_wants_dressing = true
+	if _warm < WARM.size():
+		return                                  # textures are still being made (one per frame); build on a later tick
+	for e in todo:
+		_built[e[0]] = {"node": WearLot.build(self, WearLot.plan(str(e[0]), float(e[1]))), "wear": e[1]}
 
 
 func built_lots() -> Array:
