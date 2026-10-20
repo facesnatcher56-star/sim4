@@ -58,9 +58,18 @@ func _object_aabb(o) -> AABB:
 	return AABB(Vector3(lo.x, LPos.elev(o.level), lo.y), Vector3(hi.x - lo.x, h, hi.y - lo.y))
 
 
+const CEILING_BOX := 0.5             # live play: a ceiling light answers only where the ray meets the fitting itself (this wide, 0.4 tall), not the empty air column under it
+
 const HEAD_H := 1.8                  # things whose box the ray enters above this lose to folk and furniture on the floor under the mouse
 const FOOTPRINT_BONUS := 1.2         # an object standing on the floor point under the mouse beats a taller one in front of it
 const CEILING_PENALTY := 100.0       # ceiling lights only answer when nothing else is under the mouse
+
+
+## The small box of the fitting itself, hanging from the top of an object's tall box. In an empty house the lights are the only objects, so a full-height box would win every hover over bare floor.
+func _ceiling_box(o) -> AABB:
+	var full := _object_aabb(o)
+	var c := full.get_center()
+	return AABB(Vector3(c.x - CEILING_BOX * 0.5, full.end.y - 0.4, c.z - CEILING_BOX * 0.5), Vector3(CEILING_BOX, 0.4, CEILING_BOX))
 
 
 ## Current height scale (1 = full wall, CUT_RATIO = cut down) of the wall edge an object hangs on.
@@ -119,7 +128,8 @@ func pick(mp: Vector2) -> Dictionary:
 			continue          # on a floor that is not the one being looked at
 		if not _pickable(o):
 			continue
-		var bb := _object_aabb(o)
+		var ceiling_live: bool = o.has_tag("ceiling") and not _building_tools()
+		var bb := _ceiling_box(o) if ceiling_live else _object_aabb(o)
 		var hit = bb.intersects_ray(ro, rd)
 		if hit != null:
 			var t := ro.distance_to(hit)
@@ -130,9 +140,7 @@ func pick(mp: Vector2) -> Dictionary:
 				t -= FOOTPRINT_BONUS
 			elif (hit as Vector3).y > LPos.elev(o.level) + HEAD_H:
 				t += 2.0                      # a light or a shelf top high above the room is not what the player points at
-			if o.has_tag("ceiling") and not _building_tools():
-				if not on_spot:
-					continue
+			if ceiling_live:
 				t += CEILING_PENALTY
 			if t < best_t:
 				best_t = t
