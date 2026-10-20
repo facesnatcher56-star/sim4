@@ -5,9 +5,18 @@ extends RefCounted
 ## (sleep, eat, toilet, shower...) are exempt. Numbers in data/autonomy_variety.json. Not saved (it decays within days anyway).
 
 static var mem: Dictionary = {}       # folk_id -> {key: [value, minute]}
+static var today: Dictionary = {}     # folk_id -> [game day, {interaction id: times started that day}] (the daily cap, task 32c)
 
 static func reset() -> void:
 	mem.clear()
+	today.clear()
+
+## Times `fid` started `iid` today.
+static func count_today(fid: int, iid: String) -> int:
+	var e: Variant = today.get(fid, null)
+	if e == null or int(e[0]) != SysUtil.day():
+		return 0
+	return int((e[1] as Dictionary).get(iid, 0))
 
 static func cfg() -> Dictionary:
 	return SysUtil.table("autonomy_variety")
@@ -44,6 +53,9 @@ static func mult(folk, iid: String, d: Dictionary, obj) -> float:
 	if mem.is_empty() or not mem.has(int(folk.id)) or exempt(iid, d):
 		return 1.0
 	var c: Dictionary = cfg()
+	var cap: int = int(c.get("daily_cap", 0))
+	if cap > 0 and count_today(int(folk.id), iid) >= cap:
+		return 0.0                    # enough of this for one day: people move on to something else
 	var now: int = SimEnv.now_min()
 	var a_i: float = float(c.get("per_interaction", 0.35))
 	if str(d.get("target", "object")) == "folk":
@@ -66,6 +78,11 @@ static func on_started(folk_id: int, iid: String, target_id: int) -> void:
 	if d.is_empty() or exempt(iid, d):
 		return
 	var now: int = SimEnv.now_min()
+	var e: Variant = today.get(folk_id, null)
+	if e == null or int(e[0]) != SysUtil.day():
+		e = [SysUtil.day(), {}]
+		today[folk_id] = e
+	(e[1] as Dictionary)[iid] = int((e[1] as Dictionary).get(iid, 0)) + 1
 	var v: float = _add(folk_id, "i:" + iid, now)
 	if str(d.get("target", "object")) == "object":
 		var o = WorldIface.get_object(target_id)

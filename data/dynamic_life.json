@@ -1,0 +1,69 @@
+{
+ "_doc": "Task 32c: the tuning of DynLife (scripts/systems/dyn_*.gd). plans = small spontaneous plans a resident forms (hourly dice, stateless: master seed + folk + hour + plan); each gives a buff from data/content_dynamic.json (its autonomy_mult is what steers the choice) and may queue things to do at once. Fields: chance = per hour for a neutral person; hours = [[from,to]]; weekend_mult = factor on Saturday and Sunday; stages = {stage: factor} (a stage not listed never makes the plan); traits / moods = {name: factor}; needs = {need: gain} (x(1 + gain x how empty the need is)); needs_object = ids or tags of at least one object the plan needs near the folk; outdoor = not in rain, snow or storms; queue = what to start at once; needs_contact = a friend to ring; stat_off = what a far-off resident (not simulated minute by minute) gets instead. reactions = what residents do when something happens (fire, siren, storm, big news, birthday, a guest): scope town (within reach tiles) | home (the household, at home) | household; each response has a chance, traits that raise or lower it and the stages that may do it. social = household initiative: dinners, game nights, playtime, inviting friends over. Routines by day and mood are in data/routines.json.",
+ "enabled": true,
+ "min_gap_hours": 3,
+ "plans": {
+  "stroll": {"chance": 0.045, "hours": [[7, 12], [15, 19.5]], "weekend_mult": 1.6, "stages": {"child": 0.6, "teen": 0.9, "adult": 1.0, "elder": 1.2},
+   "traits": {"outdoorsy": 2.2, "active": 1.5, "lazy": 0.35, "loner": 1.2, "workaholic": 0.6},
+   "moods": {"sad": 1.8, "anxious": 1.8, "tense": 1.6, "bored": 1.8, "energized": 1.4, "angry": 1.4},
+   "outdoor": true, "buff": "plan_walk", "queue": ["stroll"], "stat_off": {"fun": 6, "energy": -2}},
+  "call_friend": {"chance": 0.05, "hours": [[10, 21]], "stages": {"teen": 1.4, "adult": 1.0, "elder": 1.3},
+   "traits": {"social": 2.0, "charmer": 1.3, "gossip": 1.4, "loner": 0.3, "shy": 0.55},
+   "moods": {"lonely": 3.0, "sad": 1.6, "happy": 1.3, "bored": 1.5}, "needs": {"social": 2.5},
+   "queue": ["call_friend"], "needs_contact": true, "stat_off": {"social": 8}},
+  "cook_special": {"chance": 0.05, "hours": [[10, 12], [15, 18]], "weekend_mult": 1.7, "stages": {"teen": 0.6, "adult": 1.0, "elder": 1.0},
+   "traits": {"foodie": 2.4, "glutton": 1.3, "generous": 1.3, "lazy": 0.4},
+   "moods": {"inspired": 1.6, "happy": 1.3, "proud": 1.4}, "needs_object": ["stove"], "buff": "plan_cook"},
+  "garden": {"chance": 0.05, "hours": [[8, 12], [16, 19]], "weekend_mult": 1.5, "stages": {"teen": 0.5, "adult": 1.0, "elder": 1.4},
+   "traits": {"green_thumb": 3.0, "outdoorsy": 1.8, "neat": 1.2, "lazy": 0.4},
+   "moods": {"content": 1.4, "anxious": 1.5}, "needs_object": ["garden_plot", "plant"], "outdoor": true, "buff": "plan_garden"},
+  "create": {"chance": 0.045, "hours": [[10, 12], [14, 22]], "stages": {"child": 0.8, "teen": 1.2, "adult": 1.0, "elder": 1.0},
+   "traits": {"creative": 2.4, "musical": 1.8, "bookworm": 1.2, "lazy": 0.6},
+   "moods": {"inspired": 2.2, "sad": 1.4, "focused": 1.4, "nostalgic": 1.5}, "buff": "plan_create"},
+  "read": {"chance": 0.04, "hours": [[9, 12], [14, 18], [20, 22.5]], "stages": {"child": 0.8, "teen": 1.0, "adult": 1.0, "elder": 1.4},
+   "traits": {"bookworm": 3.0, "lazy": 1.2, "active": 0.7, "gamer": 0.7},
+   "moods": {"content": 1.4, "anxious": 1.3, "nostalgic": 1.4}, "buff": "plan_read"},
+  "get_moving": {"chance": 0.04, "hours": [[6.5, 9.5], [16.5, 20]], "stages": {"teen": 1.3, "adult": 1.0, "elder": 0.5},
+   "traits": {"active": 2.6, "outdoorsy": 1.4, "lazy": 0.2, "competitive": 1.4, "workaholic": 0.8},
+   "moods": {"energized": 2.0, "angry": 1.8, "tense": 1.5, "sad": 1.3}, "needs_object": ["treadmill", "dumbbell_rack"], "buff": "plan_move"},
+  "tidy_up": {"chance": 0.045, "hours": [[8, 12], [16, 19]], "weekend_mult": 1.6, "stages": {"child": 0.4, "teen": 0.6, "adult": 1.0, "elder": 1.0},
+   "traits": {"neat": 3.0, "perfectionist": 1.8, "germaphobe": 1.6, "lazy": 0.2},
+   "moods": {"tense": 1.8, "anxious": 1.8, "angry": 1.4}, "buff": "plan_tidy"},
+  "lazy_spell": {"chance": 0.05, "hours": [[10, 17]], "weekend_mult": 2.0, "stages": {"child": 0.7, "teen": 1.4, "adult": 0.8, "elder": 1.2},
+   "traits": {"lazy": 3.0, "easygoing": 1.3, "workaholic": 0.2, "active": 0.5},
+   "moods": {"bored": 1.2, "content": 1.3, "sad": 1.4, "dazed": 1.8}, "buff": "plan_lazy"}
+ },
+ "stroll": {"stops": 2, "min_tiles": 4, "max_tiles": 22, "tries": 14},
+ "reactions": {
+  "fire_started": {"scope": "town", "reach": 40, "responses": [
+   {"do": "look_out_window", "chance": 0.75, "traits": {"gossip": 1.3, "social": 1.2, "shy": 0.8, "loner": 0.8, "easygoing": 0.8}},
+   {"do": "go_watch", "chance": 0.22, "traits": {"gossip": 2.0, "social": 1.5, "outdoorsy": 1.3, "shy": 0.4, "loner": 0.4, "lazy": 0.4, "germaphobe": 0.5}, "stages": ["teen", "adult", "elder"]},
+   {"do": "talk_over", "chance": 0.5, "iids": ["swap_stories", "gossip", "ask_about_day"], "traits": {"gossip": 1.6, "social": 1.4, "loner": 0.4, "shy": 0.6}},
+   {"do": "comfort_worried", "chance": 0.6, "iids": ["cheer_up", "hug"], "traits": {"empath": 1.7, "generous": 1.3, "loner": 0.6}, "stages": ["teen", "adult", "elder"]}]},
+  "disaster": {"scope": "town", "reach": 80, "phases": ["siren", "start"], "responses": [
+   {"do": "look_out_window", "chance": 0.9},
+   {"do": "talk_over", "chance": 0.6, "iids": ["swap_stories", "ask_about_day", "gossip"], "traits": {"social": 1.3, "loner": 0.5}},
+   {"do": "comfort_worried", "chance": 0.75, "iids": ["cheer_up", "hug"], "traits": {"empath": 1.6, "generous": 1.3}, "stages": ["teen", "adult", "elder"]}]},
+  "lightning": {"scope": "home", "responses": [
+   {"do": "look_out_window", "chance": 0.35, "traits": {"shy": 1.2}},
+   {"do": "comfort_worried", "chance": 0.5, "iids": ["cheer_up", "hug"], "traits": {"empath": 1.6}, "stages": ["teen", "adult", "elder"]}]},
+  "weather_changed": {"scope": "home", "to": ["thunderstorm", "rain", "snow", "heatwave"], "responses": [
+   {"do": "look_out_window", "chance": 0.3},
+   {"do": "talk_over", "chance": 0.2, "iids": ["ask_about_day", "swap_stories"]}]},
+  "chronicle": {"scope": "home", "min_severity": 2, "responses": [
+   {"do": "talk_over", "chance": 0.35, "iids": ["gossip", "swap_stories", "give_advice"], "traits": {"gossip": 1.8, "social": 1.3, "loner": 0.4, "shy": 0.6}, "stages": ["teen", "adult", "elder"]},
+   {"do": "comfort_worried", "chance": 0.2, "iids": ["cheer_up", "hug"], "traits": {"empath": 2.0}, "stages": ["teen", "adult", "elder"]}]},
+  "birthday": {"scope": "household", "responses": [
+   {"do": "wish_well", "chance": 0.85, "iids": ["hug", "compliment", "high_five"], "traits": {"generous": 1.2, "charmer": 1.2, "shy": 0.7, "loner": 0.6, "grudgeholder": 0.7}}]},
+  "visit_started": {"scope": "household", "responses": [
+   {"do": "greet_guest", "chance": 0.8, "iids": ["greet", "high_five"], "traits": {"social": 1.2, "shy": 0.5, "loner": 0.4, "charmer": 1.2}}]}
+ },
+ "react": {"cool_min": 60, "max_per_event": 6, "stages": ["child", "teen", "adult", "elder"], "watch_distance": 5},
+ "social": {
+  "enabled": true,
+  "family_dinner": {"hours": [17.5, 18.5], "chance": 0.5, "weekend_mult": 1.4, "min_people": 2, "traits": {"social": 1.2, "loner": 0.6, "workaholic": 0.7, "generous": 1.1}, "buff": "family_dinner", "toast": "The household is sitting down to dinner together."},
+  "game_night": {"hours": [19, 20.5], "chance": 0.14, "weekend_mult": 2.2, "min_people": 2, "traits": {"gamer": 1.6, "social": 1.4, "competitive": 1.3, "loner": 0.4, "shy": 0.7, "bookworm": 0.8}, "buff": "game_night", "toast": "It is game night at home."},
+  "playtime": {"hours": [[9, 12], [15, 18.5]], "chance": 0.3, "weekend_mult": 1.5, "buff": "plan_play_kids"},
+  "friends_over": {"chance": 0.04, "hours": [[10, 17]], "weekend_mult": 1.8, "min_friendship": 25, "traits": {"social": 2.2, "charmer": 1.3, "loner": 0.2, "shy": 0.4, "generous": 1.2, "germaphobe": 0.5}, "duration": [150, 240], "stages": ["adult", "elder", "teen"], "toast": "{name} invited {guest} over."}
+ }
+}

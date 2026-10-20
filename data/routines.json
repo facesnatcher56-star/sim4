@@ -46,5 +46,25 @@
     "tag_mult": {"sleep": 2.2, "work": 0.2, "exercise": 0.1, "social": 0.3, "skill": 0.2, "study": 0.1, "prepare": 0.3, "party": 0.1},
     "tag_bonus": {"sleep": 6.0},
     "once": false
-  }
+  },
+  "weekend_morning": {"label": "a slow weekend morning", "tag_mult": {"garden": 1.8, "outdoor": 1.5, "cook": 1.3, "chore": 1.2, "work": 0.3, "skill": 0.7}, "once": false, "weekend": true, "time_between": [8, 12]},
+  "weekend_afternoon": {"label": "a free weekend afternoon", "tag_mult": {"fun": 1.4, "social": 1.5, "outdoor": 1.5, "game": 1.3, "music": 1.3, "creative": 1.3, "work": 0.3, "skill": 0.7}, "once": false, "weekend": true, "time_between": [12, 18]},
+  "weekend_evening": {"label": "a weekend evening", "tag_mult": {"social": 1.5, "party": 1.6, "tv": 1.3, "game": 1.5, "work": 0.3, "skill": 0.6}, "once": false, "weekend": true, "time_between": [18, 23]},
+  "weekday_morning_free": {"label": "a free weekday morning", "tag_mult": {"exercise": 1.4, "chore": 1.3, "read": 1.3}, "once": false, "weekend": false, "requires": ["no_job"], "time_between": [7, 11]},
+  "weekday_daytime_free": {"label": "a quiet weekday", "tag_mult": {"chore": 1.2, "skill": 1.3, "garden": 1.3, "creative": 1.3}, "once": false, "weekend": false, "requires": ["no_job"], "time_between": [11, 16]},
+  "weekday_evening": {"label": "a weekday evening at home", "tag_mult": {"tv": 1.4, "relax": 1.4, "cook": 1.2, "social": 1.2, "work": 0.4, "skill": 0.8}, "once": false, "weekend": false, "time_between": [17, 21.5]},
+  "after_school": {"label": "after school", "tag_mult": {"study": 1.4, "play": 1.8, "game": 1.2, "fun": 1.2, "social": 1.2}, "once": false, "weekend": false, "stages": ["child", "teen"], "time_between": [15.5, 19]},
+  "school_holiday_play": {"label": "a day off for the young", "tag_mult": {"play": 2.0, "fun": 1.3, "outdoor": 1.3, "social": 1.3}, "once": false, "weekend": true, "stages": ["child", "toddler"], "time_between": [8, 19]},
+  "mood_sad": {"label": "feeling low", "tag_mult": {"comfort": 1.6, "rest": 1.5, "music": 1.4, "read": 1.3, "exercise": 0.8, "fun": 0.8}, "once": false, "moods": ["sad", "guilty", "embarrassed"]},
+  "mood_tense": {"label": "working off some steam", "tag_mult": {"exercise": 2.0, "creative": 1.4, "chore": 1.4, "social": 0.7}, "once": false, "moods": ["angry", "tense", "jealous"]},
+  "mood_energized": {"label": "full of energy", "tag_mult": {"exercise": 1.8, "dance": 1.6, "outdoor": 1.5}, "once": false, "moods": ["energized", "confident"]},
+  "mood_playful": {"label": "in a playful mood", "tag_mult": {"fun": 1.5, "dance": 1.8, "funny": 1.8, "game": 1.5, "play": 1.8}, "once": false, "moods": ["playful"]},
+  "mood_lonely": {"label": "wanting company", "tag_mult": {"social": 1.8, "phone": 2.0, "friendly": 1.5}, "once": false, "moods": ["lonely"]},
+  "mood_inspired": {"label": "feeling inspired", "tag_mult": {"creative": 2.0, "skill": 1.5, "write": 1.5, "music": 1.4}, "once": false, "moods": ["inspired", "focused"]},
+  "mood_bored": {"label": "looking for something new", "tag_mult": {"fun": 1.5, "creative": 1.3, "game": 1.2, "outdoor": 1.3, "idle_life": 0.7}, "once": false, "moods": ["bored"]},
+  "mood_anxious": {"label": "trying to settle", "tag_mult": {"relax": 1.5, "read": 1.4, "exercise": 1.3, "music": 1.2}, "once": false, "moods": ["anxious", "uncomfortable"]},
+  "mood_happy": {"label": "in good spirits", "tag_mult": {"social": 1.3, "friendly": 1.2, "outdoor": 1.2}, "once": false, "moods": ["happy", "content", "proud"]},
+  "mood_nostalgic": {"label": "lost in memories", "tag_mult": {"nostalgia": 1.8, "read": 1.3, "music": 1.3}, "once": false, "moods": ["nostalgic"]},
+  "night_owl_evening": {"label": "the night owl hours", "tag_mult": {"creative": 1.6, "game": 1.5, "skill": 1.4}, "once": false, "traits_any": ["night_owl"], "time_between": [21, 2]},
+  "early_bird_morning": {"label": "an early bird morning", "tag_mult": {"exercise": 1.6, "chore": 1.3, "garden": 1.4}, "once": false, "traits_any": ["early_bird"], "time_between": [5, 9]}
 }

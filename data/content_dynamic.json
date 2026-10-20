@@ -1,0 +1,938 @@
+{
+ "_doc": "Content of task 32c (DynLife: more dynamic behaviour). Idle life (short idles instead of standing still), reactions and plans. Weights live in data/dynamic_life.json; routines in data/routines.json. Merged by DynContent (ContentMerge), stage-gated by SysContent.gate_late_content.",
+ "interactions": {
+  "stretch": {
+   "label": "Stretch",
+   "kind": "super",
+   "target": "self",
+   "tags": [
+    "idle_life",
+    "rest"
+   ],
+   "duration_min": 2,
+   "posture": "stand",
+   "tests": [],
+   "per_min": {
+    "comfort": 0.3,
+    "energy": 0.1
+   },
+   "on_finish": [],
+   "autonomous": true,
+   "priority": "low",
+   "advertises": {
+    "idle_life": 0.9
+   },
+   "thought": "",
+   "cooldown_min": 40
+  },
+  "look_around": {
+   "label": "Look Around",
+   "kind": "super",
+   "target": "self",
+   "tags": [
+    "idle_life",
+    "rest"
+   ],
+   "duration_min": 3,
+   "posture": "stand",
+   "tests": [],
+   "per_min": {
+    "comfort": 0.05
+   },
+   "on_finish": [],
+   "autonomous": true,
+   "priority": "low",
+   "advertises": {
+    "idle_life": 0.6
+   },
+   "thought": "",
+   "cooldown_min": 30
+  },
+  "check_phone": {
+   "label": "Check the Phone",
+   "kind": "super",
+   "target": "self",
+   "tags": [
+    "idle_life",
+    "phone"
+   ],
+   "duration_min": 5,
+   "posture": "stand",
+   "tests": [],
+   "per_min": {
+    "social": 0.15
+   },
+   "on_finish": [],
+   "autonomous": true,
+   "priority": "low",
+   "advertises": {
+    "idle_life": 0.9
+   },
+   "thought": "",
+   "cooldown_min": 45
+  },
+  "hum_tune": {
+   "label": "Hum a Tune",
+   "kind": "super",
+   "target": "self",
+   "tags": [
+    "idle_life",
+    "music"
+   ],
+   "duration_min": 4,
+   "posture": "stand",
+   "tests": [],
+   "per_min": {
+    "comfort": 0.05
+   },
+   "on_finish": [],
+   "autonomous": true,
+   "priority": "low",
+   "advertises": {
+    "idle_life": 0.8
+   },
+   "thought": "",
+   "cooldown_min": 50
+  },
+  "tidy_up": {
+   "label": "Tidy Up a Little",
+   "kind": "super",
+   "target": "self",
+   "tags": [
+    "idle_life",
+    "tidy"
+   ],
+   "duration_min": 6,
+   "posture": "stand",
+   "tests": [],
+   "per_min": {
+    "comfort": 0.05
+   },
+   "on_finish": [],
+   "autonomous": true,
+   "priority": "low",
+   "advertises": {
+    "idle_life": 0.7,
+    "tidy": 0.6
+   },
+   "thought": "",
+   "cooldown_min": 60
+  },
+  "gaze_out_window": {
+   "label": "Gaze Out the Window",
+   "kind": "super",
+   "target": "self",
+   "tags": [
+    "idle_life",
+    "rest"
+   ],
+   "duration_min": 6,
+   "posture": "stand",
+   "tests": [],
+   "per_min": {
+    "comfort": 0.05
+   },
+   "on_finish": [],
+   "autonomous": true,
+   "priority": "low",
+   "advertises": {
+    "idle_life": 0.7
+   },
+   "thought": "",
+   "cooldown_min": 50
+  },
+  "fidget_and_think": {
+   "label": "Pace and Think",
+   "kind": "super",
+   "target": "self",
+   "tags": [
+    "idle_life",
+    "rest"
+   ],
+   "duration_min": 5,
+   "posture": "stand",
+   "tests": [],
+   "per_min": {
+    "comfort": 0.05
+   },
+   "on_finish": [],
+   "autonomous": true,
+   "priority": "low",
+   "advertises": {
+    "idle_life": 0.6
+   },
+   "thought": "",
+   "cooldown_min": 60
+  },
+  "sip_water": {
+   "label": "Get a Sip of Water",
+   "kind": "super",
+   "target": "self",
+   "tags": [
+    "idle_life",
+    "drink"
+   ],
+   "duration_min": 2,
+   "posture": "stand",
+   "tests": [],
+   "per_min": {
+    "hunger": 0.2
+   },
+   "on_finish": [],
+   "autonomous": true,
+   "priority": "low",
+   "advertises": {
+    "idle_life": 0.5
+   },
+   "thought": "",
+   "cooldown_min": 70
+  },
+  "look_out_window": {
+   "label": "Look Out the Window",
+   "kind": "super",
+   "target": "self",
+   "tags": [
+    "react"
+   ],
+   "duration_min": 4,
+   "posture": "stand",
+   "tests": [],
+   "per_min": {
+    "fun": 0.1
+   },
+   "on_finish": [],
+   "autonomous": false,
+   "priority": "high",
+   "advertises": {},
+   "thought": "What's going on out there?",
+   "cooldown_min": 0
+  },
+  "watch_commotion": {
+   "label": "Watch What's Happening",
+   "kind": "super",
+   "target": "self",
+   "tags": [
+    "react",
+    "outdoor"
+   ],
+   "duration_min": 8,
+   "posture": "stand",
+   "tests": [],
+   "per_min": {
+    "fun": 0.1
+   },
+   "on_finish": [],
+   "autonomous": false,
+   "priority": "normal",
+   "advertises": {},
+   "thought": "I hope everyone is alright.",
+   "cooldown_min": 0
+  },
+  "enjoy_the_air": {
+   "label": "Enjoy the Fresh Air",
+   "kind": "super",
+   "target": "self",
+   "tags": [
+    "react",
+    "outdoor"
+   ],
+   "duration_min": 6,
+   "posture": "stand",
+   "tests": [],
+   "per_min": {
+    "fun": 0.1
+   },
+   "on_finish": [],
+   "autonomous": false,
+   "priority": "normal",
+   "advertises": {},
+   "thought": "It's good to get out.",
+   "cooldown_min": 0
+  },
+  "call_friend": {
+   "label": "Call a Friend",
+   "kind": "super",
+   "target": "self",
+   "tags": [
+    "phone",
+    "social",
+    "call"
+   ],
+   "duration_min": 8,
+   "posture": "stand",
+   "tests": [],
+   "per_min": {
+    "social": 0.6,
+    "fun": 0.2
+   },
+   "on_finish": [],
+   "autonomous": false,
+   "priority": "normal",
+   "advertises": {},
+   "thought": "I'll give them a ring.",
+   "cooldown_min": 0
+  },
+  "play_together": {
+   "label": "Play Together",
+   "kind": "social",
+   "category": "friendly",
+   "target": "folk",
+   "tags": [
+    "social",
+    "fun",
+    "play",
+    "friendly"
+   ],
+   "duration_min": 15,
+   "posture": "stand",
+   "tests": [
+    {
+     "stat_below": [
+      "social",
+      94
+     ]
+    },
+    {
+     "relationship_above": [
+      "friendship",
+      3
+     ]
+    }
+   ],
+   "target_tests": [
+    {
+     "posture_not": "lie"
+    }
+   ],
+   "per_min": {
+    "social": 2.4,
+    "fun": 1.0
+   },
+   "target_per_min": {
+    "social": 2.2,
+    "fun": 1.0
+   },
+   "skill_xp_per_min": {
+    "charisma": 0.2
+   },
+   "on_finish": [],
+   "autonomous": true,
+   "priority": "normal",
+   "advertises": {
+    "social": 1.6,
+    "fun": 0.8
+   },
+   "thought": "Let's play!",
+   "cooldown_min": 150,
+   "social": {
+    "base": 0.7,
+    "mode": "full",
+    "outcomes": {
+     "great": {
+      "label": "A brilliant game",
+      "fr": 4,
+      "tbuff": "entertained",
+      "buff": "entertained",
+      "p": 0.6
+     },
+     "good": {
+      "label": "Good fun",
+      "fr": 2.5,
+      "tbuff": "cheered_up",
+      "p": 0.5
+     },
+     "meh": {
+      "label": "Fizzled out",
+      "fr": 0.5
+     },
+     "bad": {
+      "label": "Squabble over the rules",
+      "fr": -0.5
+     }
+    }
+   }
+  },
+  "board_game": {
+   "label": "Play a Board Game",
+   "kind": "social",
+   "category": "friendly",
+   "target": "folk",
+   "tags": [
+    "social",
+    "fun",
+    "game",
+    "friendly"
+   ],
+   "duration_min": 30,
+   "posture": "stand",
+   "tests": [
+    {
+     "stat_below": [
+      "social",
+      94
+     ]
+    },
+    {
+     "relationship_above": [
+      "friendship",
+      8
+     ]
+    }
+   ],
+   "target_tests": [
+    {
+     "posture_not": "lie"
+    }
+   ],
+   "per_min": {
+    "social": 2.0,
+    "fun": 0.9
+   },
+   "target_per_min": {
+    "social": 1.9,
+    "fun": 0.9
+   },
+   "skill_xp_per_min": {
+    "charisma": 0.2
+   },
+   "on_finish": [],
+   "autonomous": true,
+   "priority": "normal",
+   "advertises": {
+    "social": 1.4,
+    "fun": 1.0
+   },
+   "thought": "Fancy a game?",
+   "cooldown_min": 240,
+   "social": {
+    "base": 0.7,
+    "mode": "full",
+    "outcomes": {
+     "great": {
+      "label": "Game night champions",
+      "fr": 4,
+      "tbuff": "entertained",
+      "buff": "entertained",
+      "p": 0.6
+     },
+     "good": {
+      "label": "A fun game",
+      "fr": 2.5
+     },
+     "meh": {
+      "label": "Rules dispute",
+      "fr": 0.3
+     },
+     "bad": {
+      "label": "Sore loser",
+      "fr": -1.5,
+      "te": 3
+     }
+    }
+   }
+  },
+  "people_watch": {
+   "label": "Watch the World Go By",
+   "kind": "super",
+   "target": "self",
+   "tags": [
+    "idle_life",
+    "rest"
+   ],
+   "duration_min": 8,
+   "posture": "stand",
+   "tests": [],
+   "per_min": {
+    "comfort": 0.05
+   },
+   "on_finish": [],
+   "autonomous": true,
+   "priority": "low",
+   "advertises": {
+    "idle_life": 0.6
+   },
+   "thought": "",
+   "cooldown_min": 60
+  },
+  "doodle": {
+   "label": "Doodle on a Notepad",
+   "kind": "super",
+   "target": "self",
+   "tags": [
+    "idle_life",
+    "creative"
+   ],
+   "duration_min": 10,
+   "posture": "stand",
+   "tests": [],
+   "per_min": {
+    "comfort": 0.05
+   },
+   "on_finish": [],
+   "autonomous": true,
+   "priority": "low",
+   "advertises": {
+    "idle_life": 0.6,
+    "creative": 0.4
+   },
+   "thought": "",
+   "cooldown_min": 70
+  },
+  "flick_magazine": {
+   "label": "Flick Through a Magazine",
+   "kind": "super",
+   "target": "self",
+   "tags": [
+    "idle_life",
+    "read"
+   ],
+   "duration_min": 10,
+   "posture": "stand",
+   "tests": [],
+   "per_min": {
+    "comfort": 0.05
+   },
+   "on_finish": [],
+   "autonomous": true,
+   "priority": "low",
+   "advertises": {
+    "idle_life": 0.6
+   },
+   "thought": "",
+   "cooldown_min": 80
+  },
+  "do_a_puzzle": {
+   "label": "Do a Little Puzzle",
+   "kind": "super",
+   "target": "self",
+   "tags": [
+    "idle_life",
+    "game"
+   ],
+   "duration_min": 12,
+   "posture": "stand",
+   "tests": [],
+   "per_min": {
+    "comfort": 0.05
+   },
+   "on_finish": [],
+   "autonomous": true,
+   "priority": "low",
+   "advertises": {
+    "idle_life": 0.5
+   },
+   "thought": "",
+   "cooldown_min": 90
+  },
+  "rearrange_shelf": {
+   "label": "Straighten Things Up",
+   "kind": "super",
+   "target": "self",
+   "tags": [
+    "idle_life",
+    "tidy"
+   ],
+   "duration_min": 8,
+   "posture": "stand",
+   "tests": [],
+   "per_min": {
+    "comfort": 0.05
+   },
+   "on_finish": [],
+   "autonomous": true,
+   "priority": "low",
+   "advertises": {
+    "idle_life": 0.5
+   },
+   "thought": "",
+   "cooldown_min": 80
+  },
+  "shake_a_leg": {
+   "label": "Shake a Leg",
+   "kind": "super",
+   "target": "self",
+   "tags": [
+    "idle_life",
+    "dance"
+   ],
+   "duration_min": 4,
+   "posture": "stand",
+   "tests": [],
+   "per_min": {
+    "comfort": 0.05
+   },
+   "on_finish": [],
+   "autonomous": true,
+   "priority": "low",
+   "advertises": {
+    "idle_life": 0.4
+   },
+   "thought": "",
+   "cooldown_min": 70
+  },
+  "ponder_the_day": {
+   "label": "Ponder the Day",
+   "kind": "super",
+   "target": "self",
+   "tags": [
+    "idle_life",
+    "rest"
+   ],
+   "duration_min": 12,
+   "posture": "stand",
+   "tests": [],
+   "per_min": {
+    "comfort": 0.05
+   },
+   "on_finish": [],
+   "autonomous": true,
+   "priority": "low",
+   "advertises": {
+    "idle_life": 0.5
+   },
+   "thought": "",
+   "cooldown_min": 90
+  },
+  "plan_tomorrow": {
+   "label": "Make Plans for Tomorrow",
+   "kind": "super",
+   "target": "self",
+   "tags": [
+    "idle_life",
+    "write"
+   ],
+   "duration_min": 8,
+   "posture": "stand",
+   "tests": [],
+   "per_min": {
+    "comfort": 0.05
+   },
+   "on_finish": [],
+   "autonomous": true,
+   "priority": "low",
+   "advertises": {
+    "idle_life": 0.5
+   },
+   "thought": "",
+   "cooldown_min": 90
+  },
+  "flip_recipes": {
+   "label": "Flip Through Recipes",
+   "kind": "super",
+   "target": "self",
+   "tags": [
+    "idle_life",
+    "read"
+   ],
+   "duration_min": 10,
+   "posture": "stand",
+   "tests": [],
+   "per_min": {
+    "comfort": 0.05
+   },
+   "on_finish": [],
+   "autonomous": true,
+   "priority": "low",
+   "advertises": {
+    "idle_life": 0.5
+   },
+   "thought": "",
+   "cooldown_min": 90
+  },
+  "look_through_photos": {
+   "label": "Look Through Old Photos",
+   "kind": "super",
+   "target": "self",
+   "tags": [
+    "idle_life",
+    "phone",
+    "nostalgia"
+   ],
+   "duration_min": 10,
+   "posture": "stand",
+   "tests": [],
+   "per_min": {
+    "comfort": 0.05
+   },
+   "on_finish": [],
+   "autonomous": true,
+   "priority": "low",
+   "advertises": {
+    "idle_life": 0.5
+   },
+   "thought": "",
+   "cooldown_min": 90
+  },
+  "sing_softly": {
+   "label": "Sing Softly",
+   "kind": "super",
+   "target": "self",
+   "tags": [
+    "idle_life",
+    "music"
+   ],
+   "duration_min": 5,
+   "posture": "stand",
+   "tests": [],
+   "per_min": {
+    "comfort": 0.05
+   },
+   "on_finish": [],
+   "autonomous": true,
+   "priority": "low",
+   "advertises": {
+    "idle_life": 0.5
+   },
+   "thought": "",
+   "cooldown_min": 80
+  },
+  "crossword": {
+   "label": "Do a Crossword",
+   "kind": "super",
+   "target": "self",
+   "tags": [
+    "idle_life",
+    "game"
+   ],
+   "duration_min": 12,
+   "posture": "stand",
+   "tests": [],
+   "per_min": {
+    "comfort": 0.05
+   },
+   "on_finish": [],
+   "autonomous": true,
+   "priority": "low",
+   "advertises": {
+    "idle_life": 0.5
+   },
+   "thought": "",
+   "cooldown_min": 100
+  },
+  "fold_the_washing": {
+   "label": "Fold Some Washing",
+   "kind": "super",
+   "target": "self",
+   "tags": [
+    "idle_life",
+    "tidy"
+   ],
+   "duration_min": 10,
+   "posture": "stand",
+   "tests": [],
+   "per_min": {
+    "comfort": 0.05
+   },
+   "on_finish": [],
+   "autonomous": true,
+   "priority": "low",
+   "advertises": {
+    "idle_life": 0.5
+   },
+   "thought": "",
+   "cooldown_min": 90
+  },
+  "polish_up": {
+   "label": "Polish Something Up",
+   "kind": "super",
+   "target": "self",
+   "tags": [
+    "idle_life",
+    "tidy"
+   ],
+   "duration_min": 8,
+   "posture": "stand",
+   "tests": [],
+   "per_min": {
+    "comfort": 0.05
+   },
+   "on_finish": [],
+   "autonomous": true,
+   "priority": "low",
+   "advertises": {
+    "idle_life": 0.5
+   },
+   "thought": "",
+   "cooldown_min": 90
+  },
+  "write_a_postcard": {
+   "label": "Write a Postcard",
+   "kind": "super",
+   "target": "self",
+   "tags": [
+    "idle_life",
+    "write"
+   ],
+   "duration_min": 10,
+   "posture": "stand",
+   "tests": [],
+   "per_min": {
+    "comfort": 0.05
+   },
+   "on_finish": [],
+   "autonomous": true,
+   "priority": "low",
+   "advertises": {
+    "idle_life": 0.5
+   },
+   "thought": "",
+   "cooldown_min": 100
+  }
+ },
+ "buffs": {
+  "plan_walk": {
+   "label": "Fancies a Walk",
+   "mood": {
+    "energized": 1
+   },
+   "duration_min": 120,
+   "autonomy_mult": {
+    "interaction:enjoy_the_air": 1.0
+   },
+   "thought": "A walk would do me good."
+  },
+  "plan_cook": {
+   "label": "Feels Like Cooking",
+   "mood": {
+    "inspired": 1
+   },
+   "duration_min": 180,
+   "autonomy_mult": {
+    "gourmet": 3.0,
+    "interaction:cook_meal_good": 2.0,
+    "interaction:cook_fish_dinner": 2.0
+   },
+   "thought": "I'll cook something special tonight."
+  },
+  "plan_garden": {
+   "label": "Green Fingers",
+   "mood": {
+    "content": 1
+   },
+   "duration_min": 180,
+   "autonomy_mult": {
+    "garden": 3.0,
+    "plant": 2.5
+   },
+   "thought": "The garden needs me."
+  },
+  "plan_create": {
+   "label": "Creative Itch",
+   "mood": {
+    "inspired": 2
+   },
+   "duration_min": 180,
+   "autonomy_mult": {
+    "creative": 2.5,
+    "music": 1.8,
+    "write": 1.8
+   },
+   "thought": "I feel like making something."
+  },
+  "plan_read": {
+   "label": "Wants a Good Book",
+   "mood": {
+    "content": 1
+   },
+   "duration_min": 150,
+   "autonomy_mult": {
+    "read": 3.0
+   },
+   "thought": "I could do with a good read."
+  },
+  "plan_move": {
+   "label": "Wants to Move",
+   "mood": {
+    "energized": 2
+   },
+   "duration_min": 150,
+   "autonomy_mult": {
+    "exercise": 2.5,
+    "fitness": 2.5
+   },
+   "thought": "Time to get moving."
+  },
+  "plan_tidy": {
+   "label": "Spring Clean Mood",
+   "mood": {
+    "focused": 1
+   },
+   "duration_min": 150,
+   "autonomy_mult": {
+    "clean": 2.2,
+    "chore": 2.0,
+    "tidy": 3.0
+   },
+   "thought": "This place needs a good tidy."
+  },
+  "plan_lazy": {
+   "label": "Lazy Spell",
+   "mood": {
+    "content": 1
+   },
+   "duration_min": 180,
+   "autonomy_mult": {
+    "rest": 2.0,
+    "tv": 2.0,
+    "relax": 2.0,
+    "exercise": 0.4,
+    "chore": 0.5
+   },
+   "thought": "Nothing to do and all day to do it."
+  },
+  "plan_play_kids": {
+   "label": "In a Playful Mood",
+   "mood": {
+    "playful": 2
+   },
+   "duration_min": 150,
+   "autonomy_mult": {
+    "interaction:play_together": 4.0,
+    "interaction:tickle": 2.0,
+    "play": 3.0
+   },
+   "thought": "The little ones want to play."
+  },
+  "family_dinner": {
+   "label": "Family Dinner",
+   "mood": {
+    "happy": 1
+   },
+   "duration_min": 90,
+   "autonomy_mult": {
+    "meal": 2.5,
+    "interaction:eat_meal": 2.0,
+    "interaction:eat_meal_good": 2.0,
+    "interaction:board_game": 0.3
+   },
+   "thought": "Dinner's on, everyone!"
+  },
+  "game_night": {
+   "label": "Game Night",
+   "mood": {
+    "playful": 2
+   },
+   "duration_min": 150,
+   "autonomy_mult": {
+    "interaction:board_game": 6.0,
+    "interaction:party_game": 3.0,
+    "interaction:play_pool": 2.0,
+    "interaction:play_together": 3.0
+   },
+   "thought": "Game night!"
+  },
+  "curious_about_noise": {
+   "label": "Curious About the Noise",
+   "mood": {
+    "tense": 1
+   },
+   "duration_min": 20,
+   "autonomy_mult": {
+    "social": 1.3,
+    "interaction:swap_stories": 3.0,
+    "interaction:gossip": 3.0
+   },
+   "thought": "I wonder what that was."
+  }
+ }
+}

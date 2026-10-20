@@ -66,6 +66,7 @@ static func systems_rows(sm: Object) -> Array:
 		["hour/DisasterClock.on_hour", "DisasterClock", 60, 300, N, "hour", DisasterClock.on_hour, null, "running disasters only"],
 		["hour/Vacation.on_hour", "Vacation", 60, 310, N, "", Vacation.on_hour, Callable(Vacation, "busy"), "active trips only"],
 		["hour/PlaceAuto.on_hour", "PlaceAuto", 60, 312, N, "hour", PlaceAuto.on_hour, null, "residents ACTIVE: who is ill, which pets need care (O(residents + pets), a few comparisons each)"],
+		["hour/DynLife.on_hour", "DynLife", 60, 313, N, "hour", DynLife.on_hour, null, "residents ACTIVE / NEAR: stateless dice for small plans, household dinners / game nights / playtime, friends over (O(residents), a few comparisons each); far residents get a stat nudge"],
 		# --- day layer (was SystemsManager._on_day)
 		["day/ensure_registered", "SystemsManager", 1440, 200, N, "", ens, null, "residents only"],
 		["day/Holidays.on_day", "Holidays", 1440, 210, N, "day", Holidays.on_day, null, "world-level"],

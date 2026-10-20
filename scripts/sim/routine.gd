@@ -11,6 +11,10 @@ extends RefCounted
 ##   "tag_mult": {"prepare": 2.0},                  # score multiplier for interactions with the tag
 ##   "tag_bonus": {"prepare": 4.0},                 # flat score bonus (added after multipliers)
 ##   "once": true                                   # each interaction only boosted once per day per routine
+##   (task 32c) "weekend": true|false               # Saturday + Sunday only | weekdays only
+##              "moods": ["sad", ...]               # only while the folk's mood is one of these
+##              "traits_any": ["night_owl"]         # only folk with at least one of these traits
+##              "stages": ["child", "teen"]         # only these life stages
 ## }
 
 ## The routines that are active for `folk` right now ([[id, def], ...]); depends on the time of day and the job only, so one
@@ -75,6 +79,20 @@ static func _active(folk, r: Dictionary) -> bool:
 					return false
 	if r.has("circadian") and not Circadian.in_phase(folk, str(r["circadian"])):
 		return false
+	if r.has("weekend") and bool(r["weekend"]) != (posmod(int(SimEnv.clock().day()) - 1, 7) >= 5):
+		return false
+	if r.has("stages") and not (r["stages"] as Array).has(str(folk.age_stage)):
+		return false
+	if r.has("moods") and not (r["moods"] as Array).has(str(folk.mood_name)):
+		return false
+	if r.has("traits_any"):
+		var any_t := false
+		for t in r["traits_any"]:
+			if folk.has_trait(str(t)):
+				any_t = true
+				break
+		if not any_t:
+			return false
 	var h: float = SimEnv.hour_f()
 	if r.has("before_work_hours"):
 		if not folk.has_job():

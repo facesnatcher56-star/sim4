@@ -205,6 +205,7 @@ func _on_interaction_finished(folk_id: int, iid: String, success: bool) -> void:
 	CareerProgress.on_interaction(folk_id, iid, success)
 	MarketTick.on_interaction_finished(folk_id, iid, success)
 	LifeTick.on_interaction_finished(folk_id, iid, success)
+	DynLife.on_interaction_finished(folk_id, iid, success)
 	RelationshipService.on_interaction_finished(folk_id, iid, success)
 	StoryVisits.on_interaction(folk_id, iid, success)
 	if success:
@@ -263,6 +264,7 @@ func _on_game_event(ev_name: String, payload: Dictionary) -> void:
 	ChaosClock.on_game_event(ev_name, payload)
 	MarketTick.on_game_event(ev_name, payload)
 	LifeTick.on_game_event(ev_name, payload)
+	DynLife.on_game_event(ev_name, payload)
 	MoodSwings.on_game_event(ev_name, payload)
 	StoryPacing.on_game_event(ev_name, payload)
 	Storyteller.on_game_event(ev_name, payload)
