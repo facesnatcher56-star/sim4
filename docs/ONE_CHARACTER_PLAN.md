@@ -1,7 +1,321 @@
 # One-character play: design, cost and risks (owner items 35 and 36)
 
 Status: DESIGN ONLY. No game code was changed. Written for the owner and the reviewer; the builder starts only after the owner decides.
-Revision 1 (task 35) source: `coord/messages/2026-10-22T1430-reviewer-33-34-35-owner.md` and a read of the real code. Revision 2 (task 36) is the section directly below and overrides Revision 1 wherever they differ.
+Revision 3 (owner answers to R9, and task 40) is the section directly below and overrides Revisions 1 and 2 wherever they differ. Revision 1 (task 35) source: `coord/messages/2026-10-22T1430-reviewer-33-34-35-owner.md` and a read of the real code. Revision 2 (task 36) is the section directly below and overrides Revision 1 wherever they differ.
+
+## Revision 3 (owner answers to R9, part 1) and task 40: no free food, homelessness, the housing ladder, communities, rough districts
+
+Status: DESIGN ONLY, no game code changed. Sources: the owner answers in `coord/messages/2026-10-23T0030-reviewer-36-owner-answers-1.md` (no free food, cooking costs money, the 300 coins re-checked) and task 40 in `coord/messages/2026-10-23T0100-reviewer-40-housing-ladder-rough-districts.md` (homelessness, moving house in the first build, the ladder, communities, rough districts, gangs). Revision 3 overrides Revision 2 and Revision 1 wherever they differ; Revision 2 numbers that changed were edited in place and carry "REVISED (Revision 3)". Numbers were run in Python (scratch scripts; formulas shown) on values read from the data files named in each row. Anything I could not verify is listed in R11.8.
+
+### R10. What the owner decided, and the one-line consequence
+
+| Decision | Consequence |
+|---|---|
+| Nobody feeds you: no free community supper, no free welcome basket | Both removed from the pawn's path. Food is bought or cooked from bought ingredients. Survival floor = cheap food for coins, the floor to sleep on, the flat's bathroom, income reachable on day 1 (R11) |
+| Cooking costs money, 3 coins an ingredient to start | Proposal A of R2.3 is adopted (R11.4) |
+| Hunger collapse, hospital bill and debt are an acceptable consequence | R11.7 says what the bill is and what the town does |
+| After eviction: homelessness is part of the game | Sleep rough or use the shelter (a bed, a shower, a locker, a curfew, limited nights, no food); ways back: day labour, a deposit, a cheap room (R12) |
+| Moving house is in the FIRST playable build | Old S9 becomes stages M1 and M2 before the playable gate (R15) |
+| The housing ladder, communities, rough districts, gangs | R12 to R14; tests R16 |
+
+### R11. The no-free-food paper model (re-run with data values)
+
+#### R11.1 The data values and formulas
+
+| Quantity | Value | Source |
+|---|---|---|
+| Hunger decay | 0.075 per minute = 4.5 per hour = 108 per awake-only day; scale -100..100; start 55 | `data/needs.json` `hunger` |
+| Hunger while asleep | x0.4 on the floor (`sleep_floor`, 600 min), x0.35 in a bed | `data/interactions.json` `sleep_floor`, `sleep_bed` |
+| Net hunger loss per day | 16 h awake x 4.5 + 8 h asleep x 4.5 x 0.4 = 72 + 14.4 = 86.4 (Easy x0.8 = 69, Hard x1.2 = 104) | formula; `need_mult` in `data/scenarios.json` `difficulties` |
+| Bakery croissant | 3 coins, +22 hunger, 08:00 to 17:00 = 0.136 coins per point | `data/life/30_food.json` `bakery` |
+| Zip Burger meal | 9 coins, +45, 10:00 to 23:00 = 0.20 per point; fries 4 / +18; veggie wrap 8 / +34 | same file `fast_food` |
+| Vending machine snack | 3 coins, +24 (12 per minute for 2 minutes), cooldown 30 min = 0.125 per point | `data/interactions.json` `buy_snack` |
+| Others (dearer) | food truck 8 / +32 to +34 (Friday to Sunday), soup 7 / +14, lake picnic 8 / +30 | `30_food.json` |
+| Pantry groceries | 30 coins for a bag of 5 units (6 a unit), supermarket 08:00 to 21:00; needs a fridge to be useful | `data/shops.json`, `data/economy.json` `groceries` |
+| Cheapest daily food | bakery only 86.4 x 0.136 = 11.8; "mix" (1 burger + 2 croissants, 0.17 per point) = 14.7; burger only 17.3 | formulas above |
+| Meals a day to avoid starving | about 4 croissants or 2 burger meals (about 90 points) a day; hunger reaches "hungry" (-20) after (55 + 20) / 4.5 = 17 h on day 1, so the first meal is due on the evening of day 1 | formulas |
+| Starvation clock | floor -92; 12 h at the floor = warning; 2,880 min at the floor = collapse; death chance only after 4,320 min; town help after 240 min of collapse (Easy 120, Hard 480 in the R3 ladder); rescue sets hunger to 15 | `data/incidents/02_needs_health.json` `health.needs.hunger`, `rescue` |
+| Hospital | severity 2 (what `HealthCollapse._town_help` sends): bill 220, stay 16 h; severity 1 / 3 = 60 / 700 | `data/incidents.json` `hospital`, `scripts/systems/health_collapse.gd` |
+| Entry wages | per hour: Dishwasher 14 (10 to 16, Mon to Fri), Cashier 12 (6 to 12, every day), Weeder 13 (7 to 13, Mon to Sat), Odd-Jobber 14 (8 to 15, Mon to Fri), Street Busker 14 (17 to 23, Wed to Sun), Gym Attendant 14 (6 to 12), Proofreader 13 (9 to 15), Teaching Aide 13 (8 to 15), Painter 13 (9 to 15, Tue to Sat). Pay = hours x wage x (0.8 + 0.4 x performance/100) x wage index; performance starts 50, so x1.0 | `data/careers.json` (level 1, `settings.pay_perf_*`), `scripts/systems/career_shifts.gd` `on_returned` |
+| Pay timing | each completed shift is paid when it ends (`Economy.deposit` in `on_returned`). There is no weekly pay delay. Hired at 08:00 on day 1: Dishwasher or Proofreader work the same day (84 or 78 paid at 16:00 / 15:00); Weeder, Cashier, Gym, Odd-Jobber, Aide start day 2; Painter day 2; Busker day 3 (Wednesday). Day 1 is a Monday (`Seasons.weekday`, `start_hour` 8) | `career_shifts.gd` `_hired_after_start`, `data/scenarios.json` |
+| Odd jobs (mailbox) | 30 coins now (20 proposed in R2.3) per 90 min, 2 a day, no application, no cooldown beyond the daily cap; costs 9 energy and 9 hygiene each. The mailbox stays in the empty home (`keep_defs`), so it works on day 1 | `data/bank.json` `work.odd_job`, `data/incidents/13_economy.json` `odd_job`, `data/start_home.json` |
+| Busking | NOT in the data except as the career level above. No free-standing "busk for tips" exists (the `street_music` line in `data/vacation.json` is scenery). A NEW optional interaction is possible but not needed (R11.5) | grep `busk` |
+| Bills | issued day 4, 11, 18 ..., due 3 days later; about 60 a week in the starter flat (R2.2); late fee 10 percent (min 10); bills are paid on the DUE day by autopay if the balance covers them, else they go late and count as a missed bill; 3 missed bills repossess belongings | `data/economy.json` `bills`, `scripts/systems/economy.gd` `on_day` |
+| Rent | 70 a week, first due day 8 (the first week is paid by signing the lease), due 3 days after issue; warn at the first miss, notice at the second (R2.2, design) | R2.2 |
+| Prices | bed (sofa bed) 120, computer 900, microwave cart 260 + table 300, fridge 600, stove 450, counter 150 | `data/objects.json` |
+
+#### R11.2 First income: what is really reachable on day 1
+
+| Route | Day-1 reality | Pay |
+|---|---|---|
+| Odd jobs at the mailbox | Always available, from the first minute, no application | 2 x 20 = 40 a day (Normal, proposed); 20 an hour |
+| Jobs tab (notice board), Dishwasher or Proofreader | Needs an opening that week (the new-game board seed in R2.4 guarantees at least two unrestricted entries; which two is random). Hired at 08:00 the shift runs the same day | 84 or 78 at the end of day 1 |
+| Jobs tab, any other entry job | First shift on day 2 (hired after the shift start) | 72 to 98 at the end of day 2 (best: Odd-Jobber 7 h x 14 = 98) |
+| Street Busker (career) | Wed to Sun only: first shift day 3 | 84 |
+| Day labour (NEW, R12) | At the works gate, for the homeless and anyone else | 40 for 4 h (10 an hour), once a day |
+| Crime (rough districts only) | R14 | much more per hour, with heat |
+
+#### R11.3 Day-by-day table (Normal, daily steps)
+
+Model rules (Python, `model.py` in the scratchpad): bills are paid on their due day if the balance covers them; food (14.7 a day, the mix) is paid every day; the bot buys the bed (120) and then the computer (900) when coins minus the price still cover the bills due in the next 4 days plus 3 days of food; sensible = hired on day 1, first shift day 2 (the conservative case), then Dishwasher Mon to Fri 84 a shift, two odd-job sessions (2 x 20) on days it has no shift (day 1, Saturday, Sunday); slow = hired on day 4 (first shift the same day), odd jobs only on weekends; idle-fed = eats and pays bills but earns nothing. Coins at the end of the day:
+
+| Day | Sensible, 300 | Slow, 300 | Idle-fed, 300 | Sensible, 200 | Slow, 200 | Idle-fed, 200 |
+|---|---|---|---|---|---|---|
+| 1 | 205 (bed bought) | 165 (bed) | 285 | 105 (bed) | 185 | 185 |
+| 2 | 275 | 151 | 271 | 175 | 171 | 171 |
+| 3 | 344 | 136 | 256 | 244 | 156 | 156 |
+| 4 | 413 | 205 | 241 | 313 | 225 | 141 |
+| 5 | 483 | 275 | 227 | 383 | 175 (bed) | 127 |
+| 6 | 508 | 300 | 212 | 408 | 200 | 112 |
+| 7 | 473 | 265 | 137 | 373 | 165 | 37 |
+| 8 | 542 | 334 | 122 | 442 | 234 | 22 |
+| 9 | 612 | 404 | 108 | 512 | 304 | 8 |
+| 10 | 681 | 473 | 93 | 581 | 373 | 0 |
+| 11 | 680 | 472 | 8 | 580 | 372 | 0 (rent late) |
+| 12 | 750 | 542 | 0 | 650 | 442 | 0 |
+| 13 | 775 | 567 | 0 | 675 | 467 | 0 |
+| 14 | 740 | 532 | 0 (bill late) | 640 | 432 | 0 (bill late) |
+| 21 | 1008 (computer day 22) | 800 (computer day 26) | 0 | 908 (computer day 24) | 700 (computer day 30) | 0 |
+
+The numbers behind the table: the sensible steady-state margin is +265 a week (R2.5); an odd-jobs-only player (no job at all, 2 sessions every day) nets +47 a week at 20 coins, so it "just feasibly gets by", and it never buys the computer within 6 weeks.
+
+Do-nothing player (hunger only, hourly steps, no eating, awake the whole time; sleeping shifts every date below by about half a day): hunger reaches the floor on day 2 at 16:40, collapses on day 4 at 16:40, the town ambulance comes four hours later, and the pattern repeats every 3 to 4 days because the rescue only lifts hunger to 15. Money events (autopay on):
+
+| Event | Start 300 | Start 200 |
+|---|---|---|
+| Day 4 evening, collapse 1: hospital 220 | paid from coins, 80 left | cannot be paid, becomes a bill (coins 200), due day 7 |
+| Day 8, collapse 2: hospital 220 | becomes a bill (coins 20) | becomes a bill, coins 140 (bill 1 late on day 7) |
+| Day 11 | first late rent: the landlord warning; 2 missed bills | hospital bill late again (2 missed) |
+| Day 12, collapse 3 | 220 more | 220 more |
+| Day 14 to 15 | third missed bill: repossession of belongings starts (day 14) | third missed bill: repossession (day 15) |
+| First late rent | day 11 | day 18 (warning) |
+| Eviction notice (second late rent) | day 18, bailiffs day 21 | day 25 |
+| Debt by day 18 | 3 hospital bills (660) + late fees about 66 + 2 rents 160 | 4 hospital bills (880) + fees about 88 + rent |
+
+So the do-nothing player collapses on day 4, is in debt from day 4 to 8, and loses the flat only in week 3 to 4. That is slower than the "warning in week 2" of R2.5, because the hospital bill, not the rent, is the first thing to fail. An idle-but-fed player (the last columns above) is broke on day 10 (start 200) or 12 (300), has the first late bill on day 11 to 14 and the first late rent on day 11 to 18.
+
+#### R11.4 Cooking costs money (decided)
+
+`cook_meal`, `prep_food_*`, `microwave_meal` and the good/gourmet variants take ingredients (test `coins_at_least`, reason "No money for ingredients", `coins_add` on finish; a partly eaten meal is not refunded). Starting prices at 3 coins an ingredient: `prep_food` 1 ingredient (3), `microwave_meal` 2 (6), `cook_meal` 2 (6), `cook_meal_good` 3 (9), `cook_meal_gourmet` 4 (12). A cooked meal restores about 80 points (12 while cooking plus 15 min of `eat_meal` at 4.5 a minute = 67): 6 coins for 80 points = 0.075 per point against 0.14 to 0.20 on the street. Daily cost cooked: 86.4 / 80 x 6 = 6.5 against 14.7, a saving of about 8 a day or 57 a week. The kitchen (microwave cart 260 + table 300 = 560) therefore does NOT pay for itself soon (about 10 weeks); it buys time (no shopping run), `well_fed` and mood. In the model a sensible bot going kitchen first buys it on day 12 and the computer on day 31. Conflict to fix in S8: supermarket pantry food is 6 coins a unit (`economy.json` `groceries`), twice the ingredient price; either tune groceries to 3 (a 15-coin bag) or let pantry food feed only the fridge-based `grab_snack`. The ingredient price is one data constant (`ingredient_cost`), tuned in S8 as the owner said.
+
+#### R11.5 Busking and the early-income floor
+
+The owner listed busking. In the data it exists only as the Street Busker career (14 an hour, 17:00 to 23:00, Wednesday to Sunday), so the earliest busking pay is day 3. An optional NEW interaction, `busk` (park or plaza, no instrument, 60 min, tips 8 + charisma x 2 coins, once a day), is worth about 8 to 12 an hour, below odd jobs (20), so it is a fun extra and a fallback when the mailbox is gone (homeless), not a pillar. Recommendation: build day labour (R12) first and add `busk` only if the playtest shows players with no way to earn.
+
+#### R11.6 Is 300 still right? No: 200 for Normal (Easy 350, Hard 100)
+
+What the model says:
+- Days of cheap food that 300 buys after the first week's rent is set aside. Reading the owner's sentence as "keep what falls due in the first two weeks": the first bill (60, day 7) and the first full rent (70, day 8) leave 170 coins. At 14.7 a day (mix) that is 11.6 days; bakery only 14.4 days; burger only 9.8 days. With the 120 bed bought as well, 50 coins are left, 3.4 days. Start 200 leaves 70 after the same two charges: 4.8 days (bakery only 5.9), which is "hardly any money".
+- Feasibility. Every working bot survives at every start from 100 up: odd jobs alone pay 40 a day against 14.7 food, and a day-1 job pays 78 to 84 the same evening. No working bot is late on a bill at 150, 200 or 300. So the first week is never infeasible; at 300 it is SOFT: the sensible bot owns the bed on day 1, its lowest balance is 177, and no decision hurts.
+- At 200: sensible bed day 1 to 3, lowest balance 105; slow bed day 5, lowest 156; odd-jobs-only lowest 105; idle-fed broke on day 10, first late rent day 11; one hospital bill (220) is more than the whole purse, so a collapse is real debt from the first minute. That matches "hardly any money, can just feasibly get by".
+- Computer: day 24 at 200 and day 22 at 300 for the sensible bot (day 23 and 20 if the first shift is on day 1), day 26 to 30 for the slow bot. The purse barely moves it; wages do. This is at the top of the owner's "2 to 3 weeks". Data-only option: computer price 900 to 750 gives day 20 (start 200) and day 17 (300). I recommend keeping 900 until the real `pawn_bot` runs (S6) and moving the price only if the measured date is later than day 24.
+- Bed: sensible day 1 to 5 at every start from 100 to 300 (day 3 to 5 at 100), so the owner's "bed by day 3 to 5" holds at 200 (the slow bot gets it on day 5).
+- Honest finding: the steady-state margin once employed (+265 a week, 53 percent of income) is generous; only the days before the first pay are tight. If the owner wants "hardly any money" to last longer, the lever is NOT the purse but the wage or the bill (for example odd jobs to 16 and bills from 60 to 70); the bed and computer dates then slip by about a week. I did not change those.
+
+Easy and Hard (same model; `need_mult` 0.8 / 1.2, R3 multipliers: wages x1.10 / 0.90, prices x0.95 / 1.10, rent 55 / 70 / 85, bills x0.8 / 1 / 1.3, odd job 24 / 20 / 16):
+
+| | Easy | Normal | Hard |
+|---|---|---|---|
+| Starting coins | 350 (was 500) | 200 (was 300) | 100 (was 150) |
+| Food a day (mix) | 69 points, 11.1 coins | 86 points, 14.7 | 104 points, 19.4 |
+| First week's rent | prepaid | prepaid | NOT prepaid: rent issued day 4, due day 7 |
+| Hospital bill, hunger collapse | 154, town help after 120 min | 220, 240 min | 308, 480 min |
+| Sensible bot: bed / computer / lowest coins | day 1 / day 13 to 15 / 139 | day 1 / day 23 to 24 / 105 | day 5 to 6 / day 47 to 53 / 80 |
+| Slow bot | bed day 1, computer day 19 | bed day 5, computer day 30 | bed day 12 to 18, computer after week 8 |
+| Odd jobs only | fine, computer day 34 | +47 a week, no computer | late rent from day 14: not survivable by design |
+| Idle-fed | broke about day 15, late rent day 18 | broke day 10, late rent day 11 | broke day 4 to 6, late rent and bill on day 7 |
+| Do-nothing | collapse day 5, two bills paid before debt | collapse day 4 | collapse day 4; death chance about 5 percent per collapse (death clock 3,000 min vs town help at 2,880 + 480) |
+
+Hard is survivable only with a real job from the first days; Easy is the "learn the game" setting.
+
+#### R11.7 Hunger collapse: the bill, the debt and what the town does
+
+What happens today (verified in code): after 2,880 minutes at the floor the pawn collapses; a housemate would help (none in the solo start); after `town_help_min` (240 on Normal) passers-by call an ambulance: `HealthCollapse.rescue` (hunger set to 15, "shaky" buff, no food given) and `Hospital.emergency(id, 2, "neglect")`: a 16-hour stay and a bill of 220. `Hospital.charge` takes the coins at once if the balance covers the bill; otherwise the bill goes into the bill book as `reason: hospital`, due in 3 days, and follows the ordinary rules: 10 percent late fee, counts as a missed bill, three missed bills repossess belongings, and it feeds `CrimePressure` (debt, late bill), which raises the desperate-crime odds. Health insurance (80 percent) pays only if bought. There is no negative balance; "debt" is the unpaid-bill list.
+
+What the town does, and the proposal: today nothing more than the rescue (no food, by the owner's rule). The rescue lifts hunger to 15, about 24 hours before the floor again (107 points / 4.5), so a player who does not eat is rescued about every 3 to 4 days and billed 220 each time: 880 plus fees by day 18 (R11.3). Proposed (small, data plus one hook): (1) after the second hunger neglect within 14 days the discharge letter offers a PAYMENT PLAN: the hospital bills merge into one paid in four weekly parts with no late fee while the parts are paid (a bill rule, not food or money); (2) the second neglect also writes a Chronicle line and a Jobs-tab banner ("The town clinic suggests the notice board"); (3) a neglect bill is issued at most once per 6 game days, so nobody is billed twice inside one recovery window. All three are tuning knobs for S6. Nothing here gives food or coins.
+
+#### R11.8 Unverified, flagged
+
+- Whether the starter map places a vending machine near the flat: the lot templates contain `vending_machine` (public lots), so `buy_snack` exists, but I did not trace the placement. The model uses the bakery and burger prices, which are verified; vending is a bonus.
+- Whether a hospital stay pauses hunger. The model pauses it for 16 hours.
+- Whether the commute charges a bus fare (`data/transport.json` bus fare 4). If it charges 4 each way, a full-time week costs 40 more; the margin falls from 265 to 225 and the computer slips to about day 26 at 200 coins.
+- Whether the starter flat template has a counter (`prep_food` needs `counter`, 150 coins) or only a bathroom nook.
+- Whether the Jobs tab opens for a player without an address (homeless, R12).
+- Pantry groceries at 6 a unit vs ingredients at 3 (R11.4).
+- The hired-after-start rule uses `Commute.lead_hours` (walk time to the workplace); a long walk could push a 10:00 shift to day 2. Treated as same-day for hires at 08:00.
+
+### R12. Homelessness, moving house and the housing ladder
+
+#### R12.1 After eviction: homeless, not game over
+
+Eviction (Tier A in R2.2): the second late rent serves the notice, three days later the bailiffs clear the flat (up to 3 belongings taken, existing `ChaosMoney.eviction`), the lease ends, unpaid bills stay as debt (they block new rentals and the council list until cleared), and the player is on the street with what they carry. The game continues.
+
+- Sleeping rough (bench, park, doorway): energy +0.05 a minute (floor 0.08, bed 0.125 in `data/interactions.json`), buff `slept_rough` (uncomfortable 2.5 for 8 h, worse than `slept_badly` 1.5); hygiene and fun decay unchanged; cold nights use the existing exposure machinery (`health_exposure.gd`, `health_shelter.gd`). Per night risks (Normal, ordinary district): robbery 3 percent (loses up to 50 percent of the coins carried: the existing `robbery.share` 0.5 and `min_coins` 20), moved on by police 20 percent (woken, no fine, walk to another spot). In a rough district: robbery x4 (12 percent), moved on x0.3 (nobody cares). Carrying fewer than 20 coins is not robbed.
+- The shelter (a lot on plot_3, R14.4; open to anyone with no home): free bed in a dorm, hot shower, a locker (10 items, safe from theft), check-in 20:00 to 22:00, out by 07:00 (curfew), 3 nights a week on Normal (Easy 4, Hard 2); sleep there is `sleep_bed` quality (energy 0.1, no `slept_badly`, 10 percent noise); NO food, not even a snack. Cause line: "The council runs a shelter because people lose their homes; it gives you a bed, not a meal."
+- Day labour (NEW): at the works gate, 07:00 to 09:00 pick up 4 hours of work, 10 coins an hour = 40, once a day, no application, no mailbox needed. Open to anyone (a rung below odd jobs).
+- Ways back (computed in R12.4): day labour and the Jobs tab; a deposit; a cheap room.
+
+#### R12.2 The ladder: rungs, numbers, causes and reasons to climb
+
+Rents are weekly, Normal, all-in = rent + the bills share. Property values follow the existing `HousingProps` yield (0.012 of value a week, `data/housing.json` `rent`), so a property of value V rents for 0.012 x V. Rough-district variants are in R14.1. Deposit = one week's rent (the "arrears plus a week's deposit" of R2.2).
+
+| Rung | Rent + bills (all-in) | Deposit | What you get | Cause line (why it costs what it costs) | Reason to want the next rung |
+|---|---|---|---|---|---|
+| 1 Street | 0 | 0 | Poor sleep, robbery and move-on risks | "Nobody owns the bench, so nobody charges for it; nobody keeps it safe either." | Tired, cold, robbed; the shelter is free |
+| 2 Shelter | 0 (3 nights a week) | 0 | Dorm bed, shower, locker, curfew, NO food | "The council pays for a few beds; it cannot pay for more nights." | Only 3 nights, the other 4 are the street; no day storage; no address for a job |
+| 3 Rooming house or bedsit | 35 (rent 25 + 10 shared bills) | 35 | A cot and a locker in a shared house; shared bathroom (30 percent chance it is occupied at peak, up to 20 min wait); thin walls (15 percent a night `slept_badly`); petty theft 4 percent a week (lose up to 25 coins or an object unless the 40-coin lockbox is bought); no kitchen (street food only); no computer without theft risk | "A room in somebody else's house is cheap because you share everything." (property value about 2,100) | Privacy, a kitchen, a safe computer, no queue for the shower |
+| 4 Council flat | 95 (rent 50 + bills 45) | 0 (council) | Own door, bathroom, kitchenette (counter); unfurnished; secure tenancy (eviction only at 3 missed rents); rent rises 10 percent per 100 a week of earnings above 450 | "The council lets flats below market to people with little income, so you apply and you wait." Needs: not in arrears, income under 450 a week, not an owner. Wait 14 days Normal (Easy 7, Hard 21), halved with a shelter letter | The wait; the estate is in a poorer district (roughness 0.4); the rent follows your pay; rules (no business, no sub-letting) |
+| 5 Starter flat (the 36 start) | 130 (70 + 60) | 70 | The Starter Studio template; private landlord; open market; no list | R2.2 | One room; the bills fall on you |
+| 6 Better flat | 190 (120 + 70) | 120 | 1-bedroom, own kitchen and bath, decent district (hood 0.55); needs income of about 600 a week (a level 2 job) | Market rent of a 10,000 property | Space, a district with a school and a park |
+| 7 Good-district flat or small house | 270 (180 + 90) or a mortgage (20 percent down, existing `HousingAgent.buy`) | 180 | A garden, a second bedroom, a quiet street | A 15,000 to 21,000 property (`value` rules) | Family, heirs, owning |
+
+The starter flat is therefore NOT the cheapest rung (the council flat and the bedsit cost less), but it is immediate, private and not means-tested, which is why a new player starts there. A player can also step DOWN on purpose: giving notice and moving to a bedsit saves 95 a week, which is how a failing player avoids eviction. The step-down is a deliberate "Move" command, not a punishment.
+
+#### R12.3 Moving house (in the first build)
+
+Needed for: eviction (leave the flat), the shelter and bedsit, the council flat, and every step up. What exists: `PlayerLots.claim` (co-op only: converts a townie home, moves the townies out, sets the region `pid`); `HousingAgent` rent/buy/sell/lease-back; the statistical listings (flats and houses that are numbers, not lots). What the design needs:
+1. A solo `PlayerLots.move(player, lot_id, tenure)` reusing the claim machinery: the target lot's region gets the `pid`, its residents are relocated, the old lot reverts to the landlord or market, and the pawn and belongings arrive (what is in the old home's inventory, a 15-coin moving fee, up to 40 objects; anything left behind is lost). The starter flat, council flat, better flat and houses must be REAL lots; the statistical listings become real by being mapped onto free lot units. The bedsit and the shelter are interior areas of one rooming-house and one shelter lot (R14.4), so the pawn "lives in" a room without a lot claim.
+2. A tenancy record per rung: weekly rent, deposit, notice period (7 days), a waiting-list state for the council flat, a lockout state (homeless).
+3. A homeless state: no home lot. Tests such as `at_home_lot` use the lot where the pawn last slept, so `sleep_floor`'s test and the self-action menu still work outdoors.
+4. Camera, save, `Neighborhood.residents_of`, bills and the mailbox (odd jobs) follow the home. The mailbox is a fixture of rented lots only, which is why homeless players need day labour.
+Highest unknown (still): many systems assume one fixed home lot. M1 starts with a spike that lists them (grep for `Neighborhood.home_id`, `Players.primary_household` and the `home` region).
+
+#### R12.4 Climb times (computed)
+
+Python, `climb.py`: after eviction coins 20, arrears 150, food 14.7 a day, day labour 40, a Dishwasher shift 84; the bedsit needs deposit 35 + week 35 + 3 days of food, the starter flat needs the arrears cleared plus deposit 70 + week 70 + bills 60 + 3 days of food.
+
+| Player | Bedsit | Arrears paid | Back in a starter flat |
+|---|---|---|---|
+| Job hired on day 1 after eviction | day 2 | day 5 | day 9 |
+| Job hired on day 4 | day 4 | day 8 | day 11 |
+| Day labour only | day 4 | day 12 | day 21 |
+| Job on day 1 in a rough district (robbery x4 costs about 12 percent) | day 3 | day 5 | day 9 |
+
+Homelessness is a bad week or two, not a spiral, if the player works. The council flat is a slower alternative (14 days) that also cuts the weekly cost by 35.
+
+### R13. Communities (heritage never sets income, crime or district rank)
+
+- Data: NEW `data/heritage.json`, a small list of fictional heritage ids (name pools, cuisine, festival, a shop/venue tag). `heritage` is a field on `Folk`, inherited like looks: `Genetics` (`data/genetics.json` `inherit`) passes it from the parents (one parent's heritage, or "mixed" in 20 percent); the pawn picks one in the creator (or random); townies get theirs from a seeded pool that does NOT depend on their home lot, job or wealth. Looks (skin tone etc.) stay a separate field with their own inheritance; the two are not tied by design, and the test covers both.
+- Soft pull when choosing where to live: for a household H and district D, `pull = 1 + 0.15 x relatives_in_D (cap 3) + 0.10 x known_people_in_D (friends or better, cap 3) + 0.10 x heritage_share_in_D (0..1)`, capped at 1.4. It multiplies the weight in the townie house choice (`HousingAgent` buy and rent picks) and sorts the player's listings with the tags "near family", "friends nearby", "community shops here" (no price effect). Community shops and venues are places with a `heritage` tag in the existing place data (cuisine items, festival days); their prices are the same as any other.
+- Clustering emerges because the pull compounds over years at every income level (a poor family in a rough district and a rich family in a good district both gather relatives). It is never an input to rent, wages, hiring, justice, `CrimePressure` or district roughness. Enforced twice: (1) a source guard test greps the economy, careers, justice, crime and district scripts for the token `heritage` and fails on any hit; (2) the statistical test below.
+- `heritage_independence_test` (slow tier): 8 seeds x 5 game years; for each heritage compute the mean household income rank, the crime-victim and offender rate and the mean district roughness rank of its members; assert each lies within 2 standard errors of the town mean (a permutation test with shuffled heritage labels gives the noise band), and the same for skin tone; also assert that the cluster index (share of a group's neighbours with the same heritage) rises above the shuffled baseline in all three income terciles.
+
+### R14. Rough districts, crime and gangs
+
+#### R14.1 District economics (each with a cause line)
+
+NEW data `districts` in `data/city.json` (extends `zones`): each district has `lots`, `roughness` 0..1 (0 = ordinary, 0.4 = poor, 0.85 to 1 = rough), a police coverage and a jobs mix. Roughness is COMPUTED each month from play and economics (vacant units, resident unemployment, police funding, crime points of the last 28 days via `CrimeRate`), with a starting value from the map; it is never read from heritage.
+
+| Effect | Ordinary | Rough (roughness 0.85) | Cause line |
+|---|---|---|---|
+| Rent | 100 percent of market | 70 percent: bedsit 28, flat 55 + 50 bills, better flat 85 + 55 | "Landlords cannot charge more because nobody wants to live there." |
+| Jobs within 2 blocks | 6 to 8 careers | 1 to 2 (the works only) | "The shops and offices left; the works hires few." |
+| Commute to the good jobs | 5 to 13 min | 17 to 21 min (3 to 4 blocks; bus 4 coins each way if the fare applies) | "The good jobs are in the town centre." |
+| Police | `police.response_min` [12, 30], `catch_on_scene` 0.5, patrol x1 | response [35, 90], catch 0.2, patrol x0.35 | "The council underfunds it: the police budget follows the district's tax base." Ties to Council and task 12 `CityBudget`: district police share = funding x (1 - 0.5 x roughness); the mayor can raise it |
+| Empty units and shops | 0 to 10 percent | 30 to 40 percent vacant; two of three shop slots empty; no bakery | "Shops close when customers leave; empty units attract squatters and dealers." |
+| Schools (world context only) | funding as the town | school quality x0.8 | "Less tax base." No harm to children as gameplay. |
+| Cycle | | Improves with police or amenity funding, a council project, a boom or gentrification (property value up, rent up 10 percent a month until roughness falls under 0.5, locals priced out: Council and 13 later); worsens in a recession, with closures, a gang war | Both directions exist |
+
+#### R14.2 Crime numbers ("extremely higher")
+
+Baselines are today's data: robbery, burglary and assault from `data/justice.json` (`robbery.share` 0.5, `burglary`, `assault.far_daily` 0.004), gang war `daily` 0.004 and `recruit_daily` 0.03 (`data/crimeunder.json` `gang`), town `CrimeRate.crime_mult` 0.6..1.8, storyteller `hard_cap` 1.5. A district multiplier D(roughness) = 1 + k x roughness^1.5 applies INSIDE the district only, per incident kind:
+
+| Incident (inside a rough district, roughness 0.85) | Multiple of the town baseline | Cap | Note |
+|---|---|---|---|
+| Break-ins (burglary pick) | x6 | 8 | burglars are drawn from the district's own desperate townies (`CrimePressure`) |
+| Street robbery (night, outdoors, carrying 20+ coins) | x8 | 10 | the player always may Hand over / Run / Fight (`CrimeStreet`) |
+| Assault, brawls, gang fights | x5 | 8 | |
+| Vandalism, theft, shoplifting | x4 | 6 | |
+| Dealers on corners | 2 per block (vs 0 to 1) | | `CrimeUnderDeal` townies (tasks 21 and 23) |
+| Gang war starts | 0.004 to 0.02 a day (x5) | | `gang.war.daily`; wars last 8 to 16 days with 1 to 3 incidents a day, as today |
+| Gang foundings | 0.01 to 0.04 a day (x4); max_gangs 3 town-wide, 2 per rough district | | |
+| DRIVE-BY (NEW, district-scoped) | 0.006 a day in peace, 0.04 a day in a gang war | own cap | about 0.5 a game year (28 days); owner list in R14.6 |
+
+Poor districts (roughness 0.4) get x2 to x3. Town-wide caps stay: `hard_cap` 1.5 and the `hard_incidents` list (murder, serial killer, disasters) are unchanged; murder and serial-killer caps remain town-wide. The district caps (6 to 10) apply only to the kinds above, inside rough districts. `crime_mult()` (town) still scales the pressure rolls, and the district term multiplies it, so a safe town makes rough districts safer too. The `CrimeRate` window feeds back into roughness (the cycle).
+
+Drive-by incident, non-graphic (event text and a camera shake, no gore): at night (20:00 to 03:00) a car passes a gang-held block and shots are heard. Only people outdoors on the target block can be hit. Chance an exposed person is hit: 8 percent. If hit: injury severity 1 (60 percent, hospital 60), 2 (28 percent, 220), 3 (12 percent, 700, ward stay); death in 12 percent of the hit (about 1 percent per exposure), only if `mature_events` is on and "Gang violence" is above Low. Children are never exposed (indoors or at school by rule; no child victims). The police respond (R14.1 times), witnesses give leads, the Chronicle gets a line. Expected player death risk: 0.5 drive-bys a year x 15 percent chance the pawn is outdoors there x 1 percent = about 0.08 percent per game year. NPC townies use the statistical version with the same rates.
+
+#### R14.3 Gangs
+
+Reuse `CrimeUnderGang` (task 23: boss, ranks associate/soldier/lieutenant/boss, territory as corners, dues, loyalty, wars, crackdowns, informants, `leave_traitor` 0.3, `recruit_daily` 0.03). Changes: territory = BLOCKS of the district (a few lots); 2 named crews per rough district from the existing name list (the Harbour Crew, the Ashen Hands, the Lantern Row boys, the Salt Street Family, the Velvet Knives, the Corner Kings); the pecking order that already exists; NPC members are townies with job-like roles: lookout, runner, dealer, enforcer (each a small row in `crimeunder.json`, paying 20 to 90 a shift); rivalry starts a war with the existing probability x5 inside the district; revenge follows a killing or an arrest (`CrimeRevenge`); police crackdowns end wars (`police_end` 0.06; bust base 0.002 raised to 0.01 where coverage is low and a tip exists). A crew GROWS when residents are jobless and police coverage is low (recruit x1.5 per 10 percent unemployment above 20), and SHRINKS after a crackdown, a jailed boss (`boss_jailed` -0.25 loyalty) or when roughness falls under 0.5.
+
+#### R14.4 Hosting one rough district on today's map (task 30 does not wait)
+
+Map facts (`data/map_layout.json`): row 2 has `townie_c`(0), `home`(1), `townie_a`(2), `townie_b`(3), `works`(4); row 3 has `hospital`, `police`, `courthouse`, `apartments`(3), `car_park`(4); column 5 holds four empty `plots`. District "the Kiln Quarter" = the south-east of the grid:
+- `apartments` (3,3): becomes the rooming house (bedsits are interior areas, shared bathroom) with council flats on the upper floors; it is `NOT_CLAIMABLE` in `PlayerLots` today, so the move-in rules are changed for it.
+- `townie_b` (3,2): the "second townhouse" (base 11,000, hood 0.45, the cheapest home): its rent drops to the rough band.
+- `works` (4,2): the industrial edge: the day labour gate and the district's only legal jobs.
+- `car_park` (4,3): the corner: vending machines, loiterers, dealers, the gang hangout and the drive-by target block.
+- `plot_3` (5,2): a new small lot "shelter" (dorm, shower, lockers; a template reusing bed, shower and locker defs); `plot_4` (5,3): left empty (a vacant lot) with an empty-shop row.
+- `police` (1,3) and `courthouse` (2,3) are two to three blocks west, but their patrol share to the district is x0.35 (underfunding, not distance).
+Changes: the `districts` table above, `hood` 0.25 on these lots, a per-lot district tag read by `CrimeRate`, `CrimeBurglary`, `CrimeStreet`, `Incidents` weighting and the `Storyteller` cards, the shelter template, day labour, vacant-unit flags. The future generator (task 30) places one or two such districts (cheap old housing near the works or rail, few amenities) from the same table.
+
+#### R14.5 The pressure cycle (the core), ways out, opt-outs
+
+Offers (every one a player choice; NPCs decide by traits and need):
+- Trigger: the pawn lives in a district with roughness >= 0.6 and is broke (`CrimePressure` broke or poor: coins < 150), or jobless, or has a late bill. First offer within 3 days on Normal (Easy 5, Hard 2), then one every 4 days while the trigger holds: a recruiter, a friend or a dealer who needs a lookout.
+- Pay against legal work: lookout 2 h for 40 (20 an hour, same night, no commute), run 1 h for 55 (55 an hour, 10 percent chance of rivals or police trouble), corner dealer shift 4 h for 90 plus stock risk; legal: day labour 10 an hour, Dishwasher 14, odd jobs 20, all slow to start or far.
+- Cost of accepting: heat (police attention +8 per job, decays 1 a day; arrest chance 3 percent per job in a low-coverage district, 8 percent elsewhere), dues of 3 a day once in (the existing `dues_day`), crew obligations (jobs you cannot refuse without standing loss), rivals (revenge), and a RECORD if caught (the existing `record_no_job` pressure; hiring blocked by `JusticeCareers`; the record expunges after `expunge_days` 56 = two game years of clean living).
+- Refusing: stay clean, poorer; the recruiter returns, with threats on the third refusal (a loss of standing in the block, a scare, never an executed death threat).
+- Ways out: climb the ladder (R12), a steady legal job, community programs (a free night class a week at the library: +1 skill step per 4 weeks; a mentor volunteer townie who lowers `CrimePressure` like the existing "charity" help 0.2), expunging, leaving a crew (cost: a payoff of 150, or the existing `leave_traitor` 0.3 chance of violence and standing loss).
+- Opt-outs: a new setting "Gang violence" (off / low / normal / high = 0 / 0.35 / 1 / 1.5 on district violence kinds: robbery, brawls, gang war, drive-by). Off: no gang wars, no drive-bys, no gang fights, no violent crew jobs (break-ins and petty theft still follow the `Surprises` setting). "Mature life events" (existing `mature_events`) off forces Low, removes deaths from district violence (injury only) and drive-by deaths entirely. Both live in Settings, saved per game, the host's choice in co-op.
+- Hard limits stay: no trafficking, no sexual content, no harm to children as gameplay (kids are affected only as world context such as school quality; no child victims of shootings or crime offers).
+
+#### R14.6 For the owner (new numbers outside the old rarity caps)
+
+1. Drive-by rate: 0.006 a day in peace, 0.04 a day in a gang war, about 0.5 a game year in a rough district; death chance 12 percent of the hit, with an 8 percent hit chance when outdoors on the block. Lower or higher?
+2. District violence caps of 8 to 10 times the town rate (break-ins x6, robbery x8, brawls x5) beyond `hard_cap` 1.5: OK?
+3. Murder and serial killer stay town-wide capped: confirm.
+4. Recruitment: the first offer for a broke player within 3 days on Normal: OK?
+
+### R15. The 36 stage plan with 40 inside it
+
+Old S9 (move up, 2 sessions, optional) is replaced by M1 and M2, which sit BEFORE the playable gate. Everything else is as R4 except where marked.
+
+| Stage | Deliverable | New tests | Sessions | Risks |
+|---|---|---|---|---|
+| S0 Foundations | as R4 | `pawn_basics_test` | 1 | Low |
+| S1 Silence the pawn | as R4 | `pawn_leak_test`, `pawn_alone_test`, `pawn_commute_test` | 2 | Hidden state changers |
+| S2 Survival floor | CHANGED: self-action menu, fixtures, `PawnWarn`, reflexes, cause lines; NO supper and NO basket; the bakery/burger/vending food route; start tips rewritten; rough-sleeping buff and risks | `pawn_floor_test`, `pawn_warn_test`, `pawn_reflex_fire_test`, `pawn_nofood_test` | 2.5 | UI; warnings not noisy |
+| S3 The new start | as R4 with the Revision 3 numbers (200 coins, difficulty ladder incl. hospital and shelter nights), ingredient costs (R11.4) | `start_flat_test`, `pawn_rent_test`, `pawn_difficulty_test` | 3 | Tenancy at start touches `HousingProps` and `Economy` |
+| S4 Time | as R4 | `pawn_skip_test`, `pawn_afk_test` | 2 | Skip rate on the big map |
+| S5 Routines | as R4 (may move after the gate to save 2, if the owner agrees) | `pawn_rules_test`, `pawn_rules_replay_test` | 2 | Scope creep |
+| M1 Moving house and homelessness (NEW, first build) | solo `PlayerLots.move`, tenancy records and deposits, lease end and lockout, homeless state, rough sleeping, shelter (lot on plot_3: dorm, locker, curfew, nights a week), day labour, moving fee and belongings, camera and save follow, arrears blocking rentals | `pawn_move_test`, `pawn_evict_test`, `pawn_shelter_test` | 3.5 | Highest unknown: fixed home lot assumptions |
+| M2 The ladder (NEW, first build) | bedsit and rooming house (shared bathroom, noise, theft, lockbox), council list and application, better flat and house via claim, step-down command, listings mapped to real lot units | `pawn_ladder_test`, `pawn_council_test` | 2.5 | Content volume |
+| S6 Balance and test migration | `pawn_bot` including the eviction-and-climb bot and the no-free-food asserts (R16), test migration, new hash baseline | `pawn_bot_balance_test` (slow) + 5-day fast variant | 3.5 | Numbers are paper arithmetic until here |
+| S7 Storyteller, growth, heirs | as R4 | `pawn_storyteller_test`, `pawn_heir_test`, `pawn_child_test` | 2 | Rates feel wrong until played |
+| S8 Ask and the family strip | as R4 | `pawn_ask_test`, `pawn_guard_test`, `pawn_suggest_test` | 1.5 | Odds tuning |
+| C1 Communities (task 40) | `heritage.json`, inheritance, soft pull, listing tags, community places | `heritage_independence_test` (slow), source guard | 1.5 | Statistical test flakiness |
+| D1 Districts (task 40) | `districts` table, monthly roughness, the Kiln Quarter on the current map, district rent, jobs, police, vacant units, council funding link | `district_rates_test`, `district_econ_test` | 2 | Council and 12 hooks |
+| D2 District crime, gangs, pressure cycle (task 40) | district multipliers on incidents and cards, drive-by incident, dealers on corners, blocks as territory, crew roles and growth, offers, heat, record, ways out, "Gang violence" setting, mature gating | `district_pressure_test`, `gang_off_test`, `district_climb_bot`, `child_safety_test` | 3 | Tone and volume; storyteller rates |
+| T Test glue | the task-40 tests in the slow tier, docs | | 0.5 | |
+| Total | | about 24 new files | about 32.5 (range 27 to 40) | |
+
+Playable one-character game (the GATE = S0 to S6 plus M1 and M2): 1 + 2 + 2.5 + 3 + 2 + 2 + 3.5 + 2.5 + 3.5 = 22 sessions (about 20 with routines after the gate). It was 15 in R4: +7 = M1 3.5 + M2 2.5 + S2 +0.5 + S6 +0.5. After the gate: S7, S8, C1, D1, D2, T = 10.5 more.
+
+Parallelism: S4 and S5 in parallel; M1 then M2 after S3 (M2 needs M1's tenancy), S6 after both; C1 and D1 can start once M1 exists (C1 needs only heritage and listings; D1 needs the district table and lots); D2 after D1; S7 and S8 in parallel.
+
+What moves earlier: the old S9 (moving) is now M1 and M2 inside the gate; the Tier B night shelter moves from S9 to M1. What moves later: only S5, optionally.
+
+Cut order if time is short (cut first to last): D2 secondary (crew pecking order and revenge depth, community programs, mentor), D1 beyond the one district (the gentrification cycle), C1 communities, S8, S5 depth, the lifestyle-need multiplier. Not cuttable by the owner's decisions: no free food (S2, S3), ingredient costs (S3, tuned in S8), M1 and M2 (moving, shelter, the ladder); if D2 ships, it ships with the opt-out setting.
+
+### R16. Tests (new in Revision 3)
+
+- `pawn_nofood_test` (fast): new game, the pawn does nothing: `welcome_snack` or any free-food interaction is never offered or run for the pawn; hunger falls 86 +- 4 a day; first collapse on day 4 to 5; the first hospital bill 220 the same evening; no death by day 14.
+- `pawn_bot` asserts (R2.5 updated): sensible bot, 3 seeds, 14 days: alive, no late bill, first wage by day 2, bed by day 5, computer by day 26; slow bot: no late bill, bed by day 8; odd-jobs-only: balance non-negative every day for 28 days; idle-fed: first late rent on day 11 to 18; do-nothing: first collapse on day 4 to 5.
+- `pawn_ladder_climb_bot`: an evicted pawn on Normal with a hired job: in a bedsit within 4 days, back in a starter flat within 14 days; day labour only: bedsit within 6 days, a flat within 28 days.
+- `district_rates_test`: over 5 game years, 3 seeds, incident rates per 1,000 resident-days in the Kiln Quarter vs the rest: break-ins ratio in [4, 8], robbery [5, 10], assault [3.5, 7]; the rest of the town stays within the existing band; murder and serial incidents per town-year unchanged vs baseline (within noise).
+- `district_pressure_test`: a broke pawn (coins < 50, jobless) living in the Kiln Quarter receives a first crew offer within 3 game days on Normal (5 on Easy, 2 on Hard); a pawn with a job and 300 coins gets none; every offer waits for a decision (no autoplay).
+- `district_climb_bot`: a clean pawn in the Kiln Quarter (bedsit 28) with a legal job and no offer accepted reaches a starter flat within 21 game days and leaves the district within 6 weeks; the district's commute does not make a job unreachable (a job within 21 min).
+- `heritage_independence_test` (R13): correlation of heritage with income, crime and district rank within the permutation noise band across 8 seeds.
+- `gang_off_test`: with "Gang violence" Off, 5 game years in the Kiln Quarter produce zero `gang_war`, `drive_by` and `gang_fight` events and no violent crew offers; with `mature_events` off, no drive-by and no death from district violence.
+- `child_safety_test`: no child-stage folk is ever a target, victim or in the exposure list of a drive-by or crime offer.
+
+### R17. Remaining questions
+
+None open from R9. New small ones are in R14.6 (drive-by rate, district caps, murder caps, recruitment timing) and in R11.6 (200 coins vs the owner's expectation; the employed margin is generous).
+
+---
 
 ## Revision 2 (task 36): one character is THE game, not a mode
 
@@ -10,7 +324,7 @@ Status of Revision 2: DESIGN ONLY, no game code changed. Source: the owner decis
 ### R0. The short version
 
 1. There is no `Pawn.mode` flag and no second game. The pawn is simply "the head of the local player's household in the `Players` table" (`Pawn.of(player_id)`). Where nobody registered a player (almost every test fixture, `HoodKit`) there is no pawn and every folk stays an autonomous NPC. That one fact removes most of the test migration (R5).
-2. The start is one adult from the creator, alone, renting a cheap starter flat with a bathroom but no furniture, with 300 coins (Normal). Food comes from street food and a free evening supper at the community hall; sleep comes from the floor until a 120-coin sofa bed is bought. Details and numbers in R2.
+2. The start is one adult from the creator, alone, renting a cheap starter flat with a bathroom but no furniture, with 200 coins (Normal; REVISED in Revision 3, was 300). There is NO free food of any kind: food is bought (street food, vending, corner shop) or cooked from ingredients that cost coins; sleep comes from the floor until a 120-coin sofa bed is bought. Details and numbers in R2 and Revision 3 (R11).
 3. The existing "empty home" start (task 32d) is the right base but is far too rich and too safe: it gives 5,500 coins, an owned home, free infinite snacks from a welcome basket, and (measured) `AutoFurnish` spends 1,900 coins of furniture on day 2 for a player who does nothing. All three are removed or changed (R2.1).
 4. A real gap found while reading the code: the "survive with nothing" fallbacks (`sleep_floor`, `welcome_snack`, `cafe_restroom`) are `target: "self"` interactions that ONLY the autonomy picker can start. No menu lets a player order them. With the pawn silenced, the survival floor would be unreachable. A "self actions" menu is stage S2 work, not polish.
 5. Effort: about 20 agent-sessions (range 17 to 25), up from 14, because the start economy, rent/eviction, the new creator and the deletions are new work that Revision 1 did not have. Dropping the flag and the dual-mode test burden saves roughly one session. The game is playable end to end after S6 (about 15 sessions); S7 to S9 (storyteller growth and heirs, the family "Ask" system, moving up) follow and can ship later.
@@ -45,11 +359,11 @@ I ran the real new-game path (`NewGame.start`, solo scenario, empty home, world 
 | Evicting a player tenant | `HousingRent._bill` only serves an "eviction notice" toast on the second late rent; `ChaosMoney.eviction` (07b) takes up to 3 belongings after a notice. Nothing ever ends the tenancy or locks the player out | "Eviction is a real risk" needs a defined outcome (R2.2, row "Eviction"). |
 | Welcome basket | `welcome_snack`: `hunger < 45`, no fridge, cooldown 150 min, +42 hunger, no stock, no price | Free food forever in a bare home. Must be finite. |
 | Self interactions | `sleep_floor`, `welcome_snack`, `cafe_restroom` are `target: "self"`. `InteractionQuery.entries_for` handles only `object` and `folk`; `Autonomy._folk_self_defs` is the only reader | The player has no way to order them. |
-| Home cooking | `cook_meal`, `prep_food`, `microwave_meal` use no ingredients (only `grab_snack` takes 1 fridge stock; `fridge_clean` is true when there is no fridge) | Unlimited free food once a stove or microwave exists. See R2.3 for the proposal. |
+| Home cooking | `cook_meal`, `prep_food`, `microwave_meal` use no ingredients (only `grab_snack` takes 1 fridge stock; `fridge_clean` is true when there is no fridge) | Unlimited free food once a stove or microwave exists. DECIDED by the owner (Revision 3): ingredients cost coins, 3 per ingredient to start (R11.4). |
 | Odd jobs at the mailbox | 30 coins per 90 minutes, 2 a day, no skill, no application (`data/bank.json` `work.odd_job`) | 20 coins an hour beats the dishwasher (14 an hour). Too rich for "hardly any money". |
 | Job board | Town window, Jobs tab (`LifeHubJobs` / `EduJobs`): weekly openings per career (0 to 3, each career about 50 percent open), Apply hires at once, no computer needed | Day-1 income without a computer already works, if there are openings. |
 | Entry wages | 12 to 17 coins an hour for six-hour shifts (Dishwasher 14, Cashier 12, Weeder 13, Odd-Jobber 14, Street Busker 14), so about 70 to 100 a shift; pay is x0.8 to x1.2 by performance (start 50 gives x1.0) | Sets the whole ladder. |
-| Food | Zip Burger meal 9 coins (+45 hunger, 10:00 to 23:00), bakery croissant 3 (+22, 08:00 to 17:00), restaurant soup 7 (+14). Hunger falls 108 a day on a -100..100 scale | About 17 coins a day, 120 a week, if you eat only out. |
+| Food | Zip Burger meal 9 coins (+45 hunger, 10:00 to 23:00), bakery croissant 3 (+22, 08:00 to 17:00), restaurant soup 7 (+14). Hunger falls 108 a day awake-only, about 86 net of sleep (R11.1) | REVISED (Revision 3): about 12 to 17 coins a day (15 for a burger-plus-croissants mix), about 105 a week, if you eat only out. |
 | Autopay | Settings option "Pay bills automatically", default OFF (`data/economy.json` says `auto_pay: true` but the code and the setting use their own default) | Reviewer default is ON; flip the setting default and `NewGame`. |
 | Hospital | Bills 60 / 220 / 700 coins by severity (`data/incidents.json`); unpayable bills become ordinary bills | One hunger collapse can cost more than the whole starting purse. |
 
@@ -57,21 +371,21 @@ I ran the real new-game path (`NewGame.start`, solo scenario, empty home, world 
 
 | Part | Proposal | Number (Normal) | Cause line |
 |---|---|---|---|
-| Starting coins | A small purse, not furniture money | 300 (Easy 500, Hard 150). The first week's rent is already paid by signing the lease and is NOT in the 300. | "You arrive with a bag and a few days of money: about a week of cheap food (120), the first bill (60) and 120 spare, which is exactly the price of the cheapest bed. Worse only if you spend it on the wrong thing first." |
+| Starting coins | A small purse, not furniture money | REVISED (Revision 3, R11.6): 200 (Easy 350, Hard 100); was 300 / 500 / 150. The first week's rent is already paid by signing the lease and is NOT in the purse. | "You arrive with a bag and a few days of money: two weeks of cheap food if nothing else is due, but the first bill (60) and the first full rent (70) fall due in the first eight days. Worse only if you spend it before the first pay." |
 | The home | CONFIRMED: a cheap rented starter flat. It is the existing "Starter Studio" template (`small`: one room and a bathroom nook, running costs "Low"). Counter-proposal: none to the type, but the rent must be set on its own small property (base about 6,000, market rent about 75) and not on the 14,000 house, or the rent review (+8 percent every 28 days toward market) would drive it to 203. | Rent 70 a week, due every 7 days from day 8, three days to pay (as today's bills). Landlord is a townie (HousingAgent already picks the richest townie as buyer). | "A flat costs rent because somebody else owns it. The landlord pays water and council charges, so your bill is smaller; you pay for the power and phone you use. It gets worse only when you do not pay." |
 | Bills | Landlord covers water and council charges (shares 0.25 + 0.25 of the fixed charge) and the structure belongs to the landlord, not to you | About 60 a week (power 27 + phone 18 + about 15 of use), instead of 128 | "The flat's walls, windows and lights are the landlord's, so they are not your property to be taxed." |
-| Eviction | Real, in two tiers. TIER A (S3): late rent warns on the FIRST miss ("Pay by day N or the landlord starts eviction", week 2 for a do-nothing player); the second miss serves the notice (already exists); three days later the bailiffs clear the flat (`ChaosMoney.eviction` already takes belongings) and the lease ends; you can sign again by paying the arrears plus one week's deposit, and until then the front door is locked and you sleep rough (park bench = floor sleeping with a cold penalty; night shelter cot from TIER B). TIER B (S9, optional): the community hall runs a night shelter cot (21:00 to 07:00, free). Hard moves the notice to the first missed rent. | warn at 1 missed, notice at 2 missed, bailiffs 3 days after notice | "You lose the flat because the rent was not paid for two weeks; it gets worse only while the arrears stay unpaid." |
+| Eviction | REVISED (Revision 3, R12): the lease ends and the player is HOMELESS, not out of the game; the shelter (Tier B) is part of the first playable build. Original text follows. Real, in two tiers. TIER A (S3): late rent warns on the FIRST miss ("Pay by day N or the landlord starts eviction", week 2 for a do-nothing player); the second miss serves the notice (already exists); three days later the bailiffs clear the flat (`ChaosMoney.eviction` already takes belongings) and the lease ends; you can sign again by paying the arrears plus one week's deposit, and until then the front door is locked and you sleep rough (park bench = floor sleeping with a cold penalty; night shelter cot from TIER B). TIER B (S9, optional): the community hall runs a night shelter cot (21:00 to 07:00, free). Hard moves the notice to the first missed rent. | warn at 1 missed, notice at 2 missed, bailiffs 3 days after notice | "You lose the flat because the rent was not paid for two weeks; it gets worse only while the arrears stay unpaid." |
 | Floor sleeping | EXISTS (`sleep_floor`): energy +0.08 a minute against +0.125 and +0.1 comfort in a bed, "slept badly" (uncomfortable 1.5 for 8 h), only at home or when energy < 15 | needs the self-action menu (R2.6 gap 1) | "A hard floor gives poor rest; it never makes you ill." |
 | Tap / toilet / shower | Fixtures of the flat: toilet, shower and sink are kept when the lot is stripped (`StartHome.keep_defs`), owned by the landlord (community owner -1, never in your bill, never sold or repossessed) | 0 coins | "A rented flat comes with its bathroom; you do not buy a toilet to move in." |
 | Cheap food 1: street food | Bakery croissant 3, Zip Burger meal 9, soup 7 | about 17 a day, 120 a week | "Food costs money because somebody cooked it." |
-| Cheap food 2: welcome basket | Make it finite: 3 snacks, then it is empty (an object state on the flat, or a per-household counter) | 3 uses | "The landlord left three snacks; when they are gone they are gone." |
-| Cheap food 3: soup kitchen | NEW place in `data/life` on the existing library lot (the community hall): "Hollow Oak Community Supper", daily 18:00 to 19:00, price 0, +35 hunger, once a day per person, 20-minute service | 0 coins | "The town runs a free supper every evening for anyone who turns up; it is plain and you have to be there at six." |
+| Cheap food 2: welcome basket | REMOVED (owner, Revision 3): no free food. `welcome_snack` is dropped from the pawn's path (the self-action menu never lists it, `Pawn.is_pawn` fails its test, the start tips stop mentioning it); it stays for NPCs only. | 0 uses | "Nobody feeds you. You have to make money to eat." |
+| Cheap food 3: soup kitchen | REMOVED (owner, Revision 3): no free community supper. Replaced by vending machine snacks (3 coins, +24 hunger), already in the lot templates, and the bakery (R11.1). | n/a | "Food costs money because somebody made it." |
 | Corner shop | Already: supermarket/market stalls (8:00 to 21:00) for pantry food once there is a fridge | n/a | |
 | Reach first income | See R2.4 | | |
 
 #### R2.3 The ladder: each purchase must noticeably help
 
-Honest note first: with today's rules a computer does not pay for itself fast in coins (freelance is 40 + 9 x skill per two-hour gig, cap two a day), but it does pay in time, in a higher hourly rate once skills grow, and in no commute. And kitchen appliances cost far more than the food they save, because cooking has no ingredient cost. Two proposals for the owner below.
+REVISED (Revision 3): Proposal A is DECIDED (owner: cooking costs money, 3 coins per ingredient, tune later; numbers in R11.4); B is rejected; the supper and basket are gone. Honest note first: with today's rules a computer does not pay for itself fast in coins (freelance is 40 + 9 x skill per two-hour gig, cap two a day), but it does pay in time, in a higher hourly rate once skills grow, and in no commute. And kitchen appliances cost far more than the food they save, because cooking has no ingredient cost. Two proposals for the owner below.
 
 | Step | Item (price) | What the player feels | Money effect |
 |---|---|---|---|
@@ -87,7 +401,7 @@ Proposal A (recommended, small): `cook_meal`, `prep_food`, `microwave_meal` take
 Proposal B: leave cooking free and accept that the kitchen is a pure time/mood upgrade.
 Proposal C (optional, 0.5 session, data only): a "Second-hand" stall in the market shops at 45 percent price for bed frames, fridge, stove, computer with a worse starting condition (the wear and repair system already exists). It makes the first computer reachable in about 10 days instead of about 20. I recommend A and leave C for after the playtest.
 
-Odd jobs: lower to 20 coins per 90 minutes, still 2 a day (13 an hour, below the dishwasher 14). Wages stay as they are.
+Odd jobs: lower to 20 coins per 90 minutes, still 2 a day (13 an hour, below the dishwasher 14; today's data is 30, `data/bank.json` `work.odd_job.base`). Wages stay as they are. (Confirmed by the Revision 3 model: with 20 an odd-jobs-only player nets about +47 a week, which is literally "just feasibly gets by".)
 
 #### R2.4 First income on day 1 or 2 with no computer
 
@@ -95,7 +409,7 @@ Four ways exist or are one small change away, none needs a computer:
 1. Town window, Jobs tab ("the notice board"): hire at once. Day-1 reality: each career has 0 to 3 openings a week (`EduJobs.refresh`, 0 about a quarter of the time), so about 10 of the 14 careers are open in a given week; the entry rung of Cook (Dishwasher), Barista (Cashier), Gardener (Weeder), Handyperson (Odd-Jobber), Musician (Street Busker), Painter, Writer, Teacher (Aide) and Fitness (Attendant) have no requirements. Make sure the first week of a NEW game always has at least two unrestricted entry openings (NEW, `EduJobs.refresh` hook; a new-game-only seed of the board). Newspaper ads: the Courier (2 coins, newsstand) lists the same openings as text; same data, no new system.
 2. Mailbox "Do Odd Jobs": 20 coins per 90 minutes, no application, 2 a day.
 3. Street busker (a career level): 17:00 to 23:00, 14 an hour, no skill.
-4. The first shift: UNVERIFIED whether someone hired at 08:30 works the same day (depends on `Careers.apply_schedule` and `Commute.lead_hours`); the bot test pins it. Target: first wage paid by the end of day 2.
+4. The first shift: VERIFIED in Revision 3 (R11.2, `career_shifts.gd`): pay is deposited when each shift ends, so there is no weekly pay delay. A new game starts at 08:00 on day 1 (a Monday, `Seasons.weekday`), and someone hired before the shift start works the same day (Dishwasher 10:00 to 16:00, Writer 09:00 to 15:00); hired after it starts, the first shift is tomorrow. First wage: day 1 evening at best, day 2 typically, day 3 for the Busker (Wednesday to Sunday). Busking as free-standing play does NOT exist in the data (`Street Busker` is a career level only): see R11.5.
 
 OpportunityTaker (a jobless folk with less than 300 coins "is seeking" and may auto-accept an offer) must skip the pawn: the offer waits as a card for the player.
 
@@ -109,22 +423,15 @@ Steady state, Normal, a sensible player (job five weekdays, odd jobs on the two 
 | Odd jobs: 2 days x 2 x 20 | +80 |
 | Rent | -70 |
 | Bills | -60 |
-| Street food (until a kitchen) | -120 |
-| Margin | about +250 (about +170 without odd jobs) |
+| Street food (until a kitchen) | -105 (REVISED: 15 a day, R11.1; was -120) |
+| Margin | about +265 (about +185 without odd jobs) (REVISED: was +250 / +170) |
 
-Paper simulation (Python, daily steps, not the real game): start 300, rent first due day 8, bills from day 4 (due +3 days), bed bought as soon as coins stay above a 150 reserve.
-
-| Player | Result (Normal, start 300) |
-|---|---|
-| Sensible, bed then computer | bed day 1 to 3, computer day about 22 |
-| Sensible, bed then kitchen then computer | bed day 1 to 3, kitchen day about 12, computer day about 30 |
-| Idle (eats street food, never works) | first late rent day 11 (week 2: the eviction warning), notice day 14 to 18 |
-| Same with start 350 | first problem not until day 14 and the notice day 18: so 300, not 350, meets "warning in week 2" |
+REVISED (Revision 3): the paper simulation that stood here was replaced by the day-by-day model in R11.3 (real data values, no free food). Results to carry into the asserts: sensible bed day 1 to 5, computer day 20 to 24 (day 17 to 20 with a 750-coin computer), idle-and-fed first late bill day 11 to 14 and first late rent day 11 to 18 (start 200), a do-nothing player first collapses on day 4.
 
 `pawn_bot` (deterministic, `tests/pawn_bot.gd`; Revision 1 section 3.4 describes the driver) plays the real game and these become asserts (slow tier, a 5-day fast variant):
 - Sensible bot, Normal, 3 seeds, 14 game days: alive; never two late bills in a row; coins below 0 on at most one day; first wage by end of day 2; bed owned by day 5 at the latest; with "bed, then computer" priority the computer is owned by day 24 at the latest; with kitchen first, by day 35.
-- Idle bot (street food, sleep, no job): alive at day 14; first "rent overdue / eviction warning" no later than day 14; eviction notice no later than day 21.
-- Starving bot (does nothing at all): first collapse by day 4, no death by day 14 on Normal and Easy (Hard may die, R3).
+- Idle bot (street food, sleep, no job): alive at day 14; first "rent overdue / eviction warning" no later than day 18 and not before day 11 (start 200: broke on day 10, rent late day 11); eviction notice no later than day 25 (REVISED in Revision 3; R11.3 shows why 14 and 21 no longer hold).
+- Starving bot (does nothing at all): first collapse on day 4 (R11.3), the first hospital bill the same evening, no death by day 21 on Normal and Easy (Hard may die, R3); the second collapse about 3 to 4 days later.
 - "Debt spiral" is defined as coins below 0 for 7 days in a row, or two consecutive bills late. One hospital bill of 220 at the 150-coin reserve is recoverable within a week; the test inserts one.
 
 Unknowns: real hospital severity of a hunger collapse (60 or 220); whether freelance and odd jobs fit around a six-hour shift in the time budget (a day has 24 h: 8 sleep, 1 commute, 6 work, 2 food, 1 hygiene leaves about 6; the bot will show whether energy holds); the effect of weather and holidays on shifts.
@@ -145,13 +452,15 @@ Normal is "just feasibly get by". Easy gives a bed and slack; Hard removes the c
 
 | Knob | Easy | Normal | Hard | Where |
 |---|---|---|---|---|
-| Starting coins | 500 | 300 | 150 | NEW `start_coins` in `difficulties` (replaces `funds_mult` for the start) |
+| Starting coins | 350 | 200 | 100 | NEW `start_coins` in `difficulties` (replaces `funds_mult` for the start). REVISED in Revision 3 (R11.6); was 500 / 300 / 150 |
 | First week's rent prepaid | yes | yes | no (due day 4) | NEW |
 | Flat rent per week | 55 | 70 | 85 | NEW |
 | A sofa bed already in the flat | yes | no | no | NEW |
 | Bills x | 0.8 | 1.0 | 1.3 | exists |
 | Wages x / shop and food prices x | 1.10 / 0.95 | 1.0 / 1.0 | 0.90 / 1.10 | NEW hook (Economy, same style as `bill_mult`) |
-| Odd job pay | 24 | 20 | 16 | NEW |
+| Odd job pay (per 90 min) | 24 | 20 | 16 | NEW |
+| Hospital bill of a hunger collapse (severity 2) | 154 | 220 | 308 | x0.7 / 1.0 / 1.4 on 220 (`data/incidents.json`), added in Revision 3 |
+| Shelter nights a week (Revision 3, R12) | 4 | 3 | 2 | NEW |
 | Entry openings on the first board | 3 or more | 2 or more | 1 | NEW |
 | Missed rents before the notice | 3 | 2 | 1 | NEW (`evict_after_missed` per difficulty) |
 | Hunger, energy, bladder decay | x0.8 | x1.0 | x1.2 | exists (`need_mult`) |
@@ -161,7 +470,7 @@ Alternative for Hard that I do NOT recommend for v1: start in the night shelter 
 
 ### R4. Revised plan: stages, effort, risks
 
-Replaces Revision 1 section 9. One session is a focused work block with design in hand, tests and report. S4 and S5 can run in parallel; so can S7 and S8.
+Replaces Revision 1 section 9. SUPERSEDED by the stage table in Revision 3 (R15), which moves house-moving (old S9) ahead of the playable gate and adds task 40. One session is a focused work block with design in hand, tests and report. S4 and S5 can run in parallel; so can S7 and S8.
 
 | Stage | Deliverable | New tests | Sessions | Risks |
 |---|---|---|---|---|
@@ -278,6 +587,8 @@ An heir can be 8. Rules (one line in S7, one test file):
 - Test case in `pawn_child_test`: an 8-year-old heir with a parent present (school order works, job order refused with a reason, stove refused with a reason) and without (nobody-left prompt).
 
 ### R9. Questions I still have for the owner (few)
+
+ANSWERED (Revision 3): 1 eviction and 4 moving house: homelessness is part of the game and moving is in the first playable build (R12); 2 cooking: costs money; 3 free supper: no free food at all. Original text kept below.
 
 1. Eviction outcome: is "the bailiffs clear the flat and you must pay arrears plus a deposit to sign again" (Tier A) enough for the first release, with the night shelter in a later stage? My recommendation: yes.
 2. Home cooking: ingredients at 3 coins a meal (Proposal A, recommended) or free (B)?
