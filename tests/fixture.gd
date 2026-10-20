@@ -49,3 +49,35 @@ static func _reset_autoloads() -> void:
 		wd.current_household_id = 0
 		wd.coin_spend = Callable()
 		wd.coin_refund = Callable()
+## The runners (run_all / run_one) call this once: settings, UI flags and save slots of a TEST process live in a private folder.
+## Without it parallel shards (tools/run_fast.ps1) and the player's own files shared user://settings.cfg and user://saves: a test that
+## sets "surprises" to chaotic/rare, or writes slot 95/97, changed the dice of whatever other shard happened to load it at that moment.
+static func isolate_user_files() -> void:
+	var dir := "user://test_%d" % OS.get_process_id()
+	DirAccess.make_dir_recursive_absolute(dir + "/saves")
+	GameSettings.path = dir + "/settings.cfg"
+	GameSettings.values = {}
+	UIPrefs.PATH = dir + "/ui_prefs.cfg"
+	SaveLoad.DIR = dir + "/saves"
+	ShareState.seen_path = dir + "/share_seen.json"
+	_isolated_dir = dir
+
+static var _isolated_dir: String = ""
+
+## Best-effort removal of the private folder at the end of a run.
+static func clean_user_files() -> void:
+	if _isolated_dir == "":
+		return
+	var stack: Array = [_isolated_dir]
+	var dirs: Array = []
+	while not stack.is_empty():
+		var d: String = stack.pop_back()
+		dirs.append(d)
+		for s in DirAccess.get_directories_at(d):
+			stack.append(d + "/" + s)
+		for fl in DirAccess.get_files_at(d):
+			DirAccess.remove_absolute(d + "/" + fl)
+	dirs.reverse()
+	for d in dirs:
+		DirAccess.remove_absolute(d)
+	_isolated_dir = ""
