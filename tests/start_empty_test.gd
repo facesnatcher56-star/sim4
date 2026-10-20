@@ -116,6 +116,17 @@ func run() -> Array:
 	panel.queue_free()
 	UIPrefs.set_flag("tips_seen", seen_before)
 	_check(Economy.balance(1) > 0, "the allowance covered the basics (left %d)" % Economy.balance(1))
+	# a guest on the home lot never takes the resident's bed (seed-dependent order bug: a visitor lay down in the one bed and the owner slept on the floor)
+	_check(Cond.check_one({"home_guest": false}, {"folk": f}), "resident is not a home guest")
+	f.set_meta("visitor", true)
+	_check(Neighborhood.lot_of(f) != Neighborhood.HOME or not Cond.check_one({"home_guest": false}, {"folk": f}), "a visitor at home is a home guest")
+	f.remove_meta("visitor")
+	var guest_sleeps := 0
+	var gcb := func(fid: int, iid: String, _t: int):
+		var g = SysUtil.folk(fid)
+		if g != null and fid != f.id and g.has_meta("visitor") and Neighborhood.lot_of(g) == Neighborhood.HOME and (iid.begins_with("sleep") or iid.begins_with("nap")):
+			guest_sleeps += 1
+	Events.interaction_started.connect(gcb)
 	started.clear()
 	Events.interaction_started.connect(cb)
 	var home_hours := 0
@@ -124,6 +135,8 @@ func run() -> Array:
 		if Neighborhood.lot_of(f) == Neighborhood.HOME:
 			home_hours += 1
 	Events.interaction_started.disconnect(cb)
+	Events.interaction_started.disconnect(gcb)
+	_check(guest_sleeps == 0, "bought: no guest lay down in the household bed (%d)" % guest_sleeps)
 	_check(SysUtil.folk(f.id) != null, "bought: still alive")
 	_check(int(started.get("sleep_floor", 0)) <= 1 and int(started.get("sleep_bed", 0)) >= int(started.get("sleep_floor", 0)), "bought: sleeps in the bed, not on the floor %s" % str(started))      # (a folk caught out at the park may still lie down once)
 	_check(int(started.get("welcome_snack", 0)) == 0 and int(started.get("cafe_restroom", 0)) == 0, "bought: the fallbacks switch off")

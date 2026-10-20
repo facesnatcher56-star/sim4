@@ -113,6 +113,10 @@ static func check_one(c: Variant, ctx: Dictionary) -> bool:
 						return false
 				elif str(folk.age_stage) != str(v):
 					return false
+			"home_guest":                      # true = a visitor standing on the player's home lot: a guest does not sleep in the host's bed, sofa or floor (it would leave the resident nowhere to lie down)
+				var guest: bool = folk != null and folk.has_meta("visitor") and WorldIface.stub == null and WorldIface.world() != null and Neighborhood.lot_of(folk) == Neighborhood.HOME
+				if guest != bool(v):
+					return false
 			"at_home_lot":                    # task 32c: true = on the folk's own home lot (or in a world without a map); idle fillers use it, so a folk out in town with nothing to do still heads home for a need (stranded_home)
 				if folk != null and bool(v) and not (WorldIface.stub != null or WorldIface.world() == null or NeighborhoodLots.lot_at(folk.tile) == PlayerLots.home_of(folk)):
 					return false

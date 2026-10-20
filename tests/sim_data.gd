@@ -2,7 +2,7 @@
 ## Data-file integrity: schemas, cross references, and agreement with data/objects.json (world agent).
 
 const Kit = preload("res://tests/sim_testkit.gd")
-const COND_KEYS := ["circadian", "no_free_bed", "at_home_lot", "lacks_object", "pair_flag_absent", "stat_below", "stat_above", "has_trait", "lacks_trait", "has_buff", "lacks_buff", "mood_is", "skill_at_least",
+const COND_KEYS := ["circadian", "no_free_bed", "at_home_lot", "home_guest", "lacks_object", "pair_flag_absent", "stat_below", "stat_above", "has_trait", "lacks_trait", "has_buff", "lacks_buff", "mood_is", "skill_at_least",
 	"object_state_eq", "object_state_above", "object_state_below", "time_between", "coins_at_least", "relationship_above",
 	"has_job", "posture_is", "posture_not", "not", "any", "age_stage_is", "homemaker", "fridge_clean"]
 const LOOT_KEYS := ["add_buff", "remove_buff", "target_add_buff", "target_remove_buff", "stat_add", "target_stat_add", "skill_xp",
