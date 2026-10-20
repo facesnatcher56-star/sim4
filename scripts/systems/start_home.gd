@@ -88,4 +88,4 @@ static func is_bare(hid: int) -> bool:
 static func tips_for(scenario_def: Dictionary) -> Array:
 	if is_bare(Economy.primary_household()) and not (cfg().get("empty_tips", []) as Array).is_empty():
 		return cfg()["empty_tips"]
-	return scenario_def.get("tips", [])
+	return Scenario.tips_text(scenario_def)

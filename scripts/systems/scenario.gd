@@ -83,13 +83,30 @@ static func goal_text(g: Dictionary) -> Dictionary:
 	if g.has("label_no_fridge") and not _home_has_fridge():
 		label = str(g["label_no_fridge"])
 		hint = str(g.get("hint_no_fridge", hint))
+	if g.has("hint_no_computer") and not home_has("computer"):
+		hint = str(g["hint_no_computer"])
 	return {"label": label, "hint": hint}
 
 static func _home_has_fridge() -> bool:
+	return home_has("fridge")
+
+## Does the player's household own an object of this def? (empty starts have no computer / fridge until they are bought)
+static func home_has(def_id: String) -> bool:
 	for o in Economy.objects_of(Economy.primary_household()):
-		if str(o.def_id) == "fridge":
+		if str(o.def_id) == def_id:
 			return true
 	return false
+
+## Welcome tips of a scenario: entries listed in `tips_no_computer` ({index: text}) change while the home has no computer.
+static func tips_text(sdef: Dictionary) -> Array:
+	var tips: Array = (sdef.get("tips", []) as Array).duplicate()
+	if home_has("computer"):
+		return tips
+	var alt: Dictionary = sdef.get("tips_no_computer", {})
+	for k in alt:
+		if int(k) < tips.size():
+			tips[int(k)] = str(alt[k])
+	return tips
 
 static func has_goals() -> bool:
 	return not goals().is_empty()

@@ -19,6 +19,7 @@
       "who": "1 Folk", "where": "Studio flat", "tone": "Easy-going",
       "folk": [{"stage": "adult", "rel": "none"}],
       "moved_in": "You've just moved in! Click %s to get started.",
+      "tips_no_computer": {"1": "Your first goals are in 'Getting Started' at the top-left. Step one is a job: click Town at the top and open the Jobs tab, or buy a computer first."},
       "tips": [
         "This is you. Click your Folk (the face at the bottom-left) to see their needs and mood, then click things in the world to choose what they do.",
         "Your first goals are in 'Getting Started' at the top-left. Step one is a job: click the computer and choose Look for Jobs.",
@@ -27,6 +28,7 @@
       ],
       "goals": [
         {"id": "job", "label": "Get a job", "hint": "Click the computer, choose Look for Jobs, then Accept the offer.",
+          "hint_no_computer": "No computer yet: click Town at the top, open the Jobs tab and apply there. Or press B and buy a computer.",
           "check": {"jobs": 1}, "reward": {"coins": 150, "points": 25}},
         {"id": "friend", "label": "Make a friend", "hint": "Open the Map (M), visit the park or cafe and chat with someone, or invite a neighbour over.",
           "check": {"cond": [{"friends_at_least": 1}]}, "reward": {"coins": 200, "points": 25}},
@@ -53,6 +55,7 @@
         {"id": "decorate", "label": "Make it yours: buy 2 things", "hint": "Press B for Build/Buy and add furniture or decor.",
           "check": {"event": "object_bought", "count": 2}, "reward": {"coins": 150, "points": 25}},
         {"id": "jobs", "label": "Both find work", "hint": "At a computer choose Look for Jobs, once for each of you.",
+          "hint_no_computer": "No computer yet: click Town at the top, open the Jobs tab and apply there for each of you. Or press B and buy a computer.",
           "check": {"jobs": 2}, "reward": {"coins": 250, "points": 40}},
         {"id": "date", "label": "Go on a date", "hint": "Click your partner and choose a date, or visit the cafe or park together.",
           "check": {"event": "date_completed"}, "reward": {"coins": 150, "points": 30}},
@@ -75,6 +78,7 @@
       ],
       "goals": [
         {"id": "jobs", "label": "A parent finds work", "hint": "At the computer choose Look for Jobs and Accept the offer.",
+          "hint_no_computer": "No computer yet: click Town at the top, open the Jobs tab and apply there. Or press B and buy a computer.",
           "check": {"jobs": 1}, "reward": {"coins": 200, "points": 30}},
         {"id": "fridge", "label": "Stock the fridge", "hint": "Click the fridge and choose Order Groceries.",
           "label_no_fridge": "Buy a fridge and stock it", "hint_no_fridge": "Press B, buy a fridge, then click it and choose Order Groceries.",

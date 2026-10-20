@@ -41,5 +41,21 @@ func run() -> Array:
 	_check(str(Scenario.goal_text(goal)["label"]) == "Buy a fridge and stock it", "empty home: goal says buy a fridge")
 	Kit.new_game("family", "normal", {}, -1, {"home_state": "furnished", "world_seed": 5})
 	_check(str(Scenario.goal_text(goal)["label"]) == "Stock the fridge", "furnished home: goal says stock the fridge")
+	# job goal hint (task 32f): no computer in an empty home -> the Town Jobs tab or buy one
+	for sid in ["solo", "family", "couple"]:
+		var jg: Dictionary = {}
+		for g in Scenario.def(sid)["goals"]:
+			if g.has("hint_no_computer"):
+				jg = g
+		_check(not jg.is_empty(), "%s: the job goal has a no-computer hint" % sid)
+		Kit.new_game(sid, "normal", {}, -1, {"home_state": "empty", "world_seed": 5})
+		var ht: String = str(Scenario.goal_text(jg)["hint"])
+		_check(ht.contains("Jobs tab") and ht.contains("computer") and not ht.begins_with("Click the computer") and not ht.begins_with("At "), "%s empty: hint points to Town > Jobs / buy a computer (%s)" % [sid, ht])
+		if sid == "solo":
+			_check(str(StartHome.tips_for(Scenario.def(sid))[1]).to_lower().contains("bed"), "solo empty: bare-home tips still lead")
+			_check(str(Scenario.tips_text(Scenario.def(sid))[1]).contains("Jobs tab"), "solo: welcome tip does not send you to a missing computer")
+		Kit.new_game(sid, "normal", {}, -1, {"home_state": "furnished", "world_seed": 5})
+		var hf: String = str(Scenario.goal_text(jg)["hint"])
+		_check(hf.contains("No computer yet") == not Scenario.home_has("computer"), "%s furnished: the Jobs-tab hint appears only when there is no computer (%s)" % [sid, hf])
 	Kit.teardown()
 	return fails
