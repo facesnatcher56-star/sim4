@@ -22,6 +22,7 @@ var calls: VehicleCalls = null
 var signals: VehicleSignals = null
 var filler: VehicleFiller = null
 var walkers: VehicleWalkers = null
+var props: ParkingProps = null                 # carports (display only, made when the layer draws)
 var lot_view: Node3D = null
 var draw: bool = true                       # false: no meshes (tests)
 var forced_focus: Array = []                # Vector2 (world x, z) points that replace the camera and the anchors (tests)
@@ -63,6 +64,10 @@ func _init() -> void:
 
 
 func _ready() -> void:
+	if draw:
+		props = ParkingProps.new()
+		props.name = "ParkingProps"
+		add_child(props)
 	var w = WorldIface.world()
 	if w != null and w.has_signal("world_reset"):
 		w.world_reset.connect(reset)
@@ -70,6 +75,9 @@ func _ready() -> void:
 
 func reset() -> void:
 	VehicleBays.forget()
+	ParkingMarks.forget()
+	if props != null:
+		props.dirty = true
 	sim.vehicles.clear()
 	ambient.reset()
 	trips.reset()
@@ -119,6 +127,7 @@ func advance(delta: float, speed: int) -> void:
 	calls.tick(dt)
 	buses.tick(dt)
 	if draw:
+		nodes.cam_ground = camera_ground()
 		nodes.sync(self, sim.vehicles, sim.vt, float(cfg.get("hazard_flash_s", 0.45)))
 		signals.update()
 
@@ -133,6 +142,7 @@ func sync() -> void:
 	calls.sync()
 	if draw:
 		signals.sync()
+		props.sync()
 	_cap()
 
 
@@ -163,6 +173,15 @@ func _compute_focus() -> Array:
 		if out.size() >= 6:
 			break
 	return out
+
+
+## Where the camera looks on the ground (the real lights of the vehicles go to those nearest to it).
+func camera_ground() -> Vector2:
+	var t: Variant = lot_view.get("_target") if lot_view != null else null
+	if t is Vector3:
+		return Vector2((t as Vector3).x, (t as Vector3).z)
+	var f: Array = focus_points()
+	return f[0] if not f.is_empty() else Vector2.ZERO
 
 
 func focus_points() -> Array:

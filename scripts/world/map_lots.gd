@@ -42,6 +42,7 @@ static func _place(w, r: Dictionary, tid: String, reports: Dictionary) -> bool:
 	var rep: Dictionary = LotLoader.report.duplicate(true)
 	reports[str(r["lot"])] = rep
 	r["door"] = _standable_near(w, rep["entry"] as Vector2i, rc)
+	LotParking.add(w, r)                       # task 42: driveway / bays / lay-by (floors, fence gaps, region.parking)
 	return good
 
 ## Nearest tile to `t` (inside rc) that is walkable and not a doorway edge case.

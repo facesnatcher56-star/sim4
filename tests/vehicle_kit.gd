@@ -6,8 +6,8 @@ const Kit = preload("res://tests/hood_kit.gd")
 static var _acc: float = 0.0
 
 
-static func game(start: String = "small") -> Array:
-	var folk: Array = Kit.new_game(start)
+static func game(start: String = "small", world_seed: int = 1) -> Array:
+	var folk: Array = Kit.new_game(start, 777, world_seed)
 	StoryPacing.enabled = false
 	CityState.reset()
 	UtilityEvents.dice_on = false

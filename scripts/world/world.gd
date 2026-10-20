@@ -39,6 +39,7 @@ const FLOOR_DEFS := {
 	"asphalt": {"decor": 0.0, "color": "#4a4d55", "terrain": true, "srgb": true},   # "srgb": colour is exact (the mesher converts it to linear)
 	"sidewalk": {"decor": 0.1, "color": "#b9b6ae", "terrain": true, "srgb": true},
 	"crosswalk": {"decor": 0.0, "color": "#4a4d55", "terrain": true, "srgb": true},   # asphalt + white bars drawn by the chunk mesher
+	"driveway": {"decor": 0.0, "color": "#a6a39b", "terrain": true, "srgb": true},   # task 42: paved strip / bay / lay-by of LotParking (never a road: cars park here)
 	"lawn": {"decor": 0.3, "color": "#86c35f", "terrain": true},        # empty reserved lot ground (lighter than block grass)
 	"sand": {"decor": 0.0, "color": "#d8c690", "terrain": true, "srgb": true},
 	"water": {"decor": 0.4, "color": "#3f7fc0", "terrain": true, "srgb": true, "blocks": true},
