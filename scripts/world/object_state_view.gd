@@ -41,7 +41,13 @@ static func reset() -> void:
 static func look_of(o) -> Dictionary:
 	if not ObjectVisualRules.has_rules(str(o.def_id)):
 		return {}
-	return ObjectVisualRules.resolve(str(o.def_id), o.state, o.def.get("state", {}), use_tags_of(int(o.id)), float(o.def.get("height", 1.0)))
+	var st: Dictionary = o.state
+	var pov := WearLayer.poverty_at(o.tile)               # task 41a: the lot's wealth score and a stable per-object pick pick the poor variants (view only)
+	if pov > 0.0:
+		st = o.state.duplicate()
+		st["_poverty"] = pov
+		st["_pick"] = WearRules.pick_of(int(o.id))
+	return ObjectVisualRules.resolve(str(o.def_id), st, o.def.get("state", {}), use_tags_of(int(o.id)), float(o.def.get("height", 1.0)))
 
 
 ## Called by LotView for an object node after it was built or its state changed.
