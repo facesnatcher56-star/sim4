@@ -229,6 +229,7 @@ func _statistical(f: Array) -> void:
 	# statistical resolve: summary, determinism, chronicle
 	IncidentDefs.get_def("minor_fall").erase("chronicle_min_severity")      # the shipped data keeps everyday falls out of the chronicle (19i); this checks the hook itself
 	K.events.clear()
+	ChronicleHook.dedupe = false          # the same outcome text in one minute would be told once; this counts every hook call
 	Incidents.seed_rng(5)
 	var s1: Array = []
 	for i in 6:
@@ -240,6 +241,7 @@ func _statistical(f: Array) -> void:
 	for i in 6:
 		s2.append(str(Incidents.resolve_statistical("minor_fall", tid)["summary"]))
 	K.expect(f, s1 == s2, "statistical resolution is deterministic for a seed")
+	ChronicleHook.dedupe = true
 	K.expect(f, K.count_events("chronicle") >= 7, "every statistical outcome emits the chronicle hook")
 	var ch: Dictionary = K.events.filter(func(e): return e[0] == "chronicle")[0][1]
 	for key in ["kind", "text", "day", "subjects", "lot", "severity", "public"]:
