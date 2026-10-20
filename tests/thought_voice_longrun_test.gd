@@ -10,7 +10,12 @@ var _hh_lines := 0
 var _words: Array = []
 var _hh: Dictionary = {}
 
+var _all: Dictionary = {}
+var _all_n := 0
+
 func _cap(fid: int, text: String) -> void:
+	_all[text] = true
+	_all_n += 1
 	if not _hh.has(fid):
 		return
 	_hh_lines += 1
@@ -67,8 +72,11 @@ func run() -> Array:
 	var share: float = float(_refs) / maxf(1.0, float(_hh_lines))
 	if share < 0.2:
 		fails.append("only %.0f%% of lines name a person, place or recent event (need 20%%)" % (share * 100.0))
+	var town: float = float(_all.size()) / maxf(1.0, float(_all_n))
+	if town < 0.5:
+		fails.append("whole-town distinct/total %.2f < 0.5 (%d of %d)" % [town, _all.size(), _all_n])
 	if _hh_lines < 30:
 		fails.append("household barely spoke (%d lines in 3 days)" % _hh_lines)
-	print("thought_voice_longrun: household lines %d, distinct/total %s, max per folk-day %d, references %.0f%%" % [_hh_lines, str(ratios), worst, share * 100.0])
+	print("thought_voice_longrun: town distinct/total %.2f (%d of %d), household lines %d, distinct/total %s, max per folk-day %d, references %.0f%%" % [town, _all.size(), _all_n, _hh_lines, str(ratios), worst, share * 100.0])
 	main.queue_free()
 	return fails

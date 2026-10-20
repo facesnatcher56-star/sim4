@@ -125,6 +125,21 @@ func run() -> Array:
 	K.expect(fails, _texts(a.id).size() == 1 and _texts(b.id).size() == 1, "both chat partners speak (%s)" % str(_got))
 	K.expect(fails, not (str(_texts(a.id)[0]) if not _texts(a.id).is_empty() else "").begins_with("Let's talk about"), "no generic 'Let's talk about' line")
 
+	# names and templates are rationed per day: nobody is nmd more than twice, no template more than twice
+	ThoughtVoice.reset()
+	K.set_time(7, 10)
+	var st2 := ThoughtVoice._state(a.id, SimEnv.now_min(), SysUtil.day())
+	var nmd: Dictionary = {}
+	for i in 40:
+		var l := ThoughtContext.line(a, st2, SysUtil.day(), i * 37)
+		st2["used"] = {}
+		for nm in ["Bram", "Cass"]:
+			if l.find(nm) >= 0:
+				nmd[nm] = int(nmd.get(nm, 0)) + 1
+	K.expect(fails, int(nmd.get("Bram", 0)) <= 2 and int(nmd.get("Cass", 0)) <= 2, "a friend is nmd at most twice a day (%s)" % str(nmd))
+	for t in (st2["tmpl"] as Dictionary):
+		K.expect(fails, int(st2["tmpl"][t]) <= 2, "template used at most twice a day: %s" % t)
+
 	SimEnv.events().thought.disconnect(_cap)
 	K.teardown()
 	return fails

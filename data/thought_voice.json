@@ -8,14 +8,16 @@
    2,
    3
   ],
-  "max_per_day": 16,
+  "max_per_day": 14,
   "lookback_days": 2,
   "pass_lookback_days": 2,
   "context_chance": 0.5,
   "category_gap_frac": 0.5,
   "urgent_repeat_min": 10,
   "event_react_max": 2,
-  "event_gap_frac": 0.25
+  "event_gap_frac": 0.25,
+  "template_max_per_day": 2,
+  "name_max_per_day": 2
  },
  "tone_traits": {
   "cheerful": [
@@ -540,9 +542,13 @@
    "I like it here at {place}.",
    "{place} is busy today.",
    "I could stay at {place} all afternoon.",
-   "Funny, I never noticed that at {place} before.",
    "{place} always has a nice atmosphere.",
-   "I should come to {place} more often."
+   "I should come to {place} more often.",
+   "Funny, I never noticed that at {place} before.",
+   "{place} is my kind of place.",
+   "I wonder who else comes to {place}.",
+   "Another visit to {place}.",
+   "{place} feels familiar by now."
   ],
   "election": [
    "Who will you vote for?",
@@ -758,7 +764,9 @@
    "What's your favourite meal?",
    "I read about a lovely soup.",
    "Do you cook much?",
-   "Nothing beats a home-cooked supper."
+   "Nothing beats a home-cooked supper.",
+   "{you}, have you heard? It's about dinner.",
+   "Tell me, {you}, what do you think?"
   ],
   "fitness": [
    "I've been trying to get fitter.",
@@ -766,7 +774,9 @@
    "My legs ache, but in a good way.",
    "Stretching every morning helps.",
    "Did you do any exercise today?",
-   "I should join a class."
+   "I should join a class.",
+   "{you}, have you heard? It's about the gym.",
+   "Tell me, {you}, what do you think?"
   ],
   "books": [
    "Read anything good lately?",
@@ -774,7 +784,9 @@
    "The ending surprised me.",
    "Have you got a book to lend?",
    "I love a good mystery.",
-   "Books are the best company."
+   "Books are the best company.",
+   "{you}, have you heard? It's about my book.",
+   "Tell me, {you}, what do you think?"
   ],
   "games": [
    "Did you beat the last level?",
@@ -782,7 +794,9 @@
    "Fancy a game tonight?",
    "I was up all night playing.",
    "The new game is so much fun.",
-   "Let's have a rematch."
+   "Let's have a rematch.",
+   "{you}, have you heard? It's about that game.",
+   "Tell me, {you}, what do you think?"
   ],
   "music": [
    "I can't get that tune out of my head.",
@@ -790,7 +804,9 @@
    "What's your favourite song?",
    "I could listen to that all day.",
    "Music makes everything better.",
-   "Let's put a record on."
+   "Let's put a record on.",
+   "{you}, have you heard? It's about that song.",
+   "Tell me, {you}, what do you think?"
   ],
   "art": [
    "I've been sketching again.",
@@ -798,7 +814,9 @@
    "Colours matter more than people think.",
    "I want to make something this week.",
    "Have you seen the gallery?",
-   "Art is hard but worth it."
+   "Art is hard but worth it.",
+   "{you}, have you heard? It's about my sketch.",
+   "Tell me, {you}, what do you think?"
   ],
   "plants": [
    "The garden is coming along nicely.",
@@ -806,7 +824,9 @@
    "Did you water the plants?",
    "Spring will bring so many flowers.",
    "I'm trying a new seed.",
-   "Gardening is my quiet time."
+   "Gardening is my quiet time.",
+   "{you}, have you heard? It's about the garden.",
+   "Tell me, {you}, what do you think?"
   ],
   "work": [
    "Work has been a lot lately.",
@@ -815,7 +835,9 @@
    "I'm hoping for a promotion.",
    "The commute is the worst part.",
    "What do you do all day?",
-   "How's the job going?"
+   "How's the job going?",
+   "{you}, have you heard? It's about the job.",
+   "Tell me, {you}, what do you think?"
   ],
   "fixing": [
    "I fixed the tap yesterday.",
@@ -823,7 +845,9 @@
    "Something is always breaking.",
    "Do you know how to mend that?",
    "A little oil fixes most things.",
-   "I love a good repair job."
+   "I love a good repair job.",
+   "{you}, have you heard? It's about the repair.",
+   "Tell me, {you}, what do you think?"
   ],
   "romance": [
    "Have you met someone lately?",
@@ -831,7 +855,9 @@
    "Are you seeing anyone?",
    "I think I'm falling for someone.",
    "Romance isn't dead, you know.",
-   "Tell me about your first date."
+   "Tell me about your first date.",
+   "{you}, have you heard? It's about romance.",
+   "Tell me, {you}, what do you think?"
   ],
   "gossip": [
    "Did you hear about {other}?",
@@ -847,7 +873,9 @@
    "I'm glad we can talk.",
    "Something's been on my mind.",
    "Honestly, I'm doing okay.",
-   "Thanks for listening."
+   "Thanks for listening.",
+   "{you}, have you heard? It's about my day.",
+   "Tell me, {you}, what do you think?"
   ],
   "dreams": [
    "Where do you see yourself in ten years?",
@@ -855,7 +883,9 @@
    "I've got big plans.",
    "What would you do if you could do anything?",
    "Some day I'll build my own house.",
-   "I dream about a quiet life."
+   "I dream about a quiet life.",
+   "{you}, have you heard? It's about my plans.",
+   "Tell me, {you}, what do you think?"
   ],
   "humor": [
    "Have you heard the one about the duck?",
@@ -863,7 +893,9 @@
    "Tell me something funny.",
    "That reminds me of a joke.",
    "You should have seen my face!",
-   "Laughter is the best medicine."
+   "Laughter is the best medicine.",
+   "{you}, have you heard? It's about a joke.",
+   "Tell me, {you}, what do you think?"
   ],
   "the_party": [
    "That party was something.",
@@ -871,7 +903,9 @@
    "Did you see the dancing?",
    "We should do that again.",
    "What a night that was.",
-   "I'm still tired from the party."
+   "I'm still tired from the party.",
+   "{you}, have you heard? It's about the party.",
+   "Tell me, {you}, what do you think?"
   ],
   "weather": [
    "Lovely weather, isn't it?",
@@ -879,7 +913,9 @@
    "It's colder than yesterday.",
    "I love this time of year.",
    "The forecast says sun tomorrow.",
-   "Typical weather for the season."
+   "Typical weather for the season.",
+   "{you}, have you heard? It's about the weather.",
+   "Tell me, {you}, what do you think?"
   ],
   "chores": [
    "So much washing up.",
@@ -887,7 +923,9 @@
    "I never finish tidying.",
    "The laundry pile is huge.",
    "We should share the chores.",
-   "A tidy house, a tidy mind."
+   "A tidy house, a tidy mind.",
+   "{you}, have you heard? It's about the chores.",
+   "Tell me, {you}, what do you think?"
   ],
   "election": [
    "Have you decided who to vote for?",
@@ -910,7 +948,16 @@
    "Lovely to see a new face.",
    "So, what brings you here?",
    "I don't think we've properly met.",
-   "Hello there!"
+   "Hello there!",
+   "Nice to meet you, {you}.",
+   "Hello, {you}! I don't think we've met.",
+   "Haven't seen you around, {you}.",
+   "I'm glad we bumped into each other, {you}.",
+   "So, {you}, what do you do?",
+   "Pleased to meet you, {you}.",
+   "You must be {you}.",
+   "Is it {you}? Lovely to see you.",
+   "I'm still learning names. {you}, right?"
   ],
   "_default": [
    "Fancy a chat?",
@@ -918,7 +965,142 @@
    "Nice to see you.",
    "What's new with you?",
    "Lovely day, isn't it?",
-   "I was hoping to run into you."
+   "I was hoping to run into you.",
+   "Good to see you, {you}.",
+   "How have you been, {you}?",
+   "{you}! Just who I wanted to see.",
+   "Got a minute, {you}?",
+   "Walk with me, {you}?",
+   "What's the news, {you}?"
+  ]
+ },
+ "venue_types": {
+  "park": [
+   "The pond looks lovely today.",
+   "Somebody should feed the ducks.",
+   "I can hear the swings creaking.",
+   "Fresh cut grass, my favourite smell.",
+   "The bench by the oak is free.",
+   "A dog just ran past, wagging.",
+   "I could lie on the lawn all day.",
+   "The kids are loving the slide.",
+   "What a view across the pond.",
+   "Birdsong and sunshine, perfect.",
+   "A jogger just waved at me.",
+   "The flower beds are looking cheerful.",
+   "I could do with a picnic here.",
+   "The path winds so nicely round the pond.",
+   "Someone is flying a kite.",
+   "The old oak has seen everything.",
+   "That squirrel has no fear.",
+   "Wind in the trees, a lovely sound.",
+   "I'll walk one more lap."
+  ],
+  "cafe": [
+   "The barista's latte art is lovely.",
+   "That cake looks too good to skip.",
+   "I'll take the corner table.",
+   "Fresh coffee, best smell there is.",
+   "The pastries are calling me.",
+   "I could people-watch here for hours.",
+   "The chalkboard menu has changed.",
+   "Just one more cup, I think.",
+   "Someone's laptop has taken over the sofa.",
+   "The espresso machine hisses happily.",
+   "I'll try the lemon cake today.",
+   "A window seat would be perfect.",
+   "Is that a new playlist?",
+   "They know my order by now.",
+   "The steamed milk smells so good.",
+   "A scone with jam, why not.",
+   "The queue is shorter than I feared.",
+   "I love the clink of cups in here."
+  ],
+  "gym": [
+   "One more set, then home.",
+   "The treadmill is free at last.",
+   "I can feel the burn already.",
+   "Stretch first, brag later.",
+   "Someone has the good weights again.",
+   "My legs will hate me tomorrow.",
+   "Water break, then another round.",
+   "I can do ten more. Maybe five.",
+   "The mirror is not my friend today.",
+   "Someone's music is far too loud."
+  ],
+  "library": [
+   "Shh, it's lovely and quiet.",
+   "So many books, so little time.",
+   "I'll borrow one more, I think.",
+   "That shelf smells of old paper.",
+   "The reading nook is taken.",
+   "I should return my overdue book.",
+   "Maybe a mystery tonight?",
+   "Whispers and page-turning, bliss."
+  ],
+  "market": [
+   "Those apples look fresh.",
+   "I need a list, I always forget something.",
+   "The queue is moving slowly.",
+   "Is the bread still warm?",
+   "Prices have crept up again.",
+   "Something tasty for supper, perhaps.",
+   "So many choices on one shelf.",
+   "I'll grab a basket.",
+   "The bakery stall smells wonderful.",
+   "Plums are in season, I see.",
+   "I'll compare the prices first.",
+   "The cheese counter is tempting."
+  ],
+  "office": [
+   "Another meeting, another biscuit.",
+   "The printer is jammed again.",
+   "I need a quiet hour to focus.",
+   "Is it lunchtime yet?",
+   "My inbox never ends.",
+   "The desk plant needs watering.",
+   "Coffee machine first, then work.",
+   "Nearly the end of the shift."
+  ],
+  "school": [
+   "The playground is full of noise.",
+   "Homework first, play after.",
+   "I hope the day goes well.",
+   "Chalk dust and lunch boxes.",
+   "The bell will ring soon.",
+   "Library time is my favourite.",
+   "The teacher's in a good mood."
+  ],
+  "hospital": [
+   "I hope everyone here is on the mend.",
+   "Hospitals always smell of soap.",
+   "The nurses work so hard.",
+   "Deep breaths, it will be fine.",
+   "I'd rather be anywhere else, honestly."
+  ],
+  "city_hall": [
+   "So much paperwork in one place.",
+   "Is this the right queue?",
+   "The mayor's office looks grand.",
+   "I'll wait my turn."
+  ],
+  "garage": [
+   "That engine sounds rough.",
+   "Smells of oil and rubber.",
+   "I wonder what the repair will cost."
+  ],
+  "fire": [
+   "The engines are polished and ready.",
+   "I'm glad they're here for us.",
+   "What a big red truck!"
+  ],
+  "police": [
+   "Best to stay on the right side of the law.",
+   "The station is quiet today."
+  ],
+  "courthouse": [
+   "It's very grand in here.",
+   "Let's hope for a fair verdict."
   ]
  }
 }

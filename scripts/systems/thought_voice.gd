@@ -108,12 +108,14 @@ static func _gap(c: Dictionary) -> float:
 static func _state(id: int, now: int, day: int) -> Dictionary:
 	var st: Dictionary = _st.get(id, {})
 	if st.is_empty() or now < int(st["last"]) - 5000:
-		st = {"last": -1000, "day": day, "count": 0, "cats": {}, "used": {}}
+		st = {"last": -1000, "day": day, "count": 0, "cats": {}, "used": {}, "tmpl": {}, "named": {}}
 		_st[id] = st
 	if int(st["day"]) != day:
 		st["day"] = day
 		st["count"] = 0
 		st["cats"] = {}
+		st["tmpl"] = {}
+		st["named"] = {}
 		var used: Dictionary = st["used"]
 		var keep := int(conf().get("lookback_days", 2)) + 1
 		for k in used.keys():
@@ -196,28 +198,31 @@ static func chat(actor: int, other: int, topic: String) -> void:
 	if not topics.has(key):
 		key = "_default"
 	var third := ThoughtContext.third_party(actor, other, now)
-	var vars := {"other": SysUtil.folk_name(third) if third >= 0 else "", "child": ThoughtContext.child_name(actor, other), "you": SysUtil.folk_name(other)}
-	var lines := _fill_pool(topics[key], vars)
-	if lines.is_empty():
-		lines = _fill_pool(topics["_default"], vars)
 	var day := SysUtil.day()
-	for who in [actor, other]:
-		var st := _state(int(who), now, day)
+	for pair in [[actor, other], [other, actor]]:
+		var who := int(pair[0])
+		var vars := {"other": SysUtil.folk_name(third) if third >= 0 else "", "child": ThoughtContext.child_name(actor, other), "you": SysUtil.folk_name(int(pair[1]))}
+		var lines := _fill_pool(topics[key], vars)
+		if lines.is_empty():
+			lines = _fill_pool(topics["_default"], vars)
+		var st := _state(who, now, day)
 		var line := pick_fresh(lines, st, day, hash([now, who, key]))
 		if line != "":
-			say(int(who), line, float(conf().get("category_gap_frac", 0.5)))
+			say(who, line, float(conf().get("category_gap_frac", 0.5)))
 
 static func _fill_pool(pool: Array, vars: Dictionary) -> Array:
 	var out: Array = []
 	for l in pool:
-		var s := str(l)
-		var ok := true
-		for k in vars:
-			if s.find("{%s}" % k) >= 0:
-				if str(vars[k]) == "":
-					ok = false
-				else:
-					s = s.replace("{%s}" % k, str(vars[k]))
-		if ok and s.find("{") < 0:
-			out.append(s)
+		var got := fill_one(str(l), vars)
+		if got != "":
+			out.append(got)
 	return out
+
+## One template with {vars} filled, or "" when a variable it needs is empty / unknown.
+static func fill_one(s: String, vars: Dictionary) -> String:
+	for k in vars:
+		if s.find("{%s}" % k) >= 0:
+			if str(vars[k]) == "":
+				return ""
+			s = s.replace("{%s}" % k, str(vars[k]))
+	return "" if s.find("{") >= 0 else s

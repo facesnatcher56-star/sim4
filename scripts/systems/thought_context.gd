@@ -73,16 +73,37 @@ static func _react(e: Dictionary, vars: Dictionary, ids: Array, subj: int, day: 
 
 # ------------------------------------------------------------------ ambient context lines
 ## A line naming a person, place or recent event for `f`, or "" (then the normal line is used).
+## No template is used more than template_max_per_day times a day and nobody is named more than name_max_per_day times (events excepted).
 static func line(f, st: Dictionary, day: int, roll: int) -> String:
 	var opts: Array = _options(f, day)
 	if opts.is_empty():
 		return ""
+	var c: Dictionary = ThoughtVoice.conf()
+	var tmax := int(c.get("template_max_per_day", 2))
+	var nmax := int(c.get("name_max_per_day", 2))
+	var look := int(c.get("lookback_days", 2))
 	var start := absi(hash([roll, int(f.id), day])) % opts.size()
 	for i in opts.size():
 		var o: Dictionary = opts[(start + i) % opts.size()]
-		var pool := ThoughtVoice._fill_pool(o["pool"], o["vars"])
-		var got := ThoughtVoice.pick_fresh(pool, st, day, hash([roll, i, int(f.id)]))
-		if got != "":
+		var names: Array = o.get("names", [])
+		var over := false
+		for n in names:
+			if not bool(o.get("event", false)) and int((st["named"] as Dictionary).get(n, 0)) >= nmax:
+				over = true
+		if over:
+			continue
+		var pool: Array = o["pool"]
+		var ps := absi(hash([roll, i, int(f.id)])) % maxi(1, pool.size())
+		for j in pool.size():
+			var tmpl := str(pool[(ps + j) % pool.size()])
+			if int((st["tmpl"] as Dictionary).get(tmpl, 0)) >= tmax:
+				continue
+			var got := ThoughtVoice.fill_one(tmpl, o["vars"])
+			if got == "" or day - int((st["used"] as Dictionary).get(got, -99)) < look:
+				continue
+			(st["tmpl"] as Dictionary)[tmpl] = int((st["tmpl"] as Dictionary).get(tmpl, 0)) + 1
+			for n in names:
+				(st["named"] as Dictionary)[n] = int((st["named"] as Dictionary).get(n, 0)) + 1
 			return got
 	return ""
 
@@ -99,43 +120,50 @@ static func _options(f, day: int) -> Array:
 		var ids: Array = r["ids"]
 		if not ids.is_empty() and not ids.has(fid):
 			continue
-		out.append({"pool": e.get("recall", []), "vars": r["vars"]})
-		out.append({"pool": e.get("recall", []), "vars": r["vars"]})     # recent news is weighted up
-	var fr := _best_friend(fid)
-	if fr >= 0:
-		out.append({"pool": ctx.get("friend", []), "vars": {"friend": _name(fr)}})
+		for k in 2:       # recent news is weighted up
+			out.append({"pool": e.get("recall", []), "vars": r["vars"], "event": true})
+	for fr in _friends(fid, 4):
+		out.append({"pool": ctx.get("friend", []), "vars": {"friend": _name(fr)}, "names": [_name(fr)]})
 	var sp: int = FamilyTree.spouse_of(fid)
 	if sp >= 0 and SysUtil.folk(sp) != null:
-		out.append({"pool": ctx.get("partner", []), "vars": {"partner": _name(sp)}})
+		out.append({"pool": ctx.get("partner", []), "vars": {"partner": _name(sp)}, "names": [_name(sp)]})
 	var kid := _relative(FamilyTree.children_of(fid))
 	if kid >= 0 and str(f.age_stage) not in ["baby", "toddler", "child"]:
-		out.append({"pool": ctx.get("child", []), "vars": {"child": _name(kid)}})
+		out.append({"pool": ctx.get("child", []), "vars": {"child": _name(kid)}, "names": [_name(kid)]})
 	var par := _relative(FamilyTree.parents_of(fid))
 	if par >= 0 and str(f.age_stage) not in ["baby", "toddler"]:
-		out.append({"pool": ctx.get("parent", []), "vars": {"parent": _name(par)}})
+		out.append({"pool": ctx.get("parent", []), "vars": {"parent": _name(par)}, "names": [_name(par)]})
 	if Careers.has_job(fid):
 		out.append({"pool": ctx.get("work", []), "vars": {}})
 	var lot: String = Neighborhood.lot_of_folk(f)
-	if lot != "" and Venues.type_of_lot(lot) != "home" and (fid + day) % 2 == 0:
-		out.append({"pool": ctx.get("venue", []), "vars": {"place": Neighborhood.label_of(lot)}})
+	if lot != "" and Venues.type_of_lot(lot) != "home":
+		var pv := {"place": Neighborhood.label_of(lot)}
+		var spec: Array = (c.get("venue_types", {}) as Dictionary).get(Venues.type_of_lot(lot), [])
+		if not spec.is_empty():
+			out.append({"pool": spec, "vars": pv})
+			out.append({"pool": spec, "vars": pv})
+		if (fid + day) % 3 == 0:
+			out.append({"pool": ctx.get("venue", []), "vars": pv})
 	if CityElection.phase == "campaign" and str(f.age_stage) not in ["baby", "toddler", "child"]:
 		out.append({"pool": ctx.get("election", []), "vars": {}})
 	return out
 
-## The living, known person this folk is fondest of (>= 30 friendship), or -1.
-static func _best_friend(fid: int) -> int:
-	var best := -1
-	var bv := 30.0
+## Up to n living, known people this folk is fond of (friendship >= 30), most recently in touch first, ties by warmth.
+static func _friends(fid: int, n: int) -> Array:
+	var scored: Array = []
 	for key in RelationshipService.keys_of(fid):
 		var p: Dictionary = RelationshipService.pairs.get(key, {})
 		if p.is_empty():
 			continue
 		var o := int(p["hi"]) if int(p["lo"]) == fid else int(p["lo"])
 		var v := RelationshipService.value(fid, o, "friendship")
-		if v > bv and (SysUtil.folk(o) != null or Story.is_townie(o)):
-			bv = v
-			best = o
-	return best
+		if v >= 30.0 and (SysUtil.folk(o) != null or Story.is_townie(o)):
+			scored.append([int(p.get("last_contact", 0)), v, o])
+	scored.sort_custom(func(x, y): return x[0] > y[0] or (x[0] == y[0] and x[1] > y[1]))
+	var out: Array = []
+	for s in scored.slice(0, n):
+		out.append(int(s[2]))
+	return out
 
 static func _relative(ids: Array) -> int:
 	for i in ids:
