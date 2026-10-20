@@ -53,7 +53,9 @@ static func _born(ta: Dictionary, tb: Dictionary, sex: String = "") -> void:
 	baby["lot"] = int(ta.get("lot", 1))
 	RelationshipBits.set_flag(int(baby["id"]), a, "family", true, false)
 	RelationshipBits.set_flag(int(baby["id"]), b, "family", true, false)
-	baby["appearance"] = Genetics.inherit(Family.person_info(a), Family.person_info(b), null, {"sex": Sexes.of_townie(baby)})["appearance"]
+	var gen_b: Dictionary = Genetics.inherit(Family.person_info(a), Family.person_info(b), null, {"sex": Sexes.of_townie(baby)})
+	baby["appearance"] = gen_b["appearance"]
+	baby["heritage"] = str(gen_b.get("heritage", ""))
 	Family.note_townie_birth(int(baby["id"]), a, b)
 	var today: int = SysUtil.day()
 	for t in [ta, tb]:
@@ -124,7 +126,9 @@ static func _arrive_group(with_child: bool) -> void:
 	kid["lot"] = int(a["lot"])
 	RelationshipBits.set_flag(int(kid["id"]), ia, "family", true, false)
 	RelationshipBits.set_flag(int(kid["id"]), ib, "family", true, false)
-	kid["appearance"] = Genetics.inherit(Family.person_info(ia), Family.person_info(ib), null, {"sex": Sexes.of_townie(kid)})["appearance"]
+	var gen_k: Dictionary = Genetics.inherit(Family.person_info(ia), Family.person_info(ib), null, {"sex": Sexes.of_townie(kid)})
+	kid["appearance"] = gen_k["appearance"]
+	kid["heritage"] = str(gen_k.get("heritage", ""))
 	Family.note_townie_birth(int(kid["id"]), ia, ib)
 	for t in [a, b]:
 		t["kids"] = 1

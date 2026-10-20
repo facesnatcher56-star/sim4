@@ -17,3 +17,4 @@ Run "new game + 1 day" "--headless,--path,.,--script,res://tools/solo_smoke.gd,-
 Run "housing run" "--headless,--path,.,--script,res://tools/solo_smoke.gd,--,1,--ladder"
 Run "rough district run" "--headless,--path,.,--script,res://tools/solo_smoke.gd,--,1,--rough"
 Run "main scene boots" "--headless,--path,.,--quit-after,1500,--,--autostart"
+Write-Output (& powershell -File (Join-Path $PSScriptRoot "heritage_guard.ps1") | Out-String)

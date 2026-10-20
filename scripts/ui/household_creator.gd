@@ -19,6 +19,7 @@ var editor: FolkEditor
 var error_label: Label
 var go_btn: Button
 var intro: Label
+var heritage_opt: OptionButton
 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -61,6 +62,16 @@ func _column() -> VBoxContainer:
 	name_edit.max_length = 20
 	name_edit.text_changed.connect(func(t): household["name"] = t.strip_edges())
 	top.add_child(name_edit)
+	top.add_child(UIU.make_label("   Heritage", 14))
+	heritage_opt = OptionButton.new()
+	heritage_opt.tooltip_text = "Where your people come from. It gives a soft pull when people choose where to live (relatives, friends, community shops). It never changes money, work, justice or crime."
+	heritage_opt.add_item("Random")
+	heritage_opt.set_item_metadata(0, "")
+	for hid in Heritage.ids():
+		heritage_opt.add_item(Heritage.label_of(str(hid)))
+		heritage_opt.set_item_metadata(heritage_opt.item_count - 1, str(hid))
+	heritage_opt.item_selected.connect(func(i): _members()[0]["heritage"] = str(heritage_opt.get_item_metadata(i)))
+	top.add_child(heritage_opt)
 	home_row = HBoxContainer.new()
 	home_row.add_theme_constant_override("separation", 10)
 	root.add_child(home_row)
@@ -102,7 +113,11 @@ func open(h: Dictionary, p_start_id: String, with_home: bool, go_text: String) -
 	selected = 0
 	name_edit.text = str(household.get("name", "Fernwood"))
 	go_btn.text = go_text
-	intro.text = "Choose 1 to %d Folk. Pick an age group, three traits (they change what a Folk enjoys and how they behave), a life aspiration and a look. Hover for details." % HouseholdSetup.MAX_FOLK
+	intro.text = "You play one Folk. Pick a name, three traits (they change what a Folk enjoys and how they behave), a life aspiration and a look. Hover for details."
+	var h0: String = str(_members()[0].get("heritage", ""))
+	for i in heritage_opt.item_count:
+		if str(heritage_opt.get_item_metadata(i)) == h0:
+			heritage_opt.select(i)
 	home_row.visible = with_home
 	if with_home:
 		_build_home_cards()
@@ -160,19 +175,7 @@ func _rebuild_members() -> void:
 		var idx := i
 		b.pressed.connect(func(): _select(idx))
 		member_row.add_child(b)
-	add_btn = Button.new()
-	add_btn.text = "+ Add Folk"
-	add_btn.disabled = folk.size() >= HouseholdSetup.MAX_FOLK
-	add_btn.tooltip_text = "Up to %d Folk per household" % HouseholdSetup.MAX_FOLK
-	add_btn.pressed.connect(_add_member)
-	member_row.add_child(add_btn)
-	remove_btn = Button.new()
-	remove_btn.text = "Remove"
-	remove_btn.disabled = folk.size() <= 1
-	remove_btn.tooltip_text = "Remove the selected Folk"
-	remove_btn.pressed.connect(_remove_member)
-	member_row.add_child(remove_btn)
-	_load_selected()
+	_load_selected()          # one-character play: no adding or removing Folk
 
 func _select(i: int) -> void:
 	selected = i

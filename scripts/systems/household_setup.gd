@@ -1,4 +1,4 @@
-﻿class_name HouseholdSetup
+class_name HouseholdSetup
 extends RefCounted
 ## Builds, validates and wires up the starting household of a new game (no UI).
 ##
@@ -157,6 +157,8 @@ static func create_folk(h: Dictionary) -> Array:
 		var f := Folk.create(str(fd["name"]), fd.get("traits", []), -1, str(fd.get("sex", "")))
 		fd["sex"] = f.sex
 		f.age_stage = str(fd.get("stage", "adult"))
+		f.heritage = str(fd.get("heritage", "")) if str(fd.get("heritage", "")) != "" else Heritage.random_id()
+		fd["heritage"] = f.heritage
 		if Genetics.is_valid(fd.get("appearance", {})):
 			f.appearance = (fd["appearance"] as Dictionary).duplicate(true)
 		if not fd.has("color"):

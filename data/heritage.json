@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "notes": "Heritage communities (docs/ONE_CHARACTER_PLAN.md R13). Fictional heritages: a name for the settings screen, a cuisine, a festival and the tag of the community shops. A heritage is inherited from the parents like a look, but it is NOT tied to the look and it NEVER sets income, wages, hiring, justice, crime or the roughness of a district (tools/heritage_guard.ps1 greps the money, career, justice, crime and district scripts for the word). It only gives a soft pull when people choose where to live: relatives, friends and the community shops nearby.",
+  "mixed_chance": 0.2,
+  "pull": {"relative": 0.15, "known": 0.10, "share": 0.10, "cap": 1.4, "relative_cap": 3, "known_cap": 3},
+  "heritages": {
+    "amber_coast": {"label": "Amber Coast", "cuisine": "grilled fish and amber rice", "festival": {"label": "Lantern Night", "day_of_year": 40}, "shop_tag": "amber_stall"},
+    "northern_hills": {"label": "Northern Hills", "cuisine": "barley stew and oatcakes", "festival": {"label": "Shearing Fair", "day_of_year": 66}, "shop_tag": "hill_pantry"},
+    "river_folk": {"label": "River Folk", "cuisine": "smoked eel and reed bread", "festival": {"label": "Boat Blessing", "day_of_year": 12}, "shop_tag": "river_stall"},
+    "salt_harbour": {"label": "Salt Harbour", "cuisine": "salt cod and sea greens", "festival": {"label": "Tide Supper", "day_of_year": 92}, "shop_tag": "harbour_deli"},
+    "ember_vale": {"label": "Ember Vale", "cuisine": "peppered lamb and flatbread", "festival": {"label": "Kiln Fire", "day_of_year": 18}, "shop_tag": "vale_oven"},
+    "pine_lake": {"label": "Pine Lake", "cuisine": "pine-smoked trout and berries", "festival": {"label": "First Ice", "day_of_year": 100}, "shop_tag": "lake_cabin"}
+  }
+}

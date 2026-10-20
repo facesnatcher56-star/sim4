@@ -259,7 +259,7 @@ static func inherit(parent_a, parent_b, r: RandomNumberGenerator = null, opts: D
 	var sex: String = str(opts.get("sex", ""))
 	GeneticsSex.fit(ap, sex, g)
 	ap = GeneticsUnique.make_distinct(ap, others, g, sex)
-	return {"appearance": ap, "traits": inherit_traits(parent_a, parent_b, g, opts)}
+	return {"appearance": ap, "traits": inherit_traits(parent_a, parent_b, g, opts), "heritage": Heritage.inherit(parent_a, parent_b)}
 
 ## Traits a child can pick up at RANDOM (an extra at birth, a new one on growing up): everything the parents / the child do not already
 ## have, except the rare and negative ones (data/genetics.json inherit.rare_traits: crime traits). Those only come down from a parent

@@ -35,6 +35,9 @@ static func _rung(dlg: BankHub, r: Dictionary) -> void:
 		return
 	var q: Dictionary = SoloLadder.quote(id)
 	var txt: String = "%s: rent %d + bills %d a week, deposit %d. %s" % [str(r["label"]), SoloCfg.rung_rent(r), SoloCfg.rung_bills(r), SoloCfg.rung_deposit(r), str(r.get("cause", ""))]
+	var tags: Array = Heritage.tags_for_lot(str(r.get("lot", "")), SysUtil.folk(Pawn.of()))
+	if not tags.is_empty():
+		txt += "  (%s)" % ", ".join(tags)
 	if not bool(q["ok"]) and str(q["reason"]) != "":
 		txt += "  [%s]" % str(q["reason"])
 	var bs: Array = [dlg.button("Move here", "Costs %d to move in (deposit, first week, movers)" % int(q["due"]), func(): _act(dlg, "move", {"rung": id}), bool(q["ok"]))]

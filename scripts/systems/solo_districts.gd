@@ -1,7 +1,7 @@
 class_name SoloDistricts
 extends RefCounted
 ## Districts of the town (R14): a district is a set of lots with a roughness 0..1. The Kiln Quarter (south-east, around the Works) is the rough one.
-## Roughness is never read from heritage (R13). It starts from data/solo.json and moves with the town's own crime (monthly, `drift`).
+## Roughness is never read from who lives there (R13). It starts from data/solo.json and moves with the town's own crime (monthly, `drift`).
 ## Everything here is a lookup of numbers in data/solo.json "districts" / "crime"; the incident systems multiply their own dice by `mult`.
 
 static var rough: Dictionary = {}         # district id -> roughness now (starts from the data; saved in the solo block through SoloHome)
@@ -9,7 +9,7 @@ static var rough: Dictionary = {}         # district id -> roughness now (starts
 static func reset() -> void:
 	rough = {}
 
-## Monthly (every `pressure.drift_days` days): roughness follows the town's own crime and the police budget, never heritage. A crime wave pushes
+## Monthly (every `pressure.drift_days` days): roughness follows the town's own crime and the police budget, never who lives there. A crime wave pushes
 ## it up, a quiet well-policed month eases it, so a district can recover or decay.
 static func on_day(day: int) -> void:
 	if not SoloHome.active:

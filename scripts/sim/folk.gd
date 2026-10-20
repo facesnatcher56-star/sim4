@@ -32,6 +32,7 @@ var current: Interaction = null
 var household_id: int = 0
 ## Look (see the APPEARANCE CONTRACT at the top of scripts/systems/genetics.gd). {} = not generated yet.
 var appearance: Dictionary = {}
+var heritage: String = ""          # heritage community id ("" none, "mixed"); inherited, never an input to money, work or crime (systems/heritage.gd)
 var posture: String = "stand"   # stand | sit | lie  (set by the running interaction; UI reads it)
 var work_start: float = -1.0    # hour of day the job starts, -1 = no job (careers system sets these)
 var work_end: float = -1.0
@@ -360,7 +361,7 @@ func to_dict() -> Dictionary:
 		"work_start": work_start, "work_end": work_end,
 		"memory": memory.duplicate(true), "relationships": rel,
 		"history_counts": history_counts.duplicate(),
-		"appearance": appearance.duplicate(true),
+		"appearance": appearance.duplicate(true), "heritage": heritage,
 	}
 
 static func from_dict(d: Dictionary) -> Folk:
@@ -393,5 +394,6 @@ static func from_dict(d: Dictionary) -> Folk:
 		f.relationships[int(k)] = (rel[k] as Dictionary).duplicate()
 	f.history_counts = (d.get("history_counts", {}) as Dictionary).duplicate()
 	f.appearance = Genetics.normalize(d.get("appearance", {}))
+	f.heritage = str(d.get("heritage", ""))
 	f.refresh_mood()
 	return f

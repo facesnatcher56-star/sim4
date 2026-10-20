@@ -95,7 +95,7 @@ static func add_townie(age_days: float = -1.0, nm: String = "", traits: Array = 
 		age_days = SysUtil.rng.randf_range(float(Aging.stage_def("adult").get("from_day", 44)) + 2.0, float(Aging.stage_def("elder").get("from_day", 140)) - 10.0)
 	var t: Dictionary = {"id": id, "name": nm, "sex": sex, "traits": traits.duplicate(), "age_days": age_days, "career": career, "level": level,
 		"coins": SysUtil.rng.randi_range(100, 800), "alive": true, "lot": SysUtil.rng.randi_range(1, 6), "last_visit_day": -99,
-		"appearance": Genetics.unique_appearance(GeneticsUnique.registry(), null, sex)}
+		"appearance": Genetics.unique_appearance(GeneticsUnique.registry(), null, sex), "heritage": Heritage.random_id()}
 	townies[id] = t
 	return t
 

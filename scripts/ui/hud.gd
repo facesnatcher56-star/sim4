@@ -481,6 +481,8 @@ func _update_clock(_t = 0) -> void:
 	time_label.text = UIU.clock_text()
 	var here: String = Neighborhood.lot_of_selected()
 	lot_label.text = "" if here == Neighborhood.HOME or here == "" else "at %s  " % Neighborhood.label_of(here)
+	if TimeSkip.active:
+		lot_label.text = ">> skipping ahead (%s)  " % TimeSkip.reason()
 	day_label.text = "Day %d" % UIU.day_number()
 
 func set_speed(s: int) -> void:

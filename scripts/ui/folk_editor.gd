@@ -49,11 +49,14 @@ func _ready() -> void:
 	sex_opt.tooltip_text = "Female or male. Only a woman can be pregnant; relationships between any two adults are open. Looks and names follow."
 	sex_opt.item_selected.connect(func(i): _set_sex(Sexes.BOTH[i]))
 	left.add_child(sex_opt)
-	left.add_child(UIU.make_label("Age group", 13, UITheme.MUTED))
+	var age_label := UIU.make_label("Age group", 13, UITheme.MUTED)
+	age_label.visible = false          # one-character play: you always start as an adult
+	left.add_child(age_label)
 	stage_opt = OptionButton.new()
 	for s in HouseholdSetup.STAGES:
 		stage_opt.add_item(HouseholdSetup.STAGE_LABELS[s])
 	stage_opt.item_selected.connect(func(i): _set_stage(HouseholdSetup.STAGES[i]))
+	stage_opt.visible = false
 	left.add_child(stage_opt)
 	rel_row = HBoxContainer.new()
 	left.add_child(rel_row)
@@ -93,6 +96,7 @@ func _ready() -> void:
 	home_check.text = "Stays at home"
 	home_check.tooltip_text = "No career: looks after the house, the cooking and the little ones. No job offers."
 	home_check.toggled.connect(func(on): _edit("homemaker", on))
+	home_check.visible = false          # a solo pawn simply has no job until they take one
 	left.add_child(home_check)
 	var mid := VBoxContainer.new()
 	mid.custom_minimum_size = Vector2(330, 0)

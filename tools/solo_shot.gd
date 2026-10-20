@@ -23,7 +23,10 @@ func _process(_d: float) -> bool:
 		_main.title.visible = false
 		sp.open()
 		sp.visible = true
-		if _scn != "picker":
+		if _scn == "creator":
+			sp.select("solo")
+			sp._open_creator(false)
+		elif _scn != "picker":
 			sp.select("solo")
 			sp._emit_chosen()
 	if _frames == 60 and _scn == "myself":
@@ -44,6 +47,27 @@ func _process(_d: float) -> bool:
 		var hud2 = _main.hud
 		hud2.money_hub.tab = "homes"
 		hud2.money_hub.show_for(hud2.selected_folk_id)
+	if _scn == "skip":
+		if _frames == 60:
+			var hud4 = _main.hud
+			var f4 = hud4._resolve(hud4.selected_folk_id)
+			root.get_node("Clock").total_minutes = 22 * 60
+			var r4: Dictionary = Commands.run({"player_id": 1, "folk_id": f4.id, "action": "interact", "args": {"interaction_id": "sleep_floor", "target_id": -1}})
+			print("SKIP order sleep: %s" % str(r4))
+			root.get_node("Clock").set_speed(3)
+		if _frames > 170 and _frames < 190 and false:
+			print("SKIPF %d total=%d active=%s blocker=%s why=%s dt=%.4f" % [_frames, root.get_node("Clock").total_minutes, str(TimeSkip.active), TimeSkip._blocker(), TimeSkip.why, _d])
+		if _frames > 60 and _frames % 30 == 0:
+			var f5 = _main.hud._resolve(_main.hud.selected_folk_id)
+			var vis := []
+			for d in [_main.hud.goals_dialog, _main.hud.career_dialog, _main.hud.money_hub, _main.hud.life_hub, _main.hud.town_dialog, _main.hud.household_dialog, _main.hud.help_dialog, _main.hud.pause_menu, _main.hud.settings_dialog, _main.hud.confirm_dialog, _main.hud.case_prompt, _main.hud.case_board]:
+				if d != null and d.visible:
+					vis.append(str(d.name))
+			print("SKIP speed=%d dialogs=%s accum=%s coop=%s paused=%s procmode=%s" % [root.get_node("Clock").speed, str(vis), str(root.get_node("Clock")._accum), str(root.get_node("Clock").coop_rate), str(paused), str(root.get_node("Clock").process_mode)])
+			print("SKIP frame %d clock=%d active=%s why=%s current=%s tile=%s" % [_frames, root.get_node("Clock").total_minutes, str(TimeSkip.active), TimeSkip.reason(), str(f5.current.def_id) if f5.current != null else "-", str(f5.tile)])
+		if _frames >= 600:
+			quit(0)
+		return false
 	if _frames == 100:
 		var img := root.get_texture().get_image()
 		img.save_png(_out)

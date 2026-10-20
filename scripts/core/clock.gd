@@ -28,8 +28,18 @@ func _process(delta: float) -> void:
 		return
 	if speed <= 0:
 		return
-	_accum += delta * MIN_PER_SEC[clampi(speed, 0, 3)]
+	var rate: float = MIN_PER_SEC[clampi(speed, 0, 3)]
+	if speed == 3:
+		var skip: float = TimeSkip.rate()          # one-character play: race through sleep, work and long walks, stop on anything that needs the player
+		if skip > rate:
+			rate = skip
+			_accum = minf(_accum, float(TimeSkip.MAX_PER_FRAME))
+	else:
+		TimeSkip.active = false
+	_accum += delta * rate
 	var n := int(_accum)
+	if rate > MIN_PER_SEC[3]:
+		n = mini(n, TimeSkip.MAX_PER_FRAME)
 	if n > 0:
 		_accum -= n
 		advance_minutes(n)

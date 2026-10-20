@@ -74,12 +74,12 @@ static func person_info(id: int) -> Dictionary:
 	if f != null:
 		Genetics.ensure(f)
 		return {"id": id, "name": str(f.name), "sex": Sexes.of(id), "traits": f.traits.duplicate(), "appearance": f.appearance, "age_days": age_days_of(id),
-			"stage": str(f.age_stage), "alive": true, "on_lot": true, "household_id": int(f.household_id)}
+			"stage": str(f.age_stage), "alive": true, "on_lot": true, "household_id": int(f.household_id), "heritage": str(f.heritage)}
 	if Story.townies.has(id):
 		var t: Dictionary = Story.townies[id]
 		Genetics.ensure(t)
 		return {"id": id, "name": str(t["name"]), "sex": Sexes.of_townie(t), "traits": (t["traits"] as Array).duplicate(), "appearance": t["appearance"],
-			"age_days": float(t["age_days"]), "stage": Story.stage_of(t), "alive": bool(t["alive"]), "on_lot": false, "household_id": -1}
+			"age_days": float(t["age_days"]), "stage": Story.stage_of(t), "alive": bool(t["alive"]), "on_lot": false, "household_id": -1, "heritage": str(t.get("heritage", ""))}
 	var p: Dictionary = people.get(id, {})
 	return {"id": id, "name": str(p.get("name", "Someone")), "sex": Sexes.of(id), "traits": [], "appearance": {}, "age_days": float(p.get("died_age_days", 0.0)),
 		"stage": Aging.stage_for_days(float(p.get("died_age_days", 0.0))), "alive": false, "on_lot": false, "household_id": -1}

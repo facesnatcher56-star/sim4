@@ -102,10 +102,5 @@
     "dues_per_day": 3,
     "leave_payoff": 150,
     "record_expunge_days": 56
-  },
-  "heritage": {
-    "mixed_chance": 0.2,
-    "pull": {"relative": 0.15, "known": 0.1, "share": 0.1, "cap": 1.4},
-    "ids": ["amber_coast", "northern_hills", "river_folk", "salt_harbour", "ember_vale", "pine_lake"]
   }
 }

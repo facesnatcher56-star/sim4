@@ -56,6 +56,7 @@ static func _make_baby(m, mother_id: int, father_id: int, sex: String, pc: Dicti
 	var baby_name: String = Names.pick_first([], SysUtil.rng, sex) + ((" " + fam) if fam != "" else "")
 	var baby := Folk.create(baby_name, [], -1, sex)
 	baby.appearance = gen["appearance"]
+	baby.heritage = str(gen.get("heritage", ""))
 	baby.household_id = int(m.household_id)
 	baby.age_stage = "baby"
 	Aging.register(baby, 0.0, [mother_id, father_id])

@@ -47,7 +47,7 @@ static func _find_tenant(p: Dictionary) -> void:
 			pool.append(t)
 	if pool.is_empty():
 		return
-	var t2: Dictionary = pool[HousingProps.rng.randi_range(0, pool.size() - 1)]
+	var t2: Dictionary = _weighted_tenant(pool, p)
 	t2["home_prop"] = str(p["id"])
 	p["tenant_kind"] = "townie"
 	p["tenant"] = int(t2["id"])
@@ -55,6 +55,25 @@ static func _find_tenant(p: Dictionary) -> void:
 	if str(p["owner_kind"]) == "player":
 		SysUtil.notify("%s moved into %s and will pay %d coins a week." % [t2["name"], p["label"], rent], "info")
 	SysUtil.game_event("tenant_moved_in", {"prop": str(p["id"]), "tenant": int(t2["id"])})
+
+## A random tenant from the pool, each weighted by the soft pull of the district (relatives, friends, community shops there; Heritage.pull). Same draw as before
+## when the pool has one person or no district.
+static func _weighted_tenant(pool: Array, p: Dictionary) -> Dictionary:
+	var did: String = SoloDistricts.district_of(str(p.get("lot", "")))
+	if did == "" or pool.size() == 1 or not SoloHome.active:
+		return pool[HousingProps.rng.randi_range(0, pool.size() - 1)]
+	var w: Array = []
+	var total: float = 0.0
+	for t in pool:
+		var x: float = Heritage.pull(int(t["id"]), str(t.get("heritage", "")), did)
+		w.append(x)
+		total += x
+	var r: float = HousingProps.rng.randf() * total
+	for i in pool.size():
+		r -= float(w[i])
+		if r <= 0.0:
+			return pool[i]
+	return pool[pool.size() - 1]
 
 static func _charge(p: Dictionary, day: int) -> void:
 	var rent: int = _rent_due(p)

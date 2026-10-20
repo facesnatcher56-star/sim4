@@ -18,7 +18,19 @@ func _process(_d: float) -> bool:
 	var verbose := "--toasts" in OS.get_cmdline_user_args()
 	if verbose:
 		SimEnv.events().notification.connect(func(text, kind): print("  [d%d %02d:00 %s] %s" % [Kit.clock().day(), Kit.clock().hour(), kind, text]))
+	var hs := {}
+	for t in Story.alive_townies():
+		hs[str(t.get("heritage", ""))] = int(hs.get(str(t.get("heritage", "")), 0)) + 1
+	print("SMOKE heritage: pawn=%s townies=%s" % [f.heritage, str(hs)])
 	print("SMOKE start: folk=%d pawn=%s coins=%d rung=%s homeless=%s day=%d hour=%d" % [folk.size(), str(Pawn.is_pawn(f)), Economy.balance(f.household_id), SoloHome.rung, str(SoloHome.homeless), Kit.clock().day(), Kit.clock().hour()])
+	if "--walk" in OS.get_cmdline_user_args():
+		print("SMOKE travel: %s" % str(Neighborhood.travel([f.id], "cafe")))
+		for i in 6:
+			Kit.run(10)
+			print("SMOKE walk +%d min: tile=%s current=%s queue=%d lot=%s" % [(i + 1) * 10, str(f.tile), str(f.current.def_id) if f.current != null else "-", f.queue.size(), Neighborhood.lot_of(f)])
+		Kit.teardown()
+		quit(0)
+		return true
 	if "--rough" in OS.get_cmdline_user_args():
 		_rough(f, Kit)
 		Kit.teardown()

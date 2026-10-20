@@ -111,6 +111,7 @@ static func reset_all() -> void:
 	BabyCare.reset()
 	Weather.reset()
 	Neighborhood.reset()
+	Heritage.reset(Neighborhood.world_seed)
 	Scenario.reset()
 	Incidents.reset()
 	AccidentMarks.reset_cache()
