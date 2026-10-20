@@ -237,20 +237,18 @@ func _refresh_folks() -> void:
 	_clear_stood_on()
 
 
-## A folk that appears on top of an ambient car (a visitor arriving at a gate tile where the car stands): the car is simply not there any more.
+## A folk that appears on top of a parked ambient car (a visitor arriving at a gate tile where the car stands): the car does not vanish, its driver has come back to it and it
+## drives off (it is not hidden or removed in view).
 func _clear_stood_on() -> void:
 	for v in sim.vehicles:
-		if str(v["tag"]) != "ambient" and str(v["tag"]) != "other":
+		if str(v["tag"]) != "ambient" or str(v["state"]) != "parked" or v.has("leaving") or v.has("dest_lot"):
 			continue
 		var h: Vector2 = v["dir"]
 		var rt: Vector2 = VehicleRoads.right_of(h)
 		for p in sim.folks:
 			var d: Vector2 = p - (v["pos"] as Vector2)
 			if d.length_squared() < 16.0 and absf(d.dot(h)) < float(v["len"]) * 0.5 - 0.2 and absf(d.dot(rt)) < float(v["wid"]) * 0.5 - 0.1:
-				if str(v["tag"]) == "ambient":
-					ambient.remove(v)
-				else:
-					sim.kill(v)
+				ambient._leave(v)
 				break
 
 

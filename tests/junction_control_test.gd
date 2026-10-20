@@ -71,6 +71,15 @@ func run() -> Array:
 			all_same += 1
 		mean_share += float(top) / float(maxi(signals.size(), 1))
 		n += 1
+	var all_red: int = 0
+	var samples: int = 0
+	for s5 in signals:
+		for step3 in 600:
+			var t3: float = float(step3) * 0.1
+			samples += 1
+			if ctl.state(s5.x, s5.y, 0, t3, 12.0) == ctl.state(s5.x, s5.y, 1, t3, 12.0):
+				all_red += 1
+	print("  [junctions] all four ways of a light show the same state (red) %.0f%% of the time (the old lattice: 42%% at every junction)" % [100.0 * float(all_red) / float(samples)])
 	print("  [junctions] lights showing the same pair of states at once: on average %.0f%% of them, all of them in %.0f%% of the samples" % [100.0 * mean_share / float(n), 100.0 * float(all_same) / float(n)])
 	_check(float(all_same) / float(n) < 0.12, "the lights are not in step (all alike in %.0f%% of the samples)" % [100.0 * float(all_same) / float(n)])
 	# pedestrian phase and night flash
