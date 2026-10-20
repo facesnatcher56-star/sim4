@@ -85,6 +85,9 @@ static func check_one(c: Variant, ctx: Dictionary) -> bool:
 			"lacks_object":                    # task 32d: none of these object defs within reach (a bare home): the fallback interactions switch on
 				if folk == null or SleepPlaces.lacks_any(folk, v) != true:
 					return false
+			"has_object":                      # task 33c: at least one of these object defs within reach (an action needs a thing to act on: no puzzle without a table)
+				if folk == null or not SleepPlaces.has_any(folk, v):
+					return false
 			"coins_at_least":
 				if folk == null or WorldIface.get_coins(int(folk.household_id)) < int(v):
 					return false

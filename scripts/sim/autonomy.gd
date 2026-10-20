@@ -210,6 +210,8 @@ static func gather(folk, closed = null) -> Array:
 	var others: Array = WorldIface.folk_near(folk)
 	var partners: Variant = null      # committed partners, looked up once and only when a romantic interaction is considered (Straying)
 	var idle_slices: int = DynLife.IDLE_SLICES
+	var idle_rank: Dictionary = {}             # task 33c: the fillers whose needed object is within reach -> their number (dealt in slices among themselves)
+	var idle_dealt := false
 	var idle_ok: int = -1                    # task 32c: idle fillers are only looked at when the folk has nothing pressing (decided once), and a rotating twelfth of them per decision
 	for e in _folk_self_defs(defs):
 		var iid: String = e[0]
@@ -219,7 +221,13 @@ static func gather(folk, closed = null) -> Array:
 			if idle_ok < 0:
 				idle_ok = 1 if DynLife.idle_ok(folk) else 0
 				idle_slices = DynLife.idle_slices(folk)
-			if idle_ok == 0 or (int(e[4]) + int(folk.id) + SimEnv.now_min() / 5) % idle_slices != 0:
+			if idle_ok == 0:
+				continue
+			if not idle_dealt:
+				idle_dealt = true
+				idle_rank = _idle_rank(folk, defs)
+				idle_slices = maxi(1, int(round(float(idle_slices) * float(idle_rank.size()) / maxf(1.0, float(_idle_total(defs))))))
+			if not idle_rank.has(iid) or (int(idle_rank[iid]) + int(folk.id) + SimEnv.now_min() / 5) % idle_slices != 0:
 				continue
 		var romantic: bool = not is_self and RomanceRules.is_romantic_def(d2)
 		if closed != null:
@@ -237,6 +245,45 @@ static func gather(folk, closed = null) -> Array:
 				if f2.id != folk.id and not (romantic and not (RomanceRules.allowed(int(folk.id), int(f2.id)) and Straying.may_flirt(int(folk.id), int(f2.id), partners))):
 					out.append({"id": iid, "target_id": int(f2.id), "kind": "folk", "obj": null, "folk": f2, "pk": pk})
 	return out
+
+## Task 33c: the idle fillers the folk can do here, numbered 0.. in table order. A filler that names a needed object (Cond `has_object`) is left out when none of
+## those objects is within reach, and the slices shrink in proportion (a bare home deals its few fillers as often as a furnished home deals its many), so a bare
+## home is not left standing around. In a home with everything the numbers are the table positions, as before.
+static func _idle_rank(folk, defs: Dictionary) -> Dictionary:
+	var have: Dictionary = {}
+	var out: Dictionary = {}
+	var n := 0
+	for e in _folk_self_defs(defs):
+		if int(e[4]) < 0:
+			continue
+		var ok := true
+		for t in (e[1] as Dictionary).get("tests", []):
+			if t is Dictionary and (t as Dictionary).has("has_object"):
+				if have.is_empty():
+					for o in WorldIface.objects_for(folk):
+						have[str(o.def_id)] = true
+					have["#"] = true
+				var v: Variant = t["has_object"]
+				var found := false
+				for id in (v if v is Array else [v]):
+					if have.has(str(id)):
+						found = true
+						break
+				if not found:
+					ok = false
+					break
+		if ok:
+			out[str(e[0])] = n
+			n += 1
+	return out
+
+
+static func _idle_total(defs: Dictionary) -> int:
+	var n := 0
+	for e in _folk_self_defs(defs):
+		if int(e[4]) >= 0:
+			n += 1
+	return n
 
 static var _fs_src: Dictionary = {}
 static var _fs_n: int = -1

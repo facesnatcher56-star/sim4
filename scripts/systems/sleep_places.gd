@@ -104,3 +104,13 @@ static func lacks_any(folk, defs: Variant) -> bool:
 		if str(o.def_id) in ids:
 			return false
 	return true
+
+
+## Cond "has_object" (task 33c): some object of one of the def ids `defs` is within reach of the folk. Unlike `lacks_any` it needs no home-lot guard: an idle filler that
+## names the thing it needs is only offered where that thing is.
+static func has_any(folk, defs: Variant) -> bool:
+	var ids: Array = defs if defs is Array else [defs]
+	for o in WorldIface.objects_for(folk):
+		if str(o.def_id) in ids:
+			return true
+	return false

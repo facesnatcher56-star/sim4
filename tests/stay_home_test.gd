@@ -50,6 +50,7 @@ func _offers_wait(f: Array) -> void:
 	WorldIface.coins[1] = 5000
 	Economy.deposit(1, 5000, "test")
 	Careers.confirm_offers = true
+	Economy.owner[int(w.add_object("computer", Vector2i(16, 12)).id)] = 1      # with a computer to search from and money in the bank nobody is looking (task 33c: without one they are)
 	_cmd(int(h.id), true)
 	for d in range(2, 60):
 		K.set_time(d, 6)
