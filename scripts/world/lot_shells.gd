@@ -61,6 +61,7 @@ func _rebuild_shells() -> void:
 		if bid >= 0:
 			storeys = float(maxi(1, int(World.levels.building(bid)["max"]) + 1))      # a tower's shell is as tall as the tower
 		model.scale = Vector3(want.x / fp.x, storeys, want.y / fp.y)
+		Looks.tint_tree(model, str(r["lot"]))
 		root.add_child(model)
 		add_child(root)
 		_shells[str(r["lot"])] = {"root": root, "rect": rect, "open": false, "lot": str(r["lot"]), "home": str(r["kind"]) == "home",

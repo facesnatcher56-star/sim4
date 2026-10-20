@@ -17,6 +17,7 @@ func _ready() -> void:
 	_connect_signals()
 	LevelView.ensure_on(self)      # upper floors / basements of multi-floor buildings (scripts/world/level_view.gd)
 	level_view.view_changed.connect(return_to_cutaway)     # changing floor or building: back to the readable Cutaway view
+	LookOverlay.ensure_on(self)    # vignette + grain of the current look (scripts/world/look_overlay.gd)
 	WeatherView.ensure_on(self)    # sky / sun / weather particles / seasons (scripts/world/weather_view.gd)
 	ObjectStateView.ensure_on(self)    # objects show their state: soil, grime, sparks, burners, screens (scripts/world/object_state_view.gd; view only)
 	FireView.ensure_on(self)       # flames / smoke / scorch marks (scripts/world/fire_view.gd)
@@ -38,6 +39,7 @@ func _connect_signals() -> void:
 	World.world_reset.connect(func(): call_deferred("frame_home"))   # new / loaded / travelled-to lot: show all of it
 	World.walls_changed.connect(func(): _walls_dirty = true)
 	World.floors_changed.connect(func(): _floors_dirty = true)
+	Looks.bus.changed.connect(func(_id): rebuild_all())     # a new visual style (Settings / --look): rebuild floors, walls and shells with its tints
 	var ev := get_node_or_null("/root/Events")
 	if ev:
 		ev.object_placed.connect(_on_object_placed)

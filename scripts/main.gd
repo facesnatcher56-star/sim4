@@ -18,6 +18,7 @@ func _ready() -> void:
 	GameSettings.load_settings()      # before anything shows: window, quality, audio, keys
 	SettingsApply.apply_all()
 	GameSettings.bus.changed.connect(_on_setting_changed)
+	Looks.bus.changed.connect(func(_i): _retheme())
 	var sched := SimScheduler.of(Clock)
 	SimRegistry.install_app(sched, self)      # autosave on the player's interval = a daily row in sim_registry.gd
 	sched.budget_usec = 4000                 # a frame whose sim work passed ~4 ms postpones LOW-priority jobs to a later tick (stats: deferred)
@@ -148,9 +149,13 @@ func _enter_game() -> void:
 # ------------------------------------------------------------ settings
 func _on_setting_changed(key: String, _v) -> void:
 	if key == "high_contrast":
-		for c in [hud, title, start_picker]:
-			if c != null:
-				c.theme = UITheme.build()
+		_retheme()
+
+
+func _retheme() -> void:
+	for c in [hud, title, start_picker]:
+		if c != null:
+			c.theme = UITheme.build()
 
 ## Autosave on the player's interval, only while a game is running.
 func _autosave_check(day: int) -> void:

@@ -1,0 +1,405 @@
+{
+ "version": 1,
+ "notes": "Visual looks (task 41). 'reference' is today's look and must stay identical to the hard-coded values it replaced (tests/looks_test.gd). surfaces: per class {sat,val multiply HSV, tint multiplies rgb, lift adds}. palette: absolute colours per floor type (replaces the base colour before grading). wear: deterministic per-tile grime (view only). env: sky / sun / ambient / lamp / wet / post knobs read by WeatherView and LookOverlay. ui: UITheme colours. material_class maps glb material names (a trailing * = prefix) to surface classes.",
+ "default": "reference",
+ "order": [
+  "reference",
+  "grounded"
+ ],
+ "floor_class": {
+  "wood": "floor_wood",
+  "tile": "floor_tile",
+  "carpet": "floor_carpet",
+  "dirt": "ground",
+  "stone": "ground",
+  "concrete": "ground",
+  "grass": "grass",
+  "lawn": "grass",
+  "asphalt": "road",
+  "crosswalk": "road",
+  "sidewalk": "sidewalk",
+  "sand": "sand",
+  "water": "water"
+ },
+ "material_class": {
+  "wall": "wall",
+  "roof": "roof",
+  "chimney": "roof",
+  "trim": "trim",
+  "base": "trim",
+  "awning": "awning",
+  "door_paint": "accent",
+  "glass": "glass",
+  "wood": "wood",
+  "wood_dark": "wood"
+ },
+ "looks": {
+  "reference": {
+   "label": "Reference (today)",
+   "desc": "Today's look, unchanged.",
+   "surfaces": {
+    "floor_wood": {
+     "sat": 1.0,
+     "val": 1.0,
+     "tint": "#ffffff",
+     "lift": 0.0
+    },
+    "floor_tile": {
+     "sat": 1.0,
+     "val": 1.0,
+     "tint": "#ffffff",
+     "lift": 0.0
+    },
+    "floor_carpet": {
+     "sat": 1.0,
+     "val": 1.0,
+     "tint": "#ffffff",
+     "lift": 0.0
+    },
+    "ground": {
+     "sat": 1.0,
+     "val": 1.0,
+     "tint": "#ffffff",
+     "lift": 0.0
+    },
+    "grass": {
+     "sat": 1.0,
+     "val": 1.0,
+     "tint": "#ffffff",
+     "lift": 0.0
+    },
+    "road": {
+     "sat": 1.0,
+     "val": 1.0,
+     "tint": "#ffffff",
+     "lift": 0.0
+    },
+    "sidewalk": {
+     "sat": 1.0,
+     "val": 1.0,
+     "tint": "#ffffff",
+     "lift": 0.0
+    },
+    "sand": {
+     "sat": 1.0,
+     "val": 1.0,
+     "tint": "#ffffff",
+     "lift": 0.0
+    },
+    "water": {
+     "sat": 1.0,
+     "val": 1.0,
+     "tint": "#ffffff",
+     "lift": 0.0
+    },
+    "wall": {
+     "sat": 1.0,
+     "val": 1.0,
+     "tint": "#ffffff",
+     "lift": 0.0
+    },
+    "roof": {
+     "sat": 1.0,
+     "val": 1.0,
+     "tint": "#ffffff",
+     "lift": 0.0
+    },
+    "trim": {
+     "sat": 1.0,
+     "val": 1.0,
+     "tint": "#ffffff",
+     "lift": 0.0
+    },
+    "awning": {
+     "sat": 1.0,
+     "val": 1.0,
+     "tint": "#ffffff",
+     "lift": 0.0
+    },
+    "accent": {
+     "sat": 1.0,
+     "val": 1.0,
+     "tint": "#ffffff",
+     "lift": 0.0
+    },
+    "glass": {
+     "sat": 1.0,
+     "val": 1.0,
+     "tint": "#ffffff",
+     "lift": 0.0
+    },
+    "wood": {
+     "sat": 1.0,
+     "val": 1.0,
+     "tint": "#ffffff",
+     "lift": 0.0
+    },
+    "leaf": {
+     "sat": 1.0,
+     "val": 1.0,
+     "tint": "#ffffff",
+     "lift": 0.0
+    },
+    "sky": {
+     "sat": 1.0,
+     "val": 1.0,
+     "tint": "#ffffff",
+     "lift": 0.0
+    }
+   },
+   "palette": {},
+   "wear": {
+    "floor_dirt": 0.0,
+    "stain_chance": 0.0,
+    "stain_color": "#3a2f25",
+    "corner_dark": 0.0
+   },
+   "env": {
+    "night_sky": [
+     0.035,
+     0.045,
+     0.11
+    ],
+    "twilight": [
+     0.92,
+     0.55,
+     0.42
+    ],
+    "twilight_mix": 0.55,
+    "sun_warm": [
+     1.0,
+     0.6,
+     0.36
+    ],
+    "sun_white": [
+     1.0,
+     0.97,
+     0.9
+    ],
+    "sun_base": 0.9,
+    "shadow_mult": 1.0,
+    "moon_color": [
+     0.55,
+     0.66,
+     1.0
+    ],
+    "moon_energy": 0.55,
+    "amb_day": [
+     0.78,
+     0.8,
+     0.86
+    ],
+    "amb_night": [
+     0.2,
+     0.25,
+     0.46
+    ],
+    "amb_energy_day": 0.62,
+    "amb_energy_night": 0.62,
+    "exposure_night": 1.1,
+    "exposure_day": 1.0,
+    "saturation": 1.0,
+    "contrast": 1.0,
+    "brightness": 1.0,
+    "fog_tint": [
+     0.72,
+     0.75,
+     0.78
+    ],
+    "fog_floor": 0.0,
+    "lamp_color": "#ffffff",
+    "lamp_energy": 1.0,
+    "lamp_range": 1.0,
+    "window_glow": 0.0,
+    "window_color": "#ffc773",
+    "wet_dark": 0.0,
+    "wet_color": "#0d121a",
+    "vignette": 0.0,
+    "grain": 0.0
+   },
+   "ui": {
+    "bg": "#1b2430",
+    "panel": "#232f3e",
+    "panel_hi": "#2d3c4f",
+    "accent": "#3fb8af",
+    "text": "#e8eef4",
+    "muted": "#93a3b5",
+    "radius": 10
+   }
+  },
+  "grounded": {
+   "label": "Grounded and gritty",
+   "desc": "Muted real-world colours, real contrast, dark nights, wear and dirt.",
+   "surfaces": {
+    "floor_wood": {
+     "sat": 0.5,
+     "val": 0.62,
+     "tint": "#f2e8dc",
+     "lift": 0.0
+    },
+    "floor_tile": {
+     "sat": 0.25,
+     "val": 0.78,
+     "tint": "#eeeadf",
+     "lift": 0.0
+    },
+    "floor_carpet": {
+     "sat": 0.3,
+     "val": 0.68,
+     "tint": "#e8e2de",
+     "lift": 0.0
+    },
+    "ground": {
+     "sat": 0.6,
+     "val": 0.78,
+     "tint": "#ffffff",
+     "lift": 0.0
+    },
+    "grass": {
+     "sat": 0.5,
+     "val": 0.58,
+     "tint": "#e4e2cc",
+     "lift": 0.0
+    },
+    "road": {
+     "sat": 0.8,
+     "val": 0.72,
+     "tint": "#ffffff",
+     "lift": 0.0
+    },
+    "sidewalk": {
+     "sat": 0.6,
+     "val": 0.78,
+     "tint": "#e8e6e0",
+     "lift": 0.0
+    },
+    "sand": {
+     "sat": 0.6,
+     "val": 0.8,
+     "tint": "#ffffff",
+     "lift": 0.0
+    },
+    "water": {
+     "sat": 0.55,
+     "val": 0.72,
+     "tint": "#ffffff",
+     "lift": 0.0
+    },
+    "wall": {
+     "sat": 0.45,
+     "val": 0.8,
+     "tint": "#efe6d8",
+     "lift": 0.0
+    },
+    "roof": {
+     "sat": 0.5,
+     "val": 0.7,
+     "tint": "#ffffff",
+     "lift": 0.0
+    },
+    "trim": {
+     "sat": 0.4,
+     "val": 0.78,
+     "tint": "#ffffff",
+     "lift": 0.0
+    },
+    "awning": {
+     "sat": 0.5,
+     "val": 0.68,
+     "tint": "#ffffff",
+     "lift": 0.0
+    },
+    "accent": {
+     "sat": 0.55,
+     "val": 0.72,
+     "tint": "#ffffff",
+     "lift": 0.0
+    },
+    "glass": {
+     "sat": 0.5,
+     "val": 0.8,
+     "tint": "#ffffff",
+     "lift": 0.0
+    },
+    "wood": {
+     "sat": 0.6,
+     "val": 0.75,
+     "tint": "#ffffff",
+     "lift": 0.0
+    },
+    "leaf": {
+     "sat": 0.55,
+     "val": 0.66,
+     "tint": "#ffffff",
+     "lift": 0.0
+    },
+    "sky": {
+     "sat": 0.55,
+     "val": 0.9,
+     "tint": "#eeeeec",
+     "lift": 0.0
+    }
+   },
+   "palette": {
+    "wood": "#85694c",
+    "tile": "#a9a798",
+    "carpet": "#6b6361",
+    "grass": "#667447",
+    "lawn": "#6d7a4c",
+    "dirt": "#6a5742",
+    "concrete": "#8d8b86",
+    "stone": "#85847f",
+    "asphalt": "#2f3136",
+    "crosswalk": "#2f3136",
+    "sidewalk": "#9c9a93",
+    "sand": "#b5a67c"
+   },
+   "wear": {
+    "floor_dirt": 0.12,
+    "stain_chance": 0.05,
+    "stain_color": "#3a2f25",
+    "corner_dark": 0.1
+   },
+   "env": {
+    "night_sky": "#05070f",
+    "twilight": "#c9785c",
+    "twilight_mix": 0.55,
+    "sun_warm": "#f0a070",
+    "sun_white": "#f6efe0",
+    "sun_base": 0.82,
+    "shadow_mult": 0.9,
+    "moon_color": "#7a92d0",
+    "moon_energy": 0.32,
+    "amb_day": "#b8bcc4",
+    "amb_night": "#222a46",
+    "amb_energy_day": 0.55,
+    "amb_energy_night": 0.22,
+    "exposure_night": 1.0,
+    "exposure_day": 1.0,
+    "saturation": 0.82,
+    "contrast": 1.1,
+    "brightness": 0.98,
+    "fog_tint": "#a9b0b4",
+    "fog_floor": 0.08,
+    "lamp_color": "#ffd49a",
+    "lamp_energy": 1.5,
+    "lamp_range": 1.3,
+    "window_glow": 2.2,
+    "window_color": "#ffc773",
+    "wet_dark": 0.5,
+    "wet_color": "#0d121a",
+    "vignette": 0.35,
+    "grain": 0.03
+   },
+   "ui": {
+    "bg": "#1c1e21",
+    "panel": "#25282c",
+    "panel_hi": "#32363b",
+    "accent": "#a58d66",
+    "text": "#dedbd4",
+    "muted": "#8d8b85",
+    "radius": 4
+   }
+  }
+ }
+}

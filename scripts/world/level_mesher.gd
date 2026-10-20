@@ -65,7 +65,7 @@ static func material(glass: bool = false) -> StandardMaterial3D:
 
 static func floor_color(world: WorldGrid, type: String, t: Vector2i) -> Color:
 	var fd: Dictionary = world.FLOOR_DEFS.get(type, {})
-	var col := Color(str(fd.get("color", "#b8864e")))
+	var col := Looks.floor_color(type, Color(str(fd.get("color", "#b8864e"))), t)
 	if col.v > 0.72:
 		col.v = 0.72 + (col.v - 0.72) * 0.3
 	if (t.x + t.y) % 2 == 1:
@@ -120,7 +120,7 @@ static func walls(world: WorldGrid, level: int, low: Callable) -> Array:
 		var cz: float = float(e.y) if horizontal else e.y + 0.5
 		var sx: float = 1.0 + WALL_T if horizontal else WALL_T
 		var sz: float = WALL_T if horizontal else 1.0 + WALL_T
-		var col := WALL_COL if kind != "fence" else Color(0.55, 0.38, 0.22)
+		var col := Looks.grade("wall", WALL_COL) if kind != "fence" else Color(0.55, 0.38, 0.22)
 		match kind:
 			"window":
 				solid.box(Vector3(cx - sx * 0.5, y, cz - sz * 0.5), Vector3(sx, minf(0.9, h), sz), col)
@@ -168,7 +168,7 @@ static func roof(world: WorldGrid, bid: int, style: String) -> ArrayMesh:
 		lo = lo.min(Vector2(t))
 		hi = hi.max(Vector2(t) + Vector2.ONE)
 	var y0 := LPos.elev(top) + WALL_H + 0.02
-	var col := Color(0.55, 0.28, 0.22)
+	var col := Looks.grade("roof", Color(0.55, 0.28, 0.22))
 	var ov := 0.25
 	var x0 := lo.x - ov
 	var x1 := hi.x + ov

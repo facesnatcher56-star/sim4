@@ -2,17 +2,28 @@ class_name UITheme
 extends RefCounted
 ## One cohesive generated Theme (dark slate + teal accent).
 
-const BG := Color("#1b2430")
-const PANEL := Color("#232f3e")
-const PANEL_HI := Color("#2d3c4f")
-const ACCENT := Color("#3fb8af")
-const TEXT := Color("#e8eef4")
-const MUTED := Color("#93a3b5")
+## Colours come from the current look (data/looks.json "ui"; reference = the values below). They are static vars so a look switch re-colours
+## everything built afterwards; build() re-reads them, main.gd re-themes the HUD / menus on Looks.bus.changed.
+static var BG := Color("#1b2430")
+static var PANEL := Color("#232f3e")
+static var PANEL_HI := Color("#2d3c4f")
+static var ACCENT := Color("#3fb8af")
+static var TEXT := Color("#e8eef4")
+static var MUTED := Color("#93a3b5")
+
+## Re-read the colours of the current look.
+static func sync_look() -> void:
+	BG = Looks.ui_col("bg", Color("#1b2430"))
+	PANEL = Looks.ui_col("panel", Color("#232f3e"))
+	PANEL_HI = Looks.ui_col("panel_hi", Color("#2d3c4f"))
+	ACCENT = Looks.ui_col("accent", Color("#3fb8af"))
+	TEXT = Looks.ui_col("text", Color("#e8eef4"))
+	MUTED = Looks.ui_col("muted", Color("#93a3b5"))
 
 static func box(bg: Color, radius: int = 8, border: Color = Color(0, 0, 0, 0), bw: int = 0, pad: int = 8) -> StyleBoxFlat:
 	var s := StyleBoxFlat.new()
 	s.bg_color = bg
-	s.set_corner_radius_all(radius)
+	s.set_corner_radius_all(maxi(1, radius + Looks.ui_radius(10) - 10))      # sober looks have squarer corners
 	s.border_color = border
 	s.set_border_width_all(bw)
 	s.content_margin_left = pad
@@ -22,6 +33,7 @@ static func box(bg: Color, radius: int = 8, border: Color = Color(0, 0, 0, 0), b
 	return s
 
 static func build() -> Theme:
+	sync_look()
 	var t := Theme.new()
 	t.default_font_size = 15
 	t.set_color("font_color", "Label", TEXT)

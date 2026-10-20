@@ -16,6 +16,7 @@ const SNOW_FLOORS := ["grass", "lawn", "dirt", "stone", "concrete", "sand"]
 
 var overlay_grass_mat: StandardMaterial3D
 var overlay_snow_mat: StandardMaterial3D
+var overlay_wet_mat: StandardMaterial3D        # darkens roads and pavements in rain (look-driven; hidden at alpha 0)
 var tree_mats: Dictionary = {}          # "oak"/"pine"/"trunk" -> StandardMaterial3D (WeatherView tints the leaves by season)
 
 var _chunks: Dictionary = {}            # Vector2i -> {root, floor, grass, snow, trees:Array}
@@ -24,6 +25,7 @@ var _vis: Dictionary = {}               # chunks in the view rectangle (drawn)
 var _keep: Dictionary = {}              # chunks that keep walls / trees alive
 var _floor_mat: StandardMaterial3D
 var _snow_on: bool = false
+var _wet_on: bool = false
 var _marks: Array = []                  # road centre lines [x0, y0, x1, y1] in tile units
 var _tree_meshes: Dictionary = {}       # species -> ArrayMesh (leaves + trunk surfaces) or null
 var _chunk_root: Node3D
@@ -35,6 +37,7 @@ func _init_chunk_materials() -> void:
 	_floor_mat.roughness = 0.95
 	overlay_grass_mat = _overlay(Color(1, 1, 1, 0))
 	overlay_snow_mat = _overlay(Color(0.95, 0.97, 1.0, 0))
+	overlay_wet_mat = _overlay(Color(0.05, 0.07, 0.1, 0))
 	tree_mats = {"oak": _tree_mat(Color(0.35, 0.62, 0.28)), "pine": _tree_mat(Color(0.18, 0.42, 0.26)), "trunk": _tree_mat(Color(0.38, 0.27, 0.18))}
 
 
@@ -80,7 +83,7 @@ func _rebuild_chunks_all() -> void:
 	pm.size = Vector2(World.width * 3.0 + 100.0, World.height * 3.0 + 100.0)
 	_ground_mi.mesh = pm
 	_ground_mi.position = Vector3(World.width * 0.5, -0.03, World.height * 0.5)
-	_ground_mi.material_override = _mat(Color(0.36, 0.5, 0.3))
+	_ground_mi.material_override = _mat(Looks.grade("grass", Color(0.36, 0.5, 0.3)))
 	_ground_mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	_floor_root.add_child(_ground_mi)
 	_pull_dirty_chunks()
@@ -156,6 +159,17 @@ func set_overlay_snow_visible(on: bool) -> void:
 		(ch["snow"] as MeshInstance3D).visible = on
 
 
+## Weather + look: a dark film over roads and pavements while it rains (alpha 0 hides it; the reference look never shows it).
+func set_wet_overlay(alpha: float, c: Color) -> void:
+	overlay_wet_mat.albedo_color = Color(c.r, c.g, c.b, clampf(alpha, 0.0, 0.9))
+	var on := alpha > 0.01
+	if on == _wet_on:
+		return
+	_wet_on = on
+	for ch in _chunks.values():
+		(ch["wet"] as MeshInstance3D).visible = on
+
+
 # ------------------------------------------------------------------ chunk mesh
 
 func _build_chunk(c: Vector2i) -> void:
@@ -169,6 +183,7 @@ func _build_chunk(c: Vector2i) -> void:
 	var fa := _MeshArrays.new()
 	var ga := _MeshArrays.new()
 	var sa := _MeshArrays.new()
+	var wa := _MeshArrays.new()
 	var floors := World.floors
 	var w := World.width
 	var holes: Dictionary = World.levels.ground_holes
@@ -185,6 +200,8 @@ func _build_chunk(c: Vector2i) -> void:
 				_crosswalk_bars(fa, x, y)
 			if ft == "grass" or ft == "lawn":
 				ga.quad(x, y, x + 1, y + 1, 0.006, Color.WHITE)
+			if ft == "asphalt" or ft == "crosswalk" or ft == "sidewalk":
+				wa.quad(x, y, x + 1, y + 1, 0.007, Color.WHITE)
 			if ft in SNOW_FLOORS:
 				sa.quad(x, y, x + 1, y + 1, 0.009, Color.WHITE)
 	for m in _marks:
@@ -193,6 +210,8 @@ func _build_chunk(c: Vector2i) -> void:
 	(ch["grass"] as MeshInstance3D).mesh = ga.commit()
 	(ch["snow"] as MeshInstance3D).mesh = sa.commit()
 	(ch["snow"] as MeshInstance3D).visible = _snow_on
+	(ch["wet"] as MeshInstance3D).mesh = wa.commit()
+	(ch["wet"] as MeshInstance3D).visible = _wet_on
 	_build_trees_for_chunk(ch, rc, big)
 	(ch["root"] as Node3D).visible = _vis.has(c) or _vis.is_empty()
 
@@ -202,11 +221,11 @@ func _new_chunk(c: Vector2i) -> Dictionary:
 	root.name = "chunk_%d_%d" % [c.x, c.y]
 	_floor_root.add_child(root)
 	var out := {"root": root, "trees": []}
-	for k in ["floor", "grass", "snow"]:
+	for k in ["floor", "grass", "snow", "wet"]:
 		var mi := MeshInstance3D.new()
 		mi.name = k
 		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		mi.material_override = _floor_mat if k == "floor" else (overlay_grass_mat if k == "grass" else overlay_snow_mat)
+		mi.material_override = _floor_mat if k == "floor" else (overlay_grass_mat if k == "grass" else (overlay_wet_mat if k == "wet" else overlay_snow_mat))
 		root.add_child(mi)
 		out[k] = mi
 	return out
@@ -214,7 +233,7 @@ func _new_chunk(c: Vector2i) -> Dictionary:
 
 func _floor_color(ft: String, t: Vector2i) -> Color:
 	var fd: Dictionary = World.FLOOR_DEFS.get(ft, {})
-	var col := Color(str(fd.get("color", "#6aa84f")))
+	var col := Looks.floor_color(ft, Color(str(fd.get("color", "#6aa84f"))), t)
 	if fd.get("srgb", false):
 		col = col.srgb_to_linear()        # vertex colours are read as linear: road / sidewalk / water keep their exact look
 	elif col.v > 0.72:
