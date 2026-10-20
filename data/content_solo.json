@@ -2,32 +2,193 @@
   "_doc": "One-character play content (merged by SoloContent): the bottom of the ladder. Self actions for the pawn only, ordered from the Myself menu. Numbers that may be tuned live in data/solo.json.",
   "interactions": {
     "sleep_rough": {
-      "label": "Sleep Rough", "kind": "super", "target": "self", "tags": ["sleep", "rest"], "duration_min": 600, "posture": "lie",
-      "tests": [{"circadian": "sleep_ok"}, {"is_pawn": true}, {"on_street": true}],
-      "per_min": {"energy": 0.05},
-      "need_decay_mult": {"hunger": 0.4, "bladder": 0.55, "social": 0.4, "fun": 0.3, "hygiene": 0.8, "energy": 0.4},
-      "end_when": [{"any": [{"circadian": "alarm"}, {"stat_above": ["energy", 60]}]}, {"circadian": "day"}],
-      "on_finish": [{"add_buff": "slept_rough"}, {"solo_hook": "rough_night"}],
-      "autonomous": false, "player_menu": true, "priority": "normal", "thought": "A bench, a doorway, anywhere."
-    },
-    "shelter_sleep": {
-      "label": "Sleep in the Shelter", "kind": "super", "target": "self", "tags": ["sleep", "rest"], "duration_min": 600, "posture": "lie",
-      "tests": [{"circadian": "sleep_ok"}, {"is_pawn": true}, {"at_lot": "shelter"}, {"shelter_night": true}],
-      "per_min": {"energy": 0.1, "comfort": 0.05},
-      "need_decay_mult": {"hunger": 0.35, "bladder": 0.5, "social": 0.3, "fun": 0.2, "hygiene": 0.5, "energy": 0.3},
-      "end_when": [{"any": [{"circadian": "alarm"}, {"stat_above": ["energy", 60]}]}, {"circadian": "day"}],
-      "on_finish": [{"solo_hook": "shelter_night"}],
-      "autonomous": false, "player_menu": true, "priority": "normal", "thought": "A real bed, for a few nights."
+      "label": "Sleep Rough",
+      "kind": "super",
+      "target": "self",
+      "tags": [
+        "sleep",
+        "rest"
+      ],
+      "duration_min": 600,
+      "posture": "lie",
+      "tests": [
+        {
+          "circadian": "sleep_ok"
+        },
+        {
+          "is_pawn": true
+        },
+        {
+          "on_street": true
+        }
+      ],
+      "per_min": {
+        "energy": 0.05
+      },
+      "need_decay_mult": {
+        "hunger": 0.4,
+        "bladder": 0.55,
+        "social": 0.4,
+        "fun": 0.3,
+        "hygiene": 0.8,
+        "energy": 0.4
+      },
+      "end_when": [
+        {
+          "any": [
+            {
+              "circadian": "alarm"
+            },
+            {
+              "stat_above": [
+                "energy",
+                60
+              ]
+            }
+          ]
+        },
+        {
+          "circadian": "day"
+        }
+      ],
+      "on_finish": [
+        {
+          "add_buff": "slept_rough"
+        },
+        {
+          "solo_hook": "rough_night"
+        }
+      ],
+      "autonomous": false,
+      "player_menu": true,
+      "priority": "normal",
+      "thought": "A bench, a doorway, anywhere."
     },
     "day_labour": {
-      "label": "Take a Day's Labour", "kind": "super", "target": "self", "tags": ["work"], "duration_min": 240, "posture": "stand",
-      "tests": [{"is_pawn": true}, {"at_lot": "works"}, {"time_between": [7, 9]}],
-      "per_min": {"hygiene": -0.04, "fun": -0.03},
-      "on_finish": [{"coins_add": 40}, {"solo_hook": "day_labour"}],
-      "autonomous": false, "player_menu": true, "priority": "normal", "cooldown_min": 1380, "thought": "Four hours of hauling for forty coins."
+      "label": "Take a Day's Labour",
+      "kind": "super",
+      "target": "self",
+      "tags": [
+        "work"
+      ],
+      "duration_min": 240,
+      "posture": "stand",
+      "tests": [
+        {
+          "is_pawn": true
+        },
+        {
+          "at_lot": "works"
+        },
+        {
+          "time_between": [
+            7,
+            9
+          ]
+        }
+      ],
+      "per_min": {
+        "hygiene": -0.04,
+        "fun": -0.03
+      },
+      "on_finish": [
+        {
+          "coins_add": 40
+        },
+        {
+          "solo_hook": "day_labour"
+        }
+      ],
+      "autonomous": false,
+      "player_menu": true,
+      "priority": "normal",
+      "cooldown_min": 1380,
+      "thought": "Four hours of hauling for forty coins."
+    },
+    "sleep_shelter": {
+      "label": "Sleep in a Shelter Bunk",
+      "kind": "super",
+      "target": "object",
+      "objects": [
+        "shelter_bed"
+      ],
+      "tags": [
+        "sleep",
+        "rest"
+      ],
+      "duration_min": 660,
+      "posture": "lie",
+      "tests": [
+        {
+          "circadian": "sleep_ok"
+        },
+        {
+          "is_pawn": true
+        },
+        {
+          "shelter_night": true
+        }
+      ],
+      "per_min": {
+        "energy": 0.1,
+        "comfort": 0.05
+      },
+      "need_decay_mult": {
+        "hunger": 0.35,
+        "bladder": 0.5,
+        "social": 0.3,
+        "fun": 0.2,
+        "hygiene": 0.5,
+        "energy": 0.3
+      },
+      "end_when": [
+        {
+          "any": [
+            {
+              "circadian": "alarm"
+            },
+            {
+              "stat_above": [
+                "energy",
+                60
+              ]
+            }
+          ]
+        },
+        {
+          "circadian": "day"
+        }
+      ],
+      "on_finish": [
+        {
+          "solo_hook": "shelter_night"
+        }
+      ],
+      "autonomous": false,
+      "priority": "normal",
+      "thought": "A real bed, for a few nights."
     }
   },
   "buffs": {
-    "slept_rough": {"label": "Slept Rough", "mood": {"uncomfortable": 2.5}, "duration_min": 480, "thought": "Cold, stiff, and I smell of the street."}
+    "slept_rough": {
+      "label": "Slept Rough",
+      "mood": {
+        "uncomfortable": 2.5
+      },
+      "duration_min": 480,
+      "thought": "Cold, stiff, and I smell of the street."
+    }
+  },
+  "objects": {
+    "shelter_bed": {
+      "clone": "bunk_bed",
+      "override": {
+        "label": "Shelter Bunk",
+        "price": 0,
+        "interactions": [
+          "sleep_shelter"
+        ]
+      }
+    }
   }
 }

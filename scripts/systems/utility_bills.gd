@@ -50,6 +50,7 @@ static func parts(hid: int) -> Dictionary:
 			v += untracked * rate
 		out[u] = v * mult * (CityGov.tax if u == "rates" else 1.0)         # the council charges follow the tax rate (task 12.4)
 	_savings(hid, out)
+	SoloRules.landlord_pays(hid, out)          # one-character play: a tenant's landlord pays the water and the council charges
 	out["cover"] = float(DisasterInsurance.bill_extra(hid)) + float(BankInsurance.bill_extra(hid)) + float(CrimeSecurityAlarm.bill_extra(hid))      # home insurance, health / car / life cover (13), alarm monitoring and a guard (21)
 	return out
 

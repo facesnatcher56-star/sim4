@@ -43,6 +43,22 @@ static func is_homeless() -> bool:
 static func locked_out(f) -> bool:
 	return active and homeless and Pawn.is_pawn(f)
 
+## Why these folk may not go to `lot_id` ("" = they may): the old home is locked after an eviction, the shelter is only for people with no home.
+static func travel_refusal(folk_ids: Array, lot_id: String) -> String:
+	if not active:
+		return ""
+	var pawn_in := false
+	for id in folk_ids:
+		if Pawn.is_pawn_id(int(id)):
+			pawn_in = true
+	if not pawn_in:
+		return ""
+	if lot_id == Neighborhood.HOME and homeless:
+		return "You have no home to go to: the landlord has changed the locks."
+	if lot_id == SoloShelter.lot_id() and not homeless:
+		return "The shelter is for people with no home."
+	return ""
+
 static func rung_def() -> Dictionary:
 	return SoloCfg.rung(rung)
 
@@ -51,7 +67,7 @@ static func hid() -> int:
 
 ## The map-home property of the pawn's tenancy (the rent bills hang on it).
 static func prop() -> Dictionary:
-	return HousingProps.home_prop(Economy.primary_household())
+	return SoloMove.prop_at(Neighborhood.HOME)
 
 static func to_dict() -> Dictionary:
 	if not active:

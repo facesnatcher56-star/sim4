@@ -229,6 +229,13 @@ static func _on_enter(f, lot_id: String) -> void:
 		if not f.has_meta("silent_trip"):
 			SysUtil.notify("%s arrived at %s." % [f.name, Neighborhood.label_of(lot_id)], "travel")
 		f.remove_meta("silent_trip")
+	if SoloHome.active and Pawn.is_pawn(f) and SoloHome.travel_refusal([fid], lot_id) != "":
+		SysUtil.notify(SoloHome.travel_refusal([fid], lot_id), "warn")
+		f.set_meta("denied", lot_id)
+		f.cancel_current("denied")
+		f.clear_queue()
+		walk_to(f, street_tile(lot_id), "")
+		return
 	if lot_id == Neighborhood.HOME:
 		Neighborhood.apply_pantry()
 		return

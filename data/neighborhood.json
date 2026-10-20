@@ -1,4 +1,4 @@
-﻿{
+{
   "version": 1,
   "home_id": "home",
   "grid": [7, 4],
@@ -33,6 +33,7 @@
     {"id": "works", "label": "Ironbridge Works", "type": "works", "template": "works", "pos": [4, 1], "color": "#7d7f86", "blurb": "Factory floor, warehouse, motor bay and control room, with a building yard out front."},
     {"id": "fire_station", "label": "Fernwood Fire Station", "type": "fire", "template": "fire_01", "pos": [5, 0], "color": "#d9534f", "blurb": "The engines and the crew. Fires are fought from here."},
     {"id": "city_hall", "label": "Fernwood City Hall", "type": "city_hall", "template": "cityhall_01", "pos": [5, 1], "color": "#8c7b5e", "blurb": "The mayor, the council chamber and the town notice board."},
-    {"id": "car_park", "label": "Station Street Car Park", "type": "garage", "template": "garage_01", "pos": [5, 2], "color": "#7a8794", "blurb": "Six levels of parking. A daily fee."}
+    {"id": "car_park", "label": "Station Street Car Park", "type": "garage", "template": "garage_01", "pos": [5, 2], "color": "#7a8794", "blurb": "Six levels of parking. A daily fee."},
+    {"id": "shelter", "label": "Fernwood Night Shelter", "type": "shelter", "template": "shelter", "pos": [5, 3], "color": "#8a8f98", "blurb": "A bunk, a shower and a locker for a few nights a week. No food."}
   ]
 }

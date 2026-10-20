@@ -4,6 +4,9 @@ extends RefCounted
 
 static func build(dlg: BankHub) -> void:
 	var h: int = dlg.hid()
+	if SoloHome.active:
+		SoloHomeUi.build(dlg)          # one-character play: where you live and the ladder of places
+		dlg.heading("Property market")
 	HousingProps.ensure()
 	var home: Dictionary = HousingProps.home_prop(h)
 	dlg.heading("Your home")

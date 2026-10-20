@@ -13,6 +13,7 @@
     "shelter_nights": {"relaxed": 4, "normal": 3, "hard": 2},
     "flat_property": {"base": 6000, "hood": 0.5, "label": "Starter Studio"},
     "notice_days": 3,
+    "landlord_pays": {"water": 1.0, "rates": 1.0},
     "autopay": true
   },
   "food": {

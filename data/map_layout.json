@@ -1,4 +1,4 @@
-﻿{
+{
  "version": 1,
  "notes": "Starter neighbourhood on World.MAP_W x World.MAP_H (the only place the map size is set). Starter neighbourhood. Road grid: vertical roads start at vroads_x, horizontal at hroads_y; every road is road_w wide (outer tile of each side = sidewalk, the road_w-2 between = asphalt). Block (c,r) is the lot slot between vroads_x[c]/vroads_x[c+1] and hroads_y[r]/hroads_y[r+1]; lot rects are lot_size and the slot origin is (vroads_x[c]+road_w, hroads_y[r]+road_w). Task 12b: one more column of slots was added east of the works column (road x 229, map width 236): fire_station, city_hall and car_park are real lots (column 4) and `plots` are four reserved empty blocks (column 5; lawn, region kind park, label Empty plot) where the town-planning projects of CityPlan build. Slots hold the lots of neighborhood.json (the template/label/type come from there).",
  "road_w": 6,
@@ -89,12 +89,12 @@
   ],
   "fire_station": [4, 0],
   "city_hall": [4, 1],
-  "car_park": [4, 3]
+  "car_park": [4, 3],
+  "shelter": [5, 2]
  },
  "plots": {
   "plot_1": [5, 0],
   "plot_2": [5, 1],
-  "plot_3": [5, 2],
   "plot_4": [5, 3]
  },
  "green": {

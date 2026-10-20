@@ -1,4 +1,4 @@
-﻿class_name Economy
+class_name Economy
 extends RefCounted
 ## Household funds, weekly bills, late fees, repossession, buying/selling objects and grocery restock.
 ## Balances live in WorldIface.coins (the same numbers Cond `coins_at_least` / Loot `coins_add` use).
@@ -357,6 +357,8 @@ static func on_day(day: int) -> void:
 	# One bill per call, even if the clock skipped several cycles: missed cycles are merged, never stacked.
 	if day >= next_bill_day:
 		for hid2 in household_ids():
+			if SoloHome.is_homeless() and Players.player_of(int(hid2)) > 0:
+				continue          # no home, no bills (the unpaid ones stay as debt)
 			issue_bill(int(hid2))
 		Weather.reset_bill_period()
 		next_bill_day += every * (1 + (day - next_bill_day) / every)

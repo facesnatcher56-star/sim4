@@ -7090,6 +7090,430 @@
    ],
    "staff": [],
    "price": 0
+  },
+  "shelter": {
+   "label": "Fernwood Night Shelter",
+   "description": "The council's dorm for people with nowhere to sleep: a bunk, a shower and a locker for a few nights a week. No food is served.",
+   "kind": "venue",
+   "venue": "shelter",
+   "floors": [
+    {
+     "rect": [
+      0,
+      18,
+      31,
+      18
+     ],
+     "type": "stone"
+    },
+    {
+     "rect": [
+      0,
+      19,
+      31,
+      23
+     ],
+     "type": "concrete"
+    },
+    {
+     "rect": [
+      5,
+      4,
+      26,
+      17
+     ],
+     "type": "tile"
+    },
+    {
+     "rect": [
+      20,
+      4,
+      26,
+      9
+     ],
+     "type": "concrete"
+    }
+   ],
+   "walls": [
+    {
+     "a": [
+      5,
+      4
+     ],
+     "b": [
+      27,
+      4
+     ],
+     "type": "wall"
+    },
+    {
+     "a": [
+      5,
+      18
+     ],
+     "b": [
+      27,
+      18
+     ],
+     "type": "wall"
+    },
+    {
+     "a": [
+      5,
+      4
+     ],
+     "b": [
+      5,
+      18
+     ],
+     "type": "wall"
+    },
+    {
+     "a": [
+      27,
+      4
+     ],
+     "b": [
+      27,
+      18
+     ],
+     "type": "wall"
+    }
+   ],
+   "objects": [
+    {
+     "def": "door",
+     "tile": [
+      15,
+      17
+     ],
+     "rot": 2
+    },
+    {
+     "def": "window",
+     "tile": [
+      8,
+      17
+     ],
+     "rot": 2
+    },
+    {
+     "def": "window",
+     "tile": [
+      12,
+      17
+     ],
+     "rot": 2
+    },
+    {
+     "def": "window",
+     "tile": [
+      19,
+      17
+     ],
+     "rot": 2
+    },
+    {
+     "def": "window",
+     "tile": [
+      23,
+      17
+     ],
+     "rot": 2
+    },
+    {
+     "def": "window",
+     "tile": [
+      9,
+      4
+     ],
+     "rot": 0
+    },
+    {
+     "def": "window",
+     "tile": [
+      12,
+      4
+     ],
+     "rot": 0
+    },
+    {
+     "def": "window",
+     "tile": [
+      18,
+      4
+     ],
+     "rot": 0
+    },
+    {
+     "def": "window",
+     "tile": [
+      22,
+      4
+     ],
+     "rot": 0
+    },
+    {
+     "def": "window",
+     "tile": [
+      5,
+      8
+     ],
+     "rot": 3
+    },
+    {
+     "def": "window",
+     "tile": [
+      5,
+      13
+     ],
+     "rot": 3
+    },
+    {
+     "def": "window",
+     "tile": [
+      26,
+      12
+     ],
+     "rot": 1
+    },
+    {
+     "def": "window",
+     "tile": [
+      26,
+      15
+     ],
+     "rot": 1
+    },
+    {
+     "def": "shelter_bed",
+     "tile": [
+      7,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "shelter_bed",
+     "tile": [
+      9,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "shelter_bed",
+     "tile": [
+      11,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "shelter_bed",
+     "tile": [
+      13,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "shelter_bed",
+     "tile": [
+      7,
+      11
+     ],
+     "rot": 0
+    },
+    {
+     "def": "shelter_bed",
+     "tile": [
+      9,
+      11
+     ],
+     "rot": 0
+    },
+    {
+     "def": "shelter_bed",
+     "tile": [
+      11,
+      11
+     ],
+     "rot": 0
+    },
+    {
+     "def": "shelter_bed",
+     "tile": [
+      13,
+      11
+     ],
+     "rot": 0
+    },
+    {
+     "def": "wardrobe",
+     "tile": [
+      6,
+      8
+     ],
+     "rot": 3
+    },
+    {
+     "def": "wardrobe",
+     "tile": [
+      6,
+      9
+     ],
+     "rot": 3
+    },
+    {
+     "def": "shower",
+     "tile": [
+      24,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "shower",
+     "tile": [
+      25,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "toilet",
+     "tile": [
+      24,
+      8
+     ],
+     "rot": 1
+    },
+    {
+     "def": "toilet",
+     "tile": [
+      24,
+      10
+     ],
+     "rot": 1
+    },
+    {
+     "def": "sink",
+     "tile": [
+      26,
+      6
+     ],
+     "rot": 1
+    },
+    {
+     "def": "sink",
+     "tile": [
+      26,
+      7
+     ],
+     "rot": 1
+    },
+    {
+     "def": "table",
+     "tile": [
+      17,
+      12
+     ],
+     "rot": 0
+    },
+    {
+     "def": "chair",
+     "tile": [
+      17,
+      13
+     ],
+     "rot": 2
+    },
+    {
+     "def": "chair",
+     "tile": [
+      18,
+      13
+     ],
+     "rot": 2
+    },
+    {
+     "def": "lamp",
+     "tile": [
+      16,
+      6
+     ],
+     "rot": 0
+    },
+    {
+     "def": "pendant_light",
+     "tile": [
+      16,
+      12
+     ],
+     "rot": 0
+    },
+    {
+     "def": "pendant_light",
+     "tile": [
+      10,
+      8
+     ],
+     "rot": 0
+    },
+    {
+     "def": "pendant_light",
+     "tile": [
+      22,
+      12
+     ],
+     "rot": 0
+    },
+    {
+     "def": "trash_bin",
+     "tile": [
+      26,
+      15
+     ],
+     "rot": 1
+    },
+    {
+     "def": "plant",
+     "tile": [
+      6,
+      16
+     ],
+     "rot": 0
+    },
+    {
+     "def": "smoke_alarm",
+     "tile": [
+      15,
+      10
+     ],
+     "rot": 0
+    }
+   ],
+   "spawn": [
+    [
+     15,
+     19
+    ],
+    [
+     16,
+     19
+    ],
+    [
+     14,
+     19
+    ]
+   ],
+   "entry": [
+    15,
+    19
+   ],
+   "staff": [],
+   "price": 0
   }
  }
 }

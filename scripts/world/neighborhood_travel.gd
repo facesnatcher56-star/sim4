@@ -1,4 +1,4 @@
-﻿class_name NeighborhoodTravel
+class_name NeighborhoodTravel
 extends RefCounted
 ## Getting residents from lot to lot on the one map. Neighborhood.travel / can_travel / movable / go_home delegate here.
 ##   walk (default)   each folk gets a player "go here" to the lot's entry tile and walks there on the street graph; the trip
@@ -32,6 +32,9 @@ static func can_travel(folk_ids: Array, lot_id: String, opts: Dictionary = {}) -
 	var ids: Array = movable(folk_ids)
 	if ids.is_empty():
 		return {"ok": false, "reason": "Nobody free to go (at work, school or a party)."}
+	var gate: String = SoloHome.travel_refusal(ids, lot_id)          # one-character play: locked out of the old home, the shelter is for people with no home
+	if gate != "":
+		return {"ok": false, "reason": gate}
 	var all_there := true
 	for id in ids:
 		var f = SysUtil.folk(int(id))

@@ -12,6 +12,15 @@ static func evict_after(p: Dictionary) -> int:
 		return SoloRent.evict_after()
 	return int(HousingRent.rc().get("evict_after_missed", 2))
 
+## The landlord pays some of the fixed charges of a let place (data/solo.json start.landlord_pays: part -> share).
+static func landlord_pays(hid: int, parts: Dictionary) -> void:
+	if not SoloHome.active or SoloHome.homeless or Players.player_of(hid) <= 0:
+		return
+	var shares: Dictionary = (SoloCfg.sect("start") as Dictionary).get("landlord_pays", {})
+	for k in shares:
+		if parts.has(k):
+			parts[k] = float(parts[k]) * (1.0 - float(shares[k]))
+
 ## Named consequences fired from interaction data ({"solo_hook": name}).
 static func hook(name: String, folk) -> void:
 	match name:

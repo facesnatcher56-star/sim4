@@ -6,6 +6,9 @@ extends RefCounted
 static func cfg() -> Dictionary:
 	return SoloCfg.sect("shelter")
 
+static func lot_id() -> String:
+	return str(cfg().get("lot", "shelter"))
+
 static func nights_allowed() -> int:
 	return int(SoloCfg.by_diff("start", "shelter_nights"))
 

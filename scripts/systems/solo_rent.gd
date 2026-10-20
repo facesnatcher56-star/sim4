@@ -21,22 +21,22 @@ static func begin(hid: int) -> void:
 	p["hood"] = float(fp.get("hood", 0.5))
 	p["label"] = str(fp.get("label", "Starter Studio"))
 	p["condition"] = 80.0
-	_let(p, hid, SoloCfg.rent())
+	let_to_pawn(p, hid, SoloCfg.rent(), SoloCfg.rent())
 	var prepaid: bool = bool(SoloCfg.by_diff("start", "first_week_prepaid"))
 	HousingRent.next_cycle = SysUtil.day() + (7 if prepaid else 3)      # Hard: the first rent is due on day 7, issued on day 4
-	SoloHome.deposit = SoloCfg.rent()
 	SoloMove.mark_fixtures(Neighborhood.HOME)
 
-## Make `p` a let property with the pawn's household as tenant (a landlord townie owns it).
-static func _let(p: Dictionary, hid: int, rent: int) -> void:
-	var landlord: Dictionary = _landlord()
-	if landlord.is_empty():
-		p["owner_kind"] = "bank"
-		p["owner"] = 0
-	else:
-		p["owner_kind"] = "townie"
-		p["owner"] = int(landlord["id"])
-		landlord["home_prop"] = landlord.get("home_prop", "")
+## Make `p` a let property with the pawn's household as tenant (a landlord townie owns it). A townie who lived there is no longer its tenant.
+static func let_to_pawn(p: Dictionary, hid: int, rent: int, deposit: int) -> void:
+	SoloHome.deposit = deposit
+	if str(p.get("tenant_kind", "")) == "townie":
+		var t: Dictionary = Story.townies.get(int(p["tenant"]), {})
+		if not t.is_empty():
+			t.erase("home_prop")
+	if str(p.get("owner_kind", "")) != "townie":          # a property of a townie keeps its landlord; the others get the richest townie
+		var landlord: Dictionary = _landlord()
+		p["owner_kind"] = "bank" if landlord.is_empty() else "townie"
+		p["owner"] = 0 if landlord.is_empty() else int(landlord["id"])
 	p["tenant_kind"] = "player"
 	p["tenant"] = hid
 	p["rent"] = rent

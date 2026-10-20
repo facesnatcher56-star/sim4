@@ -42,6 +42,60 @@ static func belongings(hid: int) -> Array:
 	out.sort_custom(func(a, b): return int(a["value"]) > int(b["value"]))
 	return out
 
+## The pawn's things leave the old place: removed from the lot, up to the cap, dearest first. Returns the store [{"def", "value"}].
+static func take_belongings(hid: int) -> Array:
+	var w = _w()
+	var out: Array = []
+	var cap: int = int(cfg().get("max_objects", 40))
+	for b in belongings(hid):
+		if out.size() >= cap:
+			break
+		if w != null and w.remove_object(int(b["id"])):
+			out.append({"def": str(b["def"]), "value": int(b["value"])})
+	return out
+
+## A property record for a lot that had none (the Elm Court rooms): valued from the rung's rent.
+static func make_prop(lot_label: String, r: Dictionary) -> Dictionary:
+	var rent: int = SoloCfg.rung_rent(r)
+	var p: Dictionary = HousingProps.make("map_" + lot_label + "_" + str(r.get("id", "")), str(r.get("label", lot_label)), "flat", maxi(int(float(rent) / 0.012), 1000), 0.3, 70.0, lot_label)
+	HousingProps.props[str(p["id"])] = p
+	return p
+
+## The household walks into the new home; the movers put the belongings in; what does not fit is sold at half price; a furnished rung gets its bed.
+static func move_in() -> void:
+	var hid: int = Economy.primary_household()
+	var w = _w()
+	var rc: Rect2i = NeighborhoodLots.rect_of(Neighborhood.HOME)
+	var spawn: Vector2i = NeighborhoodLots.entry_tile(Neighborhood.HOME)
+	if w != null and "starter_spawn_tiles" in w and not (w.starter_spawn_tiles as Array).is_empty():
+		spawn = (w.starter_spawn_tiles as Array)[0]
+	_place_household(hid, spawn, false)
+	var rooms: Array = [] if w == null else AutoFurnish._rooms(w, rc)
+	var placed: Array = []
+	var sold := 0
+	var furnished: String = str(SoloHome.rung_def().get("furnished", ""))
+	if furnished == "cot" and not rooms.is_empty():
+		_put(w, hid, "single_bed", rooms, rc, placed, -1)
+	for it in SoloHome.stored:
+		if rooms.is_empty() or _put(w, hid, str(it["def"]), rooms, rc, placed, hid) < 0:
+			var back: int = int(int(it["value"]) / 2)
+			sold += back
+			Economy.deposit(hid, back, "sold: no room in the new place")
+	if sold > 0:
+		SysUtil.notify("Some of your things did not fit and were sold for %d coins." % sold, "info")
+	SoloHome.stored = []
+	Neighborhood.focus_lot(Neighborhood.HOME)
+
+static func _put(w, hid: int, def_id: String, rooms: Array, rc: Rect2i, placed: Array, owner_hid: int) -> int:
+	for room in AutoFurnish._rooms_by_preference(rooms, "largest"):
+		var oid: int = AutoFurnish._place_one(w, hid, def_id, room, rc, placed)
+		if oid >= 0:
+			placed.append(oid)
+			Economy.owner[oid] = owner_hid
+			Economy.placed_day[oid] = SysUtil.day()
+			return oid
+	return -1
+
 # ------------------------------------------------------------------ people
 ## Everybody of the household stands on the street outside the home lot (locked out).
 static func put_on_street(hid: int) -> void:
@@ -85,8 +139,8 @@ static func swap_roles(lot_b: String) -> bool:
 	rg._lot_index_valid = false
 	w.rooms.invalidate_all()
 	# the properties follow their buildings
-	var pa: Dictionary = HousingProps.get_prop("map_" + Neighborhood.HOME)
-	var pb: Dictionary = HousingProps.get_prop("map_" + lot_b)
+	var pa: Dictionary = prop_at(Neighborhood.HOME)
+	var pb: Dictionary = prop_at(lot_b)
 	if not pa.is_empty():
 		pa["lot"] = lot_b
 	if not pb.is_empty():
@@ -96,6 +150,13 @@ static func swap_roles(lot_b: String) -> bool:
 	SoloHome.phys[lot_b] = ph
 	resync_positions()
 	return true
+
+## The housing property standing on the lot with this label ({} for a lot without one).
+static func prop_at(lot_label: String) -> Dictionary:
+	for id in HousingProps.props:
+		if str(HousingProps.props[id].get("lot", "")) == lot_label:
+			return HousingProps.props[id]
+	return {}
 
 static func _remember_positions() -> void:
 	if not _orig_pos.is_empty():
