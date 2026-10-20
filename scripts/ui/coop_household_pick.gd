@@ -40,7 +40,7 @@ func _ready() -> void:
 	_button("Customise...", _customise, row)
 	_button("Move in", func(): chosen.emit(household), row)
 	_button("Back", func(): cancelled.emit(), row)
-	_error = UIU.make_label("", 14, Color("#e5534b"))
+	_error = UIU.make_label("", 14, UITheme.sem("bad"))
 	_error.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	box.add_child(_error)
 	_creator = HouseholdCreator.new()

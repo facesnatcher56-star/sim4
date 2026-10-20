@@ -11,8 +11,49 @@ static var ACCENT := Color("#3fb8af")
 static var TEXT := Color("#e8eef4")
 static var MUTED := Color("#93a3b5")
 
+## Semantic colours (good / warn / bad / coin ...): custom-drawn and per-label UI asks for these instead of hard-coding a colour, so the look decides
+## how loud they are (the grounded look uses muted sage / ochre / brick with contrast >= 4.5:1 on the panels). The literals below ARE today's
+## (reference) values; data/looks.json "ui.sem" overrides them per look. tests/ui_tone_test.gd keeps literals out of the other UI files.
+const SEM_DEFAULT := {"good": "#4cc78a", "good_text": "#7ed6a5", "info": "#3fb8af", "warn": "#e8913d", "bad": "#e5534b", "coin": "#f2c94c", "coin_hi": "#ffe38a",
+	"coin_bg": "#4a3d12", "romance": "#ee86a6", "trust": "#35a7b0", "group": "#8f6bf0", "low_text": "#ff8a80", "error": "#e07a5f", "caution": "#d9a441",
+	"friendly": "#4cc78a", "funny": "#f2c94c", "deep": "#35a7b0", "mean": "#e5534b", "bubble": "#ffffff", "bubble_text": "#1d2630", "bubble_edge": "#333340",
+	"ring_back": "#0f141f", "map_bg": "#17202a", "card_bg": "#1c2430"}
+static var _sem: Dictionary = {}
+static var _tone_sat := 1.0
+static var _tone_val := 1.0
+
+static func sem(key: String) -> Color:
+	if _sem.is_empty():
+		sync_look()
+	return _sem.get(key, Color.MAGENTA)
+
+## Mutes a colour by the look's UI tone (mood / need colours): identity for the reference look.
+static func tone(c: Color) -> Color:
+	if _sem.is_empty():
+		sync_look()
+	if _tone_sat == 1.0 and _tone_val == 1.0:
+		return c
+	return Color.from_hsv(c.h, clampf(c.s * _tone_sat, 0.0, 1.0), clampf(c.v * _tone_val, 0.0, 1.0), c.a)
+
+## WCAG contrast ratio of two colours (1 .. 21).
+static func contrast(a: Color, b: Color) -> float:
+	var la := _lum(a)
+	var lb := _lum(b)
+	return (maxf(la, lb) + 0.05) / (minf(la, lb) + 0.05)
+
+static func _lum(c: Color) -> float:
+	var f := func(v: float) -> float: return v / 12.92 if v <= 0.03928 else pow((v + 0.055) / 1.055, 2.4)
+	return 0.2126 * f.call(c.r) + 0.7152 * f.call(c.g) + 0.0722 * f.call(c.b)
+
 ## Re-read the colours of the current look.
 static func sync_look() -> void:
+	_sem.clear()
+	var look_sem: Dictionary = Looks.ui_dict("sem")
+	for k in SEM_DEFAULT:
+		_sem[k] = Color(str(look_sem.get(k, SEM_DEFAULT[k])))
+	var tn: Dictionary = Looks.ui_dict("tone")
+	_tone_sat = float(tn.get("sat", 1.0))
+	_tone_val = float(tn.get("val", 1.0))
 	BG = Looks.ui_col("bg", Color("#1b2430"))
 	PANEL = Looks.ui_col("panel", Color("#232f3e"))
 	PANEL_HI = Looks.ui_col("panel_hi", Color("#2d3c4f"))

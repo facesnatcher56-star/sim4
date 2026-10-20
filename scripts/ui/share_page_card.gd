@@ -45,7 +45,7 @@ static func _png(card: Dictionary) -> String:
 	vp.size = Vector2i(520, 360)
 	vp.render_target_update_mode = SubViewport.UPDATE_ONCE
 	var bg := ColorRect.new()
-	bg.color = Color("#1c2430")
+	bg.color = UITheme.sem("card_bg")
 	bg.size = Vector2(vp.size)
 	vp.add_child(bg)
 	var lab := Label.new()

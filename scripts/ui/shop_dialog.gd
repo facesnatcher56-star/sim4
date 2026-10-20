@@ -30,7 +30,7 @@ static func build(dlg: BankHub) -> void:
 	var where: String = "You are here and it is open." if inside else ("Open %02d:00 to %02d:00 at %s." % [int(sh2["hours"][0]), int(sh2["hours"][1]), Neighborhood.label_of(lot)])
 	dlg.line("%s. %s" % [str(sh2["label"]), where], 13, UITheme.MUTED)
 	if ShopStock.on_sale(shop_id):
-		dlg.line("SALE: %d%% off today." % int(round(ShopStock.deal_pct(shop_id) * 100.0)), 14, Color("#f2c94c"))
+		dlg.line("SALE: %d%% off today." % int(round(ShopStock.deal_pct(shop_id) * 100.0)), 14, UITheme.sem("coin"))
 	var online: bool = bool(sh2.get("online", false))
 	var items: Dictionary = sh2["items"]
 	for iid in items.keys():

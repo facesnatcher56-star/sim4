@@ -53,7 +53,7 @@ func setup(def: Dictionary, funds: int) -> void:
 	v.add_child(chips)
 	chips.add_child(_chip(str(def.get("who", "")), UITheme.PANEL_HI, UITheme.TEXT, "Who lives here"))
 	chips.add_child(_chip(str(def.get("where", "")), UITheme.PANEL_HI, UITheme.TEXT, "The home"))
-	var m := _chip(coins_text(funds), Color("#4a3d12"), Color("#f2c94c"), "Starting funds at the chosen difficulty")
+	var m := _chip(coins_text(funds), UITheme.sem("coin_bg"), UITheme.sem("coin"), "Starting funds at the chosen difficulty")
 	money_label = m.get_child(0)
 	chips.add_child(m)
 	chips.add_child(_chip(str(def.get("tone", "")), UITheme.PANEL_HI, UITheme.MUTED, "How the start feels"))

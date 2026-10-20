@@ -20,7 +20,7 @@ static func build(dlg: LifeHub) -> void:
 	var conds: Array = HealthCond.list(id)
 	for c in conds:
 		var txt: String = "%s: %s" % [c["label"], ("medicine for %d more days" % int(c["doses"])) if bool(c["managed"]) else "no medicine. Flare-ups are likely."]
-		dlg.line(txt, 14, UITheme.TEXT if bool(c["managed"]) else Color("#e8a33d"))
+		dlg.line(txt, 14, UITheme.TEXT if bool(c["managed"]) else UITheme.sem("warn"))
 	if int(r["shot_until"]) >= SysUtil.day():
 		dlg.line("Flu shot: protected for %d more days." % (int(r["shot_until"]) - SysUtil.day() + 1), 13, UITheme.MUTED)
 	if int(r["checkup_day"]) >= 0:
@@ -28,4 +28,4 @@ static func build(dlg: LifeHub) -> void:
 	else:
 		dlg.line("No check-up yet. The clinic can find problems early.", 13, UITheme.MUTED)
 	if f.has_buff("toothache"):
-		dlg.line("A toothache: see the dentist.", 13, Color("#e8a33d"))
+		dlg.line("A toothache: see the dentist.", 13, UITheme.sem("warn"))

@@ -76,7 +76,7 @@ func _column() -> VBoxContainer:
 				out.append(fl[i]["appearance"])
 		return out
 	root.add_child(editor)
-	error_label = UIU.make_label("", 14, Color("#e5534b"))
+	error_label = UIU.make_label("", 14, UITheme.sem("bad"))
 	error_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	root.add_child(error_label)
 	var bottom := HBoxContainer.new()

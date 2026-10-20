@@ -45,7 +45,7 @@ func _ready() -> void:
 	_decline_btn = _btn("No", row, func(): _vote("pause", false))
 	_alert_box = HBoxContainer.new()
 	v.add_child(_alert_box)
-	_alert_label = UIU.make_label("", 15, Color("#f2c94c"))
+	_alert_label = UIU.make_label("", 15, UITheme.sem("coin"))
 	_alert_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_alert_label.custom_minimum_size = Vector2(300, 0)
 	_alert_box.add_child(_alert_label)
@@ -99,7 +99,7 @@ func _refresh(ses: CoopSession) -> void:
 	elif str(st.get("note", "")) != "" and text == "":
 		text = str(st["note"])
 	_banner.text = text
-	_banner.add_theme_color_override("font_color", Color("#7ed6a5") if bool(st.get("skip", false)) else UITheme.TEXT)
+	_banner.add_theme_color_override("font_color", UITheme.sem("good_text") if bool(st.get("skip", false)) else UITheme.TEXT)
 	_banner.visible = text != ""
 	var paused := bool(st.get("paused", false))
 	var i_voted: bool = (st.get("yes", []) as Array).has(me)

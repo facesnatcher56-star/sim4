@@ -37,7 +37,7 @@ static func _import(h: ShareHub) -> void:
 		var rd := ShareFile.read("household", h.choice)
 		h.preview = ShareValidate.household(rd["data"]) if bool(rd["ok"]) else rd
 	if not bool(h.preview["ok"]):
-		h.line("This file cannot be used: %s." % h.preview["error"], 14, Color("#e07a5f"))
+		h.line("This file cannot be used: %s." % h.preview["error"], 14, UITheme.sem("error"))
 		return
 	var d: Dictionary = h.preview["data"]
 	h.heading(str(d["title"]))

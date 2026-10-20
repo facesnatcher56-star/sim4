@@ -25,8 +25,8 @@ func show_thought(folk_id: int, text: String) -> void:
 			old["node"].queue_free()
 	var p := PanelContainer.new()
 	p.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	p.add_theme_stylebox_override("panel", UITheme.box(Color(1, 1, 1, 0.95), 14, Color(0.2, 0.2, 0.25), 2, 10))
-	var l := UIU.make_label(text, 14, Color("#1d2630"))
+	p.add_theme_stylebox_override("panel", UITheme.box(Color(UITheme.sem("bubble"), 0.95), 14, UITheme.sem("bubble_edge"), 2, 10))
+	var l := UIU.make_label(text, 14, UITheme.sem("bubble_text"))
 	p.add_child(l)
 	p.modulate.a = 0.0
 	p.visible = false

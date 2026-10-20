@@ -57,7 +57,7 @@ static func _gamble(dlg: BankHub, h: int) -> void:
 	dlg.line("Lottery: %d tickets for the next draw (day %d), jackpot %d. Tickets are sold at the market stalls." % [BankGamble.tickets_of(h), BankGamble.next_draw, BankGamble.current_jackpot()], 13)
 	var fid: int = dlg.folk_id
 	if BankGamble.is_hooked(fid):
-		dlg.line("You can't stop thinking about the next bet. Money is slipping away.", 13, Color("#e5534b"))
+		dlg.line("You can't stop thinking about the next bet. Money is slipping away.", 13, UITheme.sem("bad"))
 	var stakes: Array = []
 	for s in SysUtil.table("bank").get("gamble", {}).get("cards_stake", [5, 10, 25]):
 		stakes.append(dlg.button("Cards %d" % int(s), "A hand of cards: win and get double back", func(): dlg.act("gamble_cards", {"stake": int(s)}), Economy.balance(h) >= int(s)))

@@ -9,7 +9,7 @@ func _ready() -> void:
 func build() -> void:
 	var hid := int(World.current_household_id) if World.get("current_household_id") != null else 1
 	title_label.text = "Household money"
-	line("%d Coins" % Economy.balance(hid), 26, Color("#f2c94c"))
+	line("%d Coins" % Economy.balance(hid), 26, UITheme.sem("coin"))
 	_bills(hid)
 	_utilities(hid)
 	_week(hid)
@@ -25,7 +25,7 @@ func _bills(hid: int) -> void:
 		var late := bool(bl.get("late", false))
 		var days_left := int(bl["due"]) - today
 		var when := "OVERDUE (includes a %d coin late fee)" % int(bl.get("fee", 0)) if late else ("due today" if days_left <= 0 else "due in %d day%s (day %d)" % [days_left, "" if days_left == 1 else "s", int(bl["due"])])
-		line("%d coins, %s" % [int(bl["amount"]), when], 15, Color("#e8913d") if late else UITheme.TEXT)
+		line("%d coins, %s" % [int(bl["amount"]), when], 15, UITheme.sem("warn") if late else UITheme.TEXT)
 		if bl.has("parts"):
 			line(UtilityBills.describe(bl["parts"]), 11, UITheme.MUTED)       # task 12: the bill split by utility
 	if not due.is_empty():
@@ -47,7 +47,7 @@ func _bills(hid: int) -> void:
 func _utilities(hid: int) -> void:
 	heading("Utilities")
 	for l in Utilities.status_lines(hid):
-		line(str(l), 12, UITheme.MUTED if str(l).find("working") >= 0 else Color("#e8913d"))
+		line(str(l), 12, UITheme.MUTED if str(l).find("working") >= 0 else UITheme.sem("warn"))
 
 func _week(hid: int) -> void:
 	heading("Last 7 days")

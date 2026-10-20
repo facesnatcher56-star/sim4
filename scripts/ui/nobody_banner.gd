@@ -8,7 +8,7 @@ var _label: Label
 
 func _ready() -> void:
 	visible = false
-	add_theme_stylebox_override("panel", UITheme.box(Color(UITheme.PANEL, 0.98), 8, Color("#d9a441"), 2, 10))
+	add_theme_stylebox_override("panel", UITheme.box(Color(UITheme.PANEL, 0.98), 8, UITheme.sem("caution"), 2, 10))
 	var v := VBoxContainer.new()
 	add_child(v)
 	_label = UIU.make_label("", 14)

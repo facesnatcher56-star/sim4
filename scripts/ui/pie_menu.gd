@@ -6,8 +6,9 @@ extends Control
 signal chosen(def_id: String, target_id: int)
 
 const SOCIAL_ORDER := ["Friendly", "Funny", "Romantic", "Deep", "Group", "Mean"]
-const CAT_COLORS := {"Friendly": Color("#4cc78a"), "Funny": Color("#f2c94c"), "Romantic": Color("#ee86a6"), "Deep": Color("#35a7b0"),
-	"Group": Color("#8f6bf0"), "Mean": Color("#e5534b")}
+const CAT_KEYS := {"Friendly": "friendly", "Funny": "funny", "Romantic": "romance", "Deep": "deep", "Group": "group", "Mean": "mean"}
+static func cat_color(cat: String) -> Color:
+	return UITheme.sem(CAT_KEYS[cat]) if CAT_KEYS.has(cat) else UITheme.ACCENT
 ## Which social sections stay expanded between openings (player's choice persists).
 static var open_cats: Dictionary = {"Friendly": true}
 
@@ -168,7 +169,7 @@ func _fill_social(f, target, entries: Array) -> void:
 		header.flat = true
 		header.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		header.name = "cat_" + str(c3)
-		var col: Color = CAT_COLORS.get(c3, UITheme.ACCENT)
+		var col: Color = cat_color(str(c3))
 		header.add_theme_color_override("font_color", col)
 		header.add_theme_color_override("font_hover_color", col.lightened(0.3))
 		list.add_child(header)

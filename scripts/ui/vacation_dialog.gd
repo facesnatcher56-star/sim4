@@ -176,7 +176,7 @@ func _update_price() -> void:
 			txt += "%d school days missed (grade drops)." % int(lv["school_days"])
 		_price_box.add_child(_note(txt))
 	if not bool(q.get("ok", false)):
-		_price_box.add_child(_note(str(q.get("reason", "")), Color("#e8913d")))
+		_price_box.add_child(_note(str(q.get("reason", "")), UITheme.sem("warn")))
 	var go := Button.new()
 	go.text = "Book it and go"
 	go.disabled = not bool(q.get("ok", false))
@@ -196,7 +196,7 @@ func _row(a: String, b: String, strong: bool = false) -> HBoxContainer:
 	var l := UIU.make_label(a, 14 if not strong else 16)
 	l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	h.add_child(l)
-	h.add_child(UIU.make_label(b, 14 if not strong else 16, Color("#f2c94c") if strong else UITheme.TEXT))
+	h.add_child(UIU.make_label(b, 14 if not strong else 16, UITheme.sem("coin") if strong else UITheme.TEXT))
 	return h
 
 func _note(text: String, color: Color = UITheme.MUTED) -> Label:
@@ -237,7 +237,7 @@ func _there(t: Dictionary, now: int) -> void:
 	var c: Dictionary = t["cruise"]
 	line("%s, %s. Sea: %s. Home at the quay in %s." % [str(c["name"]), str(c["phase"]), str(c["sea"]), _mins(CruiseRoute.first_min(c["timeline"], "home_dock") - now)], 14)
 	if bool(c.get("restricted", false)):
-		line("The captain has restricted movement on the ship.", 13, Color("#e8913d"))
+		line("The captain has restricted movement on the ship.", 13, UITheme.sem("warn"))
 	heading("Route")
 	for r in c["route"]:
 		var what: String = {"embark": "Sail from home", "sea": "At sea", "home": "Home"}.get(str(r["kind"]), "Port: %s" % str(r["label"]))
@@ -247,7 +247,7 @@ func _there(t: Dictionary, now: int) -> void:
 		_btn("Go ashore", func(): Commands.run({"folk_id": folk_id, "action": "vacation", "args": {"action": "go_ashore", "args": {}}}))
 		_btn("Back to the ship", func(): Commands.run({"folk_id": folk_id, "action": "vacation", "args": {"action": "board", "args": {}}}))
 		if here:
-			line("Be back on the ship by 16:30 or it sails without you, and the flight home is expensive.", 12, Color("#e8913d"))
+			line("Be back on the ship by 16:30 or it sails without you, and the flight home is expensive.", 12, UITheme.sem("warn"))
 
 func _btn(text: String, fn: Callable) -> void:
 	var b := Button.new()
