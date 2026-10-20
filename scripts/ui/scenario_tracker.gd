@@ -75,7 +75,8 @@ func refresh() -> void:
 		var mark := CheckMark.new()
 		mark.on = done
 		row.add_child(mark)
-		var label: String = str(g["label"])
+		var gt: Dictionary = Scenario.goal_text(g)
+		var label: String = str(gt["label"])
 		var need: int = int((g.get("check", {}) as Dictionary).get("count", 1))
 		if need > 1 and not done:
 			label += " (%d/%d)" % [int(Scenario.progress.get(str(g["id"]), 0)), need]
@@ -86,7 +87,7 @@ func refresh() -> void:
 		row.add_child(l)
 		if not done and not shown_hint:
 			shown_hint = true
-			var hint := UIU.make_label(str(g.get("hint", "")), 12, UITheme.MUTED)
+			var hint := UIU.make_label(str(gt["hint"]), 12, UITheme.MUTED)
 			hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 			hint.custom_minimum_size = Vector2(WIDTH - 40, 0)
 			var hr := HBoxContainer.new()

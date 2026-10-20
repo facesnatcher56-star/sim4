@@ -76,6 +76,21 @@ static func active() -> bool:
 static func goals() -> Array:
 	return def(active_id).get("goals", []) if active() else []
 
+## Shown text of a checklist goal: goals with `label_no_fridge` / `hint_no_fridge` switch while the home has no fridge yet (empty starts).
+static func goal_text(g: Dictionary) -> Dictionary:
+	var label: String = str(g.get("label", ""))
+	var hint: String = str(g.get("hint", ""))
+	if g.has("label_no_fridge") and not _home_has_fridge():
+		label = str(g["label_no_fridge"])
+		hint = str(g.get("hint_no_fridge", hint))
+	return {"label": label, "hint": hint}
+
+static func _home_has_fridge() -> bool:
+	for o in Economy.objects_of(Economy.primary_household()):
+		if str(o.def_id) == "fridge":
+			return true
+	return false
+
 static func has_goals() -> bool:
 	return not goals().is_empty()
 
