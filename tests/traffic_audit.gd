@@ -41,7 +41,7 @@ func _stamp() -> String:
 
 
 func _find_vv(n: Node):
-	if n is VehicleView:
+	if "sim" in n and "nodes" in n and "buses" in n:
 		return n
 	for c in n.get_children():
 		var r = _find_vv(c)
@@ -148,6 +148,8 @@ func _process(_d: float) -> bool:
 		return false
 	_check()
 	var now := Time.get_ticks_msec() / 1000.0
+	if _check_frames % 120 == 0:
+		print("TRAFFIC tick %s frames %d in view now %d" % [_stamp(), _check_frames, _prev_on.size()])
 	if _out != "none" and now >= _next_shot:
 		_next_shot = now + _shot_every
 		var path := "%s/%02d_%s.png" % [_out, _shots, _stamp().replace(" ", "_").replace(":", "")]
