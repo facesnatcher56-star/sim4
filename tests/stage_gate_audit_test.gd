@@ -21,6 +21,9 @@ const SAFE_TAGS := {
 	"vacation": "a family holiday", "fitness": "swimming and hiking on holiday", "night": "only a tag", "cafe": "a family meal out",
 	"kitchen": "a child may boil water for tea", "safety": "taking care", "conflict": "children argue (toddlers are blocked by the conflict tag)", "chore": "a child's chore (toddlers are blocked by the chore tag)",
 	"skill": "learning something", "shop": "a child may buy a snack (toddlers are blocked by the shop tag)", "purchase": "a child may buy a snack (toddlers are blocked by the purchase tag)",
+	"idle_life": "short idles (babies and toddlers are blocked by the def's own tests)", "react": "looking out of the window or watching what happens", "phone": "a child may ring a relative",
+	"call": "a phone call", "music": "humming and singing", "read": "reading", "write": "writing and drawing", "game": "games and puzzles (toddlers are blocked by the game tag)",
+	"tidy": "putting things away (toddlers are blocked by the def's own tests)", "dance": "dancing", "play": "play", "friendly": "friendly talk", "nostalgia": "looking at old photos",
 	"romance": "children's crushes are blocked by their own stage tests", "wedding": "the wedding def tests for the engagement",
 }
 

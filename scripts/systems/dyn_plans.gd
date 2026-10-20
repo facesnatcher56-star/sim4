@@ -47,6 +47,9 @@ static func roll(f, abs_hour: int) -> void:
 	var key := "dyn:plan"
 	if SimEnv.now_min() < int(f.cooldowns.get(key, -1)):
 		return
+	for n in f.needs:
+		if Autonomy.urgency(f, str(n)) > 5.0:
+			return                      # a pressing need comes first: no plans for now
 	var plans: Dictionary = c.get("plans", {})
 	var i := 0
 	var far: bool = Tiers.of(f) > Tiers.NEAR

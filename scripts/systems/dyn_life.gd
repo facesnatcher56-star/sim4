@@ -70,9 +70,14 @@ static func queue(f, iid: String, target_id: int = -1) -> bool:
 	f.enqueue(ir)
 	return true
 
+## Somebody who must not be pulled away: a walk (a trip, a commute), an order of the player, a high-priority job, sleep, work, an emergency, the toilet.
 static func busy_with_must(f) -> bool:
+	if not f.queue.is_empty():
+		return true
 	if f.current == null:
 		return false
+	if str(f.current.def_id) == "go_here" or f.current.player or f.current.effective_priority() >= 2:
+		return true
 	for t in f.current.def.get("tags", []):
 		if t in ["sleep", "emergency", "work", "toilet"]:
 			return true

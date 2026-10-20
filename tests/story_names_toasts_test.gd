@@ -65,12 +65,16 @@ func _variety(f: Array) -> void:
 	AutonomyVariety.reset()
 	K.expect(f, is_equal_approx(AutonomyVariety.mult(a, iid, d, null), 1.0), "no history: no penalty")
 	var last := 1.0
+	var cap: int = int(AutonomyVariety.cfg().get("daily_cap", 0))
 	for i in 8:
 		AutonomyVariety.on_started(a.id, iid, -1)
 		var m: float = AutonomyVariety.mult(a, iid, d, null)
+		if cap > 0 and i + 1 >= cap:
+			K.expect(f, m == 0.0, "after %d starts today autonomy has had enough of it (%.2f)" % [i + 1, m])
+			continue
 		K.expect(f, m < last + 0.0001, "repeat %d lowers the score (%.2f)" % [i, m])
 		last = m
-	K.expect(f, last < 0.5 and last >= 0.12, "eight repeats: well below half but never zero (%.2f)" % last)
+	K.expect(f, last < 0.8 and last >= 0.12, "the repeats before the daily cap: well below one but never zero (%.2f)" % last)
 	K.set_time(5, 12)
 	var later: float = AutonomyVariety.mult(a, iid, d, null)
 	K.expect(f, later > last + 0.2, "boredom recovers over days (%.2f -> %.2f)" % [last, later])
