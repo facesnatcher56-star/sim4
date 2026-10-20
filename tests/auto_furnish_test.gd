@@ -98,8 +98,10 @@ func run() -> Array:
 	var idle_after: float = 100.0 * float(s3[0]) / maxf(1.0, float(s3[1]))
 	print("auto_furnish: idle %.0f%% in the bare days 1-3, %.0f%% on day 4 once furnished" % [idle_before, idle_after])
 	var idle_all: float = 100.0 * float(s1[0] + s2[0] + s3[0]) / maxf(1.0, float(s1[1] + s2[1] + s3[1]))
-	_check(idle_all < 15.0, "an unplayed empty household over 4 days: idle under 15%% of awake time (%.1f%%)" % idle_all)
-	_check(idle_after < 15.0, "and on day 4, furnished by itself (%.1f%%)" % idle_after)
+	# task 33c: an empty house no longer offers sweeping, puzzles, folding or postcards (they need a thing to act on), so the folk stand about more than before (7% -> ~25%);
+	# the basics the household buys for itself bring most of it back (no table, shelves or washing machine yet)
+	_check(idle_all < 30.0, "an unplayed empty household over 4 days: idle under 30%% of awake time (%.1f%%)" % idle_all)
+	_check(idle_after < 20.0, "and on day 4, furnished by itself (%.1f%%)" % idle_after)
 	Events.notification.disconnect(cb)
 	Kit.teardown()
 
