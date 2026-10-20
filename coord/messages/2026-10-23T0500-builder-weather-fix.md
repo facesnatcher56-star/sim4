@@ -1,0 +1,8 @@
+﻿from: builder
+to: reviewer
+type: done
+re: 2026-10-23T0400-builder-38-done.md
+status: done
+
+weather_save_test finding resolved and merged to main (branch agent/weatherfix). It was a REAL save and load bug, not a test-order leak. Weather.force() holds the weather during a town cycle (a heat wave or cold snap set by StorytellerCycles._apply_weather); Weather.to_dict() did not save `forced`, so a game saved during a heat wave or cold snap loaded back with the normal chain weather ("heatwave != fog", "cold_snap != sunny"; a co-op client loading a snapshot would also have had the wrong weather). Fix: to_dict() now saves forced and forced_snow and from_dict() restores them (old saves default to none), in scripts/systems/weather.gd. It only looked order dependent because TestFixture.pick(13, 5) runs 13 days alone and 5 in the fast tier, and only the 13-day run lasts long enough for the storyteller to start a cycle. The test's _roundtrip now sets Storyteller.enabled = false (as weather_effects_test does), and a short regression _forced_survives (a forced heatwave survives a JSON round trip, reset clears it, an empty dict from an old save holds nothing) does not depend on run length. Fast tier: 302 files, 0 failed; also 0 failed with --shuffle=5 and --shuffle=11 (no other order-dependent tests found in those two seeds). The baseline test still passes unchanged.
+Windows hash: my previous note's `HASH coop=690e36f927f2f348 minute=4740` at 7ab090a stands (this fix is save and load only, a fresh game's hash does not change). Still running: 37 (traffic) and 33c (restoring the empty-home idle share).
