@@ -1,7 +1,8 @@
 class_name FolkProps
 extends RefCounted
-## Small props in a folk's hand while a clip plays (view only, never touches sim state): a book for reading, a cup for a drink, a game pad for video games,
-## a fork for a meal, a brush for painting, a phone, a newspaper. All data in data/animation_map.json "props": `defs` (bone + a few primitive parts each) and
+## Small props in a folk's hands while a clip plays (view only, never touches sim state): a book for reading, a cup for a drink, a game pad for video games,
+## a fork and plate for a meal, a brush for painting, a phone, a newspaper; task 33: watering can, pan, cloth, broom, wrench, trowel, rod, weights, pen,
+## toothbrush, mic, baby bundle and bottle, guitar, ... All data in data/animation_map.json "props": `defs` (bone + a few primitive parts each) and
 ## `rules` (first match wins: interaction ids / tags / clips). The prop hangs on a BoneAttachment3D of the folk's skeleton and is hidden as soon as no rule
 ## matches (the clip ended, the folk walks off). Rigs without a skeleton (the placeholder capsule person) get none.
 
@@ -12,23 +13,36 @@ static func _cfg() -> Dictionary:
 	return FolkView.anim_map().get("props", {})
 
 
-## The prop name for what the folk is doing: "" when none. `tags` are the tags of the running interaction.
-static func prop_for(def_id: String, tags: Array, clip: String) -> String:
+## Does a rule (props or fx) apply to this interaction id / tags and the clip being played? ids OR tags (none of both = any); `clips` must contain the clip.
+static func rule_matches(rule: Dictionary, def_id: String, tags: Array, clip: String) -> bool:
+	if rule.has("clips") and not (clip in (rule["clips"] as Array)):
+		return false
+	var ok := not (rule.has("ids") or rule.has("tags"))
+	if rule.has("ids") and def_id in (rule["ids"] as Array):
+		ok = true
+	if not ok and rule.has("tags"):
+		for t in (rule["tags"] as Array):
+			if str(t) in tags:
+				ok = true
+				break
+	return ok
+
+
+## The props for what the folk is doing (first matching rule: `prop` or `props`): [] when none. `tags` are the tags of the running interaction.
+static func props_for(def_id: String, tags: Array, clip: String) -> Array:
 	for r in (_cfg().get("rules", []) as Array):
 		var rule: Dictionary = r
-		if rule.has("clips") and not (clip in (rule["clips"] as Array)):
-			continue
-		var ok := not (rule.has("ids") or rule.has("tags"))
-		if rule.has("ids") and def_id in (rule["ids"] as Array):
-			ok = true
-		if not ok and rule.has("tags"):
-			for t in (rule["tags"] as Array):
-				if str(t) in tags:
-					ok = true
-					break
-		if ok:
-			return str(rule.get("prop", ""))
-	return ""
+		if rule_matches(rule, def_id, tags, clip):
+			if rule.has("props"):
+				return (rule["props"] as Array).duplicate()
+			return [str(rule.get("prop", ""))] if str(rule.get("prop", "")) != "" else []
+	return []
+
+
+## The first prop name for what the folk is doing: "" when none.
+static func prop_for(def_id: String, tags: Array, clip: String) -> String:
+	var l := props_for(def_id, tags, clip)
+	return str(l[0]) if not l.is_empty() else ""
 
 
 ## Shows the prop that goes with the interaction + clip the folk is playing, hides the rest. Called every frame; cheap when nothing changed.
@@ -39,16 +53,17 @@ static func update(fv, inter: Variant, clip: String) -> void:
 	if sig == fv._prop_sig:
 		return
 	fv._prop_sig = sig
-	var want := ""
+	var want: Array = []
 	if inter != null and not fv._moving and fv._waypoints.is_empty():
 		var tags: Array = inter.def.get("tags", []) if inter.def is Dictionary else []
-		want = prop_for(str(inter.def_id), tags, clip)
+		want = props_for(str(inter.def_id), tags, clip)
 	for k in fv._props:
-		(fv._props[k] as Node3D).visible = (k == want)
-	if want != "" and not fv._props.has(want):
-		var n := _build(fv, want)
-		if n != null:
-			fv._props[want] = n
+		(fv._props[k] as Node3D).visible = (k in want)
+	for w in want:
+		if not fv._props.has(w):
+			var n := _build(fv, str(w))
+			if n != null:
+				fv._props[w] = n
 
 
 static func _find_skeleton(n: Node) -> Skeleton3D:
