@@ -218,7 +218,8 @@ static func _add_part(out: Array, p: Dictionary, state: Dictionary, def_state: D
 	var pos := _vec(p.get("pos", [0, 0, 0]))
 	if p.has("grow"):
 		var g: Dictionary = p["grow"]
-		var r := maxf(_ratio(state, def_state, str(g.get("key", ""))), float(g.get("min", 0.0)))
+		var rr := _ratio(state, def_state, str(g.get("key", "")))
+		var r := lerpf(float(g.get("min", 0.0)), 1.0, rr) if bool(g.get("lerp", false)) else maxf(rr, float(g.get("min", 0.0)))
 		var axis := clampi(int(g.get("axis", 1)), 0, 2)
 		var full: float = size[axis]
 		size[axis] = full * r

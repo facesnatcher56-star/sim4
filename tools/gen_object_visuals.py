@@ -35,7 +35,7 @@ T["broken"] = {"id": "broken", "states": [
        fx=[{"kind": "sparks", "pos": [0, 0.05, 0], "on_top": True}, {"kind": "smoke", "pos": [0, 0.1, 0], "on_top": True}]),
     st("ok")]}
 T["screen_on"] = {"id": "screen", "states": [
-    st("on", [{"any": [eq("on", True), {"in_use": True}]}], surfaces={"screen": {"color": "#6fb4ff", "emit": 1.7, "flicker": 0.5}},
+    st("on", [{"any": [eq("on", True), {"in_use": True}]}], surfaces={"screen": {"color": "#4f98e6", "emit": 1.05, "flicker": 0.5}},
        parts=[part("box", [0.01, 0.01, 0.01], [0, 0.8, -0.4], "#8fc4ff", light=[3.2, 0.55])]),
     st("off")]}
 T["spoiled"] = {"id": "spoiled", "states": [
@@ -140,9 +140,10 @@ O["nightstand"] = lamp([-0.1, 0.85, 0.1], rng=3.0, en=0.7)
 O["pendant_light"] = lamp([0, 1.8, 0], rng=5.0, en=1.0)
 
 # beds: made = the model as it is; unmade = the neat blanket is hidden and a rumpled one lies on top
-unmade = [part("box", [1.5, 0.14, 0.85], [0.15, 0.69, -0.45], "#5b82c0", rot=[0, 8, 3]),
-          part("box", [0.9, 0.16, 0.6], [-0.35, 0.73, -0.1], "#4a70ad", rot=[0, -18, -5]),
-          part("box", [0.08, 0.55, 0.8], [0.97, 0.35, -0.5], "#5b82c0", rot=[0, 0, -4]),
+unmade = [part("box", [1.78, 0.03, 1.5], [0, 0.64, -0.12], "#ecebf0"),
+          part("box", [1.5, 0.14, 0.85], [0.15, 0.71, -0.45], "#7f9bc4", rot=[0, 8, 3]),
+          part("box", [0.9, 0.16, 0.6], [-0.35, 0.75, -0.1], "#6c88b4", rot=[0, -18, -5]),
+          part("box", [0.08, 0.55, 0.8], [0.97, 0.38, -0.5], "#7f9bc4", rot=[0, 0, -4]),
           part("box", [0.6, 0.14, 0.34], [-0.2, 0.7, 0.65], "#f1efe8", rot=[0, 22, 0])]
 O["bed"] = {"layers": [{"id": "made", "states": [st("unmade", [eq("made", False)], hide=["fabric_*", "baby_blue"], parts=unmade), st("made")]}]}
 O["single_bed"] = {"extends": "bed", "part_scale": [0.5, 1, 1]}
@@ -154,7 +155,7 @@ def easel(w, h, y0, zf, hide):
     return {"layers": [
         {"id": "blank", "states": [st("blank", [{"key": "progress", "ratio_lte": 0}], hide=hide), st("started")]},
         {"id": "wash", "states": [st("wash", [{"key": "progress", "ratio_gt": 0}], hide=hide, parts=[
-            part("box", [w, h, 0.006], [0, y0 + h / 2, zz], "#f2d58c", grow={"key": "progress", "axis": 1, "min": 0.2})])]},
+            part("box", [w, h, 0.006], [0, y0 + h / 2, zz], "#f2d58c", grow={"key": "progress", "axis": 1, "min": 0.3, "lerp": True})])]},
         {"id": "detail", "states": [
             st("scene", [{"key": "progress", "ratio_gte": 0.5}], parts=[
                 part("box", [w, h * 0.35, 0.008], [0, y0 + h * 0.175, zz - 0.003], "#4f9a4a"),

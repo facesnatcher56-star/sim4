@@ -249,7 +249,7 @@ func _nodes() -> void:
 	bvis.add_child(bmi)
 	bed.add_child(bvis)
 	ObjectVisualNodes.apply(bed, _look("bed", {"made": false}))
-	_check(bmi.get_surface_override_material(1) is ShaderMaterial and bmi.get_surface_override_material(0) == null, "the neat blanket surface is hidden")
+	_check(bmi.get_surface_override_material(1) is StandardMaterial3D and bmi.get_surface_override_material(0) == null, "the neat blanket surface is hidden")
 	node.free()
 	bed.free()
 

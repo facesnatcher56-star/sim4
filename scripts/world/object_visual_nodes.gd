@@ -9,7 +9,7 @@ const NEAR := "Near"
 
 static var _meshes: Dictionary = {}
 static var _mats: Dictionary = {}
-static var _hidden_mat: ShaderMaterial = null
+static var _hidden_mat: StandardMaterial3D = null
 static var _flick_shader: Shader = null
 
 
@@ -122,12 +122,13 @@ static func set_near(node: Node3D, on: bool) -> void:
 
 # ------------------------------------------------------------------ materials / meshes
 
-static func _invisible() -> ShaderMaterial:
+## A surface that is not drawn (the model's neat blanket, its painted-in crops): fully transparent.
+static func _invisible() -> StandardMaterial3D:
 	if _hidden_mat == null:
-		var sh := Shader.new()
-		sh.code = "shader_type spatial;\nvoid fragment() { discard; }\n"
-		_hidden_mat = ShaderMaterial.new()
-		_hidden_mat.shader = sh
+		_hidden_mat = StandardMaterial3D.new()
+		_hidden_mat.albedo_color = Color(1, 1, 1, 0)
+		_hidden_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		_hidden_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	return _hidden_mat
 
 
