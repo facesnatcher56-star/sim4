@@ -28,7 +28,7 @@ const DEFS := [
 		"tip": "Syncs frames to your monitor to stop tearing. Adaptive only syncs when the frame rate is at or above the refresh rate."},
 	{"k": "max_fps", "tab": "display", "t": "enum", "label": "Max FPS", "def": 60, "opts": [[30, "30"], [60, "60"], [120, "120"], [144, "144"], [0, "Unlimited"]],
 		"tip": "Caps the frame rate. Lower values save power and heat."},
-	{"k": "visual_style", "tab": "display", "t": "enum", "label": "Visual style", "def": "reference", "opts": [["reference", "Reference (today)"], ["grounded", "Grounded and gritty"]],
+	{"k": "visual_style", "tab": "display", "t": "enum", "label": "Visual style", "def": "grounded", "opts": [["grounded", "Grounded and gritty"], ["reference", "Reference (bright)"]],
 		"tip": "Reference is the bright look the game has had so far. Grounded and gritty: muted real-world colours, real contrast, dark nights, wear and dirt. Options come from data/looks.json."},
 	{"k": "ui_scale", "tab": "display", "t": "range", "label": "UI scale", "def": 100, "min": 80, "max": 150, "step": 5, "unit": "%",
 		"tip": "Makes all menus and buttons bigger or smaller. Applies immediately. On small windows it is limited so the top bar still fits."},
