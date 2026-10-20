@@ -82,6 +82,7 @@ var _sel_arrow: MeshInstance3D
 var _grid_mi: MeshInstance3D
 var _hover_label: Label3D
 var _xray_t: float = 0.0
+var _see_walls: Dictionary = {}      # wall edge -> true: walls cut down because they hide the selected folk or a housemate at work (view only, see lot_picking.gd)
 var _tile_hl: MeshInstance3D
 var _ghost: Node3D = null
 var _ghost_ok: bool = false
