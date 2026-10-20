@@ -17,7 +17,6 @@
  "ambulance": {"hold_from_severity": 2, "worsen_after": 18, "worsen_chance": 0.5, "death_mult_per_target": 0.5, "death_mult_max": 2.0},
  "text": {
   "on_way": "An ambulance is on its way. It should be here in about {min} minutes.",
-  "late": "The ambulance took {min} minutes. {name} got worse while waiting.",
   "arrived": "The ambulance has arrived.",
   "fire_arrived": "The fire engine arrived after {min} minutes.",
   "police_arrived": "A patrol car arrived after {min} minutes."

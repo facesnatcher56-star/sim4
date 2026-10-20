@@ -66,6 +66,8 @@ func _effects(f: Array) -> void:
 func _burglary_prevention(f: Array) -> void:
 	var w := C.town(8)
 	K.set_time(3, 2, 0)
+	var keep_awake: Variant = CrimeBurglary.cfg().get("awake_abort", 0.0)
+	CrimeBurglary.cfg()["awake_abort"] = 0.0           # this test is about locks, dogs and lights; somebody awake at home has its own test (logic_burglary_test)
 	var quiet_bare: int = 0
 	for i in 300:
 		if CrimeBurglary._prevented(1, "home:1", false) != "":
@@ -75,6 +77,7 @@ func _burglary_prevention(f: Array) -> void:
 	for i in 300:
 		if CrimeBurglary._prevented(1, "home:1", false) != "":
 			quiet_sec += 1
+	CrimeBurglary.cfg()["awake_abort"] = keep_awake
 	K.expect(f, quiet_sec > quiet_bare + 40, "locks, a dog and lights make burglars give up far more often (%d vs %d of 300)" % [quiet_sec, quiet_bare])
 	K.teardown()
 

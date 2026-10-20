@@ -41,6 +41,8 @@ static func tick_minute(f, r: Dictionary) -> void:
 			Health.tell(f, "healed", "good")
 		elif str(f.posture) == "lie":
 			treat_minutes(f, float(Health.cfg("injury").get("rest_bonus_per_min", 1.0)))
+		elif bool(Worsening.cause(str(r.get("inj_cause", ""))).get("strain", false)):
+			treat_minutes(f, -Worsening.strain_extra(f))        # task 34: walking or working on a sprain slows the healing (waiting never worsens it)
 
 static func treat_minutes(f, minutes: float) -> void:
 	for b in f.buffs:

@@ -1,4 +1,4 @@
-﻿class_name Hospital
+class_name Hospital
 extends RefCounted
 ## The hospital rabbit hole. No map lot: a patient simply leaves through Away (reason "hospital", hidden on the map) for N hours,
 ## carries the hidden `in_hospital` buff, and comes back with a bill (scaled by severity; Incidents.insurance_cover() pays part).
@@ -42,9 +42,20 @@ static func fall_ill(f, severity: int, reason: String = "") -> void:
 # ------------------------------------------------------------------ admit / discharge
 ## An emergency (injury, illness, collapse): on the real map the patient at home waits for the ambulance first (task 12.3), else admitted at once.
 static func emergency(folk_id: int, severity: int, reason: String = "") -> bool:
+	if not Worsening.needs_ambulance(reason, clampi(severity, 1, 3)):                  # task 34: a sprain or a cold is no ambulance case: a lift or a taxi to the clinic
+		return _clinic_visit(folk_id, severity, reason)
 	if CityAmbulance.hold(folk_id, clampi(severity, 1, 3), reason):
 		return true
 	return admit(folk_id, severity, reason)
+
+static func _clinic_visit(folk_id: int, severity: int, reason: String) -> bool:
+	var sev: int = mini(clampi(severity, 1, 3), int(Worsening.cfg().get("minor_visit_severity", 1)))
+	var f = SysUtil.folk(folk_id)
+	var ok: bool = admit(folk_id, sev, reason)
+	if ok and f != null and int(f.household_id) > 0:
+		var tx: Dictionary = Worsening.cfg().get("text", {})
+		SysUtil.notify(str(tx.get("clinic", "")).replace("{name}", str(f.name)), "info")
+	return ok
 
 static func admit(folk_id: int, severity: int, reason: String = "") -> bool:
 	severity = clampi(severity, 1, 3)
@@ -154,7 +165,7 @@ static func _finish_townie(tid: int) -> void:
 	if t.is_empty() or p.is_empty():
 		return
 	t.erase("in_hospital")
-	if Incidents.rng.randf() < _by_sev("townie_death_chance", int(p["severity"]), 0.0) * CityServices.death_mult():      # task 12: slow ambulances cost lives
+	if Incidents.rng.randf() < _by_sev("townie_death_chance", int(p["severity"]), 0.0) * Worsening.townie_death_mult(str(p.get("reason", ""))):      # task 12: slow ambulances cost lives, but only where waiting matters (task 34)
 		Aging.kill(tid, "illness")
 	else:
 		Story._log("%s came home from hospital." % t["name"])

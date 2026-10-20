@@ -20,7 +20,7 @@ static func holding(fid: int) -> bool:
 	return false
 
 static func hold(fid: int, severity: int, reason: String) -> bool:
-	if _releasing or not CityServices.map_ready() or severity < int(cfg().get("hold_from_severity", 2)):
+	if _releasing or not CityServices.map_ready() or not Worsening.needs_ambulance(reason, severity):
 		return false
 	var f = SysUtil.folk(fid)
 	if f == null or int(f.household_id) <= 0 or bool(f.has_meta("visitor")):
@@ -51,10 +51,12 @@ static func _arrive(p: Dictionary) -> void:
 		return
 	var sev: int = int(p["severity"])
 	var c: Dictionary = cfg()
-	if int(p["minutes"]) > int(c.get("worsen_after", 18)) and sev < 3 and CityState.chance(float(c.get("worsen_chance", 0.5))):
+	var cz: Dictionary = Worsening.cause(str(p["reason"]))
+	# only a cause that really gets worse with time (bleeding, burns, a heart attack...) can worsen while the ambulance is on its way (data/worsening.json)
+	if bool(cz.get("worsens", false)) and int(p["minutes"]) > int(cz.get("worsen_after", c.get("worsen_after", 18))) and sev < 3 and CityState.chance(float(cz.get("worsen_chance", c.get("worsen_chance", 0.5)))):
 		sev += 1
 		CityServices.count("worsened")
-		SysUtil.notify(str(CityServices.cfg().get("text", {}).get("late", "")).replace("{min}", str(int(p["minutes"]))).replace("{name}", str(f.name)), "warn")
+		SysUtil.notify(str(Worsening.cfg().get("text", {}).get("late", "")).replace("{min}", str(int(p["minutes"]))).replace("{name}", str(f.name)).replace("{why}", str(cz.get("why", ""))), "warn")
 	_releasing = true
 	Hospital.admit(fid, sev, str(p["reason"]))
 	_releasing = false
