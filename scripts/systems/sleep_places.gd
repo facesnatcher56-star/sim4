@@ -93,3 +93,14 @@ static func no_free_bed(folk) -> bool:
 		if _bed_slots(o) > 0 and WorldIface.has_free_slot(o, int(folk.id)):
 			return false
 	return true
+
+## Cond "lacks_object": true at home when no object of any def id in `defs` is within reach of the folk (bare-home fallbacks, task 32d).
+static func lacks_any(folk, defs: Variant) -> bool:
+	var w = WorldIface.world()
+	if w != null and w.get("regions") != null and w.regions.has_regions() and Neighborhood.lot_of_folk(folk) != Neighborhood.HOME:
+		return false                    # only inside the player home lot (a park has no toilet either, and nobody orders a snack there)
+	var ids: Array = defs if defs is Array else [defs]
+	for o in WorldIface.objects_for(folk):
+		if str(o.def_id) in ids:
+			return false
+	return true

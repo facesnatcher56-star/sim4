@@ -49,7 +49,7 @@ func _ready() -> void:
 	title.continue_game.connect(load_game)
 	title.quit_game.connect(func(): get_tree().quit())
 	if "--autostart" in OS.get_cmdline_user_args():
-		start_new_game(default_household())
+		start_new_game(default_household(), "classic", {"home_state": "furnished"})      # the dev path keeps the furnished classic house
 	else:
 		show_title()
 
@@ -140,7 +140,7 @@ func _enter_game() -> void:
 	if all.size() > 0:
 		hud.select_folk(all[0].id)
 	hud.tracker.reset_for_game()
-	hud.tips.start(false, Scenario.def(Scenario.active_id).get("tips", []))
+	hud.tips.start(false, StartHome.tips_for(Scenario.def(Scenario.active_id)), StartHome.is_bare(Economy.primary_household()))
 	if World.has_method("get_coins"):
 		Events.coins_changed.emit(1, int(World.call("get_coins")))
 

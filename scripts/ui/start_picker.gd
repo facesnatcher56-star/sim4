@@ -11,6 +11,9 @@ var household: Dictionary = {}
 var start_id := "classic"
 var world_seed := 0                # drawn per picker opening; the whole map follows from it
 var homes: Dictionary = {}         # scenario id -> home template shown on its card
+var home_state := "empty"           # task 32d: empty (furnish it yourself, default) or furnished
+var home_buttons: Dictionary = {}
+var home_desc: Label
 var funds_base := -1               # Free Play funds option (-1 = the scenario's own funds)
 var storyteller := "classic"       # task 29: the storyteller personality (Calm / Classic / Chaotic / Custom)
 var st_custom: Dictionary = {}     # the four Custom sliders, 0..1
@@ -99,6 +102,7 @@ func _build_options(root: VBoxContainer) -> void:
 	diff_desc = UIU.make_label("", 13, UITheme.MUTED)
 	diff_desc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	dr.add_child(diff_desc)
+	_build_home_state(root)
 	_build_storyteller(root)
 	funds_row = HBoxContainer.new()
 	root.add_child(funds_row)
@@ -108,6 +112,35 @@ func _build_options(root: VBoxContainer) -> void:
 		funds_base = int(funds_opt.get_item_metadata(i))
 		_refresh())
 	funds_row.add_child(funds_opt)
+
+## Home row (task 32d): an empty home (the default) or a furnished one.
+func _build_home_state(root: VBoxContainer) -> void:
+	var hr := HBoxContainer.new()
+	root.add_child(hr)
+	var hl := UIU.make_label("Home", 15)
+	hl.tooltip_text = "Start with bare walls and extra coins to furnish it yourself, or move into a furnished home. In co-op the host's choice applies."
+	hr.add_child(hl)
+	var grp := ButtonGroup.new()
+	for hid in StartHome.ids():
+		var b := Button.new()
+		b.text = str(StartHome.option(hid).get("label", hid))
+		b.toggle_mode = true
+		b.button_group = grp
+		b.custom_minimum_size = Vector2(110, 34)
+		b.pressed.connect(set_home_state.bind(str(hid)))
+		hr.add_child(b)
+		home_buttons[str(hid)] = b
+	home_desc = UIU.make_label("", 13, UITheme.MUTED)
+	home_desc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	hr.add_child(home_desc)
+
+func set_home_state(s: String) -> void:
+	home_state = StartHome.normalize(s)
+	if home_buttons.has(home_state):
+		(home_buttons[home_state] as Button).button_pressed = true
+	if home_desc != null:
+		home_desc.text = str(StartHome.option(home_state).get("desc", ""))
+		_refresh()
 
 ## Storyteller row (task 29): pick how the unexpected plays out; Custom shows four sliders. The choice is saved as the default for the next game.
 func _build_storyteller(root: VBoxContainer) -> void:
@@ -160,6 +193,7 @@ func open() -> void:
 	var sa: Dictionary = StorytellerCmd.settings_args()
 	st_custom = (sa["custom"] as Dictionary).duplicate()
 	set_storyteller(str(sa["personality"]))
+	set_home_state(StartHome.default_id())
 	var keys: Array = ["frequency", "severity", "balance", "mercy"]
 	var i := 0
 	for ch in st_sliders.get_children():
@@ -228,7 +262,8 @@ func _refresh() -> void:
 	var names: Array = []
 	for fd in household.get("folk", []):
 		names.append(str(fd["name"]))
-	summary.text = "" if custom else "%s  -  %s" % [", ".join(names), ScenarioCard.coins_text(funds())]
+	var extra: String = ("  +  %s to furnish" % ScenarioCard.coins_text(StartHome.bonus(start_id))) if home_state == "empty" else ""
+	summary.text = "" if custom else "%s  -  %s" % [", ".join(names), ScenarioCard.coins_text(funds())] + extra
 
 func _open_creator(with_home: bool) -> void:
 	var custom: bool = bool(Scenario.def(selected_id).get("custom", false))
@@ -261,4 +296,4 @@ func _emit_chosen() -> void:
 	GameSettings.set_value("storyteller_good", int(round(float(st_custom.get("balance", 0.5)) * 100.0)))
 	GameSettings.set_value("storyteller_mercy", int(round(float(st_custom.get("mercy", 0.5)) * 100.0)))
 	chosen.emit({"storyteller": st, "scenario": selected_id, "difficulty": difficulty, "start_id": start_id, "funds": funds(), "household": household,
-		"home_template": str(homes.get(selected_id, "")), "world_seed": world_seed})
+		"home_template": str(homes.get(selected_id, "")), "world_seed": world_seed, "home_state": home_state})

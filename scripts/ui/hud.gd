@@ -106,6 +106,7 @@ func _ready() -> void:
 	tracker = ScenarioTracker.new()      # 'Getting Started' checklist (top-left), only visible with a scenario
 	tracker.goals_requested.connect(func(): goals_dialog.toggle_for(selected_folk_id))
 	add_child(tracker)
+	tips.tracker = tracker      # the tips stack under the checklist in the left column
 	var coop_hud := CoopHud.new()      # pace / why time is skipping / pause vote / alerts / name tags; invisible outside a co-op session
 	coop_hud.hud = self
 	add_child(coop_hud)

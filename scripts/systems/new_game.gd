@@ -1,7 +1,7 @@
 class_name NewGame
 extends RefCounted
 ## Builds a fresh game world from the new-game screen's choices (UI-free, so tests run the very same code).
-## NewGame.start(mgr, household, start_id, opts) -> Array of Folk.   opts: {scenario, difficulty, funds, world_seed, home_template} (all optional; the last two: random / drawn from the start's pool;
+## NewGame.start(mgr, household, start_id, opts) -> Array of Folk.   opts: {scenario, difficulty, funds, world_seed, home_template, home_state (empty|furnished, default from data/start_home.json)} (all optional; the last two: random / drawn from the start's pool;
 ## without a scenario: no checklist, Normal difficulty, the start's own funds).
 
 const SPAWN_FALLBACK := [Vector2i(6, 6), Vector2i(7, 6), Vector2i(8, 6)]
@@ -23,6 +23,8 @@ static func start(mgr: SystemsManager, h: Dictionary, start_id: String, opts: Di
 	if home_tpl == "":
 		home_tpl = str(Neighborhood.start_def(start_id).get("template", LotLoader.CLASSIC))
 	Neighborhood.start_game(home_tpl, wseed)
+	var home_state: String = StartHome.normalize(str(opts.get("home_state", StartHome.default_id())))
+	StartHome.apply(w, home_state)            # task 32d: the default home is bare (walls, doors, windows, floors, lights); the player furnishes it
 	var spawns: Array = w.starter_spawn_tiles if w.get("starter_spawn_tiles") != null else []
 	if spawns.is_empty():
 		spawns = SPAWN_FALLBACK
@@ -41,6 +43,8 @@ static func start(mgr: SystemsManager, h: Dictionary, start_id: String, opts: Di
 		_gentle_first_day()
 		Scenario.begin(str(scen["id"]), str(opts.get("difficulty", Scenario.default_difficulty())))
 	Neighborhood.finish_new_game(start_id, int(opts.get("funds", -1)))
+	if home_state == "empty":
+		Economy.deposit(Economy.primary_household(), StartHome.bonus(start_id), "moving-in allowance")      # enough for the basics
 	return folk
 
 ## A new player's first morning should be calm: re-roll the weather seed (a few times at most) until day 1 is sunny or cloudy.

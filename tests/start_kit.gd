@@ -29,7 +29,7 @@ static func new_game(scenario_id: String, diff: String = "normal", h: Dictionary
 	mgr = SystemsManager.new()
 	mgr.autosave_enabled = false
 	mgr.setup()
-	var opts := {"scenario": scenario_id, "difficulty": diff, "funds": Scenario.funds_for(scenario_id, diff, funds_base)}
+	var opts := {"scenario": scenario_id, "difficulty": diff, "funds": Scenario.funds_for(scenario_id, diff, funds_base), "home_state": "furnished"}      # the old furnished start; start_empty_test passes "empty"
 	opts.merge(extra, true)      # e.g. world_seed, home_template
 	return NewGame.start(mgr, h, str(def.get("start_id", "classic")), opts)
 
