@@ -145,7 +145,7 @@ func _data_sit_lie_clips() -> void:
 				var idef: Dictionary = SimEnv.data().interaction_def(str(iid))
 				if idef.is_empty() or str(idef.get("target", "object")) != "object":
 					continue
-				if str(iid) in ["clean_object", "repair_object", "make_bed", "clean_toilet"]:
+				if FolkClipRules.stands_at_slot_id(str(iid)):
 					continue          # maintenance: the folk stands next to the object (animation_map stand_at_slot)
 				var raw := FolkClipRules.pick_from(FolkClipRules.entry_for(str(iid), idef.get("tags", [])), p)
 				var ok: bool = FolkClipRules.is_sit_clip(raw) if p == "sit" else FolkClipRules.is_lie_clip(raw)

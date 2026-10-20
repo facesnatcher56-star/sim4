@@ -2,7 +2,7 @@ extends RefCounted
 ## VARIETY: every folk model variant (6 age groups) carries all toggleable parts, all 31 clips and the body morph targets;
 ## FolkRigStyle keeps only what an appearance asks for, tints every named material and sets the morphs.
 
-const REQUIRED_CLIPS := 33     # 31 + Sit_Read, Sit_Type (task 27)
+const REQUIRED_CLIPS := 62     # 31 + Sit_Read, Sit_Type (task 27) + 29 action clips (task 33, blender/folk_action_poses.py)
 const K = preload("res://tests/systems_kit.gd")
 
 
