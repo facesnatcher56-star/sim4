@@ -50,6 +50,9 @@ static func why_not(fid: int, pid: String, sid: String, target: int = -1) -> Str
 		return why
 	if not Places.exists(pid) or not Places.is_open(pid):
 		return "%s: %s." % [Places.label(pid), Places.status_text(pid)]
+	var mins: int = int(svc.get("minutes", 0))
+	if mins > 0 and not Places.is_open_for(pid, SysUtil.now(), mins):
+		return "%s closes before this would finish (%d min)." % [Places.label(pid), mins]          # it would be cut short and half the money given back
 	if not Places.is_there(f, pid):
 		return "Go to %s first." % Places.lot_label(pid)
 	if pending.has(fid) or SysUtil.is_away(f):

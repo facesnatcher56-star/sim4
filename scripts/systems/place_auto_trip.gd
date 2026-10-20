@@ -67,6 +67,8 @@ static func choose(f, services: Array, kind_pick: String, target: int) -> String
 		if pid == "" or not Places.is_open(pid, now) or not PlaceAutoPlan.viable_at(f, str(s), now, target):
 			continue
 		var svc: Dictionary = Places.services(pid)[str(s)]
+		if not _open_through(f, pid, svc, now):
+			continue
 		if bool(svc.get("once_per_day", false)) and int(PlaceUse.last_used.get("%d|%s" % [int(f.id), str(s)], -1)) == SysUtil.day():
 			continue
 		if not Economy.can_afford(int(f.household_id), PlaceUse.price(pid, str(s), int(f.id))):
@@ -75,6 +77,15 @@ static func choose(f, services: Array, kind_pick: String, target: int) -> String
 	if ok.is_empty():
 		return ""
 	return str(ok[PlaceAuto.rng.randi_range(0, ok.size() - 1)]) if kind_pick == "random" else str(ok[0])
+
+## Will the door still be open when they get there AND for the whole service? (cause: the walk takes time and a cut-short
+## service is refunded half; logic: nobody walks to a shut counter, so look at arrival time, not now.)
+static func _open_through(f, pid: String, svc: Dictionary, now: int) -> bool:
+	var walk := 0
+	if not Places.is_there(f, pid):
+		walk = maxi(NeighborhoodTravel.walk_minutes(int(f.id), Places.lot_of(pid)), 0)
+	var arrive: int = now + walk
+	return Places.is_open_for(pid, arrive, int(svc.get("minutes", 0))) and Venues.open_for(Places.lot_of(pid), arrive, int(svc.get("minutes", 0)))
 
 ## Try to start a due plan. Returns true when it is finished with (started or dropped), false to keep waiting.
 static func _start(p: Dictionary, now: int) -> bool:

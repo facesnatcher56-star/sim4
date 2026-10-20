@@ -98,6 +98,17 @@ static func open_at(pid: String, at_min: int = -1) -> bool:
 static func is_open(pid: String, at_min: int = -1) -> bool:
 	return open_at(pid, at_min) and PlaceStaff.staffed(pid) and not PlaceStaff.closed_today(pid)
 
+## Open for business through the whole stretch [start, start + span) minutes (a service that would be cut by closing time).
+static func is_open_for(pid: String, start_min: int, span: int) -> bool:
+	if not is_open(pid, start_min):
+		return false
+	var step := 0
+	while step < span:
+		if not open_at(pid, start_min + step):
+			return false
+		step += 15
+	return span <= 0 or open_at(pid, start_min + span - 1)
+
 ## "Open until 18:00" / "Opens 17:00" / "Closed today" / "Short of staff" for the UI.
 static func status_text(pid: String) -> String:
 	if not exists(pid):
