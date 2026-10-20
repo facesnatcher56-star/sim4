@@ -92,7 +92,9 @@ func _closed_hours() -> void:
 	# open when she leaves, closed when she gets there
 	Kit.set_time(2, 21, 55)                            # the gym closes at 22:00
 	WorldIface.coins[1] = 500
-	var r2: Dictionary = Neighborhood.travel([mira.id], "gym", {"quiet": true})
+	var own: Dictionary = Neighborhood.travel([mira.id], "gym", {"quiet": true})
+	_check(not bool(own["ok"]) and str(own["reason"]).find("closed by the time") >= 0, "her own outing is not started: the gym will be shut when she arrives (%s)" % str(own.get("reason", "")))
+	var r2: Dictionary = Neighborhood.travel([mira.id], "gym", {})          # a player's order is still allowed
 	_check(bool(r2["ok"]), "gym is still open when she sets out")
 	Kit.run(int(r2["minutes"]) + 25)
 	_check(Neighborhood.where(mira.id) != "gym", "turned away: the gym had closed (at %s)" % Neighborhood.where(mira.id))

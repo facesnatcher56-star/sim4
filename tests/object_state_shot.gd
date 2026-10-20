@@ -179,6 +179,12 @@ func _run() -> void:
 	rr.seed = 101
 	_main.start_new_game(HouseholdSetup.make_household("family", rr), str(Scenario.def("family").get("start_id", "classic")), {"scenario": "family", "difficulty": "normal", "world_seed": 101})
 	await _frames(20)
+	if OS.has_environment("SHOT_RES"):         # SHOT_RES=1280x720: the saved window settings would otherwise pick the size
+		var wh := OS.get_environment("SHOT_RES").split("x")
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
+		DisplayServer.window_set_size(Vector2i(int(wh[0]), int(wh[1])))
+		root.size = Vector2i(int(wh[0]), int(wh[1]))
+		await _frames(10)
 	print("started")
 	var W := _W()
 	_main.hud.visible = false

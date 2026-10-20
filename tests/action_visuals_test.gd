@@ -27,6 +27,7 @@ func run() -> Array:
 	var rows: Dictionary = AK.rows()
 	_share(rows)
 	_everyday(rows)
+	_paint_is_the_easels(rows)
 	AK.Kit.teardown()
 	_fx_data()
 	_view()
@@ -66,6 +67,22 @@ func _everyday(rows: Dictionary) -> void:
 			_check(SHOWN[id] in props, "%s (%s) shows %s, want %s" % [id, clip, str(props), SHOWN[id]])
 		else:
 			_check(fx != "", "%s (%s) shows no particles" % [id, clip])
+
+
+## Paint (brush in hand, an easel clip) belongs to the easels only; a doodle is Write with a pen and a notepad (review of 33).
+func _paint_is_the_easels(rows: Dictionary) -> void:
+	for id in rows:
+		var r: Dictionary = rows[id]
+		if not ("Paint" in (r["clips"] as Array)):
+			continue
+		for o in (r["objects"] as Array):
+			_check(str(o) in ["easel", "easel_large"], "%s plays the Paint clip at %s (only easels paint)" % [id, str(o)])
+		_check(not (r["objects"] as Array).is_empty(), "%s plays the Paint clip with no easel" % id)
+	var dc: Dictionary = rows.get("doodle", {})
+	_check(not dc.is_empty() and ("Write" in (dc["clips"] as Array)), "doodle plays %s, want Write" % str(dc.get("clips")))
+	var props := FolkProps.props_for("doodle", ["idle_life", "creative"], "Write")
+	_check("pen" in props and "notepad" in props, "a doodle shows a pen and a notepad, got %s" % str(props))
+	_check(FolkProps.props_for("doodle", ["idle_life", "creative"], "Sit_Write").has("notepad"), "a seated doodle shows the notepad")
 
 
 func _fx_data() -> void:

@@ -78,9 +78,9 @@ static func _apply_one(d: Dictionary, ctx: Dictionary) -> void:
 				SimEnv.emit("game_event", str(v), payload)
 			"notify":
 				if v is Array:
-					SimEnv.emit("notification", str(v[0]), str(v[1]) if v.size() > 1 else "info")
+					SimEnv.emit("notification", fill_text(str(v[0]), folk), str(v[1]) if v.size() > 1 else "info")
 				else:
-					SimEnv.emit("notification", str(v), "info")
+					SimEnv.emit("notification", fill_text(str(v), folk), "info")
 			"consume_item":
 				if obj != null and WorldIface.state_get(obj, "stock", null) != null:
 					WorldIface.state_add(obj, "stock", -1.0)
@@ -88,3 +88,17 @@ static func _apply_one(d: Dictionary, ctx: Dictionary) -> void:
 				SimEnv.emit("game_event", "consume_item", payload2)
 			_:
 				push_warning("Loot: unknown key '%s'" % str(key))
+
+## {name} = who it happened to, {where} = what kind of place ("at home", "at Moss & Mug Cafe", "out on the street"): a toast with no name tells the player nothing.
+static func fill_text(text: String, folk) -> String:
+	if folk == null or not (text.contains("{name}") or text.contains("{where}")):
+		return text
+	return text.replace("{name}", str(folk.name)).replace("{where}", where_text(folk))
+
+static func where_text(folk) -> String:
+	var lot: String = Neighborhood.lot_of_folk(folk)
+	if lot == "":
+		return "out on the street"
+	if lot == Neighborhood.HOME:
+		return "at home"
+	return "at " + Neighborhood.label_of(lot)

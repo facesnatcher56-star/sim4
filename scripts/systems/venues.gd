@@ -64,6 +64,13 @@ static func minutes_to_close(lot_id: String, at_min: int = -1) -> int:
 			return step * 15
 	return 100000
 
+## Is the lot open for the whole stretch [start, start + span) minutes? A walk that ends at a shut door, or a service that
+## would be cut by closing time (half the price back, "left early"), is not worth setting off for.
+static func open_for(lot_id: String, start_min: int, span: int = 0) -> bool:
+	if not is_open(lot_id, start_min):
+		return false
+	return span <= 0 or minutes_to_close(lot_id, start_min) >= span
+
 ## Human readable status for the UI.
 static func status_text(lot_id: String) -> String:
 	var vtype := type_of_lot(lot_id)

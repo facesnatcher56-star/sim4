@@ -61,7 +61,7 @@ func _update_rings(delta: float) -> void:
 	if lot_view == null or not lot_view.has_method("screen_pos"):
 		return
 	var cfg := ProgressRing.cfg()
-	var rad := float(cfg.get("radius_px", 13.0))
+	var view_h: float = get_viewport_rect().size.y
 	var live: Dictionary = {}
 	for c in _cands:
 		var inter = c["inter"]
@@ -77,6 +77,7 @@ func _update_rings(delta: float) -> void:
 		var head: Vector3 = fv.head_position()
 		if cam.is_position_behind(head):
 			continue
+		var rad := ProgressRing.radius_for(absf(cam.unproject_position(head).y - cam.unproject_position(fv.global_position).y), view_h)
 		# sits just above the head, then is pushed up until it clears the name tag and the mood icon (both are 3D nodes on the folk)
 		var center: Vector2 = cam.unproject_position(head + Vector3(0, -0.15, 0)) - Vector2(0, rad + 4.0)
 		var obstacles: Array = []
@@ -130,9 +131,11 @@ func _draw() -> void:
 	for r in _rings:
 		var c: Vector2 = r["pos"]
 		var rad: float = r["r"]
-		draw_circle(c, rad + 2.0, Color(0.06, 0.08, 0.12, 0.82))
-		draw_arc(c, rad - 1.5, 0.0, TAU, 32, Color(1, 1, 1, 0.18), 3.0, true)
+		var aw := ProgressRing.arc_width(rad)
+		var ar := rad - aw * 0.5                      # the arc sits inside the disc edge
+		draw_circle(c, rad + 2.0, Color(0.06, 0.08, 0.12, 0.88))
+		draw_arc(c, ar, 0.0, TAU, 48, Color(1, 1, 1, 0.22), aw, true)
 		var f: float = r["frac"]
 		if f > 0.004:
-			draw_arc(c, rad - 1.5, -PI * 0.5, ProgressRing.arc_end(f), 32, UITheme.ACCENT, 3.5, true)
-		ProgressIcons.draw(self, str(r["shape"]), c, rad * 0.62, r["color"])
+			draw_arc(c, ar, -PI * 0.5, ProgressRing.arc_end(f), 48, UITheme.ACCENT, aw, true)
+		ProgressIcons.draw(self, str(r["shape"]), c, (rad - aw) * 0.78, r["color"])

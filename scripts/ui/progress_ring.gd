@@ -82,3 +82,18 @@ static func percent_text(frac: float) -> String:
 ## Arc end angle (radians, from 12 o'clock clockwise) for the fill of a fraction.
 static func arc_end(frac: float) -> float:
 	return -PI * 0.5 + TAU * clampf(frac, 0.0, 1.0)
+
+
+## Ring radius in pixels: `radius_px` scaled with how big the folk is on screen (camera zoom; `ref_folk_px` = the folk's height at the default view),
+## kept between `radius_min_px` and `radius_max_px` (24..28 at 1280x720) so it is always readable and never covers the folk. Bigger windows grow the
+## range by sqrt(height / 720).
+static func radius_for(folk_px: float, view_h: float) -> float:
+	var c := cfg()
+	var k := sqrt(maxf(view_h, 360.0) / 720.0)
+	var r := float(c.get("radius_px", 26.0)) * (folk_px / maxf(1.0, float(c.get("ref_folk_px", 110.0)))) if folk_px > 0.0 else float(c.get("radius_px", 26.0))
+	return clampf(r * k, float(c.get("radius_min_px", 24.0)) * k, float(c.get("radius_max_px", 28.0)) * k)
+
+
+## Thickness of the filled arc for a ring of radius `r` (thick enough to read the fill at a glance).
+static func arc_width(r: float) -> float:
+	return maxf(5.0, r * float(cfg().get("arc_width_frac", 0.3)))

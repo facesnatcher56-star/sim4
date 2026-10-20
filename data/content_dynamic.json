@@ -172,6 +172,25 @@
     },
     {
      "at_home_lot": true
+    },
+    {
+     "has_object": [
+      "sofa",
+      "armchair",
+      "table",
+      "coffee_table",
+      "desk",
+      "counter",
+      "bar_counter",
+      "bed",
+      "single_bed",
+      "sofa_bed",
+      "bookshelf",
+      "bookcase_tall",
+      "dresser",
+      "wardrobe",
+      "nightstand"
+     ]
     }
    ],
    "per_min": {
@@ -210,6 +229,11 @@
     },
     {
      "at_home_lot": true
+    },
+    {
+     "has_object": [
+      "window"
+     ]
     }
    ],
    "per_min": {
@@ -284,6 +308,14 @@
     },
     {
      "at_home_lot": true
+    },
+    {
+     "has_object": [
+      "sink",
+      "fridge",
+      "coffee_maker",
+      "tea_kettle"
+     ]
     }
    ],
    "per_min": {
@@ -599,6 +631,11 @@
     },
     {
      "at_home_lot": true
+    },
+    {
+     "has_object": [
+      "window"
+     ]
     }
    ],
    "per_min": {
@@ -636,6 +673,13 @@
     },
     {
      "at_home_lot": true
+    },
+    {
+     "has_object": [
+      "desk",
+      "table",
+      "coffee_table"
+     ]
     }
    ],
    "per_min": {
@@ -674,6 +718,15 @@
     },
     {
      "at_home_lot": true
+    },
+    {
+     "has_object": [
+      "coffee_table",
+      "sofa",
+      "armchair",
+      "bookshelf",
+      "bookcase_tall"
+     ]
     }
    ],
    "per_min": {
@@ -711,6 +764,14 @@
     },
     {
      "at_home_lot": true
+    },
+    {
+     "has_object": [
+      "table",
+      "coffee_table",
+      "desk",
+      "bar_counter"
+     ]
     }
    ],
    "per_min": {
@@ -748,6 +809,15 @@
     },
     {
      "at_home_lot": true
+    },
+    {
+     "has_object": [
+      "bookshelf",
+      "bookcase_tall",
+      "dresser",
+      "nightstand",
+      "wardrobe"
+     ]
     }
    ],
    "per_min": {
@@ -859,6 +929,13 @@
     },
     {
      "at_home_lot": true
+    },
+    {
+     "has_object": [
+      "desk",
+      "table",
+      "coffee_table"
+     ]
     }
    ],
    "per_min": {
@@ -896,6 +973,12 @@
     },
     {
      "at_home_lot": true
+    },
+    {
+     "has_object": [
+      "stove",
+      "counter"
+     ]
     }
    ],
    "per_min": {
@@ -1008,6 +1091,14 @@
     },
     {
      "at_home_lot": true
+    },
+    {
+     "has_object": [
+      "table",
+      "coffee_table",
+      "desk",
+      "bar_counter"
+     ]
     }
    ],
    "per_min": {
@@ -1045,6 +1136,11 @@
     },
     {
      "at_home_lot": true
+    },
+    {
+     "has_object": [
+      "washing_machine"
+     ]
     }
    ],
    "per_min": {
@@ -1082,6 +1178,20 @@
     },
     {
      "at_home_lot": true
+    },
+    {
+     "has_object": [
+      "table",
+      "coffee_table",
+      "desk",
+      "counter",
+      "mirror",
+      "tv",
+      "piano",
+      "dresser",
+      "bookshelf",
+      "bookcase_tall"
+     ]
     }
    ],
    "per_min": {
@@ -1119,6 +1229,13 @@
     },
     {
      "at_home_lot": true
+    },
+    {
+     "has_object": [
+      "desk",
+      "table",
+      "coffee_table"
+     ]
     }
    ],
    "per_min": {
@@ -1132,6 +1249,401 @@
    },
    "thought": "",
    "cooldown_min": 100,
+   "idle_gate": true
+  },
+  "sit_on_floor": {
+   "label": "Sit on the Floor and Watch the Street",
+   "kind": "super",
+   "target": "self",
+   "tags": [
+    "idle_life",
+    "rest"
+   ],
+   "duration_min": 15,
+   "posture": "stand",
+   "tests": [
+    {
+     "lacks_buff": "stage_baby"
+    },
+    {
+     "lacks_buff": "stage_toddler"
+    },
+    {
+     "circadian": "day"
+    },
+    {
+     "at_home_lot": true
+    },
+    {
+     "lacks_object": [
+      "sofa",
+      "armchair",
+      "chair",
+      "dining_chair",
+      "bar_stool",
+      "sofa_bed",
+      "bed",
+      "single_bed"
+     ]
+    }
+   ],
+   "per_min": {
+    "comfort": 0.3,
+    "energy": 0.1
+   },
+   "on_finish": [],
+   "autonomous": true,
+   "priority": "low",
+   "advertises": {
+    "idle_life": 0.9
+   },
+   "thought": "",
+   "cooldown_min": 50,
+   "idle_gate": true
+  },
+  "stretch_on_wall": {
+   "label": "Stretch Against the Wall",
+   "kind": "super",
+   "target": "self",
+   "tags": [
+    "idle_life",
+    "rest"
+   ],
+   "duration_min": 4,
+   "posture": "stand",
+   "tests": [
+    {
+     "lacks_buff": "stage_baby"
+    },
+    {
+     "lacks_buff": "stage_toddler"
+    },
+    {
+     "circadian": "day"
+    },
+    {
+     "at_home_lot": true
+    }
+   ],
+   "per_min": {
+    "comfort": 0.3,
+    "energy": 0.1
+   },
+   "on_finish": [],
+   "autonomous": true,
+   "priority": "low",
+   "advertises": {
+    "idle_life": 0.9
+   },
+   "thought": "",
+   "cooldown_min": 50,
+   "idle_gate": true
+  },
+  "pace_and_think": {
+   "label": "Pace the Room and Think",
+   "kind": "super",
+   "target": "self",
+   "tags": [
+    "idle_life",
+    "rest"
+   ],
+   "duration_min": 10,
+   "posture": "stand",
+   "tests": [
+    {
+     "lacks_buff": "stage_baby"
+    },
+    {
+     "lacks_buff": "stage_toddler"
+    },
+    {
+     "circadian": "day"
+    },
+    {
+     "at_home_lot": true
+    }
+   ],
+   "per_min": {
+    "comfort": 0.3,
+    "energy": 0.1
+   },
+   "on_finish": [],
+   "autonomous": true,
+   "priority": "low",
+   "advertises": {
+    "idle_life": 0.9
+   },
+   "thought": "",
+   "cooldown_min": 50,
+   "idle_gate": true
+  },
+  "count_coins": {
+   "label": "Count the Coins",
+   "kind": "super",
+   "target": "self",
+   "tags": [
+    "idle_life",
+    "rest"
+   ],
+   "duration_min": 8,
+   "posture": "stand",
+   "tests": [
+    {
+     "lacks_buff": "stage_baby"
+    },
+    {
+     "lacks_buff": "stage_toddler"
+    },
+    {
+     "circadian": "day"
+    },
+    {
+     "at_home_lot": true
+    },
+    {
+     "coins_at_least": 1
+    }
+   ],
+   "per_min": {
+    "comfort": 0.3,
+    "energy": 0.1
+   },
+   "on_finish": [],
+   "autonomous": true,
+   "priority": "low",
+   "advertises": {
+    "idle_life": 0.9
+   },
+   "thought": "",
+   "cooldown_min": 50,
+   "idle_gate": true
+  },
+  "floor_todo_list": {
+   "label": "Make a To-Do List",
+   "kind": "super",
+   "target": "self",
+   "tags": [
+    "idle_life",
+    "rest"
+   ],
+   "duration_min": 12,
+   "posture": "stand",
+   "tests": [
+    {
+     "lacks_buff": "stage_baby"
+    },
+    {
+     "lacks_buff": "stage_toddler"
+    },
+    {
+     "circadian": "day"
+    },
+    {
+     "at_home_lot": true
+    }
+   ],
+   "per_min": {
+    "comfort": 0.3,
+    "energy": 0.1
+   },
+   "on_finish": [],
+   "autonomous": true,
+   "priority": "low",
+   "advertises": {
+    "idle_life": 0.9
+   },
+   "thought": "",
+   "cooldown_min": 50,
+   "idle_gate": true
+  },
+  "listen_to_neighbours": {
+   "label": "Listen to the Neighbours",
+   "kind": "super",
+   "target": "self",
+   "tags": [
+    "idle_life",
+    "rest"
+   ],
+   "duration_min": 10,
+   "posture": "stand",
+   "tests": [
+    {
+     "lacks_buff": "stage_baby"
+    },
+    {
+     "lacks_buff": "stage_toddler"
+    },
+    {
+     "circadian": "day"
+    },
+    {
+     "at_home_lot": true
+    }
+   ],
+   "per_min": {
+    "comfort": 0.3,
+    "energy": 0.1
+   },
+   "on_finish": [],
+   "autonomous": true,
+   "priority": "low",
+   "advertises": {
+    "idle_life": 0.9
+   },
+   "thought": "",
+   "cooldown_min": 50,
+   "idle_gate": true
+  },
+  "imagine_furniture": {
+   "label": "Imagine Where the Furniture Goes",
+   "kind": "super",
+   "target": "self",
+   "tags": [
+    "idle_life",
+    "rest"
+   ],
+   "duration_min": 12,
+   "posture": "stand",
+   "tests": [
+    {
+     "lacks_buff": "stage_baby"
+    },
+    {
+     "lacks_buff": "stage_toddler"
+    },
+    {
+     "circadian": "day"
+    },
+    {
+     "at_home_lot": true
+    }
+   ],
+   "per_min": {
+    "comfort": 0.3,
+    "energy": 0.1
+   },
+   "on_finish": [],
+   "autonomous": true,
+   "priority": "low",
+   "advertises": {
+    "idle_life": 0.9
+   },
+   "thought": "",
+   "cooldown_min": 50,
+   "idle_gate": true
+  },
+  "practise_speech_air": {
+   "label": "Practise a Speech",
+   "kind": "super",
+   "target": "self",
+   "tags": [
+    "idle_life",
+    "rest"
+   ],
+   "duration_min": 10,
+   "posture": "stand",
+   "tests": [
+    {
+     "lacks_buff": "stage_baby"
+    },
+    {
+     "lacks_buff": "stage_toddler"
+    },
+    {
+     "circadian": "day"
+    },
+    {
+     "at_home_lot": true
+    }
+   ],
+   "per_min": {
+    "comfort": 0.3,
+    "energy": 0.1
+   },
+   "on_finish": [],
+   "autonomous": true,
+   "priority": "low",
+   "advertises": {
+    "idle_life": 0.9
+   },
+   "thought": "",
+   "cooldown_min": 50,
+   "idle_gate": true
+  },
+  "shadow_box": {
+   "label": "Shadow-box",
+   "kind": "super",
+   "target": "self",
+   "tags": [
+    "idle_life",
+    "rest"
+   ],
+   "duration_min": 8,
+   "posture": "stand",
+   "tests": [
+    {
+     "lacks_buff": "stage_baby"
+    },
+    {
+     "lacks_buff": "stage_toddler"
+    },
+    {
+     "circadian": "day"
+    },
+    {
+     "at_home_lot": true
+    }
+   ],
+   "per_min": {
+    "comfort": 0.3,
+    "energy": 0.1
+   },
+   "on_finish": [],
+   "autonomous": true,
+   "priority": "low",
+   "advertises": {
+    "idle_life": 0.9
+   },
+   "thought": "",
+   "cooldown_min": 50,
+   "idle_gate": true
+  },
+  "do_sit_ups": {
+   "label": "Do a Few Sit-ups",
+   "kind": "super",
+   "target": "self",
+   "tags": [
+    "idle_life",
+    "rest"
+   ],
+   "duration_min": 8,
+   "posture": "stand",
+   "tests": [
+    {
+     "lacks_buff": "stage_baby"
+    },
+    {
+     "lacks_buff": "stage_toddler"
+    },
+    {
+     "circadian": "day"
+    },
+    {
+     "at_home_lot": true
+    }
+   ],
+   "per_min": {
+    "comfort": 0.3,
+    "energy": 0.1
+   },
+   "on_finish": [],
+   "autonomous": true,
+   "priority": "low",
+   "advertises": {
+    "idle_life": 0.9
+   },
+   "thought": "",
+   "cooldown_min": 50,
    "idle_gate": true
   }
  },

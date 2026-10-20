@@ -46,7 +46,7 @@ func _jobless(info: Dictionary) -> void:
 		return
 	if (info.get("offer", {}) as Dictionary).is_empty():
 		line("No job yet.", 16)
-		line("Use a computer's \"Look for Jobs\" to find an offer. You can accept or decline it here or from the pop-up.", 13, UITheme.MUTED)
+		line("Use a computer's \"Look for Jobs\", or Town then the Jobs tab, to find work. A job offer can be accepted or declined here, in the Jobs tab or from the pop-up.", 13, UITheme.MUTED)
 		return
 	offer_card(self, folk_id)
 

@@ -234,7 +234,7 @@
    "kind": "family",
    "schedule": [
     {
-     "holiday": true,
+     "holiday": "midsummer",
      "hours": [
       11,
       15
@@ -242,7 +242,7 @@
     }
    ],
    "news_chance": 1.0,
-   "blurb": "On every holiday: bands, floats and the whole town along the park road.",
+   "blurb": "Once a year, at Midsummer: bands, floats and the whole town along the park road.",
    "news": [
     "The holiday parade sets off from the park at eleven."
    ],

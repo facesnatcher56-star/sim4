@@ -92,6 +92,8 @@ func _update_walls(delta: float) -> void:
 			target = 1.0
 		elif wall_mode == WallMode.DOWN:
 			target = CUT_RATIO
+		elif wall_mode == WallMode.CUTAWAY and _see_walls.has(w["e"]):
+			target = CUT_RATIO            # a wall between the camera and the folk you follow (or a housemate at work) drops: the dig and the trowel must be seen
 		elif wall_mode == WallMode.CUTAWAY and _in_open_building(w):
 			target = 1.0 if is_far_wall(w["e"], _building_rect_of(w), d) else CUT_RATIO
 		elif wall_mode == WallMode.CUTAWAY:

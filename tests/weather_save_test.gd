@@ -8,6 +8,7 @@ func run() -> Array:
 	var f: Array = []
 	_roundtrip(f)
 	_full_save(f)
+	_forced_survives(f)
 	return f
 
 func _signature() -> Array:
@@ -22,6 +23,7 @@ func _signature() -> Array:
 
 func _roundtrip(f: Array) -> void:
 	var w: StubWorld = W.setup(2468)
+	Storyteller.enabled = false            # town cycles hold/release the weather by their own (unsaved here) state; this half only restores Weather
 	K.make_folk(w, "Ann")
 	Economy.next_bill_day = 10000          # bills reset the weather bill period; keep them out of this comparison
 	Seasons.set_length(5)
@@ -73,4 +75,17 @@ func _full_save(f: Array) -> void:
 	var diffs: Array = []
 	W.expect(f, K.deep_eq(sig_before, sig_after, "sig", diffs), "SaveLoad.restore restores the weather: %s" % str(diffs.slice(0, 4)))
 	W.expect(f, Seasons.length() == 6, "season length is part of the save")
+	W.teardown()
+
+## A town cycle (heat wave / cold snap) holds the weather with Weather.force; a loaded game must still be in it (short run, so it fails in the fast tier too).
+func _forced_survives(f: Array) -> void:
+	W.setup(31)
+	Weather.force("heatwave")
+	var parsed: Variant = JSON.parse_string(JSON.stringify(Weather.to_dict()))
+	Weather.reset(1)
+	W.expect(f, Weather.forced == "", "reset drops the held weather")
+	Weather.from_dict(parsed)
+	W.expect(f, Weather.forced == "heatwave" and Weather.current() == "heatwave", "a held (forced) weather survives save / load")
+	Weather.from_dict({})
+	W.expect(f, Weather.forced == "", "an old save without the field holds nothing")
 	W.teardown()

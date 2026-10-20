@@ -51,7 +51,27 @@ static func can_travel(folk_ids: Array, lot_id: String, opts: Dictionary = {}) -
 		var chk := Venues.check_entry(lot_id, ids)
 		if not bool(chk["ok"]):
 			return {"ok": false, "reason": str(chk["reason"])}
+		var late: String = _closed_on_arrival(ids, lot_id, opts)
+		if late != "":
+			return {"ok": false, "reason": late}
 	return {"ok": true, "reason": ""}
+
+## A person's own outing (quiet / silent / auto opts: never a player order) to a place that will be shut by the time they walk there:
+## nobody sets off on a long walk to a closed door. A player's order is still allowed (the menu shows when it opens).
+static func _closed_on_arrival(ids: Array, lot_id: String, opts: Dictionary) -> String:
+	if bool(opts.get("fast", false)) or bool(opts.get("instant", false)) or bool(opts.get("free", false)):
+		return ""
+	if not (bool(opts.get("quiet", false)) or bool(opts.get("silent", false)) or bool(opts.get("auto", false))):
+		return ""
+	var walk := 0
+	for id in ids:
+		walk = maxi(walk, walk_minutes(int(id), lot_id))
+	if walk <= 0:
+		return ""
+	var arrive: int = SimEnv.now_min() + walk
+	if Venues.open_for(lot_id, arrive, 10):          # still open for a while after they arrive: worth the walk
+		return ""
+	return "%s will be closed by the time they get there." % Neighborhood.label_of(lot_id)
 
 ## Estimated walking minutes for one folk from where it stands (-1: no way there).
 static func walk_minutes(folk_id: int, lot_id: String) -> int:

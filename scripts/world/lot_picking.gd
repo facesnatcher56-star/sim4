@@ -292,6 +292,7 @@ func _update_xray(delta: float) -> void:
 		if o.is_wall_mounted() or o.is_floor_layer() or float(o.def.get("height", 1.0)) < 1.3:
 			continue
 		blockers.append(_object_aabb(o))
+	_update_see_walls(toward)
 	for fv in _folk_views.values():
 		var occluded := false
 		if fv.visible:
@@ -307,6 +308,49 @@ func _update_xray(delta: float) -> void:
 				if occluded:
 					break
 		fv.set_xray(occluded)
+
+
+## Folk whose action must stay readable: the selected folk, and any housemate of theirs who is doing something (not just walking). A wall that stands
+## between the camera and one of them is cut down (CUTAWAY mode; see _update_walls) so the silhouette is left to everybody else.
+func _focus_folk_views() -> Array:
+	var out: Array = []
+	if selected_kind != "folk" or not _folk_views.has(selected_id):
+		return out
+	var sel = World.get_folk(selected_id)
+	var hid: int = int(sel.household_id) if sel != null else -1
+	for f in World.all_folk():
+		var v = _folk_views.get(f.id, null)
+		if v == null or not is_instance_valid(v) or not v.visible:
+			continue
+		if int(f.id) == selected_id or (hid > 0 and int(f.household_id) == hid and f.current != null):
+			out.append(v)
+	return out
+
+
+## Throttled with the x-ray pass. The test uses each wall's full height whatever its current scale, so a wall that was just cut stays in the set (no flicker).
+func _update_see_walls(toward: Vector3) -> void:
+	_see_walls.clear()
+	var focus := _focus_folk_views()
+	if focus.is_empty() or wall_mode != WallMode.CUTAWAY:
+		return
+	for w in _walls:
+		if w["kind"] == "fence" or w["free"]:
+			continue
+		var p: Vector3 = w["pos"]
+		var half := Vector3(0.58, WALL_H * 0.5, WALL_T) if w["axis"] == 0 else Vector3(WALL_T, WALL_H * 0.5, 0.58)
+		var bb := AABB(p + Vector3(0, WALL_H * 0.5, 0) - half, half * 2.0)
+		for fv in focus:
+			var hit = false
+			for hp in [fv.head_position() - Vector3(0, 0.25, 0), fv.global_position + Vector3(0, 0.6, 0)]:
+				if bb.grow(0.05).has_point(hp):
+					continue
+				var h = bb.intersects_ray(hp, toward)
+				if h != null and (h - hp).dot(toward) > 0.05:
+					hit = true
+					break
+			if hit:
+				_see_walls[w["e"]] = true
+				break
 
 
 func _update_hover_label() -> void:
