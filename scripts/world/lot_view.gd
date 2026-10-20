@@ -16,6 +16,7 @@ func _ready() -> void:
 	_build_fx()
 	_connect_signals()
 	LevelView.ensure_on(self)      # upper floors / basements of multi-floor buildings (scripts/world/level_view.gd)
+	level_view.view_changed.connect(return_to_cutaway)     # changing floor or building: back to the readable Cutaway view
 	WeatherView.ensure_on(self)    # sky / sun / weather particles / seasons (scripts/world/weather_view.gd)
 	FireView.ensure_on(self)       # flames / smoke / scorch marks (scripts/world/fire_view.gd)
 	PlotView.ensure_on(self)       # scaffolding, building sites and finished buildings on the reserved plots of the east side (scripts/world/plot_view.gd; view only)

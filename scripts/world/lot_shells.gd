@@ -7,19 +7,18 @@
 
 const SHELL_DIR := "res://assets/models/outdoor/"
 const SHELL_MARGIN := 0.12          # the shell is this much bigger on each side than the template walls (no z-fighting with them)
-const OPEN_RADIUS := 2              # tiles around the building footprint that open the shell
+const OPEN_RADIUS := 0              # tiles around the building footprint that open the shell (0: a folk has to be inside)
 const SHELL_PERIOD := 0.25          # seconds between occupancy checks
 const SHELL_NAMES := {"small": "house_small_%s", "medium": "house_medium_%s", "classic": "house_medium_%s", "large": "house_large_%s",
 	"cafe": "cafe_%s", "gym": "gym_%s", "library": "library_%s", "market": "market_%s", "school": "school_%s", "office": "office_%s",
 	"tower": "office_%s", "hospital": "office_%s", "apartments": "office_%s", "courthouse": "library_%s", "police": "library_%s", "garage": "gym_%s", "works": "market_%s"}
 
-const FADE_ALPHA := 0.85            # how see-through a shell gets while it covers the folk or the spot the camera follows
+const FADE_ALPHA := 0.93            # how see-through a shell gets while it covers the folk or the spot the camera follows
 const FADE_RATE := 5.0              # per second
 const OVERVIEW_ZOOM := 28.0        # zoomed out at least this far, a click on a lot flies the camera to it
 const LOT_FRAME_ZOOM := 22.0
 
 var shells_enabled: bool = true
-var _shells: Dictionary = {}         # lot id -> {root: Node3D, rect: Rect2i (tiles), open: bool, lot: String}
 var _shell_clock: float = 0.0
 
 
@@ -35,6 +34,7 @@ func _rebuild_shells() -> void:
 	for sh in _shells.values():
 		(sh["root"] as Node3D).queue_free()
 	_shells.clear()
+	_shell_gen += 1
 	if not World.regions.has_regions():
 		return
 	for r in World.regions.regions.values():
@@ -65,6 +65,7 @@ func _rebuild_shells() -> void:
 		add_child(root)
 		_shells[str(r["lot"])] = {"root": root, "rect": rect, "open": false, "lot": str(r["lot"]), "home": str(r["kind"]) == "home",
 			"aabb": _shell_aabb(rect, storeys), "meshes": _mesh_nodes(model), "fade": 0.0}
+		_shells[str(r["lot"])]["aabb"] = _mesh_aabb(_shells[str(r["lot"])]["meshes"], _shells[str(r["lot"])]["aabb"])
 	_shell_clock = SHELL_PERIOD
 
 
@@ -84,6 +85,20 @@ func _mesh_nodes(n: Node) -> Array:
 	for c in n.get_children():
 		out.append_array(_mesh_nodes(c))
 	return out
+
+
+## The box the real shell meshes fill (roofs, towers and chimneys stand taller than the template says); `fallback` when there are no meshes yet.
+func _mesh_aabb(meshes: Array, fallback: AABB) -> AABB:
+	var out := AABB()
+	var first := true
+	for mi in meshes:
+		var m := mi as MeshInstance3D
+		if m == null or m.mesh == null or not m.is_inside_tree():
+			continue
+		var bb: AABB = m.global_transform * m.mesh.get_aabb()
+		out = bb if first else out.merge(bb)
+		first = false
+	return fallback if first else out.merge(fallback)
 
 
 ## World box of a standing shell (its footprint, as tall as its storeys: roughly 4 m each plus the roof).
@@ -120,6 +135,13 @@ func _fade_targets() -> Array:
 		var fv = _folk_views[selected_id]
 		if is_instance_valid(fv):
 			out.append((fv as Node3D).position + Vector3(0, 0.8, 0))
+			out.append((fv as Node3D).position + Vector3(0, 0.1, 0))      # and the floor they stand on
+	for f in World.all_folk():            # every folk of the household: a tall neighbour must not hide any of them
+		if int(f.household_id) > 0 and not f.has_meta("away") and not f.has_meta("visitor") and int(f.id) != selected_id:
+			var v = _folk_views.get(f.id, null)
+			if v != null and is_instance_valid(v):
+				out.append((v as Node3D).position + Vector3(0, 0.8, 0))
+				out.append((v as Node3D).position + Vector3(0, 0.1, 0))
 	return out
 
 
@@ -160,7 +182,7 @@ func _update_shells(delta: float) -> void:
 	var changed: Array = []
 	for sh in _shells.values():
 		var rect: Rect2i = sh["rect"]
-		var open: bool = not shells_enabled or (bool(sh["home"]) and tool != "select") or (level_view != null and level_view.wants_open(sh["rect"]))
+		var open: bool = not shells_enabled or bool(sh["home"]) or (level_view != null and level_view.wants_open(sh["rect"]))      # the player always sees into their own home
 		if not open:
 			var near := rect.grow(OPEN_RADIUS)
 			for t in watchers:

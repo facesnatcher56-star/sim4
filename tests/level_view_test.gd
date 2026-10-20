@@ -85,8 +85,8 @@ func run() -> Array:
 		lv._update_folk_visibility()
 		_check(not fv_f.has_meta("level_hidden") and fv_o.has_meta("level_hidden"), "the Folk on the viewed floor is shown, the one on the ground is hidden")
 	# the roof only on the top floor with walls up
+	lv.set_viewed(3)      # (changing floors returns to cut-away, so choose Walls Up after it)
 	lot.set_wall_mode(0)
-	lv.set_viewed(3)
 	lv._sync_nodes()
 	_check(lv._roof != null, "roof drawn on the top floor in 'walls up' mode")
 	lot.set_wall_mode(1)

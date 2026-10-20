@@ -16,6 +16,7 @@ func _build_walls() -> void:
 	_wall_nodes.clear()
 	_walls.clear()
 	_doors.clear()
+	_wall_by_edge.clear()
 	_wall_ends.clear()
 	_wall_by_chunk.clear()
 	for e2 in World.walls:
@@ -49,9 +50,12 @@ func _sync_wall_chunks(force: bool = false) -> void:
 	if changed:
 		_walls.clear()
 		_doors.clear()
+		_wall_by_edge.clear()
 		for ch in _wall_nodes.values():
 			_walls.append_array(ch["walls"])
 			_doors.append_array(ch["doors"])
+			for w in ch["walls"]:
+				_wall_by_edge[w["e"]] = w
 
 
 func _build_wall_chunk(c: Vector2i) -> void:
@@ -88,6 +92,8 @@ func _update_walls(delta: float) -> void:
 			target = 1.0
 		elif wall_mode == WallMode.DOWN:
 			target = CUT_RATIO
+		elif wall_mode == WallMode.CUTAWAY and _in_open_building(w):
+			target = 1.0 if is_far_wall(w["e"], _building_rect_of(w), d) else CUT_RATIO
 		elif wall_mode == WallMode.CUTAWAY:
 			var p: Vector3 = w["pos"]
 			var comp: float
@@ -105,6 +111,44 @@ func _update_walls(delta: float) -> void:
 			cur = move_toward(cur, target, delta * 4.0)
 			w["scale"] = cur
 			(w["node"] as Node3D).scale.y = maxf(cur, 0.01)
+
+
+## The standing / open shell (building) a wall belongs to, found once per wall and shell rebuild: {} when it stands in no building.
+func _building_of(w: Dictionary) -> Dictionary:
+	if int(w.get("bgen", -1)) != _shell_gen:
+		w["bgen"] = _shell_gen
+		w["blot"] = ""
+		var e: Vector3i = w["e"]
+		for sh in _shells.values():
+			var rc: Rect2i = sh["rect"]
+			var inside: bool = (e.x >= rc.position.x and e.y >= rc.position.y and e.x <= rc.end.x and e.y <= rc.end.y
+				and (e.x < rc.end.x if e.z == 0 else e.y < rc.end.y))
+			if inside:
+				w["blot"] = sh["lot"]
+				break
+	var lot := str(w["blot"])
+	return _shells[lot] if lot != "" and _shells.has(lot) else {}
+
+
+func _in_open_building(w: Dictionary) -> bool:
+	var sh := _building_of(w)
+	return not sh.is_empty() and bool(sh["open"])
+
+
+func _building_rect_of(w: Dictionary) -> Rect2i:
+	return _building_of(w)["rect"]
+
+
+## The outer wall on the far side of a building as seen from the camera (the back drop); everything else of an open building
+## (near outer walls AND the walls between rooms) is cut down so no room is hidden. `d` = horizontal unit vector toward the camera.
+static func is_far_wall(e: Vector3i, rc: Rect2i, d: Vector3) -> bool:
+	if e.z == 0:
+		if absf(d.z) <= 0.25:
+			return true
+		return e.y == (rc.position.y if d.z > 0.0 else rc.end.y)
+	if absf(d.x) <= 0.25:
+		return true
+	return e.x == (rc.position.x if d.x > 0.0 else rc.end.x)
 
 
 func _update_doors(delta: float) -> void:
