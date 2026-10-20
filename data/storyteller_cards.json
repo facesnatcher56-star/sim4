@@ -69,7 +69,7 @@
     "pet_on_doorstep": {"title": "A pet at the door", "size": "small", "tone": "good", "cat": "home", "scope": "home", "weight": 1.5, "when": {"pets": true},
       "text": "A friendly stray turned up on the doorstep.", "lot_text": "A friendly stray turned up on {name}'s doorstep.", "options": [{"id": "keep", "label": "Take them in", "fx": [{"pet": true}, {"buff": "cheered_up"}], "text": "{name} took {pet} in. They have a new friend."}, {"id": "shelter", "label": "Take them to the shelter", "fx": [{"rep": 1}], "text": "The shelter will find them a home."}],
       "default": "keep", "auto": "keep"},
-    "headhunter": {"title": "A job headhunter", "size": "medium", "tone": "good", "cat": "work", "scope": "home", "weight": 1.2, "wealth": {"poor": 1.8}, "tags": ["work"], "when": {"adult": true},
+    "headhunter": {"title": "A job headhunter", "size": "medium", "tone": "good", "cat": "work", "scope": "home", "weight": 1.2, "wealth": {"poor": 1.8}, "tags": ["work"], "when": {"adult": true, "job": true},
       "arrive": "headhunter", "text": "{other}, a recruiter, rang {name} with an offer that sounds too good to ignore.",
       "options": [
         {"id": "listen", "label": "Hear them out", "fx": [{"job_offer": true}], "text": "{other} sent the details over."},
@@ -130,7 +130,7 @@
         "know": {"text": "{who}'s house caught fire. Maybe they could use a hand.", "home_card": "ask_to_stay", "chance": 0.5, "delay": [1, 3]}, "town": {"news": "A house fire on {zone} had the fire brigade out."}}},
     "crash_avenue": {"title": "A crash on the avenue", "size": "medium", "tone": "bad", "cat": "town", "scope": "district", "incident": "traffic_hit", "target": "townie", "weight": 1.0, "tags": ["traffic", "accident"],
       "text": "A crash on the avenue in {zone} left someone hurt.",
-      "ripple": {"near": {"text": "A crash on the avenue has traffic snarled up on {zone}.", "buff": "anxious_jitters"}, "detour": {"days": 0.3},
+      "ripple": {"near": {"text": "A crash on the avenue has traffic snarled up on {zone}.", "buff": ""}, "detour": {"days": 0.3},
         "know": {"text": "{who} was hurt in a crash. A visit would mean a lot.", "friend": 2, "thanks": true}, "town": {"news": "A crash on {zone} sent someone to hospital."}}},
     "shop_robbery": {"title": "A robbery at the corner shop", "size": "small", "tone": "bad", "cat": "crime", "scope": "district", "weight": 1.4, "tags": ["crime"],
       "text": "The corner shop on {zone} was robbed.", "fx": [{"other_coins": [-80, -20]}],
