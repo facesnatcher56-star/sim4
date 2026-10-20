@@ -29,11 +29,22 @@ static func set_role(f, on: bool) -> bool:
 		Careers.seeking.erase(id)
 		Careers.homemakers[id] = true
 		SysUtil.notify("%s will stay at home and look after the house and the family." % f.name, "info")
+		if not has_other_income(f):
+			SysUtil.notify("Nobody else in the household earns money. The bills still come, so %s's household will need savings or a job from someone else." % f.name, "warn")
 	else:
 		Careers.homemakers.erase(id)
 		SysUtil.notify("%s is open to work again." % f.name, "info")
 	SysUtil.game_event("homemaker_set", {"folk_id": id, "on": on})
 	return true
+
+## Task 34: a homemaker earns nothing, so somebody else must (a job or a pension), or the household lives off savings and runs out.
+static func has_other_income(f) -> bool:
+	for k in SysUtil.residents():
+		if int(k.household_id) != int(f.household_id) or int(k.id) == int(f.id) or is_homemaker(k):
+			continue
+		if Careers.jobs.has(int(k.id)) or Careers.retired.has(int(k.id)):
+			return true
+	return false
 
 ## Spoiled items in the household's fridges (cooking and snacks wait until it is thrown away).
 static func fridge_spoiled(hid: int) -> float:

@@ -1,0 +1,29 @@
+{
+ "_doc": "Task 34: which injuries and illnesses really get worse with time, and which never need an ambulance. Every rule says WHY (the cause), so a mechanic can be checked with 'why would this happen?'. A cause is matched by words in the reason text (lowercased) from the first row to the last; the first hit wins. 'ambulance': 'always' (rushed even at severity 1), 'by_severity' (from ambulance.hold_from_severity), 'never' (home care, or a lift or taxi to the clinic). 'worsens': true = waiting longer than worsen_after minutes can raise the severity by one (chance worsen_chance); false = waiting changes nothing. A minor injury ('strain': true) only takes longer to heal if the person keeps walking or working on it.",
+ "default": {"id": "other", "ambulance": "by_severity", "worsens": false, "why": "serious, but waiting alone does not make it worse"},
+ "causes": [
+  {"id": "bleeding", "match": ["bleed", "stab", "knife", "gunshot", "shot", "gas blast", "meteor", "hit by a car", "clipped by a car", "wandering into the road", "serious accident", "accident at work", "a car"], "ambulance": "by_severity", "worsens": true, "worsen_after": 12, "worsen_chance": 0.6, "why": "bleeding gets worse every minute without first aid"},
+  {"id": "burns", "match": ["burn", "smoke", "fire"], "ambulance": "by_severity", "worsens": true, "worsen_after": 15, "worsen_chance": 0.5, "why": "burns and smoke damage keep getting worse until they are treated"},
+  {"id": "heart", "match": ["heart attack"], "ambulance": "always", "worsens": true, "worsen_after": 8, "worsen_chance": 0.7, "why": "a heart attack damages the heart more every minute"},
+  {"id": "stroke", "match": ["stroke"], "ambulance": "always", "worsens": true, "worsen_after": 8, "worsen_chance": 0.7, "why": "a stroke damages the brain more every minute"},
+  {"id": "choking", "match": ["chok"], "ambulance": "always", "worsens": true, "worsen_after": 4, "worsen_chance": 0.8, "why": "a blocked airway cannot wait"},
+  {"id": "drowning", "match": ["drown", "swallowing water"], "ambulance": "always", "worsens": true, "worsen_after": 6, "worsen_chance": 0.7, "why": "water in the lungs gets worse by the minute"},
+  {"id": "overdose", "match": ["overdose"], "ambulance": "always", "worsens": true, "worsen_after": 10, "worsen_chance": 0.6, "why": "an overdose keeps working on the body"},
+  {"id": "poisoning", "match": ["poison", "breathing in gas", "gas leak"], "ambulance": "by_severity", "worsens": true, "worsen_after": 15, "worsen_chance": 0.5, "why": "poison keeps working until it is treated"},
+  {"id": "hypothermia", "match": ["hypothermia", "exposure"], "ambulance": "by_severity", "worsens": true, "worsen_after": 15, "worsen_chance": 0.5, "why": "the body keeps cooling until they are warmed up"},
+  {"id": "heatstroke", "match": ["heatstroke", "heat stroke", "heat exhaustion"], "ambulance": "by_severity", "worsens": true, "worsen_after": 15, "worsen_chance": 0.5, "why": "the body keeps overheating until it is cooled"},
+  {"id": "electric", "match": ["electric shock"], "ambulance": "by_severity", "worsens": true, "worsen_after": 10, "worsen_chance": 0.4, "why": "an electric shock can upset the heartbeat"},
+  {"id": "serious_fall", "match": ["bad fall", "serious fall", "jump from a window"], "ambulance": "by_severity", "worsens": true, "worsen_after": 20, "worsen_chance": 0.4, "why": "a hard fall may hide internal injuries that get worse if the person is moved or left"},
+  {"id": "labour", "match": ["labour", "labor", "complication", "caesarean"], "ambulance": "always", "worsens": true, "worsen_after": 10, "worsen_chance": 0.6, "why": "a birth with complications cannot wait"},
+  {"id": "sprain", "match": ["ankle", "strain", "sprain", "scraped", "bruise", "treadmill fall", "a fall", "pulled"], "ambulance": "never", "worsens": false, "strain": true, "why": "a sprain does not get worse by waiting; only walking or working on it slows the healing"},
+  {"id": "scuffle", "match": ["scuffle", "fight", "beating", "struggle", "mishap", "jostl"], "ambulance": "never", "worsens": false, "strain": true, "why": "bruises and scrapes do not get worse by waiting"},
+  {"id": "mild_illness", "match": ["flu", "cold", "stomach bug", "spoiled food", "roach", "mould", "damp"], "ambulance": "never", "worsens": false, "why": "an ordinary illness is cared for at home or at the clinic and does not get worse minute by minute"}
+ ],
+ "minor_visit_severity": 1,
+ "text": {
+  "late": "The ambulance took {min} minutes. {name} got worse: {why}.",
+  "clinic": "{name} was taken to the clinic by a neighbour.",
+  "clinic_taxi": "{name} took a taxi to the clinic."
+ },
+ "strain": {"extra_per_min_walking": 0.5, "extra_per_min_working": 0.5, "note": "while walking or working on a sprained or bruised body part, the injury timer loses 0.5 less per minute: recovery is longer"}
+}
