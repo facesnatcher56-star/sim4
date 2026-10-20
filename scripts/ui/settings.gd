@@ -71,6 +71,8 @@ const DEFS := [
 	{"k": "confirm_quit", "tab": "gameplay", "t": "bool", "label": "Confirm before quitting to title", "def": true,
 		"tip": "Asks 'are you sure?' before leaving the game, because unsaved progress is lost."},
 	{"k": "thought_bubbles", "tab": "gameplay", "t": "bool", "label": "Show thought bubbles", "def": true, "tip": "The little speech balloons above Folk heads."},
+	{"k": "progress_rings", "tab": "gameplay", "t": "enum", "label": "Show progress rings", "def": 2, "opts": [[0, "Off"], [1, "Selected folk only"], [2, "Household"], [3, "Everyone"]],
+		"tip": "A little ring over a Folk's head that fills while they do a timed action. Household = the selected Folk and the rest of their home."},
 	{"k": "need_numbers", "tab": "gameplay", "t": "bool", "label": "Show need numbers", "def": true, "tip": "Percent values next to the need bars. Takes effect when you next select a Folk."},
 	{"k": "tooltip_delay", "tab": "gameplay", "t": "range", "label": "Tooltip delay", "def": 0.5, "min": 0.0, "max": 1.5, "step": 0.1, "unit": " s",
 		"tip": "How long you hover before a tooltip appears. May need a restart to take effect."},
@@ -214,6 +216,8 @@ static func ensure_loaded() -> void:
 static func effects_quality() -> int: return get_int("effects")
 static func shadows_quality() -> int: return get_int("shadows")
 static func reduce_motion() -> bool: return get_bool("reduce_motion")
+## Progress rings over heads: 0 off, 1 selected folk only, 2 household (default), 3 everyone.
+static func progress_rings_mode() -> int: return clampi(get_int("progress_rings"), 0, 3)
 static func flashing_allowed() -> bool: return not get_bool("no_flash")
 static func high_contrast() -> bool: return get_bool("high_contrast")
 static func colorblind() -> bool: return get_bool("colorblind")
