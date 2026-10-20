@@ -25,6 +25,8 @@ static func chance_of(f, p: Dictionary) -> float:
 	var c: float = float(p.get("chance", 0.0)) * stage_f
 	if DynLife.is_weekend():
 		c *= float(p.get("weekend_mult", 1.0))
+	if p.has("bare_gain"):
+		c *= HomeBare.boost(f, str(p["bare_gain"]))               # a bare home: out for a stroll, ring a friend (task 32f)
 	c *= DynLife.trait_factor(f, p.get("traits", {})) * _mood_factor(f, p.get("moods", {})) * _need_factor(f, p.get("needs", {}))
 	return c
 

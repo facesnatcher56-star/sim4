@@ -40,6 +40,7 @@ static func run(env: Dictionary) -> Dictionary:
 		PlayerLots.acting = int(e["player_id"])        # build rules follow the player whose order this is
 		res = CommandActions.dispatch(e)
 		PlayerLots.acting = -1
+		AutoFurnish.note_order(int(e["player_id"]))        # the household is being played (task 32f: no auto-furnishing while the player gives orders)
 		if not res.has("ok"):
 			res["ok"] = true
 	var entry: Dictionary = e.duplicate()

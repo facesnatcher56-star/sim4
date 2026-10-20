@@ -13,6 +13,9 @@ static func eval(gate: String, f, kind: String, d: Dictionary, day: int) -> Dict
 	var fid: int = int(f.id)
 	var stage: String = str(f.age_stage)
 	match gate:
+		"bare":
+			var bf: float = HomeBare.factor(f)                 # free park outings only for a home with little to do in (task 32f)
+			return {"mult": bf} if bf >= 0.3 and stage not in ["baby", "toddler"] else NO
 		"ill":
 			return {"mult": 1.0} if _sick(f) else NO          # once the doctor has seen them they rest for a couple of days
 		"checkup":

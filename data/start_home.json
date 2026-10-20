@@ -11,13 +11,14 @@
   "bonus_by_size": {"small": 1500, "medium": 2000, "classic": 2200, "large": 2500},
   "bonus_default": 2000,
   "basics": [
-    {"id": "bed", "defs": ["bed", "single_bed", "sofa_bed", "bunk_bed"], "per_folk": true, "text": "Buy a bed so your Folk can sleep properly: press B, open Bedroom, pick a bed and click a spot in the bedroom."},
-    {"id": "toilet", "defs": ["toilet"], "text": "Next, a toilet: press B, open Bathroom and place a Toilet in the bathroom."},
-    {"id": "fridge", "defs": ["fridge"], "text": "Now a fridge for food: press B, open Kitchen and place a Fridge. Then add a stove."},
-    {"id": "shower", "defs": ["shower", "bathtub"], "text": "A shower keeps everyone fresh: press B, open Bathroom and place a Shower."},
-    {"id": "stove", "defs": ["stove"], "text": "A stove lets your Folk cook: press B, open Kitchen and place a Stove."},
-    {"id": "seat", "defs": ["chair", "dining_chair", "sofa", "armchair", "bar_stool"], "per_folk": true, "text": "Everyone needs somewhere to sit: press B and add a chair or sofa."}
+    {"id": "bed", "buy": "sofa_bed", "room": "largest", "defs": ["bed", "single_bed", "sofa_bed", "bunk_bed"], "per_folk": true, "text": "Buy a bed so your Folk can sleep properly: press B, open Bedroom, pick a bed and click a spot in the bedroom."},
+    {"id": "toilet", "buy": "toilet", "room": "smallest", "defs": ["toilet"], "text": "Next, a toilet: press B, open Bathroom and place a Toilet in the bathroom."},
+    {"id": "fridge", "buy": "fridge", "room": "second", "defs": ["fridge"], "text": "Now a fridge for food: press B, open Kitchen and place a Fridge. Then add a stove."},
+    {"id": "shower", "buy": "shower", "room": "smallest", "defs": ["shower", "bathtub"], "text": "A shower keeps everyone fresh: press B, open Bathroom and place a Shower."},
+    {"id": "stove", "buy": "stove", "room": "second", "defs": ["stove"], "text": "A stove lets your Folk cook: press B, open Kitchen and place a Stove."},
+    {"id": "seat", "buy": "chair", "room": "largest", "defs": ["chair", "dining_chair", "sofa", "armchair", "bar_stool"], "per_folk": true, "text": "Everyone needs somewhere to sit: press B and add a chair or sofa."}
   ],
+  "auto_furnish": {"idle_days": 2, "min_bare": 0.4, "reserve": 100},
   "done_text": "That is the basics covered. Keep furnishing as your coins allow.",
   "empty_tips": [
     "This home is empty: your Folk will sleep on the floor and order in snacks until you furnish it. Press B to open Build / Buy.",

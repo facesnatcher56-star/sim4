@@ -71,6 +71,7 @@ static func chance(f, kid: String, d: Dictionary, price: int) -> float:
 		for t in (c.get("trait_all", {}) as Dictionary):
 			if f.has_trait(str(t)):
 				p *= float(c["trait_all"][t])
+		p *= HomeBare.boost(f, "out_gain")                  # a home with little in it sends people out (task 32f)
 	p *= float((d.get("stage_mult", {}) as Dictionary).get(stage, 1.0))
 	for t2 in (d.get("traits", {}) as Dictionary):
 		if f.has_trait(str(t2)):
@@ -143,7 +144,8 @@ static func hours_for(f, services: Array, d: Dictionary, day: int, free: Array, 
 # ------------------------------------------------------------------ making the plans
 static func trips_cap(f, day: int) -> int:
 	var t: Dictionary = PlaceAuto.cfg().get("trips_per_day", {})
-	return int(t.get("work", 1)) if PlaceAutoTime.works_today(f, day) else int(t.get("free", 2))
+	var base: int = int(t.get("work", 1)) if PlaceAutoTime.works_today(f, day) else int(t.get("free", 2))
+	return base + int(round(HomeBare.factor(f) * float(HomeBare.cfg().get("extra_trips", 0))))
 
 ## Everything this person might do today with its chance: [{kind, p, services, ctx, claim, essential}].
 static func rolled(f, day: int) -> Array:

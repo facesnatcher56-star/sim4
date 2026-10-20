@@ -76,6 +76,7 @@ static func systems_rows(sm: Object) -> Array:
 		["day/Careers.on_day", "Careers", 1440, 240, L, "day", Careers.on_day, null, "residents' jobs; townie careers by daily comparison"],
 		["day/WeatherWorld.on_day", "WeatherWorld", 1440, 250, L, "day", WeatherWorld.on_day_sched, null, "garden plots + the rain catch-up of far plants (sliced over the day)"],
 		["day/Economy.on_day", "Economy", 1440, 260, L, "day", Economy.on_day, null, "bills per household"],
+		["day/AutoFurnish.on_day", "AutoFurnish", 1440, 262, N, "day", AutoFurnish.on_day, null, "players' households only: buys the basics after 2 days with no player order and a bare home (a handful of comparisons, placement only when it fires)"],
 		["day/RelationshipService.on_day", "RelationshipService", 1440, 270, L, "day", RelationshipService.on_day_sched, null, "known pairs, 1/24 per hour (DaySlices); ACTIVE and STATISTICAL pairs alike (data only)"],
 		["day/Story.on_day", "Story", 1440, 280, L, "day", Story.on_day, null, "STATISTICAL townies: daily dice (TOWN townies too)"],
 		["day/Fire.on_day", "Fire", 1440, 290, N, "day", Fire.on_day, null, "burning / burnt lots only"],

@@ -117,6 +117,7 @@ old signal order. To add a system's hook: add ONE row to `systems_rows()` (name,
 | day | 240 | day/Careers.on_day | Careers | day | NORMAL | residents' jobs; townie careers by daily comparison |
 | day | 250 | day/WeatherWorld.on_day | WeatherWorld | day | NORMAL | garden plots + the rain catch-up of far plants (sliced over the day) |
 | day | 260 | day/Economy.on_day | Economy | day | NORMAL | bills per household |
+| day | 262 | day/AutoFurnish.on_day | AutoFurnish | day | NORMAL | players' households only: buys the basics after 2 days with no player order and a bare home (a handful of comparisons, placement only when it fires) |
 | day | 270 | day/RelationshipService.on_day | RelationshipService | day | NORMAL | known pairs, 1/24 per hour (DaySlices); ACTIVE and STATISTICAL pairs alike (data only) |
 | day | 280 | day/Story.on_day | Story | day | NORMAL | STATISTICAL townies: daily dice (TOWN townies too) |
 | day | 290 | day/Fire.on_day | Fire | day | NORMAL | burning / burnt lots only |

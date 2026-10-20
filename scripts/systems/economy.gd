@@ -24,6 +24,8 @@ static func reset() -> void:
 	repossessed.clear()
 	next_bill_day = 0
 	auto_pay = false
+	AutoFurnish.reset()
+	HomeBare.reset()
 	_seq = 1
 
 static func cfg() -> Dictionary:
@@ -212,11 +214,15 @@ static func buy_object(hid: int, def_id: String, tile: Vector2i, rot: int = 0) -
 	var id: int = int(w.place_object(def_id, tile, rot))
 	if id < 0:
 		return -1
+	claim_bought(hid, id, def_id, price)
+	return id
+
+## The books of a purchase whose object is already placed (buy_object, AutoFurnish after it checked the spot): pays, records the owner, tells the world.
+static func claim_bought(hid: int, id: int, def_id: String, price: int) -> void:
 	spend(hid, price, "bought " + def_id)
 	owner[id] = hid
 	placed_day[id] = SysUtil.day()
 	SysUtil.game_event("object_bought", {"object_id": id, "household_id": hid, "def_id": def_id})
-	return id
 
 ## Sell an object back at 50-80% depending on age. Returns the coins received (0 = refused).
 static func sell_object(hid: int, object_id: int) -> int:
@@ -394,7 +400,12 @@ static func to_dict() -> Dictionary:
 		"owner": SysUtil.str_keys(owner), "placed_day": SysUtil.str_keys(placed_day), "usage": SysUtil.str_keys(usage),
 		"repossessed": repossessed.duplicate(true), "next_bill_day": next_bill_day, "auto_pay": auto_pay, "seq": _seq,
 		"funds": SysUtil.str_keys(_funds_without_npcs()),
-	}
+	}.merged(_furnish_block())
+
+## The 'furnish' sub-block exists only once somebody has given an order or the household has furnished itself (older saves and fresh worlds are unchanged).
+static func _furnish_block() -> Dictionary:
+	var f: Dictionary = AutoFurnish.to_dict()
+	return {} if f.is_empty() else {"furnish": f}
 
 ## Household balances only: the pocket money of ambient NPCs (household -1) is not saved.
 static func _funds_without_npcs() -> Dictionary:
@@ -413,6 +424,7 @@ static func from_dict(d: Dictionary) -> void:
 	repossessed = (d.get("repossessed", []) as Array).duplicate(true)
 	next_bill_day = int(d.get("next_bill_day", 0))
 	auto_pay = bool(d.get("auto_pay", false))
+	AutoFurnish.from_dict(d.get("furnish", {}))
 	_seq = int(d.get("seq", 1))
 	if d.has("funds"):
 		WorldIface.coins.clear()

@@ -42,6 +42,7 @@ static func apply_key(key: String) -> void:
 		"master_vol", "music_vol", "sfx_vol", "mute": apply_audio()
 		"surprises": Incidents.set_level(GameSettings.get_str("surprises"))
 		"auto_pay": Economy.auto_pay = GameSettings.get_bool("auto_pay")
+		"auto_furnish": AutoFurnish.mode = GameSettings.get_str("auto_furnish")
 		"pick_for_me": SuccessionNobody.auto_pick = GameSettings.get_bool("pick_for_me")
 		"tooltip_delay": ProjectSettings.set_setting("gui/timers/tooltip_delay_sec", GameSettings.get_float("tooltip_delay"))
 

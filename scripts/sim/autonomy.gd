@@ -209,6 +209,7 @@ static func gather(folk, closed = null) -> Array:
 			out.append({"id": e[0], "target_id": oid, "kind": "object", "obj": o, "folk": null, "pk": e[1]})
 	var others: Array = WorldIface.folk_near(folk)
 	var partners: Variant = null      # committed partners, looked up once and only when a romantic interaction is considered (Straying)
+	var idle_slices: int = DynLife.IDLE_SLICES
 	var idle_ok: int = -1                    # task 32c: idle fillers are only looked at when the folk has nothing pressing (decided once), and a rotating twelfth of them per decision
 	for e in _folk_self_defs(defs):
 		var iid: String = e[0]
@@ -217,7 +218,8 @@ static func gather(folk, closed = null) -> Array:
 		if int(e[4]) >= 0:
 			if idle_ok < 0:
 				idle_ok = 1 if DynLife.idle_ok(folk) else 0
-			if idle_ok == 0 or (int(e[4]) + int(folk.id) + SimEnv.now_min() / 5) % DynLife.IDLE_SLICES != 0:
+				idle_slices = DynLife.idle_slices(folk)
+			if idle_ok == 0 or (int(e[4]) + int(folk.id) + SimEnv.now_min() / 5) % idle_slices != 0:
 				continue
 		var romantic: bool = not is_self and RomanceRules.is_romantic_def(d2)
 		if closed != null:
@@ -330,7 +332,7 @@ static func _profile(folk, iid: String, d: Dictionary, obj, cache: Dictionary, p
 	var c0: float = base * float(p["buff_mult"]) * float(p["trait_mult"]) * float(rt["mult"]) + float(p["like"])
 	if base > 0.0 or float(rt["bonus"]) > 0.0:
 		c0 += float(rt["bonus"])
-	var variety: float = AutonomyVariety.mult(folk, iid, d, obj) * StoryPacing.interaction_mult(folk, d, cache) * SkillInterest.mult(folk, iid, d, cache) * Homemaker.mult(folk, d)      # "bored of it" (data/autonomy_variety.json), skill taste (data/skill_interest.json)
+	var variety: float = AutonomyVariety.mult(folk, iid, d, obj) * StoryPacing.interaction_mult(folk, d, cache) * SkillInterest.mult(folk, iid, d, cache) * Homemaker.mult(folk, d) * HomeBare.autonomy_mult(folk, iid, d)      # "bored of it" (data/autonomy_variety.json), skill taste (data/skill_interest.json)
 	p["variety"] = variety
 	if c0 > 0.0:
 		c0 *= variety

@@ -82,7 +82,7 @@ static func _invites(ppl: Array, abs_hour: int, h: float, weekend: bool, p: Dict
 			continue
 		if now < int(f.cooldowns.get("dyn:invite", -1)):
 			continue
-		var prob: float = float(p.get("chance", 0.0)) * DynLife.trait_factor(f, p.get("traits", {})) * (float(p.get("weekend_mult", 1.0)) if weekend else 1.0)
+		var prob: float = float(p.get("chance", 0.0)) * HomeBare.boost(f, "invite_gain") * DynLife.trait_factor(f, p.get("traits", {})) * (float(p.get("weekend_mult", 1.0)) if weekend else 1.0)
 		if DynLife.dice(int(f.id), abs_hour, 105) >= prob:
 			continue
 		var guest = _pick_friend(f, float(p.get("min_friendship", 25)))

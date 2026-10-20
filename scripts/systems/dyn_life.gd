@@ -13,10 +13,15 @@ const IDLE_SLICES := 12            # a decision looks at one twelfth of the idle
 static func idle_ok(f) -> bool:
 	if off or not f.queue.is_empty():
 		return false
+	var limit: float = HomeBare.idle_urgency(f)          # a bare home cannot fix its needs: do not wait for them (task 32f)
 	for n in f.needs:
-		if Autonomy.urgency(f, str(n)) > 3.0:
+		if Autonomy.urgency(f, str(n)) > limit:
 			return false
 	return Circadian.in_phase(f, "day") and (WorldIface.stub != null or WorldIface.world() == null or NeighborhoodLots.lot_at(f.tile) == PlayerLots.home_of(f))
+
+## How many slices the idle fillers are dealt in (fewer = more of them looked at per decision); a bare home looks at more.
+static func idle_slices(f) -> int:
+	return IDLE_SLICES if not HomeBare.is_thin(f) else maxi(int(HomeBare.cfg().get("idle_slices", IDLE_SLICES)), 1)
 
 static func cfg() -> Dictionary:
 	return SysUtil.table("dynamic_life")
