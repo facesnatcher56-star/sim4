@@ -28,7 +28,25 @@
    "memory": {"value": -0.9, "text": "the freezing night {name} was lost"},
    "grave_style": "stone", "unexpected": true, "severity": 4
   },
-  "heatstroke": {
+   "flu": {
+   "label": "The flu",
+   "text": "{name} was too frail to shake off the flu and did not wake again.",
+   "legacy_text": "{They} could not get over a bad bout of flu.",
+   "grief": {"strength": 1.3, "days": 4},
+   "child_text": "{They} only had the flu. I don't understand.",
+   "memory": {"value": -0.8, "text": "the flu that took {name}"},
+   "grave_style": "stone", "unexpected": true, "severity": 3
+  },
+  "broken_heart": {
+   "label": "A broken heart",
+   "text": "{name} could not bear the loss of a life partner and passed away the same night, of a broken heart.",
+   "legacy_text": "{They} did not long outlive {their} partner.",
+   "grief": {"strength": 1.5, "days": 6},
+   "child_text": "{They} missed {their} partner so much.",
+   "memory": {"value": -0.8, "text": "the night {name} followed {their} partner"},
+   "grave_style": "stone", "unexpected": false, "severity": 3
+  },
+ "heatstroke": {
    "label": "Heatstroke",
    "text": "{name} was out in the burning heat for too long and could not be revived.",
    "legacy_text": "{They} was caught out in a scorching heatwave.",

@@ -56,6 +56,9 @@ static func on_minute() -> void:
 			if int(j["attempt_day"]) != day and is_work_day(str(j["career"]), day, str(j.get("shift", "day"))) \
 					and in_shift_window(h + _lead(f, h, f.work_start, f.work_end), f.work_start, f.work_end):
 				j["attempt_day"] = day
+				if _hired_after_start(f, j, h, day):
+					SysUtil.notify("%s starts at the %s tomorrow." % [f.name, str(Careers.career_def(str(j["career"])).get("label", "new job")).to_lower()], "career")
+					continue
 				_start_shift(f, j, h)
 		elif Careers.school.has(fid):
 			var sc: Dictionary = Careers.cfg().get("school", {})
@@ -64,6 +67,12 @@ static func on_minute() -> void:
 			if int(st["attempt_day"]) != day and is_school_day(day) and h + _lead(f, h, s0, float(sc.get("end", 15))) >= s0 and h < float(sc.get("end", 15)):
 				st["attempt_day"] = day
 				_start_school(f, st, h, sc)
+
+## First day on the job: hired after the day shift has already begun, so the first shift is tomorrow's (no late walk, no penalty).
+static func _hired_after_start(f, j: Dictionary, h: float, day: int) -> bool:
+	if int(j.get("hired_day", -1)) != day or int(j.get("days_worked", 0)) != 0 or f.work_end <= f.work_start or h < f.work_start - 6.0:
+		return false
+	return h + Commute.lead_hours(f) > f.work_start + Workplace.num("grace_min", 5.0) / 60.0
 
 ## Hours before the start at which a folk has to leave home so that the walk to the workplace gets there on time (0 without a map).
 static func _lead(f, h: float, start: float, end: float) -> float:

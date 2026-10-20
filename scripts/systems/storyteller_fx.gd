@@ -92,6 +92,8 @@ static func _one(e: Dictionary, ctx: Dictionary) -> void:
 				var f = SysUtil.folk(fid)
 				if f != null and not Careers.offers.has(fid):
 					Careers.make_offer(f)
+			"tempt":
+				Straying.tempt(fid)
 			"jealous_if_partnered":
 				_jealous(hid, fid)
 			"mood_city":

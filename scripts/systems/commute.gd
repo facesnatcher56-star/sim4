@@ -41,7 +41,7 @@ static func lead_hours(f) -> float:
 	if lot == "":
 		return 0.0
 	var m: float = Workplace.trip_minutes(f, NeighborhoodLots.entry_tile(lot))
-	return 0.0 if m < 0.0 else (m + Workplace.num("buffer_min", 10.0)) / 60.0
+	return 0.0 if m < 0.0 else (m * Workplace.num("lead_mult", 1.15) + Workplace.num("buffer_min", 10.0)) / 60.0
 
 static func begin(f, kind: String, ctx: Dictionary) -> bool:
 	var lot: String = Workplace.lot_of_folk(f)
@@ -55,7 +55,7 @@ static func begin(f, kind: String, ctx: Dictionary) -> bool:
 	var now: int = SysUtil.now()
 	var t: Dictionary = {"kind": kind, "lot": lot, "state": "out", "due_min": int(ctx["due_min"]), "end_min": int(ctx["end_min"]), "left_min": now,
 		"arrive_min": -1, "career": str(ctx.get("career", "")), "title": str(ctx.get("title", "")), "shift": str(ctx.get("shift", "day")),
-		"level": int(ctx.get("level", 1)), "shift_end": float(ctx.get("shift_end", 0.0))}
+		"level": int(ctx.get("level", 1)), "shift_end": float(ctx.get("shift_end", 0.0)), "plan_min": plan}
 	trips[fid] = t
 	f.set_meta(NeighborhoodLots.IN_LOT, NeighborhoodLots.lot_at(f.tile))
 	_walk(f, dest, now + plan + Workplace.traffic_delay(f, dest) > int(t["due_min"]) + Workplace.num("grace_min", 5.0))
@@ -129,7 +129,8 @@ static func _step_out(f, t: Dictionary, now: int) -> void:
 	if CareerShifts.player_busy(f) and SkipRules.chooses_to_skip(f, str(t["kind"])):
 		miss(f, t, "chose to skip %s on the way" % ("work" if str(t["kind"]) == "work" else "school"))
 		return
-	if now > int(t["due_min"]) + int(Workplace.num("miss_after_min", 90.0)) or now >= int(t["end_min"]) - 20:
+	var allowed: float = maxf(Workplace.num("miss_after_min", 90.0), float(t.get("plan_min", 0.0)) * Workplace.num("miss_plan_mult", 2.0))      # a long walk may take long: give up only when well past the planned trip
+	if now > int(t["due_min"]) + int(allowed) or now >= int(t["end_min"]) - 20:
 		miss(f, t, "never made it to %s" % ("work" if str(t["kind"]) == "work" else "school"))
 		return
 	if not walking(f):
@@ -273,6 +274,7 @@ static func from_dict(d: Dictionary) -> void:
 		var t: Dictionary = (d["trips"][k] as Dictionary).duplicate(true)
 		for key in ["due_min", "end_min", "left_min", "arrive_min", "level"]:
 			t[key] = int(t.get(key, 0))
+		t["plan_min"] = float(t.get("plan_min", 0.0))
 		t["shift_end"] = float(t.get("shift_end", 0.0))
 		trips[int(str(k))] = t
 	for k2 in d.get("lates", {}):

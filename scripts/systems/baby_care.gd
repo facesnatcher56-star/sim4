@@ -98,12 +98,15 @@ static func _sleeping(f) -> bool:
 static func wanted_care(baby) -> Array:
 	var kc: Dictionary = cfg().get("kid_care", {})
 	var kid: bool = _is_kid(baby)
-	var below: Dictionary = kc.get("below", {}) if kid else cfg().get("care_below", {})
+	var teen: bool = str(baby.age_stage) == "teen"          # a teen feeds themselves; an adult at home steps in only when it has gone too far
+	var below: Dictionary = (kc.get("teen_below", {}) if teen else kc.get("below", {})) if kid else cfg().get("care_below", {})
 	var out: Array = []
 	var map: Dictionary = {"hunger": "feed_baby", "bladder": "change_diaper", "hygiene": "change_diaper", "energy": "rock_to_sleep",
 		"fun": "play_with_baby", "social": "hold_baby"}
 	for n in map:
 		if kid and str(baby.age_stage) == "child" and not (kc.get("child_needs", []) as Array).has(n):
+			continue
+		if teen and not (kc.get("teen_needs", []) as Array).has(n):
 			continue
 		if kid and n == "energy" and _sleeping(baby):
 			continue

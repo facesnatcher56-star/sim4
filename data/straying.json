@@ -1,0 +1,11 @@
+{
+  "window_days": 3,
+  "base": 0.004,
+  "max": 0.5,
+  "trait_mult": {"romantic": 3.0, "charmer": 3.0, "honest": 0.5, "jealous": 0.6, "loner": 0.6, "shy": 0.5},
+  "bond_mult": {"spouse": 1.0, "partner": 1.5, "sweetheart": 2.5, "dating": 4.0},
+  "marriage": {"romance_low": 30, "romance_mid": 60, "low_mult": 8.0, "mid_mult": 2.0},
+  "crush": {"romance_above": 40, "mult": 3.0},
+  "tempted_buff": "tempted",
+  "jealous_scene_gap_days": 2
+}

@@ -261,6 +261,7 @@ static func children_of(folk_id: int) -> Array:
 static func _check_deaths() -> void:
 	var dc: Dictionary = cfg().get("death", {})
 	var start: float = float(dc.get("start_day", 170))
+	var widowed_tonight: Array = []        # partners of the people who died in this pass
 	for fid in records.keys():
 		var f = SysUtil.folk(int(fid))
 		if f == null or not SysUtil.is_resident(f):
@@ -270,7 +271,17 @@ static func _check_deaths() -> void:
 			continue
 		var p: float = (float(dc.get("chance_per_day", 0.03)) + float(dc.get("ramp_per_day", 0.004)) * (days - start)) * HealthLife.death_mult(int(fid))      # task 14: long-term conditions
 		if days >= float(dc.get("max_day", 230)) or SysUtil.chance(p):
-			kill(int(fid), "old age")
+			var cause: String = "old age"
+			if widowed_tonight.has(int(fid)):
+				# a couple rarely goes on the very same night: the other one carries on a while, and now and then dies of a broken heart
+				if SysUtil.chance(float(dc.get("broken_heart_chance", 0.1))):
+					cause = "broken_heart"
+				elif SysUtil.chance(float(dc.get("same_night_delay", 0.9))):
+					continue
+			var mate: int = int(FamilyTree.partner_of(int(fid)).get("id", -1))
+			kill(int(fid), cause)
+			if mate >= 0:
+				widowed_tonight.append(mate)
 
 ## Remove a folk from the world, with grief, inheritance, a grave and a legacy record. Returns the legacy summary.
 ## `cause` is a death-cause id of data/death_causes.json (or "old age"); every path that kills someone goes through here.
