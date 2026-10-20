@@ -209,10 +209,16 @@ static func gather(folk, closed = null) -> Array:
 			out.append({"id": e[0], "target_id": oid, "kind": "object", "obj": o, "folk": null, "pk": e[1]})
 	var others: Array = WorldIface.folk_near(folk)
 	var partners: Variant = null      # committed partners, looked up once and only when a romantic interaction is considered (Straying)
+	var idle_ok: int = -1                    # task 32c: idle fillers are only looked at when the folk has nothing pressing (decided once), and a rotating twelfth of them per decision
 	for e in _folk_self_defs(defs):
 		var iid: String = e[0]
 		var d2: Dictionary = e[1]
 		var is_self: bool = e[2]
+		if int(e[4]) >= 0:
+			if idle_ok < 0:
+				idle_ok = 1 if DynLife.idle_ok(folk) else 0
+			if idle_ok == 0 or (int(e[4]) + int(folk.id) + SimEnv.now_min() / 5) % DynLife.IDLE_SLICES != 0:
+				continue
 		var romantic: bool = not is_self and RomanceRules.is_romantic_def(d2)
 		if closed != null:
 			var why2: String = _closed_reason(folk, iid, d2, "", cache)
@@ -232,7 +238,7 @@ static func gather(folk, closed = null) -> Array:
 
 static var _fs_src: Dictionary = {}
 static var _fs_n: int = -1
-static var _fs_list: Array = []        # [iid, def, is_self, "iid|"] of every autonomous interaction aimed at a person / at the actor
+static var _fs_list: Array = []        # [iid, def, is_self, "iid|", idle slot or -1] of every autonomous interaction aimed at a person / at the actor
 
 ## The autonomous folk / self interactions, in table order (static data: rebuilt when the table or one of its entries is replaced).
 static func _folk_self_defs(defs: Dictionary) -> Array:
@@ -245,13 +251,16 @@ static func _folk_self_defs(defs: Dictionary) -> Array:
 	if ok:
 		return _fs_list
 	var out: Array = []
+	var n_idle := 0
 	for iid in defs:
 		var d2: Dictionary = defs[iid]
 		if not bool(d2.get("autonomous", true)):
 			continue
 		var tk: String = str(d2.get("target", "object"))
 		if tk == "folk" or tk == "self":
-			out.append([str(iid), d2, tk == "self", str(iid) + "|"])
+			out.append([str(iid), d2, tk == "self", str(iid) + "|", n_idle if bool(d2.get("idle_gate", false)) else -1])
+			if bool(d2.get("idle_gate", false)):
+				n_idle += 1
 	_fs_src = defs
 	_fs_n = defs.size()
 	_fs_list = out

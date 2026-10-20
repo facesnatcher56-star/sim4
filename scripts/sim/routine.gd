@@ -22,8 +22,10 @@ extends RefCounted
 static func active_routines(folk) -> Array:
 	var out: Array = []
 	var routines: Dictionary = SimEnv.data().routines()
+	var wk: bool = posmod(int(SimEnv.clock().day()) - 1, 7) >= 5
+	var h: float = SimEnv.hour_f()
 	for rid in routines:
-		if _active(folk, routines[rid]):
+		if _active(folk, routines[rid], wk, h):
 			out.append([rid, routines[rid]])
 	return out
 
@@ -60,7 +62,7 @@ static func mark_done(folk, def_id: String) -> void:
 	var routines: Dictionary = SimEnv.data().routines()
 	for rid in routines:
 		var r: Dictionary = routines[rid]
-		if bool(r.get("once", false)) and _active(folk, r):
+		if bool(r.get("once", false)) and _active(folk, r, posmod(int(SimEnv.clock().day()) - 1, 7) >= 5):
 			folk.routine_log[_log_key(str(rid), def_id)] = true
 	if folk.routine_log.size() > 200:
 		folk.routine_log.clear()
@@ -68,7 +70,7 @@ static func mark_done(folk, def_id: String) -> void:
 static func _log_key(rid: String, def_id: String) -> String:
 	return "%s:%d:%s" % [rid, int(SimEnv.clock().day()), def_id]
 
-static func _active(folk, r: Dictionary) -> bool:
+static func _active(folk, r: Dictionary, wk: bool = false, h: float = -1.0) -> bool:
 	for req in r.get("requires", []):
 		match str(req):
 			"has_job":
@@ -77,9 +79,7 @@ static func _active(folk, r: Dictionary) -> bool:
 			"no_job":
 				if folk.has_job():
 					return false
-	if r.has("circadian") and not Circadian.in_phase(folk, str(r["circadian"])):
-		return false
-	if r.has("weekend") and bool(r["weekend"]) != (posmod(int(SimEnv.clock().day()) - 1, 7) >= 5):
+	if r.has("weekend") and bool(r["weekend"]) != wk:
 		return false
 	if r.has("stages") and not (r["stages"] as Array).has(str(folk.age_stage)):
 		return false
@@ -93,7 +93,10 @@ static func _active(folk, r: Dictionary) -> bool:
 				break
 		if not any_t:
 			return false
-	var h: float = SimEnv.hour_f()
+	if r.has("circadian") and not Circadian.in_phase(folk, str(r["circadian"])):
+		return false
+	if h < 0.0:
+		h = SimEnv.hour_f()
 	if r.has("before_work_hours"):
 		if not folk.has_job():
 			return false

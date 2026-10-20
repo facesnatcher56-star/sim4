@@ -7,6 +7,17 @@ extends RefCounted
 ## the dice are stateless (master seed + folk + hour + plan), so nothing here is saved and a loaded game rolls the same dice.
 static var off: bool = false          # tests / debugging: switch the whole thing off
 
+const IDLE_SLICES := 12            # a decision looks at one twelfth of the idle fillers, rotating every 5 minutes (cheap, and more variety)
+
+## May the folk be given an idle filler now? Nothing pressing (no need above urgency 3), nothing queued, on the home lot, in the day phase.
+static func idle_ok(f) -> bool:
+	if off or not f.queue.is_empty():
+		return false
+	for n in f.needs:
+		if Autonomy.urgency(f, str(n)) > 3.0:
+			return false
+	return Circadian.in_phase(f, "day") and (WorldIface.stub != null or WorldIface.world() == null or NeighborhoodLots.lot_at(f.tile) == PlayerLots.home_of(f))
+
 static func cfg() -> Dictionary:
 	return SysUtil.table("dynamic_life")
 

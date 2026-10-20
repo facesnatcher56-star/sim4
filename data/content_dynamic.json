@@ -36,7 +36,8 @@
     "idle_life": 0.9
    },
    "thought": "",
-   "cooldown_min": 40
+   "cooldown_min": 40,
+   "idle_gate": true
   },
   "look_around": {
    "label": "Look Around",
@@ -72,7 +73,8 @@
     "idle_life": 0.6
    },
    "thought": "",
-   "cooldown_min": 30
+   "cooldown_min": 30,
+   "idle_gate": true
   },
   "check_phone": {
    "label": "Check the Phone",
@@ -108,7 +110,8 @@
     "idle_life": 0.9
    },
    "thought": "",
-   "cooldown_min": 45
+   "cooldown_min": 45,
+   "idle_gate": true
   },
   "hum_tune": {
    "label": "Hum a Tune",
@@ -144,7 +147,8 @@
     "idle_life": 0.8
    },
    "thought": "",
-   "cooldown_min": 50
+   "cooldown_min": 50,
+   "idle_gate": true
   },
   "tidy_up": {
    "label": "Tidy Up a Little",
@@ -181,7 +185,8 @@
     "tidy": 0.6
    },
    "thought": "",
-   "cooldown_min": 60
+   "cooldown_min": 60,
+   "idle_gate": true
   },
   "gaze_out_window": {
    "label": "Gaze Out the Window",
@@ -217,7 +222,8 @@
     "idle_life": 0.7
    },
    "thought": "",
-   "cooldown_min": 50
+   "cooldown_min": 50,
+   "idle_gate": true
   },
   "fidget_and_think": {
    "label": "Pace and Think",
@@ -253,7 +259,8 @@
     "idle_life": 0.6
    },
    "thought": "",
-   "cooldown_min": 60
+   "cooldown_min": 60,
+   "idle_gate": true
   },
   "sip_water": {
    "label": "Get a Sip of Water",
@@ -289,7 +296,8 @@
     "idle_life": 0.5
    },
    "thought": "",
-   "cooldown_min": 70
+   "cooldown_min": 70,
+   "idle_gate": true
   },
   "look_out_window": {
    "label": "Look Out the Window",
@@ -603,7 +611,8 @@
     "idle_life": 0.6
    },
    "thought": "",
-   "cooldown_min": 60
+   "cooldown_min": 60,
+   "idle_gate": true
   },
   "doodle": {
    "label": "Doodle on a Notepad",
@@ -640,7 +649,8 @@
     "creative": 0.4
    },
    "thought": "",
-   "cooldown_min": 70
+   "cooldown_min": 70,
+   "idle_gate": true
   },
   "flick_magazine": {
    "label": "Flick Through a Magazine",
@@ -676,7 +686,8 @@
     "idle_life": 0.6
    },
    "thought": "",
-   "cooldown_min": 80
+   "cooldown_min": 80,
+   "idle_gate": true
   },
   "do_a_puzzle": {
    "label": "Do a Little Puzzle",
@@ -712,7 +723,8 @@
     "idle_life": 0.5
    },
    "thought": "",
-   "cooldown_min": 90
+   "cooldown_min": 90,
+   "idle_gate": true
   },
   "rearrange_shelf": {
    "label": "Straighten Things Up",
@@ -748,7 +760,8 @@
     "idle_life": 0.5
    },
    "thought": "",
-   "cooldown_min": 80
+   "cooldown_min": 80,
+   "idle_gate": true
   },
   "shake_a_leg": {
    "label": "Shake a Leg",
@@ -784,7 +797,8 @@
     "idle_life": 0.4
    },
    "thought": "",
-   "cooldown_min": 70
+   "cooldown_min": 70,
+   "idle_gate": true
   },
   "ponder_the_day": {
    "label": "Ponder the Day",
@@ -820,7 +834,8 @@
     "idle_life": 0.5
    },
    "thought": "",
-   "cooldown_min": 90
+   "cooldown_min": 90,
+   "idle_gate": true
   },
   "plan_tomorrow": {
    "label": "Make Plans for Tomorrow",
@@ -856,7 +871,8 @@
     "idle_life": 0.5
    },
    "thought": "",
-   "cooldown_min": 90
+   "cooldown_min": 90,
+   "idle_gate": true
   },
   "flip_recipes": {
    "label": "Flip Through Recipes",
@@ -892,7 +908,8 @@
     "idle_life": 0.5
    },
    "thought": "",
-   "cooldown_min": 90
+   "cooldown_min": 90,
+   "idle_gate": true
   },
   "look_through_photos": {
    "label": "Look Through Old Photos",
@@ -929,7 +946,8 @@
     "idle_life": 0.5
    },
    "thought": "",
-   "cooldown_min": 90
+   "cooldown_min": 90,
+   "idle_gate": true
   },
   "sing_softly": {
    "label": "Sing Softly",
@@ -965,7 +983,8 @@
     "idle_life": 0.5
    },
    "thought": "",
-   "cooldown_min": 80
+   "cooldown_min": 80,
+   "idle_gate": true
   },
   "crossword": {
    "label": "Do a Crossword",
@@ -1001,7 +1020,8 @@
     "idle_life": 0.5
    },
    "thought": "",
-   "cooldown_min": 100
+   "cooldown_min": 100,
+   "idle_gate": true
   },
   "fold_the_washing": {
    "label": "Fold Some Washing",
@@ -1037,7 +1057,8 @@
     "idle_life": 0.5
    },
    "thought": "",
-   "cooldown_min": 90
+   "cooldown_min": 90,
+   "idle_gate": true
   },
   "polish_up": {
    "label": "Polish Something Up",
@@ -1073,7 +1094,8 @@
     "idle_life": 0.5
    },
    "thought": "",
-   "cooldown_min": 90
+   "cooldown_min": 90,
+   "idle_gate": true
   },
   "write_a_postcard": {
    "label": "Write a Postcard",
@@ -1109,7 +1131,8 @@
     "idle_life": 0.5
    },
    "thought": "",
-   "cooldown_min": 100
+   "cooldown_min": 100,
+   "idle_gate": true
   }
  },
  "buffs": {
