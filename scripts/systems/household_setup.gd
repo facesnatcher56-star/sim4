@@ -204,6 +204,48 @@ static func apply(h: Dictionary, folk: Array) -> void:
 			Family.link_parent(int(folk[i].id), int(folk[0].id))
 			if mate >= 0:
 				Family.link_parent(int(folk[i].id), int(folk[mate].id))
+	_start_bonds(specs, folk, mate)
+
+## Starting household members already know each other (task 32e): partners/spouses high friendship and romance, parent/child high,
+## siblings medium, unrelated housemates acquaintance-level. Goes through RelationshipService, so RomanceRules.allowed still decides romance.
+const BOND_PARTNER := 75.0
+const BOND_PARENT := 70.0
+const BOND_SIBLING := 60.0
+const BOND_HOUSEMATE := 20.0
+
+static func pair_level(specs: Array, i: int, j: int, mate: int) -> Dictionary:
+	var ri: String = str(specs[i].get("rel", "none")) if i > 0 else "first"
+	var rj: String = str(specs[j].get("rel", "none")) if j > 0 else "first"
+	if i == 0 or j == 0:
+		var r: String = rj if i == 0 else ri
+		match r:
+			"partner", "spouse":
+				return {"friendship": BOND_PARTNER, "romance": 65.0}
+			"child", "parent":
+				return {"friendship": BOND_PARENT}
+			"sibling":
+				return {"friendship": BOND_SIBLING}
+		return {"friendship": BOND_HOUSEMATE}
+	# two non-first members
+	if mate >= 0 and (i == mate or j == mate):
+		var other: int = j if i == mate else i
+		if str(specs[other].get("rel", "")) == "child":
+			return {"friendship": BOND_PARENT}
+	if ri == "child" and rj == "child":
+		return {"friendship": BOND_SIBLING}
+	if ri == "sibling" and rj == "sibling":
+		return {"friendship": BOND_SIBLING}
+	return {"friendship": BOND_HOUSEMATE}
+
+static func _start_bonds(specs: Array, folk: Array, mate: int) -> void:
+	for i in folk.size():
+		for j in range(i + 1, folk.size()):
+			var lv: Dictionary = pair_level(specs, i, j, mate)
+			var a: int = int(folk[i].id)
+			var b: int = int(folk[j].id)
+			for dir in [[a, b], [b, a]]:
+				for track in lv:
+					RelationshipService.set_value(dir[0], dir[1], str(track), float(lv[track]))
 
 static func _bond(a: int, b: int) -> void:
 	for dir in [[a, b], [b, a]]:
