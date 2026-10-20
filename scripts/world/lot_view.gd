@@ -242,7 +242,7 @@ func _add_object_node(o) -> void:
 		node.rotation.y = 0.0
 		node.add_child(props)
 	else:
-		node.add_child(make_def_visual(o.def_id))
+		node.add_child(make_def_visual(o.def_id, o.id))
 	node.visible = not _shell_hides(o.tile)
 	_obj_root.add_child(node)
 	_obj_nodes[o.id] = node

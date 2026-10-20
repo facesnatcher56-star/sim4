@@ -350,7 +350,7 @@ func _sync_objects(l: int, n: Dictionary) -> void:
 			node = props
 			node.position = Vector3(c.x, y, c.y)
 		elif full and o.level == l:
-			node = lot.call("make_def_visual", o.def_id)
+			node = lot.call("make_def_visual", o.def_id, o.id)
 			node.position = Vector3(c.x, y + (0.005 if o.is_floor_layer() else 0.0), c.y)
 			node.rotation.y = lot.call("_yaw_for_rot", o.rot)
 		if node != null:
