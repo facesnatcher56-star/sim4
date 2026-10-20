@@ -161,12 +161,10 @@ func _neighbourhood(f: Array) -> void:
 	PlaceNews.on_day(day_bp + 1)
 	K.expect(f, not ChronicleHook.recent.any(func(p): return str(p["text"]).find("block party") >= 0), "and not on others")
 	# the parade needs a holiday
-	var hday := -1
-	for d in range(1, 120):
-		if not Holidays.today(d).is_empty():
-			hday = d
-			break
-	K.expect(f, hday > 0, "the calendar has a holiday (day %d)" % hday)
+	var hday: int = Holidays.holiday_day("midsummer", 1)
+	K.expect(f, hday > 0 and str(Holidays.today(hday).get("id", "")) == "midsummer", "the calendar has Midsummer (day %d)" % hday)
+	K.set_time(Holidays.holiday_day("spring_bloom", 1), 12)
+	K.expect(f, not Places.open_at("holiday_parade"), "no parade at the other festivals: it is a once-a-year thing")
 	K.set_time(hday, 12)
 	K.expect(f, Places.open_at("holiday_parade") and bool(PlaceUse.use(1, "holiday_parade", "watch_parade", {"instant": true})["ok"]), "on a holiday the parade goes by and anybody can watch")
 	var plain := -1

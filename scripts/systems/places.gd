@@ -57,19 +57,24 @@ static func _day_ok(days: Array, wd: int) -> bool:
 	return days.is_empty() or SysUtil.has_int(days, wd)
 
 static var _hol_day: int = -1
-static var _hol_on: bool = false
+static var _hol_id: String = ""
 
-static func _holiday_on(day: int) -> bool:
+## The holiday id on this day ("" = none).
+static func _holiday_on(day: int) -> String:
 	if day != _hol_day:
 		_hol_day = day
-		_hol_on = not Holidays.today(day).is_empty()
-	return _hol_on
+		_hol_id = str(Holidays.today(day).get("id", ""))
+	return _hol_id
 
 ## Does this schedule row apply on game day `day`? Weekdays (`days`), days of the year (`doy`, the block party) and holidays (`holiday`, the parade).
 static func _row_day_ok(row: Dictionary, day: int) -> bool:
 	if row.has("doy") and not SysUtil.has_int(row["doy"], Aging.doy(day)):
 		return false
-	if bool(row.get("holiday", false)) and not _holiday_on(day):
+	var hol: Variant = row.get("holiday", false)
+	if hol is String or hol is Array:
+		if _holiday_on(day) == "" or (hol is String and _holiday_on(day) != hol) or (hol is Array and not (hol as Array).has(_holiday_on(day))):
+			return false         # a named holiday (or a few): the parade is once a year, not at every festival
+	elif bool(hol) and _holiday_on(day) == "":
 		return false
 	return _day_ok(row.get("days", []), SysUtil.weekday(day))
 
@@ -97,17 +102,6 @@ static func open_at(pid: String, at_min: int = -1) -> bool:
 ## Open for business: inside the hours, staffed, and not shut by something else (a holiday, a closure).
 static func is_open(pid: String, at_min: int = -1) -> bool:
 	return open_at(pid, at_min) and PlaceStaff.staffed(pid) and not PlaceStaff.closed_today(pid)
-
-## Open for business through the whole stretch [start, start + span) minutes (a service that would be cut by closing time).
-static func is_open_for(pid: String, start_min: int, span: int) -> bool:
-	if not is_open(pid, start_min):
-		return false
-	var step := 0
-	while step < span:
-		if not open_at(pid, start_min + step):
-			return false
-		step += 15
-	return span <= 0 or open_at(pid, start_min + span - 1)
 
 ## "Open until 18:00" / "Opens 17:00" / "Closed today" / "Short of staff" for the UI.
 static func status_text(pid: String) -> String:
