@@ -43,6 +43,10 @@ func _process(_d: float) -> bool:
 		for e in iq.self_entries(f3):
 			print("SELF %s | %s | enabled=%s | %s" % [e["id"], e["label"], str(e["enabled"]), e["reason"]])
 		quit(0)
+	if _frames == 60 and _scn == "jobs":
+		var hud5 = _main.hud
+		hud5.life_hub.tab = "jobs"
+		hud5.life_hub.show_for(hud5.selected_folk_id)
 	if _frames == 60 and _scn == "homes":
 		var hud2 = _main.hud
 		hud2.money_hub.tab = "homes"

@@ -56,23 +56,19 @@ static func offer_card(dlg: UIDialog, fid: int) -> void:
 	if o.is_empty():
 		return
 	var ld: Dictionary = Careers.level_def(str(o["career"]), int(o["level"]))
+	var cdef: Dictionary = Careers.career_def(str(o["career"]))
 	dlg.heading("Job offer")
-	dlg.line("%s (%s)" % [str(ld.get("title", "?")), str(Careers.career_def(str(o["career"])).get("label", ""))], 18)
-	dlg.line("%d coins/hour, %s to %s. The offer ends on day %d." % [int(ld.get("pay", 0)), hours_text(float(ld.get("start", 0))), hours_text(float(ld.get("end", 0))), int(o.get("expires_day", 0))], 13, UITheme.MUTED)
-	var row := HBoxContainer.new()
-	dlg.body.add_child(row)
-	var ok := Button.new()
-	ok.text = "Accept"
-	ok.pressed.connect(func():
+	var inner: VBoxContainer = UICard.card(dlg.body, dlg.dialog_width - 50.0, "%s  (%s)" % [str(ld.get("title", "?")), str(cdef.get("label", ""))], "OFFER", str(cdef.get("description", "")))
+	UICard.chips(inner, [["Pay", "%d/h" % int(ld.get("pay", 0))], ["Hours", "%s-%s" % [hours_text(float(ld.get("start", 0))), hours_text(float(ld.get("end", 0)))]], ["Ends", "day %d" % int(o.get("expires_day", 0))]])
+	UICard.action(inner, "Accept", func():
 		Commands.run({"folk_id": fid, "action": "career_accept"})
 		dlg.refresh())
-	row.add_child(ok)
 	var no := Button.new()
 	no.text = "Decline"
 	no.pressed.connect(func():
 		Commands.run({"folk_id": fid, "action": "career_decline"})
 		dlg.refresh())
-	row.add_child(no)
+	inner.add_child(no)
 
 func _job(info: Dictionary) -> void:
 	line("%s, %s" % [str(info["title"]), str(info["career_label"])], 18)
