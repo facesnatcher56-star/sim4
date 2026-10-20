@@ -30,6 +30,8 @@ static func start(mgr: SystemsManager, h0: Dictionary, start_id: String, opts: D
 	if spawns.is_empty():
 		spawns = SPAWN_FALLBACK
 	var folk: Array = HouseholdSetup.create_folk(h)
+	if not (h0.get("folk", []) as Array).is_empty() and not (h.get("folk", []) as Array).is_empty():
+		h0["folk"][0]["color"] = h["folk"][0].get("color", Color.WHITE)          # the caller (main.gd) reads the colour of the face it was handed
 	var tiles: Array = HouseholdSetup.spawn_tiles(folk.size(), spawns)
 	for i in folk.size():
 		folk[i].household_id = 1

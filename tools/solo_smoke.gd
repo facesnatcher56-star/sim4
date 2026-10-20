@@ -19,6 +19,11 @@ func _process(_d: float) -> bool:
 	if verbose:
 		SimEnv.events().notification.connect(func(text, kind): print("  [d%d %02d:00 %s] %s" % [Kit.clock().day(), Kit.clock().hour(), kind, text]))
 	print("SMOKE start: folk=%d pawn=%s coins=%d rung=%s homeless=%s day=%d hour=%d" % [folk.size(), str(Pawn.is_pawn(f)), Economy.balance(f.household_id), SoloHome.rung, str(SoloHome.homeless), Kit.clock().day(), Kit.clock().hour()])
+	if "--rough" in OS.get_cmdline_user_args():
+		_rough(f, Kit)
+		Kit.teardown()
+		quit(0)
+		return true
 	if "--ladder" in OS.get_cmdline_user_args():
 		_ladder(f, Kit)
 		Kit.teardown()
@@ -55,3 +60,18 @@ func _ladder(f: Folk, Kit) -> void:
 	print("SMOKE sleep_rough order -> %s current=%s" % [str(sr), str(f.current.def_id) if f.current != null else "-"])
 	Kit.run(60 * 24)
 	print("SMOKE end ladder: alive=%s coins=%d day=%d rough_nights=%d" % [str(SysUtil.folk(f.id) != null), Economy.balance(f.household_id), Kit.clock().day(), SoloHome.rough_nights])
+
+## Targeted check of the Kiln Quarter: move to the bedsit, run broke, answer the crew offers "yes", force a drive-by, play a week.
+func _rough(f: Folk, Kit) -> void:
+	Economy.deposit(f.household_id, 300, "smoke money")
+	var r: Dictionary = Commands.run({"player_id": 1, "folk_id": f.id, "action": "solo", "args": {"action": "move", "rung": "bedsit"}})
+	print("SMOKE move bedsit -> %s district=%s roughness=%.2f" % [str(r.get("ok")), SoloDistricts.district_of("home"), SoloDistricts.roughness_of("kiln")])
+	Economy.spend(f.household_id, maxi(Economy.balance(f.household_id) - 40, 0), "smoke spend")
+	JusticePlayer.auto = "yes"
+	for d in 8:
+		if d == 3:
+			SoloCrews.due_abs = (Kit.clock().day() - 1) * 24 + Kit.clock().hour() + 2
+			SoloCrews.district_id = "kiln"
+			print("SMOKE forcing a drive-by at abs hour %d" % SoloCrews.due_abs)
+		Kit.run(60 * 24)
+		print("SMOKE day %d: coins=%d member=%s heat=%.0f refusals=%d records=%d burglary_mult=%.1f robbery_mult=%.1f" % [Kit.clock().day(), Economy.balance(f.household_id), str(SoloPressure.member), SoloPressure.heat, SoloPressure.refusals, (JusticeState.records.get(f.id, []) as Array).size(), SoloDistricts.mult("home", "burglary"), SoloDistricts.mult("home", "robbery")])

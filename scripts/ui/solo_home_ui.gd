@@ -12,6 +12,9 @@ static func build(dlg: BankHub) -> void:
 	var owed: int = Economy.owed(dlg.hid())
 	if owed > 0:
 		dlg.line("You owe %d coins in unpaid bills. They block a new tenancy until paid." % owed, 13, UITheme.MUTED)
+	if SoloPressure.member:
+		dlg.row_with("You run errands for %s (standing %d, heat %d). Dues %d a day." % [SoloPressure.crew_name, int(SoloPressure.standing), int(SoloPressure.heat), int(SoloCfg.sect("pressure").get("dues_per_day", 3))], [
+			dlg.button("Leave the crew", "Costs a payoff of %d coins; if you cannot pay they may beat you." % int(SoloCfg.sect("pressure").get("leave_payoff", 150)), func(): _act(dlg, "leave_crew", {}))])
 	dlg.heading("Places to live")
 	for r in SoloCfg.ladder():
 		_rung(dlg, r)

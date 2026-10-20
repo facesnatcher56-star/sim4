@@ -66,6 +66,7 @@ static func systems_rows(sm: Object) -> Array:
 		["hour/DisasterClock.on_hour", "DisasterClock", 60, 300, N, "hour", DisasterClock.on_hour, null, "running disasters only"],
 		["hour/Vacation.on_hour", "Vacation", 60, 310, N, "", Vacation.on_hour, Callable(Vacation, "busy"), "active trips only"],
 		["hour/PlaceAuto.on_hour", "PlaceAuto", 60, 312, N, "hour", PlaceAuto.on_hour, null, "residents ACTIVE: who is ill, which pets need care (O(residents + pets), a few comparisons each)"],
+		["hour/SoloCrews.on_hour", "SoloCrews", 60, 314, N, "hour", SoloCrews.on_hour, null, "one-character play: the planned drive-by of a rough district (one comparison an hour)"],
 		["hour/DynLife.on_hour", "DynLife", 60, 313, N, "hour", DynLife.on_hour, null, "residents ACTIVE / NEAR: stateless dice for small plans, household dinners / game nights / playtime, friends over (O(residents), a few comparisons each); far residents get a stat nudge"],
 		# --- day layer (was SystemsManager._on_day)
 		["day/ensure_registered", "SystemsManager", 1440, 200, N, "", ens, null, "residents only"],
@@ -88,6 +89,9 @@ static func systems_rows(sm: Object) -> Array:
 		["day/WorksEvents.on_day", "WorksEvents", 1440, 318, N, "day", WorksEvents.on_day, null, "world-level: strike and closure dice per industrial career (headcounts only; townies are counted, never visited)"],
 		["day/DisasterClock.on_day", "DisasterClock", 1440, 320, N, "day", DisasterClock.on_day, null, "running disasters only"],
 		["day/SoloRent.on_day", "SoloRent", 1440, 335, N, "day", SoloRent.on_day, null, "one-character play: the pawn's eviction notice, the shelter week; a few comparisons"],
+		["day/SoloDistricts.on_day", "SoloDistricts", 1440, 336, N, "day", SoloDistricts.on_day, null, "one-character play: the roughness drift once a month (one comparison a day)"],
+		["day/SoloPressure.on_day", "SoloPressure", 1440, 337, N, "day", SoloPressure.on_day, null, "one-character play: the pawn's crew offers and dues; a few comparisons"],
+		["day/SoloCrews.on_day", "SoloCrews", 1440, 338, N, "day", SoloCrews.on_day, null, "one-character play: the drive-by dice of the rough districts (one roll per rough district)"],
 		["day/MarketTick.on_day", "MarketTick", 1440, 330, L, "day", MarketTick.on_day, null, "markets, shops, bank, rents (world-level)"],
 		["day/LifeTick.on_day", "LifeTick", 1440, 335, L, "day", LifeTick.on_day, null, "places (staff), school and college records of residents, townie studies, the job board: all daily, O(places + townies)"],
 		["day/StoryPacing.on_day", "StoryPacing", 1440, 340, L, "day", StoryPacing.on_day, null, "world-level"],

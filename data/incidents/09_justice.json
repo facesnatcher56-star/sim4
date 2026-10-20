@@ -1,4 +1,4 @@
-﻿{
+{
  "_doc": "Legal system (task 09): the trial, sentences, prison, appeals and civil cases are driven by scripts/systems/justice_*.gd, prison.gd, courthouse.gd and data/justice.json, not by dice here. This file only adds the small-claims incident (neighbour disputes, ~0.1 a year per household) so civil court has a steady trickle of cases. Task 09c adds vandalism, trespassing and public disturbance (small offences settled with a fine or community service, see crime_petty.gd).",
  "handlers": {
   "justice_small_claim": {
@@ -83,7 +83,8 @@
       "summary": ""
      }
     ]
-   }
+   },
+   "district": "petty"
   },
   "trespassing": {
    "label": "Trespassing",
@@ -123,7 +124,8 @@
       "summary": ""
      }
     ]
-   }
+   },
+   "district": "petty"
   },
   "public_disturbance": {
    "label": "Public disturbance",
@@ -177,7 +179,8 @@
       "adult"
      ]
     }
-   ]
+   ],
+   "district": "petty"
   }
  }
 }

@@ -69,6 +69,9 @@ static func describe_tests(def: Dictionary, folk = null, target = null) -> Strin
 				"coins_at_least": parts.append("costs %s Coins" % v)
 				"pays_ingredients": parts.append("No money for ingredients (%s Coins)" % v)
 				"is_pawn": parts.append("not for you")
+				"circadian": parts.append("Not time to sleep yet")
+				"no_free_bed": parts.append("You have a bed to use")
+				"time_between": parts.append("Only between %d:00 and %d:00" % [int(v[0]), int(v[1])])
 				"at_lot": parts.append("not here")
 				"on_street": parts.append("only outdoors, on a street or in a park")
 				"homeless": parts.append("only if you have no home")
@@ -127,6 +130,8 @@ static func self_entries(folk) -> Array:
 			continue
 		if (not bool(d.get("autonomous", true)) and not bool(d.get("player_menu", false))) or str(d.get("kind", "")) != "super":
 			continue
+		if d.has("_solo") and (d.get("tests", []) as Array).has({"is_pawn": false}):
+			continue          # not for the pawn at all (the welcome basket)
 		ids.append(id)
 	return build_entries(folk, ids, table, make_checker(folk, null))
 

@@ -17,6 +17,8 @@ static func run(e: Dictionary) -> Dictionary:
 			res = SoloLadder.apply_council()
 		"give_up_home":
 			res = SoloLadder.give_up_home()
+		"leave_crew":
+			res = SoloPressure.leave(SysUtil.folk(Pawn.of()))
 		_:
 			res = {"ok": false, "reason": "Unknown housing action."}
 	res["msg"] = str(res.get("reason", ""))

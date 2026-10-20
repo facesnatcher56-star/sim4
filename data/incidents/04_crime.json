@@ -1,4 +1,4 @@
-﻿{
+{
  "_doc": "Crime (task 04): burglary, street robbery, assault, murder, serial killer, theft by guests. Rates are per household / person / town per game year at the Rare default. The hour-limited ones are multiplied up because only the night hours pass the condition (burglary 2.4 x 6/24 = 0.6 a year; robbery 2.2 while out at night ~0.1 a year for a night-walker). Murder and assault have rate 0 on purpose: they come from motive (scripts/systems/crime_murder.gd, crime_assault.gd); the incidents exist for the F9 force button. The case record and all follow-up (discovery, police, trial) live in data/justice.json + scripts/systems/case_*.gd, justice_*.gd.",
  "handlers": {
   "crime_burglary": {
@@ -706,7 +706,8 @@
       "summary": ""
      }
     ]
-   }
+   },
+   "district": "burglary"
   },
   "guest_theft": {
    "label": "Theft by a guest",
@@ -811,7 +812,8 @@
       "summary": ""
      }
     ]
-   }
+   },
+   "district": "robbery"
   },
   "assault": {
    "label": "Assault",

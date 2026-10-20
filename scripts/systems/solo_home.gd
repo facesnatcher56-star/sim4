@@ -35,6 +35,9 @@ static func reset() -> void:
 	rough_nights = 0
 	phys = {}
 	SoloMove.reset()
+	SoloPressure.reset()
+	SoloCrews.reset()
+	SoloDistricts.reset()
 
 static func is_homeless() -> bool:
 	return active and homeless
@@ -59,6 +62,13 @@ static func travel_refusal(folk_ids: Array, lot_id: String) -> String:
 		return "The shelter is for people with no home."
 	return ""
 
+## The label (lot id as the game knows it now) of the building that was originally called `orig`.
+static func label_of_phys(orig: String) -> String:
+	for id in phys:
+		if str(phys[id]) == orig:
+			return str(id)
+	return orig
+
 static func rung_def() -> Dictionary:
 	return SoloCfg.rung(rung)
 
@@ -73,7 +83,8 @@ static func to_dict() -> Dictionary:
 	if not active:
 		return {}
 	return {"rung": rung, "homeless": homeless, "since": since_day, "notice": notice_day, "leaving": leaving_day, "council": council_day, "deposit": deposit,
-		"stored": stored.duplicate(true), "sweek": shelter_week, "snights": shelter_nights, "rough": rough_nights, "phys": phys.duplicate()}
+		"stored": stored.duplicate(true), "sweek": shelter_week, "snights": shelter_nights, "rough": rough_nights, "phys": phys.duplicate(),
+		"pressure": SoloPressure.to_dict(), "districts": SoloDistricts.rough.duplicate(), "driveby": [SoloCrews.due_abs, SoloCrews.district_id]}
 
 static func from_dict(d: Dictionary) -> void:
 	reset()
@@ -92,4 +103,9 @@ static func from_dict(d: Dictionary) -> void:
 	shelter_nights = int(d.get("snights", 0))
 	rough_nights = int(d.get("rough", 0))
 	phys = (d.get("phys", {}) as Dictionary).duplicate()
+	SoloPressure.from_dict(d.get("pressure", {}))
+	SoloDistricts.rough = (d.get("districts", {}) as Dictionary).duplicate()
+	var db: Array = d.get("driveby", [-1, ""])
+	SoloCrews.due_abs = int(db[0])
+	SoloCrews.district_id = str(db[1])
 	SoloMove.resync_positions()

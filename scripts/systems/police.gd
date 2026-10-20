@@ -62,6 +62,7 @@ static func respond(c: Dictionary, delay: int = -1) -> void:
 			var scene: String = str(c.get("scene", ""))
 			var lot: String = PlayerLots.home_of_household(int(c.get("vhid", 0))) if scene.begins_with("home:") else Neighborhood.HOME
 			delay = int(CityServices.dispatch("police", lot)["minutes"])
+	delay = SoloDistricts.police_delay(c, delay)          # task 40: the council underfunds the police of a rough district
 	JusticeState.queue({"kind": "police_arrive", "due_min": SysUtil.now() + delay, "case": int(c["id"])})
 	CaseStore.note(c, "The police were called.")
 
@@ -88,7 +89,7 @@ static func arrive(c: Dictionary) -> void:
 	if str(c["state"]) == "hidden":
 		CaseDiscovery.report(c, int(c["victim"]), "called")
 	var here: bool = bool(c.get("on_scene", false))
-	if here and culprit >= 0 and JusticeState.chance(float(cfg().get("catch_on_scene", 0.5)) * strength()):
+	if here and culprit >= 0 and JusticeState.chance(float(cfg().get("catch_on_scene", 0.5)) * strength() * SoloDistricts.catch_factor(c)):
 		c["on_scene"] = false
 		CrimeBurglary.end_scene(c, true)
 		c["recovered"] = true

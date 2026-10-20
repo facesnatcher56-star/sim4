@@ -13,10 +13,7 @@ static func label_of(r: Dictionary) -> String:
 	var orig: String = str(r.get("lot", ""))
 	if orig == "" or orig == SoloShelter.lot_id():
 		return orig
-	for id in SoloHome.phys:
-		if str(SoloHome.phys[id]) == orig:
-			return str(id)
-	return orig
+	return SoloHome.label_of_phys(orig)
 
 ## Wages in the last 7 days: what the council and the landlords judge "income" by.
 static func income_week(hid: int) -> int:

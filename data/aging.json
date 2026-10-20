@@ -1,4 +1,4 @@
-﻿{
+{
   "version": 1,
   "days_per_year": 4,
   "birthday_toast": true,
@@ -12,13 +12,13 @@
     {"id": "child",   "label": "Child",   "from_day": 20,  "trait_slots": 2, "forbid_tags": ["work", "flirt", "romance", "kiss", "wedding", "cook", "repair", "utility", "paperwork", "crime", "rescue", "community", "career", "speech", "staff", "pregnancy"]},
     {"id": "teen",    "label": "Teen",    "from_day": 50,  "trait_slots": 3, "forbid_tags": ["work", "flirt", "romance", "kiss", "wedding"]},
     {"id": "adult",   "label": "Adult",   "from_day": 76,  "trait_slots": 4, "forbid_tags": []},
-    {"id": "elder",   "label": "Elder",   "from_day": 172, "trait_slots": 4, "forbid_tags": ["exercise"]}
+    {"id": "elder",   "label": "Elder",   "from_day": 248, "trait_slots": 4, "forbid_tags": ["exercise"]}
   ],
   "death": {
-    "start_day": 202,
+    "start_day": 288,
     "chance_per_day": 0.03,
     "ramp_per_day": 0.004,
-    "max_day": 262,
+    "max_day": 368,
     "broken_heart_chance": 0.1,
     "same_night_delay": 0.9
   },

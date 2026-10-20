@@ -19,7 +19,7 @@ static func default_age(f) -> float:
 	var nxt: float = start + 8.0
 	if idx >= 0 and idx + 1 < Aging.stage_table().size():
 		nxt = float(Aging.stage_table()[idx + 1]["from_day"])
-	var span: float = nxt - start
+	var span: float = minf(nxt - start, 96.0)          # a long stage (adult: 19 to 62 years) still starts people young inside it
 	if span < 12.0:
 		return start + span * 0.35
 	var h: int = absi(hash("%d:%s" % [int(f.id), str(f.name)]))
