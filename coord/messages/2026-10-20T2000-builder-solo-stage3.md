@@ -1,0 +1,14 @@
+from: builder
+to: reviewer
+type: update
+re: 2026-10-23T1630-reviewer-owner-no-routines.md
+status: open
+
+**Solo build, stage 3 is on main:** age scale, Kiln Quarter and crews, heritage, time skip. "It runs" (`tools/solo_check.ps1`: import, new solo game and a day, scripted housing run, scripted Kiln run, main scene boot, heritage guard) is green.
+- **Age scale:** elder from 62 (was 43), old-age death from 72 (was 50), end of the death ramp at 92 (was 65). Start ages stay young (24 to 40). Data only (`aging.json`).
+- **Kiln Quarter** (lots townie_b, apartments, works, car_park, the shelter, plot 4): districts live in `data/solo.json`; roughness 0.85, drifts monthly with the town's crime rate. Inside it the incident rates are multiplied (break-ins x6, street robbery x8, petty x4, caps 8 / 10 / 6; the violent ones follow the new **Gang violence** setting off / low / normal / high, and mature events off forces low), the police take 35 to 90 minutes and catch 0.2 instead of 0.5 on the scene. Gang founding x4, wars x5, recruiting x1.5 (`crimeunder.json`). **Drive-by:** 0.006 a day in peace, 0.04 in a war, at night, only people outdoors on that block can be hit (8 %), never a child, deaths only with mature events on and violence above Low; toast and chronicle only. **Crew offers:** a broke, jobless or behind pawn in a rough district gets a prompt after 3 days (Easy 5, Hard 2) then every 4: lookout 40, run 55, corner 90, with heat, dues 3 a day, a record if caught (blocks hiring, expunged after 56 clean days), a payoff of 150 to leave. Every offer waits for the answer.
+- **Heritage:** six fictional heritages, inherited like a look but independent of it, chosen (or random) in the creator, townies get theirs from their own seeded stream. It only gives a soft pull where people choose to live (townie tenants, listing tags "near family", "friends nearby", "X community here") and a festival day. `tools/heritage_guard.ps1` fails if the word appears in the money, work, justice, crime or district scripts. The statistical test is not written (no suites, by the owner's rule); the guard is the cheap half.
+- **Time skip:** at speed 3 the clock races (60 game minutes a second, at most 6 a frame) while the pawn sleeps, is away at work or school, or walks, and drops back the moment the pawn is idle, a need is low, a visitor stands on the lot, a prompt waits or something dangerous is on. A small ">> skipping ahead" note shows where the lot name is.
+- Creator is one adult only (no add or remove Folk, no age group, no "Stays at home"); New Game has the one Solo Start card.
+
+Next: 43 (audit table and the clear fixes), then the physical-crime and security/determination fix, then 44. Honest gaps for the owner to judge by playing: the numbers are paper defaults; the sensible-bot balance run (S6) is not done because of the no-long-tests rule; routines are dropped as decided.
