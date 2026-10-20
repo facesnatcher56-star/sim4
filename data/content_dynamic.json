@@ -172,6 +172,25 @@
     },
     {
      "at_home_lot": true
+    },
+    {
+     "has_object": [
+      "sofa",
+      "armchair",
+      "table",
+      "coffee_table",
+      "desk",
+      "counter",
+      "bar_counter",
+      "bed",
+      "single_bed",
+      "sofa_bed",
+      "bookshelf",
+      "bookcase_tall",
+      "dresser",
+      "wardrobe",
+      "nightstand"
+     ]
     }
    ],
    "per_min": {
@@ -210,6 +229,11 @@
     },
     {
      "at_home_lot": true
+    },
+    {
+     "has_object": [
+      "window"
+     ]
     }
    ],
    "per_min": {
@@ -284,6 +308,14 @@
     },
     {
      "at_home_lot": true
+    },
+    {
+     "has_object": [
+      "sink",
+      "fridge",
+      "coffee_maker",
+      "tea_kettle"
+     ]
     }
    ],
    "per_min": {
@@ -599,6 +631,11 @@
     },
     {
      "at_home_lot": true
+    },
+    {
+     "has_object": [
+      "window"
+     ]
     }
    ],
    "per_min": {
@@ -636,6 +673,13 @@
     },
     {
      "at_home_lot": true
+    },
+    {
+     "has_object": [
+      "desk",
+      "table",
+      "coffee_table"
+     ]
     }
    ],
    "per_min": {
@@ -674,6 +718,15 @@
     },
     {
      "at_home_lot": true
+    },
+    {
+     "has_object": [
+      "coffee_table",
+      "sofa",
+      "armchair",
+      "bookshelf",
+      "bookcase_tall"
+     ]
     }
    ],
    "per_min": {
@@ -711,6 +764,14 @@
     },
     {
      "at_home_lot": true
+    },
+    {
+     "has_object": [
+      "table",
+      "coffee_table",
+      "desk",
+      "bar_counter"
+     ]
     }
    ],
    "per_min": {
@@ -748,6 +809,15 @@
     },
     {
      "at_home_lot": true
+    },
+    {
+     "has_object": [
+      "bookshelf",
+      "bookcase_tall",
+      "dresser",
+      "nightstand",
+      "wardrobe"
+     ]
     }
    ],
    "per_min": {
@@ -859,6 +929,13 @@
     },
     {
      "at_home_lot": true
+    },
+    {
+     "has_object": [
+      "desk",
+      "table",
+      "coffee_table"
+     ]
     }
    ],
    "per_min": {
@@ -896,6 +973,12 @@
     },
     {
      "at_home_lot": true
+    },
+    {
+     "has_object": [
+      "stove",
+      "counter"
+     ]
     }
    ],
    "per_min": {
@@ -1008,6 +1091,14 @@
     },
     {
      "at_home_lot": true
+    },
+    {
+     "has_object": [
+      "table",
+      "coffee_table",
+      "desk",
+      "bar_counter"
+     ]
     }
    ],
    "per_min": {
@@ -1045,6 +1136,11 @@
     },
     {
      "at_home_lot": true
+    },
+    {
+     "has_object": [
+      "washing_machine"
+     ]
     }
    ],
    "per_min": {
@@ -1082,6 +1178,20 @@
     },
     {
      "at_home_lot": true
+    },
+    {
+     "has_object": [
+      "table",
+      "coffee_table",
+      "desk",
+      "counter",
+      "mirror",
+      "tv",
+      "piano",
+      "dresser",
+      "bookshelf",
+      "bookcase_tall"
+     ]
     }
    ],
    "per_min": {
@@ -1119,6 +1229,13 @@
     },
     {
      "at_home_lot": true
+    },
+    {
+     "has_object": [
+      "desk",
+      "table",
+      "coffee_table"
+     ]
     }
    ],
    "per_min": {

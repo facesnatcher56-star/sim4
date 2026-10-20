@@ -211,6 +211,29 @@ Allowed to stay generic (`generic_ok`): go_here, sys_away, sys_staff, sit_chair.
 
 Pour, Wipe, Mop, Repair (crouched), Phone_Call, Phone_Text (+ Sit_ twins), Eat, Dig (crouched), Bend, Fish, Lift, Write (+ Sit_Write), Brush_Teeth, Sing, Cradle, Look, Think (+ Sit_Think), Reach, Strum, Sit_Piano, Balance, Relax (+ Sit_Relax), Speech, Aim. Sitting folk get the `Sit_` twin through `sit_substitute`.
 
+## An action needs a reason and a thing (task 33c, logic rule of task 34)
+
+"Tidy Up a Little" in an empty house, "Fold Some Washing" with no washing, a puzzle with no table: the idle fillers of task 32c (`idle_life`, target self) now carry Cond `has_object` (`data/content_dynamic.json`; `Cond` key `has_object`, `SleepPlaces.has_any`: one of these object defs within reach of the folk). Cause in one line: the folk does it because the thing is there; without it the filler is not offered or picked. Test `tests/idle_needs_object_test.gd` (bare home: none of the 14 are offered, the free ones still are; with the objects present they come back).
+
+| filler | needs one of | why |
+|---|---|---|
+| tidy_up | sofa, armchair, table, coffee table, desk, counter, bar counter, beds, shelves, dresser, wardrobe, nightstand | something to tidy |
+| polish_up | table, coffee table, desk, counter, mirror, tv, piano, dresser, shelves | something to polish |
+| rearrange_shelf | bookshelf, tall bookcase, dresser, nightstand, wardrobe | a shelf |
+| fold_the_washing | washing machine | washing |
+| do_a_puzzle, crossword | table, coffee table, desk, bar counter | a surface to lay it on |
+| flip_recipes | stove, counter | a kitchen |
+| flick_magazine | coffee table, sofa, armchair, bookshelf, tall bookcase | where magazines lie |
+| plan_tomorrow, write_a_postcard, doodle | desk, table, coffee table | a surface to write on (pen and notepad props) |
+| sip_water | sink, fridge, coffee maker, tea kettle | something to drink from |
+| gaze_out_window, people_watch | window | a window (the bare home keeps its windows) |
+
+Need nothing, stay as they are: stretch, look_around, ponder_the_day, fidget_and_think, daydream (the folk's own body and thoughts), hum_tune, sing_softly, shake_a_leg (their own voice and body), check_phone, look_through_photos (the phone is carried; it has a prop). `welcome_snack`, `cafe_restroom` and `sleep_floor` are the bare-home fallbacks of task 32d and are meant to be offered when the object is missing.
+
+Paint is the easels' clip only (test `action_visuals_test`): `doodle` is Write with a pen and notepad, `build_snowfolk` is Bend (the `creative` tag no longer maps to Paint).
+
+The folk of a self filler stays where they stand (no walk to the object); the gate only decides whether the filler exists. Not done: walking to the table before the puzzle.
+
 ## Not covered
 
 - Objects changing (soil darkening, dirty dish, broken look, fridge door, burner glow, TV flicker, made bed, crops growing) is task 33.3 (`state33b`); the progress ring above the head is 33.4.
