@@ -26,6 +26,7 @@ func run() -> Array:
 	Neighborhood.pantry = 4
 	Kit.run(int(r["minutes"]) + 20)
 	var coins: int = Economy.balance(1)
+	var where_before: Array = [Neighborhood.where(tobin.id), Neighborhood.where(mira.id)]       # residents on their own may be walking somewhere by now: what must hold is that a load puts them where they were
 	var snap: Dictionary = SaveLoad.snapshot("hood")
 	var parsed: Variant = JSON.parse_string(JSON.stringify(snap))
 	_check(parsed is Dictionary, "snapshot survives JSON")
@@ -46,7 +47,7 @@ func run() -> Array:
 	_check(not (SaveLoad.snapshot("x")["systems"]["economy"]["funds"] as Dictionary).has("-1"), "NPC pocket money is not saved")
 	var f2 = SysUtil.folk(tobin.id)
 	_check(f2 != null and not f2.has_meta("away"), "folk at home are not hidden")
-	_check(Neighborhood.where(tobin.id) == "home" and Neighborhood.where(mira.id) == "park", "locations restored from the tiles")
+	_check([Neighborhood.where(tobin.id), Neighborhood.where(mira.id)] == where_before, "locations restored from the tiles (%s, was %s)" % [str([Neighborhood.where(tobin.id), Neighborhood.where(mira.id)]), str(where_before)])
 	var m2 = SysUtil.folk(mira.id)
 	_check(m2 != null and not m2.has_meta("away"), "traveller is at the park")
 	Kit.run(120)

@@ -35,6 +35,7 @@ func _plans_fired(f, days: int, first_hour: int) -> Dictionary:
 
 func run() -> Array:
 	var f: Array = []
+	var seed_before: int = Storyteller.master_seed
 	# 1. plans follow traits and are the same every time for the same seed
 	var ws := _world(["bookworm", "creative"])
 	var ada = ws[1]
@@ -107,6 +108,7 @@ func run() -> Array:
 	var rt_wd := _routine_names(false)
 	Kit.expect(f, rt_wk.has("a free weekend afternoon") and not rt_wd.has("a free weekend afternoon"), "weekend routines are not weekend only: %s / %s" % [str(rt_wk), str(rt_wd)])
 	Kit.teardown()
+	Storyteller.master_seed = seed_before
 	return f
 
 func _routine_names(weekend: bool) -> Array:
