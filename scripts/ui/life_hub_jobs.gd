@@ -10,6 +10,7 @@ static func build(dlg: LifeHub) -> void:
 		return
 	if Careers.has_job(dlg.folk_id):
 		dlg.line("Now: %s. Applying to another job means leaving this one." % Careers.title_of(dlg.folk_id), 13, UITheme.MUTED)
+	CareerDialog.offer_card(dlg, dlg.folk_id)          # a pending offer (the toast) is answered right here: Accept / Decline
 	var rows: Array = EduJobs.board_for(f)
 	if rows.is_empty():
 		dlg.line("No openings this week. Check again next week.", 14, UITheme.MUTED)

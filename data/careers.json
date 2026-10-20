@@ -7,10 +7,11 @@
     "autonomy_mult": {"chore": 1.6, "clean": 1.6, "cook": 1.5, "meal": 1.5, "prepare": 1.4, "shop": 1.4, "baby_care": 2.0, "family": 1.3}
   },
   "seeking": {
-    "_doc": "Only somebody looking for work takes an offer on their own: searching in the last search_days days, or the household has less than broke_below coins; never within min_days_between_changes of the last hire / quit.",
+    "_doc": "Only somebody looking for work takes an offer on their own: searching in the last search_days days, or the household has less than broke_below coins, or (no_computer_looks) the household has no computer to search from; never within min_days_between_changes of the last hire / quit.",
     "search_days": 3,
     "broke_below": 300,
-    "min_days_between_changes": 7
+    "min_days_between_changes": 7,
+    "no_computer_looks": true
   },
   "first_job": {
     "_doc": "Who gets offered what (task 19j): a first job or a new offer is a weighted pick over the careers the person qualifies for, so children do not all become baristas. weight = base + skill x skill_w + trait bonus x trait_w + aspiration match + the job board (openings, hot demand), then divided down for each housemate already in that career. teen_careers are the ones with a part-time level 1 (teens only, level 1).",
