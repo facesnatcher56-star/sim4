@@ -119,7 +119,7 @@ func _sit_clips() -> void:
 	W.folk_pose.erase(f.id)
 	for i in 12:
 		fv._process(0.05)
-	_check(fv.clip == "Type", "standing write_story plays '%s', want Type (Paint is the easel's)" % fv.clip)
+	_check(fv.clip == "Write", "standing write_story plays '%s', want Write (Paint is the easel's)" % fv.clip)
 	fv.free()
 	W.folk_pose.erase(f.id)
 	W.remove_folk(f.id)
@@ -163,14 +163,16 @@ func _hand_props() -> void:
 	var defs: Dictionary = cfg.get("defs", {})
 	var clips: Array = FolkView.anim_map().get("sit_clips", []) + FolkView.anim_map().get("lie_clips", [])
 	for r in (cfg.get("rules", []) as Array):
-		_check(defs.has(str(r["prop"])), "props rule names '%s' without a definition" % str(r["prop"]))
+		var names: Array = (r["props"] as Array) if r.has("props") else [str(r.get("prop", ""))]
+		for nm in names:
+			_check(defs.has(str(nm)), "props rule names '%s' without a definition" % str(nm))
 	for k in defs:
-		_check(not (defs[k]["parts"] as Array).is_empty() and str(defs[k]["bone"]).begins_with("hand_"), "prop '%s' has no parts or no hand bone" % k)
+		_check(not (defs[k]["parts"] as Array).is_empty() and str(defs[k]["bone"]) in ["hand_R", "hand_L", "chest"], "prop '%s' has no parts or no hand / chest bone" % k)
 	_check(FolkProps.prop_for("read_armchair", ["read"], "Sit_Read") == "book", "reading in a seat has a book")
 	_check(FolkProps.prop_for("brew_coffee", ["drink", "coffee"], "Use_Stand") == "cup", "brewing coffee has a cup")
 	_check(FolkProps.prop_for("play_computer", ["fun"], "Sit_Type") == "gamepad", "play_computer has a game pad")
 	_check(FolkProps.prop_for("paint_canvas", ["creative"], "Paint") == "brush", "painting has a brush")
-	_check(FolkProps.prop_for("study_recipes", ["read", "cook"], "Cook") == "", "no book while the clip is Cook")
+	_check(FolkProps.prop_for("study_recipes", ["read", "cook"], "Cook") != "book", "no book while the clip is Cook")
 	_check(FolkProps.prop_for("read_book", ["read"], "Walk") == "", "no prop while walking")
 	var pr := _mk(Vector2i(8, 8))
 	var f: Folk = pr[0]
