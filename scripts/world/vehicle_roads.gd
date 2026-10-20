@@ -83,15 +83,21 @@ static func corner(ctr: Vector2, din: int, dout: int, lane: float) -> Vector2:
 
 ## Shortest list of [i, j, din, dout] junction visits from (arriving at junction (i0, j0) heading west) to (leaving junction (i1, j1) heading west).
 static func visits(i0: int, j0: int, i1: int, j1: int) -> Array:
+	return search(Vector3i(i0, j0, W), func(cur: Vector3i) -> int: return W if cur.x == i1 and cur.y == j1 and cur.z != E else -1)
+
+
+## Dijkstra over (junction, heading it was entered with). `goal` returns the heading to leave by when the state is a goal, else -1. Leaving the grid is never an expansion
+## (the edge exits are goals). Turns cost TURN_COST tiles, U-turns do not exist.
+static func search(start: Vector3i, goal: Callable) -> Array:
 	var nx: int = xs().size()
 	var ny: int = ys().size()
 	var best: Dictionary = {}
 	var prev: Dictionary = {}
 	var open: Array = []
-	var start: Vector3i = Vector3i(i0, j0, W)
 	best[start] = 0.0
 	open.append(start)
-	var goal: Vector3i = Vector3i(-1, -1, -1)
+	var found: Vector3i = Vector3i(-1, -1, -1)
+	var goal_out: int = W
 	while not open.is_empty():
 		var bi: int = 0
 		for k in open.size():
@@ -99,8 +105,10 @@ static func visits(i0: int, j0: int, i1: int, j1: int) -> Array:
 				bi = k
 		var cur: Vector3i = open[bi]
 		open.remove_at(bi)
-		if cur.x == i1 and cur.y == j1 and cur.z != E:
-			goal = cur
+		var g: int = int(goal.call(cur))
+		if g >= 0:
+			found = cur
+			goal_out = g
 			break
 		for dout in 4:
 			if dout == (cur.z + 2) % 4:
@@ -116,15 +124,15 @@ static func visits(i0: int, j0: int, i1: int, j1: int) -> Array:
 				prev[ns] = cur
 				if not open.has(ns):
 					open.append(ns)
-	if goal.x < 0:
+	if found.x < 0:
 		return []
-	var chain: Array = [goal]
+	var chain: Array = [found]
 	while prev.has(chain[0]):
 		chain.push_front(prev[chain[0]])
 	var out: Array = []
 	for k2 in chain.size():
 		var st: Vector3i = chain[k2]
-		var dout2: int = chain[k2 + 1].z if k2 + 1 < chain.size() else W
+		var dout2: int = chain[k2 + 1].z if k2 + 1 < chain.size() else goal_out
 		out.append([st.x, st.y, st.z, dout2])
 	return out
 
@@ -149,6 +157,27 @@ static func sidewalk_route(fa: Dictionary, start_x: float, fb: Dictionary, end_x
 	pts[0] = Vector2(start_x, float(fa["hy"]) + 0.5)
 	pts[pts.size() - 1] = Vector2(end_x, float(fb["hy"]) + 0.5)
 	return r
+
+
+static var _leg_cache: Dictionary = {}
+
+## Length in tiles of the lane route from the bus kerb of lot `a` to the bus kerb of lot `b` (what a bus really drives, west-flowing lanes and all), or -1 without a map.
+## The timetable of TransportBus is built from it, so the bus in the picture and the minutes on the sign agree.
+static func leg_length(a: String, b: String) -> float:
+	var key := a + ">" + b
+	if _leg_cache.has(key):
+		return _leg_cache[key]
+	var fa: Dictionary = frontage(a)
+	var fb: Dictionary = frontage(b)
+	var out: float = -1.0
+	if not fa.is_empty() and not fb.is_empty():
+		var veh: Dictionary = SysUtil.table("vehicles")
+		var bx: float = float((veh.get("bus_stop", {}) as Dictionary).get("bus_x_from_gate", 8.5))
+		var lane: float = float(veh.get("lane", 1.0))
+		var leg: Dictionary = lane_route(fa, float(fa["gate"]) + bx, fb, float(fb["gate"]) + bx, lane)
+		out = VehiclePath.make(leg["pts"], float(veh.get("corner_radius", 1.8))).length
+	_leg_cache[key] = out
+	return out
 
 
 ## Every junction id of the net (today: lattice column, row).
@@ -199,3 +228,94 @@ static func downstream_end(fr: Dictionary, reach: float = 28.0) -> Dictionary:
 ## Which axis (0 = east-west, 1 = north-south) a heading uses.
 static func axis_of(dir: int) -> int:
 	return 0 if dir == E or dir == W else 1
+
+
+# ------------------------------------------------------------------ the ends of the road net (through traffic)
+const EDGE_PAD := 8.0      # tiles outside the road end where through traffic enters and leaves: past the map edge, never on a picture
+
+## Every road end where traffic can come in or go out: {key, i, j, dir (heading when coming in), out (heading when leaving), main (a main road ends here)}.
+## Today: the lattice ends east, west and north (the south ends meet the woods).
+static func edge_ends() -> Array:
+	var out: Array = []
+	var nx: int = xs().size()
+	var ny: int = ys().size()
+	for j in ny:
+		out.append({"key": "E%d" % j, "i": nx - 1, "j": j, "dir": W, "out": E})
+		out.append({"key": "W%d" % j, "i": 0, "j": j, "dir": E, "out": W})
+	for i in nx:
+		out.append({"key": "N%d" % i, "i": i, "j": 0, "dir": S, "out": N})
+	return out
+
+
+## Lane point of a road end: `inward` true = where traffic appears (outside the map, on its lane), false = where it is gone.
+static func end_point(e: Dictionary, inward: bool, lane: float = 1.0) -> Vector2:
+	var ctr: Vector2 = junction_center(int(e["i"]), int(e["j"]))
+	var d: int = int(e["dir"]) if inward else int(e["out"])
+	var sgn: float = -1.0 if inward else 1.0
+	return ctr + Vector2(DIRS[d]) * (sgn * (float(road_w()) * 0.5 + EDGE_PAD)) + right_of(Vector2(DIRS[d])) * lane
+
+
+static func _pts_of(vs: Array, lane: float) -> Array:
+	var pts: Array = []
+	for v in vs:
+		pts.append(corner(junction_center(int(v[0]), int(v[1])), int(v[2]), int(v[3]), lane))
+	return pts
+
+
+## Through traffic: from the road end `a` to the road end `b`. {pts, visits}; empty when there is no way.
+static func through_route(a: Dictionary, b: Dictionary, lane: float = 1.0) -> Dictionary:
+	var ie: int = int(b["i"])
+	var je: int = int(b["j"])
+	var oe: int = int(b["out"])
+	var vs: Array = search(Vector3i(int(a["i"]), int(a["j"]), int(a["dir"])), func(c: Vector3i) -> int: return oe if c.x == ie and c.y == je and c.z != (oe + 2) % 4 else -1)
+	if vs.is_empty():
+		return {}
+	var pts: Array = [end_point(a, true, lane)]
+	pts.append_array(_pts_of(vs, lane))
+	pts.append(end_point(b, false, lane))
+	return {"pts": pts, "visits": vs}
+
+
+## From the road end `a` to the lane in front of lot `fb` at x = end_x (heading west).
+static func entry_route(a: Dictionary, fb: Dictionary, end_x: float, lane: float = 1.0) -> Dictionary:
+	var i1: int = int(fb["c"]) + 1
+	var j1: int = int(fb["jr"])
+	var vs: Array = search(Vector3i(int(a["i"]), int(a["j"]), int(a["dir"])), func(c: Vector3i) -> int: return W if c.x == i1 and c.y == j1 and c.z != E else -1)
+	if vs.is_empty():
+		return {}
+	var pts: Array = [end_point(a, true, lane)]
+	pts.append_array(_pts_of(vs, lane))
+	pts.append(Vector2(end_x, float(fb["lane_z"])))
+	return {"pts": pts, "visits": vs}
+
+
+## From the lane in front of lot `fa` at x = start_x (heading west) to the road end `b`.
+static func exit_route(fa: Dictionary, start_x: float, b: Dictionary, lane: float = 1.0) -> Dictionary:
+	var ie: int = int(b["i"])
+	var je: int = int(b["j"])
+	var oe: int = int(b["out"])
+	var vs: Array = search(Vector3i(int(fa["c"]), int(fa["jr"]), W), func(c: Vector3i) -> int: return oe if c.x == ie and c.y == je and c.z != (oe + 2) % 4 else -1)
+	if vs.is_empty():
+		return {}
+	var pts: Array = [Vector2(start_x, float(fa["lane_z"]))]
+	pts.append_array(_pts_of(vs, lane))
+	pts.append(end_point(b, false, lane))
+	return {"pts": pts, "visits": vs}
+
+
+## The nearest road end for a car leaving the lane in front of lot `fa` (by lane route length).
+static func nearest_end(fa: Dictionary, lane: float = 1.0) -> Dictionary:
+	var best: Dictionary = {}
+	var best_len: float = 1.0e9
+	for e in edge_ends():
+		var r: Dictionary = exit_route(fa, float(fa["gate"]), e, lane)
+		if r.is_empty():
+			continue
+		var l: float = 0.0
+		var pts: Array = r["pts"]
+		for k in range(1, pts.size()):
+			l += (pts[k] as Vector2).distance_to(pts[k - 1])
+		if l < best_len:
+			best_len = l
+			best = e
+	return best

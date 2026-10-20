@@ -1,0 +1,23 @@
+TRAFFIC done d2 19:00: real 60 s, frames 2729
+TRAFFIC layer hidden 0 of 2729 frames
+TRAFFIC in view (avg per frame): ["car 2.12", "bus 0.43"]
+TRAFFIC buses: max 2 at once, in view on 41% of frames, avg 0.43
+TRAFFIC vanished while in view: {  }
+TRAFFIC popped in while in view: {  }
+TRAFFIC ghosted (a vehicle faded through a jam; always 0 since task 37): 0
+TRAFFIC jams (waited 22 s or more): { "light_or_sign": 4, "cycle": 1 }, vehicles that backed up to free a deadlock: 1
+TRAFFIC lights: on average 57% of the traffic-light junctions show the same pair of states; all of them alike in 1.4% of the frames
+TRAFFIC filler: { "spawned": 92, "through": 70, "to_lot": 22, "deferred": 23, "dropped": 12, "full": 3, "no_route": 0, "gone": 4, "on_screen": 0, "blocked": 15 }
+TRAFFIC hour 07: vehicles in view 3.11, bus on screen 32%, new vehicles per game minute 0.83
+TRAFFIC hour 08: vehicles in view 3.80, bus on screen 84%, new vehicles per game minute 0.17
+TRAFFIC hour 09: vehicles in view 2.63, bus on screen 32%, new vehicles per game minute 0.08
+TRAFFIC hour 10: vehicles in view 1.15, bus on screen 55%, new vehicles per game minute 0.08
+TRAFFIC hour 11: vehicles in view 1.41, bus on screen 0%, new vehicles per game minute 0.12
+TRAFFIC hour 12: vehicles in view 1.41, bus on screen 32%, new vehicles per game minute 0.13
+TRAFFIC hour 13: vehicles in view 3.02, bus on screen 58%, new vehicles per game minute 0.08
+TRAFFIC hour 14: vehicles in view 2.98, bus on screen 71%, new vehicles per game minute 0.10
+TRAFFIC hour 15: vehicles in view 3.21, bus on screen 69%, new vehicles per game minute 0.13
+TRAFFIC hour 16: vehicles in view 3.18, bus on screen 0%, new vehicles per game minute 0.08
+TRAFFIC hour 17: vehicles in view 2.33, bus on screen 47%, new vehicles per game minute 0.12
+TRAFFIC hour 18: vehicles in view 2.83, bus on screen 7%, new vehicles per game minute 0.07
+TRAFFIC hour 19: vehicles in view 2.00, bus on screen 0%, new vehicles per game minute 0.00

@@ -1,0 +1,10 @@
+TRAFFIC done d2 03:30: real 150 s, frames 8896
+TRAFFIC layer hidden 0 of 8896 frames
+TRAFFIC in view (avg per frame): ["bus 0.58", "car 0.91"]
+TRAFFIC buses: max 2 at once, in view on 50% of frames, avg 0.58
+TRAFFIC vanished while in view: {  }
+TRAFFIC popped in while in view: { "bus": 1 }
+TRAFFIC ghosted (jam cleared by passing through): 0
+TRAFFIC hour 01: vehicles in view 1.34, bus on screen 26%
+TRAFFIC hour 02: vehicles in view 1.82, bus on screen 84%
+TRAFFIC hour 03: vehicles in view 1.14, bus on screen 28%

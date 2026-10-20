@@ -199,7 +199,9 @@ func _build_chunk(c: Vector2i) -> void:
 			var col := _floor_color(ft, t)
 			fa.quad(x, y, x + 1, y + 1, 0.0, col)
 			if ft == "crosswalk":
-				_crosswalk_bars(fa, x, y)
+				var zc = JunctionMarks.zebra_color(t)              # only the arms with a painted crossing get bars (task 37); the others are plain asphalt
+				if zc != null:
+					_crosswalk_bars(fa, x, y, zc)
 			if ft == "grass" or ft == "lawn":
 				ga.quad(x, y, x + 1, y + 1, 0.006, Color.WHITE)
 			if ft == "asphalt" or ft == "crosswalk" or ft == "sidewalk":
@@ -208,6 +210,8 @@ func _build_chunk(c: Vector2i) -> void:
 				sa.quad(x, y, x + 1, y + 1, 0.009, Color.WHITE)
 	for m in _marks:
 		_add_mark(fa, m, rc)
+	for q in JunctionMarks.quads(rc):
+		fa.quad(float(q[0]), float(q[1]), float(q[2]), float(q[3]), MARK_Y, q[4])
 	(ch["floor"] as MeshInstance3D).mesh = fa.commit()
 	(ch["grass"] as MeshInstance3D).mesh = ga.commit()
 	(ch["snow"] as MeshInstance3D).mesh = sa.commit()
@@ -250,8 +254,7 @@ func _floor_color(ft: String, t: Vector2i) -> Color:
 
 
 ## Zebra bars: bars run along the road, spaced along the walking direction (towards a neighbouring sidewalk / crosswalk).
-func _crosswalk_bars(fa, x: int, y: int) -> void:
-	var white := Color(0.78, 0.78, 0.74)
+func _crosswalk_bars(fa, x: int, y: int, white: Color = Color(0.78, 0.78, 0.74)) -> void:
 	var walk_x := _is_walk(x - 1, y) or _is_walk(x + 1, y)
 	if walk_x:
 		fa.quad(x + 0.2, y + 0.08, x + 0.7, y + 0.92, MARK_Y, white)

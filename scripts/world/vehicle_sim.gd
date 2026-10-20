@@ -11,14 +11,23 @@ var vehicles: Array = []
 var vt: float = 0.0
 var folks: PackedVector2Array = PackedVector2Array()
 var dark_fn: Callable = Callable()          # (i, j) -> bool: the lights of this junction are out
+var retire_fn: Callable = Callable()        # (pos) -> bool: may a vehicle that reached the end of its path leave the world here? (off the picture); unset = always
+var control: VehicleControl = null          # who controls each junction (data/junctions.json)
+var hour: float = 12.0                      # game hour (the night mode of quiet lights); the view sets it every frame
 var _next_id: int = 1
-var ghost_log: Array = []                   # [kind, id, pos, blocker kind/state/pos] of the jams that were cleared (for tests)
+var jam_log: Array = []                     # one record per jam that had to be broken (cause, who, where): VehicleJams
+var reversals: int = 0                      # how many times a vehicle backed up to free a deadlock
 var _blocker: Dictionary = {}
-var ghosted: int = 0                        # how many times a jam was cleared by letting a vehicle through (a test wants this to stay 0)
+var _body_cache: Dictionary = {}
+var _grid: Dictionary = {}                  # cell -> vehicles in it at the start of the step (who is near whom without looking at everybody)
+const CELL := 16.0            # vehicle id -> body sample points, for the current step
+var ghosted: int = 0                        # ALWAYS 0 since task 37: a vehicle is never faded out or driven through another one (kept so old tests and audits can read it)
+var ghost_log: Array = []                   # always empty (see jam_log)
 
 
 func _init(c: Dictionary = {}) -> void:
 	cfg = c if not c.is_empty() else SysUtil.table("vehicles")
+	control = VehicleControl.new()
 
 
 func num(key: String, default: float) -> float:
@@ -44,7 +53,7 @@ func add(kind: String, glb: String, path: VehiclePath, opts: Dictionary = {}) ->
 	var v: Dictionary = {"id": _next_id, "kind": kind, "glb": glb, "wid": sz.x, "len": sz.y, "path": path, "s": float(opts.get("s", 0.0)), "v": 0.0,
 		"vmax": float(opts.get("vmax", speed_of(kind))), "state": "drive", "stops": opts.get("stops", []).duplicate(true), "visits": [],
 		"lights": {"siren": false, "hazard": false}, "ignore_signals": kind in ["fire", "ambulance", "police"] or bool(opts.get("ignore_signals", false)),
-		"end": str(opts.get("end", "dead")), "blocked_t": 0.0, "ghost_until": -1.0, "tag": str(opts.get("tag", "")), "key": str(opts.get("key", "")),
+		"end": str(opts.get("end", "dead")), "blocked_t": 0.0, "tag": str(opts.get("tag", "")), "key": str(opts.get("key", "")),
 		"pos": path.at(float(opts.get("s", 0.0))), "dir": path.dir_at(float(opts.get("s", 0.0))), "color": opts.get("color", ""), "born": vt}
 	_next_id += 1
 	attach_visits(v, opts.get("visits", []))
@@ -93,35 +102,18 @@ func restart(v: Dictionary, path: VehiclePath, visits: Array, end: String = "dea
 	attach_visits(v, visits)
 
 
+## What a vehicle on `axis` meets at junction (i, j): see VehicleControl.state; "dark" when the power is out.
 func signal_state(i: int, j: int, axis: int) -> String:
 	if dark_fn.is_valid() and bool(dark_fn.call(i, j)):
 		return "dark"
-	var sg: Dictionary = cfg.get("signal", {})
-	var cycle: float = float(sg.get("cycle_s", 11.0))
-	var green: float = float(sg.get("green_s", 3.6))
-	var red: float = float(sg.get("all_red_s", 1.9))
-	var t: float = fposmod(vt + float(i * 3 + j * 5) * 1.7, cycle)
-	if t < green:
-		return "green" if axis == 1 else "red"
-	if t >= green + red and t < 2.0 * green + red:
-		return "green" if axis == 0 else "red"
-	return "red"
+	return control.state(i, j, axis, vt, hour)
 
 
-## Seconds until the green of this axis ends (a big number when the lights are out).
+## Seconds until the green of this axis ends (a big number when the lights are out or there is no cycling light).
 func green_left(i: int, j: int, axis: int) -> float:
 	if dark_fn.is_valid() and bool(dark_fn.call(i, j)):
 		return 999.0
-	var sg: Dictionary = cfg.get("signal", {})
-	var cycle: float = float(sg.get("cycle_s", 11.0))
-	var green: float = float(sg.get("green_s", 3.6))
-	var red: float = float(sg.get("all_red_s", 1.9))
-	var t: float = fposmod(vt + float(i * 3 + j * 5) * 1.7, cycle)
-	if axis == 1 and t < green:
-		return green - t
-	if axis == 0 and t >= green + red and t < 2.0 * green + red:
-		return 2.0 * green + red - t
-	return 0.0
+	return control.green_left(i, j, axis, vt, hour)
 
 
 func _brake(d: float) -> float:
@@ -134,6 +126,15 @@ func step(dt: float) -> void:
 	vt += dt
 	if dt <= 0.0:
 		return
+	_body_cache.clear()
+	_grid.clear()
+	for g in vehicles:
+		var gp: Vector2 = g["pos"]
+		var gk := Vector2i(int(floorf(gp.x / CELL)), int(floorf(gp.y / CELL)))
+		if _grid.has(gk):
+			(_grid[gk] as Array).append(g)
+		else:
+			_grid[gk] = [g]
 	for v in vehicles:
 		if str(v["state"]) != "parked" and str(v["state"]) != "dead":
 			_step_one(v, dt)
@@ -160,10 +161,15 @@ static func centre(path: VehiclePath, s: float, length: float) -> Vector2:
 
 
 func _step_one(v: Dictionary, dt: float) -> void:
+	if v.has("reverse_left") or vt < float(v.get("wait_until", -1.0)):
+		if VehicleJams.hold(self, v, dt):
+			return
 	var path: VehiclePath = v["path"]
 	var vis0: Array = v["visits"]
 	while not vis0.is_empty() and float(v["s"]) - float(v["len"]) * 0.5 > float((vis0[0] as Dictionary)["s_clear"]):
-		vis0.pop_front()
+		var passed: Dictionary = vis0.pop_front()
+		if str(v.get("sign_ok", "")) == "%d,%d" % [int(passed["i"]), int(passed["j"])]:
+			v.erase("sign_ok")
 	v["pos"] = centre(path, float(v["s"]), float(v["len"]))
 	v["dir"] = heading(path, float(v["s"]), float(v["len"]))
 	var half: float = float(v["len"]) * 0.5
@@ -194,21 +200,33 @@ func _step_one(v: Dictionary, dt: float) -> void:
 	var dend: float = path.length - float(v["s"])
 	if dend <= 0.05:
 		v["v"] = 0.0
-		v["state"] = "parked" if str(v["end"]) == "park" else "dead"
+		if str(v["end"]) == "park":
+			v["state"] = "parked"
+		elif bool(v.get("vanish_ok", false)) or not retire_fn.is_valid() or bool(retire_fn.call(v["pos"])):
+			v["state"] = "dead"              # gone at the end of its way: into a garage (vanish_ok) or off the picture, never in view
+		else:
+			v["end_hold"] = true             # it would be seen to vanish: it waits where it is until the picture has moved on
 		return
 	if str(v["end"]) == "park":
 		lim = minf(lim, maxf(_brake(dend), 0.7))
 	var obstructed: bool = false
 	v["wait_for"] = -1
+	v["wait_folk"] = false
 	var gy: Dictionary = v.get("gate_yield", {})
 	if not gy.is_empty():
 		if float(v["s"]) > float(gy["s"]) + 0.2:
 			v["gate_yield"] = {}
 		elif _lane_busy(v, gy):
 			lim = minf(lim, _brake(float(gy["s"]) - float(v["s"])))      # wait in the bay, never in the gateway, until the lane and the walkway are clear
+	var yd: Dictionary = v.get("yard", {})
+	if not yd.is_empty():
+		if float(v["s"]) > float(yd["s"]) + 0.5:
+			v["yard"] = {}
+		elif _yard_busy(v, yd["rect"]):
+			lim = minf(lim, _brake(float(yd["s"]) - float(v["s"])))      # an arriving car waits on the lane while somebody is driving about in the front yard
 	if not bool(v["ignore_signals"]):
 		lim = minf(lim, _signals_limit(v, half))
-	var ol: float = _obstacle_limit(v, half)
+	var ol: float = VehicleProbes.obstacle_limit(self, v, half)
 	if ol < lim:
 		lim = ol
 		obstructed = ol < 0.15
@@ -216,18 +234,10 @@ func _step_one(v: Dictionary, dt: float) -> void:
 	var sp: float = float(v["v"])
 	sp = minf(lim, sp + accel * dt) if sp < lim else maxf(lim, sp - num("decel", 16.0) * dt)
 	v["v"] = sp
-	if obstructed and sp < 0.1:
+	if (obstructed or int(v["wait_for"]) >= 0) and sp < 0.1:
 		v["blocked_t"] = float(v["blocked_t"]) + dt
-		if float(v["blocked_t"]) > num("ghost_after_s", 20.0):
-			v["ghost_until"] = vt + 4.0
-			v["blocked_t"] = 0.0
-			ghosted += 1
-			var near: Array = []
-			for o2 in vehicles:
-				if (o2["pos"] as Vector2).distance_to(v["pos"]) < 14.0:
-					near.append([int(o2["id"]), str(o2["kind"]), o2["pos"], o2["dir"], snappedf(float(o2["v"]), 0.1), str(o2["state"]), int(o2.get("wait_for", -1)), snappedf(float(o2["blocked_t"]), 0.1), (o2["visits"] as Array).size()])
-			ghost_log.append(near)
-			ghost_log.append([str(v["kind"]), int(v["id"]), v["pos"], str(_blocker.get("kind", "?")), str(_blocker.get("state", "?")), _blocker.get("pos", Vector2.ZERO), str(_blocker.get("tag", ""))])
+		if float(v["blocked_t"]) > num("jam_after_s", 22.0):
+			VehicleJams.resolve(self, v)
 	else:
 		v["blocked_t"] = 0.0
 	v["s"] = minf(float(v["s"]) + sp * dt, path.length)
@@ -254,15 +264,34 @@ func _signals_limit(v: Dictionary, half: float) -> float:
 		elif st == "dark":
 			if d > -0.4 and d < 7.0:
 				lim = minf(lim, maxf(_brake(maxf(d, 0.0)) * 0.6, float((cfg.get("speeds", {}) as Dictionary).get("creep", 1.6))))
-		if d > -0.4 and d < 5.0 and st != "red" and (_no_room_beyond(v, half, float(vis["s_clear"])) or (bool(vis["left"]) and _oncoming_to(v, vis["ctr"])) or _box_conflict(v, vis, st == "dark")):
+		elif st != "green":
+			lim = minf(lim, VehicleSigns.limit(self, v, vis, d, st))      # stop / give-way signs, uncontrolled junctions, the mini roundabout, the night flash
+		var open_box: bool = st in ["dark", "flash", "free", "round"]
+		if d > -0.4 and d < 5.0 and st != "red" and (_no_room_beyond(v, half, float(vis["s_clear"])) or (bool(vis["left"]) and _oncoming_to(v, vis["ctr"])) or _box_conflict(v, vis, open_box)):
 			lim = minf(lim, _brake(maxf(d, 0.0)))          # never block the crossing: wait at the line until there is room on the far side
 		if d > -0.4:
 			break                                     # only the next junction matters
 	return lim
 
 
+## Is somebody moving about in the front yard (a car that has pulled out of its bay or turned in, not one still waiting to go)?
+## Cause: the yard is one room wide with a bay on each side of the gate, so two cars meeting in it would be head to head; one at a time.
+func _yard_busy(v: Dictionary, rect: Rect2) -> bool:
+	for o in vehicles:
+		if o == v or str(o["state"]) == "dead" or str(o["state"]) == "parked":
+			continue
+		var gy: Dictionary = o.get("gate_yield", {})
+		if not gy.is_empty() and float(o["s"]) <= float(gy["s"]) + 0.5:
+			continue                                              # still waiting in its bay for the way out to clear: it has not started
+		if rect.has_point(o["pos"]):
+			return true
+	return false
+
+
 ## Traffic is coming along the lane past the gate (or stands in it): a vehicle leaving the lot must wait.
 func _lane_busy(v: Dictionary, gy: Dictionary) -> bool:
+	if gy.has("rect") and _yard_busy(v, gy["rect"]):
+		return true
 	for o in vehicles:
 		if o == v or str(o["state"]) == "dead" or str(o["state"]) == "parked":
 			continue
@@ -356,95 +385,6 @@ func _no_room_beyond(v: Dictionary, half: float, s_clear: float) -> bool:
 			if along - float(o["len"]) * 0.5 < need + half:
 				return true
 	return false
-
-
-func _obstacle_limit(v: Dictionary, half: float) -> float:
-	if vt < float(v["ghost_until"]):
-		return INF
-	var h: Vector2 = v["dir"]
-	var rt: Vector2 = VehicleRoads.right_of(h)
-	var lim: float = INF
-	_blocker = {}
-	var look: float = num("look", 6.0) + float(v["v"]) * 0.6
-	var gap: float = num("gap", 0.9)
-	var pos: Vector2 = v["pos"]
-	var wid: float = float(v["wid"])
-	for o in vehicles:
-		if o == v or str(o["state"]) == "dead":
-			continue
-		var d: Vector2 = (o["pos"] as Vector2) - pos
-		if d.length_squared() > 900.0:
-			continue
-		var oh: float = float(o["len"]) * 0.5
-		var cs: float = h.dot(o["dir"])
-		var margin: float = wid * 0.5 + 0.12
-		var near_only: bool = false
-		if cs < -0.7:
-			margin = wid * 0.5                                   # oncoming in the other lane: only a real intrusion counts (a left turn across it gives way by age)
-		if cs <= 0.7:
-			var yields: bool = int(o["id"]) < int(v["id"]) or float(o["v"]) < 0.3
-			if not yields:
-				continue                                         # the other one gives way to me
-		if int(o.get("wait_for", -1)) == int(v["id"]):
-			near_only = true                                     # it waits for me (a deadlock in the making): only stop for it when it is really in my way
-		var best: float = INF
-		var ohd: Vector2 = o["dir"]
-		var ort: Vector2 = VehicleRoads.right_of(ohd)
-		var ow: float = float(o["wid"]) * 0.5 * 0.95
-		var ol: float = oh * 0.95
-		var nl: int = int(ceil(ol * 2.0 / 1.1))
-		var pts_o: Array = []
-		for ia in nl + 1:
-			var sx: float = -1.0 + 2.0 * float(ia) / float(nl)
-			for sy in [-1.0, 0.0, 1.0]:
-				pts_o.append((o["pos"] as Vector2) + ohd * (ol * sx) + ort * (ow * sy))
-		var horizon: float = 2.4 if near_only else look + half + 6.0
-		var vpath: VehiclePath = v["path"]
-		var dd: float = 0.2
-		while dd <= horizon and best == INF:
-			var sp: float = float(v["s"]) + dd
-			if sp > vpath.length + 0.5:
-				break
-			var pc: Vector2 = centre(vpath, sp, float(v["len"]))
-			var nose: Vector2 = vpath.at(minf(sp + half * 0.9, vpath.length))
-			for q in pts_o:
-				if (q as Vector2).distance_squared_to(nose) < margin * margin or (q as Vector2).distance_squared_to(pc) < margin * margin:
-					best = dd
-					break
-			dd += 0.8
-		if best < INF:
-			var bl: float = _brake(best - gap)
-			if bl < lim:
-				lim = bl
-				_blocker = o
-				v["wait_for"] = int(o["id"])
-	if not folks.is_empty():
-		var vpath2: VehiclePath = v["path"]
-		var fm: float = wid * 0.5 + 0.35
-		var d2: float = 0.2
-		var hz: float = look + half
-		while d2 <= hz:
-			var sp2: float = float(v["s"]) + d2
-			if sp2 > vpath2.length + 0.5:
-				break
-			var c2: Vector2 = centre(vpath2, sp2, float(v["len"]))
-			var n2: Vector2 = vpath2.at(minf(sp2 + half * 0.9, vpath2.length))
-			var hit_f: Vector2 = Vector2.INF
-			var r2: Vector2 = vpath2.at(maxf(sp2 - half * 0.9, 0.0))
-			var m1: Vector2 = vpath2.at(minf(sp2 + half * 0.45, vpath2.length))
-			var m2: Vector2 = vpath2.at(maxf(sp2 - half * 0.45, 0.0))
-			for p in folks:
-				if p.distance_squared_to(n2) < fm * fm or p.distance_squared_to(c2) < fm * fm or p.distance_squared_to(r2) < fm * fm or p.distance_squared_to(m1) < fm * fm or p.distance_squared_to(m2) < fm * fm:
-					hit_f = p
-					break
-			if hit_f != Vector2.INF:
-				var fl: float = _brake(d2 - 0.4)
-				if fl < lim:
-					lim = fl
-					_blocker = {"kind": "folk", "state": "stand", "pos": hit_f, "tag": "folk"}
-				break
-			d2 += 0.7
-	return lim
 
 
 # ------------------------------------------------------------------ queries and checks

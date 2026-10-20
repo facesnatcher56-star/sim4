@@ -148,8 +148,9 @@ func _vehicle_for(rec: Dictionary, fa: Dictionary, fb: Dictionary) -> Dictionary
 		var dest_bay: int = -1
 		var kind: String = "car"
 		var glb: String = "taxi"
-		var lead: float = 0.0
 		var existing: Dictionary = {}
+		var pre: Dictionary = {}
+		var post: Dictionary = {}
 		if mode == "car":
 			existing = sim.by_key("car:%d" % int(rec["car"]))
 			var c: Dictionary = Transport.car(int(rec["car"]))
@@ -162,16 +163,13 @@ func _vehicle_for(rec: Dictionary, fa: Dictionary, fb: Dictionary) -> Dictionary
 				dest_pos = (VehicleBays.of(str(rec["to"]))[free] as Dictionary)["pos"]
 		else:
 			kind = "taxi"
-			lead = 18.0
-		r = VehicleRoutes.trip(fa, bay_pos, fb, dest_pos, lead)
+			pre = _drive_in(fa)                                  # the taxi comes from a road end of the map and leaves by one: it never starts or ends on the picture
+		if dest_bay < 0:
+			post = _drive_out(fb)
+		r = VehicleRoutes.trip(fa, bay_pos, fb, dest_pos, 0.0, pre, post)
 		if r.is_empty():
 			return {}
 		var path2: VehiclePath = r["path"]
-		if kind == "taxi":
-			var tail: Array = path2.pts.duplicate()
-			tail.append(Vector2(float(fb["gate"]) - 14.0, float(fb["lane_z"])))
-			path2 = VehiclePath.make(tail, 0.0)
-			r["path"] = path2
 		if existing.is_empty():
 			v = sim.add(kind, glb, path2, {"end": "park" if dest_bay >= 0 else "dead", "key": "car:%d" % int(rec["car"]) if mode == "car" else ""})
 			v["gate_yield"] = r["gate_yield"]
@@ -197,6 +195,32 @@ func _vehicle_for(rec: Dictionary, fa: Dictionary, fb: Dictionary) -> Dictionary
 	rec["door_d"] = r["drop_door"]
 	rec["path"] = r["path"]
 	return {"v": v, "r": r}
+
+
+## From the nearest road end of the map to the lane in front of `fa` (empty if none).
+func _drive_in(fa: Dictionary) -> Dictionary:
+	var lane: float = float(view.cfg.get("lane", 1.0))
+	var best: Dictionary = {}
+	var best_len: float = 1.0e9
+	for e in VehicleRoads.edge_ends():
+		var rt: Dictionary = VehicleRoads.entry_route(e, fa, float(fa["gate"]) + 2.0, lane)
+		if rt.is_empty():
+			continue
+		var l: float = 0.0
+		var pp: Array = rt["pts"]
+		for k in range(1, pp.size()):
+			l += (pp[k] as Vector2).distance_to(pp[k - 1])
+		if l < best_len:
+			best_len = l
+			best = rt
+	return best
+
+
+## From the lane in front of `fb` to the nearest road end of the map.
+func _drive_out(fb: Dictionary) -> Dictionary:
+	var lane: float = float(view.cfg.get("lane", 1.0))
+	var e: Dictionary = VehicleRoads.nearest_end(fb, lane)
+	return VehicleRoads.exit_route(fb, float(fb["gate"]) - 1.5, e, lane) if not e.is_empty() else {}
 
 
 func _free_bay(lot_id: String) -> int:
@@ -281,7 +305,7 @@ func _alight(fid: int, rec: Dictionary, v: Dictionary) -> void:
 	v.erase("vcap")
 	if str(rec["mode"]) == "bike":
 		rec["phase"] = "done"
-		view.sim.kill(v)
+		# the bike is not killed: it ends its path where the rider got off and stays there until the picture has moved on (VehicleSim end_hold)
 
 
 func _tick_bus(rec: Dictionary, now: float) -> void:
