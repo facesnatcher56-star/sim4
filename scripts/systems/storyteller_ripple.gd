@@ -54,12 +54,18 @@ static func _near(hid: int, p: Dictionary, ctx: Dictionary) -> bool:
 		return false
 	if buff != "" and not SimEnv.data().buff_def(buff).is_empty():
 		for f in res:
+			if not _can_notice(f):
+				continue
 			if Storyteller.rng.randf() < float(rcfg().get("near_buff_chance", 0.7)):
 				f.add_buff(buff)
 	StorytellerLog.toast(hid, text)
 	StorytellerLog.add("ripple", text, "", "h%d" % hid, [hid], "home", "")
 	_count(hid, "near")
 	return true
+
+## Task 34: only somebody who can see or hear it is unsettled by what happens down the road: not a sleeper, not someone away or in hospital, not a baby.
+static func _can_notice(f) -> bool:
+	return not SysUtil.is_away(f) and not Hospital.is_in(f) and not f.has_buff("in_hospital") and not FireRules.asleep(f) and str(f.age_stage) not in ["baby"]
 
 static func _know(hid: int, p: Dictionary, ctx: Dictionary, who: int) -> bool:
 	var friends: Array = knows_who(hid, who)

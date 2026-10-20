@@ -30,5 +30,14 @@ func run() -> Array:
 		_check(StorytellerPlay.can_play("headhunter", c, key), "a recruiter can ring somebody with a job")
 		Careers.jobs.erase(int(adult.id))
 	_check(str((StorytellerDeck.card("crash_avenue").get("ripple", {}).get("near", {}) as Dictionary).get("buff", "x")) == "", "a traffic jam does not make the neighbours anxious")
+	# a ripple unsettles those who can notice it, not somebody in hospital
+	var res: Array = StorytellerPlay.residents_of(hid)
+	if res.size() >= 2 and not SimEnv.data().buff_def("anxious_jitters").is_empty():
+		var keep = StorytellerRipple.rcfg().get("near_buff_chance", 0.7)
+		StorytellerRipple.rcfg()["near_buff_chance"] = 1.0
+		res[1].add_buff("in_hospital")
+		StorytellerRipple._near(hid, {"text": "Sirens.", "buff": "anxious_jitters"}, {})
+		StorytellerRipple.rcfg()["near_buff_chance"] = keep
+		_check(res[0].has_buff("anxious_jitters") and not res[1].has_buff("anxious_jitters"), "somebody in hospital is not unsettled by sirens they cannot hear")
 	Kit.teardown()
 	return fails
