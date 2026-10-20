@@ -19,6 +19,8 @@ func _ready() -> void:
 	level_view.view_changed.connect(return_to_cutaway)     # changing floor or building: back to the readable Cutaway view
 	LookOverlay.ensure_on(self)    # vignette + grain of the current look (scripts/world/look_overlay.gd)
 	WeatherView.ensure_on(self)    # sky / sun / weather particles / seasons (scripts/world/weather_view.gd)
+	ClutterView.ensure_on(self)    # floor clutter that grows with a room's mess (scripts/world/clutter_view.gd; view only)
+	WearView.ensure_on(self)       # district wear dressing near the camera: litter, graffiti, weeds, cracks (scripts/world/wear_view.gd; view only)
 	ObjectStateView.ensure_on(self)    # objects show their state: soil, grime, sparks, burners, screens (scripts/world/object_state_view.gd; view only)
 	FireView.ensure_on(self)       # flames / smoke / scorch marks (scripts/world/fire_view.gd)
 	PlotView.ensure_on(self)       # scaffolding, building sites and finished buildings on the reserved plots of the east side (scripts/world/plot_view.gd; view only)
@@ -39,6 +41,7 @@ func _connect_signals() -> void:
 	World.world_reset.connect(func(): call_deferred("frame_home"))   # new / loaded / travelled-to lot: show all of it
 	World.walls_changed.connect(func(): _walls_dirty = true)
 	World.floors_changed.connect(func(): _floors_dirty = true)
+	WearLayer.bus.changed.connect(func(_lot): _refresh_wall_wear(); _refresh_poor_objects())      # task 41a: wealth / district wear changed
 	Looks.bus.changed.connect(func(_id): rebuild_all())     # a new visual style (Settings / --look): rebuild floors, walls and shells with its tints
 	var ev := get_node_or_null("/root/Events")
 	if ev:
@@ -274,6 +277,14 @@ func _refresh_object_visual(o) -> void:
 			if o.def.has("decor_scale_state"):
 				(mi.material_override as StandardMaterial3D).albedo_color = base.lerp(Color(0.5, 0.4, 0.2), 1.0 - o.ratio(str(o.def["decor_scale_state"])))
 	ObjectStateView.refresh(self, o, node)      # task 33.3: state -> look (data/object_visuals.json)
+
+
+## Task 41a: re-resolve the look of objects whose lot's wealth score changed (poor variants appear / go).
+func _refresh_poor_objects() -> void:
+	for id in _obj_nodes.keys():
+		var o = World.get_object(int(id))
+		if o != null and ObjectVisualRules.has_rules(str(o.def_id)):
+			_refresh_object_visual(o)
 
 
 func _on_object_placed(id: int) -> void:

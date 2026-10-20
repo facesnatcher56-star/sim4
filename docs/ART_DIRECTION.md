@@ -88,3 +88,22 @@ The reference look does no extra work (`Looks.grade` returns at once, the overla
 Night windows of the closed shells use one glow level per building (no per-room light); furniture is not recoloured; the rough district itself (task 40) does not exist,
 so the dressing is applied to the home lot; the UI keeps a few hard-coded mint accents (`UITheme.ACCENT` is now look-aware, custom-drawn bars that use their own greens
 are not); the grain / vignette are screen-space, not per-object; no corner-shop front (the bus stop is the street prop).
+
+
+## Task 41a: the wear / poverty layer (dressing, props, decals, state in the visuals)
+
+`grounded` is now the default look (`data/looks.json` "default", Settings > Display > Visual style, Reference stays selectable). View only: no sim state or rng (tile hashes and own generators).
+
+| piece | what | where |
+|---|---|---|
+| Wealth score | a household's funds give 0..1 (`poverty` in `data/wear_layer.json`: 600 coins or less = 1, 4500 or more = 0); the player's lot reads the household, any lot can also declare a district wear level | `WearRules.poverty_score`, `WearLayer.lot_poverty / lot_wear / poverty_at` |
+| Poor interiors | `data/object_poverty.json` is merged into the 33b rules: bed, single bed, sofa bed become a **mattress on the floor** (stained blanket, a dent, an old pillow; the unmade-bed parts are skipped), chairs are **broken** or recoloured **mismatched** (`_pick` 0..2, stable per object), the TV sits on a **cardboard box** with rabbit ears, sofas sag, other furniture gets a worn / grimy tint by score. Pseudo state keys `_poverty` and `_pick` are injected by `ObjectStateView.look_of` and never written to the object | `ObjectVisualRules._merge_poverty`, `ObjectStateView.look_of` |
+| Mess clutter | per tile mess gives pieces (untidy 1, messy 2, squalid 4: dishes, clothes, boxes, bags, cans, bottles, paper, towels by room kind); they vanish when the mess is cleaned; a poor lot keeps a few boxes and bags. One MultiMesh per kind | `ClutterView`, `WearRules.clutter_for_tile`, `WearProps` |
+| Wall grime | one world-space shader for the `wall` and `wood` classes of walls, window frames, doors: dirty base course, rain streaks, peeling paint, soot and moss on the **cut wall top**; `instance uniform wear` per wall (outside strong, inside lighter) from the lot's wear | `WearShader`, `WearWalls`, `lot_walls._build_wall_chunk` |
+| Litter | muted paper, cans, bottles, bags, newspaper as real low-poly shapes in loose clusters | `WearProps.litter` |
+| Tags | six tags (RAT, KOZ, SIX, NEK, DOA, VEX) with real letters, outline, fill, highlight, shadow, drips and an underline; decals sized to the texture's 512:192 aspect | `GraffitiTex` |
+| Yard | clusters of grass in three heights with wide curved blades, broad-leaf weeds with dandelions, straw and brown clumps, dead patches (brown decal + dry stalks + bare soil) | `WearYard` |
+| District wear | `data/district_dressing.json`: `presets` (rough 0.85, tired 0.5, tidy 0.08), `districts` (rough_row declares townie_b), `wear_map` (density per wear level, 0 below a `min_wear`). `WearView` builds a lot's dressing (litter, tags, cracks, weeds, dead patches, door stains, boarded windows) only while the camera is within 44 tiles, nothing when zoomed far out. Hook: `WearLayer.set_district_wear(id, 0..1)` makes a block improve or decline | `WearLot.plan / build`, `WearView` |
+
+Shots: `tests/art41a_shot.gd` (Forward+): `powershell -File tools/godot_guard.ps1 -MaxSeconds 500 -Args "--path,.,--rendering-method,forward_plus,--resolution,1280x720,--script,res://tests/art41a_shot.gd,--,coord/shots/art41,1280x720,grounded,interior_before+interior_after+litter+graffiti+yard+exterior+street+district+bedroom"`.
+Tests: `tests/wear_layer_test.gd` (fast).
