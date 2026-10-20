@@ -38,6 +38,8 @@ func _init_chunk_materials() -> void:
 	overlay_grass_mat = _overlay(Color(1, 1, 1, 0))
 	overlay_snow_mat = _overlay(Color(0.95, 0.97, 1.0, 0))
 	overlay_wet_mat = _overlay(Color(0.05, 0.07, 0.1, 0))
+	overlay_wet_mat.roughness = 0.2            # wet streets catch the lamps
+	overlay_wet_mat.metallic_specular = 1.0
 	tree_mats = {"oak": _tree_mat(Color(0.35, 0.62, 0.28)), "pine": _tree_mat(Color(0.18, 0.42, 0.26)), "trunk": _tree_mat(Color(0.38, 0.27, 0.18))}
 
 
