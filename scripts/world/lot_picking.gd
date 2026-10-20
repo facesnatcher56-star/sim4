@@ -46,15 +46,45 @@ func _object_aabb(o) -> AABB:
 	var h: float = float(o.def.get("height", 1.0))
 	if o.is_wall_mounted():
 		var e: Vector3i = World.mount_edge(o.tile, o.rot)
+		var wh := 2.0 * _wall_scale(e)        # a cut-down wall carries its window / door down with it
 		if e.z == 0:
-			return AABB(Vector3(e.x + 0.05, LPos.elev(o.level), e.y - 0.12), Vector3(0.9, 2.0, 0.24))
-		return AABB(Vector3(e.x - 0.12, LPos.elev(o.level), e.y + 0.05), Vector3(0.24, 2.0, 0.9))
+			return AABB(Vector3(e.x + 0.05, LPos.elev(o.level), e.y - 0.12), Vector3(0.9, wh, 0.24))
+		return AABB(Vector3(e.x - 0.12, LPos.elev(o.level), e.y + 0.05), Vector3(0.24, wh, 0.9))
 	var lo := Vector2(1e9, 1e9)
 	var hi := Vector2(-1e9, -1e9)
 	for t in o.footprint():
 		lo = lo.min(Vector2(t))
 		hi = hi.max(Vector2(t) + Vector2.ONE)
 	return AABB(Vector3(lo.x, LPos.elev(o.level), lo.y), Vector3(hi.x - lo.x, h, hi.y - lo.y))
+
+
+const HEAD_H := 1.8                  # things whose box the ray enters above this lose to folk and furniture on the floor under the mouse
+const FOOTPRINT_BONUS := 1.2         # an object standing on the floor point under the mouse beats a taller one in front of it
+const CEILING_PENALTY := 100.0       # ceiling lights only answer when nothing else is under the mouse
+
+
+## Current height scale (1 = full wall, CUT_RATIO = cut down) of the wall edge an object hangs on.
+func _wall_scale(e: Vector3i) -> float:
+	var w = _wall_by_edge.get(e, null)
+	if w != null:
+		return clampf(float(w["scale"]), CUT_RATIO, 1.0)
+	return 1.0 if wall_mode == WallMode.UP else CUT_RATIO
+
+
+## Can the player act on this object in live play? Windows, doors, rugs and pillars are scenery: no hover, no label.
+func is_usable_object(o) -> bool:
+	if o.is_wall_mounted():
+		return false
+	return not (o.def.get("interactions", []) as Array).is_empty() or o.def.has("portal") or o.has_tag("grave") or o.is_broken()
+
+
+func _building_tools() -> bool:
+	return build_mode or tool != "select"
+
+
+## Which objects the mouse may land on: everything in Build/Buy, only usable things (and no wall-hung ones) in live play.
+func _pickable(o) -> bool:
+	return _building_tools() or is_usable_object(o)
 
 
 func pick(mp: Vector2) -> Dictionary:
@@ -72,12 +102,13 @@ func pick(mp: Vector2) -> Dictionary:
 			box = AABB(fv.position + Vector3(-0.5, 0.0, -0.5), Vector3(1.0, 1.0, 1.0))
 		var hit = box.intersects_ray(ro, rd)
 		if hit != null:
-			var t := ro.distance_to(hit) - 0.3   # prefer folk when overlapping furniture
+			var t := ro.distance_to(hit) - 2.0   # folk beat the furniture they stand next to
 			if t < best_t:
 				best_t = t
 				kind = "folk"
 				id = fid
 	var gp = ground_point(mp)       # only objects near where the ray meets the ground can be hit (hundreds of objects on the big map)
+	var gt := Vector2i(-1, -1) if gp == null else Vector2i(floori(gp.x), floori(gp.z))
 	for o in World.all_objects():
 		if gp != null and (absf(o.tile.x + 0.5 - gp.x) > 9.0 or absf(o.tile.y + 0.5 - gp.z) > 9.0):
 			continue
@@ -86,12 +117,23 @@ func pick(mp: Vector2) -> Dictionary:
 			continue          # behind a standing building shell
 		if level_view != null and not level_view.object_shown(o):
 			continue          # on a floor that is not the one being looked at
+		if not _pickable(o):
+			continue
 		var bb := _object_aabb(o)
 		var hit = bb.intersects_ray(ro, rd)
 		if hit != null:
 			var t := ro.distance_to(hit)
+			var on_spot: bool = gp != null and (o.footprint() as Array).has(gt)
 			if o.is_floor_layer():
 				t += 2.0
+			if on_spot:
+				t -= FOOTPRINT_BONUS
+			elif (hit as Vector3).y > LPos.elev(o.level) + HEAD_H:
+				t += 2.0                      # a light or a shelf top high above the room is not what the player points at
+			if o.has_tag("ceiling") and not _building_tools():
+				if not on_spot:
+					continue
+				t += CEILING_PENALTY
 			if t < best_t:
 				best_t = t
 				kind = "object"
@@ -129,8 +171,10 @@ func _set_hover(kind: String, id: int, tile: Vector2i) -> void:
 
 
 func _place_highlight(box: MeshInstance3D, ring: MeshInstance3D, kind: String, id: int) -> void:
+	var slot := "sel" if ring == _sel_ring else "hover"
 	box.visible = false
 	ring.visible = false
+	var outlined: Node3D = null
 	if kind == "folk" and _folk_views.has(id):
 		ring.visible = true
 		ring.position = Vector3(_folk_views[id].position.x, 0.04, _folk_views[id].position.z)
@@ -138,10 +182,51 @@ func _place_highlight(box: MeshInstance3D, ring: MeshInstance3D, kind: String, i
 	elif kind == "object":
 		var o = World.get_object(id)
 		if o:
-			var bb := _object_aabb(o)
-			box.visible = true
-			box.position = bb.get_center()
-			box.scale = bb.size + Vector3(0.06, 0.06, 0.06)
+			outlined = _object_node(o)
+			if outlined == null:      # wall-hung / undrawn visuals: a thin slab on the floor under the object, never a box around it
+				var bb := _object_aabb(o)
+				box.visible = true
+				box.position = Vector3(bb.get_center().x, bb.position.y + 0.03, bb.get_center().z)
+				box.scale = Vector3(bb.size.x, 0.05, bb.size.z)
+	_set_outline(slot, outlined)
+
+
+## The drawn node of an object (ground floor: LotView's, upper floors: LevelView's).
+func _object_node(o) -> Node3D:
+	var n = _obj_nodes.get(o.id, null)
+	if n == null and level_view != null:
+		n = level_view.object_node(o.id)
+	return n if n != null and is_instance_valid(n) and (n as Node3D).visible else null
+
+
+func _outline_material(slot: String) -> StandardMaterial3D:
+	if not _outline_mats.has(slot):
+		var m := StandardMaterial3D.new()      # inverted hull: a coloured shell a little bigger than the mesh, front faces culled
+		m.albedo_color = Color(0.3, 0.9, 1.0) if slot == "sel" else Color(1.0, 0.86, 0.25)
+		m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		m.cull_mode = BaseMaterial3D.CULL_FRONT
+		m.grow = true
+		m.grow_amount = 0.025
+		_outline_mats[slot] = m
+	return _outline_mats[slot]
+
+
+func _set_outline(slot: String, node: Node3D) -> void:
+	var prev = _outlined.get(slot, null)
+	if prev == node:
+		return
+	if prev != null and is_instance_valid(prev):
+		_apply_overlay(prev, null)
+	_outlined[slot] = node
+	if node != null:
+		_apply_overlay(node, _outline_material(slot))
+
+
+func _apply_overlay(n: Node, m: Material) -> void:
+	if n is MeshInstance3D:
+		(n as MeshInstance3D).material_overlay = m
+	for c in n.get_children():
+		_apply_overlay(c, m)
 
 
 func _update_highlights() -> void:
@@ -226,7 +311,7 @@ func _update_hover_label() -> void:
 			_hover_label.visible = true
 	elif hover_kind == "object":
 		var o = World.get_object(hover_id)
-		if o != null:
+		if o != null and (_building_tools() or is_usable_object(o)):     # live play names only what folk can use
 			var bb := _object_aabb(o)
 			_hover_label.text = Graves.hover_text(o) if o.has_tag("grave") and Graves.hover_text(o) != "" else str(o.def.get("label", o.def_id))
 			var fire_tip: String = Fire.hover_text(o)         # fire risk / protection lines (FireRules.hover_text)

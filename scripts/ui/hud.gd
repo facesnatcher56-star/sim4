@@ -480,6 +480,8 @@ func _update_speed_buttons() -> void:
 
 func _on_build_mode(on: bool) -> void:
 	build_button.set_pressed_no_signal(on)
+	if lot_view != null:
+		lot_view.set("build_mode", on)       # wall-hung things (windows, doors) can be picked while building
 	pie.close()
 	if on:
 		prev_speed = maxi(UIU.get_speed(), 1)

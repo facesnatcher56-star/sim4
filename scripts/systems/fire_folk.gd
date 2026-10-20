@@ -126,7 +126,7 @@ static func _wake_chance(f, smoke_here: float, room_stage: int, near: int) -> fl
 
 ## "Fire!": every sleeper within earshot may wake (same room almost surely, a few rooms away through open or closed doors, walls muffle).
 static func _shout(b: Dictionary, f, now: int) -> void:
-	SimEnv.emit("thought", int(f.id), "Fire! Everybody out!")
+	ThoughtVoice.urgent(int(f.id), "Fire! Everybody out!")
 	for s in FireRules.folk_in_lot(str(b["lot"])):
 		if int(s.id) == int(f.id) or not FireRules.asleep(s):
 			continue
@@ -150,7 +150,7 @@ static func _wake_others(b: Dictionary, f, now: int) -> bool:
 			continue
 		if Fire.rng.randf() < FireRules.num("wake_others_chance", 0.7):
 			_wake(s, rec(b, s), now)
-			SimEnv.emit("thought", int(f.id), "Wake up, wake up!")
+			ThoughtVoice.urgent(int(f.id), "Wake up, wake up!")
 		return true
 	return false
 
@@ -160,7 +160,7 @@ static func _wake(f, r: Dictionary, now: int) -> void:
 	r["aware"] = true
 	r["aware_min"] = now
 	f.add_buff("fire_panic")
-	SimEnv.emit("thought", int(f.id), "Wake up! Something is on fire!")
+	ThoughtVoice.urgent(int(f.id), "Wake up! Something is on fire!")
 
 # ------------------------------------------------------------------ acting
 static func _act(b: Dictionary, f, r: Dictionary, fires: Array, now: int) -> void:
@@ -188,7 +188,7 @@ static func _act(b: Dictionary, f, r: Dictionary, fires: Array, now: int) -> voi
 		return
 	if not bool(b["called"]) and now - int(r["aware_min"]) >= int(FireRules.num("call_after_aware_min", 1.0)) and Fire.rng.randf() < FireRules.num("call_chance", 0.6):
 		Fire.call_brigade(lot, int(f.id))
-		SimEnv.emit("thought", int(f.id), "Calling the fire department!")
+		ThoughtVoice.urgent(int(f.id), "Calling the fire department!")
 	var top: int = 0
 	for fi in fires:
 		top = maxi(top, int(fi["stage"]))
@@ -202,7 +202,7 @@ static func _act(b: Dictionary, f, r: Dictionary, fires: Array, now: int) -> voi
 		var p: float = FireRules.num("smother_chance", 0.1) + FireRules.num("smother_per_skill", 0.04) * skill + 0.03 * score
 		if Fire.rng.randf() < p:
 			Fire.extinguish(fires[0], "folk")
-			SimEnv.emit("thought", int(f.id), "Phew! I put it out.")
+			ThoughtVoice.urgent(int(f.id), "Phew! I put it out.")
 		elif ext == null:
 			pass
 		else:
@@ -234,11 +234,11 @@ static func _flee(b: Dictionary, f, r: Dictionary) -> void:
 			blocked = true
 	if blocked:
 		r["state"] = "trapped"
-		SimEnv.emit("thought", int(f.id), "I'm trapped!")
+		ThoughtVoice.urgent(int(f.id), "I'm trapped!")
 		return
 	if not bool(b["called"]) and Fire.rng.randf() < 0.85:           # on the way out: phone from the street
 		Fire.call_brigade(lot, int(f.id))
-		SimEnv.emit("thought", int(f.id), "Calling the fire department!")
+		ThoughtVoice.urgent(int(f.id), "Calling the fire department!")
 	var ir := Interaction.create("flee_fire", f, -1, false)
 	if ir == null:
 		return
@@ -249,7 +249,7 @@ static func _flee(b: Dictionary, f, r: Dictionary) -> void:
 	if w != null:
 		f.enqueue(w)
 	r["state"] = "fleeing"
-	SimEnv.emit("thought", int(f.id), "Get out!")
+	ThoughtVoice.urgent(int(f.id), "Get out!")
 
 static func _trapped(b: Dictionary, f, r: Dictionary) -> void:
 	r["trap"] = int(r["trap"]) + 1
@@ -258,7 +258,7 @@ static func _trapped(b: Dictionary, f, r: Dictionary) -> void:
 		FireLevels.land(f, true)
 		r["state"] = "safe"
 		r["expo"] = maxf(float(r["expo"]), FireRules.num("hurt_min", 9.0))
-		SimEnv.emit("thought", int(f.id), "I got out through a window!")
+		ThoughtVoice.urgent(int(f.id), "I got out through a window!")
 		_keep_waiting(f)
 
 ## Awake grown-ups carry out babies, toddlers and anyone collapsed first.
@@ -278,7 +278,7 @@ static func _rescue_dependants(b: Dictionary, f, now: int) -> bool:
 				heavy = true
 		if Fire.rng.randf() < (0.4 if heavy else 0.85):
 			carry_out(b, d, dr)
-			SimEnv.emit("thought", int(f.id), "I've got you!")
+			ThoughtVoice.urgent(int(f.id), "I've got you!")
 	return any
 
 ## Put someone safely in the street (rescue by a parent or by the fire department); smoke may have hurt them on the way.
@@ -330,7 +330,7 @@ static func _exposure(b: Dictionary, f, r: Dictionary, room_stage: int, asleep: 
 	if ex >= FireRules.num("hurt_min", 9.0) and int(r["hurt"]) < 1:
 		injure(f, 1, "smoke")
 		_hurt(b, f, r, 1)
-		SimEnv.emit("thought", int(f.id), "I can't breathe!")
+		ThoughtVoice.urgent(int(f.id), "I can't breathe!")
 	if ex >= FireRules.num("lethal_min", 28.0):
 		(b["dead"] as Array).append(int(f.id))
 		Fire._stat("deaths")
@@ -359,7 +359,7 @@ static func on_extinguisher_used(folk_id: int) -> void:
 	if not b.is_empty():
 		rec(b, f)["state"] = "none"
 	if out == 0 and tried > 0:
-		SimEnv.emit("thought", int(f.id), "It is too big!")
+		ThoughtVoice.urgent(int(f.id), "It is too big!")
 
 ## The blaze is over: everybody may go about their day again.
 static func release(b: Dictionary) -> void:

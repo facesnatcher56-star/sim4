@@ -178,7 +178,7 @@ func _fill(f: Folk) -> void:
 		if ir.can_run(f, null, false) and ir.start():
 			return
 		if ir.player:
-			SimEnv.emit("thought", f.id, "I can't do that right now.")
+			ThoughtVoice.urgent(f.id, "I can't do that right now.")
 	if f.current != null or not f.queue.is_empty() or not autonomy_enabled:
 		return
 	var now := SimEnv.now_min()

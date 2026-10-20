@@ -62,6 +62,12 @@ func cycle_wall_mode() -> int:
 	return wall_mode
 
 
+## Walls Up is a deliberate choice, never the state the game leaves the player in: loading, travelling home and changing floors come back to Cutaway.
+func return_to_cutaway() -> void:
+	if wall_mode != WallMode.CUTAWAY:
+		set_wall_mode(WallMode.CUTAWAY)
+
+
 func set_wall_mode(m: int) -> void:
 	wall_mode = clampi(m, 0, 2)
 	_cut_dirty = true
@@ -111,6 +117,7 @@ func _on_framed() -> void:
 
 ## Centre the camera on the built-up part of the lot (walls + objects) and zoom so all of it is on screen.
 func frame_home() -> void:
+	return_to_cutaway()
 	var lo := Vector2(1e9, 1e9)
 	var hi := Vector2(-1e9, -1e9)
 	for e in World.walls:

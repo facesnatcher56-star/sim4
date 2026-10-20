@@ -157,7 +157,7 @@ static func on_started(actor: int, iid: String, target: int) -> void:
 		var c2 := circle_of(actor)
 		if not c2.is_empty():
 			c2["topic"] = topic
-		SimEnv.emit("thought", actor, "Let's talk about %s." % topic_label(topic))
+		ThoughtVoice.chat(actor, target, topic)       # topic lines for both speakers (data/thought_voice.json)
 
 static func on_finished(actor: int, iid: String, _success: bool) -> void:
 	var mode := _convmode(iid)

@@ -129,7 +129,7 @@ static func _warn(a: int, b: int) -> void:
 	var bn: String = CrimePerson.name_of(b)
 	var fa = CrimePerson.folk(a)
 	if fa != null:
-		SimEnv.emit("thought", a, "I can't stand %s any more..." % bn)
+		ThoughtVoice.urgent(a, "I can't stand %s any more..." % bn)
 	# the whisper network: friends of both sides hear about it
 	var holders: Array = CrimePerson.friends(a).slice(0, 2) + CrimePerson.friends(b).slice(0, 2)
 	for h in holders:
