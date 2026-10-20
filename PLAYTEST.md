@@ -55,6 +55,14 @@ Top bar buttons: **Map**, **Money** (shops, your business, homes, bank), **Town*
 - **Co-op on two PCs**: title screen **Co-op**. One player **hosts** a saved game and shares the code, the other types it under **Join a game**. Both PCs must run the same build. 2 to 4 players.
 - Build and decorate: **B**, buy furniture, place walls and floors, add a second floor.
 
+## What changed since your first run
+
+- **The home starts empty by default.** New Game has a Home row: "Empty home (furnish it yourself)" or "Furnished home". An empty home comes with a moving-in allowance (about 1,500 to 2,500 coins). Press B and buy a bed, a toilet and a fridge first; the tips walk you through it. Until then your Folk sleep on the floor, take a free snack from the welcome basket and use a free restroom.
+- **The mouse picks things in the room.** Windows, doors and lights no longer steal the highlight; the thing under the mouse gets an outline.
+- **You can always see inside your own home.** Walls cut down automatically; other buildings open while your Folk is inside. Walls Up (Tab) is a choice, and it resets to cut-away when you change floor or load.
+- **Thoughts repeat less and mention real people, places and events.**
+- **Folk do more with their days:** weekend routines, spontaneous plans, reactions to sirens and storms, idle life, family dinners and game nights, outings to the town places on their own.
+- **Compact Folk panel.** Click Details to expand it; the tips dock to the left.
 ## Known issues
 
 From the latest notes, as plain as possible:
