@@ -1,0 +1,108 @@
+{
+  "version": 1,
+  "notes": "One-character play (docs/ONE_CHARACTER_PLAN.md Revision 3). Every number the owner may tune by playing lives here. Per-difficulty values are keyed relaxed (Easy) / normal / hard. Read through SoloCfg.",
+  "start": {
+    "coins": {"relaxed": 350, "normal": 200, "hard": 100},
+    "rent": {"relaxed": 55, "normal": 70, "hard": 85},
+    "first_week_prepaid": {"relaxed": true, "normal": true, "hard": false},
+    "sofa_bed": {"relaxed": true, "normal": false, "hard": false},
+    "evict_after_missed": {"relaxed": 3, "normal": 2, "hard": 1},
+    "wage_mult": {"relaxed": 1.1, "normal": 1.0, "hard": 0.9},
+    "odd_job_pay": {"relaxed": 24, "normal": 20, "hard": 16},
+    "hospital_mult": {"relaxed": 0.7, "normal": 1.0, "hard": 1.4},
+    "shelter_nights": {"relaxed": 4, "normal": 3, "hard": 2},
+    "flat_property": {"base": 6000, "hood": 0.5, "label": "Starter Studio"},
+    "notice_days": 3,
+    "autopay": true
+  },
+  "food": {
+    "ingredient_cost": 3,
+    "ingredients": {"prep_food": 1, "prep_food_good": 2, "microwave_meal": 2, "cook_meal": 2, "cook_meal_good": 3, "cook_meal_gourmet": 4, "cook_fish_dinner": 3},
+    "no_free_food_for_pawn": ["welcome_snack"]
+  },
+  "jobs": {
+    "first_board": ["cook", "writer", "handyperson", "gardener", "barista", "fitness_coach", "painter", "teacher"],
+    "min_openings": {"relaxed": 3, "normal": 2, "hard": 1}
+  },
+  "moving": {
+    "fee": 15,
+    "max_objects": 40,
+    "notice_days": 7,
+    "kept_defs": ["mailbox", "toilet", "shower", "sink", "fishing_spot", "garden_plot", "fire_extinguisher"]
+  },
+  "rough_sleep": {
+    "buff": "slept_rough",
+    "robbery_chance": 0.03,
+    "moved_on_chance": 0.2,
+    "rob_share": 0.5,
+    "rob_min_coins": 20
+  },
+  "shelter": {
+    "lot": "shelter",
+    "plot": "plot_3",
+    "checkin": [20, 22],
+    "checkout_hour": 7,
+    "cause": "The council runs a shelter because people lose their homes; it gives you a bed, not a meal."
+  },
+  "day_labour": {
+    "hours": [7, 9],
+    "minutes": 240,
+    "pay_per_hour": 10,
+    "lot": "works"
+  },
+  "ladder": [
+    {"id": "street", "label": "The street", "rent": 0, "bills": 0, "deposit": 0, "lot": "", "cause": "Nobody owns the bench, so nobody charges for it; nobody keeps it safe either."},
+    {"id": "shelter", "label": "Night shelter", "rent": 0, "bills": 0, "deposit": 0, "lot": "shelter", "cause": "The council pays for a few beds; it cannot pay for more nights."},
+    {"id": "bedsit", "label": "Bedsit at Elm Court", "rent": 25, "bills": 10, "deposit": 35, "lot": "apartments", "furnished": "cot", "district": "kiln",
+      "cause": "A room in somebody else's house is cheap because you share everything."},
+    {"id": "council", "label": "Council flat at Elm Court", "rent": 50, "bills": 45, "deposit": 0, "lot": "apartments", "furnished": "cot", "district": "kiln",
+      "wait_days": {"relaxed": 7, "normal": 14, "hard": 21}, "income_max": 450,
+      "cause": "The council lets flats below market to people with little income, so you apply and you wait."},
+    {"id": "starter", "label": "Starter Studio", "rent": "start.rent", "bills": 60, "deposit": "rent", "lot": "home", "cause": "A private landlord lets the studio at the going rate."},
+    {"id": "better", "label": "Better flat (Cedar Court)", "rent": 120, "bills": 70, "deposit": "rent", "lot": "townie_b", "income_min": 500,
+      "cause": "Market rent of a 10,000 coin property."},
+    {"id": "house", "label": "Family house (Maple Row)", "rent": 180, "bills": 90, "deposit": "rent", "lot": "townie_a", "income_min": 700,
+      "cause": "A 15,000 to 21,000 coin property with a garden and a quiet street."}
+  ],
+  "districts": {
+    "kiln": {
+      "label": "Kiln Quarter",
+      "lots": ["townie_b", "apartments", "works", "car_park", "shelter", "plot_4"],
+      "roughness": 0.85,
+      "rent_mult": 0.7,
+      "hood": 0.25,
+      "police_mult": 0.35,
+      "response_min": [35, 90],
+      "catch_on_scene": 0.2
+    }
+  },
+  "crime": {
+    "k_exponent": 1.5,
+    "multiples": {"burglary": 6, "robbery": 8, "assault": 5, "petty": 4},
+    "caps": {"burglary": 8, "robbery": 10, "assault": 8, "petty": 6},
+    "gang_war_mult": 5,
+    "gang_found_mult": 4,
+    "drive_by": {"peace_daily": 0.006, "war_daily": 0.04, "hit_chance": 0.08, "severity": [0.6, 0.28, 0.12], "death_of_hit": 0.12, "hours": [20, 3]},
+    "violence_setting": {"off": 0.0, "low": 0.35, "normal": 1.0, "high": 1.5}
+  },
+  "pressure": {
+    "min_roughness": 0.6,
+    "broke_coins": 150,
+    "first_offer_days": {"relaxed": 5, "normal": 3, "hard": 2},
+    "repeat_days": 4,
+    "offers": [
+      {"id": "lookout", "label": "Be a lookout", "minutes": 120, "pay": 40, "heat": 8, "arrest": 0.03},
+      {"id": "runner", "label": "Run a package", "minutes": 60, "pay": 55, "heat": 8, "arrest": 0.03, "trouble": 0.1},
+      {"id": "corner", "label": "Work a corner", "minutes": 240, "pay": 90, "heat": 8, "arrest": 0.03}
+    ],
+    "heat_decay_per_day": 1,
+    "dues_per_day": 3,
+    "leave_payoff": 150,
+    "record_expunge_days": 56
+  },
+  "heritage": {
+    "mixed_chance": 0.2,
+    "pull": {"relative": 0.15, "known": 0.1, "share": 0.1, "cap": 1.4},
+    "ids": ["amber_coast", "northern_hills", "river_folk", "salt_harbour", "ember_vale", "pine_lake"]
+  }
+}

@@ -434,6 +434,17 @@ func rebuild_folk_row() -> void:
 			if lot_view != null and lot_view.has_method("focus_on"):
 				lot_view.call("focus_on", "folk", fid))      # the camera goes to wherever that folk is (another lot on the big map)
 		folk_row.add_child(b)
+		if Pawn.is_pawn(f):
+			var mb := Button.new()
+			mb.text = "Myself"
+			mb.tooltip_text = "Things you can do without any object: sleep on the floor, ..."
+			mb.custom_minimum_size = Vector2(70, 46)
+			mb.name = "myself_button"
+			mb.pressed.connect(func():
+				var me = _resolve(selected_folk_id)
+				if me != null:
+					pie.open_with_entries(me, "self", -1, InteractionQuery.self_entries(me), get_viewport().get_mouse_position()))
+			folk_row.add_child(mb)
 
 func _on_selection_changed(kind: String, id: int) -> void:
 	if build_panel.active:

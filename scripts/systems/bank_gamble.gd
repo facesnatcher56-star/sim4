@@ -100,6 +100,8 @@ static func _urges(c: Dictionary, a: Dictionary) -> void:
 		if f == null or not SysUtil.is_resident(f):
 			continue
 		f.add_buff("gambling_urge")
+		if Pawn.is_pawn(f):          # the urge shows, the player decides whether to buy
+			continue
 		var n: int = int(a.get("urge_tickets", 4))
 		var cost: int = n * int(c.get("ticket_price", 5))
 		if Economy.spend(int(f.household_id), cost, "lottery tickets (an urge)"):

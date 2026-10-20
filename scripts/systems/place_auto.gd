@@ -63,7 +63,7 @@ static func on_day(day: int) -> void:
 	ids.sort()
 	for fid in ids:
 		var f2 = SysUtil.folk(fid)
-		if f2 != null:
+		if f2 != null and not Pawn.is_pawn(f2):          # the pawn goes out only when the player sends them
 			PlaceAutoPlan.make(f2, day)
 	PlaceAutoTownies.on_day(day)
 

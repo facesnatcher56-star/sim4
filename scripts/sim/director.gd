@@ -181,6 +181,8 @@ func _fill(f: Folk) -> void:
 			ThoughtVoice.urgent(f.id, "I can't do that right now.")
 	if f.current != null or not f.queue.is_empty() or not autonomy_enabled:
 		return
+	if Pawn.is_pawn(f):          # zero autonomy for the player's character
+		return
 	var now := SimEnv.now_min()
 	if now < f.idle_until_min:
 		return

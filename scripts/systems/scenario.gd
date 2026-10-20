@@ -55,6 +55,8 @@ static func default_difficulty() -> String:
 
 ## Starting coins for a scenario at a difficulty (rounded to 50). `base` overrides the scenario's own number (Free Play funds option).
 static func funds_for(scenario_id: String, diff_id: String, base: int = -1) -> int:
+	if scenario_id == "solo":
+		return SoloCfg.start_coins(diff_id)          # one-character play: data/solo.json
 	var b: int = base if base >= 0 else int(def(scenario_id).get("funds", 5000))
 	var m: float = float(difficulty_def(diff_id).get("funds_mult", 1.0))
 	return int(round(float(b) * m / 50.0)) * 50

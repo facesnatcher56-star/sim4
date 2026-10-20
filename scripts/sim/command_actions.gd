@@ -37,6 +37,8 @@ static func _interact(e: Dictionary) -> Dictionary:
 	var f = WorldIface.get_folk(int(e["folk_id"]))
 	if f == null:
 		return {"ok": false, "msg": "That person is not in the town any more."}
+	if Players.owns(int(e.get("player_id", Players.LOCAL)), int(f.household_id)) and not Pawn.is_pawn(f) and not Players.table.is_empty():
+		return {"ok": false, "msg": "You play one character. %s makes their own choices." % str(f.name)}
 	if bool(a.get("strict", false)):
 		var sd = _director()
 		if sd == null:

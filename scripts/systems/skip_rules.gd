@@ -38,6 +38,8 @@ static func chance(f, kind: String) -> float:
 
 ## True when this person really does skip. Asked by the shift / school start and again by the commute: the first answer of the day stands.
 static func chooses_to_skip(f, kind: String) -> bool:
+	if Pawn.is_pawn(f):          # the player's character never skips on their own
+		return false
 	var fid: int = int(f.id)
 	var day: int = SysUtil.day()
 	var d: Dictionary = decided.get(fid, {})

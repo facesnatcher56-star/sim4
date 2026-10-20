@@ -73,7 +73,7 @@ static func at_home(f) -> bool:
 static func people() -> Array:
 	var out: Array = []
 	for f in SysUtil.residents():
-		if SysUtil.is_away(f) or JusticeState.inmates.has(int(f.id)) or Hospital.is_in(int(f.id)):
+		if SysUtil.is_away(f) or JusticeState.inmates.has(int(f.id)) or Hospital.is_in(int(f.id)) or Pawn.is_pawn(f):
 			continue
 		out.append(f)
 	return out

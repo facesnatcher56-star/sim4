@@ -144,7 +144,8 @@ static func odd_job(folk_id: int) -> int:
 		SysUtil.notify("No more odd jobs going today.", "info")
 		return 0
 	g["odd"] = int(g["odd"]) + 1
-	var pay: int = int(round(float(c.get("base", 30)) * MarketEconomy.wage_mult()))
+	var base: float = float(SoloCfg.by_diff("start", "odd_job_pay")) if Pawn.is_pawn(f) else float(c.get("base", 30))      # one-character play: the pawn's odd job pays by difficulty
+	var pay: int = int(round(base * MarketEconomy.wage_mult()))
 	Economy.deposit(int(f.household_id), pay, "odd job")
 	return pay
 

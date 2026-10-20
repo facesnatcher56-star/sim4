@@ -12,6 +12,8 @@ static func cfg() -> Dictionary:
 
 ## Overdue bills and a repossession in the last weeks.
 static func behind(hid: int) -> bool:
+	if SoloHome.active and Players.player_of(hid) > 0:
+		return false          # one-character play: the landlord's own eviction (SoloRent) replaces this storyteller incident
 	var late := false
 	for bl in Economy.outstanding(hid):
 		if bool(bl["late"]):

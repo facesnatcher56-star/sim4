@@ -31,6 +31,7 @@ static func install_all() -> void:
 	IncidentContent.install()
 	CityGov.install()                  # task 12: the politician career, the mayor and election interactions
 	VacationContent.install()          # idempotent; also runs inside install() before the tag patches
+	SoloContent.install()               # one-character play: ingredient costs, no free food for the pawn
 	gate_late_content()                # the content merged above arrived after install()'s stage gates: gate it too
 
 ## Stage-gates (by aging.json tags) every interaction merged after install(): family, pregnancy, life, weather, incident and city content.

@@ -67,6 +67,12 @@ static func describe_tests(def: Dictionary, folk = null, target = null) -> Strin
 				"has_trait": parts.append("needs the %s trait" % PieEntries.label_of_trait(str(v)))
 				"lacks_trait": parts.append("not for %s Folk" % PieEntries.label_of_trait(str(v)))
 				"coins_at_least": parts.append("costs %s Coins" % v)
+				"pays_ingredients": parts.append("No money for ingredients (%s Coins)" % v)
+				"is_pawn": parts.append("not for you")
+				"at_lot": parts.append("not here")
+				"on_street": parts.append("only outdoors, on a street or in a park")
+				"homeless": parts.append("only if you have no home")
+				"shelter_night": parts.append("no shelter nights left this week")
 				"skill_at_least": parts.append("needs %s skill level %s" % [UIU.sentence(str(v[0])), v[1]])
 				"object_state_above": parts.append("Out of stock" if str(v[0]) == "stock" else "Nothing to do here")
 				"object_state_below", "object_state_eq": parts.append("Nothing to do here")
@@ -109,6 +115,20 @@ static func make_checker(folk, target) -> Callable:
 			return "Unavailable"
 		var ok = it.call("can_run", folk, target)
 		return "" if ok else InteractionQuery.describe_tests(table.get(id, {}), folk, target)
+
+## The things a folk can do to itself (sleep on the floor, ...): target "self" defs that are not hidden, not idle fillers and not emergencies.
+## One-character play: autonomy never starts these for the pawn, so the player orders them from the Myself menu.
+static func self_entries(folk) -> Array:
+	var table := UIU.tbl("interactions")
+	var ids: Array = []
+	for id in table:
+		var d: Dictionary = table[id]
+		if str(d.get("target", "")) != "self" or bool(d.get("hidden", false)) or bool(d.get("idle_gate", false)) or d.has("emergency"):
+			continue
+		if (not bool(d.get("autonomous", true)) and not bool(d.get("player_menu", false))) or str(d.get("kind", "")) != "super":
+			continue
+		ids.append(id)
+	return build_entries(folk, ids, table, make_checker(folk, null))
 
 ## target_kind: "object" | "folk"
 static func entries_for(folk, target_kind: String, target_id: int) -> Array:

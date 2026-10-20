@@ -115,7 +115,7 @@ static func _evict(p: Dictionary, why: String) -> void:
 static func _bill(p: Dictionary, rent: int, day: int) -> void:
 	var hid: int = int(p["tenant"])
 	var late: int = _late_rent_bills(p)
-	if late >= int(rc().get("evict_after_missed", 2)) and not bool(p.get("notice", false)):
+	if late >= SoloRules.evict_after(p) and not bool(p.get("notice", false)):
 		p["notice"] = true
 		SysUtil.notify("EVICTION NOTICE: rent on %s is overdue. Pay your bills or belongings will be taken." % str(p["label"]), "bad")
 		ChronicleHook.note("eviction", "An eviction notice was served on %s." % str(p["label"]), [], "home:%d" % hid, 3, true)

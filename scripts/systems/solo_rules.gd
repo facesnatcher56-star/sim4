@@ -1,0 +1,23 @@
+class_name SoloRules
+extends RefCounted
+## Small hooks of one-character play that other systems call (kept here so those files stay one-liners). Numbers: data/solo.json.
+
+## Wages and the day labour pay for the pawn, by difficulty.
+static func wage_mult(f) -> float:
+	return float(SoloCfg.by_diff("start", "wage_mult")) if Pawn.is_pawn(f) else 1.0
+
+## Missed rents before the eviction notice: the pawn's tenancy follows the difficulty, everybody else the housing table.
+static func evict_after(p: Dictionary) -> int:
+	if str(p.get("tenant_kind", "")) == "player" and SoloHome.active:
+		return SoloRent.evict_after()
+	return int(HousingRent.rc().get("evict_after_missed", 2))
+
+## Named consequences fired from interaction data ({"solo_hook": name}).
+static func hook(name: String, folk) -> void:
+	match name:
+		"rough_night":
+			SoloShelter.rough_night(folk)
+		"shelter_night":
+			SoloShelter.shelter_night(folk)
+		"day_labour":
+			SoloShelter.day_labour_done(folk)

@@ -1,4 +1,4 @@
-﻿extends Node
+extends Node
 ## Boot: title -> new-game screen (StartPicker: scenario + difficulty + household) -> home lot -> Folk -> gameplay.
 ## Pass `-- --autostart` to skip the menus (3 roommates in the classic house, no scenario).
 const LOT_VIEW_PATH := "res://scenes/world/lot_view.tscn"
@@ -50,7 +50,7 @@ func _ready() -> void:
 	title.continue_game.connect(load_game)
 	title.quit_game.connect(func(): get_tree().quit())
 	if "--autostart" in OS.get_cmdline_user_args():
-		start_new_game(default_household(), "classic", {"home_state": "furnished"})      # the dev path keeps the furnished classic house
+		start_new_game(default_household(), "small", {"scenario": "solo", "home_state": "empty"})      # the dev path: the real solo start
 	else:
 		show_title()
 

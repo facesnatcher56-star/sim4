@@ -88,6 +88,24 @@ static func check_one(c: Variant, ctx: Dictionary) -> bool:
 			"has_object":                      # task 33c: at least one of these object defs within reach (an action needs a thing to act on: no puzzle without a table)
 				if folk == null or not SleepPlaces.has_any(folk, v):
 					return false
+			"at_lot":                          # the folk stands in this lot (id or list of ids)
+				if folk == null or not (NeighborhoodLots.lot_at(folk.tile) in (v if v is Array else [v])):
+					return false
+			"on_street":                       # outdoors on a street or in a park (no lot): somewhere to sleep rough
+				if folk == null or (NeighborhoodLots.lot_at(folk.tile) != "") != (not bool(v)):
+					return false
+			"homeless":
+				if SoloHome.is_homeless() != bool(v):
+					return false
+			"shelter_night":                   # a shelter night is still free this week
+				if SoloShelter.nights_left() <= 0:
+					return false
+			"is_pawn":                         # one-character play: the player's character (true) or an ordinary NPC (false)
+				if folk == null or Pawn.is_pawn(folk) != bool(v):
+					return false
+			"pays_ingredients":                # cooking costs coins for the pawn only; NPC cooks stay free (their economy is unchanged)
+				if folk == null or (Pawn.is_pawn(folk) and WorldIface.get_coins(int(folk.household_id)) < int(v)):
+					return false
 			"coins_at_least":
 				if folk == null or WorldIface.get_coins(int(folk.household_id)) < int(v):
 					return false

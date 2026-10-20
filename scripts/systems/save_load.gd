@@ -41,7 +41,7 @@ static func snapshot(label: String = "") -> Dictionary:
 			"economy": Economy.to_dict(), "careers": Careers.to_dict(), "relationships": RelationshipService.to_dict(),
 			"goals": Goals.to_dict(), "aging": Aging.to_dict(), "story": Story.to_dict(), "away": Away.to_dict(), "commute": Commute.to_dict(),
 			"family": Family.to_dict(), "babycare": BabyCare.to_dict(), "weather": Weather.to_dict(),
-			"neighborhood": Neighborhood.to_dict(), "scenario": Scenario.to_dict(), "incidents": Incidents.to_dict(), "justice": JusticeState.to_dict(), "fire": Fire.to_dict(), "share": ShareState.to_dict(), "econ": MarketTick.to_dict(), "vacation": Vacation.to_dict(), "players": Players.to_dict(), "tiers": Tiers.to_dict(), "city": CityState.to_dict(), "life": LifeTick.to_dict(),
+			"neighborhood": Neighborhood.to_dict(), "scenario": Scenario.to_dict(), "incidents": Incidents.to_dict(), "justice": JusticeState.to_dict(), "fire": Fire.to_dict(), "share": ShareState.to_dict(), "econ": MarketTick.to_dict(), "vacation": Vacation.to_dict(), "players": Players.to_dict(), "tiers": Tiers.to_dict(), "city": CityState.to_dict(), "life": LifeTick.to_dict(), "solo": SoloHome.to_dict(),
 		},
 	}
 
@@ -162,6 +162,7 @@ static func restore(d: Dictionary) -> bool:
 	ShareState.deliver_pending()      # gifts and letters left in a shared town arrive once
 	Vacation.from_dict(sy.get("vacation", {}))
 	Players.from_dict(sy.get("players", {}))
+	SoloHome.from_dict(sy.get("solo", {}))
 	Tiers.from_dict(sy.get("tiers", {}))
 	CityState.from_dict(sy.get("city", {}))
 	CrimeFlow.install()               # reset_all removed the justice careers / crime traits; a loaded game may already use them

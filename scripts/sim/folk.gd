@@ -315,6 +315,8 @@ func prune_memory() -> void:
 # ---------- interaction queue ----------
 ## Add an interaction. Higher effective priority (player commands win) preempts the current one.
 func enqueue(inter: Interaction) -> void:
+	if not Pawn.allows(self, inter):          # one-character play: the pawn only does what the player ordered or what the body / world forces
+		return
 	var eff := inter.effective_priority()
 	if current != null and eff > current.effective_priority() and current.is_interruptible():
 		current.cancel("preempted")

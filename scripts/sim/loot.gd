@@ -59,6 +59,14 @@ static func _apply_one(d: Dictionary, ctx: Dictionary) -> void:
 			"object_state_toggle":
 				if obj != null:
 					WorldIface.state_set(obj, str(v), not bool(WorldIface.state_get(obj, str(v), false)))
+			"solo_hook":                       # a named consequence of one-character play (SoloRules.hook)
+				SoloRules.hook(str(v), folk)
+			"pawn_wage":                       # day labour: the pawn's wage, by difficulty
+				if folk != null:
+					Economy.deposit(int(folk.household_id), int(round(float(v) * SoloRules.wage_mult(folk))), "day labour")
+			"pawn_coins_add":                  # ingredients: only the pawn pays
+				if folk != null and Pawn.is_pawn(folk):
+					Economy.record(int(folk.household_id), int(v), str(ctx.get("reason", "ingredients")))
 			"coins_add":
 				if folk != null:
 					# household money goes through the Economy ledger (money history, crime pressure, legacy score); NPC pocket money (-1) is not ledgered

@@ -51,7 +51,7 @@ static func idle_days(hid: int, day: int) -> int:
 ## Would the household furnish itself today? (not whether it can afford to)
 static func wanted(hid: int, day: int) -> bool:
 	var c: Dictionary = cfg()
-	if c.is_empty() or mode == "off" or idle_days(hid, day) < int(c.get("idle_days", 2)):
+	if SoloHome.active or c.is_empty() or mode == "off" or idle_days(hid, day) < int(c.get("idle_days", 2)):
 		return false
 	if mode == "auto" and last_order.has(hid):
 		return false                      # a played household keeps its furniture to the player unless they asked otherwise

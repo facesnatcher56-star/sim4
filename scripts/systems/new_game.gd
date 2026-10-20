@@ -6,7 +6,8 @@ extends RefCounted
 
 const SPAWN_FALLBACK := [Vector2i(6, 6), Vector2i(7, 6), Vector2i(8, 6)]
 
-static func start(mgr: SystemsManager, h: Dictionary, start_id: String, opts: Dictionary = {}) -> Array:
+static func start(mgr: SystemsManager, h0: Dictionary, start_id: String, opts: Dictionary = {}) -> Array:
+	var h: Dictionary = _one_adult(h0)          # one-character play: the player makes exactly one adult
 	var w = WorldIface.world()
 	for f in w.all_folk().duplicate():
 		w.remove_folk(f.id)
@@ -23,7 +24,7 @@ static func start(mgr: SystemsManager, h: Dictionary, start_id: String, opts: Di
 	if home_tpl == "":
 		home_tpl = str(Neighborhood.start_def(start_id).get("template", LotLoader.CLASSIC))
 	Neighborhood.start_game(home_tpl, wseed)
-	var home_state: String = StartHome.normalize(str(opts.get("home_state", StartHome.default_id())))
+	var home_state: String = StartHome.normalize(str(opts.get("home_state", "empty")))      # the flat is rented bare unless a test asks for the furnished house
 	StartHome.apply(w, home_state)            # task 32d: the default home is bare (walls, doors, windows, floors, lights); the player furnishes it
 	var spawns: Array = w.starter_spawn_tiles if w.get("starter_spawn_tiles") != null else []
 	if spawns.is_empty():
@@ -42,10 +43,22 @@ static func start(mgr: SystemsManager, h: Dictionary, start_id: String, opts: Di
 	if not scen.is_empty():
 		_gentle_first_day()
 		Scenario.begin(str(scen["id"]), str(opts.get("difficulty", Scenario.default_difficulty())))
-	Neighborhood.finish_new_game(start_id, int(opts.get("funds", -1)))
-	if home_state == "empty":
-		Economy.deposit(Economy.primary_household(), StartHome.bonus(start_id), "moving-in allowance")      # enough for the basics
+	Neighborhood.finish_new_game(start_id, SoloCfg.start_coins())
+	SoloRent.begin(Economy.primary_household())          # the studio is rented from a landlord; the first rent is due on day 8; no allowance, no free food
+	SoloStart.finish(folk)
 	return folk
+
+## One-character play: only the first adult of the creator's household is used.
+static func _one_adult(h: Dictionary) -> Dictionary:
+	var out: Dictionary = h.duplicate(true)
+	var fl: Array = out.get("folk", [])
+	if fl.size() > 1:
+		out["folk"] = [fl[0]]
+	if not (out.get("folk", []) as Array).is_empty():
+		var f0: Dictionary = out["folk"][0]
+		f0["stage"] = "adult"
+		f0["rel"] = "none"
+	return out
 
 ## A new player's first morning should be calm: re-roll the weather seed (a few times at most) until day 1 is sunny or cloudy.
 static func _gentle_first_day() -> void:

@@ -87,6 +87,7 @@ static func systems_rows(sm: Object) -> Array:
 		["day/CityGov.on_day", "CityGov", 1440, 317, N, "day", CityGov.on_day, null, "world-level: the weekly budget, the election campaign and the monthly council (townies are only counted)"],
 		["day/WorksEvents.on_day", "WorksEvents", 1440, 318, N, "day", WorksEvents.on_day, null, "world-level: strike and closure dice per industrial career (headcounts only; townies are counted, never visited)"],
 		["day/DisasterClock.on_day", "DisasterClock", 1440, 320, N, "day", DisasterClock.on_day, null, "running disasters only"],
+		["day/SoloRent.on_day", "SoloRent", 1440, 335, N, "day", SoloRent.on_day, null, "one-character play: the pawn's eviction notice, the shelter week; a few comparisons"],
 		["day/MarketTick.on_day", "MarketTick", 1440, 330, L, "day", MarketTick.on_day, null, "markets, shops, bank, rents (world-level)"],
 		["day/LifeTick.on_day", "LifeTick", 1440, 335, L, "day", LifeTick.on_day, null, "places (staff), school and college records of residents, townie studies, the job board: all daily, O(places + townies)"],
 		["day/StoryPacing.on_day", "StoryPacing", 1440, 340, L, "day", StoryPacing.on_day, null, "world-level"],

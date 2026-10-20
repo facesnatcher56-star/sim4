@@ -87,6 +87,8 @@ func _hook_world() -> void:
 static func reset_all() -> void:
 	CrimeFlow.uninstall()
 	Players.reset()
+	SoloHome.reset()
+	SoloDistricts.reset()
 	SuccessionNobody.reset()
 	Tiers.reset()
 	DaySlices.reset()
