@@ -76,6 +76,9 @@ static func use(fid: int, pid: String, sid: String, opts: Dictionary = {}) -> Di
 		return {"ok": false, "reason": why}
 	var f = SysUtil.folk(fid)
 	var svc: Dictionary = Places.services(pid)[sid]
+	var mins_left: int = int(svc.get("minutes", 0))
+	if bool(opts.get("auto", false)) and mins_left > 0 and not Venues.open_for(Places.lot_of(pid), SysUtil.now(), mins_left):
+		return {"ok": false, "reason": "%s closes before this would finish (%d min)." % [Places.label(pid), mins_left]}          # closing time would cut it short and give half the money back
 	var cost: int = price(pid, sid, fid)
 	var net: int = cost
 	if cost > 0 and bool(svc.get("insurable", false)):
