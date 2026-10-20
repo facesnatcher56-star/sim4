@@ -4,7 +4,9 @@ extends RefCounted
 
 const REQUIRED := ["Idle", "Walk", "Run", "Sit_Idle", "Sit_Eat", "Sit_Watch", "Sleep", "Use_Stand", "Cook", "Wash", "Read",
 	"Exercise_Treadmill", "Paint", "Type", "Dance", "Talk", "Laugh", "Wave", "Cry", "Angry", "Sad_Idle", "Hug", "Kiss", "Carry",
-	"Faint", "Fall", "Shower", "ToiletSit", "Swim_idle", "Baby_Idle", "Baby_Crawl"]
+	"Faint", "Fall", "Shower", "ToiletSit", "Swim_idle", "Baby_Idle", "Baby_Crawl",
+	"Pour", "Wipe", "Mop", "Repair", "Phone_Call", "Sit_Phone_Call", "Phone_Text", "Sit_Phone_Text", "Eat", "Dig", "Bend", "Fish", "Lift", "Write", "Sit_Write",
+	"Brush_Teeth", "Sing", "Cradle", "Look", "Think", "Sit_Think", "Reach", "Strum", "Sit_Piano", "Balance", "Relax", "Sit_Relax", "Speech", "Aim"]
 const BONES := ["hips", "spine", "chest", "neck", "head", "shoulder_L", "upper_arm_L", "forearm_L", "hand_L", "shoulder_R",
 	"upper_arm_R", "forearm_R", "hand_R", "thigh_L", "shin_L", "foot_L", "thigh_R", "shin_R", "foot_R"]
 const MATS := ["skin", "hair", "eyes", "shirt", "pants", "shoes"]

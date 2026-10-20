@@ -63,7 +63,7 @@ func _sit_at_desk() -> void:
 	f.current.state = "running"
 	_step(fv, 40)
 	_check(fv.pose == "sit", "at a desk with a chair the pose is %s" % fv.pose)
-	_check(fv.clip == "Sit_Type", "writing at a desk plays '%s'" % fv.clip)
+	_check(fv.clip == "Sit_Write", "writing at a desk plays '%s'" % fv.clip)
 	var chair_pos: Vector2 = W.get_object(cid).slot_use_pos(0)
 	_check(Vector2(fv.position.x, fv.position.z).distance_to(chair_pos) < 0.1, "the writer is not on the chair: %s vs %s" % [str(fv.position), str(chair_pos)])
 	W.remove_object(cid)
@@ -79,7 +79,7 @@ func _sit_at_desk() -> void:
 	f2.current = Interaction.create("write_story", f2, did)
 	f2.current.state = "running"
 	_step(fv2, 40)
-	_check(fv2.pose != "sit" and fv2.clip == "Type", "no chair: pose %s clip %s" % [fv2.pose, fv2.clip])
+	_check(fv2.pose != "sit" and fv2.clip == "Write", "no chair: pose %s clip %s" % [fv2.pose, fv2.clip])
 	W.release(did, 0, f2.id)
 	f2.current = null
 	fv2.free()
@@ -214,7 +214,7 @@ func _make_bed_stands_beside() -> void:
 	f.current.state = "running"
 	_step(fv, 40)
 	_check(fv.pose != "lie" and not FolkClipRules.is_lie_clip(fv.clip), "making the bed lies down: pose %s clip %s" % [fv.pose, fv.clip])
-	_check(fv.clip == "Wash", "making the bed plays '%s'" % fv.clip)
+	_check(fv.clip == "Bend", "making the bed plays '%s'" % fv.clip)
 	var on_bed: Vector2 = bed.slot_use_pos(0)
 	_check(Vector2(fv.position.x, fv.position.z).distance_to(on_bed) > 0.8, "making the bed stands on the mattress: %s" % str(fv.position))
 	f.current = Interaction.create("sleep_bed", f, bid)

@@ -2,6 +2,7 @@ class_name ThoughtLayer
 extends Control
 ## Thought balloons above folk heads (Events.thought), positioned via LotView.screen_pos_of.
 var lot_view = null
+var rings = null             # ProgressLayer: its rings are obstacles the balloons are pushed above
 var balloons: Array = []     # {node, folk_id}
 const MAX_BALLOONS := 5
 
@@ -51,18 +52,19 @@ func _process(_d: float) -> void:
 			items.append({"id": b["folk_id"], "pos": pos + Vector2(-n.size.x / 2.0, -n.size.y - 8), "size": n.size, "node": n})
 		else:
 			n.visible = false
-	var placed := layout_rects(items)
+	var placed := layout_rects(items, rings.rects() if rings != null else [])
 	for i in items.size():
 		items[i]["node"].position = placed[i]
 
 ## View-only de-overlap: items {id, pos (top-left), size}. Returns top-left positions in the same order.
 ## Balloons are processed by folk id (stable), each pushed up until it clears the ones already placed.
-static func layout_rects(items: Array) -> Array:
+## `fixed` = rects already taken (progress rings): balloons never overlap them either.
+static func layout_rects(items: Array, fixed: Array = []) -> Array:
 	var order: Array = range(items.size())
 	order.sort_custom(func(a, b): return int(items[a]["id"]) < int(items[b]["id"]))
 	var out: Array = []
 	out.resize(items.size())
-	var placed: Array = []
+	var placed: Array = fixed.duplicate()
 	for i in order:
 		var sz: Vector2 = items[i]["size"]
 		var p: Vector2 = items[i]["pos"]

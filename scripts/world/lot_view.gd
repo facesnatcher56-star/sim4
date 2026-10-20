@@ -18,6 +18,7 @@ func _ready() -> void:
 	LevelView.ensure_on(self)      # upper floors / basements of multi-floor buildings (scripts/world/level_view.gd)
 	level_view.view_changed.connect(return_to_cutaway)     # changing floor or building: back to the readable Cutaway view
 	WeatherView.ensure_on(self)    # sky / sun / weather particles / seasons (scripts/world/weather_view.gd)
+	ObjectStateView.ensure_on(self)    # objects show their state: soil, grime, sparks, burners, screens (scripts/world/object_state_view.gd; view only)
 	FireView.ensure_on(self)       # flames / smoke / scorch marks (scripts/world/fire_view.gd)
 	PlotView.ensure_on(self)       # scaffolding, building sites and finished buildings on the reserved plots of the east side (scripts/world/plot_view.gd; view only)
 	VehicleView.ensure_on(self)    # cars, buses, taxis, emergency vehicles, bikes on the roads near the camera (scripts/world/vehicle_view.gd; view only)
@@ -270,6 +271,7 @@ func _refresh_object_visual(o) -> void:
 			(mi.material_override as StandardMaterial3D).albedo_color = base if on else base.darkened(0.2)
 			if o.def.has("decor_scale_state"):
 				(mi.material_override as StandardMaterial3D).albedo_color = base.lerp(Color(0.5, 0.4, 0.2), 1.0 - o.ratio(str(o.def["decor_scale_state"])))
+	ObjectStateView.refresh(self, o, node)      # task 33.3: state -> look (data/object_visuals.json)
 
 
 func _on_object_placed(id: int) -> void:

@@ -22,6 +22,7 @@ var folk_panel: FolkPanel
 var queue_bar: QueueBar
 var pie: PieMenu
 var thoughts: ThoughtLayer
+var progress: ProgressLayer          # task 33.4: progress rings over heads
 var toasts: ToastFeed
 var build_panel: BuildPanel
 var floor_selector: FloorSelector
@@ -67,7 +68,10 @@ func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_build_top_bar()
 	_build_left()
+	progress = ProgressLayer.new()
+	add_child(progress)
 	thoughts = ThoughtLayer.new()
+	thoughts.rings = progress
 	add_child(thoughts)
 	# top-centre column under the bar: job-offer card first, then the toast stack (never overlaps the folk panel or the build panel)
 	var top_center := VBoxContainer.new()
@@ -374,6 +378,7 @@ func set_lot_view(lv) -> void:
 		add_child(floor_selector)
 	floor_selector.lot_view = lv
 	thoughts.lot_view = lv
+	progress.lot_view = lv
 	build_panel.lot_view = lv
 	if lv != null and lv.has_signal("tile_clicked"):
 		lv.tile_clicked.connect(_on_tile_clicked)
@@ -394,6 +399,7 @@ func _follow_new_head(fid: int) -> void:
 
 func select_folk(id: int) -> void:
 	selected_folk_id = id
+	progress.selected_id = id
 	Neighborhood.selected = id
 	var f = _resolve(id)
 	folk_panel.show_folk(f)
