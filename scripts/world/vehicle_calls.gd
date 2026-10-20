@@ -78,6 +78,7 @@ func _launch(u: Dictionary, now: float) -> void:
 		return
 	var hold: float = clampf(float(u["scene_min"]) * view.vt_per_min(), float((view.cfg.get("emergency", {}) as Dictionary).get("hold_s_min", 5.0)), 30.0)
 	var v: Dictionary = view.sim.add(_kind(str(u["service"])), "", path, {"s": s0, "end": "dead", "visits": r["visits"], "tag": "unit"})
+	v["vanish_ok"] = true                                    # a unit drives out of and back into its station: the garage door is where it starts and ends
 	v["glb"] = str((view.cfg.get("kind_glb", {}) as Dictionary).get(str(v["kind"]), "ambulance"))
 	v["stops"] = [{"s": float(r["scene_s"]), "hold": true, "until": 0.0, "tag": "scene", "arm": true, "hold_s": hold}]
 	(v["lights"] as Dictionary)["siren"] = true

@@ -155,6 +155,14 @@ func _buses() -> void:
 	if lines.is_empty():
 		line("No bus stops at %s." % Neighborhood.label_of(lot), 12, UITheme.MUTED)
 	else:
-		line("Next buses at %s:" % Neighborhood.label_of(lot), 12, UITheme.MUTED)
+		line("%s: %s" % [Neighborhood.label_of(lot), TransportBus.next_text(lot)], 13)
 		for l in lines:
-			line(str(l), 12)
+			line(str(l), 12, UITheme.MUTED)
+		for r in TransportBus.routes():
+			var calls: Array = TransportBus.calls_today(str(r["id"]), lot)
+			if calls.is_empty():
+				continue
+			var bits: Array = []
+			for m in calls:
+				bits.append(TransportBus.clock_text(int(m)))
+			line("%s today: %s" % [str(r["name"]), " ".join(bits)], 11, UITheme.MUTED)

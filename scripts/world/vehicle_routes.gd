@@ -23,12 +23,19 @@ static func _radius() -> float:
 
 
 ## From `a` (frontage dict) starting at `a_pos` (a bay centre, or Vector2.ZERO for the lane itself) to `b` ending in `b_pos` (a bay centre or ZERO for the lane).
-static func trip(fa: Dictionary, a_pos: Vector2, fb: Dictionary, b_pos: Vector2, lead: float = 0.0) -> Dictionary:
+## `pre` / `post` ({pts, visits} from VehicleRoads.entry_route / exit_route) add a drive in from a road end of the map before the trip and a drive out to one after it
+## (a taxi, a car with no bay to park in): nothing starts or ends on the picture.
+static func trip(fa: Dictionary, a_pos: Vector2, fb: Dictionary, b_pos: Vector2, lead: float = 0.0, pre: Dictionary = {}, post: Dictionary = {}) -> Dictionary:
 	if fa.is_empty() or fb.is_empty():
 		return {}
 	var ga: float = float(fa["gate"])
 	var gb: float = float(fb["gate"])
 	var pts: Array = []
+	var pre_len: float = 0.0
+	if not pre.is_empty():
+		pts.append_array(pre["pts"])
+		for k in range(1, pts.size()):
+			pre_len += (pts[k] as Vector2).distance_to(pts[k - 1])
 	if lead > 0.0:
 		pts.append(Vector2(ga + lead, float(fa["lane_z"])))          # a vehicle that comes from up the street (a taxi)
 	if a_pos != Vector2.ZERO:
@@ -41,13 +48,24 @@ static func trip(fa: Dictionary, a_pos: Vector2, fb: Dictionary, b_pos: Vector2,
 	if b_pos != Vector2.ZERO:
 		pts.append(Vector2(gb + GATE_LANE, b_pos.y))
 		pts.append(b_pos)
+	var post_pts: Array = []
+	if not post.is_empty():
+		post_pts = post["pts"]
+		for k2 in range(1, post_pts.size()):
+			pts.append(post_pts[k2])
 	var path: VehiclePath = VehiclePath.make(pts, _radius())
-	var s_pick: float = path.closest_s(Vector2(ga - STOP_X, float(fa["lane_z"])), 0.0, 80.0)
-	var s_drop: float = path.closest_s(Vector2(gb + STOP_X, float(fb["lane_z"])), s_pick + 1.0)
+	var s_pick: float = path.closest_s(Vector2(ga - STOP_X, float(fa["lane_z"])), maxf(pre_len - 4.0, 0.0), 90.0)
+	var s_drop: float = path.closest_s(Vector2(gb + STOP_X, float(fb["lane_z"])), s_pick + 1.0, 400.0)
 	var gate_y: Dictionary = {}
 	if a_pos != Vector2.ZERO:
-		gate_y = {"s": 0.3, "x": ga, "z": float(fa["lane_z"]), "hy": float(fa["hy"])}      # wait in the bay, not in the walkway, until the way out is clear
-	return {"path": path, "visits": r["visits"], "gate_yield": gate_y, "pickup_s": s_pick, "drop_s": s_drop,
+		gate_y = {"s": 0.3, "x": ga, "z": float(fa["lane_z"]), "hy": float(fa["hy"]), "rect": VehicleAmbient.yard_rect(fa)}      # wait in the bay, not in the walkway, until the way out is clear
+	var vis: Array = []
+	if not pre.is_empty():
+		vis.append_array(pre["visits"])
+	vis.append_array(r["visits"])
+	if not post.is_empty():
+		vis.append_array(post["visits"])
+	return {"path": path, "visits": vis, "gate_yield": gate_y, "pickup_s": s_pick, "drop_s": s_drop,
 		"pickup_door": Vector2(ga - STOP_X, float(fa["hy"]) + 0.5), "drop_door": Vector2(gb + STOP_X, float(fb["hy"]) + 0.5)}
 
 

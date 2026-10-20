@@ -96,18 +96,20 @@ func _update_ground(pos: float) -> void:
 	var wet: float = float(p["wet"])
 	var snowc: float = float(p["snowcover"])
 	# wet ground darkens and turns bluish; snow covers everything
-	var g: Color = tint.lerp(Color(0.12, 0.16, 0.2), wet * 0.5)
+	var g: Color = Looks.grade("grass", tint).lerp(Color(0.12, 0.16, 0.2), wet * 0.5)
 	var ga: float = clampf(alpha + wet * 0.25, 0.0, 1.0)
 	g = g.lerp(Color(0.95, 0.97, 1.0), snowc)
 	ga = lerpf(ga, 0.96, snowc)
 	_grass_mat.albedo_color = Color(g.r, g.g, g.b, ga)
 	var sc := Color(0.95, 0.97, 1.0, clampf(snowc * 0.95, 0.0, 0.95))
+	if lot.has_method("set_wet_overlay"):
+		lot.call("set_wet_overlay", wet * Looks.ef("wet_dark", 0.0), Looks.ec("wet_color", Color(0.05, 0.07, 0.1)))
 	if lot.has_method("set_overlay_snow_visible"):
 		lot.call("set_overlay_snow_visible", snowc > 0.02)
 	_snow_mat.albedo_color = sc
 	var ground = lot.get("_ground_mi")
 	if ground != null and ground is MeshInstance3D and (ground as MeshInstance3D).material_override is StandardMaterial3D:
-		var gc: Color = _season_col("ground", pos, Color("#6fb050"))
+		var gc: Color = Looks.grade("grass", _season_col("ground", pos, Color("#6fb050")))
 		gc = gc.lerp(Color(0.1, 0.14, 0.12), wet * 0.3)
 		gc = gc.lerp(Color(0.92, 0.95, 0.98), snowc)
 		((ground as MeshInstance3D).material_override as StandardMaterial3D).albedo_color = gc
@@ -120,13 +122,13 @@ func _update_trees(pos: float) -> void:
 			(t["root"] as Node3D).queue_free()      # lot size changed (travel / new game): re-ring the scenery
 		_trees.clear()
 		_build_trees()
-	var leaf: Color = _season_col("leaf", pos, Color("#3f9a3a"))
+	var leaf: Color = Looks.grade("leaf", _season_col("leaf", pos, Color("#3f9a3a")))
 	var leaf_amt: float = _season_num("leaf_alpha", pos, 1.0)
 	var snowc: float = float(p["snowcover"])
 	var spring_f: float = clampf(1.0 - absf(pos - 0.5) * 3.0, 0.0, 1.0)     # blossoms peak mid spring
 	var bl := Color(str(Seasons.info("spring").get("blossom", "#f6b8d0")))
 	_leaf_mat.albedo_color = leaf.lerp(Color(0.95, 0.97, 1.0), snowc * 0.4)
-	_pine_mat.albedo_color = Color(0.16, 0.36, 0.22).lerp(Color(0.85, 0.9, 0.95), snowc * 0.55)
+	_pine_mat.albedo_color = Looks.grade("leaf", Color(0.16, 0.36, 0.22)).lerp(Color(0.85, 0.9, 0.95), snowc * 0.55)
 	if lot.has_method("set_tree_colors"):      # chunked MultiMesh trees (big map) follow the same seasons
 		lot.call("set_tree_colors", _leaf_mat.albedo_color.lerp(Color(0.5, 0.75, 0.4), 0.15), _pine_mat.albedo_color.lerp(Color(0.2, 0.5, 0.3), 0.2))
 	for t in _trees:

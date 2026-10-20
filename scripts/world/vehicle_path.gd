@@ -6,6 +6,9 @@ extends RefCounted
 var pts: PackedVector2Array = PackedVector2Array()
 var cum: PackedFloat32Array = PackedFloat32Array()
 var length: float = 0.0
+var _tables: Dictionary = {}                 # "kind|size" -> PackedVector2Array of points along the way every TABLE_STEP (for the obstacle probes of VehicleSim)
+
+const TABLE_STEP := 0.4
 
 
 static func make(points: Array, radius: float = 1.8) -> VehiclePath:
@@ -92,3 +95,22 @@ func closest_s(p: Vector2, from_s: float = 0.0, window: float = 1.0e9) -> float:
 			best_d = d
 			best = cum[i] + sqrt(ab.length_squared()) * t
 	return best
+
+
+## The point a vehicle of body length `blen` has as its centre when its reference distance is s = i x TABLE_STEP (kind "c", see VehicleSim.centre) or the point `ahead`
+## in front of the reference (kind "n", the nose). Built once per path and size, then indexed: the probes ask for the same points every step.
+func table(kind: String, size: float) -> PackedVector2Array:
+	var key := "%s|%.2f" % [kind, size]
+	if _tables.has(key):
+		return _tables[key]
+	var out := PackedVector2Array()
+	var n: int = int(ceil(length / TABLE_STEP)) + 1
+	out.resize(n)
+	for i in n:
+		var s: float = float(i) * TABLE_STEP
+		if kind == "c":
+			out[i] = at(s) if size < 3.0 else (at(minf(s + size * 0.4, length)) + at(maxf(s - size * 0.4, 0.0))) * 0.5
+		else:
+			out[i] = at(minf(s + size, length))
+	_tables[key] = out
+	return out

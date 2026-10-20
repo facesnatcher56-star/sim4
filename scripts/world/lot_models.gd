@@ -40,6 +40,7 @@ func _make_wall_visual(kind: String) -> Dictionary:
 		root.add_child(inst)
 		if kind == "door":
 			leaf = inst.get_node_or_null("leaf")
+		Looks.tint_tree(inst)
 		return {"root": root, "leaf": leaf}
 	# fallbacks
 	match kind:

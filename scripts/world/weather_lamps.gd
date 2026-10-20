@@ -23,8 +23,8 @@ func _refresh_lamps() -> void:
 		if light == null:
 			light = OmniLight3D.new()
 			light.shadow_enabled = false
-			light.omni_range = float(ld["range"])
-			light.light_color = ld["color"]
+			light.omni_range = float(ld["range"]) * Looks.ef("lamp_range", 1.0)
+			light.light_color = (ld["color"] as Color) * Looks.ec("lamp_color", Color.WHITE)
 			light.omni_attenuation = 1.4
 			var c: Vector2 = o.center2d()
 			light.position = Vector3(c.x, float(ld["y"]), c.y)
@@ -33,15 +33,23 @@ func _refresh_lamps() -> void:
 		var key: String = str(ld.get("state", "on"))
 		var on: bool = bool(o.state.get(key, true)) and not bool(o.state.get("broken", false))
 		light.set_meta("on", on)
-		light.set_meta("base", float(ld["energy"]))
+		light.set_meta("base", float(ld["energy"]) * Looks.ef("lamp_energy", 1.0))
 	for id in _lamp_lights.keys():
 		if not seen.has(id):
 			(_lamp_lights[id] as Node).queue_free()
 			_lamp_lights.erase(id)
 
 
+func _drop_lamps() -> void:
+	for id in _lamp_lights:
+		(_lamp_lights[id] as Node).queue_free()
+	_lamp_lights.clear()
+	_lamp_timer = 0.0
+
+
 func _update_lamp_energy(dl: float) -> void:
 	var dark: float = clampf(1.0 - dl * 1.15 + float(p["cloud"]) * 0.25 * dl, 0.0, 1.0)
+	Looks.set_night_glow(dark)
 	var t: float = Time.get_ticks_msec() * 0.001
 	for id in _lamp_lights:
 		var l: OmniLight3D = _lamp_lights[id]

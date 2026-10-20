@@ -12,6 +12,8 @@ func _check(cond: bool, msg: String) -> void:
 
 func _on_road_or_lot(w, p: Vector2) -> bool:
 	var t := Vector2i(int(floorf(p.x)), int(floorf(p.y)))
+	if t.x < 2 or t.y < 2 or t.x >= int(w.width) - 2 or t.y >= int(w.height) - 2:
+		return true                                 # through traffic drives in from and out to the road ends past the map edge (task 37)
 	var f: String = w.get_floor(t)
 	if f == "asphalt" or f == "crosswalk" or f == "sidewalk":
 		return true

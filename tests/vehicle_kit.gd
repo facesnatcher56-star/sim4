@@ -43,7 +43,7 @@ static func free_layer(vv: VehicleView) -> void:
 
 
 ## The vehicle visual audit (the vehicle half of tests/visual_audit.gd): runs the layer over the real town while the sim plays, and counts
-##   folk_in_vehicle   a folk standing inside a vehicle's body (riders hidden in a vehicle do not count)
+##   folk_in_vehicle   a folk standing inside the body of a MOVING vehicle (riders hidden in a vehicle do not count; a person who walks into a standing car is not the car's fault)
 ##   off_road          a moving vehicle that is not on road, sidewalk (bikes) or inside a lot
 ##   overlaps          two vehicle bodies cutting into each other
 ## Returns {folk_in_vehicle, off_road, overlaps, samples, max_vehicles, ghosted}.
@@ -68,7 +68,7 @@ static func audit(seconds: float, speed: int = 1) -> Dictionary:
 				var p: Vector2 = v["pos"]
 				var t := Vector2i(int(floorf(p.x)), int(floorf(p.y)))
 				var f: String = w.get_floor(t)
-				if f != "asphalt" and f != "crosswalk" and f != "sidewalk" and NeighborhoodLots.lot_at(t) == "":
+				if t.x >= 2 and t.y >= 2 and t.x < int(w.width) - 2 and t.y < int(w.height) - 2 and f != "asphalt" and f != "crosswalk" and f != "sidewalk" and NeighborhoodLots.lot_at(t) == "":
 					res["off_road"] += 1
 			for j in range(i + 1, vs.size()):
 				if VehicleSim.overlaps(v, vs[j]):
@@ -82,6 +82,8 @@ static func audit(seconds: float, speed: int = 1) -> Dictionary:
 			for v2 in vs:
 				if bool(v2.get("hidden", false)) or float((v2["pos"] as Vector2).distance_to(fp)) > 5.0:
 					continue
+				if float(v2["v"]) < 0.1:
+					continue                                  # a standing vehicle with somebody inside its footprint: the person walked into it (vehicles never vanish for that any more); only a vehicle that DRIVES over a person counts
 				var d: Vector2 = fp - (v2["pos"] as Vector2)
 				var h: Vector2 = v2["dir"]
 				if absf(d.dot(h)) < float(v2["len"]) * 0.5 - 0.2 and absf(d.dot(VehicleRoads.right_of(h))) < float(v2["wid"]) * 0.5 - 0.1:

@@ -1,0 +1,40 @@
+{
+ "_doc": "Junction control of the street lattice (task 37), read by VehicleControl (vehicle layer, VIEW ONLY) and by the floor markings of LotChunks. A junction is (column i, row j) of data/map_layout.json. MAIN roads are the rows and columns listed here; every other street is a side street. Rule: a junction where two main roads cross has traffic lights; where one main road crosses a side street, the main road keeps the right of way and the side street has a STOP sign (a few busy ones have lights); where only side streets meet there is a give-way sign, an uncontrolled junction (the edges of town) or a mini roundabout. CAUSE LINES: each kind says in one line why cars behave that way (shown in tests and used as the behaviour comment in code). Overrides below beat the rule. Times in vehicle seconds at game speed 1.",
+ "main_rows": [2],
+ "main_cols": [3],
+ "causes": {
+  "signal": "A car waits at a red light because the other street has the green; it goes on green only if it can clear the crossing before the light changes.",
+  "stop": "A car waits at a stop sign because cross traffic on the main road has priority; it stops, looks for a moment, and goes when the gap to the next car on the main road is over gap_s seconds and the crossing is empty.",
+  "giveway": "A car slows at a give-way sign because the other street has priority; it only stops when a car on that street would reach the crossing within gap_s seconds.",
+  "free": "At an uncontrolled junction cars slow down and the one that arrived first goes first (older vehicle id), because there is no sign to say otherwise.",
+  "roundabout": "A car entering a mini roundabout gives way to a car already going round (inside the box) and takes it slowly, because the island forces a curve.",
+  "flash": "At night a quiet light flashes amber on the main road (slow down, look) and red on the side street (stop, look, go), because there is not enough traffic to need a cycle."
+ },
+ "signal": {
+  "main_green_s": [6.4, 8.8],
+  "side_green_s": [3.0, 4.4],
+  "all_red_s": [1.4, 2.0],
+  "amber_s": 0.9,
+  "ped_s": 3.4,
+  "night_from": 23.0,
+  "night_to": 5.5
+ },
+ "stop": {"look_s": 0.9, "gap_s": 3.4},
+ "giveway": {"gap_s": 2.6, "creep": 2.6},
+ "free": {"creep": 3.4},
+ "roundabout": {"speed": 3.4, "island": 1.0},
+ "junctions": {
+  "3,2": {"type": "signal", "class": "major", "zebra": ["N", "E", "S", "W"], "arrows": ["E", "W"], "box": true, "poles": [0, 1, 2, 3]},
+  "1,2": {"type": "signal", "class": "minor", "zebra": ["E"], "poles": [0, 3]},
+  "5,2": {"type": "signal", "class": "minor", "poles": [1, 2], "arrows": ["W"]},
+  "3,1": {"type": "signal", "class": "minor", "zebra": ["N"], "poles": [0, 2, 3]},
+  "3,3": {"type": "signal", "class": "minor", "zebra": ["S"], "poles": [1, 3], "box": true},
+  "2,3": {"type": "roundabout"},
+  "4,3": {"type": "roundabout"},
+  "1,1": {"type": "stop", "minor": 1, "zebra": ["W"], "worn": 0.6},
+  "2,2": {"type": "stop", "minor": 1, "worn": 0.3},
+  "4,2": {"type": "stop", "minor": 1, "worn": 0.5}
+ },
+ "zebra_lots": ["school", "market", "hospital", "library", "cafe"],
+ "bollards": ["3,2", "1,2", "3,3"]
+}

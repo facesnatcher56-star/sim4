@@ -148,13 +148,15 @@ func _bike() -> void:
 func _bus() -> void:
 	var s: Array = _setup()
 	var mira = s[0]
-	mira.tile = NeighborhoodLots.entry_tile("home")
-	var dest: Vector2i = NeighborhoodLots.entry_tile("market")
-	var ride: Dictionary = TransportTrip.start(mira, dest, {"modes": ["bus"], "from_lot": "home", "to_lot": "market"})
+	mira.tile = NeighborhoodLots.entry_tile("market")
+	var dest: Vector2i = NeighborhoodLots.entry_tile("school")
+	var calls: Array = TransportBus.next_times("loop", "market", 1, SysUtil.now() + 5)
+	SimEnv.clock().total_minutes = int(calls[0]) - 2             # two minutes before a bus of the town loop calls at the market
+	var ride: Dictionary = TransportTrip.start(mira, dest, {"modes": ["bus"], "from_lot": "market", "to_lot": "school", "n": 90})
+	_check(str(ride["mode"]) == "bus", "with a bus two minutes away a long trip goes by bus (%s)" % str(ride["mode"]))
 	if str(ride["mode"]) != "bus":
-		print("  [vehicles] bus trip not chosen (%s): skipped" % str(ride["mode"]))
 		return
-	var vv: VehicleView = _layer_at("home")
+	var vv: VehicleView = _layer_at("market")
 	vv.sync()
 	var rec: Dictionary = vv.trips.recs.get(int(mira.id), {})
 	_check(not rec.is_empty() and str(rec["mode"]) == "bus" and str(rec["phase"]) == "wait", "a bus rider waits at the stop")
