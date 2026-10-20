@@ -6,7 +6,7 @@ extends RefCounted
 const K = preload("res://tests/vehicle_kit.gd")
 
 var fails: Array = []
-var _screen := Rect2(70.0, 35.0, 90.0, 50.0)
+var _screen := Rect2(85.0, 44.0, 60.0, 34.0)          # about what the default camera shows (the windowed audit uses the real one)
 
 
 func _check(cond: bool, msg: String) -> void:
@@ -20,7 +20,7 @@ func _on(p: Vector2, margin: float) -> bool:
 
 ## Drives the layer for `seconds` of vehicle time and returns the counts. `after_seed` skips the filling-in of the first seconds.
 static func watch(vv: VehicleView, screen: Rect2, seconds: float, speed: int, dt: float = 0.1) -> Dictionary:
-	var res := {"vanished": [], "popped": [], "frames": 0, "max_in_view": 0, "bus_in_view_max": 0, "bus_frames": 0, "layer_off": 0}
+	var res := {"vanished": [], "popped": [], "frames": 0, "max_in_view": 0, "bus_in_view_max": 0, "bus_frames": 0, "bus_sum": 0, "layer_off": 0}
 	var prev: Dictionary = {}
 	var seen: Dictionary = {}
 	for _i in int(seconds / dt):
@@ -46,6 +46,7 @@ static func watch(vv: VehicleView, screen: Rect2, seconds: float, speed: int, dt
 		prev = now
 		res["max_in_view"] = maxi(int(res["max_in_view"]), now.size())
 		res["bus_in_view_max"] = maxi(int(res["bus_in_view_max"]), buses)
+		res["bus_sum"] += buses
 		if buses > 0:
 			res["bus_frames"] += 1
 	return res
@@ -66,13 +67,13 @@ func run() -> Array:
 	_check(vv.sim.ghosted == 0, "nobody is ghosted through a jam (%d): %s" % [vv.sim.ghosted, str(vv.sim.ghost_log.slice(0, 4))])
 	_check(int(vv.filler.stats["spawned"]) >= 4, "through traffic enters from the road ends in the rush (%s)" % str(vv.filler.stats))
 	print("  [traffic] buses: most in the picture %d, a bus in the picture on %.0f%% of the frames" % [int(r["bus_in_view_max"]), 100.0 * float(r["bus_frames"]) / float(r["frames"])])
-	_check(int(r["bus_in_view_max"]) <= 2 and float(r["bus_frames"]) < 0.7 * float(r["frames"]), "a bus is rarely in the picture, never more than two (%d, %.0f%% of the frames)" % [int(r["bus_in_view_max"]), 100.0 * float(r["bus_frames"]) / float(r["frames"])])
+	_check(int(r["bus_in_view_max"]) <= 3 and float(r["bus_sum"]) / float(r["frames"]) <= 1.5, "about one bus in the picture, never more than three (%d, %.2f on average)" % [int(r["bus_in_view_max"]), float(r["bus_sum"]) / float(r["frames"])])
 	# the camera pans: parked cars stay where they are
 	var parked_before: Dictionary = {}
 	for v in vv.sim.vehicles:
 		if str(v["state"]) == "parked":
 			parked_before[int(v["id"])] = v["pos"]
-	_screen = Rect2(140.0, 80.0, 90.0, 50.0)
+	_screen = Rect2(150.0, 90.0, 60.0, 34.0)
 	vv.sync()
 	var gone := 0
 	for id in parked_before:

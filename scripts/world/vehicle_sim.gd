@@ -18,6 +18,9 @@ var _next_id: int = 1
 var jam_log: Array = []                     # one record per jam that had to be broken (cause, who, where): VehicleJams
 var reversals: int = 0                      # how many times a vehicle backed up to free a deadlock
 var _blocker: Dictionary = {}
+var _body_cache: Dictionary = {}
+var _grid: Dictionary = {}                  # cell -> vehicles in it at the start of the step (who is near whom without looking at everybody)
+const CELL := 16.0            # vehicle id -> body sample points, for the current step
 var ghosted: int = 0                        # ALWAYS 0 since task 37: a vehicle is never faded out or driven through another one (kept so old tests and audits can read it)
 var ghost_log: Array = []                   # always empty (see jam_log)
 
@@ -123,6 +126,15 @@ func step(dt: float) -> void:
 	vt += dt
 	if dt <= 0.0:
 		return
+	_body_cache.clear()
+	_grid.clear()
+	for g in vehicles:
+		var gp: Vector2 = g["pos"]
+		var gk := Vector2i(int(floorf(gp.x / CELL)), int(floorf(gp.y / CELL)))
+		if _grid.has(gk):
+			(_grid[gk] as Array).append(g)
+		else:
+			_grid[gk] = [g]
 	for v in vehicles:
 		if str(v["state"]) != "parked" and str(v["state"]) != "dead":
 			_step_one(v, dt)
@@ -375,22 +387,58 @@ func _no_room_beyond(v: Dictionary, half: float, s_clear: float) -> bool:
 	return false
 
 
+## Body sample points of a vehicle (cached for the step: every vehicle that looks at it uses the same ones).
+func _body_pts(o: Dictionary) -> PackedVector2Array:
+	var id: int = int(o["id"])
+	if _body_cache.has(id):
+		return _body_cache[id]
+	var ohd: Vector2 = o["dir"]
+	var ort: Vector2 = VehicleRoads.right_of(ohd)
+	var ow: float = float(o["wid"]) * 0.5 * 0.95
+	var ol: float = float(o["len"]) * 0.5 * 0.95
+	var nl: int = int(ceil(ol * 2.0 / 1.1))
+	var pts_o := PackedVector2Array()
+	var opos: Vector2 = o["pos"]
+	for ia in nl + 1:
+		var sx: float = -1.0 + 2.0 * float(ia) / float(nl)
+		pts_o.append(opos + ohd * (ol * sx) + ort * ow)
+		pts_o.append(opos + ohd * (ol * sx))
+		pts_o.append(opos + ohd * (ol * sx) - ort * ow)
+	_body_cache[id] = pts_o
+	return pts_o
+
+
 func _obstacle_limit(v: Dictionary, half: float) -> float:
 	var h: Vector2 = v["dir"]
-	var rt: Vector2 = VehicleRoads.right_of(h)
 	var lim: float = INF
 	_blocker = {}
 	var look: float = num("look", 6.0) + float(v["v"]) * 0.6
 	var gap: float = num("gap", 0.9)
 	var pos: Vector2 = v["pos"]
 	var wid: float = float(v["wid"])
-	for o in vehicles:
+	var vpath: VehiclePath = v["path"]
+	var full_h: float = look + half + 6.0
+	var sdd := PackedFloat32Array()                         # the points of my own way ahead (centre and nose), made once and only when somebody is near
+	var spc := PackedVector2Array()
+	var snose := PackedVector2Array()
+	var made: bool = false
+	var span: float = full_h + 6.5                          # nothing farther than this can be in my way (the longest body is 8.4)
+	var c0 := Vector2i(int(floorf((pos.x - span) / CELL)), int(floorf((pos.y - span) / CELL)))
+	var c1 := Vector2i(int(floorf((pos.x + span) / CELL)), int(floorf((pos.y + span) / CELL)))
+	var near: Array = []
+	for cx in range(c0.x, c1.x + 1):
+		for cy in range(c0.y, c1.y + 1):
+			var cell = _grid.get(Vector2i(cx, cy))
+			if cell != null:
+				near.append_array(cell)
+	for o in near:
 		if o == v or str(o["state"]) == "dead":
 			continue
 		var d: Vector2 = (o["pos"] as Vector2) - pos
-		if d.length_squared() > 900.0:
-			continue
 		var oh: float = float(o["len"]) * 0.5
+		var reach: float = full_h + oh + 2.0
+		if d.length_squared() > reach * reach or d.dot(h) < -(oh + half + 0.3):
+			continue                                             # out of my way: too far, or behind me
 		var cs: float = h.dot(o["dir"])
 		var margin: float = wid * 0.5 + 0.12
 		var near_only: bool = false
@@ -402,38 +450,54 @@ func _obstacle_limit(v: Dictionary, half: float) -> float:
 				continue                                         # the other one gives way to me
 		if int(o.get("wait_for", -1)) == int(v["id"]):
 			near_only = true                                     # it waits for me (a deadlock in the making): only stop for it when it is really in my way
-		var best: float = INF
-		var ohd: Vector2 = o["dir"]
-		var ort: Vector2 = VehicleRoads.right_of(ohd)
-		var ow: float = float(o["wid"]) * 0.5 * 0.95
-		var ol: float = oh * 0.95
-		var nl: int = int(ceil(ol * 2.0 / 1.1))
-		var pts_o: Array = []
-		for ia in nl + 1:
-			var sx: float = -1.0 + 2.0 * float(ia) / float(nl)
-			for sy in [-1.0, 0.0, 1.0]:
-				pts_o.append((o["pos"] as Vector2) + ohd * (ol * sx) + ort * (ow * sy))
-		var horizon: float = 2.4 if near_only else look + half + 6.0
-		var vpath: VehiclePath = v["path"]
-		var dd: float = 0.2
-		while dd <= horizon and best == INF:
-			var sp: float = float(v["s"]) + dd
-			if sp > vpath.length + 0.5:
-				break
-			var pc: Vector2 = centre(vpath, sp, float(v["len"]))
-			var nose: Vector2 = vpath.at(minf(sp + half * 0.9, vpath.length))
-			for q in pts_o:
-				if (q as Vector2).distance_squared_to(nose) < margin * margin or (q as Vector2).distance_squared_to(pc) < margin * margin:
-					best = dd
+		if not made:
+			made = true
+			var tc: PackedVector2Array = vpath.table("c", float(v["len"]))
+			var tn: PackedVector2Array = vpath.table("n", half * 0.9)
+			var dd0: float = 0.2
+			while dd0 <= full_h:
+				var sp0: float = float(v["s"]) + dd0
+				if sp0 > vpath.length + 0.5:
 					break
-			dd += 0.8
+				var ti: int = clampi(int(roundf(sp0 / VehiclePath.TABLE_STEP)), 0, tc.size() - 1)
+				sdd.append(dd0)
+				spc.append(tc[ti])
+				snose.append(tn[ti])
+				dd0 += 0.8
+		var best: float = INF
+		var pts_o: PackedVector2Array = _body_pts(o)
+		var opos: Vector2 = o["pos"]
+		var rad: float = oh + float(o["wid"]) * 0.5 + margin + 0.2     # every body point is within this of the body centre
+		var rad2: float = rad * rad
+		var horizon: float = 2.4 if near_only else full_h
+		var m2: float = margin * margin
+		for k in sdd.size():
+			if sdd[k] > horizon:
+				break
+			var pc: Vector2 = spc[k]
+			var nose: Vector2 = snose[k]
+			if opos.distance_squared_to(pc) > rad2 and opos.distance_squared_to(nose) > rad2:
+				continue
+			for q in pts_o:
+				if q.distance_squared_to(nose) < m2 or q.distance_squared_to(pc) < m2:
+					best = sdd[k]
+					break
+			if best < INF:
+				break
 		if best < INF:
 			var bl: float = _brake(best - gap)
 			if bl < lim:
 				lim = bl
 				_blocker = o
 				v["wait_for"] = int(o["id"])
+	var folk_near: bool = false
 	if not folks.is_empty():
+		var fr2: float = look + half * 2.0 + 3.0
+		for fp in folks:
+			if fp.distance_squared_to(pos) < fr2 * fr2:
+				folk_near = true
+				break
+	if folk_near:
 		var vpath2: VehiclePath = v["path"]
 		var fm: float = wid * 0.5 + 0.35
 		var d2: float = 0.2
