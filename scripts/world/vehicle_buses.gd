@@ -39,33 +39,63 @@ func geometry(rid: String) -> Dictionary:
 			ok = ok and not f.is_empty()
 			fr.append(f)
 		if ok and fr.size() >= 2:
-			var pts: Array = [Vector2(float(fr[0]["gate"]) + _bx(), float(fr[0]["lane_z"]))]
+			var lane: float = float(view.cfg.get("lane", 1.0))
+			var first := Vector2(float(fr[0]["gate"]) + _bx(), float(fr[0]["lane_z"]))
+			# the bus comes in from the nearest road end of the map to its first stop and, after the last stop, drives out of the map by the nearest road end
+			var entry: Dictionary = _best_entry(fr[0], first.x, lane)
+			var pts: Array = []
+			var visits: Array = []
+			if not entry.is_empty():
+				pts.append_array(entry["pts"])
+				visits.append_array(entry["visits"])
+			else:
+				pts.append(first)
 			for i in range(fr.size() - 1):
-				var leg: Dictionary = VehicleRoads.lane_route(fr[i], float(fr[i]["gate"]) + _bx(), fr[i + 1], float(fr[i + 1]["gate"]) + _bx(), float(view.cfg.get("lane", 1.0)))
+				var leg: Dictionary = VehicleRoads.lane_route(fr[i], float(fr[i]["gate"]) + _bx(), fr[i + 1], float(fr[i + 1]["gate"]) + _bx(), lane)
 				var lp: Array = leg["pts"]
 				for k in range(1, lp.size()):
 					pts.append(lp[k])
+				visits.append_array(leg["visits"])
+			var last: int = fr.size() - 1
+			var end_x: float = float(fr[last]["gate"]) + _bx()
+			var ex_end: Dictionary = VehicleRoads.nearest_end(fr[last], lane)
+			var ex: Dictionary = VehicleRoads.exit_route(fr[last], end_x, ex_end, lane) if not ex_end.is_empty() else {}
+			if not ex.is_empty():
+				var ep: Array = ex["pts"]
+				for k2 in range(1, ep.size()):
+					pts.append(ep[k2])
+				visits.append_array(ex["visits"])
 			var path: VehiclePath = VehiclePath.make(pts, 2.9)
 			var stop_s: Array = []
 			var from_s: float = 0.0
 			for i2 in fr.size():
-				var s: float = path.closest_s(Vector2(float(fr[i2]["gate"]) + _bx(), float(fr[i2]["lane_z"])), from_s, 200.0)
+				var s: float = path.closest_s(Vector2(float(fr[i2]["gate"]) + _bx(), float(fr[i2]["lane_z"])), from_s, 260.0)
 				stop_s.append(s)
 				from_s = s + 2.0
 			var arr: Array = []
 			for i3 in fr.size():
 				arr.append(TransportBus.offset_at(r, i3) - float(r.get("offset", 0)))
-			g = {"path": path, "stop_s": stop_s, "arr": arr, "total": float(arr[arr.size() - 1]) + _dwell(), "lots": stops, "offset": float(r.get("offset", 0)), "visits": _visits(fr)}
+			g = {"path": path, "stop_s": stop_s, "arr": arr, "total": float(arr[arr.size() - 1]) + _dwell(), "lots": stops, "offset": float(r.get("offset", 0)), "visits": visits,
+				"entry_s": float(stop_s[0])}
 	_geo[rid] = g
 	return g
 
 
-func _visits(fr: Array) -> Array:
-	var out: Array = []
-	for i in range(fr.size() - 1):
-		var leg: Dictionary = VehicleRoads.lane_route(fr[i], float(fr[i]["gate"]) + _bx(), fr[i + 1], float(fr[i + 1]["gate"]) + _bx(), float(view.cfg.get("lane", 1.0)))
-		out.append_array(leg["visits"])
-	return out
+func _best_entry(f0: Dictionary, end_x: float, lane: float) -> Dictionary:
+	var best: Dictionary = {}
+	var best_len: float = 1.0e9
+	for e in VehicleRoads.edge_ends():
+		var rt: Dictionary = VehicleRoads.entry_route(e, f0, end_x, lane)
+		if rt.is_empty():
+			continue
+		var l: float = 0.0
+		var pp: Array = rt["pts"]
+		for k in range(1, pp.size()):
+			l += (pp[k] as Vector2).distance_to(pp[k - 1])
+		if l < best_len:
+			best_len = l
+			best = rt
+	return best
 
 
 ## Where along the path the timetable puts the bus `u` minutes after it left its first stop.
@@ -87,31 +117,31 @@ func target_s(g: Dictionary, u: float) -> float:
 
 func sync() -> void:
 	var now: float = view.now_f()
+	var vmax: float = float((view.cfg.get("speeds", {}) as Dictionary).get("bus", 6.5))
 	for r in TransportBus.routes():
 		var rid: String = str(r["id"])
 		var g: Dictionary = geometry(rid)
 		if g.is_empty():
 			continue
-		var hw: float = maxf(TransportBus.headway(r, float(int(now) % 1440) / 60.0), 3.0)
-		var off: float = float(g["offset"])
-		var n_lo: int = int(ceil((now - off - float(g["total"])) / hw))
-		var n_hi: int = int(floor((now - off) / hw))
-		for n in range(n_lo, n_hi + 1):
-			var d_time: float = off + float(n) * hw
-			var u: float = now - d_time
-			var s_t: float = target_s(g, u)
+		# a run is on the road from `lead` minutes before it leaves its first stop (the drive in from the map edge) until the end of its way
+		var lead: float = float(g["entry_s"]) / maxf(vmax * view.vt_per_min(), 0.3)
+		var from_t: int = int(floor(now - float(g["total"]))) - 1
+		for d_time in TransportBus.departures(r, from_t, int(floor(now + lead)) + 1):
+			var u: float = now - float(d_time)
+			var s_t: float = target_s(g, u) if u >= 0.0 else 0.0
 			var path: VehiclePath = g["path"]
 			var p: Vector2 = path.at(s_t)
-			if not view.in_range(p, 0.6) or _count() >= int((view.cfg.get("bus_stop", {}) as Dictionary).get("max_buses", 8)):
+			if _has_run(rid, float(d_time)) or _count() >= int((view.cfg.get("bus_stop", {}) as Dictionary).get("max_buses", 8)):
 				continue
-			if _exists_near(rid, p) or not view.sim.spot_free(p, 8.4, 2.0):
+			if u < -lead:
+				continue
+			if not view.seeding and view.on_screen(p, 8.0):
+				continue                                      # never appears on the picture: it starts when its start is off screen
+			if not view.sim.spot_free(p, 8.4, 2.0):
 				continue
 			var v: Dictionary = view.sim.add("bus", "bus", path, {"s": s_t, "end": "dead", "tag": "bus", "visits": g["visits"]})
 			v["bus_rid"] = rid
-			v["bus_d"] = d_time
-	for v2 in view.sim.vehicles:
-		if str(v2["tag"]) == "bus" and view.beyond_drop(v2["pos"]):
-			view.sim.kill(v2)
+			v["bus_d"] = float(d_time)
 
 
 func _count() -> int:
@@ -122,9 +152,9 @@ func _count() -> int:
 	return n
 
 
-func _exists_near(rid: String, p: Vector2) -> bool:
+func _has_run(rid: String, d_time: float) -> bool:
 	for v in view.sim.vehicles:
-		if str(v["tag"]) == "bus" and str(v["bus_rid"]) == rid and (v["pos"] as Vector2).distance_to(p) < 9.0:
+		if str(v["tag"]) == "bus" and str(v["bus_rid"]) == rid and absf(float(v["bus_d"]) - d_time) < 0.5:
 			return true
 	return false
 

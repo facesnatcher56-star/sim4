@@ -27,8 +27,8 @@ func run() -> Array:
 	var walk: float = Workplace.commute_minutes(mira, door)
 	var lead_walk: float = Commute.lead_hours(mira) * 60.0
 	# the bus network connects the home lot with the office (a change at the market)
-	var bp: Dictionary = TransportBus.plan("home", "office")
-	_check(bool(bp["ok"]), "the buses link home and the office")
+	var bp: Dictionary = TransportBus.plan("market", "office")
+	_check(bool(bp["ok"]), "the bus loop links the market and the office")
 	var plan0: Dictionary = TransportTrip.plan(mira, door, {"commute": true})
 	print("  [city] home -> office: walk %.0f min, best on foot/bus/taxi: %s %.0f min" % [walk, plan0["mode"], float(plan0["minutes"])])
 	# a car at home

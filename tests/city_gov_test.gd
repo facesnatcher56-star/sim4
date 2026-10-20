@@ -133,7 +133,7 @@ func run() -> Array:
 	CityPolicy.propose("permits", true)
 	K.set_time(80, 23)
 	K.expect(f, CityPolicy.active("park_hours") and CityPolicy.blocks_entry("park", [int(ada.id)]).find("park is closed") >= 0, "the parks close at night")
-	K.expect(f, CityPolicy.fare_mult() == 0.0 and int(TransportBus.plan("school", "cafe")["fare"]) == 0, "free buses cost nothing")
+	K.expect(f, CityPolicy.fare_mult() == 0.0 and int(TransportBus.plan("market", "school", 80 * 1440 + 8 * 60)["fare"]) == 0, "free buses cost nothing")
 	var bal: int = int(WorldIface.coins[1])
 	CityPolicy.on_interaction(ada, "karaoke")
 	CityPolicy.on_interaction(ada, "karaoke")
