@@ -29,6 +29,13 @@ var _bus_any_frames := 0
 var _layer_off_frames := 0
 var _check_frames := 0
 var _hourly: Dictionary = {}        # game hour -> [frames, vehicle-frames in view, bus-frames]
+var _born: Dictionary = {}          # game hour -> vehicles first seen (anywhere in the layer)
+var _minutes: Dictionary = {}       # game hour -> game minutes watched
+var _last_min: int = -1
+var _sig_frames := 0
+var _sig_all_same := 0
+var _sig_top_share := 0.0
+var _jam_seen := 0
 
 
 func _clock():
@@ -41,7 +48,7 @@ func _stamp() -> String:
 
 
 func _find_vv(n: Node):
-	if n is VehicleView:
+	if str(n.name) == "VehicleView" and n.has_method("advance"):          # (not `is VehicleView`: that compiles the layer before the autoloads exist)
 		return n
 	for c in n.get_children():
 		var r = _find_vv(c)
@@ -84,7 +91,14 @@ func _check() -> void:
 				buses += 1
 			if not _seen.has(id) and _check_frames > 30:
 				_popin[kind] = int(_popin.get(kind, 0)) + 1
+		if not _seen.has(id):
+			_born[h] = int(_born.get(h, 0)) + 1
 		_seen[id] = true
+	var tot_min: int = int(_clock().total_minutes)
+	if tot_min != _last_min:
+		_last_min = tot_min
+		_minutes[h] = int(_minutes.get(h, 0)) + 1
+	_signals()
 	for id in _prev_on:
 		if not now_on.has(id):
 			# still on the list and moved out of frame normally?
@@ -104,6 +118,28 @@ func _check() -> void:
 	_bus_frames += buses
 	_bus_max = maxi(_bus_max, buses)
 	_hourly[h] = hr
+
+
+## How alike are the lights? Per frame: the share of the traffic-light junctions that show the same pair of states (north-south / east-west) as the most common pair.
+func _signals() -> void:
+	var ctl = _vv.sim.control
+	var tally := {}
+	var n := 0
+	for id in VehicleRoads.junction_ids():
+		if ctl.kind(id.x, id.y) != "signal":
+			continue
+		var k: String = _vv.sim.signal_state(id.x, id.y, 0) + "/" + _vv.sim.signal_state(id.x, id.y, 1)
+		tally[k] = int(tally.get(k, 0)) + 1
+		n += 1
+	if n == 0:
+		return
+	var top := 0
+	for k2 in tally:
+		top = maxi(top, int(tally[k2]))
+	_sig_frames += 1
+	_sig_top_share += float(top) / float(n)
+	if top == n:
+		_sig_all_same += 1
 
 
 func _process(_d: float) -> bool:
@@ -161,11 +197,17 @@ func _process(_d: float) -> bool:
 		print("TRAFFIC buses: max %d at once, in view on %.0f%% of frames, avg %.2f" % [_bus_max, 100.0 * _bus_any_frames / fr, _bus_frames / fr])
 		print("TRAFFIC vanished while in view: %s" % str(_vanish))
 		print("TRAFFIC popped in while in view: %s" % str(_popin))
-		print("TRAFFIC ghosted (jam cleared by passing through): %d" % int(_vv.sim.ghosted))
+		print("TRAFFIC ghosted (a vehicle faded through a jam; always 0 since task 37): %d" % int(_vv.sim.ghosted))
+		var causes := {}
+		for j in _vv.sim.jam_log:
+			causes[j["cause"]] = int(causes.get(j["cause"], 0)) + 1
+		print("TRAFFIC jams (waited %.0f s or more): %s, vehicles that backed up to free a deadlock: %d" % [float(_vv.sim.num("jam_after_s", 22.0)), str(causes), int(_vv.sim.reversals)])
+		print("TRAFFIC lights: on average %.0f%% of the traffic-light junctions show the same pair of states; all of them alike in %.1f%% of the frames" % [100.0 * _sig_top_share / maxf(_sig_frames, 1), 100.0 * _sig_all_same / maxf(_sig_frames, 1)])
+		print("TRAFFIC filler: %s" % str(_vv.filler.stats))
 		var hs: Array = _hourly.keys()
 		hs.sort()
 		for hh in hs:
 			var a: Array = _hourly[hh]
-			print("TRAFFIC hour %02d: vehicles in view %.2f, bus on screen %.0f%%" % [hh, float(a[1]) / maxf(a[0], 1), 100.0 * a[2] / maxf(a[0], 1)])
+			print("TRAFFIC hour %02d: vehicles in view %.2f, bus on screen %.0f%%, new vehicles per game minute %.2f" % [hh, float(a[1]) / maxf(a[0], 1), 100.0 * a[2] / maxf(a[0], 1), float(_born.get(hh, 0)) / maxf(float(_minutes.get(hh, 1)), 1.0)])
 		quit(0)
 	return false
