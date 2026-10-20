@@ -230,6 +230,8 @@ Pour, Wipe, Mop, Repair (crouched), Phone_Call, Phone_Text (+ Sit_ twins), Eat, 
 
 Need nothing, stay as they are: stretch, look_around, ponder_the_day, fidget_and_think, daydream (the folk's own body and thoughts), hum_tune, sing_softly, shake_a_leg (their own voice and body), check_phone, look_through_photos (the phone is carried; it has a prop). `welcome_snack`, `cafe_restroom` and `sleep_floor` are the bare-home fallbacks of task 32d and are meant to be offered when the object is missing.
 
+Free fillers for a bare home (task 33c follow-up; they need no object, so an empty home is not left standing about: idle 1-9% in `tests/pov_activity_mix.gd`, family 101, empty home, nobody playing, 3 days, was 7% before 33c; `auto_furnish_test` at its original bounds, 12% / 7%): sit_on_floor (only when no seat or bed is near), stretch_on_wall, pace_and_think, count_coins (needs coins), floor_todo_list (Write + pen and notepad), listen_to_neighbours, imagine_furniture, practise_speech_air, shadow_box (Aim), do_sit_ups (Bend). They are 4-15 minutes long: a long filler leaves fewer gaps between actions than many short ones, which is what keeps the idle share low.
+
 Paint is the easels' clip only (test `action_visuals_test`): `doodle` is Write with a pen and notepad, `build_snowfolk` is Bend (the `creative` tag no longer maps to Paint).
 
 The folk of a self filler stays where they stand (no walk to the object); the gate only decides whether the filler exists. Not done: walking to the table before the puzzle.

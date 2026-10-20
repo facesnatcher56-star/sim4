@@ -9,7 +9,7 @@
       {"prop": "spoon", "ids": ["boil_water", "brew_tea"], "clips": ["Cook"]},
       {"prop": "pan", "tags": ["cook"], "clips": ["Cook"]},
       {"props": ["pencil", "textbook"], "ids": ["do_homework"], "clips": ["Write", "Sit_Write", "Type", "Sit_Type"]},
-      {"props": ["pen", "notepad"], "ids": ["write_will", "write_a_postcard", "plan_tomorrow", "crossword", "do_a_puzzle", "write_story", "write_novel", "write_song", "doodle"], "clips": ["Write", "Sit_Write"]},
+      {"props": ["pen", "notepad"], "ids": ["write_will", "write_a_postcard", "plan_tomorrow", "crossword", "do_a_puzzle", "write_story", "write_novel", "write_song", "doodle", "floor_todo_list"], "clips": ["Write", "Sit_Write"]},
       {"prop": "letter", "tags": ["paperwork"], "ids": ["check_mail", "read_town_law"], "clips": ["Read", "Sit_Read"]},
       {"prop": "book", "tags": ["read"], "clips": ["Read", "Sit_Read"]},
       {"prop": "gamepad", "ids": ["play_computer", "play_video_games", "play_console"], "tags": ["game"], "clips": ["Type", "Sit_Type", "Sit_Watch", "Sit_Idle", "Idle"]},

@@ -11,7 +11,8 @@ const NEEDS := {
 	"doodle": "coffee_table", "sip_water": "sink", "gaze_out_window": "window", "people_watch": "window",
 }
 ## need nothing but the folk themselves
-const FREE := ["stretch", "look_around", "check_phone", "hum_tune", "sing_softly", "fidget_and_think", "ponder_the_day", "shake_a_leg", "look_through_photos"]
+const FREE := ["stretch", "look_around", "check_phone", "hum_tune", "sing_softly", "fidget_and_think", "ponder_the_day", "shake_a_leg", "look_through_photos",
+	"stretch_on_wall", "pace_and_think", "count_coins", "floor_todo_list", "listen_to_neighbours", "imagine_furniture", "practise_speech_air", "shadow_box", "do_sit_ups"]
 
 var fails: Array = []
 
@@ -64,7 +65,7 @@ func run() -> Array:
 	var free_seen := 0
 	for id in FREE:
 		free_seen += 1 if seen0.has(id) else 0
-	_check(free_seen >= 4, "bare home: only %d of the free fillers were offered (%s)" % [free_seen, str(seen0.keys())])
+	_check(free_seen >= 8, "bare home: only %d of the free fillers were offered (%s)" % [free_seen, str(seen0.keys())])
 	Kit.teardown()
 	# every object present: they are offered again
 	var wp := _world(NEEDS.values())
