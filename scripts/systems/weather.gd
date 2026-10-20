@@ -12,7 +12,7 @@ extends RefCounted
 ##   Weather.is_precipitating() / precip_kind() / precip_intensity() / fog_amount() / cloud_cover() / wind() / light_factor()
 ##   Weather.daylight(hour_f) 0..1 / is_dark()               Weather.snow_cover() / wetness()   (0..1, updated hourly)
 ##   Weather.walk_speed_mult() / walk_speed_mult_at(tile)    Weather.crop_growth_mult() / bill_multiplier()
-##   Weather.force(id) / unforce()                           (debug / screenshots; not saved)
+##   Weather.force(id) / unforce()                           (debug / screenshots / town cycles; saved so a loaded heat wave is still a heat wave)
 ##   Weather.to_dict() / from_dict(d) / reset(seed)
 ## HOOKS (called by SystemsManager): on_minute, on_hour, on_day, on_folk_added, on_interaction_finished, on_game_event.
 ## EVENTS: game_event "weather_changed" {from, to, label, temp, season, day}, "season_changed", "lightning", "crops_frozen".
@@ -379,13 +379,15 @@ static func to_dict() -> Dictionary:
 		pud.append([t.x, t.y, _puddles[t]])
 	return {"seed": seed_value, "chain": tail, "snow": _snow, "wet": _wet, "heat_dh": _heat_dh, "cool_dh": _cool_dh, "bill_hours": _bill_hours,
 		"min_today": _min_today, "rain_hours": _rain_hours, "heat_hours": _heat_hours, "last_weather": _last_weather, "last_season": _last_season,
-		"rain_deferred": _rain_deferred.duplicate(), "puddles": pud, "seasons": Seasons.to_dict(), "holidays": Holidays.to_dict()}
+		"rain_deferred": _rain_deferred.duplicate(), "puddles": pud, "forced": forced, "forced_snow": forced_snow, "seasons": Seasons.to_dict(), "holidays": Holidays.to_dict()}
 
 static func from_dict(d: Dictionary) -> void:
 	reset(int(d.get("seed", int(settings().get("default_seed", 1337)))))
 	if d.is_empty():
 		return
 	Seasons.from_dict(d.get("seasons", {}))
+	forced = str(d.get("forced", ""))          # a heat wave / cold snap era holds the weather; the saved game must keep it
+	forced_snow = float(d.get("forced_snow", -1.0))
 	var ch: Dictionary = d.get("chain", {})
 	var keys: Array = []
 	for k in ch:
