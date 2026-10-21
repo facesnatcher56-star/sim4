@@ -21,6 +21,6 @@ Write-Output (& powershell -File (Join-Path $PSScriptRoot "heritage_guard.ps1") 
 $g = "C:\Users\lloyd\AppData\Local\Godot47\Godot_v4.7-stable_win64_console.exe"
 $ov = Join-Path $root "override.cfg"
 Set-Content -Path $ov -Value "[display]`nwindow/size/no_focus=true`n" -Encoding ascii          # non-activating window: never steals focus
-$p = Start-Process $g -ArgumentList "--path",".","--position","9000,5000","--resolution","1920x1080","--quit-after","300" -PassThru -Wait -NoNewWindow -WorkingDirectory $root
+$p = Start-Process $g -ArgumentList "--path",".","--position","3440,164","--resolution","1920x1080","--quit-after","300" -PassThru -Wait -NoNewWindow -WorkingDirectory $root
 Remove-Item $ov -ErrorAction SilentlyContinue
 if ($p.ExitCode -eq 0) { Write-Output "ok   windowed title screen quits clean" } else { Write-Output "FAIL windowed title screen exit code $($p.ExitCode)" }
