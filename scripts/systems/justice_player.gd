@@ -63,6 +63,8 @@ static func hold(f, minutes: float, reason: String, label: String) -> bool:
 	f.clear_queue()
 	f.cancel_current("arrested")
 	f.add_buff("in_custody")
+	if PlaceHold.available(reason) and PlaceHold.begin(f, maxf(minutes, 2.0), reason, label):          # task 46: held in a real cell
+		return true
 	return Away.send(f, maxf(minutes, 2.0), reason, {"label": label})
 
 static func release(f) -> void:

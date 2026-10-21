@@ -4428,6 +4428,7 @@
    "fine_none": 0
   }
  },
+ "places": {"custody": "police", "remand": "police"},
  "intrusion": {
   "_doc": "Physical access for murder and serial killing (CrimeIntrusion): each of three steps (approach, entry, reach) is stopped with chance s / (s + determination x k). Determination = base + rage_weight x rage/100 + traits + criminal path. With a full security system an ordinary angry person is stopped 97 to 99 percent of the time; a very determined one has a real chance.",
   "k": 1.5,

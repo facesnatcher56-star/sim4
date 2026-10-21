@@ -71,6 +71,10 @@ func _process(_d: float) -> bool:
 		Courthouse.open(cc)
 		root.get_node("Events").selection_changed.emit("folk", Pawn.of())
 		root.get_node("Clock").set_speed(2)
+	if _frames == 60 and _scn == "cell":
+		JusticePlayer.hold(SysUtil.folk(Pawn.of()), 360.0, "custody", "In custody")
+		root.get_node("Events").selection_changed.emit("folk", Pawn.of())
+		root.get_node("Clock").set_speed(2)
 	if _frames == 60 and _scn == "walker":
 		var pf = _main.hud._resolve(_main.hud.selected_folk_id)
 		var vv = _main.find_child("VehicleView", true, false)
@@ -118,7 +122,7 @@ func _process(_d: float) -> bool:
 		print("PAWNMETA away=%s info=%s tile=%s lvl=%d cur=%s" % [str(pw.has_meta("away")), str(Away.info(pw.id)), str(pw.tile), pw.level, str(pw.current.def_id) if pw.current else "-"])
 		for k in (lvw.level_nodes if lvw else {}):
 			print("  L%s objs=%d" % [str(k), (lvw.level_nodes[k]["objs"] as Dictionary).size()])
-	if _frames == (900 if _scn == "court" else 100):
+	if _frames == (900 if _scn in ["court", "cell"] else 100):
 		var img := root.get_texture().get_image()
 		img.save_png(_out)
 		print("saved ", _out, " ", img.get_size())

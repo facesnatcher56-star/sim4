@@ -8,6 +8,19 @@ func _process(_d: float) -> bool:
 	_done = true
 	Kit.new_game("solo", "normal", {}, -1, {"world_seed": 4242, "home_state": "empty"})
 	JusticeCareers.staff_town()
+	if "--cell" in OS.get_cmdline_user_args():
+		var pf0 = SysUtil.folk(Pawn.of())
+		print("COURT hold=%s" % str(JusticePlayer.hold(pf0, 120.0, "custody", "In custody")))
+		for m in 8:
+			Kit.run(10)
+			print("COURT cell t+%d: tile=%s L%d cur=%s holding=%s" % [(m + 1) * 10, str(pf0.tile), pf0.level, str(pf0.current.def_id) if pf0.current else "-", str(PlaceHold.holding(pf0.id))])
+		print("COURT order: %s" % str(Commands.run({"player_id": 1, "folk_id": pf0.id, "action": "go_home"})))
+		JusticePlayer.release(pf0)
+		Kit.run(20)
+		print("COURT after release: tile=%s L%d holding=%s away=%s" % [str(pf0.tile), pf0.level, str(PlaceHold.holding(pf0.id)), str(Away.is_away(pf0.id))])
+		Kit.teardown()
+		quit(0)
+		return true
 	var tids: Array = Story.alive_townies().filter(func(t): return str(t.get("career", "")) == "" ).map(func(t): return int(t["id"]))
 	var culprit: int = int(tids[0])
 	var c: Dictionary = CaseStore.create("assault", culprit, int(tids[1]), "street", {})

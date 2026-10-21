@@ -34,7 +34,9 @@ static func run(env: Dictionary) -> Dictionary:
 	seq += 1
 	e["seq"] = seq
 	var res: Dictionary
-	if not CommandActions.has_action(e["action"]):
+	if PlaceHold.holding(int(e["folk_id"])) and str(e["action"]) in ["interact", "travel", "go_home", "life", "solo", "city", "vacation", "build_place"]:
+		res = {"ok": false, "msg": "You are being held. You cannot do that now."}
+	elif not CommandActions.has_action(e["action"]):
 		res = {"ok": false, "msg": "That action is not available."}
 	else:
 		PlayerLots.acting = int(e["player_id"])        # build rules follow the player whose order this is

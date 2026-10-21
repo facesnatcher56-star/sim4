@@ -120,6 +120,7 @@ static func _care() -> void:
 
 static func on_minute() -> void:
 	_care()
+	PlaceHold.on_minute()
 	var stale: Array = []
 	for fid in pending:
 		if SysUtil.now() - int(pending[fid]["queued_min"]) > PENDING_TIMEOUT_MIN:
@@ -138,6 +139,9 @@ static func recall(folk_id: int, reason: String = "recalled") -> bool:
 	if f == null or not active.has(folk_id):
 		return false
 	if is_visible(folk_id):
+		if PlaceHold.holding(folk_id):
+			PlaceHold.end(f)
+			return true
 		Commute.finish_visible(f, false)
 		return true
 	if f.current != null and f.current.def_id == IID:
