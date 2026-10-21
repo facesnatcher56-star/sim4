@@ -120,11 +120,11 @@ static func _find(f, kind: String, n: int) -> Dictionary:
 	var id: int = int(f.id)
 	var lines: Array = []
 	for _i in n:
-		var r: Dictionary = HobbyState.find(id, kind, float(f.skill_level("logic")) * 0.05)
+		var r: Dictionary = HobbyState.find(id, kind, SkillCheck.level(int(f.id), "perception") * 0.05)          # task 54: finding things is perception
 		if r.is_empty():
 			continue
 		lines.append("%s%s" % [r["label"], " (new!)" if bool(r["new"]) else " (already have)"])
-	f.add_skill_xp("logic", 6.0)
+	f.add_skill_xp("perception", 6.0)
 	var have: int = HobbyState.found_count(id, kind)
 	var total: int = HobbyState.items(kind).size()
 	var text := "%s found: %s. The set has %d of %d." % [f.name, ", ".join(lines), have, total]

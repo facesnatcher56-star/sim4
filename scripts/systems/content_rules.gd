@@ -16,7 +16,11 @@ static func cfg() -> Dictionary:
 static func skill_ids() -> Array:
 	return (cfg().get("skills", {}) as Dictionary).keys()
 
+## The player-facing name of a skill: data/skills.json (task 54's set) first, then this registry, then the id made readable.
 static func skill_label(skill: String) -> String:
+	var core: Dictionary = (SysUtil.table("skills").get("skills", {}) as Dictionary).get(skill, {})
+	if core.has("label"):
+		return str(core["label"])
 	return str((cfg().get("skills", {}) as Dictionary).get(skill, {}).get("label", skill.capitalize()))
 
 static func _all_objects() -> Array:

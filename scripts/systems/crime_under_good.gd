@@ -186,9 +186,9 @@ static func sting(cop: int, dealer: int) -> Dictionary:
 	var d: Dictionary = CrimeUnderDeal.rec(dealer)
 	if d.is_empty() or CrimeUnderDeal.stock_total(dealer) <= 0:
 		return {"ok": false, "msg": "That person is not selling right now."}
-	var skill: float = CrimeLifePath.skill_score(cop, {"logic": 0.6, "charisma": 0.4})
+	var skill: float = CrimeLifePath.skill_score(cop, {"perception": 0.6, "manipulation": 0.4})          # task 54: playing a buyer
 	var p: float = float(k.get("base", 0.35)) * (float(k.get("detective", 1.4)) if CrimePerson.career(cop) == "detective" else 1.0) + float(k.get("skill", 0.3)) * skill + float(d.get("tips", 0.0)) * 0.05 \
-		- CrimeLifePath.skill(dealer, "stealth") * 0.03 - CrimeUnderGood.protection(dealer) * 0.3
+		- CrimeLifePath.skill_score(dealer, {"perception": 0.6, "manipulation": 0.4}) * 10.0 * 0.03 - CrimeUnderGood.protection(dealer) * 0.3
 	if not CrimeUnderState.chance(clampf(p, 0.05, float(k.get("cap", 0.9)))):
 		d["tips"] = float(d.get("tips", 0.0)) + 0.3
 		return {"ok": true, "msg": "The dealer didn't bite.", "caught": false}

@@ -63,10 +63,11 @@ static func research(pid: int, cid: int) -> Dictionary:
 
 static func session(pid: int, c: Dictionary) -> Dictionary:
 	var k: Dictionary = cfg().get("research", {})
-	var gain: float = CrimeUnderState.range_f(k.get("gain", [0.2, 0.34])) + float(k.get("stealth_gain", 0.03)) * float(CrimeLifePath.skill(pid, "stealth"))
+	var gain: float = CrimeUnderState.range_f(k.get("gain", [0.2, 0.34])) + float(k.get("stealth_gain", 0.03)) * float(CrimeLifePath.skill(pid, "perception"))          # task 54: research is watching (perception)
 	c["research"] = clampf(float(c["research"]) + gain, 0.0, 1.0)
 	c["research_day"] = SysUtil.day()
-	CrimeLifePath.train(pid, "stealth", 3.0)
+	CrimeLifePath.train(pid, "perception", 3.0)
+	CrimeLifePath.train(pid, "stealth", 1.0)
 	var spotted: bool = CrimeUnderState.chance(float(k.get("spotted", 0.08)) * (1.0 - 0.07 * float(CrimeLifePath.skill(pid, "stealth"))))
 	if spotted:
 		c["mistakes"] = int(c["mistakes"]) + 1

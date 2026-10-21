@@ -18,20 +18,41 @@
   "logic": {"label": "Logic", "helpers": {}}
  },
  "tools": {"lockpick": 0.2, "crowbar": 0.15, "slim_jim": 0.2, "weapon": 0.2, "phone": 0.0},
+ "tools_from_gear": {"_doc": "crime gear the person owns (crimelife.json gear) counts as carried: gear id -> tool", "lockpicks": "lockpick", "tools": "crowbar"},
  "conditions": {"dark": 0.06, "noisy": -0.04, "crowded": -0.08, "raining": -0.03, "tired": -0.08, "hungry": -0.05, "injured": -0.12, "sick": -0.07, "tipsy": -0.06, "drunk": -0.15, "high": -0.12},
  "age": {"child": -0.15, "teen": -0.04, "adult": 0.0, "elder": -0.08},
  "catastrophe": {"_doc": "The deep miss: at_skill_0 .. at_skill_10 = share of rolls that end catastrophic (eased by sqrt of skill), times condition_mult, never more than max_fail_share of the failures. alarm_trace: extra trace when an alarm rings.", "at_skill_0": 0.16, "at_skill_10": 0.005, "max_fail_share": 0.6, "alarm_trace": 0.3, "condition_mult": {"drunk": 2.2, "tipsy": 1.4, "high": 1.9, "injured": 1.4, "tired": 1.3, "sick": 1.2}},
  "acts": {
-  "pick_lock": {"skill": "lockpicking", "difficulty": 0.55, "minutes": 14, "noise": 0.12, "catastrophe": {"trace": 0.7, "line": ["The pick snaps off inside the lock.", "Something cracks in the lock and the pick comes out in two pieces."]}},
-  "force_door": {"skill": "fitness", "difficulty": 0.5, "minutes": 2, "noise": 0.9, "catastrophe": {"injure": [1, "shoulder"], "noise": 1.0, "line": ["Your shoulder hits the door wrong. Something gives, and it is not the door."]}},
+  "pick_lock": {"skill": "lockpicking", "tools": ["lockpick"], "difficulty": 0.55, "minutes": 14, "noise": 0.12, "catastrophe": {"trace": 0.7, "line": ["The pick snaps off inside the lock.", "Something cracks in the lock and the pick comes out in two pieces."]}},
+  "force_door": {"skill": "fitness", "tools": ["crowbar"], "difficulty": 0.5, "minutes": 2, "noise": 0.9, "catastrophe": {"injure": [1, "shoulder"], "noise": 1.0, "line": ["Your shoulder hits the door wrong. Something gives, and it is not the door."]}},
   "break_window": {"skill": "handiness", "difficulty": 0.3, "minutes": 2, "noise": 0.7, "catastrophe": {"injure": [1, "cut hand"], "trace": 0.5, "alarm": true, "line": ["The glass bites back: a deep cut across the hand, blood on the frame."]}},
   "pickpocket": {"skill": "sleight", "difficulty": 0.5, "minutes": 1, "noise": 0.0, "opposed": "perception", "catastrophe": {"line": ["Their hand clamps over yours, still in their pocket."], "noise": 1.0}},
   "shoplift": {"skill": "sleight", "difficulty": 0.45, "minutes": 2, "noise": 0.0, "opposed": "perception", "catastrophe": {"line": ["Half the shelf comes down with it."], "noise": 1.0}},
-  "hotwire": {"skill": "mechanics", "difficulty": 0.55, "minutes": 6, "noise": 0.2, "catastrophe": {"injure": [1, "electric shock"], "alarm": true, "noise": 0.8, "line": ["A wire bites. Your arm jumps and the car horn starts blaring."]}},
+  "hotwire": {"skill": "mechanics", "tools": ["slim_jim"], "difficulty": 0.55, "minutes": 6, "noise": 0.2, "catastrophe": {"injure": [1, "electric shock"], "alarm": true, "noise": 0.8, "line": ["A wire bites. Your arm jumps and the car horn starts blaring."]}},
   "lie": {"skill": "manipulation", "difficulty": 0.5, "minutes": 2, "noise": 0.0, "opposed": "perception"},
-  "threaten": {"skill": "intimidation", "difficulty": 0.5, "minutes": 1, "noise": 0.2, "opposed": "fighting", "catastrophe": {"injure": [2, "fight"], "noise": 1.0, "line": ["They do not back off. They swing first."]}},
+  "threaten": {"skill": "intimidation", "tools": ["weapon"], "difficulty": 0.5, "minutes": 1, "noise": 0.2, "opposed": "fighting", "catastrophe": {"injure": [2, "fight"], "noise": 1.0, "line": ["They do not back off. They swing first."]}},
   "sneak": {"skill": "stealth", "difficulty": 0.5, "minutes": 3, "noise": 0.0, "opposed": "perception"},
   "cook": {"skill": "cooking", "difficulty": 0.3, "minutes": 30, "noise": 0.0, "catastrophe": {"fire": true, "fire_source": "cooking", "weight": 0.5, "line": ["The pan flares up."]}},
-  "fight": {"skill": "fighting", "difficulty": 0.5, "minutes": 2, "noise": 0.9, "opposed": "fighting", "catastrophe": {"injure": [2, "fight"], "line": ["A fist lands that you never saw coming."]}}
+  "fight": {"skill": "fighting", "tools": ["weapon"], "difficulty": 0.5, "minutes": 2, "noise": 0.9, "opposed": "fighting", "catastrophe": {"injure": [2, "fight"], "line": ["A fist lands that you never saw coming."]}}
+ },
+ "seed": {
+  "_doc": "Townies carry the same skills, seeded from their job (level grows with career level: + per_career_level per level above 1), traits and life stage, plus a stable 0..spread from their id. A townie's own trained skills (crew life) win when higher. scripts/systems/skill_seed.gd.",
+  "per_career_level": 0.6, "spread": 1.5,
+  "by_career": {
+   "cook": {"cooking": 2}, "chef": {"cooking": 3}, "barista": {"cooking": 1, "charisma": 1}, "coder": {"logic": 2}, "scientist": {"logic": 2, "perception": 1},
+   "painter": {"painting": 2}, "musician": {"guitar": 2, "piano": 1}, "writer": {"writing": 2}, "gardener": {"gardening": 2}, "teacher": {"charisma": 1, "logic": 1},
+   "fitness_coach": {"fitness": 2}, "athlete": {"fitness": 3, "fighting": 1}, "doctor": {"logic": 2, "first_aid": 3, "perception": 1},
+   "handyperson": {"handiness": 2}, "factory_worker": {"handiness": 1}, "warehouse_worker": {"fitness": 1, "driving": 1}, "construction_worker": {"handiness": 2, "fitness": 1},
+   "mechanic": {"mechanics": 2, "handiness": 1, "driving": 1}, "utility_tech": {"handiness": 2, "mechanics": 1},
+   "police_officer": {"perception": 2, "driving": 2, "fighting": 1, "fitness": 1, "intimidation": 1}, "detective": {"perception": 3, "logic": 2, "manipulation": 1},
+   "lawyer": {"manipulation": 2, "writing": 1, "charisma": 1, "logic": 1}, "judge": {"logic": 2, "perception": 1},
+   "security_guard": {"perception": 2, "intimidation": 1, "fighting": 1}, "night_watchman": {"perception": 2, "fitness": 1}
+  },
+  "by_trait": {
+   "active": {"fitness": 1}, "charmer": {"charisma": 1, "manipulation": 1}, "social": {"charisma": 1}, "bookworm": {"logic": 1, "writing": 1}, "hot_headed": {"fighting": 1, "intimidation": 1},
+   "handy": {"handiness": 1, "mechanics": 1}, "creative": {"painting": 1}, "musical": {"guitar": 1}, "green_thumb": {"gardening": 1}, "foodie": {"cooking": 1},
+   "gossip": {"perception": 1}, "empath": {"perception": 1}, "showoff": {"charisma": 1}, "outdoorsy": {"fitness": 1}, "clumsy": {"sleight": -1}, "shy": {"charisma": -1}
+  },
+  "by_stage": {"teen": {"fitness": 1}, "adult": {"driving": 2}, "elder": {"driving": 2, "perception": 1}}
  }
 }

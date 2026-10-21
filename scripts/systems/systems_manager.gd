@@ -285,6 +285,7 @@ func _on_game_event(ev_name: String, payload: Dictionary) -> void:
 	Intimacy.on_game_event(ev_name, payload)
 	Paternity.on_game_event(ev_name, payload)
 	ClinicRoute.on_game_event(ev_name, payload)
+	SkillTeach.on_game_event(ev_name, payload)
 	match ev_name:
 		"order_groceries":
 			var f = SysUtil.folk(int(payload.get("folk_id", -1)))

@@ -213,7 +213,7 @@ static func sting_chance(pid: int, d: Dictionary) -> float:
 	var k: Dictionary = cfg().get("sting", {})
 	var m: Dictionary = CrimeLifePath.member(pid)
 	var p: float = float(k.get("base", 0.03)) + float(Police.officers()) * float(k.get("per_officer", 0.012)) + float(m.get("heat", 0.0)) * float(k.get("heat", 0.02)) \
-		+ float(d.get("tips", 0.0)) * float(k.get("per_tip", 0.02)) - float(CrimeLifePath.skill(pid, "stealth")) * float(k.get("stealth", 0.05)) * 0.2
+		+ float(d.get("tips", 0.0)) * float(k.get("per_tip", 0.02)) - CrimeLifePath.skill_score(pid, {"perception": 0.6, "manipulation": 0.4}) * 10.0 * float(k.get("stealth", 0.05)) * 0.2          # task 54: spotting the undercover buyer, playing it cool
 	p *= Police.strength() * (1.0 - CrimeUnderGood.protection(pid))
 	return clampf(p, 0.0, float(k.get("cap", 0.5)))
 

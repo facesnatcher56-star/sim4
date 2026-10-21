@@ -776,7 +776,31 @@
    ],
    "prevent": [
     {
-     "label": "Strong and watchful",
+     "label": "Saw it coming",
+     "when": [
+      {
+       "skill_at_least": [
+        "perception",
+        4
+       ]
+      }
+     ],
+     "mult": 0.6
+    },
+    {
+     "label": "Ready for trouble",
+     "when": [
+      {
+       "skill_at_least": [
+        "fighting",
+        4
+       ]
+      }
+     ],
+     "mult": 0.75
+    },
+    {
+     "label": "Quick on their feet",
      "when": [
       {
        "skill_at_least": [
@@ -785,7 +809,7 @@
        ]
       }
      ],
-     "mult": 0.6
+     "mult": 0.85
     }
    ],
    "outcomes": [

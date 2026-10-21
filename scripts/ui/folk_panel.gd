@@ -434,7 +434,7 @@ func _build_skills() -> void:
 		var row := HBoxContainer.new()
 		row.name = "skill_" + str(s)
 		var lv := _skill_level(st)
-		var lab := UIU.make_label("%s  Lv %d" % [UIU.sentence(str(s)), lv], 14)
+		var lab := UIU.make_label("%s  Lv %d" % [ContentRules.skill_label(str(s)), lv], 14)
 		lab.custom_minimum_size = Vector2(130, 0)
 		row.add_child(lab)
 		var bar := ProgressBar.new()

@@ -87,20 +87,20 @@
   "townie_home": {"tiers": [[400, 0.25, 0.0, 0.0], [1500, 0.5, 0.1, 0.05], [999999, 0.8, 0.35, 0.2]], "_doc": "coins at least -> [chance of a good lock, chance of an alarm, chance of a camera]"}
  },
  "careers": {
-  "security_guard": {"label": "Security Guard", "primary_skill": "fitness", "alt_skills": ["handiness"], "days": [0, 1, 2, 3, 4, 5], "description": "Watch the doors. Notice what others miss.",
+  "security_guard": {"label": "Security Guard", "primary_skill": "perception", "alt_skills": ["intimidation", "fighting", "fitness"], "days": [0, 1, 2, 3, 4, 5], "description": "Watch the doors. Notice what others miss.",
    "hooks": {"guard_round": 3, "exercise": 1.5}, "trait_bonus": {"active": 2, "lazy": -2, "honest": 1},
    "levels": [
     {"title": "Trainee Guard", "start": 8, "end": 16, "pay": 15, "requires": {}},
-    {"title": "Guard", "start": 8, "end": 16, "pay": 21, "requires": {"skills": {"fitness": 2}}},
-    {"title": "Senior Guard", "start": 8, "end": 16, "pay": 29, "requires": {"skills": {"fitness": 4, "handiness": 2}}},
-    {"title": "Head of Security", "start": 9, "end": 17, "pay": 42, "requires": {"skills": {"fitness": 6, "charisma": 3}}}
+    {"title": "Guard", "start": 8, "end": 16, "pay": 21, "requires": {"skills": {"perception": 2}}},
+    {"title": "Senior Guard", "start": 8, "end": 16, "pay": 29, "requires": {"skills": {"perception": 4, "fighting": 2}}},
+    {"title": "Head of Security", "start": 9, "end": 17, "pay": 42, "requires": {"skills": {"perception": 6, "intimidation": 3}}}
    ],
    "tasks": [{"id": "walk_the_round", "label": "Walk the round", "interactions": ["guard_round"], "count": 1, "bonus": 5, "min_level": 1}]},
-  "night_watchman": {"label": "Night Watchman", "primary_skill": "fitness", "alt_skills": ["logic"], "days": [0, 1, 2, 3, 4, 5, 6], "description": "Keep an eye on the closed shops while the town sleeps.",
+  "night_watchman": {"label": "Night Watchman", "primary_skill": "perception", "alt_skills": ["fitness"], "days": [0, 1, 2, 3, 4, 5, 6], "description": "Keep an eye on the closed shops while the town sleeps.",
    "hooks": {"guard_round": 3, "read_book": 1}, "trait_bonus": {"active": 1, "lazy": -3, "bookworm": 1},
    "levels": [
-    {"title": "Night Watchman", "start": 22, "end": 6, "pay": 22, "requires": {"skills": {"fitness": 1}}},
-    {"title": "Night Supervisor", "start": 22, "end": 6, "pay": 32, "requires": {"skills": {"fitness": 3, "logic": 2}}}
+    {"title": "Night Watchman", "start": 22, "end": 6, "pay": 22, "requires": {"skills": {"perception": 1}}},
+    {"title": "Night Supervisor", "start": 22, "end": 6, "pay": 32, "requires": {"skills": {"perception": 3, "fitness": 2}}}
    ],
    "tasks": [{"id": "walk_the_round", "label": "Walk the round", "interactions": ["guard_round"], "count": 1, "bonus": 6, "min_level": 1}]}
  }

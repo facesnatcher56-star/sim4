@@ -7,9 +7,6 @@ extends RefCounted
 ##   kind "lot"    - a household lot (key "home:<hid>", full) or a townie lot (key "town:<n>", statistical)
 ## Townie skills come from their career (a cook has cooking = level + 1), needs / buffs are optional keys of the record.
 
-const CAREER_SKILL := {"cook": "cooking", "coder": "logic", "painter": "painting", "fitness_coach": "fitness",
-	"factory_worker": "handiness", "warehouse_worker": "fitness", "construction_worker": "handiness", "mechanic": "handiness", "utility_tech": "handiness"}
-
 var kind: String = "folk"
 var id: int = -1                    # folk id / townie id / household id or townie lot number
 var folk = null
@@ -92,13 +89,7 @@ func has_trait(tr: String) -> bool:
 func skill_level(sk: String) -> int:
 	if folk != null:
 		return folk.skill_level(sk)
-	var rec: Dictionary = t()
-	var own: Dictionary = rec.get("skills", {})
-	if own.has(sk):
-		return int(own[sk])
-	if CAREER_SKILL.get(str(rec.get("career", "")), "") == sk:
-		return int(rec.get("level", 1)) + 1
-	return 0
+	return SkillSeed.level(id, sk) if kind == "townie" else 0          # task 54: job, traits, stage (and trained skills in the record)
 
 func has_buff(b: String) -> bool:
 	if folk != null:

@@ -7,7 +7,10 @@
     "piano": {"label": "Piano"},
     "gardening": {"label": "Gardening"},
     "fishing": {"label": "Fishing"},
-    "writing": {"label": "Writing"}
+    "writing": {"label": "Writing"},
+    "photography": {"label": "Photography"},
+    "painting": {"label": "Painting"},
+    "cooking": {"label": "Cooking"}
   },
   "cooking_tiers": [
     {"min_level": 0, "cook": "cook_meal", "eat": "eat_meal", "buff": "well_fed"},

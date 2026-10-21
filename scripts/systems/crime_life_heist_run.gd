@@ -19,6 +19,20 @@ static func _best(h: Dictionary, effect: String) -> float:
 				best = CrimeLifePath.skill_score(leader, roles[rid].get("skills", {})) * 0.6       # the leader does it alone, worse
 	return best
 
+## Task 54: the escape rides on the getaway driver's driving when there is a car (the leader drives if nobody has the driver role), on foot on the
+## slowest member's fitness (the crew is as fast as its slowest runner).
+static func _getaway_body(h: Dictionary) -> float:
+	if bool(h["getaway"]):
+		var drv: int = int(h["leader"])
+		for e in h["crew"]:
+			if str(e["role"]) == "driver":
+				drv = int(e["pid"])
+		return clampf(SkillCheck.level(drv, "driving") / 10.0, 0.0, 1.0)
+	var slow: float = float(CrimeLifePath.skill(int(h["leader"]), "fitness"))
+	for e2 in h["crew"]:
+		slow = minf(slow, float(CrimeLifePath.skill(int(e2["pid"]), "fitness")))
+	return clampf(slow / 10.0, 0.0, 1.0)
+
 ## Chances of the three phases (also shown as words in the planning screen and compared by tests).
 static func phases(h: Dictionary) -> Dictionary:
 	var k: Dictionary = CrimeLifeHeist.cfg()
@@ -31,7 +45,7 @@ static func phases(h: Dictionary) -> Dictionary:
 	var entry: float = clampf(float(o["pull_off"]) + 0.12 * _best(h, "alarm") + 0.08 * _best(h, "detect"), 0.05, 0.97)
 	var noticed: float = clampf(float(o["detect"]) * (1.0 - 0.35 * _best(h, "detect")), 0.02, 0.97)
 	var vault: float = clampf(0.4 + 0.5 * _best(h, "vault") + CrimeLifeRoll.gear_effect(leader, "vault") + float(k.get("cased_bonus", 0.3)) * 0.4 * cased - 0.1 * float(td.get("vault", 1)), 0.05, 0.95)
-	var fit: float = clampf(float(CrimeLifePath.skill(leader, "fitness")) / 10.0, 0.0, 1.0)
+	var fit: float = _getaway_body(h)
 	var escape: float = clampf(0.45 + 0.3 * _best(h, "escape") + (float(k.get("getaway_bonus", 0.12)) if bool(h["getaway"]) else 0.0) + 0.15 * _best(h, "guards") + 0.2 * fit \
 		+ float(k.get("cased_bonus", 0.3)) * 0.4 * cased - float(td.get("heat", 8.0)) / 80.0, 0.05, 0.95)
 	return {"entry": entry, "noticed": noticed, "vault": vault, "escape": escape, "odds": o}

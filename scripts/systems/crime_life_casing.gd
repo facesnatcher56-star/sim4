@@ -26,13 +26,14 @@ static func start(pid: int, target: String) -> Dictionary:
 static func session(pid: int, target: String) -> Dictionary:
 	var k: Dictionary = cfg()
 	var g: Array = k.get("gain", [0.18, 0.3])
-	var gain: float = CrimeLifeState.rng.randf_range(float(g[0]), float(g[1])) + float(k.get("stealth_gain", 0.03)) * float(CrimeLifePath.skill(pid, "stealth"))
+	var gain: float = CrimeLifeState.rng.randf_range(float(g[0]), float(g[1])) + float(k.get("stealth_gain", 0.03)) * float(CrimeLifePath.skill(pid, "perception"))          # task 54: watching and learning a routine is perception
 	var rec: Dictionary = CrimeLifeState.cased.get(CrimeLifeRoll.cased_key(pid, target), {})
 	var now_amt: float = CrimeLifeRoll.cased(pid, target)
 	rec["amount"] = clampf(now_amt + gain, 0.0, 1.0)
 	rec["day"] = SysUtil.day()
 	CrimeLifeState.cased[CrimeLifeRoll.cased_key(pid, target)] = rec
-	CrimeLifePath.train(pid, "stealth", 3.0)
+	CrimeLifePath.train(pid, "perception", 3.0)
+	CrimeLifePath.train(pid, "stealth", 1.0)          # not being noticed while doing it
 	var spotted: bool = CrimeLifeState.chance(float(k.get("spotted", 0.07)) * (1.0 - 0.07 * float(CrimeLifePath.skill(pid, "stealth"))))
 	var m: Dictionary = CrimeLifePath.member(pid)
 	if spotted and not m.is_empty():

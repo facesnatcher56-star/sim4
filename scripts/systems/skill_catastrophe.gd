@@ -23,7 +23,8 @@ static func chance(pid: int, act: String, p: float) -> float:
 
 static func apply(pid: int, act: String, ctx: Dictionary) -> Dictionary:
 	var e: Dictionary = (SysUtil.table("skills").get("acts", {}) as Dictionary).get(act, {}).get("catastrophe", {})
-	var out: Dictionary = {"trace": float(e.get("trace", 0.0)), "alarm": false, "noise": float(e.get("noise", 0.0)), "line": ""}
+	# gloves (crime gear) keep prints off the snapped pick
+	var out: Dictionary = {"trace": float(e.get("trace", 0.0)) * (1.0 - CrimeLifeRoll.gear_effect(pid, "trace")), "alarm": false, "noise": float(e.get("noise", 0.0)), "line": ""}
 	var f = SysUtil.folk(pid)
 	var lines: Array = e.get("line", [])
 	if not lines.is_empty() and f != null and CrimePerson.is_player(pid):

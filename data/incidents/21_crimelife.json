@@ -455,7 +455,8 @@
      "fun": -0.02
     },
     "skill_xp_per_min": {
-     "fitness": 0.2
+     "perception": 0.2,
+     "fitness": 0.08
     },
     "on_finish": [
      {

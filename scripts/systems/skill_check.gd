@@ -14,6 +14,8 @@ static func cfg() -> Dictionary:
 static func own(pid: int, skill: String) -> float:
 	var f = SysUtil.folk(pid)
 	if f != null:
+		if Story.townies.has(pid):          # a townie walking about as Folk keeps the skills of their life (SkillSeed)
+			return float(maxi(f.skill_level(skill), SkillSeed.level(pid, skill)))
 		return float(f.skill_level(skill))
 	return float(CrimeLifePath.skill(pid, skill))
 
@@ -37,11 +39,18 @@ static func _conditions(pid: int, ctx: Dictionary) -> float:
 			s += float(c.get(k, 0.0))
 	return s
 
-static func _tools(ctx: Dictionary) -> float:
+## Tools that help THIS act (acts.<act>.tools): the ones passed in ctx.tools plus crime gear the person owns (tools_from_gear).
+static func _tools(pid: int, d: Dictionary, ctx: Dictionary) -> float:
+	var have: Array = (ctx.get("tools", []) as Array).duplicate()
+	var from_gear: Dictionary = cfg().get("tools_from_gear", {})
+	for gid in from_gear:
+		if gid != "_doc" and CrimeLifeRoll.has_gear(pid, str(gid)):
+			have.append(str(from_gear[gid]))
 	var t: float = 0.0
 	var tools: Dictionary = cfg().get("tools", {})
-	for k in (ctx.get("tools", []) as Array):
-		t += float(tools.get(str(k), 0.0))
+	for k in (d.get("tools", []) as Array):
+		if have.has(k):
+			t += float(tools.get(str(k), 0.0))
 	return t
 
 static func chance(pid: int, act: String, ctx: Dictionary = {}) -> float:
@@ -52,7 +61,7 @@ static func chance(pid: int, act: String, ctx: Dictionary = {}) -> float:
 	var theirs: float = float(d.get("difficulty", 0.5))
 	if ctx.has("opponent") and d.has("opposed"):
 		theirs = clampf(0.25 + level(int(ctx["opponent"]), str(d["opposed"])) / 10.0 * 0.6 + (0.1 if bool(ctx.get("watching", true)) else -0.1), 0.05, 0.95)
-	var p: float = 0.5 + (mine - theirs) * 0.9 + _tools(ctx) + _conditions(pid, ctx)
+	var p: float = 0.5 + (mine - theirs) * 0.9 + _tools(pid, d, ctx) + _conditions(pid, ctx)
 	for tr in (ctx.get("traits", {}) as Dictionary):
 		if SocialDynamics.has_t(pid, str(tr)):
 			p += float(ctx["traits"][tr])
