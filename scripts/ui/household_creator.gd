@@ -50,13 +50,13 @@ func _column() -> VBoxContainer:
 	var pad := Control.new()
 	pad.custom_minimum_size = Vector2(0, 14)
 	root.add_child(pad)
-	root.add_child(UIU.make_label("Create your household", 30, UITheme.ACCENT))
+	root.add_child(UIU.make_label("Create your character", 30, UITheme.ACCENT))
 	intro = UIU.make_label("", 14, UITheme.MUTED)
 	intro.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	root.add_child(intro)
 	var top := HBoxContainer.new()
 	root.add_child(top)
-	top.add_child(UIU.make_label("Household name", 14))
+	top.add_child(UIU.make_label("Family name", 14))
 	name_edit = LineEdit.new()
 	name_edit.custom_minimum_size = Vector2(220, 0)
 	name_edit.max_length = 20
@@ -221,7 +221,7 @@ func _on_edited() -> void:
 func submit() -> void:
 	household["name"] = name_edit.text.strip_edges()
 	if household["name"] == "":
-		error_label.text = "Give your household a name."
+		error_label.text = "Give your character a family name."
 		return
 	var err := HouseholdSetup.validate(household)
 	var first: Dictionary = (household.get("folk", []) as Array)[0] if not (household.get("folk", []) as Array).is_empty() else {}

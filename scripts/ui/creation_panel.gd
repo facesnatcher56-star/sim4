@@ -6,6 +6,10 @@ extends VBoxContainer
 signal changed
 
 const BAD := Color("#e8806a")
+const TABS := ["Background", "Skills", "Perks and flaws"]
+## Skill groups on the Skills tab (presentation only); a skill not listed goes under "Other".
+const GROUPS := [["People", ["charisma", "manipulation", "intimidation", "perception"]], ["Hands", ["sleight", "lockpicking", "mechanics", "handiness"]],
+	["Body", ["fitness", "fighting", "driving", "shooting"]], ["Mind", ["logic", "first_aid", "writing", "cooking"]]]
 
 var spec: Dictionary = {}
 var difficulty: String = "normal"
@@ -13,6 +17,9 @@ var _total: Label
 var _bg_opt: OptionButton
 var _bg_line: Label
 var _body: VBoxContainer
+var _tab: int = 0
+var _tabs: TabBar
+var _bg_box: VBoxContainer
 
 func _ready() -> void:
 	custom_minimum_size = Vector2(300, 0)
@@ -31,7 +38,15 @@ func _ready() -> void:
 		set_spec(Creation.random_spec(difficulty, r))
 		changed.emit())
 	top.add_child(rnd)
-	add_child(UIU.make_label("Background", 13, UITheme.MUTED))
+	_tabs = TabBar.new()
+	for t in TABS:
+		_tabs.add_tab(t)
+	_tabs.tab_changed.connect(func(i):
+		_tab = i
+		_refresh())
+	add_child(_tabs)
+	_bg_box = VBoxContainer.new()
+	add_child(_bg_box)
 	_bg_opt = OptionButton.new()
 	for id in (Creation.cfg().get("backgrounds", {}) as Dictionary):
 		_bg_opt.add_item(str(Creation.background(str(id)).get("label", id)))
@@ -41,10 +56,10 @@ func _ready() -> void:
 		_fit_skills()
 		_refresh()
 		changed.emit())
-	add_child(_bg_opt)
+	_bg_box.add_child(_bg_opt)
 	_bg_line = UIU.make_label("", 12, UITheme.MUTED)
 	_bg_line.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	add_child(_bg_line)
+	_bg_box.add_child(_bg_line)
 	var sc := ScrollContainer.new()
 	sc.custom_minimum_size = Vector2(300, 430)
 	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -94,15 +109,28 @@ func _refresh() -> void:
 	_bg_line.text = str(bg.get("text", "")) + ("\nStarts with: " + ", ".join(free) if not free.is_empty() else "")
 	for c in _body.get_children():
 		c.queue_free()
-	_body.add_child(UIU.make_label("Starting skills", 13, UITheme.MUTED))
-	for sk in Creation.skill_ids():
-		_body.add_child(_skill_row(str(sk)))
-	_body.add_child(UIU.make_label("Perks (cost points)", 13, UITheme.MUTED))
-	for id in (Creation.cfg().get("perks", {}) as Dictionary):
-		_body.add_child(_card(str(id), true))
-	_body.add_child(UIU.make_label("Flaws (give points)", 13, UITheme.MUTED))
-	for id2 in (Creation.cfg().get("flaws", {}) as Dictionary):
-		_body.add_child(_card(str(id2), false))
+	_bg_box.visible = _tab == 0
+	_body.get_parent().visible = _tab != 0
+	if _tab == 1:
+		var shown: Array = []
+		for g in GROUPS:
+			_body.add_child(UIU.make_label(str(g[0]), 13, UITheme.MUTED))
+			for sk in g[1]:
+				if Creation.skill_ids().has(sk):
+					_body.add_child(_skill_row(str(sk)))
+					shown.append(sk)
+		var rest: Array = Creation.skill_ids().filter(func(s): return not shown.has(s))
+		if not rest.is_empty():
+			_body.add_child(UIU.make_label("Other", 13, UITheme.MUTED))
+			for sk2 in rest:
+				_body.add_child(_skill_row(str(sk2)))
+	elif _tab == 2:
+		_body.add_child(UIU.make_label("Perks (cost points)", 13, UITheme.MUTED))
+		for id in (Creation.cfg().get("perks", {}) as Dictionary):
+			_body.add_child(_card(str(id), true))
+		_body.add_child(UIU.make_label("Flaws (give points)", 13, UITheme.MUTED))
+		for id2 in (Creation.cfg().get("flaws", {}) as Dictionary):
+			_body.add_child(_card(str(id2), false))
 
 func _skill_row(sk: String) -> Control:
 	var row := HBoxContainer.new()
