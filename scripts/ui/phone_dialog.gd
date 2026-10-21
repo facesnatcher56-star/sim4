@@ -181,7 +181,7 @@ func build_home(fid: int) -> void:
 	drow.add_theme_constant_override("separation", 10)
 	dock.add_child(drow)
 	for id in DOCK:
-		drow.add_child(_icon(_app_def(id), fid, false))
+		drow.add_child(_icon(_app_def(id), fid, true))          # dock icons carry small labels too (reviewer 0700)
 	body.add_child(dock)
 	var d2: Dictionary = PhoneOwn.kind_def(str(PhoneOwn.own.get(fid, {}).get("kind", "")))
 	var foot := HBoxContainer.new()
