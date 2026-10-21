@@ -73,7 +73,7 @@ static func colour(cls: String, c: Color, bk: int, variant: String) -> Color:
 
 ## Recolour an instantiated furniture / vehicle model for object `id` of kit `def_id`. Idempotent per node.
 static func apply(root: Node, id: int, def_id: String, price: float, bias: float = 0.0) -> void:
-	if Looks.is_reference() or root == null or root.has_meta("kitted"):
+	if root == null or root.has_meta("kitted"):
 		return
 	root.set_meta("kitted", Looks.current_id())
 	var bk := bucket(age(id, def_id, price, bias))

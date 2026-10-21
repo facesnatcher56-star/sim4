@@ -38,7 +38,6 @@ static func apply_key(key: String) -> void:
 		"max_fps": Engine.max_fps = GameSettings.get_int("max_fps")
 		"ui_scale", "text_size": apply_ui_scale()
 		"render_scale", "aa": apply_render()
-		"visual_style": Looks.from_setting(GameSettings.get_str("visual_style"))
 		"shadows": apply_shadows()
 		"master_vol", "music_vol", "sfx_vol", "mute": apply_audio()
 		"surprises": Incidents.set_level(GameSettings.get_str("surprises"))

@@ -4,7 +4,7 @@ extends RefCounted
 ## Static API, no autoload. `reference` is today's look and changes nothing; `grounded` is muted, dark-night and dirty.
 ## Who reads it: lot_chunks / level_mesher (floor colours + wear), lot_models / lot_shells (tint_tree on glb materials),
 ## WeatherView (env knobs, lamps, wet overlay, window glow), LookOverlay (vignette, grain), UITheme (ui colours).
-## Initial look: `--look=<id>` (user args after `--`) or env SIM_LOOK, else the Settings "Visual style" value, else data default.
+## Owner rule: one look, "grounded" (data default); there is no switch in Settings or on the command line.
 ## Listen with Looks.bus.changed(id); LotView rebuilds its meshes on a change.
 
 class Bus extends RefCounted:
@@ -13,7 +13,6 @@ class Bus extends RefCounted:
 static var bus := Bus.new()
 static var _data: Dictionary = {}
 static var _id: String = ""
-static var _cli_pending: String = ""
 static var _inited := false
 static var _mat_cache: Dictionary = {}       # "<material id>|<look>|<variant>" -> tinted material
 static var _glass: Dictionary = {}           # key -> {mat, lit}
@@ -54,14 +53,7 @@ static func _ensure() -> void:
 	if _inited:
 		return
 	_inited = true
-	var want := ""
-	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--look="):
-			want = a.substr(7)
-	if want == "":
-		want = OS.get_environment("SIM_LOOK")
-	_cli_pending = want if not look(want).is_empty() else ""
-	_id = _cli_pending if _cli_pending != "" else str(data().get("default", "reference"))
+	_id = str(data().get("default", "grounded"))
 
 
 static func current_id() -> String:
@@ -71,10 +63,6 @@ static func current_id() -> String:
 
 static func cur() -> Dictionary:
 	return look(current_id())
-
-
-static func is_reference() -> bool:
-	return current_id() == "reference"
 
 
 ## Switch the look (no setting is written). Notifies listeners only on a change.
@@ -87,14 +75,6 @@ static func set_look(id: String) -> void:
 	_glass.clear()
 	bus.changed.emit(id)
 
-
-## Called by SettingsApply for the "visual_style" setting; the command line choice wins the first time (startup apply_all).
-static func from_setting(id: String) -> void:
-	_ensure()
-	if _cli_pending != "":
-		_cli_pending = ""
-		return
-	set_look(id)
 
 
 # ------------------------------------------------------------------ colours
@@ -136,10 +116,8 @@ static func _hash01(x: int, y: int, salt: int) -> float:
 	return float(h & 0xFFFF) / 65535.0
 
 
-## Floor colour: palette replaces the base, then the class grade, then deterministic wear (grime, stains). Reference: returns `base`.
+## Floor colour: palette replaces the base, then the class grade, then deterministic wear (grime, stains).
 static func floor_color(ft: String, base: Color, t: Vector2i) -> Color:
-	if is_reference():
-		return base
 	var l := cur()
 	var c := base
 	var pal: Dictionary = l.get("palette", {})
@@ -199,9 +177,9 @@ static func _class_of_material(mname: String) -> String:
 
 
 ## Tints the materials of an instantiated glb (walls, doors, windows, shells) by material name; shared copies are cached.
-## `variant` separates window glow per building (some windows lit, some dark). Reference look: does nothing.
+## `variant` separates window glow per building (some windows lit, some dark).
 static func tint_tree(n: Node, variant: String = "") -> void:
-	if is_reference() or n == null:
+	if n == null:
 		return
 	_tint_node(n, variant)
 

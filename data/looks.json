@@ -1,10 +1,9 @@
 {
  "version": 1,
- "notes": "Visual looks (task 41). 'reference' is today's look and must stay identical to the hard-coded values it replaced (tests/looks_test.gd). surfaces: per class {sat,val multiply HSV, tint multiplies rgb, lift adds}. palette: absolute colours per floor type (replaces the base colour before grading). wear: deterministic per-tile grime (view only). env: sky / sun / ambient / lamp / wet / post knobs read by WeatherView and LookOverlay. ui: UITheme colours. material_class maps glb material names (a trailing * = prefix) to surface classes.",
+ "notes": "Visual looks (task 41). Owner (2026-10-24): 'grounded' is the only look; the old bright 'reference' look and the switch are gone. surfaces: per class {sat,val multiply HSV, tint multiplies rgb, lift adds}. palette: absolute colours per floor type (replaces the base colour before grading). wear: deterministic per-tile grime (view only). env: sky / sun / ambient / lamp / wet / post knobs read by WeatherView and LookOverlay. ui: UITheme colours. material_class maps glb material names (a trailing * = prefix) to surface classes.",
  "default": "grounded",
  "order": [
-  "grounded",
-  "reference"
+  "grounded"
  ],
  "floor_class": {
   "wood": "floor_wood",
@@ -34,244 +33,6 @@
   "wood_dark": "wood"
  },
  "looks": {
-  "reference": {
-   "label": "Reference (today)",
-   "desc": "Today's look, unchanged.",
-   "surfaces": {
-    "floor_wood": {
-     "sat": 1.0,
-     "val": 1.0,
-     "tint": "#ffffff",
-     "lift": 0.0
-    },
-    "floor_tile": {
-     "sat": 1.0,
-     "val": 1.0,
-     "tint": "#ffffff",
-     "lift": 0.0
-    },
-    "floor_carpet": {
-     "sat": 1.0,
-     "val": 1.0,
-     "tint": "#ffffff",
-     "lift": 0.0
-    },
-    "ground": {
-     "sat": 1.0,
-     "val": 1.0,
-     "tint": "#ffffff",
-     "lift": 0.0
-    },
-    "grass": {
-     "sat": 1.0,
-     "val": 1.0,
-     "tint": "#ffffff",
-     "lift": 0.0
-    },
-    "road": {
-     "sat": 1.0,
-     "val": 1.0,
-     "tint": "#ffffff",
-     "lift": 0.0
-    },
-    "sidewalk": {
-     "sat": 1.0,
-     "val": 1.0,
-     "tint": "#ffffff",
-     "lift": 0.0
-    },
-    "sand": {
-     "sat": 1.0,
-     "val": 1.0,
-     "tint": "#ffffff",
-     "lift": 0.0
-    },
-    "water": {
-     "sat": 1.0,
-     "val": 1.0,
-     "tint": "#ffffff",
-     "lift": 0.0
-    },
-    "wall": {
-     "sat": 1.0,
-     "val": 1.0,
-     "tint": "#ffffff",
-     "lift": 0.0
-    },
-    "roof": {
-     "sat": 1.0,
-     "val": 1.0,
-     "tint": "#ffffff",
-     "lift": 0.0
-    },
-    "trim": {
-     "sat": 1.0,
-     "val": 1.0,
-     "tint": "#ffffff",
-     "lift": 0.0
-    },
-    "awning": {
-     "sat": 1.0,
-     "val": 1.0,
-     "tint": "#ffffff",
-     "lift": 0.0
-    },
-    "accent": {
-     "sat": 1.0,
-     "val": 1.0,
-     "tint": "#ffffff",
-     "lift": 0.0
-    },
-    "glass": {
-     "sat": 1.0,
-     "val": 1.0,
-     "tint": "#ffffff",
-     "lift": 0.0
-    },
-    "wood": {
-     "sat": 1.0,
-     "val": 1.0,
-     "tint": "#ffffff",
-     "lift": 0.0
-    },
-    "leaf": {
-     "sat": 1.0,
-     "val": 1.0,
-     "tint": "#ffffff",
-     "lift": 0.0
-    },
-    "sky": {
-     "sat": 1.0,
-     "val": 1.0,
-     "tint": "#ffffff",
-     "lift": 0.0
-    }
-   },
-   "palette": {},
-   "wear": {
-    "floor_dirt": 0.0,
-    "stain_chance": 0.0,
-    "stain_color": "#3a2f25",
-    "corner_dark": 0.0
-   },
-   "env": {
-    "night_sky": [
-     0.035,
-     0.045,
-     0.11
-    ],
-    "twilight": [
-     0.92,
-     0.55,
-     0.42
-    ],
-    "twilight_mix": 0.55,
-    "sun_warm": [
-     1.0,
-     0.6,
-     0.36
-    ],
-    "sun_white": [
-     1.0,
-     0.97,
-     0.9
-    ],
-    "sun_base": 0.9,
-    "shadow_mult": 1.0,
-    "moon_color": [
-     0.55,
-     0.66,
-     1.0
-    ],
-    "moon_energy": 0.55,
-    "amb_day": [
-     0.78,
-     0.8,
-     0.86
-    ],
-    "amb_night": [
-     0.2,
-     0.25,
-     0.46
-    ],
-    "amb_energy_day": 0.62,
-    "amb_energy_night": 0.62,
-    "exposure_night": 1.1,
-    "exposure_day": 1.0,
-    "saturation": 1.0,
-    "contrast": 1.0,
-    "brightness": 1.0,
-    "fog_tint": [
-     0.72,
-     0.75,
-     0.78
-    ],
-    "fog_floor": 0.0,
-    "lamp_color": "#ffffff",
-    "lamp_energy": 1.0,
-    "lamp_range": 1.0,
-    "window_glow": 0.0,
-    "window_color": "#ffc773",
-    "wet_dark": 0.0,
-    "wet_color": "#0d121a",
-    "vignette": 0.0,
-    "grain": 0.0,
-    "dawn": [
-    0.92,
-    0.55,
-    0.42
-   ],
-    "season_sat": [
-     1.0,
-     1.0,
-     1.0,
-     1.0
-    ],
-    "snow_bounce": 0.0,
-    "fill_color": "#c9d2ff",
-    "puddle_dark": 0.0
-   },
-   "ui": {
-    "bg": "#1b2430",
-    "panel": "#232f3e",
-    "panel_hi": "#2d3c4f",
-    "accent": "#3fb8af",
-    "text": "#e8eef4",
-    "muted": "#93a3b5",
-    "radius": 10,
-    "sem": {
-     "good": "#4cc78a",
-     "good_text": "#7ed6a5",
-     "info": "#3fb8af",
-     "warn": "#e8913d",
-     "bad": "#e5534b",
-     "coin": "#f2c94c",
-     "coin_hi": "#ffe38a",
-     "coin_bg": "#4a3d12",
-     "romance": "#ee86a6",
-     "trust": "#35a7b0",
-     "group": "#8f6bf0",
-     "low_text": "#ff8a80",
-     "error": "#e07a5f",
-     "caution": "#d9a441",
-     "friendly": "#4cc78a",
-     "funny": "#f2c94c",
-     "deep": "#35a7b0",
-     "mean": "#e5534b",
-     "bubble": "#ffffff",
-     "bubble_text": "#1d2630",
-     "bubble_edge": "#333340",
-     "ring_back": "#0f141f",
-     "map_bg": "#17202a",
-     "card_bg": "#1c2430"
-    },
-    "tone": {
-     "sat": 1.0,
-     "val": 1.0
-    }
-   },
-   "kits": {}
-  },
   "grounded": {
    "label": "Grounded and gritty",
    "desc": "Muted real-world colours, real contrast, dark nights, wear and dirt.",
@@ -404,7 +165,10 @@
     "stain_chance": 0.05,
     "stain_color": "#3a2f25",
     "corner_dark": 0.1,
-    "shader_classes": ["wall", "wood"],
+    "shader_classes": [
+     "wall",
+     "wood"
+    ],
     "wall_base": 0.12
    },
    "env": {
