@@ -24,7 +24,9 @@
     "walk_nominal_speed": 2.2,
     "run_nominal_speed": 4.2,
     "min_scale": 0.5,
-    "max_scale": 2.4
+    "max_scale": 2.4,
+    "max_scale_fast": 5.0,
+    "use_max_scale": 6.0
   },
   "sit_clips": ["Sit_Idle", "Sit_Eat", "Sit_Watch", "Sit_Read", "Sit_Type", "ToiletSit", "Sit_Write", "Sit_Phone_Call", "Sit_Phone_Text", "Sit_Think", "Sit_Piano", "Sit_Relax"],
   "lie_clips": ["Sleep", "Faint", "Fall", "Baby_Idle"],

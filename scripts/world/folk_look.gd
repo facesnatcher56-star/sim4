@@ -249,10 +249,11 @@ func _update_mood_icon(f, delta: float) -> void:
 	_mood_icon.scale = Vector3.ONE * (0.8 + 0.15 * inten)
 
 
+## How many times faster than speed 1 the game runs right now (task 56: the real clock rate, the time skip included).
 func _speed_mult() -> float:
 	var clk := get_node_or_null("/root/Clock")
 	if clk != null:
-		return SPEED_MULT[clampi(int(clk.get("speed")), 0, 3)]
+		return float(clk.call("real_rate")) if clk.has_method("real_rate") else SPEED_MULT[clampi(int(clk.get("speed")), 0, 3)]
 	return 1.0
 
 
@@ -285,8 +286,9 @@ func _anim_speed(wanted: String) -> float:
 			else float(loco.get("walk_nominal_speed", 2.2))
 		nominal *= clampf(_body_scale, 0.35, 1.2)
 		var s := _speed_now / maxf(nominal, 0.1)
-		return clampf(s, float(loco.get("min_scale", 0.5)), float(loco.get("max_scale", 2.4)))
-	return minf(mult, 2.0)
+		var top: float = maxf(float(loco.get("max_scale", 2.4)), minf(float(loco.get("max_scale", 2.4)) * mult, float(loco.get("max_scale_fast", 5.0))))
+		return clampf(s, float(loco.get("min_scale", 0.5)), top)          # the legs keep up with a fast game, up to a rate that still reads as walking
+	return minf(mult, float(loco.get("use_max_scale", 6.0)))
 
 
 func _play_clip_name(c: String) -> void:
@@ -304,7 +306,7 @@ func _play_clip(c: String) -> void:
 
 func _placeholder_pose(delta: float) -> void:
 	var m := _speed_mult()
-	_phase += delta * 9.0 * m * (1.0 + 0.25 * float(_waypoints.size()))
+	_phase += delta * 9.0 * minf(m, 5.0) * (1.0 + 0.25 * float(_waypoints.size()) / maxf(m, 1.0))
 	var ls := sin(_phase)
 	_rig.rotation = Vector3.ZERO
 	_rig.position = Vector3.ZERO

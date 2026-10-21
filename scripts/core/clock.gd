@@ -69,6 +69,15 @@ func reset(start_total: int = START_MINUTE) -> void:
 	_accum = 0.0
 
 ## Game minutes into the current minute (0..1): smooth time for the view layer. Read-only.
+## Task 56: game minutes per real second right now (0 paused, 1 / 4 / 12, the time skip's rate while skipping). Everything drawn in motion that
+## follows the sim (folk walking, their clips) scales by this, so a faster game is everyone moving faster, never people jumping ahead.
+func real_rate() -> float:
+	if speed <= 0:
+		return 0.0
+	if speed == 3 and TimeSkip.active:
+		return TimeSkip.RATE
+	return MIN_PER_SEC[clampi(speed, 0, 3)]
+
 func frac() -> float: return clampf(_accum, 0.0, 0.999)
 func minute() -> int: return total_minutes % 60
 func hour() -> int: return (total_minutes / 60) % 24

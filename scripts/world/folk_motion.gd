@@ -2,7 +2,12 @@
 ## FolkView layer: path following, facing, social partner alignment.
 
 
-const MAX_SLICE := 24     # a tile jump longer than this (fast forward, fast travel, loading) is not animated: the folk is simply there
+const MAX_SLICE := 24     # a tile jump longer than this x the game speed (fast travel, loading) is not animated: the folk is simply there
+
+
+## Task 56: the longest route slice still walked at this game speed (a faster game moves the sim further between frames).
+func _max_slice() -> int:
+	return int(float(MAX_SLICE) * maxf(_speed_mult(), 1.0))
 
 
 ## Point of a (tile, level): tile centre, y = the floor (or the stair step) of that level.
@@ -39,7 +44,7 @@ func _update_waypoints(f) -> void:
 		_waypoints.clear()
 	elif f.level != _last_level or (far > 1 and f.current != null and not f.current.path3.is_empty()):
 		var seg3: Array = _route_slice3(f, Vector3i(_last_tile.x, _last_tile.y, _last_level), Vector3i(f.tile.x, f.tile.y, f.level))
-		if seg3.is_empty() or seg3.size() > MAX_SLICE:
+		if seg3.is_empty() or seg3.size() > _max_slice():
 			position = _wp(f.tile, f.level)                  # teleport between floors (loaded game, fast forward)
 			_ybase = position.y
 			_waypoints.clear()
@@ -52,7 +57,7 @@ func _update_waypoints(f) -> void:
 		var seg: Array = _route_slice(f, _last_tile, f.tile)
 		if seg.is_empty() and far <= 8:
 			seg = World.find_path(_last_tile, f.tile)          # short hop off any known route
-		if seg.is_empty() or seg.size() > MAX_SLICE:
+		if seg.is_empty() or seg.size() > _max_slice():
 			position = _wp(f.tile, f.level)                    # teleport (fast travel, fast forward, unreachable, loaded game)
 			_ybase = position.y
 			_waypoints.clear()
@@ -263,17 +268,20 @@ func _use_pose(f) -> String:
 
 ## Walking pace by intent, not by how far behind the sim walker the view is: a walk catches up with a brisk Walk (capped), only an urgent
 ## move runs. Data: animation_map locomotion.
+## Task 56: times the real clock rate, so at speed 2, 3 and the skip the same walk is simply faster (running stays a matter of intent).
 func _walk_speed() -> float:
 	var loco: Dictionary = anim_map().get("locomotion", {})
+	var m: float = maxf(_speed_mult(), 1.0)
 	if _urgent:
-		return float(loco.get("run_speed", 4.6))
-	var s := float(loco.get("walk_base_speed", BASE_SPEED)) * (1.0 + float(loco.get("walk_catchup_per_waypoint", 0.4)) * float(_waypoints.size()))
-	return minf(s, float(loco.get("walk_max_speed", 3.5)))
+		return float(loco.get("run_speed", 4.6)) * m
+	var behind: float = float(_waypoints.size()) / m          # the catch-up looks at how far behind in time, not in waypoints
+	var s := float(loco.get("walk_base_speed", BASE_SPEED)) * (1.0 + float(loco.get("walk_catchup_per_waypoint", 0.4)) * behind)
+	return minf(s, float(loco.get("walk_max_speed", 3.5))) * m
 
 
 ## A backlog the capped pace cannot clear (fast forward, long routes): the view hops ahead along the route instead of running.
 func _trim_backlog() -> void:
-	var keep := int((anim_map().get("locomotion", {}) as Dictionary).get("max_backlog", 4))
+	var keep := int(float((anim_map().get("locomotion", {}) as Dictionary).get("max_backlog", 4)) * maxf(_speed_mult(), 1.0) * 2.0)          # task 56: scaled with the speed, a real break only
 	if _waypoints.size() <= keep:
 		return
 	var drop := _waypoints.size() - keep
@@ -313,7 +321,7 @@ func _route_far_goal() -> void:
 	var from: Vector2i = World.open_neighbor(World.pos_to_tile(position), 0, goal_t)
 	var to: Vector2i = World.open_neighbor(goal_t, 0, from)
 	var seg: Array = World.find_path(from, to)
-	if seg.is_empty() or seg.size() > MAX_SLICE:
+	if seg.is_empty() or seg.size() > _max_slice():
 		position.x = _target.x
 		position.z = _target.z
 		return
