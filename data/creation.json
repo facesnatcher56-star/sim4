@@ -1,12 +1,22 @@
 {
   "_doc": "Task 55: character creation points (written by the reviewer; the builder wires the code). The player picks one background, buys starting skill levels, and takes perks (cost points) and flaws (give points). The points left must be 0 or more to start. budget = budget.base + budget.difficulty[diff] + background.points. Skill levels cost skill_costs[level-1] each, up to skill_cap at creation; a background's starting levels are free. Each perk / flaw has: label, text (the one plain line shown on its card), cost (perks, positive) or points (flaws, positive = points given), effects (keys the code applies through the real systems; see effect_keys), and optional excludes (ids that cannot be taken with it) and requires. Personality traits stay free and separate (traits.json). Heirs who take over on death skip this page: their skills, flaws and record come from their life. Backgrounds never depend on heritage or community.",
-  "budget": {"base": 6, "difficulty": {"easy": 4, "normal": 0, "hard": -4}},
+  "budget": {
+    "base": 6,
+    "difficulty": {
+      "easy": 4,
+      "normal": 0,
+      "hard": -4
+    }
+  },
   "skill_cap": 3,
-  "skill_costs": [1, 2, 3],
+  "skill_costs": [
+    1,
+    2,
+    3
+  ],
   "effect_keys": {
     "skill_xp_mult": "multiplier on all skill XP gained",
     "check": "flat bonus (+) or malus (-) on SkillCheck for the listed skills, in skill levels",
-    "carry_mult": "multiplier on what the person can carry",
     "wake_on_noise": "multiplier on the chance a night noise wakes them (intruders, alarms, fire)",
     "food_sickness_mult": "multiplier on getting sick from food",
     "heal_mult": "multiplier on injury healing speed",
@@ -31,48 +41,425 @@
     "fixed": "requires an item to remove the malus (e.g. glasses)"
   },
   "backgrounds": {
-    "nobody": {"label": "Nobody special", "text": "No experience to speak of. More points to spend.", "points": 6, "skills": {}},
-    "street_kid": {"label": "Street kid", "text": "Grew up rough. Knows how to keep out of sight and stand their ground.", "points": 2, "skills": {"stealth": 1, "perception": 1, "fighting": 1}, "effects": {"contact": {"where": "kiln_quarter", "kind": "acquaintance"}}},
-    "trade_apprentice": {"label": "Trade apprentice", "text": "Spent a couple of years learning a trade.", "points": 2, "skills": {"handiness": 2, "mechanics": 1}},
-    "college_dropout": {"label": "College dropout", "text": "A year of classes and a loan to show for it.", "points": 3, "skills": {"logic": 1, "writing": 1}, "effects": {"debt": {"amount": 600, "lender": "student_loan", "repay_per_week": 25}}},
-    "retail_worker": {"label": "Retail worker", "text": "Years behind a till. Good with people, hard to fool.", "points": 2, "skills": {"charisma": 1, "perception": 1}, "effects": {"hiring": {"shop": 1}}},
-    "delivery_driver": {"label": "Delivery driver", "text": "Knows the roads and is used to being on their feet.", "points": 2, "skills": {"driving": 1, "fitness": 1}, "effects": {"item": "bike", "licence": "driving"}},
-    "care_worker": {"label": "Care worker", "text": "Looked after people for a living.", "points": 2, "skills": {"first_aid": 2, "charisma": 1}},
-    "kitchen_hand": {"label": "Kitchen hand", "text": "Worked the back of a busy kitchen.", "points": 3, "skills": {"cooking": 2}},
-    "ex_con": {"label": "Fresh out", "text": "Just finished a sentence. Learned things inside, and the record follows you.", "points": 7, "skills": {"fighting": 1, "intimidation": 1, "lockpicking": 1}, "effects": {"record": {"charges": ["burglary"], "years_ago": 0}, "hiring": {"all": -2}}}
+    "nobody": {
+      "label": "Nobody special",
+      "text": "No experience to speak of. More points to spend.",
+      "points": 6,
+      "skills": {}
+    },
+    "street_kid": {
+      "label": "Street kid",
+      "text": "Grew up rough. Knows how to keep out of sight and stand their ground.",
+      "points": 2,
+      "skills": {
+        "stealth": 1,
+        "perception": 1,
+        "fighting": 1
+      },
+      "effects": {
+        "contact": {
+          "where": "kiln_quarter",
+          "kind": "acquaintance"
+        }
+      }
+    },
+    "trade_apprentice": {
+      "label": "Trade apprentice",
+      "text": "Spent a couple of years learning a trade.",
+      "points": 2,
+      "skills": {
+        "handiness": 2,
+        "mechanics": 1
+      }
+    },
+    "college_dropout": {
+      "label": "College dropout",
+      "text": "A year of classes and a loan to show for it.",
+      "points": 3,
+      "skills": {
+        "logic": 1,
+        "writing": 1
+      },
+      "effects": {
+        "debt": {
+          "amount": 600,
+          "lender": "student_loan",
+          "repay_per_week": 25
+        }
+      }
+    },
+    "retail_worker": {
+      "label": "Retail worker",
+      "text": "Years behind a till. Good with people, hard to fool.",
+      "points": 2,
+      "skills": {
+        "charisma": 1,
+        "perception": 1
+      },
+      "effects": {
+        "hiring": {
+          "shop": 1
+        }
+      }
+    },
+    "delivery_driver": {
+      "label": "Delivery driver",
+      "text": "Knows the roads and is used to being on their feet.",
+      "points": 2,
+      "skills": {
+        "driving": 1,
+        "fitness": 1
+      },
+      "effects": {
+        "item": "bike",
+        "licence": "driving"
+      }
+    },
+    "care_worker": {
+      "label": "Care worker",
+      "text": "Looked after people for a living.",
+      "points": 2,
+      "skills": {
+        "first_aid": 2,
+        "charisma": 1
+      }
+    },
+    "kitchen_hand": {
+      "label": "Kitchen hand",
+      "text": "Worked the back of a busy kitchen.",
+      "points": 3,
+      "skills": {
+        "cooking": 2
+      }
+    },
+    "ex_con": {
+      "label": "Fresh out",
+      "text": "Just finished a sentence. Learned things inside, and the record follows you.",
+      "points": 7,
+      "skills": {
+        "fighting": 1,
+        "intimidation": 1,
+        "lockpicking": 1
+      },
+      "effects": {
+        "record": {
+          "charges": [
+            "burglary"
+          ],
+          "years_ago": 0
+        },
+        "hiring": {
+          "all": -2
+        }
+      }
+    }
   },
   "perks": {
-    "fast_learner": {"label": "Fast learner", "text": "Picks up new skills quicker.", "cost": 4, "effects": {"skill_xp_mult": 1.25}, "excludes": ["slow_learner"]},
-    "strong": {"label": "Strong", "text": "Stronger than most. Fights better and carries more.", "cost": 3, "effects": {"check": {"fighting": 1, "fitness": 1}, "carry_mult": 1.3}, "excludes": ["bad_back"]},
-    "keen_eye": {"label": "Keen eye", "text": "Notices things other people miss.", "cost": 3, "effects": {"check": {"perception": 1}}, "excludes": ["poor_eyesight"]},
-    "quick_hands": {"label": "Quick hands", "text": "Nimble fingers.", "cost": 3, "effects": {"check": {"sleight": 1, "lockpicking": 1}}},
-    "smooth_talker": {"label": "Smooth talker", "text": "Words come easily.", "cost": 3, "effects": {"check": {"charisma": 1, "manipulation": 1}}},
-    "light_sleeper": {"label": "Light sleeper", "text": "Wakes at the smallest noise.", "cost": 2, "effects": {"wake_on_noise": 2.0, "sleep_quality": -0.1}, "excludes": ["heavy_sleeper"]},
-    "iron_stomach": {"label": "Iron stomach", "text": "Rarely gets sick from food.", "cost": 1, "effects": {"food_sickness_mult": 0.3}, "excludes": ["weak_stomach"]},
-    "tough": {"label": "Tough", "text": "Shrugs off knocks and heals fast.", "cost": 3, "effects": {"heal_mult": 1.5}},
-    "strong_willed": {"label": "Strong-willed", "text": "Hard to push around, hard to tempt.", "cost": 3, "effects": {"willpower": 2}, "excludes": ["weak_willed", "addictive"]},
-    "drivers_licence": {"label": "Driver's licence", "text": "Already passed the test.", "cost": 1, "effects": {"licence": "driving"}},
-    "owns_bike": {"label": "Owns a bike", "text": "Gets around town faster than on foot.", "cost": 1, "effects": {"item": "bike"}},
-    "clean_cut": {"label": "Clean-cut", "text": "Looks trustworthy to people who don't know them.", "cost": 2, "effects": {"first_impression": 1}, "excludes": ["memorable_face"]}
+    "fast_learner": {
+      "label": "Fast learner",
+      "text": "Picks up new skills quicker.",
+      "cost": 4,
+      "effects": {
+        "skill_xp_mult": 1.25
+      },
+      "excludes": [
+        "slow_learner"
+      ]
+    },
+    "strong": {
+      "label": "Strong",
+      "text": "Stronger than most. Fights better and runs harder.",
+      "cost": 3,
+      "effects": {
+        "check": {
+          "fighting": 1,
+          "fitness": 1
+        }
+      },
+      "excludes": [
+        "bad_back"
+      ]
+    },
+    "keen_eye": {
+      "label": "Keen eye",
+      "text": "Notices things other people miss.",
+      "cost": 3,
+      "effects": {
+        "check": {
+          "perception": 1
+        }
+      },
+      "excludes": [
+        "poor_eyesight"
+      ]
+    },
+    "quick_hands": {
+      "label": "Quick hands",
+      "text": "Nimble fingers.",
+      "cost": 3,
+      "effects": {
+        "check": {
+          "sleight": 1,
+          "lockpicking": 1
+        }
+      }
+    },
+    "smooth_talker": {
+      "label": "Smooth talker",
+      "text": "Words come easily.",
+      "cost": 3,
+      "effects": {
+        "check": {
+          "charisma": 1,
+          "manipulation": 1
+        }
+      }
+    },
+    "light_sleeper": {
+      "label": "Light sleeper",
+      "text": "Wakes at the smallest noise.",
+      "cost": 2,
+      "effects": {
+        "wake_on_noise": 2.0,
+        "sleep_quality": -0.1
+      },
+      "excludes": [
+        "heavy_sleeper"
+      ]
+    },
+    "iron_stomach": {
+      "label": "Iron stomach",
+      "text": "Rarely gets sick from food.",
+      "cost": 1,
+      "effects": {
+        "food_sickness_mult": 0.3
+      },
+      "excludes": [
+        "weak_stomach"
+      ]
+    },
+    "tough": {
+      "label": "Tough",
+      "text": "Shrugs off knocks and heals fast.",
+      "cost": 3,
+      "effects": {
+        "heal_mult": 1.5
+      }
+    },
+    "strong_willed": {
+      "label": "Strong-willed",
+      "text": "Hard to push around, hard to tempt.",
+      "cost": 3,
+      "effects": {
+        "willpower": 2
+      },
+      "excludes": [
+        "weak_willed",
+        "addictive"
+      ]
+    },
+    "drivers_licence": {
+      "label": "Driver's licence",
+      "text": "Already passed the test.",
+      "cost": 1,
+      "effects": {
+        "licence": "driving"
+      }
+    },
+    "owns_bike": {
+      "label": "Owns a bike",
+      "text": "Gets around town faster than on foot.",
+      "cost": 1,
+      "effects": {
+        "item": "bike"
+      }
+    },
+    "clean_cut": {
+      "label": "Clean-cut",
+      "text": "Looks trustworthy to people who don't know them.",
+      "cost": 2,
+      "effects": {
+        "first_impression": 1
+      },
+      "excludes": [
+        "memorable_face"
+      ]
+    }
   },
   "flaws": {
-    "slow_learner": {"label": "Slow learner", "text": "Takes longer to get the hang of things.", "points": 4, "effects": {"skill_xp_mult": 0.75}},
-    "bad_back": {"label": "Bad back", "text": "Heavy work and running hurt.", "points": 3, "effects": {"check": {"fitness": -1, "handiness": -1}, "carry_mult": 0.75}},
-    "poor_eyesight": {"label": "Poor eyesight", "text": "Things are blurry without glasses.", "points": 2, "effects": {"check": {"perception": -2, "driving": -1}, "fixed": "glasses"}},
-    "heavy_sleeper": {"label": "Heavy sleeper", "text": "Sleeps through almost anything.", "points": 2, "effects": {"wake_on_noise": 0.4, "sleep_quality": 0.1}},
-    "insomniac": {"label": "Insomniac", "text": "Sleep doesn't come easily.", "points": 3, "effects": {"sleep_quality": -0.3}, "excludes": ["heavy_sleeper"]},
-    "weak_stomach": {"label": "Weak stomach", "text": "Gets sick from food more often.", "points": 1, "effects": {"food_sickness_mult": 2.0}},
-    "asthma": {"label": "Asthma", "text": "Short of breath when running or in smoke.", "points": 2, "effects": {"chase_mult": 0.75, "smoke_dose_mult": 1.6}},
-    "weak_willed": {"label": "Weak-willed", "text": "Gives in easily.", "points": 3, "effects": {"willpower": -2}},
-    "addictive": {"label": "Addictive personality", "text": "Habits take hold fast.", "points": 3, "effects": {"addiction_mult": 2.0}},
-    "smoker": {"label": "Smoker", "text": "Needs cigarettes every day, and they cost money.", "points": 2, "effects": {"habit": {"need": "nicotine", "item": "cigarettes", "cost_per_day": 4}, "chase_mult": 0.9}},
-    "in_debt": {"label": "In debt", "text": "Owes money, and the lender wants it back.", "points": 3, "effects": {"debt": {"amount": 800, "lender": "loan_shop", "repay_per_week": 40}}},
-    "bad_credit": {"label": "Bad credit", "text": "Banks won't lend.", "points": 2, "effects": {"credit": "bad"}},
-    "record": {"label": "Criminal record", "text": "An old conviction that shows up on checks.", "points": 3, "effects": {"record": {"charges": ["theft"], "years_ago": 3}, "hiring": {"all": -1}}, "excludes_background": ["ex_con"]},
-    "memorable_face": {"label": "Memorable face", "text": "A scar or tattoo people remember.", "points": 2, "effects": {"witness_id_mult": 1.6}},
-    "fear_dogs": {"label": "Afraid of dogs", "text": "Dogs make them freeze.", "points": 1, "effects": {"fear": "dogs"}},
-    "fear_heights": {"label": "Afraid of heights", "text": "High places are a problem.", "points": 1, "effects": {"fear": "heights"}},
-    "short_fuse": {"label": "Short fuse", "text": "Arguments turn into fights.", "points": 2, "effects": {"fight_start_mult": 1.8, "willpower": -1}}
+    "slow_learner": {
+      "label": "Slow learner",
+      "text": "Takes longer to get the hang of things.",
+      "points": 4,
+      "effects": {
+        "skill_xp_mult": 0.75
+      }
+    },
+    "bad_back": {
+      "label": "Bad back",
+      "text": "Heavy work and running hurt.",
+      "points": 3,
+      "effects": {
+        "check": {
+          "fitness": -1,
+          "handiness": -1
+        }
+      }
+    },
+    "poor_eyesight": {
+      "label": "Poor eyesight",
+      "text": "Things are blurry without glasses.",
+      "points": 2,
+      "effects": {
+        "check": {
+          "perception": -2,
+          "driving": -1
+        },
+        "fixed": "glasses"
+      }
+    },
+    "heavy_sleeper": {
+      "label": "Heavy sleeper",
+      "text": "Sleeps through almost anything.",
+      "points": 2,
+      "effects": {
+        "wake_on_noise": 0.4,
+        "sleep_quality": 0.1
+      }
+    },
+    "insomniac": {
+      "label": "Insomniac",
+      "text": "Sleep doesn't come easily.",
+      "points": 3,
+      "effects": {
+        "sleep_quality": -0.3
+      },
+      "excludes": [
+        "heavy_sleeper"
+      ]
+    },
+    "weak_stomach": {
+      "label": "Weak stomach",
+      "text": "Gets sick from food more often.",
+      "points": 1,
+      "effects": {
+        "food_sickness_mult": 2.0
+      }
+    },
+    "asthma": {
+      "label": "Asthma",
+      "text": "Short of breath when running or in smoke.",
+      "points": 2,
+      "effects": {
+        "chase_mult": 0.75,
+        "smoke_dose_mult": 1.6
+      }
+    },
+    "weak_willed": {
+      "label": "Weak-willed",
+      "text": "Gives in easily.",
+      "points": 3,
+      "effects": {
+        "willpower": -2
+      }
+    },
+    "addictive": {
+      "label": "Addictive personality",
+      "text": "Habits take hold fast.",
+      "points": 3,
+      "effects": {
+        "addiction_mult": 2.0
+      }
+    },
+    "smoker": {
+      "label": "Smoker",
+      "text": "Needs cigarettes every day, and they cost money.",
+      "points": 2,
+      "effects": {
+        "habit": {
+          "need": "nicotine",
+          "item": "cigarettes",
+          "cost_per_day": 4
+        },
+        "chase_mult": 0.9
+      }
+    },
+    "in_debt": {
+      "label": "In debt",
+      "text": "Owes money, and the lender wants it back.",
+      "points": 3,
+      "effects": {
+        "debt": {
+          "amount": 800,
+          "lender": "loan_shop",
+          "repay_per_week": 40
+        }
+      }
+    },
+    "bad_credit": {
+      "label": "Bad credit",
+      "text": "Banks won't lend.",
+      "points": 2,
+      "effects": {
+        "credit": "bad"
+      }
+    },
+    "record": {
+      "label": "Criminal record",
+      "text": "An old conviction that shows up on checks.",
+      "points": 3,
+      "effects": {
+        "record": {
+          "charges": [
+            "theft"
+          ],
+          "years_ago": 3
+        },
+        "hiring": {
+          "all": -1
+        }
+      },
+      "excludes_background": [
+        "ex_con"
+      ]
+    },
+    "memorable_face": {
+      "label": "Memorable face",
+      "text": "A scar or tattoo people remember.",
+      "points": 2,
+      "effects": {
+        "witness_id_mult": 1.6
+      }
+    },
+    "fear_dogs": {
+      "label": "Afraid of dogs",
+      "text": "Dogs make them freeze.",
+      "points": 1,
+      "effects": {
+        "fear": "dogs"
+      }
+    },
+    "fear_heights": {
+      "label": "Afraid of heights",
+      "text": "High places are a problem.",
+      "points": 1,
+      "effects": {
+        "fear": "heights"
+      }
+    },
+    "short_fuse": {
+      "label": "Short fuse",
+      "text": "Arguments turn into fights.",
+      "points": 2,
+      "effects": {
+        "fight_start_mult": 1.8,
+        "willpower": -1
+      }
+    }
   },
-  "random": {"max_perks": 3, "max_flaws": 3, "spend_skills": true}
+  "random": {
+    "max_perks": 3,
+    "max_flaws": 3,
+    "spend_skills": true
+  }
 }
