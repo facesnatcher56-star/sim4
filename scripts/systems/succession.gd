@@ -40,7 +40,10 @@ static func set_head(player_id: int, folk_id: int) -> void:
 	Players.set_field(player_id, "head", folk_id)
 	Players.set_field(player_id, "heir", -1)
 
+## An empty players table means nobody plays (an NPC-driven household, the reviewer's probes): do not bring a player back by naming a head.
 static func _ensure_entry(player_id: int) -> void:
+	if Players.table.is_empty():
+		return
 	if not Players.table.has(player_id) and Players.household_of(player_id) > 0:
 		Players.set_player(player_id, Players.household_of(player_id), "Player" if player_id != Players.LOCAL else "")
 

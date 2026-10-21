@@ -211,7 +211,7 @@ static func make(f, day: int) -> void:
 		_place_plan(f, c, day, free, 0)
 
 ## Give the pick a start hour and store it. Returns true when a plan was made.
-static func _place_plan(f, c: Dictionary, day: int, free: Array, from_hour: int) -> bool:
+static func _place_plan(f, c: Dictionary, day: int, free: Array, from_hour: int, soonest: bool = false) -> bool:
 	var fid: int = int(f.id)
 	var d: Dictionary = kind_def(str(c["kind"]))
 	var ck := "%d|%s" % [int(f.household_id), c["claim"]]
@@ -224,7 +224,7 @@ static func _place_plan(f, c: Dictionary, day: int, free: Array, from_hour: int)
 	var hours: Array = hours_for(f, c["services"], d, day, free, from_hour, target)
 	if hours.is_empty():
 		return false
-	var h: int = int(hours[PlaceAuto.rng.randi_range(0, hours.size() - 1)])
+	var h: int = int(hours[0]) if soonest else int(hours[PlaceAuto.rng.randi_range(0, hours.size() - 1)])          # hunger goes at the first open hour
 	var gap: int = int(PlaceAuto.cfg().get("min_gap_hours", 3))
 	for q in PlaceAuto.plans:
 		if int(q["fid"]) == fid and absi(int(q["at"]) / 60 - ((day - 1) * 24 + h)) < gap and not bool(d.get("essential", false)):
@@ -238,7 +238,7 @@ static func _place_plan(f, c: Dictionary, day: int, free: Array, from_hour: int)
 	return true
 
 ## Plan one kind for this person now (the hourly illness and pet checks). `from_hour` = the earliest start hour.
-static func make_one(f, kid: String, from_hour: int) -> bool:
+static func make_one(f, kid: String, from_hour: int, soonest: bool = false) -> bool:
 	var day: int = SysUtil.day()
 	var d: Dictionary = kind_def(kid)
 	if d.is_empty():
@@ -252,4 +252,4 @@ static func make_one(f, kid: String, from_hour: int) -> bool:
 	if services.is_empty():
 		return false
 	var c := {"kind": kid, "p": 1.0, "services": services, "ctx": g.get("ctx", {}), "claim": str(g.get("claim", "")), "essential": true}
-	return _place_plan(f, c, day, PlaceAutoTime.free_hours(f, day), from_hour)
+	return _place_plan(f, c, day, PlaceAutoTime.free_hours(f, day), from_hour, soonest)

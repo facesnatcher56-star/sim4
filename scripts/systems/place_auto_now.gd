@@ -5,6 +5,7 @@ extends RefCounted
 
 static func on_hour(hour: int) -> void:
 	_ill(hour)
+	_hungry(hour)
 	_pets(hour)
 
 static func _sorted_residents() -> Array:
@@ -29,6 +30,25 @@ static func _ill(hour: int) -> void:
 		if PlaceAuto.rng.randf() >= float(kd.get("base", 0.9)):
 			continue
 		PlaceAutoPlan.make_one(f, "clinic_sick", hour + PlaceAuto.rng.randi_range(int(span[0]), int(span[1])))
+
+## Hunger cannot wait for tomorrow's plan either: the day's outings are planned in the morning, when nobody is hungry yet, so somebody with coins
+## who runs out of food at home would starve. Each hour, a hungry resident nobody is steering gets a trip to the cheapest food open now
+## (the `hungry` gate kinds), at most once every `hungry_retry_hours`.
+static func _hungry(hour: int) -> void:
+	var retry: int = int(PlaceAuto.cfg().get("hungry_retry_hours", 3))
+	for f in _sorted_residents():
+		if str(f.age_stage) in ["baby", "toddler", "child"] or SocialFit.player_controlled(f) or SysUtil.is_away(f) or PlaceAuto.trips.has(int(f.id)):
+			continue
+		if float(PlaceAutoGate.eval("hungry", f, "", {}, SysUtil.day()).get("mult", 0.0)) <= 0.0:
+			continue
+		var key := "%d|hungry_try" % int(f.id)
+		if SysUtil.now() - int(PlaceAuto.last.get(key, -100000)) < retry * 60:
+			continue
+		PlaceAuto.last[key] = SysUtil.now()
+		for kid in ["hungry_street", "hungry_bakery"]:
+			if PlaceAutoPlan.make_one(f, kid, hour, true):
+				PlaceAuto.count("hungry_now")
+				break
 
 # ------------------------------------------------------------------ pets
 static func _pets(hour: int) -> void:
