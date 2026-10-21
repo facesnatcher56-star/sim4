@@ -1,7 +1,8 @@
 extends SceneTree
 ## A scripted playtest of the real game (not a test suite): a new solo character's first day and a half, played the way a player would, through the real
 ## HUD, pie menus and prompts. It prints every toast and prompt and saves a screenshot at each step to coord/shots/playtest/.
-##   powershell -File tools/quiet_godot.ps1 --script res://tools/playtest.gd
+##   powershell -File tools/quiet_godot.ps1 --script res://tools/playtest.gd            (hidden: minimized, off-screen)
+##   <godot> --path . --script res://tools/playtest.gd -- --watch                       (a normal window you can watch)
 const OUT := "coord/shots/playtest/"
 
 var _main: Node = null
@@ -18,8 +19,9 @@ const ANSWERS := ["Ask for the job", "Pay", "Help out", "Accept", "Yes", "Go", "
 func _process(_d: float) -> bool:
 	if _main == null:
 		TestFixture.isolate_user_files()
-		root.unfocusable = true
-		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_MINIMIZED)
+		if not "--watch" in OS.get_cmdline_user_args():
+			root.unfocusable = true
+			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_MINIMIZED)
 		DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://" + OUT))
 		_main = load("res://scenes/main.tscn").instantiate()
 		root.add_child(_main)
