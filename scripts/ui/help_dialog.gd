@@ -1,12 +1,12 @@
-﻿class_name HelpDialog
+class_name HelpDialog
 extends UIDialog
 ## Controls reference (F1 or the "?" button).
 const KEYS := [
 	["Camera", [["W A S D", "Pan the camera"], ["Q / E", "Rotate the view"], ["Mouse wheel", "Zoom in and out"], ["Middle mouse drag", "Pan the camera"],
 		["Z or Tab", "Cycle wall view (cut-away / walls up / down)"]]],
 	["Time", [["Space", "Pause or resume"], ["1 / 2 / 3", "Normal, fast, fastest speed"]]],
-	["Folk", [["Click a Folk", "Select them. Clicking someone from another household opens the social menu instead"], ["Click an object", "Open the menu of things the selected Folk can do with it"],
-		["Right-click the ground", "Send the selected Folk there (Go Here)"], ["Click a queue chip", "Cancel that task"], ["Folk buttons (bottom-left)", "Switch between your household"]]],
+	["Folk", [["Click the ground", "Walk there"], ["Click an object", "Open the menu of things you can do with it right now"], ["Click a Folk", "Select them. Clicking someone from another household opens the social menu instead"],
+		["Right-click anything", "Its actions: an object, a person, yourself, or the ground (Go here)"], ["Click a queue chip", "Cancel that task"], ["Folk buttons (bottom-left)", "Switch between your household"]]],
 	["Windows", [["B", "Build / Buy mode"], ["M", "Neighbourhood map and travel"], ["F1 or ?", "This help"], ["Esc", "Close menus and dialogs"]]],
 	["Build / Buy", [["R", "Rotate the item you are placing"], ["Ctrl+Z", "Undo the last build action"], ["Esc", "Go back to selecting"]]],
 ]

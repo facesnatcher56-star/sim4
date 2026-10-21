@@ -258,6 +258,15 @@ func _build_left() -> void:
 	left.add_child(queue_bar)
 	folk_panel = FolkPanel.new()
 	left.add_child(folk_panel)
+	folk_panel.expanded_changed.connect(func(on: bool):          # the long person panel needs the left column: the tips and the checklist step aside
+		if is_instance_valid(tips) and is_instance_valid(tracker):
+			for n in [tips, tracker]:
+				if on and n.visible:
+					n.set_meta("stepped_aside", true)
+					n.visible = false
+				elif not on and n.has_meta("stepped_aside"):
+					n.remove_meta("stepped_aside")
+					n.visible = true)
 	folk_panel.goals_requested.connect(func(id): goals_dialog.toggle_for(id))
 	folk_panel.career_requested.connect(func(id): career_dialog.toggle_for(id))
 

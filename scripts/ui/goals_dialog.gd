@@ -87,8 +87,17 @@ func _perks(info: Dictionary) -> void:
 	var defs := Goals.perk_defs()
 	var ids: Array = defs.keys()
 	ids.sort_custom(func(a, b): return int(defs[a].get("cost", 0)) < int(defs[b].get("cost", 0)))
+	var shown: int = 0
+	var hidden: int = 0
 	for pid in ids:
 		var d: Dictionary = defs[pid]
+		# only what you own, what you can buy now, and the next two you are saving for; the rest is not listed
+		var can: bool = Goals.can_buy(folk_id, str(pid))
+		if not owned.has(pid) and not can:
+			if shown >= 2 + owned.size() + ids.filter(func(x): return not owned.has(x) and Goals.can_buy(folk_id, str(x))).size():
+				hidden += 1
+				continue
+		shown += 1
 		var row := HBoxContainer.new()
 		body.add_child(row)
 		var txt := UIU.make_label("%s: %s" % [str(d.get("label", pid)), str(d.get("description", ""))], 12)
@@ -112,3 +121,5 @@ func _perks(info: Dictionary) -> void:
 				refresh())
 		b.custom_minimum_size = Vector2(70, 0)
 		row.add_child(b)
+	if hidden > 0:
+		line("%d more perks unlock as you earn points." % hidden, 11, UITheme.MUTED)

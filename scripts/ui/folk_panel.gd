@@ -746,8 +746,11 @@ func _refresh_why() -> void:
 
 # ---------------- compact / expanded (task 32d) ----------------
 ## The panel starts compact so it does not cover the home: face, mood and a pip per need. Expanded = every tab as before.
+signal expanded_changed(on: bool)
+
 func set_expanded(on: bool) -> void:
 	expanded = on
+	expanded_changed.emit(on)
 	UIPrefs.set_flag("folk_panel_expanded", on)
 	if details_btn != null:
 		details_btn.text = "Less" if on else "Details"

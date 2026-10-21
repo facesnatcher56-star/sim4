@@ -34,18 +34,28 @@ static func build(dlg: BankHub) -> void:
 	var cw: float = dlg.dialog_width - 50.0
 	var online: bool = bool(sh2.get("online", false))
 	var items: Dictionary = sh2["items"]
+	if not inside:          # said once for the whole shop, not on every item
+		var open_now: bool = ShopStock.is_open(shop_id)
+		var msg: String = ("You are not there. " if open_now else "It is closed. ") + ("You can go there" if open_now else "Come back later") + (" or have things delivered." if online else ".")
+		var fid0: int = folk_id
+		var goto_row := HBoxContainer.new()
+		dlg.body.add_child(goto_row)
+		goto_row.add_child(UIU.make_label(msg, 13, UITheme.MUTED))
+		if open_now:
+			goto_row.add_child(dlg.button("Go there", "Walk to " + Neighborhood.label_of(lot), func(): Commands.run({"folk_id": fid0, "action": "travel", "args": {"folk_ids": [fid0], "lot_id": lot}}), true))
 	for iid in items.keys():
 		var it: Dictionary = items[iid]
 		var have: int = ShopStock.units(shop_id, iid)
 		var price: int = ShopStock.price(shop_id, iid)
-		var can_walk: bool = inside and have > 0
 		var card: VBoxContainer = UICard.card(dlg.body, cw, str(it["label"]), "SOLD OUT" if have <= 0 else "")
 		UICard.chips(card, [["Price", "%d" % price], ["Left", "%d" % have]])
-		var why: String = "" if can_walk else ("Sold out." if have <= 0 else "Go to %s while it is open, or order." % Neighborhood.label_of(lot))
-		var buy: Button = UICard.action(card, "Buy", func(): dlg.act("shop_buy", {"shop": shop_id, "item": iid, "qty": 1, "online": false}), can_walk, why)
+		if have <= 0:
+			continue
+		if inside:
+			UICard.action(card, "Buy", func(): dlg.act("shop_buy", {"shop": shop_id, "item": iid, "qty": 1, "online": false}), true, "")
 		if online:
-			var ob: Button = dlg.button("Order (+%d delivery)" % int(ShopStock.cfg().get("delivery_fee", 8)), "Delivered tomorrow", func(): dlg.act("shop_buy", {"shop": shop_id, "item": iid, "qty": 1, "online": true}), have > 0)
-			buy.get_parent().add_child(ob)
+			var ob: Button = dlg.button("Order (+%d delivery)" % int(ShopStock.cfg().get("delivery_fee", 8)), "Delivered tomorrow", func(): dlg.act("shop_buy", {"shop": shop_id, "item": iid, "qty": 1, "online": true}), true)
+			card.add_child(ob)
 	_owned(dlg, folk_id)
 	_work(dlg, folk_id, here)
 

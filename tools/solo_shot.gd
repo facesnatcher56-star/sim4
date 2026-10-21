@@ -74,6 +74,8 @@ func _process(_d: float) -> bool:
 		root.get_node("Clock").set_speed(2)
 	if _scn == "click" and _frames >= 60:
 		_click_script()
+	if _scn == "tour" and _frames >= 60:
+		_tour()
 	if _frames == 60 and _scn == "audit":
 		# for every object definition in the world: what the click menu shows the pawn (after the curation of data/menus.json)
 		var pw = _main.hud._resolve(_main.hud.selected_folk_id)
@@ -94,7 +96,13 @@ func _process(_d: float) -> bool:
 			var gc := 0
 			for g in cur["groups"]:
 				gc += (g["entries"] as Array).size()
-			print("MENU %-22s all=%2d enabled=%2d | main=%d groups=%d(%d)  %s" % [d, es.size(), en, (cur["main"] as Array).size(), (cur["groups"] as Array).size(), gc, str((cur["main"] as Array).map(func(x): return x["label"]))])
+			var why := ""
+			if (cur["main"] as Array).is_empty() and (cur["groups"] as Array).is_empty():
+				why = " BLOCKED: " + str((cur["blocked"] as Array).map(func(b): return "%s (%s)" % [b["label"], b["reason"]]))
+			print("MENU %-20s all=%2d enabled=%2d | main=%d groups=%d(%d)  %s%s" % [d, es.size(), en, (cur["main"] as Array).size(), (cur["groups"] as Array).size(), gc, str((cur["main"] as Array).map(func(x): return x["label"])), why])
+		var ses: Array = iqa.self_entries(pw)
+		var scur: Dictionary = pea.curate(ses, "self")
+		print("MYSELF all=%d main=%s groups=%s blocked=%s" % [ses.size(), str((scur["main"] as Array).map(func(x): return x["label"])), str((scur["groups"] as Array).map(func(g): return g["name"])), str((scur["blocked"] as Array).map(func(b): return b["label"] + ": " + b["reason"]))])
 		quit(0)
 	if _frames == 60 and _scn.begins_with("pie"):
 		var hud9 = _main.hud
@@ -172,7 +180,7 @@ func _process(_d: float) -> bool:
 		print("PAWNMETA away=%s info=%s tile=%s lvl=%d cur=%s" % [str(pw.has_meta("away")), str(Away.info(pw.id)), str(pw.tile), pw.level, str(pw.current.def_id) if pw.current else "-"])
 		for k in (lvw.level_nodes if lvw else {}):
 			print("  L%s objs=%d" % [str(k), (lvw.level_nodes[k]["objs"] as Dictionary).size()])
-	if _frames == (900 if _scn in ["court", "cell"] else (100000 if _scn == "click" else 100)):
+	if _frames == (900 if _scn in ["court", "cell"] else (100000 if _scn in ["click", "tour"] else 100)):
 		var img := root.get_texture().get_image()
 		img.save_png(_out)
 		print("saved ", _out, " ", img.get_size())
@@ -254,3 +262,55 @@ func _click_script() -> void:
 		185:
 			_shot("click_4_mailbox_rightclick")
 			quit(0)
+
+
+# ---- "tour": open every window of the game in turn and save a shot of each (tools: look through them for anything that is not game-like)
+const TOUR := ["map", "money_town", "money_shops", "money_business", "money_homes", "money_bank", "town_life_places", "town_life_study", "town_life_health", "town_life_news", "council", "household", "goals", "career", "help", "settings", "pause", "saveload", "details", "myself", "build", "phone", "casebd"]
+func _tour() -> void:
+	var hud = _main.hud
+	var idx: int = (_frames - 60) / 14
+	var phase: int = (_frames - 60) % 14
+	if idx >= TOUR.size():
+		quit(0)
+		return
+	var name: String = TOUR[idx]
+	var fid: int = hud.selected_folk_id
+	if phase == 0:
+		for d in [hud.goals_dialog, hud.career_dialog, hud.money_hub, hud.life_hub, hud.phone_dialog, hud.town_dialog, hud.household_dialog, hud.help_dialog, hud.pause_menu, hud.settings_dialog, hud.case_board]:
+			if d != null:
+				d.visible = false
+		hud.save_menu.visible = false
+		hud.pie.close()
+		hud.travel_panel.visible = false
+		if hud.build_panel.active:
+			hud.build_panel.set_active(false)
+		match name:
+			"map": hud.travel_panel.toggle()
+			"money_town", "money_shops", "money_business", "money_homes", "money_bank":
+				hud.money_hub.tab = name.substr(6)
+				hud.money_hub.show_for(fid)
+			"town_life_places", "town_life_study", "town_life_health", "town_life_news":
+				hud.life_hub.tab = name.substr(10)
+				hud.life_hub.show_for(fid)
+			"council": hud.town_dialog.show_for(fid)
+			"household": hud.household_dialog.show_for(fid)
+			"goals": hud.goals_dialog.show_for(fid)
+			"career": hud.career_dialog.show_for(fid)
+			"help": hud.help_dialog.show_for(fid)
+			"settings": hud.settings_dialog.show_for(fid)
+			"pause": hud.pause_menu.show_for(-1)
+			"saveload":
+				hud._refresh_save_menu()
+				hud.save_menu.visible = true
+			"details": hud.folk_panel.set_expanded(true)
+			"myself":
+				var me = hud._resolve(fid)
+				hud.pie.open_with_entries(me, "self", -1, load("res://scripts/ui/interaction_query.gd").self_entries(me), Vector2(300, 700))
+			"build": hud.build_panel.set_active(true)
+			"phone":
+				load("res://scripts/ui/life_hub_phone.gd").set("app", "")
+				hud.phone_dialog.show_for(fid)
+			"casebd": hud.case_board.show_for(fid)
+	elif phase == 10:
+		print("TOUR %s" % name)
+		_shot("tour_%02d_%s" % [idx, name])
