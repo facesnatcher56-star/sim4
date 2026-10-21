@@ -33,6 +33,8 @@ static func owed(pid: int) -> int:
 
 static func on_day() -> void:
 	var c: Dictionary = cfg()
+	if SysUtil.day() % int(c.get("every_days", 7)) != 0:
+		return          # weekly instalments only
 	for pid in JusticeState.debts.keys():
 		var e: Dictionary = JusticeState.debts[pid]
 		if owed(int(pid)) <= 0 or not CrimePerson.alive(int(pid)):
@@ -41,8 +43,9 @@ static func on_day() -> void:
 		if CrimePerson.in_custody(int(pid)):
 			continue
 		var have: int = CrimePerson.coins(int(pid))
-		var inst: int = mini(maxi(int(float(have) * float(c.get("share", 0.25))), 0), owed(int(pid)))
-		if have < int(c.get("min_coins", 15)) or inst <= 0:
+		var spare: int = have - int(c.get("floor", 60))          # never the food money: only what is above the subsistence floor counts as income
+		var inst: int = mini(maxi(int(float(spare) * float(c.get("share", 0.5))), 0), owed(int(pid)))
+		if inst <= 0:
 			e["missed"] = int(e["missed"]) + 1
 			_penalty(int(pid), e, c)
 			continue
@@ -66,13 +69,13 @@ static func on_day() -> void:
 
 static func _penalty(pid: int, e: Dictionary, c: Dictionary) -> void:
 	var m: int = int(e["missed"])
-	if m < int(c.get("miss_days", 7)) or m % int(c.get("miss_days", 7)) != 0:
-		return
+	if m < int(c.get("miss_weeks", 2)) or m % int(c.get("miss_weeks", 2)) != 0:
+		return          # no income: community service instead of taking the last coins
 	if JusticeState.service.has(pid) or JusticeState.inmates.has(pid):
 		return
-	if m >= 3 * int(c.get("miss_days", 7)):
+	if m >= 3 * int(c.get("miss_weeks", 2)):
 		JusticeState.service[pid] = {"days_left": int(c.get("service_days", 3)) * 2, "last_day": -1}
 	else:
 		JusticeState.service[pid] = {"days_left": int(c.get("service_days", 3)), "last_day": -1}
 	if CrimePerson.is_player(pid):
-		SysUtil.notify("Court debt unpaid for %d days: the court orders community service." % m, "warn")
+		SysUtil.notify("Court debt unpaid for %d weeks: the court orders community service." % m, "warn")

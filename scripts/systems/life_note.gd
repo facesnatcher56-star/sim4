@@ -7,6 +7,8 @@ extends RefCounted
 ##   LifeNote.news(place_id, text)                        a chronicle line with the place's lot, no toast
 
 static func say(kind: String, text: String, subjects: Array = [], severity: int = 1, toast: bool = true, toast_kind: String = "info") -> void:
+	if not subjects.is_empty():
+		text = Sexes.fill(text, int(subjects[0]))          # {they} {them} {themself}
 	var lot := ""
 	var mine := false
 	for s in subjects:

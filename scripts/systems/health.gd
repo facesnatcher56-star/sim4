@@ -49,7 +49,10 @@ static func rec_of(fid: int) -> Dictionary:
 
 ## Player text from config.health.text with {name} filled in.
 static func text(key: String, f) -> String:
-	return str(cfg("text").get(key, "")).replace("{name}", str(f.name) if f != null else "Someone")
+	var t: String = str(cfg("text").get(key, ""))
+	if f != null:
+		t = Sexes.fill(t, int(f.id))          # {they} {them} for a known sex
+	return t.replace("{name}", str(f.name) if f != null else "Someone")
 
 static func tell(f, key: String, kind: String = "warn") -> void:
 	var t: String = text(key, f)

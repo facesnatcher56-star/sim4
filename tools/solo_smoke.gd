@@ -23,6 +23,16 @@ func _process(_d: float) -> bool:
 		hs[str(t.get("heritage", ""))] = int(hs.get(str(t.get("heritage", "")), 0)) + 1
 	print("SMOKE heritage: pawn=%s townies=%s" % [f.heritage, str(hs)])
 	print("SMOKE start: folk=%d pawn=%s coins=%d rung=%s homeless=%s day=%d hour=%d" % [folk.size(), str(Pawn.is_pawn(f)), Economy.balance(f.household_id), SoloHome.rung, str(SoloHome.homeless), Kit.clock().day(), Kit.clock().hour()])
+	if "--npc" in OS.get_cmdline_user_args():
+		Players.table.clear()          # the reviewer's probe: nobody plays, the household lives on NPC autonomy
+		Economy.spend(f.household_id, Economy.balance(f.household_id), "smoke: broke")
+		SimEnv.events().notification.connect(func(text, kind): if "ent" in text or "EVICT" in text: print("  [d%d] %s" % [Kit.clock().day(), text]))
+		for h in 24 * 32:
+			Kit.run(60)
+		print("SMOKE npc: homeless=%s rung=%s coins=%d" % [str(SoloHome.homeless), SoloHome.rung, Economy.balance(f.household_id)])
+		Kit.teardown()
+		quit(0)
+		return true
 	if "--ledger" in OS.get_cmdline_user_args():
 		Economy.deposit(f.household_id, 100, "smoke")
 		Commands.run({"player_id": 1, "folk_id": f.id, "action": "solo", "args": {"action": "move", "rung": "bedsit"}})
