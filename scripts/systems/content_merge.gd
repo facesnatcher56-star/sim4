@@ -67,6 +67,8 @@ static func _into_objects(defs: Dictionary, cfg: Dictionary, mark: String) -> vo
 		if mark != "":
 			d[mark] = true
 		defs[oid] = d
+		for iid0 in d.get("interactions", []):          # a clone does what its base does: join each action's object list (a park bench is sat on)
+			_allow(str(iid0), str(oid))
 	var extra: Dictionary = cfg.get("object_interactions", {})
 	for oid in extra:
 		for iid in extra[oid]:
@@ -81,3 +83,12 @@ static func add_object_interaction(defs: Dictionary, obj_id: String, iid: String
 	if not list.has(iid):
 		list.append(iid)
 		od["interactions"] = list
+	_allow(iid, obj_id)
+
+## An action with an object list (interactions.json "objects") is offered only on those kinds; add `obj_id` when it is offered there on purpose.
+static func _allow(iid: String, obj_id: String) -> void:
+	var d: Dictionary = SimEnv.data().interactions().get(iid, {})
+	var only: Array = d.get("objects", [])
+	if not only.is_empty() and not only.has(obj_id):
+		only.append(obj_id)
+		d["objects"] = only
