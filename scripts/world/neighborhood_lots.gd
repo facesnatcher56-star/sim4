@@ -228,6 +228,8 @@ static func _on_enter(f, lot_id: String) -> void:
 		Neighborhood.loc.erase(fid)
 		if not f.has_meta("silent_trip"):
 			SysUtil.notify("%s arrived at %s." % [f.name, Neighborhood.label_of(lot_id)], "travel")
+			if Pawn.is_pawn(f):
+				Neighborhood.focus_camera(f.tile)          # playtest: the player walked somewhere and the view stayed behind; show them where they arrived
 		f.remove_meta("silent_trip")
 	if SoloHome.active and Pawn.is_pawn(f) and SoloHome.travel_refusal([fid], lot_id) != "":
 		SysUtil.notify(SoloHome.travel_refusal([fid], lot_id), "warn")

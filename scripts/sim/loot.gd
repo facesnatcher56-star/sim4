@@ -85,6 +85,8 @@ static func _apply_one(d: Dictionary, ctx: Dictionary) -> void:
 					payload["target_id"] = target.id
 				SimEnv.emit("game_event", str(v), payload)
 			"notify":
+				if folk != null and not SysUtil.is_resident(folk):
+					continue          # one-character game: a stranger's or a cashier's own moment (their bathroom accident) is not a toast for the player
 				if v is Array:
 					SimEnv.emit("notification", fill_text(str(v[0]), folk), str(v[1]) if v.size() > 1 else "info")
 				else:

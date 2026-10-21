@@ -182,7 +182,9 @@ func _fill_social(f, target, entries: Array) -> void:
 		var e: Dictionary = (e0 as Dictionary).duplicate()
 		var reason: String = str(e["reason"])
 		# the social engine knows more than the plain tests (knowledge, relationship stage...): always ask it
-		var specific: String = SocialDynamics.reason_unavailable(f, target, str(e["id"]), false)
+		# (entries that run their own action, the physical acts, asking about work, the driving test, a weapon, are not social interactions: the engine
+		# would call them "Unknown action" and hide them)
+		var specific: String = "" if e.has("action") else SocialDynamics.reason_unavailable(f, target, str(e["id"]), false)
 		if specific != "":
 			e["enabled"] = false
 			reason = PieEntries.polish_reason(specific)

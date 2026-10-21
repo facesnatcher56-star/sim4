@@ -57,7 +57,7 @@ static func on_minute() -> void:
 					and in_shift_window(h + _lead(f, h, f.work_start, f.work_end), f.work_start, f.work_end):
 				j["attempt_day"] = day
 				if _hired_after_start(f, j, h, day):
-					SysUtil.notify("%s starts at the %s tomorrow." % [f.name, str(Careers.career_def(str(j["career"])).get("label", "new job")).to_lower()], "career")
+					SysUtil.notify("%s starts the new job tomorrow." % f.name, "career")
 					continue
 				_start_shift(f, j, h)
 		elif Careers.school.has(fid):

@@ -65,6 +65,7 @@ static func already_seen() -> bool:
 ## Keep the panel in the left column, below the checklist (which grows and shrinks).
 var _folded: bool = false          # we folded the checklist to make room (one overlay at a time, 45 rule 5); unfolded when the tips close
 var _was_up: bool = false
+var _day0: int = -1
 
 func _process(_d: float) -> void:
 	if visible != _was_up:          # fold the checklist once when the tips open (the player can open it again), unfold it when they close
@@ -78,6 +79,11 @@ func _process(_d: float) -> void:
 			tracker.collapsed = false
 			tracker.refresh()
 	if not visible:
+		return
+	if _day0 < 0:
+		_day0 = SysUtil.day()
+	elif SysUtil.day() > _day0:          # playtest: the card was still covering the screen on day 2; it folds away after the first day
+		visible = false
 		return
 	var top := 62.0
 	if tracker != null and tracker.visible:
@@ -94,6 +100,7 @@ func start(force: bool = false, list: Array = [], basics: bool = false) -> void:
 		return
 	tips = list if not list.is_empty() else TIPS
 	index = 0
+	_day0 = -1
 	_show()
 	visible = true
 

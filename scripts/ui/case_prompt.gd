@@ -17,8 +17,20 @@ func ask(pid: int, title: String, text: String, options: Array, on_choice: Calla
 	if not visible:
 		_next()
 
+## Playtest: a neighbour's favour came at midnight while the character slept and held the clock. A question waits until they are awake and it is
+## daytime (07:00-22:00); it is still asked, just in the morning.
+func _asleep_or_night(pid: int) -> bool:
+	var f = SysUtil.folk(pid)
+	var h: float = SysUtil.hour_f()
+	var sleeping: bool = f != null and f.current != null and str(f.current.def_id).contains("sleep")
+	return sleeping or h >= 22.0 or h < 7.0
+
+func _process(_d: float) -> void:
+	if not visible and _current.is_empty() and not _queue.is_empty():
+		_next()
+
 func _next() -> void:
-	if _queue.is_empty():
+	if _queue.is_empty() or _asleep_or_night(int(_queue[0]["pid"])):
 		_current = {}
 		visible = false
 		return

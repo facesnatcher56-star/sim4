@@ -53,8 +53,10 @@ func _process(_d: float) -> void:
 		else:
 			n.visible = false
 	var placed := layout_rects(items, rings.rects() if rings != null else [])
+	var vp: Vector2 = get_viewport_rect().size
 	for i in items.size():
-		items[i]["node"].position = placed[i]
+		var sz: Vector2 = items[i]["size"]
+		items[i]["node"].position = Vector2(clampf(placed[i].x, 4.0, maxf(vp.x - sz.x - 4.0, 4.0)), clampf(placed[i].y, 70.0, maxf(vp.y - sz.y - 4.0, 70.0)))          # playtest: a balloon at the edge was cut off
 
 ## View-only de-overlap: items {id, pos (top-left), size}. Returns top-left positions in the same order.
 ## Balloons are processed by folk id (stable), each pushed up until it clears the ones already placed.

@@ -48,16 +48,18 @@ static func start(id: String, ctx: Dictionary) -> Dictionary:
 		for tag in (t.get("heat", {}) as Dictionary):
 			StorytellerChaos.add_heat(str(zone), str(tag), float(t["heat"][tag]))
 	_apply_weather()
-	_announce(str(t.get("start", "")), id)
+	_announce(str(t.get("start", "")), id, not t.has("weather"))          # a weather cycle: the weather itself says so (one toast, not two)
 	Storyteller.bump("cycles")
 	return {"text": str(t.get("start", "")), "ok": true, "silent": true}
 
-static func _announce(text: String, id: String) -> void:
+static func _announce(text: String, id: String, toast: bool = true) -> void:
 	if text == "":
 		return
 	Story._log(text)
 	ChronicleHook.note("cycle_" + id, text, [], "town:0", 2, true)
 	StorytellerLog.add("cycle", text, str(Storyteller.cfg().get("text", {}).get("why_cycle", "")), Storyteller.KEY_TOWN, [], "town", "cycle_" + id)
+	if not toast:
+		return
 	for hid in CityState.full_households():
 		StorytellerLog.toast(int(hid), text)
 

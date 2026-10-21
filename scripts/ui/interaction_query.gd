@@ -158,4 +158,9 @@ static func entries_for(folk, target_kind: String, target_id: int) -> Array:
 			var d: Dictionary = table[id]
 			if d.get("target", "") == "folk":
 				ids.append(id)
-	return build_entries(folk, ids, table, make_checker(folk, target)) + PersonActs.entries(folk, target) + Licences.person_entries(folk, target) + JobLeads.person_entries(folk, target) + WeaponActs.entries(folk, target)          # task 53: physical acts; 55: the driving test; 51: ask if they're hiring; 57: a carried weapon (owner's weapon_acts.gd)
+	var acts: Array = PersonActs.entries(folk, target) + Licences.person_entries(folk, target) + JobLeads.person_entries(folk, target) + WeaponActs.entries(folk, target)
+	var have: Dictionary = {}
+	for e in acts:
+		have[str(e["label"]).to_lower()] = true
+	# an older social action with the same name as a newer act (Pick Their Pocket / Pick their pocket) is shown once: the act
+	return build_entries(folk, ids, table, make_checker(folk, target)).filter(func(e): return not have.has(str(e["label"]).to_lower())) + acts          # task 53: physical acts; 55: the driving test; 51: ask if they're hiring; 57: a carried weapon (owner's weapon_acts.gd)

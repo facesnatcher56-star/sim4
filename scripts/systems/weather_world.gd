@@ -293,11 +293,12 @@ static func on_day(day: int, sliced: bool = false) -> void:
 		if frost:
 			if growth > 0.0:
 				WorldIface.state_set(o, "growth", 0.0)
-				killed += 1
+				if NeighborhoodLots.lot_at(o.tile) == Neighborhood.HOME:
+					killed += 1          # only your own crops are news to you (the park's plots die quietly)
 		elif mult > 1.0 and float(WorldIface.state_get(o, "water", 0.0)) >= 2.0:
 			WorldIface.state_add(o, "growth", float(spec.get("daily_add", 2.0)) * (mult - 1.0))
 	if killed > 0:
-		SysUtil.notify("A hard frost killed the crops!", "warn")
+		SysUtil.notify("A hard frost killed your crops.", "warn")
 		SysUtil.game_event("crops_frozen", {"count": killed, "folk_id": -1})
 	Weather._min_today = 99.0
 	Weather._rain_hours = 0.0
