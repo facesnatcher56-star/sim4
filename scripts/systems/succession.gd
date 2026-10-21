@@ -92,6 +92,7 @@ static func begin(folk_id: int) -> Dictionary:
 		if int(Players.field(pid, "heir", -1)) == folk_id:
 			Players.set_field(pid, "heir", -1)           # the picked heir died: the line decides again
 		return {}
+	LifeSummary.on_pawn_death(folk_id, str(f.name))          # task 44: what the life was, why, and what it set in motion
 	return {"pid": pid, "hid": hid, "head": folk_id, "name": str(f.name), "line": HeirLine.candidates(folk_id, hid, pid)}
 
 ## Called by Aging.kill after the head has left the world.

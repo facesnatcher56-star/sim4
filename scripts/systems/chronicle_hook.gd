@@ -39,6 +39,7 @@ static func note(kind: String, text: String, subjects: Array = [], lot: String =
 	if _repeat(kind, text, ids, lot):
 		return {}
 	var p: Dictionary = {"kind": kind, "text": text, "day": SysUtil.day(), "subjects": ids, "lot": lot, "severity": severity, "public": is_public}
+	LifeLedger.from_chronicle(p)          # task 44: the cause links of a life
 	recent.append(p)
 	while recent.size() > 40:
 		recent.pop_front()

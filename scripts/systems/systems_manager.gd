@@ -88,6 +88,8 @@ static func reset_all() -> void:
 	CrimeFlow.uninstall()
 	Players.reset()
 	SoloHome.reset()
+	LifeLedger.reset()
+	LifeSummary.reset()
 	SoloDistricts.reset()
 	SuccessionNobody.reset()
 	Tiers.reset()

@@ -43,6 +43,7 @@ static func run(env: Dictionary) -> Dictionary:
 		AutoFurnish.note_order(int(e["player_id"]))        # the household is being played (task 32f: no auto-furnishing while the player gives orders)
 		if not res.has("ok"):
 			res["ok"] = true
+		LifeLedger.on_command(e, res)
 	var entry: Dictionary = e.duplicate()
 	entry["ok"] = bool(res.get("ok", false))
 	log.append(entry)

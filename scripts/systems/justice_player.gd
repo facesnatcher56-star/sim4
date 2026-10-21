@@ -1,4 +1,4 @@
-﻿class_name JusticePlayer
+class_name JusticePlayer
 extends RefCounted
 ## Everything where the PLAYER's folk meets the justice system: clear prompts with choices (robbery reaction, a dangerous grudge, a plea,
 ## a lawyer, testimony) and being held away from the lot (custody, court, jail, prison, community service) through Away, like the hospital.
@@ -31,6 +31,9 @@ static func ask(pid: int, title: String, text: String, options: Array, on_choice
 	if ask_fn.is_valid():
 		var wrapped: Callable = func(choice):
 			entry["choice"] = str(choice)
+			for o in options:
+				if str(o["id"]) == str(choice):
+					LifeLedger.choice("You chose \"%s\" (%s)." % [str(o["label"]), title], [pid])
 			on_choice.call(choice)
 		ask_fn.call(pid, title, text, options, wrapped, default_id)
 		return

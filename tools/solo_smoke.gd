@@ -23,6 +23,18 @@ func _process(_d: float) -> bool:
 		hs[str(t.get("heritage", ""))] = int(hs.get(str(t.get("heritage", "")), 0)) + 1
 	print("SMOKE heritage: pawn=%s townies=%s" % [f.heritage, str(hs)])
 	print("SMOKE start: folk=%d pawn=%s coins=%d rung=%s homeless=%s day=%d hour=%d" % [folk.size(), str(Pawn.is_pawn(f)), Economy.balance(f.household_id), SoloHome.rung, str(SoloHome.homeless), Kit.clock().day(), Kit.clock().hour()])
+	if "--ledger" in OS.get_cmdline_user_args():
+		Economy.deposit(f.household_id, 100, "smoke")
+		Commands.run({"player_id": 1, "folk_id": f.id, "action": "solo", "args": {"action": "move", "rung": "bedsit"}})
+		ChronicleHook.note("burglary", "Someone broke into the bedsit.", [f.id], "home:%d" % f.household_id, 3, true)
+		Kit.run(60 * 24 * 3)
+		ChronicleHook.note("eviction", "The landlord kept the deposit.", [f.id], "home:%d" % f.household_id, 3, true)
+		var b: Dictionary = LifeSummary.build(f.id, str(f.name))
+		for s in b["sections"]:
+			print("SMOKE ledger section %s: %s" % [s["title"], str(s["lines"])])
+		Kit.teardown()
+		quit(0)
+		return true
 	if "--walk" in OS.get_cmdline_user_args():
 		print("SMOKE travel: %s" % str(Neighborhood.travel([f.id], "cafe")))
 		for i in 6:

@@ -38,6 +38,7 @@ var help_dialog: HelpDialog
 var incident_debug: IncidentDebug
 var case_board: CaseBoard
 var case_prompt: CasePrompt
+var life_summary: LifeSummaryDialog          # task 44: the end-of-life summary
 var pause_menu: PauseMenu
 var share_hub: ShareHub
 var settings_dialog: SettingsDialog
@@ -266,12 +267,13 @@ func _build_dialogs() -> void:
 	case_board = CaseBoard.new()
 	case_prompt = CasePrompt.new()
 	JusticePlayer.ask_fn = case_prompt.ask
-	for d in [goals_dialog, career_dialog, money_hub, life_hub, town_dialog, vacation_dialog, household_dialog, help_dialog, pause_menu, settings_dialog, confirm_dialog, incident_debug, case_board, case_prompt, share_hub]:
+	life_summary = LifeSummaryDialog.new()
+	for d in [goals_dialog, career_dialog, money_hub, life_hub, town_dialog, vacation_dialog, household_dialog, help_dialog, pause_menu, settings_dialog, confirm_dialog, incident_debug, case_board, case_prompt, share_hub, life_summary]:
 		add_child(d)
 	save_menu.visibility_changed.connect(func(): UIDialog.track_open(save_menu.get_instance_id(), save_menu.visible))
 
 func dialogs() -> Array:
-	return [confirm_dialog, settings_dialog, share_hub, pause_menu, goals_dialog, career_dialog, money_hub, life_hub, town_dialog, vacation_dialog, household_dialog, help_dialog, incident_debug, case_board, case_prompt]
+	return [confirm_dialog, settings_dialog, share_hub, pause_menu, goals_dialog, career_dialog, money_hub, life_hub, town_dialog, vacation_dialog, household_dialog, help_dialog, incident_debug, case_board, case_prompt, life_summary]
 
 func _on_pause_choice(id: String) -> void:
 	pause_menu.hide_dialog()
