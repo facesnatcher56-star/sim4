@@ -72,7 +72,7 @@ func _build() -> void:
 	root.add_child(body)
 	# ---- map
 	var map_panel := PanelContainer.new()
-	map_panel.add_theme_stylebox_override("panel", UITheme.box(Color("#17202a"), 8, Color(1, 1, 1, 0.06), 1, 8))
+	map_panel.add_theme_stylebox_override("panel", UITheme.box(UITheme.sem("map_bg"), 8, Color(1, 1, 1, 0.06), 1, 8))
 	body.add_child(map_panel)
 	var g: Array = Neighborhood.cfg().get("grid", [5, 4])
 	map_box = Control.new()
@@ -238,7 +238,7 @@ func _style_tile(l: Dictionary) -> void:
 	if not open:
 		bg = bg.lerp(Color("#2a2a2e"), 0.6)
 	var sel: bool = (lid == selected_lot)
-	var border: Color = UITheme.ACCENT if sel else (Color("#f2c94c") if lid == cur else Color(1, 1, 1, 0.1))
+	var border: Color = UITheme.ACCENT if sel else (UITheme.sem("coin") if lid == cur else Color(1, 1, 1, 0.1))
 	var bw: int = 3 if sel else (2 if lid == cur else 1)
 	for st in ["normal", "hover", "pressed", "focus"]:
 		var sb := UITheme.box(bg.lightened(0.12) if st == "hover" else bg, 8, border, bw, 8)
@@ -282,7 +282,7 @@ func _refresh_detail() -> void:
 	title_label.text = str(l["label"])
 	var open: bool = Neighborhood.is_open(lid)
 	status_label.text = Venues.status_text(lid)
-	status_label.add_theme_color_override("font_color", Color("#4cc78a") if open else Color("#e5534b"))
+	status_label.add_theme_color_override("font_color", UITheme.sem("good") if open else UITheme.sem("bad"))
 	blurb_label.text = str(l.get("blurb", ""))
 	var fee: int = Venues.fee(str(l.get("type", "")))
 	var fast: bool = fast_check.button_pressed

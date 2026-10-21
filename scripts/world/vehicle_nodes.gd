@@ -41,6 +41,7 @@ func _make(v: Dictionary) -> Dictionary:
 	if ps != null:
 		var inst: Node = ps.instantiate()
 		root.add_child(inst)
+		LookKits.apply(inst, int(v["id"]), str(v["glb"]), 300.0, 0.0)       # dull paint, dirt or rust (grounded look; view only)
 		_collect(inst, rec)
 		if str(v["kind"]) == "bike" and str(v.get("color", "")) != "":
 			_tint(inst, Color(str(v["color"])))

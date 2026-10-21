@@ -9,7 +9,7 @@ func _ready() -> void:
 func build() -> void:
 	var hid := int(World.current_household_id) if World.get("current_household_id") != null else 1
 	title_label.text = "Household money"
-	line("%d Coins" % Economy.balance(hid), 26, Color("#f2c94c"))
+	line("%d Coins" % Economy.balance(hid), 26, UITheme.sem("coin"))
 	_bills(hid)
 	_utilities(hid)
 	_week(hid)
@@ -58,7 +58,7 @@ func _utilities(hid: int) -> void:
 	UICard.reqs(body, items)
 	for l2 in Utilities.status_lines(hid):
 		if str(l2).find("working") < 0:
-			line(str(l2), 12, Color("#e8913d"))
+			line(str(l2), 12, UITheme.sem("warn"))
 
 func _week(hid: int) -> void:
 	heading("Last 7 days")

@@ -71,12 +71,15 @@ func _yaw_for_rot(rot: int) -> float:
 
 
 ## Visual (model or fallback) for a definition, origin at footprint centre, unrotated (front = model -Z).
-func make_def_visual(def_id: String) -> Node3D:
+func make_def_visual(def_id: String, obj_id: int = -1) -> Node3D:
 	var d: Dictionary = World.get_def(def_id)
 	var root := Node3D.new()
 	var ps := _load_model(str(d.get("model", "")))
 	if ps:
-		root.add_child(ps.instantiate())
+		var inst := ps.instantiate()
+		root.add_child(inst)
+		if obj_id >= 0:
+			LookKits.apply(inst, obj_id, def_id, float(d.get("price", 300)))        # worn wood, faded fabric, scuffed metal (grounded look)
 		if show_labels:
 			root.add_child(_label(str(d.get("label", def_id)), float(d.get("height", 1.0)) + 0.3))
 		return root

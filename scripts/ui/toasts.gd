@@ -3,7 +3,8 @@ extends VBoxContainer
 ## Stacking notification toasts (Events.notification), top-centre under the bar. Click a toast to dismiss it.
 ## ToastPolicy removes repeats and folds whim messages into a digest; job offers become an Accept / Decline card.
 const MAX_TOASTS := 4
-const KIND_COLORS := {"info": Color("#3fb8af"), "good": Color("#4cc78a"), "warn": Color("#e8913d"), "bad": Color("#e5534b")}
+static func kind_color(look: String) -> Color:
+	return UITheme.sem(look if look in ["info", "good", "warn", "bad"] else "info")
 ## Systems use many kinds; they map onto four looks. Warn / bad also carry a "!" so colour is never the only cue.
 const KIND_LOOK := {"birthday": "good", "goal": "good", "career": "good", "holiday": "info", "weather": "info", "relationship": "info",
 	"story": "info", "visit": "info", "invite": "info", "travel": "info", "bill": "warn", "death": "bad", "job_offer": "good"}
@@ -46,7 +47,7 @@ func push(text: String, kind: String = "info") -> void:
 
 func _show(text: String, kind: String) -> void:
 	var look: String = KIND_LOOK.get(kind, kind)
-	var col: Color = KIND_COLORS.get(look, KIND_COLORS["info"])
+	var col: Color = kind_color(look)
 	var p := PanelContainer.new()
 	p.mouse_filter = Control.MOUSE_FILTER_STOP
 	p.tooltip_text = "Click to dismiss"

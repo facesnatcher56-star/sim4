@@ -57,7 +57,8 @@ const MOOD_COLORS_CB := {
 
 static func mood_color(mood: String, fallback: Color = Color("#9aa7b4")) -> Color:
 	var t: Dictionary = MOOD_COLORS_CB if GameSettings.colorblind() else MOOD_COLORS
-	return t.get(mood, fallback)
+	var c: Color = t.get(mood, fallback)
+	return c if GameSettings.colorblind() else UITheme.tone(c)
 
 static func level_color(ratio: float) -> Color:
 	if GameSettings.colorblind():
@@ -67,10 +68,10 @@ static func level_color(ratio: float) -> Color:
 		if ratio < 0.65: return Color("#f0e442")
 		return Color("#0072b2")
 	# colour-blind friendly ramp (red -> orange -> yellow -> blue); bars also carry a number and a "!" when low
-	if ratio < 0.2: return Color("#e5534b")
-	if ratio < 0.4: return Color("#e8913d")
-	if ratio < 0.65: return Color("#e6c84a")
-	return Color("#3fa7d6")
+	if ratio < 0.2: return UITheme.tone(Color("#e5534b"))
+	if ratio < 0.4: return UITheme.tone(Color("#e8913d"))
+	if ratio < 0.65: return UITheme.tone(Color("#e6c84a"))
+	return UITheme.tone(Color("#3fa7d6"))
 
 static func stat_ratio(s) -> float:
 	if s == null:

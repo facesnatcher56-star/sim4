@@ -8,8 +8,9 @@ extends Control
 signal chosen(def_id: String, target_id: int)
 
 const SOCIAL_ORDER := ["Friendly", "Funny", "Romantic", "Deep", "Group", "Mean"]
-const CAT_COLORS := {"Friendly": Color("#4cc78a"), "Funny": Color("#f2c94c"), "Romantic": Color("#ee86a6"), "Deep": Color("#35a7b0"),
-	"Group": Color("#8f6bf0"), "Mean": Color("#e5534b")}
+const CAT_KEYS := {"Friendly": "friendly", "Funny": "funny", "Romantic": "romance", "Deep": "deep", "Group": "group", "Mean": "mean"}
+static func cat_color(cat: String) -> Color:
+	return UITheme.sem(CAT_KEYS[cat]) if CAT_KEYS.has(cat) else UITheme.ACCENT
 const KIND_ACCENT := {"object": "#f2a33c", "folk": "#ee86a6", "self": "#3fb8af", "ground": "#5bb8ff", "door": "#c98f5b", "car": "#c98f5b"}
 ## Which groups stay open between openings (the player's choice persists).
 static var open_cats: Dictionary = {"Friendly": true}
@@ -237,7 +238,7 @@ func _fill_social(f, target, entries: Array) -> void:
 					list.add_child(rb)
 					shown_recent += 1
 	for c3 in order:
-		_group_button(list, str(c3), cats[c3], CAT_COLORS.get(c3, UITheme.ACCENT))
+		_group_button(list, str(c3), cats[c3], cat_color(str(c3)))
 	_fit_scroll()
 
 func _set_header_text(header: Button, cat: String, n: int, is_open: bool) -> void:

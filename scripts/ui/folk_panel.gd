@@ -244,7 +244,7 @@ func _update_need(nid: String, stat, raw_value = null) -> void:
 	if num != null:
 		num.visible = GameSettings.get_bool("need_numbers")
 		num.text = ("! %d%%" if r < 0.2 else "%d%%") % int(r * 100.0)    # number + "!" so low needs never rely on colour alone
-		num.add_theme_color_override("font_color", Color("#ff8a80") if r < 0.2 else UITheme.TEXT)
+		num.add_theme_color_override("font_color", UITheme.sem("low_text") if r < 0.2 else UITheme.TEXT)
 	var sb := UITheme.box(UIU.level_color(r), 4, Color(0, 0, 0, 0), 0, 0)
 	bar.add_theme_stylebox_override("fill", sb)
 	need_rows[nid].tooltip_text = _need_tooltip(nid, r)
@@ -309,7 +309,7 @@ func mood_color(mood: String) -> Color:
 	if UIU.MOOD_COLORS.has(mood):
 		return UIU.mood_color(mood)
 	if Emotions.mood_defs().has(mood):
-		return Emotions.color(mood)
+		return UITheme.tone(Emotions.color(mood))
 	return UIU.MOOD_COLORS["neutral"]
 
 ## Display name of a mood id. "neutral" reads as "Calm" (nothing pulls the mood either way).
@@ -470,7 +470,8 @@ func _on_skill_changed(fid: int, _skill: String, _level: int) -> void:
 		_build_skills()
 
 # ---------------- relationships ----------------
-const TRACK_COLORS := {"friendship": Color("#4cc78a"), "romance": Color("#ee86a6"), "trust": Color("#35a7b0")}
+static func _track_color(k: String) -> Color:
+	return UITheme.sem({"friendship": "good", "romance": "romance", "trust": "trust"}[k])
 
 func _known_ids() -> Array:
 	var ids: Array = []
@@ -531,7 +532,7 @@ func _meter(title: String, value: float, col: Color) -> VBoxContainer:
 	bar.custom_minimum_size = Vector2(60, 8)
 	bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	bar.add_theme_stylebox_override("fill", UITheme.box(col if value >= 0.0 else Color("#e5534b"), 3, Color(0, 0, 0, 0), 0, 0))
+	bar.add_theme_stylebox_override("fill", UITheme.box(col if value >= 0.0 else UITheme.sem("bad"), 3, Color(0, 0, 0, 0), 0, 0))
 	v.add_child(bar)
 	return v
 
@@ -552,13 +553,13 @@ func _rel_card(oid: int) -> PanelContainer:
 	head.add_child(UIU.make_label(nm, 14))
 	var bit := RelationshipService.bit_for(folk_id, oid)
 	if bit != "stranger":
-		head.add_child(_chip(RelationshipService.bit_label(bit), Color(RelationshipService.bit_color(bit)), "How %s sees %s" % [str(UIU.prop(folk, "name", "they")), nm]))
+		head.add_child(_chip(RelationshipService.bit_label(bit), UITheme.tone(Color(RelationshipService.bit_color(bit))), "How %s sees %s" % [str(UIU.prop(folk, "name", "they")), nm]))
 	var stage := RelationshipService.romance_stage(folk_id, oid)
 	if stage in ["crush", "flirting"]:
-		head.add_child(_chip(RelationshipService.stage_label(stage), Color("#ee86a6"), "Romance stage"))
+		head.add_child(_chip(RelationshipService.stage_label(stage), UITheme.sem("romance"), "Romance stage"))
 	var ten := _track_value(oid, "tension")
 	if ten >= 10.0:
-		head.add_child(_chip("Tense %d" % int(ten), Color("#e5534b"), "Unresolved tension - make up, forgive or apologize. It fades slowly over days."))
+		head.add_child(_chip("Tense %d" % int(ten), UITheme.sem("bad"), "Unresolved tension - make up, forgive or apologize. It fades slowly over days."))
 	if other != null and other.has_method("get_mood"):
 		var om: Dictionary = other.get_mood()
 		var mn := str(om.get("mood", "neutral"))
@@ -571,9 +572,9 @@ func _rel_card(oid: int) -> PanelContainer:
 	var meters := HBoxContainer.new()
 	meters.add_theme_constant_override("separation", 8)
 	col.add_child(meters)
-	meters.add_child(_meter("Friendship", _track_value(oid, "friendship"), TRACK_COLORS["friendship"]))
-	meters.add_child(_meter("Romance", _track_value(oid, "romance"), TRACK_COLORS["romance"]))
-	meters.add_child(_meter("Trust", _track_value(oid, "trust"), TRACK_COLORS["trust"]))
+	meters.add_child(_meter("Friendship", _track_value(oid, "friendship"), _track_color("friendship")))
+	meters.add_child(_meter("Romance", _track_value(oid, "romance"), _track_color("romance")))
+	meters.add_child(_meter("Trust", _track_value(oid, "trust"), _track_color("trust")))
 	# --- what is known about them ('?' until discovered)
 	var ks := RelationshipService.known_summary(folk_id, oid)
 	var tparts: Array = []

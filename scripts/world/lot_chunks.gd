@@ -1,4 +1,4 @@
-﻿extends "res://scripts/world/lot_models.gd"
+extends "res://scripts/world/lot_models.gd"
 ## LotView layer: CHUNKED static terrain. The map is cut into 16x16 chunks (WorldRegions.CHUNK). Each chunk owns
 ##   * one floor ArrayMesh (vertex colours; road centre lines + crosswalk bars are baked in as flat quads),
 ##   * a grass-tint and a snow overlay mesh (materials shared with WeatherView, see overlay_*_mat),
@@ -40,6 +40,7 @@ func _init_chunk_materials() -> void:
 	overlay_wet_mat = _overlay(Color(0.05, 0.07, 0.1, 0))
 	overlay_wet_mat.roughness = 0.2            # wet streets catch the lamps
 	overlay_wet_mat.metallic_specular = 1.0
+	overlay_wet_mat.vertex_color_use_as_albedo = true
 	tree_mats = {"oak": _tree_mat(Color(0.35, 0.62, 0.28)), "pine": _tree_mat(Color(0.18, 0.42, 0.26)), "trunk": _tree_mat(Color(0.38, 0.27, 0.18))}
 
 
@@ -205,7 +206,7 @@ func _build_chunk(c: Vector2i) -> void:
 			if ft == "grass" or ft == "lawn":
 				ga.quad(x, y, x + 1, y + 1, 0.006, Color.WHITE)
 			if ft == "asphalt" or ft == "crosswalk" or ft == "sidewalk":
-				wa.quad(x, y, x + 1, y + 1, 0.007, Color.WHITE)
+				wa.quad(x, y, x + 1, y + 1, 0.007, Color(1, 1, 1, LightMood.wet_tile_alpha(t)))        # puddles are the darkest tiles
 			if ft in SNOW_FLOORS:
 				sa.quad(x, y, x + 1, y + 1, 0.009, Color.WHITE)
 	for m in _marks:

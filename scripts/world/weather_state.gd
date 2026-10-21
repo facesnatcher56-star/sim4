@@ -11,10 +11,6 @@ extends Node3D
 signal thunder(strength: float)
 
 const TREE_COUNT := 46
-const LIGHT_DEFS := {"lamp": {"y": 1.5, "color": Color(1.0, 0.82, 0.55), "range": 5.5, "energy": 1.6},
-	"pendant_light": {"y": 2.2, "color": Color(1.0, 0.85, 0.6), "range": 5.0, "energy": 1.5},
-	"fireplace": {"y": 0.7, "color": Color(1.0, 0.55, 0.25), "range": 5.5, "energy": 1.8, "state": "lit"},
-	"nightstand": {"y": 1.0, "color": Color(1.0, 0.82, 0.55), "range": 3.5, "energy": 0.8}}
 const MAX_LIGHTS := 18
 
 var lot: Node3D = null
@@ -38,6 +34,8 @@ var _flash: float = 0.0
 var _flash_timer: float = 6.0
 var _lamp_lights: Dictionary = {}   # object id -> OmniLight3D
 var _lamp_timer: float = 0.0
+var _fill: OmniLight3D = null          # readability fill on the selected folk at night
+var _hour: float = 12.0
 var _sky_flash_col: Color = Color.WHITE
 var time_scale_real: float = 1.0
 var fixed_hour: float = -1.0        # >= 0 pins the sun to this hour (screenshots)

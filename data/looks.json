@@ -215,7 +215,21 @@
     "wet_dark": 0.0,
     "wet_color": "#0d121a",
     "vignette": 0.0,
-    "grain": 0.0
+    "grain": 0.0,
+    "dawn": [
+    0.92,
+    0.55,
+    0.42
+   ],
+    "season_sat": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "snow_bounce": 0.0,
+    "fill_color": "#c9d2ff",
+    "puddle_dark": 0.0
    },
    "ui": {
     "bg": "#1b2430",
@@ -224,8 +238,39 @@
     "accent": "#3fb8af",
     "text": "#e8eef4",
     "muted": "#93a3b5",
-    "radius": 10
-   }
+    "radius": 10,
+    "sem": {
+     "good": "#4cc78a",
+     "good_text": "#7ed6a5",
+     "info": "#3fb8af",
+     "warn": "#e8913d",
+     "bad": "#e5534b",
+     "coin": "#f2c94c",
+     "coin_hi": "#ffe38a",
+     "coin_bg": "#4a3d12",
+     "romance": "#ee86a6",
+     "trust": "#35a7b0",
+     "group": "#8f6bf0",
+     "low_text": "#ff8a80",
+     "error": "#e07a5f",
+     "caution": "#d9a441",
+     "friendly": "#4cc78a",
+     "funny": "#f2c94c",
+     "deep": "#35a7b0",
+     "mean": "#e5534b",
+     "bubble": "#ffffff",
+     "bubble_text": "#1d2630",
+     "bubble_edge": "#333340",
+     "ring_back": "#0f141f",
+     "map_bg": "#17202a",
+     "card_bg": "#1c2430"
+    },
+    "tone": {
+     "sat": 1.0,
+     "val": 1.0
+    }
+   },
+   "kits": {}
   },
   "grounded": {
    "label": "Grounded and gritty",
@@ -391,7 +436,17 @@
     "wet_dark": 0.5,
     "wet_color": "#0d121a",
     "vignette": 0.35,
-    "grain": 0.03
+    "grain": 0.03,
+    "dawn": "#a9a3b0",
+    "season_sat": [
+     1.0,
+     1.0,
+     0.92,
+     0.78
+    ],
+    "snow_bounce": 0.1,
+    "fill_color": "#c9d2ff",
+    "puddle_dark": 0.2
    },
    "ui": {
     "bg": "#1c1e21",
@@ -399,9 +454,245 @@
     "panel_hi": "#32363b",
     "accent": "#a58d66",
     "text": "#dedbd4",
-    "muted": "#8d8b85",
-    "radius": 4
+    "muted": "#9a9892",
+    "radius": 4,
+    "sem": {
+     "good": "#8fb08c",
+     "good_text": "#9cbf98",
+     "info": "#8da6b3",
+     "warn": "#d19a58",
+     "bad": "#e0766b",
+     "coin": "#d2b06a",
+     "coin_hi": "#e6cd92",
+     "coin_bg": "#3a3220",
+     "romance": "#c98d9e",
+     "trust": "#7fa7ad",
+     "group": "#a597c9",
+     "low_text": "#e8978c",
+     "error": "#e08a74",
+     "caution": "#c9a24f",
+     "friendly": "#8fb08c",
+     "funny": "#d2b06a",
+     "deep": "#7fa7ad",
+     "mean": "#e0766b",
+     "bubble": "#d8d5cd",
+     "bubble_text": "#1f2124",
+     "bubble_edge": "#4a4c50",
+     "ring_back": "#121417",
+     "map_bg": "#17191c",
+     "card_bg": "#1f2225"
+    },
+    "tone": {
+     "sat": 0.72,
+     "val": 0.92
+    }
+   },
+   "kits": {
+    "wood": {
+     "sat": 0.7,
+     "val": 0.82,
+     "tint": "#f0e4d4",
+     "fade": 0.25,
+     "dark": 0.22,
+     "dirt": "#3b3027",
+     "dirt_mix": 0.22
+    },
+    "fabric": {
+     "sat": 0.55,
+     "val": 0.8,
+     "tint": "#eee8e0",
+     "fade": 0.45,
+     "dark": 0.2,
+     "dirt": "#4a4036",
+     "dirt_mix": 0.3
+    },
+    "metal": {
+     "sat": 0.6,
+     "val": 0.85,
+     "tint": "#f2f2f0",
+     "fade": 0.2,
+     "dark": 0.28,
+     "dirt": "#4b433b",
+     "dirt_mix": 0.3
+    },
+    "enamel": {
+     "sat": 0.5,
+     "val": 0.88,
+     "tint": "#f4efe4",
+     "fade": 0.1,
+     "dark": 0.22,
+     "dirt": "#6b5f46",
+     "dirt_mix": 0.42
+    },
+    "paint": {
+     "sat": 0.5,
+     "val": 0.8,
+     "tint": "#f0ece6",
+     "fade": 0.4,
+     "dark": 0.2,
+     "dirt": "#40382f",
+     "dirt_mix": 0.28
+    },
+    "brass": {
+     "sat": 0.7,
+     "val": 0.78,
+     "tint": "#ffffff",
+     "fade": 0.3,
+     "dark": 0.3,
+     "dirt": "#3c3226",
+     "dirt_mix": 0.35
+    },
+    "book": {
+     "sat": 0.45,
+     "val": 0.78,
+     "tint": "#eee6dc",
+     "fade": 0.3,
+     "dark": 0.15,
+     "dirt": "#40382f",
+     "dirt_mix": 0.2
+    },
+    "carpaint": {
+     "sat": 0.5,
+     "val": 0.72,
+     "tint": "#f0eeea",
+     "fade": 0.45,
+     "dark": 0.28,
+     "dirt": "#4a4640",
+     "dirt_mix": 0.4,
+     "rust": "#7a4a30",
+     "rust_mix": 0.5
+    },
+    "service_paint": {
+     "sat": 0.7,
+     "val": 0.82,
+     "tint": "#f4f2ee",
+     "fade": 0.25,
+     "dark": 0.15,
+     "dirt": "#444038",
+     "dirt_mix": 0.3
+    }
    }
   }
+ },
+ "lights": {
+  "lamp": {
+   "y": 1.5,
+   "color": "#ffd18c",
+   "range": 5.5,
+   "energy": 1.6,
+   "temp": "warm"
+  },
+  "pendant_light": {
+   "y": 2.2,
+   "color": "#ffd999",
+   "range": 5.0,
+   "energy": 1.5,
+   "temp": "warm"
+  },
+  "nightstand": {
+   "y": 1.0,
+   "color": "#ffd18c",
+   "range": 3.5,
+   "energy": 0.8,
+   "temp": "warm"
+  },
+  "fireplace": {
+   "y": 0.7,
+   "color": "#ff8c40",
+   "range": 5.5,
+   "energy": 1.8,
+   "state": "lit",
+   "temp": "fire",
+   "flicker": 0.1
+  },
+  "tv": {
+   "y": 1.0,
+   "color": "#8fb4ff",
+   "range": 4.0,
+   "energy": 0.9,
+   "state": "on",
+   "temp": "cold",
+   "flicker": 0.18
+  },
+  "computer": {
+   "y": 1.1,
+   "color": "#a8c4ee",
+   "range": 2.6,
+   "energy": 0.5,
+   "state": "on",
+   "temp": "cold"
+  },
+  "vending_machine": {
+   "y": 1.4,
+   "color": "#b9ffe6",
+   "range": 3.2,
+   "energy": 0.7,
+   "state": "",
+   "temp": "cold"
+  }
+ },
+ "kit_class": {
+  "wood": "wood",
+  "wood_dark": "wood",
+  "wood_light": "wood",
+  "fabric_red": "fabric",
+  "fabric_blue": "fabric",
+  "fabric_tan": "fabric",
+  "fabric_green": "fabric",
+  "canvas": "fabric",
+  "rug": "fabric",
+  "rug_accent": "fabric",
+  "baby_blue": "fabric",
+  "steel": "metal",
+  "metal_dark": "metal",
+  "silver": "metal",
+  "gray": "metal",
+  "ladder": "metal",
+  "white": "enamel",
+  "porcelain": "enamel",
+  "spr_white": "enamel",
+  "paint_a": "paint",
+  "paint_b": "paint",
+  "paint_c": "paint",
+  "red_paint": "paint",
+  "teal": "paint",
+  "yellow_safety": "paint",
+  "brass": "brass",
+  "spr_brass": "brass",
+  "book_red": "book",
+  "book_blue": "book",
+  "book_green": "book",
+  "book_yellow": "book",
+  "pot": "fabric",
+  "urn_clay": "fabric",
+  "body": "carpaint",
+  "amb_red": "service_paint",
+  "fire_paint": "service_paint",
+  "bus_stripe": "service_paint"
+ },
+ "kit_age": {
+  "notes": "age = hash(id)*0.8 + the wealth-tier bias of the catalogue price; buckets: nice < b0 <= used < b1 <= worn",
+  "tiers": [
+   {
+    "max_price": 150,
+    "bias": 0.3
+   },
+   {
+    "max_price": 450,
+    "bias": 0.12
+   },
+   {
+    "max_price": 900,
+    "bias": -0.05
+   },
+   {
+    "max_price": 1000000,
+    "bias": -0.15
+   }
+  ],
+  "buckets": [
+   0.33,
+   0.66
+  ]
  }
 }

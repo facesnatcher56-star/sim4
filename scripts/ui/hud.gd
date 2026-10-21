@@ -182,8 +182,8 @@ func _build_top_bar() -> void:
 	coins_label.text = "0 Coins"
 	coins_label.flat = true
 	coins_label.add_theme_font_size_override("font_size", 18)
-	coins_label.add_theme_color_override("font_color", Color("#f2c94c"))
-	coins_label.add_theme_color_override("font_hover_color", Color("#ffe38a"))
+	coins_label.add_theme_color_override("font_color", UITheme.sem("coin"))
+	coins_label.add_theme_color_override("font_hover_color", UITheme.sem("coin_hi"))
 	coins_label.tooltip_text = "Household money, bills and last week's income and spending"
 	coins_label.pressed.connect(func(): household_dialog.toggle_for(selected_folk_id))
 	h.add_child(coins_label)

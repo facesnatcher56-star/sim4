@@ -22,7 +22,7 @@ const PATH := "res://data/looks.json"
 const SURFACES := ["floor_wood", "floor_tile", "floor_carpet", "ground", "grass", "road", "sidewalk", "sand", "water", "wall", "roof", "trim", "awning", "accent", "glass", "wood", "leaf", "sky"]
 const ENV_KEYS := ["night_sky", "twilight", "twilight_mix", "sun_warm", "sun_white", "sun_base", "shadow_mult", "moon_color", "moon_energy", "amb_day", "amb_night",
 	"amb_energy_day", "amb_energy_night", "exposure_night", "exposure_day", "saturation", "contrast", "brightness", "fog_tint", "fog_floor", "lamp_color",
-	"lamp_energy", "lamp_range", "window_glow", "window_color", "wet_dark", "wet_color", "vignette", "grain"]
+	"lamp_energy", "lamp_range", "window_glow", "window_color", "wet_dark", "wet_color", "vignette", "grain", "dawn", "snow_bounce", "fill_color", "puddle_dark"]
 const UI_KEYS := ["bg", "panel", "panel_hi", "accent", "text", "muted", "radius"]
 const WEAR_KEYS := ["floor_dirt", "stain_chance", "stain_color", "corner_dark"]
 const DEFAULT_SHADER_CLASSES := []          # looks.json wear.shader_classes: surface classes drawn with WearShader (task 41a), e.g. wall and wood
@@ -170,8 +170,16 @@ static func ec(key: String, d: Color = Color.WHITE) -> Color:
 	return _col((cur().get("env", {}) as Dictionary).get(key, null), d)
 
 
+static func earr(key: String) -> Array:
+	return (cur().get("env", {}) as Dictionary).get(key, [])
+
+
 static func ui_col(key: String, d: Color) -> Color:
 	return _col((cur().get("ui", {}) as Dictionary).get(key, null), d)
+
+
+static func ui_dict(key: String) -> Dictionary:
+	return (cur().get("ui", {}) as Dictionary).get(key, {})
 
 
 static func ui_radius(d: int) -> int:
@@ -229,9 +237,9 @@ static func _tint_node(n: Node, variant: String) -> void:
 		_tint_node(c, variant)
 
 
-## WeatherView: 0 by day .. 1 in the dark; windows with a glow share light up.
-static func set_night_glow(dark: float) -> void:
+## WeatherView: 0 by day .. 1 in the dark; windows with a glow share light up, each lit or dark by the hour (people are home in the evening, asleep at 3).
+static func set_night_glow(dark: float, hour: float = 21.0) -> void:
 	var e := ef("window_glow", 0.0)
 	for k in _glass:
 		var g: Dictionary = _glass[k]
-		(g["mat"] as BaseMaterial3D).emission_energy_multiplier = e * dark * float(g["lit"])
+		(g["mat"] as BaseMaterial3D).emission_energy_multiplier = e * dark * LightMood.window_lit(1.0 - float(g["lit"]), hour)

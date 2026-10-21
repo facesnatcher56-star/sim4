@@ -97,7 +97,7 @@ func _update_rings(delta: float) -> void:
 		var tags: Array = inter.def.get("tags", []) if inter.def is Dictionary else []
 		var icon := ProgressRing.icon_for(str(inter.def_id), tags)
 		_rings.append({"id": c["id"], "pos": pos,
-			"frac": shown, "shape": str(icon.get("shape", "dots")), "color": Color(str(icon.get("color", "#e6edf5"))), "r": rad})
+			"frac": shown, "shape": str(icon.get("shape", "dots")), "color": UITheme.tone(Color(str(icon.get("color", "#e6edf5")))), "r": rad})
 	for id in _shown.keys():
 		if not live.has(id):
 			_shown.erase(id)
@@ -133,7 +133,7 @@ func _draw() -> void:
 		var rad: float = r["r"]
 		var aw := ProgressRing.arc_width(rad)
 		var ar := rad - aw * 0.5                      # the arc sits inside the disc edge
-		draw_circle(c, rad + 2.0, Color(0.06, 0.08, 0.12, 0.88))
+		draw_circle(c, rad + 2.0, Color(UITheme.sem("ring_back"), 0.88))
 		draw_arc(c, ar, 0.0, TAU, 48, Color(1, 1, 1, 0.22), aw, true)
 		var f: float = r["frac"]
 		if f > 0.004:

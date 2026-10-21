@@ -69,7 +69,7 @@ func _process(delta: float) -> void:
 func _apply(delta: float, snap: bool) -> void:
 	var clk = SimEnv.clock()
 	var hour: float = fixed_hour if fixed_hour >= 0.0 else (float(clk.hour_f()) if clk != null else 12.0)
-	var rate: float = 100.0 if snap else 1.6
+	var rate: float = 100.0 if snap else 0.7       # ~1.5 s time constant: a front rolling in fades, it does not pop
 	var wid: String = Weather.current()
 	var kind: String = Weather.precip_kind(wid)
 	var inten: float = Weather.precip_intensity(wid)
@@ -81,10 +81,11 @@ func _apply(delta: float, snap: bool) -> void:
 	p["wet"] = _smooth(float(p["wet"]), Weather.wetness(), delta, rate * 0.5)
 	p["snowcover"] = _smooth(float(p["snowcover"]), Weather.snow_cover(), delta, rate * 0.5)
 	var dl: float = Weather.daylight(hour)
+	_hour = hour
 	p["daylight"] = dl
 	var pos: float = Seasons.year_pos(-1, hour)
 	_update_sun(hour, dl, pos)
-	_update_sky(dl, wid)
+	_update_sky(dl, wid, hour)
 	_update_lightning(delta, wid)
 	if not headless:
 		_update_particles(delta)
@@ -114,17 +115,20 @@ func _update_sun(hour: float, dl: float, pos: float) -> void:
 	sun.shadow_opacity = clampf(clampf(float(p["light"]) * 1.2 - 0.1, 0.25, 1.0) * Looks.ef("shadow_mult", 1.0), 0.0, 1.0)
 	if moon != null:
 		moon.light_color = Looks.ec("moon_color", Color(0.55, 0.66, 1.0))
-		moon.light_energy = (1.0 - dl) * Looks.ef("moon_energy", 0.55) * (1.0 - float(p["cloud"]) * 0.55) + _flash * 0.4
+		moon.light_energy = maxf((1.0 - dl) * Looks.ef("moon_energy", 0.55) * (1.0 - float(p["cloud"]) * 0.55), (1.0 - dl) * LightMood.floor_energy(_nb()) * 0.6) + _flash * 0.4
 	# ambient: cool and readable at night, bright and neutral by day, a touch richer when overcast (diffuse)
 	var amb_day: Color = Looks.ec("amb_day", Color(0.78, 0.8, 0.86))
 	var amb_night: Color = Looks.ec("amb_night", Color(0.2, 0.25, 0.46))
-	env.ambient_light_color = amb_night.lerp(amb_day, dl)
+	env.ambient_light_color = LightMood.ambient_color(amb_night, amb_day, dl, _nb())
 	var dim: float = lerpf(1.0, 0.72, clampf(1.0 - float(p["light"]), 0.0, 1.0) * 1.2)
-	env.ambient_light_energy = lerpf(Looks.ef("amb_energy_night", 0.62), Looks.ef("amb_energy_day", 0.62), dl) * dim + _flash * 0.45
+	var amb_dim: float = dim * float(LightMood.wet_mood(float(p["wet"]), 0.0)["dim"])
+	var snow_up: float = float(p["snowcover"]) * Looks.ef("snow_bounce", 0.0) * (1.0 - dl)       # snow bounces a little night light back up
+	env.ambient_light_energy = LightMood.ambient_energy(Looks.ef("amb_energy_night", 0.62), Looks.ef("amb_energy_day", 0.62), dl, amb_dim, _nb()) + snow_up + _flash * 0.45
 	env.tonemap_exposure = lerpf(Looks.ef("exposure_night", 1.1), Looks.ef("exposure_day", 1.0), dl)
 	# overcast / stormy / foggy days look washed out and grey
 	env.adjustment_enabled = true
-	env.adjustment_saturation = lerpf(1.0, 0.62, clampf(float(p["cloud"]) * 0.8 + float(p["fog"]) * 0.3, 0.0, 1.0)) * Looks.ef("saturation", 1.0)
+	var season_sat: float = LightMood.season_value(Looks.earr("season_sat"), pos)       # winter greyer, autumn a little muted
+	env.adjustment_saturation = lerpf(1.0, 0.62, clampf(float(p["cloud"]) * 0.8 + float(p["fog"]) * 0.3, 0.0, 1.0)) * Looks.ef("saturation", 1.0) * season_sat
 	env.adjustment_contrast = lerpf(1.0, 0.94, float(p["fog"])) * Looks.ef("contrast", 1.0)
 	env.adjustment_brightness = Looks.ef("brightness", 1.0)
 
@@ -135,10 +139,10 @@ func _weather_tint() -> Color:
 	return Color(t) if t != "" else Color(1, 1, 1)
 
 
-func _update_sky(dl: float, wid: String) -> void:
+func _update_sky(dl: float, wid: String, hour: float = 12.0) -> void:
 	var day_sky: Color = Looks.grade("sky", Weather.sky_color(wid))
 	var night_sky: Color = Looks.ec("night_sky", Color(0.035, 0.045, 0.11))
-	var tw: Color = Looks.ec("twilight", Color(0.92, 0.55, 0.42))
+	var tw: Color = LightMood.twilight_color(hour, Looks.ec("twilight", Color(0.92, 0.55, 0.42)), Looks.ec("dawn", Color(0.92, 0.55, 0.42)))
 	var sky: Color = night_sky.lerp(day_sky, dl)
 	var twilight: float = 4.0 * dl * (1.0 - dl)
 	sky = sky.lerp(tw.lerp(day_sky, 0.35), twilight * Looks.ef("twilight_mix", 0.55) * (1.0 - float(p["cloud"]) * 0.5))

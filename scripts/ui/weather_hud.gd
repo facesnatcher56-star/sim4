@@ -104,45 +104,45 @@ class WxIcon:
 				if night:
 					_moon(c, r)
 				else:
-					_sun(c, r * 0.5, Color("#f6c945"))
+					_sun(c, r * 0.5, UITheme.tone(Color("#f6c945")))
 			"heat":
-				_sun(c, r * 0.5, Color("#f08a2c"))
+				_sun(c, r * 0.5, UITheme.tone(Color("#f08a2c")))
 				for i in 3:
-					draw_line(Vector2(c.x - r * 0.8 + i * r * 0.8, c.y + r * 0.95), Vector2(c.x - r * 0.8 + i * r * 0.8, c.y + r * 0.75), Color("#f08a2c"), 1.6)
+					draw_line(Vector2(c.x - r * 0.8 + i * r * 0.8, c.y + r * 0.95), Vector2(c.x - r * 0.8 + i * r * 0.8, c.y + r * 0.75), UITheme.tone(Color("#f08a2c")), 1.6)
 			"cloud":
-				_cloud(c + Vector2(0, -r * 0.05), r, Color("#cfd6de"))
+				_cloud(c + Vector2(0, -r * 0.05), r, UITheme.tone(Color("#cfd6de")))
 			"rain":
-				_cloud(c + Vector2(0, -r * 0.25), r * 0.95, Color("#aab4c0"))
+				_cloud(c + Vector2(0, -r * 0.25), r * 0.95, UITheme.tone(Color("#aab4c0")))
 				for i in 3:
 					var x: float = c.x - r * 0.45 + i * r * 0.45
-					draw_line(Vector2(x, c.y + r * 0.35), Vector2(x - 3, c.y + r * 0.85), Color("#5fa8f0"), 2.0)
+					draw_line(Vector2(x, c.y + r * 0.35), Vector2(x - 3, c.y + r * 0.85), UITheme.tone(Color("#5fa8f0")), 2.0)
 			"storm":
-				_cloud(c + Vector2(0, -r * 0.25), r * 0.95, Color("#7d8794"))
+				_cloud(c + Vector2(0, -r * 0.25), r * 0.95, UITheme.tone(Color("#7d8794")))
 				var bolt := PackedVector2Array([c + Vector2(r * 0.1, r * 0.1), c + Vector2(-r * 0.25, r * 0.55), c + Vector2(0, r * 0.55), c + Vector2(-r * 0.15, r * 0.95), c + Vector2(r * 0.35, r * 0.4), c + Vector2(r * 0.08, r * 0.4)])
-				draw_colored_polygon(bolt, Color("#ffd23f"))
+				draw_colored_polygon(bolt, UITheme.tone(Color("#ffd23f")))
 			"fog":
 				for i in 4:
 					var y: float = c.y - r * 0.55 + i * r * 0.38
-					draw_line(Vector2(c.x - r * (0.8 - 0.15 * (i % 2)), y), Vector2(c.x + r * (0.8 - 0.15 * ((i + 1) % 2)), y), Color("#b9c1c9"), 2.4)
+					draw_line(Vector2(c.x - r * (0.8 - 0.15 * (i % 2)), y), Vector2(c.x + r * (0.8 - 0.15 * ((i + 1) % 2)), y), UITheme.tone(Color("#b9c1c9")), 2.4)
 			"snow":
-				_cloud(c + Vector2(0, -r * 0.25), r * 0.95, Color("#c3ccd6"))
+				_cloud(c + Vector2(0, -r * 0.25), r * 0.95, UITheme.tone(Color("#c3ccd6")))
 				for i in 3:
 					draw_circle(Vector2(c.x - r * 0.45 + i * r * 0.45, c.y + r * 0.65), 2.2, Color.WHITE)
 			"cold", "season_winter":
-				_flake(c, r * 0.85, Color("#9cd2ff") if kind == "cold" else tint)
+				_flake(c, r * 0.85, UITheme.tone(Color("#9cd2ff")) if kind == "cold" else tint)
 			"wind":
 				for i in 3:
 					var y2: float = c.y - r * 0.5 + i * r * 0.5
-					draw_arc(Vector2(c.x - r * 0.1 + (i % 2) * r * 0.2, y2), r * 0.32, PI, TAU + PI * 0.7, 14, Color("#bcd4ea"), 2.0)
+					draw_arc(Vector2(c.x - r * 0.1 + (i % 2) * r * 0.2, y2), r * 0.32, PI, TAU + PI * 0.7, 14, UITheme.tone(Color("#bcd4ea")), 2.0)
 			"season_spring":
-				draw_line(c + Vector2(0, r * 0.8), c + Vector2(0, -r * 0.1), Color("#4f9e4a"), 2.4)
+				draw_line(c + Vector2(0, r * 0.8), c + Vector2(0, -r * 0.1), UITheme.tone(Color("#4f9e4a")), 2.4)
 				draw_colored_polygon(_leaf_poly(c + Vector2(0, -r * 0.05), r * 0.8, -0.5), tint)
 				draw_colored_polygon(_leaf_poly(c + Vector2(0, r * 0.3), r * 0.7, 0.5 + PI), tint)
 			"season_summer":
 				_sun(c, r * 0.5, tint)
 			"season_autumn":
 				draw_colored_polygon(_leaf_poly(c, r * 1.1, -0.9), tint)
-				draw_line(c + Vector2(-r * 0.5, r * 0.5), c + Vector2(r * 0.4, -r * 0.4), Color("#7a3d12"), 1.6)
+				draw_line(c + Vector2(-r * 0.5, r * 0.5), c + Vector2(r * 0.4, -r * 0.4), UITheme.tone(Color("#7a3d12")), 1.6)
 			_:
 				draw_circle(c, r * 0.4, Color.GRAY)
 
@@ -153,7 +153,7 @@ class WxIcon:
 			draw_line(c + Vector2(cos(a), sin(a)) * (rad + 2.5), c + Vector2(cos(a), sin(a)) * (rad + 6.0), col, 2.0)
 
 	func _moon(c: Vector2, r: float) -> void:
-		draw_circle(c, r * 0.62, Color("#e6e9f2"))
+		draw_circle(c, r * 0.62, UITheme.tone(Color("#e6e9f2")))
 		draw_circle(c + Vector2(r * 0.3, -r * 0.2), r * 0.55, Color(0.13, 0.16, 0.22, 1.0))
 
 	func _cloud(c: Vector2, r: float, col: Color) -> void:

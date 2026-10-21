@@ -31,7 +31,7 @@ static func _import(h: ShareHub) -> void:
 		var rd := ShareFile.read("town", h.choice)
 		h.preview = ShareValidateTown.town(rd["data"]) if bool(rd["ok"]) else rd
 	if not bool(h.preview["ok"]):
-		h.line("This file cannot be used: %s." % h.preview["error"], 14, Color("#e07a5f"))
+		h.line("This file cannot be used: %s." % h.preview["error"], 14, UITheme.sem("error"))
 		return
 	var d: Dictionary = h.preview["data"]
 	h.heading(str(d["title"]) + ((" - from " + str(d["from"])) if str(d["from"]) != "" else ""))

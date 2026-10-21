@@ -36,5 +36,5 @@ static func attention(owner: Node, box: Control = null) -> void:
 	if box != null and is_instance_valid(box) and not GameSettings.reduce_motion():
 		var tw := box.create_tween()
 		for i in 3:
-			tw.tween_property(box, "modulate", Color(1.6, 1.4, 0.6), 0.25)
+			tw.tween_property(box, "modulate", Color(1.5, 1.5, 1.5), 0.25)
 			tw.tween_property(box, "modulate", Color.WHITE, 0.25)

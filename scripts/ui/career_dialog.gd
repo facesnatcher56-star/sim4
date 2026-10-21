@@ -119,4 +119,4 @@ func _skip_button() -> void:
 		refresh())
 	body.add_child(b)
 	if not skipping:
-		line("Skipping costs %d performance and today's pay." % penalty, 11, Color("#e8913d"))
+		line("Skipping costs %d performance and today's pay." % penalty, 11, UITheme.sem("warn"))
