@@ -151,11 +151,28 @@ func _group_button(parent: Control, name: String, entries: Array, col: Color) ->
 	category_headers[name] = header
 	var sect := VBoxContainer.new()
 	sect.add_theme_constant_override("separation", 2)
-	sect.visible = bool(open_cats.get(name, false))
+	sect.visible = bool(open_cats.get(name, false)) and not category_boxes.values().any(func(bx): return (bx as Control).visible)          # only the first remembered group opens
 	parent.add_child(sect)
 	category_boxes[name] = sect
-	for e in entries:
-		sect.add_child(_make_button(e))
+	const SHOW := 7          # the first seven; the rest wait under "More"
+	var more_box := VBoxContainer.new()
+	more_box.add_theme_constant_override("separation", 2)
+	more_box.visible = false
+	for i in entries.size():
+		(sect if i < SHOW else more_box).add_child(_make_button(entries[i]))
+	if entries.size() > SHOW:
+		var mb := Button.new()
+		mb.flat = true
+		mb.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		mb.text = "   More (%d)" % (entries.size() - SHOW)
+		mb.add_theme_color_override("font_color", UITheme.MUTED)
+		mb.pressed.connect(func():
+			more_box.visible = true
+			mb.visible = false
+			_fit_scroll()
+			panel.reset_size())
+		sect.add_child(mb)
+		sect.add_child(more_box)
 	_set_header_text(header, name, entries.size(), sect.visible)
 	header.pressed.connect(func(): _toggle_category(name, header, sect, entries.size()))
 
@@ -248,6 +265,10 @@ func _set_header_text(header: Button, cat: String, n: int, is_open: bool) -> voi
 
 func _toggle_category(cat: String, header: Button, sect: Control, n: int) -> void:
 	var now_open := not sect.visible
+	if now_open:          # one group open at a time: the list never turns into a long scroll
+		for c in category_boxes.keys():
+			if str(c) != cat and (category_boxes[c] as Control).visible:
+				set_category_open(str(c), false)
 	sect.visible = now_open
 	open_cats[cat] = now_open
 	_set_header_text(header, cat, n, now_open)

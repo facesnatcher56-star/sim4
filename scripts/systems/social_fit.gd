@@ -20,6 +20,8 @@ static func is_soft(t: Dictionary) -> bool:
 		var v = t[k]
 		match str(k):
 			"relationship_above":
+				if str((v as Array)[0]) in ["bond", "ex", "tension"]:
+					return false          # a real state, not social fit: no break-up without being together, no rekindling without an ex, nothing to forgive without a fight
 				continue
 			"stat_below":
 				if str((v as Array)[0]) != "social":

@@ -310,8 +310,10 @@ func _update_xray(delta: float) -> void:
 	_update_see_walls(toward)
 	for fv in _folk_views.values():
 		var occluded := false
-		if fv.visible:
-			var spots := [fv.head_position() - Vector3(0, 0.25, 0), fv.global_position + Vector3(0, 0.6, 0)]
+		var fd = World.get_folk(int(fv.folk_id)) if "folk_id" in fv else null
+		var mine: bool = fd != null and SysUtil.is_resident(fd)          # playtest: cafe staff behind the counter drew as cyan ghosts; the silhouette is for your own people
+		if fv.visible and mine:
+			var spots := [fv.head_position() - Vector3(0, 0.25, 0)]          # hidden means the head is hidden, not just the legs behind a counter
 			for hp in spots:
 				for bb in blockers:
 					if (bb as AABB).grow(0.05).has_point(hp):

@@ -42,7 +42,7 @@ static func build(dlg: LifeHub, only: Array = []) -> void:
 		var week: int = int(r["pay"]) * hours * days.size()
 		var inner: VBoxContainer = UICard.card(dlg.body, w, "%s  (%s)" % [str(r["title"]), str(r["label"])], "IN DEMAND" if bool(r["hot"]) else "", str(cdef.get("description", "")))
 		UICard.chips(inner, [["Pay", "%d/h" % int(r["pay"])], ["Hours", "%02d-%02d" % [int(ld.get("start", 0)), int(ld.get("end", 0))]], ["Days", _days_text(days)], ["Week", "%d" % week],
-			["Openings", "%d" % int(r["openings"])], ["Fit", "%d%%" % int(float(r["match"]) * 100.0)]])
+			["Openings", "%d" % int(r["openings"])]])          # no "Fit %": a hidden score (quiet-depth rule); what the job asks for is listed below in words
 		var missing: Array = r["missing"]
 		if not missing.is_empty():
 			UICard.reqs(inner, missing.map(func(m): return [str(m), false]))
