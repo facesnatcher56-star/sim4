@@ -31,6 +31,7 @@ var career_dialog: CareerDialog
 var town_dialog: TownDialog
 var money_hub: BankHub                  # task 13: Town & Money window
 var phone_dialog: PhoneDialog
+var _left_none := false          # the last left click landed on bare ground (walk there once the selection says nothing was hit)
 var life_hub: LifeHub                   # task 14: Town Life window (places, study, jobs)
 var life_button: Button
 var vacation_dialog: VacationDialog
@@ -473,7 +474,13 @@ func rebuild_folk_row() -> void:
 					pie.open_with_entries(me, "self", -1, InteractionQuery.self_entries(me), get_viewport().get_mouse_position()))
 			folk_row.add_child(mb)
 
+## Where a menu opens: at the last click on the world.
+func _menu_pos() -> Vector2:
+	return lot_view.last_click if lot_view != null and "last_click" in lot_view else get_viewport().get_mouse_position()
+
 func _on_selection_changed(kind: String, id: int) -> void:
+	if kind != "none":
+		_left_none = false          # the click hit something: it does not move the person
 	if build_panel.active:
 		return
 	match kind:
@@ -485,12 +492,12 @@ func _on_selection_changed(kind: String, id: int) -> void:
 			if same_house:
 				select_folk(id)
 			else:
-				pie.open_for(cur, "folk", id, get_viewport().get_mouse_position())
+				pie.open_for(cur, "folk", id, _menu_pos())
 		"object":
 			selected_object_id = id
 			var f = _resolve(selected_folk_id)
 			if f != null:
-				pie.open_for(f, "object", id, get_viewport().get_mouse_position())
+				pie.open_for(f, "object", id, _menu_pos())
 		_:
 			selected_object_id = -1
 			pie.close()
@@ -578,18 +585,42 @@ func _can_open_pause() -> bool:
 		return false
 	return true
 
+## A left click on bare ground sends the selected person there (a click on a thing or a person selects it and opens its menu instead).
 func _on_tile_clicked(tile: Vector2i, button: int) -> void:
-	if button == MOUSE_BUTTON_RIGHT and not build_panel.active:
-		_ctx_handled = false
+	if button == MOUSE_BUTTON_LEFT and not build_panel.active:
+		_left_none = true
 		_pending_tile = tile
-		call_deferred("_maybe_go_here")
+		call_deferred("_maybe_walk")
 
-func _on_context_requested(_kind: String, _id: int, _tile: Vector2i) -> void:
-	_ctx_handled = true
-
-func _maybe_go_here() -> void:
-	if not _ctx_handled:
+func _maybe_walk() -> void:
+	if _left_none and not pie.visible:
 		go_here(_pending_tile)
+	_left_none = false
+
+## A right click on anything opens its action menu (an object, a person, or bare ground: Go here and what you can do anywhere).
+func _on_context_requested(kind: String, id: int, tile: Vector2i) -> void:
+	if build_panel.active:
+		return
+	var f = _resolve(selected_folk_id)
+	if f == null:
+		return
+	var at: Vector2 = _menu_pos()
+	match kind:
+		"object":
+			selected_object_id = id
+			pie.open_for(f, "object", id, at)
+		"folk":
+			if id == int(UIU.prop(f, "id", -1)):
+				pie.open_with_entries(f, "self", -1, InteractionQuery.self_entries(f), at)
+			else:
+				pie.open_for(f, "folk", id, at)
+		_:
+			var entries: Array = [{"id": "go_here", "label": "Go here", "category": "General", "enabled": true, "reason": "", "action": func(): go_here(tile)}]
+			for e in InteractionQuery.self_entries(f):
+				var e2: Dictionary = (e as Dictionary).duplicate()
+				e2["group"] = "Myself"
+				entries.append(e2)
+			pie.open_with_entries(f, "ground", -1, entries, at)
 
 ## Right-click on bare ground: send the selected folk there.
 func go_here(tile: Vector2i) -> bool:

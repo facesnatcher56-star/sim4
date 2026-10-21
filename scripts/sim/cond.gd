@@ -97,6 +97,15 @@ static func check_one(c: Variant, ctx: Dictionary) -> bool:
 			"homeless":
 				if SoloHome.is_homeless() != bool(v):
 					return false
+			"owns_car":                        # the household has a car (true) or none (false)
+				if folk == null or (Transport.cars_of(int(folk.household_id)).size() > 0) != bool(v):
+					return false
+			"car_impounded":                   # one of the household's cars is at the pound
+				if folk == null or Transport.cars_of(int(folk.household_id)).filter(func(c): return bool(c.get("towed", false)) or int(c.get("pound_day", -1)) >= 0).is_empty() == bool(v):
+					return false
+			"bills_due":                       # the household has an unpaid bill
+				if folk == null or (Economy.outstanding(int(folk.household_id)).size() > 0) != bool(v):
+					return false
 			"shelter_night":                   # a shelter night is still free this week
 				if SoloShelter.nights_left() <= 0:
 					return false

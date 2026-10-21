@@ -1,0 +1,12 @@
+{
+ "_doc": "What the player sees when they click an object (scripts/ui/pie_entries.gd, pie_menu.gd). Unavailable actions are never listed (the menu is for what you can do now); at most `max_flat` actions are shown at once, the rest sit in a few named groups that open on a click. Per object definition: hide = actions that are never offered here (patterns end in * for a prefix; they live in a window of their own, e.g. the Council window), groups = named groups {name: [ids or prefix*]}, first = the main actions shown first, in this order.",
+ "max_flat": 7,
+ "objects": {
+  "ground": {"first": ["go_here"]},
+  "mailbox": {
+   "first": ["check_mail", "pay_bills", "odd_job", "town_notice", "report_outage"],
+   "groups": {"Vehicles": ["buy_*", "sell_car", "refuel_car", "repair_car", "collect_car", "change_insurance"], "Call for help": ["call_*"], "Town": ["bus_times", "check_utilities", "money_matters"]},
+   "hide": ["focus_*", "propose_*", "tax_*", "rezone_*", "vote_mayor", "run_for_mayor", "organize_watch", "report_identity_theft"]
+  }
+ }
+}

@@ -7,6 +7,7 @@ extends Node3D
 ##           R rotate build ghost, Esc / right-click cancel tool, Ctrl+Z undo build.
 
 signal tile_hovered(tile: Vector2i)
+var last_click: Vector2 = Vector2.ZERO          # where the last mouse click landed (viewport coordinates): menus open there
 signal tile_clicked(tile: Vector2i, button: int)
 signal context_requested(kind: String, id: int, tile: Vector2i)   # right-click on something
 signal tool_changed(tool: String, arg: String)

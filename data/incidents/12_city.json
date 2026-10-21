@@ -525,7 +525,7 @@
     ],
     "duration_min": 3,
     "posture": "stand",
-    "tests": [],
+    "tests": [{"owns_car": true}],
     "per_min": {},
     "on_finish": [
      {
@@ -549,7 +549,7 @@
     ],
     "duration_min": 3,
     "posture": "stand",
-    "tests": [],
+    "tests": [{"owns_car": true}],
     "per_min": {},
     "on_finish": [
      {
@@ -573,7 +573,7 @@
     ],
     "duration_min": 3,
     "posture": "stand",
-    "tests": [],
+    "tests": [{"owns_car": true}],
     "per_min": {},
     "on_finish": [
      {
@@ -597,7 +597,7 @@
     ],
     "duration_min": 3,
     "posture": "stand",
-    "tests": [],
+    "tests": [{"car_impounded": true}],
     "per_min": {},
     "on_finish": [
      {

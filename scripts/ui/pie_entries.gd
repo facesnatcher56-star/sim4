@@ -94,3 +94,86 @@ static func object_title(object_id: int) -> String:
 	if o == null:
 		return "What should they do?"
 	return str(UIU.tbl("objects").get(str(UIU.prop(o, "def_id", "")), {}).get("label", "Object"))
+
+# ------------------------------------------------------------------ curated menus (data/menus.json)
+static func menus() -> Dictionary:
+	return SysUtil.table("menus")
+
+static func max_flat() -> int:
+	return int(menus().get("max_flat", 7))
+
+static func _match(id: String, patterns: Array) -> bool:
+	for p in patterns:
+		var ps: String = str(p)
+		if ps.ends_with("*"):
+			if id.begins_with(ps.trim_suffix("*")):
+				return true
+		elif id == ps:
+			return true
+	return false
+
+## What the player is shown for an object (or "self" / "ground"): only what can be done now, the object's hidden actions removed, the rest in named groups.
+## Returns {main: [entries in order], groups: [{name, entries}], blocked: [{label, reason}] (up to 4: the things that cannot be done right now)}.
+static func curate(entries: Array, object_def: String) -> Dictionary:
+	var cfg: Dictionary = (menus().get("objects", {}) as Dictionary).get(object_def, {})
+	var hide: Array = cfg.get("hide", [])
+	var first: Array = cfg.get("first", [])
+	var groups_cfg: Dictionary = cfg.get("groups", {})
+	var main: Array = []
+	var named: Dictionary = {}
+	var blocked: Array = []
+	for e0 in entries:
+		var e: Dictionary = (e0 as Dictionary).duplicate()
+		var id: String = str(e["id"])
+		if _match(id, hide):
+			continue
+		if not bool(e["enabled"]):
+			var why: String = polish_reason(str(e["reason"]))
+			if not is_never(why) and blocked.size() < 4 and why != "Not possible right now" and why != "":
+				blocked.append({"label": str(e["label"]), "reason": why})
+			continue
+		var g: String = str(e.get("group", ""))
+		for gname in groups_cfg:
+			if g != "":
+				break
+			if _match(id, groups_cfg[gname]):
+				g = str(gname)
+				break
+		if g != "":
+			if not named.has(g):
+				named[g] = []
+			(named[g] as Array).append(e)
+		else:
+			main.append(e)
+	var rank := func(e: Dictionary) -> int:
+		var fi := first.find(str(e["id"]))
+		if fi >= 0:
+			return fi
+		var ri := recent.find(str(e["id"]))
+		return 20 + ri if ri >= 0 else 99
+	main.sort_custom(func(a, b):
+		var ra: int = rank.call(a)
+		var rb: int = rank.call(b)
+		if ra != rb:
+			return ra < rb
+		if a["category"] != b["category"]:
+			return a["category"] < b["category"]
+		return a["label"] < b["label"])
+	var groups: Array = []
+	for gname in groups_cfg:
+		if named.has(gname):
+			groups.append({"name": str(gname), "entries": named[gname]})
+	# too many left over: fold them into groups by category (the most used stay on top)
+	if main.size() > max_flat():
+		var keep: Array = main.slice(0, max_flat() - 2)
+		var rest: Array = main.slice(max_flat() - 2)
+		var by_cat: Dictionary = {}
+		for e in rest:
+			var c: String = str(e["category"])
+			if not by_cat.has(c):
+				by_cat[c] = []
+			(by_cat[c] as Array).append(e)
+		for c in by_cat:
+			groups.append({"name": str(c), "entries": by_cat[c]})
+		main = keep
+	return {"main": main, "groups": groups, "blocked": blocked}

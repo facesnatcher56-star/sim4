@@ -72,6 +72,55 @@ func _process(_d: float) -> bool:
 		Courthouse.open(cc)
 		root.get_node("Events").selection_changed.emit("folk", Pawn.of())
 		root.get_node("Clock").set_speed(2)
+	if _scn == "click" and _frames >= 60:
+		_click_script()
+	if _frames == 60 and _scn == "audit":
+		# for every object definition in the world: what the click menu shows the pawn (after the curation of data/menus.json)
+		var pw = _main.hud._resolve(_main.hud.selected_folk_id)
+		var iqa = load("res://scripts/ui/interaction_query.gd")
+		var pea = load("res://scripts/ui/pie_entries.gd")
+		var seen := {}
+		for o in root.get_node("World").all_objects():
+			var d: String = str(o.def_id)
+			if seen.has(d):
+				continue
+			seen[d] = true
+			var es: Array = iqa.entries_for(pw, "object", o.id)
+			var cur: Dictionary = pea.curate(es, d)
+			var en := 0
+			for e in es:
+				if e["enabled"]:
+					en += 1
+			var gc := 0
+			for g in cur["groups"]:
+				gc += (g["entries"] as Array).size()
+			print("MENU %-22s all=%2d enabled=%2d | main=%d groups=%d(%d)  %s" % [d, es.size(), en, (cur["main"] as Array).size(), (cur["groups"] as Array).size(), gc, str((cur["main"] as Array).map(func(x): return x["label"]))])
+		quit(0)
+	if _frames == 60 and _scn.begins_with("pie"):
+		var hud9 = _main.hud
+		var pawn9 = hud9._resolve(hud9.selected_folk_id)
+		var want: String = _scn.substr(3) if _scn.length() > 3 else "mailbox"
+		var target9 = null
+		for o9 in root.get_node("World").all_objects():
+			if str(o9.def_id) == want:
+				target9 = o9
+				break
+		print("PIE target=%s" % str(target9.def_id) if target9 else "PIE none for %s" % want)
+		if target9 != null:
+			var iq9 = load("res://scripts/ui/interaction_query.gd")
+			var es: Array = iq9.entries_for(pawn9, "object", target9.id)
+			var en := 0
+			for e9 in es:
+				if e9["enabled"]:
+					en += 1
+			print("PIE entries=%d enabled=%d" % [es.size(), en])
+			for e9 in es:
+				print("  PIE %s | %s | %s | %s" % [e9["id"], e9["category"], str(e9["enabled"]), e9["reason"]])
+			hud9.pie.open_for(pawn9, "object", target9.id, Vector2(700, 300))
+			if _scn.ends_with("twice") or true:
+				hud9.pie.close()
+				hud9.pie.open_for(pawn9, "object", target9.id, Vector2(700, 300))
+				print("PIE second open children=%d visible=%s" % [hud9.pie.box.get_child_count(), str(hud9.pie.visible)])
 	if _frames == 60 and _scn == "cell":
 		JusticePlayer.hold(SysUtil.folk(Pawn.of()), 360.0, "custody", "In custody")
 		root.get_node("Events").selection_changed.emit("folk", Pawn.of())
@@ -123,9 +172,85 @@ func _process(_d: float) -> bool:
 		print("PAWNMETA away=%s info=%s tile=%s lvl=%d cur=%s" % [str(pw.has_meta("away")), str(Away.info(pw.id)), str(pw.tile), pw.level, str(pw.current.def_id) if pw.current else "-"])
 		for k in (lvw.level_nodes if lvw else {}):
 			print("  L%s objs=%d" % [str(k), (lvw.level_nodes[k]["objs"] as Dictionary).size()])
-	if _frames == (900 if _scn in ["court", "cell"] else 100):
+	if _frames == (900 if _scn in ["court", "cell"] else (100000 if _scn == "click" else 100)):
 		var img := root.get_texture().get_image()
 		img.save_png(_out)
 		print("saved ", _out, " ", img.get_size())
 		quit(0)
 	return false
+
+
+# ---- scripted mouse input for the "click" scene: real InputEvents into the viewport (the user's own mouse is never touched)
+func _click(pos: Vector2, button: int = MOUSE_BUTTON_LEFT) -> void:
+	var mm := InputEventMouseMotion.new()
+	mm.position = pos
+	mm.global_position = pos
+	root.push_input(mm, true)
+	for pressed in [true, false]:
+		var e := InputEventMouseButton.new()
+		e.position = pos
+		e.global_position = pos
+		e.button_index = button
+		e.pressed = pressed
+		e.button_mask = MOUSE_BUTTON_MASK_LEFT if button == MOUSE_BUTTON_LEFT else MOUSE_BUTTON_MASK_RIGHT
+		root.push_input(e, true)
+
+func _screen_of(def_id: String) -> Vector2:
+	var cam: Camera3D = root.get_viewport().get_camera_3d()
+	var pawn = _main.hud._resolve(_main.hud.selected_folk_id)
+	var best = null
+	var bd: float = 1e9
+	for o in root.get_node("World").all_objects():
+		if str(o.def_id) == def_id:
+			var d: float = Vector2(o.tile).distance_to(Vector2(pawn.tile))
+			if d < bd:
+				bd = d
+				best = o
+	if best == null:
+		return Vector2(-1, -1)
+	return cam.unproject_position(root.get_node("World").tile_to_pos(best.tile) + Vector3(0, 0.25, 0))
+
+func _shot(name: String) -> void:
+	var img := root.get_texture().get_image()
+	img.save_png("coord/shots/ui50/%s.png" % name)
+
+func _click_script() -> void:
+	var hud = _main.hud
+	var pie = hud.pie
+	var pawn = hud._resolve(hud.selected_folk_id)
+	var mb: Vector2 = _screen_of("mailbox")
+	match _frames:
+		60:
+			root.get_node("Clock").set_speed(1)
+			root.get_node("Events").selection_changed.connect(func(k, i): print("CLICK event selection %s %d" % [k, i]))
+			var lvv = _main.find_child("LotView", true, false)
+			lvv.tile_clicked.connect(func(t, b): print("CLICK tile_clicked %s %d" % [str(t), b]))
+			print("CLICK mailbox at %s pick=%s" % [str(mb), str(lvv.pick(mb))])
+			_click(mb)
+		75:
+			print("CLICK1 pie visible=%s children=%d buttons=%d" % [str(pie.visible), pie.box.get_child_count(), pie.entry_buttons.size()])
+			_shot("click_1_mailbox")
+		80:
+			_click(Vector2(1200, 800))          # away: closes the menu (and the click is swallowed by the menu)
+		95:
+			print("CLICK2 pie visible=%s" % str(pie.visible))
+			_click(mb)
+		110:
+			print("CLICK3 (mailbox again) pie visible=%s children=%d buttons=%d" % [str(pie.visible), pie.box.get_child_count(), pie.entry_buttons.size()])
+			_shot("click_2_mailbox_again")
+			_click(Vector2(1200, 800))
+		125:
+			print("CLICK4 menu closed=%s" % str(not pie.visible))
+			print("CLICK4 before ground click: tile=%s queue=%s current=%s" % [str(pawn.tile), str(pawn.queue.map(func(q): return "%s->%s" % [q.def_id, str(q.goto_tile)])), str(pawn.current.def_id) if pawn.current else "-"])
+			_click(Vector2(1200, 800))
+		140:
+			print("CLICK5 after ground click: tile=%s queue=%s current=%s" % [str(pawn.tile), str(pawn.queue.map(func(q): return "%s->%s" % [q.def_id, str(q.goto_tile)])), str(pawn.current.def_id) if pawn.current else "-"])
+			_click(Vector2(1000, 700), MOUSE_BUTTON_RIGHT)
+		155:
+			print("CLICK6 right-click ground: pie visible=%s buttons=%d panel=%s" % [str(pie.visible), pie.entry_buttons.size(), str(pie.panel.get_global_rect())])
+		165:
+			_shot("click_3_ground_menu")
+			_click(_screen_of("mailbox"), MOUSE_BUTTON_RIGHT)
+		185:
+			_shot("click_4_mailbox_rightclick")
+			quit(0)

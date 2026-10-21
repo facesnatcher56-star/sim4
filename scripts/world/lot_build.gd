@@ -191,6 +191,8 @@ func _unhandled_input(event: InputEvent) -> void:
 			set_tool("select")
 	elif event is InputEventMouseButton:
 		var mb: InputEventMouseButton = event
+		if mb.pressed and (mb.button_index == MOUSE_BUTTON_LEFT or mb.button_index == MOUSE_BUTTON_RIGHT):
+			last_click = mb.position
 		if mb.pressed and mb.is_action("sim_zoom_in"):
 			set_zoom(_zoom_target * (1.0 / 0.9 if GameSettings.invert_zoom() else 0.9))
 		elif mb.pressed and mb.is_action("sim_zoom_out"):
@@ -228,8 +230,7 @@ func _on_right_press(mp: Vector2) -> void:
 		return
 	var p := pick(mp)
 	tile_clicked.emit(p["tile"], MOUSE_BUTTON_RIGHT)
-	if p["kind"] != "none":
-		context_requested.emit(p["kind"], p["id"], p["tile"])
+	context_requested.emit(p["kind"], p["id"], p["tile"])          # on bare ground too: the menu offers "Go here" and what you can do anywhere
 
 
 # ------------------------------------------------------------------ build-mode feedback

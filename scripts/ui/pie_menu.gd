@@ -1,14 +1,17 @@
 class_name PieMenu
 extends Control
-## Popup interaction menu (grouped list). Full-rect click catcher closes it.
-## Objects get a flat grouped list. Folk targets (social menu) get collapsible category sections - Friendly / Funny / Romantic /
-## Deep / Group / Mean / ... - inside a scroll area, with a specific reason on every disabled entry (SocialDynamics.reason_unavailable).
+## The action menu of the game: what the player can do with the thing they clicked (an object, a person, themselves, or bare ground).
+## It lists only what can be done NOW, a handful of actions at a time: the main ones on top (recent first), the rest in a few named groups that open on a click.
+## What cannot be done is not listed; at most a short "not right now" note under the list says why the most likely ones are out (and the whole list when nothing can be done).
+## Objects use the curated menus in data/menus.json (PieEntries.curate). People get the social categories (Friendly / Funny / Romantic / Deep / Group / Mean) as
+## groups. Bare ground offers "Go here" and the things you can do anywhere. A click outside closes it; so does Esc.
 signal chosen(def_id: String, target_id: int)
 
 const SOCIAL_ORDER := ["Friendly", "Funny", "Romantic", "Deep", "Group", "Mean"]
 const CAT_COLORS := {"Friendly": Color("#4cc78a"), "Funny": Color("#f2c94c"), "Romantic": Color("#ee86a6"), "Deep": Color("#35a7b0"),
 	"Group": Color("#8f6bf0"), "Mean": Color("#e5534b")}
-## Which social sections stay expanded between openings (player's choice persists).
+const KIND_ACCENT := {"object": "#f2a33c", "folk": "#ee86a6", "self": "#3fb8af", "ground": "#5bb8ff"}
+## Which groups stay open between openings (the player's choice persists).
 static var open_cats: Dictionary = {"Friendly": true}
 
 var panel: PanelContainer
@@ -17,9 +20,10 @@ var folk = null
 var target_kind := ""
 var target_id := -1
 var entry_buttons: Array = []
-var category_headers: Dictionary = {}    # category -> header Button (folk menu)
-var category_boxes: Dictionary = {}      # category -> VBoxContainer holding that section's buttons
+var category_headers: Dictionary = {}    # group -> header Button
+var category_boxes: Dictionary = {}      # group -> VBoxContainer holding that group's buttons
 var scroll: ScrollContainer = null
+var _list: VBoxContainer = null           # where the entries go (inside `scroll`)
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
@@ -36,78 +40,142 @@ func _gui_input(ev: InputEvent) -> void:
 		close()
 		accept_event()
 
+func _unhandled_key_input(ev: InputEvent) -> void:
+	if visible and ev is InputEventKey and ev.pressed and (ev as InputEventKey).keycode == KEY_ESCAPE:
+		close()
+		get_viewport().set_input_as_handled()
+
 func open_for(f, kind: String, id: int, screen_pos: Vector2) -> void:
 	open_with_entries(f, kind, id, InteractionQuery.entries_for(f, kind, id), screen_pos)
 
+## `entries`: [{id, label, category, enabled, reason}] and optionally {action: Callable} (run instead of queueing an interaction).
 func open_with_entries(f, kind: String, id: int, entries: Array, screen_pos: Vector2) -> void:
 	folk = f
 	target_kind = kind
 	target_id = id
 	for c in box.get_children():
+		box.remove_child(c)
 		c.queue_free()
 	entry_buttons.clear()
 	category_headers.clear()
 	category_boxes.clear()
 	scroll = null
+	_list = null
+	UIIdentity.skin(panel, str(KIND_ACCENT.get(kind, "#f2a33c")), "band", 10)
 	var target = UIU.get_folk(id) if kind == "folk" else null
-	entries = PieEntries.prepare(entries)
-	var title_text := PieEntries.object_title(id) if kind == "object" else "Interact"
-	if target != null:
-		title_text = "Interact with %s" % str(UIU.prop(target, "name", "them"))
-		var bit := RelationshipService.bit_for(int(UIU.prop(f, "id", -1)), id)
-		if bit != "stranger":
-			title_text += "  (%s)" % RelationshipService.bit_label(bit)
-	var title := UIU.make_label(title_text, 13, UITheme.MUTED)
-	box.add_child(title)
-	if entries.is_empty():
-		box.add_child(UIU.make_label("Nothing they can do here right now.", 14))
-	if kind == "folk" and target != null and not entries.is_empty():
+	var title_text := "What now?"
+	var object_def := ""
+	match kind:
+		"object":
+			title_text = PieEntries.object_title(id)
+			var o = WorldIface.get_object(id)
+			object_def = str(UIU.prop(o, "def_id", "")) if o != null else ""
+		"folk":
+			title_text = "Interact"
+			if target != null:
+				title_text = str(UIU.prop(target, "name", "them"))
+				var bit := RelationshipService.bit_for(int(UIU.prop(f, "id", -1)), id)
+				if bit != "stranger":
+					title_text += "  (%s)" % RelationshipService.bit_label(bit)
+		"self":
+			title_text = "Myself"
+		"ground":
+			title_text = "Here"
+	box.add_child(UIU.make_label(title_text, 16, Color(str(KIND_ACCENT.get(kind, "#f2a33c"))).lightened(0.3)))
+	if kind == "folk" and target != null:
 		_fill_social(f, target, entries)
 	else:
-		_fill_flat(entries)
+		_fill_compact(PieEntries.curate(entries, object_def if kind == "object" else kind))
 	visible = true
+	if get_parent() != null:
+		get_parent().move_child(self, -1)          # on top of the tips, the checklist and every other panel
 	panel.reset_size()
 	await get_tree().process_frame
-	var vp := get_viewport_rect().size
-	panel.position = Vector2(clampf(screen_pos.x - 20, 0, vp.x - panel.size.x), clampf(screen_pos.y - 20, 0, vp.y - panel.size.y))
+	_place(screen_pos)
 
-func _make_button(e: Dictionary, reason: String) -> Button:
+func _place(screen_pos: Vector2) -> void:
+	panel.reset_size()
+	var vp := get_viewport_rect().size
+	panel.position = Vector2(clampf(screen_pos.x + 8, 8, maxf(vp.x - panel.size.x - 8, 8)), clampf(screen_pos.y - 12, 62, maxf(vp.y - panel.size.y - 8, 62)))
+
+func _scroll_list() -> VBoxContainer:
+	if _list != null:
+		return _list
+	scroll = ScrollContainer.new()
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.custom_minimum_size = Vector2(240, 0)
+	box.add_child(scroll)
+	_list = VBoxContainer.new()
+	_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_list.add_theme_constant_override("separation", 3)
+	scroll.add_child(_list)
+	return _list
+
+func _fit_scroll() -> void:
+	if scroll == null:
+		return
+	var vp_h: float = get_viewport_rect().size.y
+	scroll.custom_minimum_size = Vector2(240, minf(_list.get_combined_minimum_size().y + 4.0, minf(vp_h * 0.62, 520.0)))
+
+func _make_button(e: Dictionary, reason: String = "") -> Button:
 	var b := Button.new()
 	b.text = e["label"]
 	b.alignment = HORIZONTAL_ALIGNMENT_LEFT
-	b.custom_minimum_size = Vector2(190, 28)
+	b.custom_minimum_size = Vector2(230, 30)
 	b.disabled = not e["enabled"]
 	if not e["enabled"]:
-		if reason != "":
-			var short := reason if reason.length() <= 30 else reason.substr(0, 28) + "..."
-			b.text = "%s  (%s)" % [e["label"], short.substr(0, 1).to_lower() + short.substr(1)]
 		b.tooltip_text = reason
 		b.mouse_filter = Control.MOUSE_FILTER_STOP   # keep tooltips on disabled buttons
 	var did: String = e["id"]
 	b.name = "btn_" + did
-	b.pressed.connect(func(): _choose(did))
+	if e.has("action") and (e["action"] as Callable).is_valid():
+		var act: Callable = e["action"]
+		b.pressed.connect(func():
+			close()
+			act.call())
+	else:
+		b.pressed.connect(func(): _choose(did))
 	entry_buttons.append(b)
 	return b
 
-func _fill_flat(entries: Array) -> void:
-	var last_cat := ""
-	var headers := entries.size() > 7     # short menus need no group titles
-	var recent_n := 0
+func _group_button(parent: Control, name: String, entries: Array, col: Color) -> void:
+	var header := Button.new()
+	header.flat = true
+	header.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	header.name = "cat_" + name
+	header.add_theme_color_override("font_color", col)
+	header.add_theme_color_override("font_hover_color", col.lightened(0.3))
+	parent.add_child(header)
+	category_headers[name] = header
+	var sect := VBoxContainer.new()
+	sect.add_theme_constant_override("separation", 2)
+	sect.visible = bool(open_cats.get(name, false))
+	parent.add_child(sect)
+	category_boxes[name] = sect
 	for e in entries:
-		if e["enabled"] and PieEntries.recent.has(str(e["id"])):
-			recent_n += 1
-	if recent_n > 0 and headers:
-		box.add_child(UIU.make_label("RECENT", 11, UITheme.ACCENT))
-	for e in entries:
-		var is_recent: bool = recent_n > 0 and e["enabled"] and PieEntries.recent.has(str(e["id"]))
-		if headers and not is_recent and e["category"] != last_cat:
-			last_cat = e["category"]
-			var h := UIU.make_label(last_cat.to_upper(), 11, UITheme.ACCENT)
-			box.add_child(h)
-		box.add_child(_make_button(e, str(e["reason"])))
+		sect.add_child(_make_button(e))
+	_set_header_text(header, name, entries.size(), sect.visible)
+	header.pressed.connect(func(): _toggle_category(name, header, sect, entries.size()))
+
+## The curated list: main actions, then the groups, then (only when there is little to do) a short note on what is out of reach.
+func _fill_compact(cur: Dictionary) -> void:
+	var main: Array = cur["main"]
+	var groups: Array = cur["groups"]
+	if main.is_empty() and groups.is_empty():
+		box.add_child(UIU.make_label("Nothing to do here right now.", 14))
+		for b in cur["blocked"]:
+			box.add_child(UIU.make_label("%s: %s" % [b["label"], str(b["reason"]).to_lower()], 12, UITheme.MUTED))
+		return
+	var list := _scroll_list()
+	for e in main:
+		list.add_child(_make_button(e))
+	for g in groups:
+		_group_button(list, str(g["name"]), g["entries"], Color(str(KIND_ACCENT.get(target_kind, "#f2a33c"))).lightened(0.2))
+	_fit_scroll()
 
 func _fill_social(f, target, entries: Array) -> void:
 	var cats: Dictionary = {}
+	var blocked: Array = []
 	for e0 in entries:
 		var e: Dictionary = (e0 as Dictionary).duplicate()
 		var reason: String = str(e["reason"])
@@ -120,12 +188,19 @@ func _fill_social(f, target, entries: Array) -> void:
 			reason = "Unavailable right now"
 		else:
 			reason = PieEntries.polish_reason(reason)
-		if not e["enabled"] and PieEntries.is_never(reason):
+		if not e["enabled"]:
+			if not PieEntries.is_never(reason) and blocked.size() < 4:
+				blocked.append({"label": str(e["label"]), "reason": reason})
 			continue
 		var c: String = str(e["category"])
 		if not cats.has(c):
 			cats[c] = []
-		(cats[c] as Array).append({"e": e, "reason": reason})
+		(cats[c] as Array).append(e)
+	if cats.is_empty():
+		box.add_child(UIU.make_label("Nothing to do with them right now.", 14))
+		for b in blocked:
+			box.add_child(UIU.make_label("%s: %s" % [b["label"], str(b["reason"]).to_lower()], 12, UITheme.MUTED))
+		return
 	var order: Array = []
 	for c in SOCIAL_ORDER:
 		if cats.has(c):
@@ -136,61 +211,30 @@ func _fill_social(f, target, entries: Array) -> void:
 			rest.append(c2)
 	rest.sort()
 	order.append_array(rest)
-	scroll = ScrollContainer.new()
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	var vp_h: float = get_viewport_rect().size.y if is_inside_tree() else 720.0
-	scroll.custom_minimum_size = Vector2(230, minf(vp_h * 0.68, 520.0))
-	box.add_child(scroll)
-	var list := VBoxContainer.new()
-	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	list.add_theme_constant_override("separation", 2)
-	scroll.add_child(list)
+	var list := _scroll_list()
 	var shown_recent := 0
 	for rid in PieEntries.recent:
 		for c4 in order:
-			for it4 in cats[c4]:
-				if str(it4["e"]["id"]) == str(rid) and it4["e"]["enabled"] and shown_recent < 3:
-					if shown_recent == 0:
-						list.add_child(UIU.make_label("RECENT", 11, UITheme.ACCENT))
-					var rb := _make_button(it4["e"], "")
+			for e4 in cats[c4]:
+				if str(e4["id"]) == str(rid) and shown_recent < 3:
+					var rb := _make_button(e4)
 					rb.name = "recent_" + str(rid)
 					entry_buttons.pop_back()    # shortcuts, not extra entries
 					list.add_child(rb)
 					shown_recent += 1
 	for c3 in order:
-		var items: Array = cats[c3]
-		var enabled_n := 0
-		for it in items:
-			if it["e"]["enabled"]:
-				enabled_n += 1
-		var is_open: bool = bool(open_cats.get(c3, false))
-		var header := Button.new()
-		header.flat = true
-		header.alignment = HORIZONTAL_ALIGNMENT_LEFT
-		header.name = "cat_" + str(c3)
-		var col: Color = CAT_COLORS.get(c3, UITheme.ACCENT)
-		header.add_theme_color_override("font_color", col)
-		header.add_theme_color_override("font_hover_color", col.lightened(0.3))
-		list.add_child(header)
-		category_headers[c3] = header
-		var sect := VBoxContainer.new()
-		sect.add_theme_constant_override("separation", 2)
-		sect.visible = is_open
-		list.add_child(sect)
-		category_boxes[c3] = sect
-		for it2 in items:
-			sect.add_child(_make_button(it2["e"], str(it2["reason"])))
-		_set_header_text(header, str(c3), enabled_n, items.size(), is_open)
-		header.pressed.connect(func(): _toggle_category(str(c3), header, sect, enabled_n, items.size()))
+		_group_button(list, str(c3), cats[c3], CAT_COLORS.get(c3, UITheme.ACCENT))
+	_fit_scroll()
 
-func _set_header_text(header: Button, cat: String, enabled_n: int, total: int, is_open: bool) -> void:
-	header.text = "%s %s   %d/%d" % ["▾" if is_open else "▸", cat.to_upper(), enabled_n, total]
+func _set_header_text(header: Button, cat: String, n: int, is_open: bool) -> void:
+	header.text = "%s %s  (%d)" % ["▾" if is_open else "▸", cat, n]
 
-func _toggle_category(cat: String, header: Button, sect: Control, enabled_n: int, total: int) -> void:
+func _toggle_category(cat: String, header: Button, sect: Control, n: int) -> void:
 	var now_open := not sect.visible
 	sect.visible = now_open
 	open_cats[cat] = now_open
-	_set_header_text(header, cat, enabled_n, total, now_open)
+	_set_header_text(header, cat, n, now_open)
+	_fit_scroll()
 	panel.reset_size()
 
 func set_category_open(cat: String, is_open: bool) -> void:
@@ -200,6 +244,7 @@ func set_category_open(cat: String, is_open: bool) -> void:
 		var header: Button = category_headers[cat]
 		var txt := header.text
 		header.text = ("▾" if is_open else "▸") + txt.substr(1)
+		_fit_scroll()
 		panel.reset_size()
 
 func _choose(def_id: String) -> void:
