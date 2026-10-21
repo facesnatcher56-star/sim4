@@ -128,11 +128,11 @@ static func resolve(actor_id: int, target_id: int, iid: String, d: Dictionary) -
 	if fx.has("tbuff") and SysUtil.rng.randf() <= p:
 		t.add_buff(str(fx["tbuff"]))
 	if fx.has("say"):
-		SimEnv.emit("thought", actor_id, str(fx["say"]))
+		SimEnv.emit("speech", actor_id, str(fx["say"]), target_id)
 	elif label != "" and (tier == "great" or tier == "bad"):
 		SimEnv.emit("thought", actor_id, label + ("!" if tier == "great" else "..."))
 	if fx.has("tsay"):
-		SimEnv.emit("thought", target_id, str(fx["tsay"]))
+		SimEnv.emit("speech", target_id, str(fx["tsay"]), actor_id)          # the reply (ThoughtLayer shows it just after the line it answers)
 	# ---- getting to know
 	for k in fx.get("reveal", []):
 		RelationshipKnowledge.reveal(actor_id, target_id, str(k), topic)

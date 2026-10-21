@@ -2,3 +2,5 @@
 shot*.png
 smoke*.png
 override.cfg
+coord/shots/playtest/film/
+coord/shots/playtest/tour/

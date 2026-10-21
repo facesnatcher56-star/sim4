@@ -197,7 +197,12 @@ func start() -> bool:
 	var th: String = str(def.get("thought", ""))
 	if th != "":
 		actor.last_thought_min = SimEnv.now_min()
-		SimEnv.emit("thought", actor.id, th)
+		if str(def.get("target", "")) == "folk" and target_id >= 0:          # said to someone: a speech balloon with the speaker's name, pointing at them
+			var said: String = ThoughtVoice.filter(actor.id, th)
+			if said != "":
+				SimEnv.emit("speech", actor.id, said, target_id)
+		else:
+			SimEnv.emit("thought", actor.id, th)
 	if n == 0:
 		_arrive()
 	else:

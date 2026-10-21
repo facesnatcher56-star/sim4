@@ -27,6 +27,9 @@ func _process(_d: float) -> bool:
 		root.add_child(_main)
 		return false
 	_frames += 1
+	if "--film" in OS.get_cmdline_user_args() and _frames > 60 and _frames % 20 == 0:          # a frame every 20: what a player watching would see
+		DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://" + OUT + "film"))
+		root.get_texture().get_image().save_png("res://%sfilm/f%05d.png" % [OUT, _frames])
 	if _frames == 5:
 		UIPrefs.set_flag("tips_seen", false)
 		_main.title.visible = false
@@ -145,7 +148,62 @@ func _travel(lot: String) -> void:
 	var f = pawn()
 	print("[%s] ORDER travel to %s: %s" % [_time(), lot, str(Commands.run({"player_id": 1, "folk_id": f.id, "action": "travel", "args": {"folk_ids": [f.id], "lot_id": lot}}))])
 
+## --tour: the same town from several places, at several times of day and zoom levels (the owner: "shots from several places and several times... zoom
+## out and in"), with the clock running so people walk and talk. Shots: coord/shots/playtest/tour/<place>_<hour>_<zoom>.png
+const TOUR_PLACES := ["home", "cafe", "market", "park", "bank", "police", "courthouse", "hospital", "city_hall", "works", "office", "gym"]
+const TOUR_HOURS := [10, 18, 22]
+const TOUR_ZOOMS := {"close": 9.0, "mid": 22.0, "far": 48.0}
+var _tour: Array = []
+
+func _tour_step() -> void:
+	var talk: bool = "--talk" in OS.get_cmdline_user_args()          # --talk: busy places at midday, four shots a second apart (who says what, in order)
+	if _tour.is_empty():
+		for l in (["cafe", "park", "market", "gym"] if talk else TOUR_PLACES):
+			if not Neighborhood.lot(l).is_empty():
+				for h in ([12] if talk else TOUR_HOURS):
+					for z in (["close", "mid"] if talk else TOUR_ZOOMS.keys()):
+						for k in (4 if talk else 1):
+							_tour.append([l, h, z, k])
+		_tour.push_front(null)
+		DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://" + OUT + "tour"))
+		_speed(1)
+	var prev = _tour.pop_front()
+	var tl = _hud.thoughts
+	if tl != null:
+		print("[%s] BALLOONS %d visible %d" % [_time(), tl.balloons.size(), tl.balloons.filter(func(b): return is_instance_valid(b["node"]) and b["node"].visible).size()])
+	if prev != null:
+		_shot("tour/%s_%02d_%s%s" % [prev[0], int(prev[1]), prev[2], ("_%d" % int(prev[3])) if talk else ""])
+	if _tour.is_empty():
+		print("[%s] TOUR END" % _time())
+		quit(0)
+		return
+	var nxt: Array = _tour[0]
+	if talk and prev != null and int(nxt[3]) > 0 and str(prev[0]) == str(nxt[0]) and str(prev[2]) == str(nxt[2]):
+		if int(nxt[3]) == 1:          # a line and its reply between two people on screen: does it read who said what, in order?
+			var here: Array = WorldIface.all_folk().map(func(f): return int(f.id))
+			var lv2 = _main.find_child("LotView", true, false)
+			here = here.filter(func(i): var sp = lv2.screen_pos("folk", int(i)); return sp is Vector2 and Rect2(Vector2(300, 150), Vector2(1300, 750)).has_point(sp))
+			print("[%s] SPEECH TEST at %s: %d on screen" % [_time(), nxt[0], here.size()])
+			if here.size() >= 2:
+				SimEnv.emit("speech", int(here[0]), "Have you tried the new place on Elm Court?", int(here[1]))
+				SimEnv.emit("speech", int(here[1]), "Not yet. Is it any good?", int(here[0]))
+		_wait(50)          # the same spot again a moment later
+		return
+	var c = root.get_node("Clock")
+	var want: int = (c.day() - 1) * 1440 + int(nxt[1]) * 60
+	if int(c.total_minutes) % 1440 != int(nxt[1]) * 60:
+		c.total_minutes = want + (1440 if want < int(c.total_minutes) else 0)
+	var lv = _main.find_child("LotView", true, false)
+	var rc: Rect2i = NeighborhoodLots.rect_of(str(nxt[0]))
+	lv.select("none", -1)
+	lv.focus_tile(rc.position + Vector2i(rc.size.x / 2, rc.size.y - 4))
+	lv.set_zoom(float(TOUR_ZOOMS[nxt[2]]))
+	_wait(120)          # two seconds of life: people walk, talk, toasts come and go
+
 func _run_step() -> void:
+	if "--tour" in OS.get_cmdline_user_args():
+		_tour_step()
+		return
 	_step += 1
 	match _step:
 		1:

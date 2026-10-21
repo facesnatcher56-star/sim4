@@ -168,6 +168,18 @@ func _update_shell_fade(delta: float) -> void:
 		for mi in sh["meshes"]:
 			if is_instance_valid(mi):
 				(mi as GeometryInstance3D).transparency = cur * FADE_ALPHA
+				if _custom_shader(mi):          # the grime shader (41a) ignores instance transparency: hide those pieces instead of leaving a half-solid ghost
+					(mi as Node3D).visible = cur < 0.5
+
+
+func _custom_shader(mi: MeshInstance3D) -> bool:
+	if mi.material_override is ShaderMaterial:
+		return true
+	if mi.mesh != null:
+		for i in mi.mesh.get_surface_count():
+			if mi.get_active_material(i) is ShaderMaterial:
+				return true
+	return false
 
 
 func _update_shells(delta: float) -> void:

@@ -11,6 +11,7 @@ signal interaction_started(folk_id: int, interaction_id: String, target_id: int)
 signal interaction_finished(folk_id: int, interaction_id: String, success: bool)
 signal queue_changed(folk_id: int)
 signal thought(folk_id: int, text: String)          # balloon text
+signal speech(folk_id: int, text: String, to_id: int)   # a line said out loud to someone (-1 = to nobody in particular): a speech balloon with a tail and the name
 signal object_placed(object_id: int)
 signal object_removed(object_id: int)
 signal object_state_changed(object_id: int, state: String)

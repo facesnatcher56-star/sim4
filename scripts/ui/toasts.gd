@@ -1,8 +1,8 @@
 class_name ToastFeed
 extends VBoxContainer
-## Stacking notification toasts (Events.notification), top-centre under the bar. Click a toast to dismiss it.
+## Stacking notification toasts (Events.notification), top right under the bar (out of the middle of the view). Click a toast to dismiss it.
 ## ToastPolicy removes repeats and folds whim messages into a digest; job offers become an Accept / Decline card.
-const MAX_TOASTS := 4
+const MAX_TOASTS := 3
 static func kind_color(look: String) -> Color:
 	return UITheme.sem(look if look in ["info", "good", "warn", "bad"] else "info")
 ## Systems use many kinds; they map onto four looks. Warn / bad also carry a "!" so colour is never the only cue.

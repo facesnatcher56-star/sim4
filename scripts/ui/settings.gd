@@ -36,7 +36,7 @@ const DEFS := [
 		"tip": "Smooths jagged edges. FXAA is cheap and soft; MSAA is sharper but costs more."},
 	{"k": "shadows", "tab": "display", "t": "enum", "label": "Shadows", "def": 2, "opts": QUALITY,
 		"tip": "Shadow quality. Off is the fastest."},
-	{"k": "night_brightness", "tab": "display", "t": "range", "label": "Night brightness", "def": 35, "min": 0, "max": 100, "step": 5, "unit": "%",
+	{"k": "night_brightness", "tab": "display", "t": "range", "label": "Night brightness", "def": 55, "min": 0, "max": 100, "step": 5, "unit": "%",
 		"tip": "How much you can see in the dark. 0 is a true night where only lamps and windows light the town; higher keeps streets and your household readable. Your selected person always has a faint light on them."},
 	{"k": "effects", "tab": "display", "t": "enum", "label": "Effects quality", "def": 2, "opts": QUALITY,
 		"tip": "Weather particles, fog and similar effects. Off is the fastest."},

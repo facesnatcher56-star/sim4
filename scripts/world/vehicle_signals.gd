@@ -167,6 +167,10 @@ func _build_signs(c: Vector2, d: Dictionary) -> void:
 
 
 func update() -> void:
+	var cam: Camera3D = _root.get_viewport().get_camera_3d() if _root != null and _root.is_inside_tree() else null
+	var far: bool = cam != null and cam.projection == Camera3D.PROJECTION_ORTHOGONAL and cam.size > 34.0
+	for rec in _shelters.values():
+		(rec["label"] as Label3D).visible = not far          # too far out to read: hidden, the shelter itself still shows
 	if not _built:
 		return
 	var ctl: VehicleControl = view.sim.control
@@ -216,8 +220,9 @@ func _sync_shelters() -> void:
 			_root.add_child(n)
 			var lb := Label3D.new()
 			lb.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-			lb.pixel_size = 0.012
-			lb.font_size = 32
+			lb.fixed_size = true          # playtest: it filled the street zoomed in and was a speck zoomed out; now the same size on screen at any zoom
+			lb.pixel_size = 0.0016
+			lb.font_size = 28
 			lb.outline_size = 28          # a dark plate behind the text (docs/UI_STYLE.md: world labels get a backing)
 			lb.outline_modulate = Color(0.1, 0.13, 0.18, 0.92)
 			lb.modulate = Color(1.0, 0.92, 0.55)

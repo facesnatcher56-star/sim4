@@ -160,7 +160,7 @@ static func _speak(c: Dictionary, who: int, line: String) -> void:
 			if int(cf.get_meta("townie_id", -1)) == who:
 				f = cf
 	if f != null:
-		SimEnv.emit("thought", int(f.id), line)
+		SimEnv.emit("speech", int(f.id), line, -1)
 	if _in_court(c) or CaseStore.household_involved(c):
 		SysUtil.notify("%s: %s" % [CrimePerson.name_of(who), line], "story")
 

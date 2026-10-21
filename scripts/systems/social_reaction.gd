@@ -78,7 +78,7 @@ static func _apply(a, t, iid: String, d: Dictionary, group: String, o: Dictionar
 		a.add_buff(str(o["abuf"]))
 	if o.has("tbuf"):
 		t.add_buff(str(o["tbuf"]))
-	SimEnv.emit("thought", tid, line)
+	SimEnv.emit("speech", tid, line, aid)
 	if SocialFit.player_controlled(a) or SocialFit.player_controlled(t):
 		SysUtil.notify(line, "story")
 	LifeLedger.add("reaction", line, [aid, tid], false, 2)

@@ -91,7 +91,12 @@ func _ready() -> void:
 	top_center.add_child(nobody_banner)
 	toasts = ToastFeed.new()
 	toasts.offer = offer_toast
-	top_center.add_child(toasts)
+	toasts.anchor_left = 1.0          # playtest: toasts down the middle covered the town; they stack at the right under the bar
+	toasts.anchor_right = 1.0
+	toasts.offset_left = -360
+	toasts.offset_right = -12
+	toasts.offset_top = 60
+	add_child(toasts)
 	build_panel = BuildPanel.new()
 	build_panel.anchor_left = 1.0
 	build_panel.anchor_right = 1.0

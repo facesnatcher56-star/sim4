@@ -20,6 +20,8 @@ func filter(text: String, kind: String, now: float) -> Dictionary:
 		_add_whim(text, now)
 		return {"action": "whim", "text": "", "kind": kind}
 	text = polish(text)
+	if (kind == "travel" and " head" in text and not "hospital" in text) or (kind == "relationship" and " met " in text):
+		return {"action": "drop", "text": text, "kind": kind}          # playtest: routine lines (you just sent them; you met someone) filled the screen
 	if _recent.has(text) and now - float(_recent[text]) < DEDUPE_SEC:
 		return {"action": "drop", "text": text, "kind": kind}
 	_recent[text] = now
