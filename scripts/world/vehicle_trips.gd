@@ -143,8 +143,8 @@ func _vehicle_for(rec: Dictionary, fa: Dictionary, fb: Dictionary) -> Dictionary
 			"drop_door": Vector2(float(fb["gate"]) + 1.0, float(fb["hy"]) + 0.5)}
 		v = sim.add("bike", "bike", path, {"end": "dead", "ignore_signals": true, "color": _shirt(int(rec["fid"]))})
 	else:
-		var bay_pos := Vector2.ZERO
-		var dest_pos := Vector2.ZERO
+		var bay_pos: Variant = Vector2.ZERO               # a place of VehicleBays when the car stands in one, else the lane
+		var dest_pos: Variant = Vector2.ZERO
 		var dest_bay: int = -1
 		var kind: String = "car"
 		var glb: String = "taxi"
@@ -157,10 +157,14 @@ func _vehicle_for(rec: Dictionary, fa: Dictionary, fb: Dictionary) -> Dictionary
 			glb = view.ambient.owner_glb(c) if not c.is_empty() else "car_hatchback_red"
 			if not existing.is_empty() and str(existing["state"]) == "parked":
 				bay_pos = existing["pos"]
+				var ex_bays: Array = VehicleBays.of(str(existing.get("lot", "")))
+				if str(existing.get("lot", "")) == str(rec["from"]) and int(existing.get("bay", -1)) >= 0 and int(existing["bay"]) < ex_bays.size():
+					bay_pos = ex_bays[int(existing["bay"])]
+					existing["bay_free_s"] = VehicleAmbient.BAY_CLEAR_S             # the place it leaves is free for the next car once it has driven out
 			var free: int = _free_bay(str(rec["to"]))
 			if free >= 0:
 				dest_bay = free
-				dest_pos = (VehicleBays.of(str(rec["to"]))[free] as Dictionary)["pos"]
+				dest_pos = VehicleBays.of(str(rec["to"]))[free]
 		else:
 			kind = "taxi"
 			pre = _drive_in(fa)                                  # the taxi comes from a road end of the map and leaves by one: it never starts or ends on the picture
@@ -173,9 +177,10 @@ func _vehicle_for(rec: Dictionary, fa: Dictionary, fb: Dictionary) -> Dictionary
 		if existing.is_empty():
 			v = sim.add(kind, glb, path2, {"end": "park" if dest_bay >= 0 else "dead", "key": "car:%d" % int(rec["car"]) if mode == "car" else ""})
 			v["gate_yield"] = r["gate_yield"]
+			v["back_m"] = float(r.get("back_m", 0.0))
 		else:
 			v = existing
-			sim.restart(v, path2, r["visits"], "park" if dest_bay >= 0 else "dead", r["gate_yield"])
+			sim.restart(v, path2, r["visits"], "park" if dest_bay >= 0 else "dead", r["gate_yield"], float(r.get("back_m", 0.0)))
 		if dest_bay >= 0:
 			view.ambient._occ(str(rec["to"]))[dest_bay] = int(v["id"])
 			v["dest_lot"] = str(rec["to"])

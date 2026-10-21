@@ -26,7 +26,7 @@
   "ambient": ["car_hatchback_red", "car_hatchback_blue", "car_hatchback_white", "car_hatchback_yellow", "car_sedan_red", "car_sedan_blue", "car_sedan_white", "car_sedan_yellow", "car_van_white", "car_van_blue"]
  },
  "kind_glb": {"taxi": "taxi", "bus": "bus", "fire": "fire_engine", "ambulance": "ambulance", "police": "police_car", "tow": "tow_truck", "bike": "bike"},
- "bays": {"rows_from_edge": 2.0, "x_offsets": [8.0, 23.0], "walkway": [11, 19], "max_per_lot": 2},
+ "bays": {"max_per_lot": 8, "_doc": "the places themselves (driveway, bays, lay-by) are made by LotParking from data/parking.json"},
  "ambient": {"max_parked": 40, "max_moving": 10, "depart_per_s": 0.35, "stay_s": [20, 90], "density_floor": 0.25},
  "filler": {
   "_doc": "Through traffic (VehicleFiller): cars per hour entering from the road ends, by hour (curve, weekday) or (curve_weekend), x the day of the week; floor_per_hour keeps a few cars at 3 am. Cause: a town has through traffic and customers, so the roads are busy at the rush hours, quiet at night, and the main road (main_weight) carries most.",
@@ -40,5 +40,10 @@
  "boarding": {"door_reach": 2.6, "max_wait_min": 1.5, "taxi_hold_min": 0.6},
  "emergency": {"hold_s_min": 5.0, "lights_flash_s": 0.18},
  "crash": {"at": 0.55, "other_gap": 5.6, "tow_after_min": 8, "tow_kinds": ["serious", "wreck"]},
- "hazard_flash_s": 0.45
+ "hazard_flash_s": 0.45,
+ "lights": {
+  "_doc": "Vehicle lamps (task 42, VehicleLights / VehicleLightRigs; display only). Headlights are on when daylight x weather light is under 0.55, in fog or in rain or snow; real lights only for the nearest few, the rest use the emissive lamps and the beam decal. Low beam reaches about 17 m (VehicleLights.BEAM_LEN).",
+  "real_n": 6, "real_radius": 48.0, "spot_range": 20.0, "spot_angle": 26.0, "spot_attenuation": 1.0, "spot_pitch": 9.0, "spot_energy": 4.0,
+  "emergency_n": 3, "flash_range": 11.0, "flash_energy": 3.0
+ }
 }

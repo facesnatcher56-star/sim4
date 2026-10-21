@@ -9,6 +9,9 @@ const DIR := "res://assets/models/outdoor/"
 var _scenes: Dictionary = {}
 var _nodes: Dictionary = {}               # vehicle id -> {root, wheels, haz, red, blue, amber, r}
 var _tint_mats: Dictionary = {}
+var rigs: VehicleLightRigs = VehicleLightRigs.new()      # real lights for the nearest few (task 42)
+var cam_ground: Vector2 = Vector2.ZERO                   # where the camera looks, on the ground: the vehicles nearest to it get the real lights
+var _rig_t: float = 0.0
 
 
 func _scene(glb: String) -> PackedScene:
@@ -31,13 +34,14 @@ func clear() -> void:
 		if is_instance_valid(_nodes[id]["root"]):
 			(_nodes[id]["root"] as Node).queue_free()
 	_nodes.clear()
+	rigs.clear()
 
 
 func _make(v: Dictionary) -> Dictionary:
 	var ps: PackedScene = _scene(str(v["glb"]))
 	var root := Node3D.new()
 	root.name = "V%d" % int(v["id"])
-	var rec: Dictionary = {"root": root, "wheels": [], "haz": [], "red": null, "blue": null, "amber": null, "r": 0.35}
+	var rec: Dictionary = {"root": root, "wheels": [], "haz": [], "red": null, "blue": null, "amber": null, "r": 0.35, "lamps": null, "half_len": float(v["len"]) * 0.5, "pv": 0.0}
 	if ps != null:
 		var inst: Node = ps.instantiate()
 		root.add_child(inst)
@@ -45,6 +49,7 @@ func _make(v: Dictionary) -> Dictionary:
 		_collect(inst, rec)
 		if str(v["kind"]) == "bike" and str(v.get("color", "")) != "":
 			_tint(inst, Color(str(v["color"])))
+	rec["lamps"] = VehicleLights.attach(root, v)
 	return rec
 
 
@@ -84,6 +89,8 @@ func _tint(n: Node, col: Color) -> void:
 
 func sync(parent: Node3D, vehicles: Array, vt: float, flash: float) -> void:
 	var seen: Dictionary = {}
+	var lctx: Dictionary = VehicleLights.context()
+	var blink: bool = fposmod(vt, VehicleLights.BLINK_S) < VehicleLights.BLINK_S * 0.5
 	for v in vehicles:
 		var id: int = int(v["id"])
 		seen[id] = true
@@ -111,8 +118,18 @@ func sync(parent: Node3D, vehicles: Array, vt: float, flash: float) -> void:
 		if rec["amber"] != null:
 			(rec["amber"] as Node3D).visible = bool(lights.get("amber", false)) and on
 		root.visible = not bool(v.get("hidden", false))
+		var lst: Dictionary = VehicleLights.state(v, lctx, float(rec["pv"]))
+		rec["pv"] = float(v["v"])
+		rec["head"] = bool(lst["head"])
+		rec["siren"] = bool(lst["siren"])
+		VehicleLights.apply(rec, lst, lctx, blink, on)
 	for id2 in _nodes.keys():
 		if not seen.has(id2):
 			if is_instance_valid(_nodes[id2]["root"]):
 				(_nodes[id2]["root"] as Node).queue_free()
 			_nodes.erase(id2)
+	var now_ms: int = Time.get_ticks_msec()
+	if now_ms - int(_rig_t) >= 400:
+		_rig_t = float(now_ms)
+		rigs.assign(_nodes, cam_ground, lctx)
+	rigs.tick(fposmod(vt, flash * 2.0) < flash)

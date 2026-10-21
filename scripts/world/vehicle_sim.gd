@@ -88,8 +88,9 @@ func add_parked(kind: String, glb: String, pos: Vector2, dir: Vector2, opts: Dic
 
 
 ## Send a standing (or finished) vehicle along a new path.
-func restart(v: Dictionary, path: VehiclePath, visits: Array, end: String = "dead", gate_yield: Dictionary = {}) -> void:
+func restart(v: Dictionary, path: VehiclePath, visits: Array, end: String = "dead", gate_yield: Dictionary = {}, back_m: float = 0.0) -> void:
 	v["gate_yield"] = gate_yield
+	v["back_m"] = back_m
 	v["path"] = path
 	v["s"] = 0.0
 	v["v"] = 0.0
@@ -98,7 +99,7 @@ func restart(v: Dictionary, path: VehiclePath, visits: Array, end: String = "dea
 	v["stops"] = []
 	v["blocked_t"] = 0.0
 	v["pos"] = path.at(0.0)
-	v["dir"] = path.dir_at(0.0)
+	v["dir"] = face(v, path)
 	attach_visits(v, visits)
 
 
@@ -153,6 +154,25 @@ static func heading(path: VehiclePath, s: float, length: float) -> Vector2:
 	return d.normalized() if d.length() > 0.2 else path.dir_at(s)
 
 
+## The way the body points: along the path, except for the first `back_m` metres of a way out that is driven backwards (out of a driveway or a bay: the body keeps pointing
+## the way it came), then it swings round to the way it is going over 3 m (task 42). `reversing(v)` is true while it is backing.
+func face(v: Dictionary, path: VehiclePath) -> Vector2:
+	var h: Vector2 = heading(path, float(v["s"]), float(v["len"]))
+	var bm: float = float(v.get("back_m", 0.0))
+	var s: float = float(v["s"])
+	if bm <= 0.0 or s >= bm + 3.0:
+		return h
+	var away: Vector2 = -heading(path, minf(s, bm), float(v["len"]))
+	if s < bm:
+		return away
+	var to: Vector2 = heading(path, minf(bm + 3.0, path.length), float(v["len"]))
+	return Vector2.from_angle(lerp_angle(away.angle(), to.angle(), (s - bm) / 3.0))
+
+
+static func reversing(v: Dictionary) -> bool:
+	return float(v.get("back_m", 0.0)) > 0.0 and float(v["s"]) < float(v.get("back_m", 0.0)) and str(v["state"]) != "parked" and float(v["v"]) > 0.05
+
+
 ## Where the body centre is for the path distance `s` (midpoint of the two axles).
 static func centre(path: VehiclePath, s: float, length: float) -> Vector2:
 	if length < 3.0:
@@ -171,7 +191,7 @@ func _step_one(v: Dictionary, dt: float) -> void:
 		if str(v.get("sign_ok", "")) == "%d,%d" % [int(passed["i"]), int(passed["j"])]:
 			v.erase("sign_ok")
 	v["pos"] = centre(path, float(v["s"]), float(v["len"]))
-	v["dir"] = heading(path, float(v["s"]), float(v["len"]))
+	v["dir"] = face(v, path)
 	var half: float = float(v["len"]) * 0.5
 	var lim: float = float(v["vmax"])
 	if v.has("vcap"):
@@ -242,7 +262,7 @@ func _step_one(v: Dictionary, dt: float) -> void:
 		v["blocked_t"] = 0.0
 	v["s"] = minf(float(v["s"]) + sp * dt, path.length)
 	v["pos"] = centre(path, float(v["s"]), float(v["len"]))
-	v["dir"] = heading(path, float(v["s"]), float(v["len"]))
+	v["dir"] = face(v, path)
 
 
 func _signals_limit(v: Dictionary, half: float) -> float:

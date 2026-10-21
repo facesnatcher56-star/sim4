@@ -213,6 +213,10 @@ func _build_chunk(c: Vector2i) -> void:
 		_add_mark(fa, m, rc)
 	for q in JunctionMarks.quads(rc):
 		fa.quad(float(q[0]), float(q[1]), float(q[2]), float(q[3]), MARK_Y, q[4])
+	for q2 in ParkingMarks.quads(rc):                                     # task 42: bay lines and lay-by ends
+		fa.quad(float(q2[0]), float(q2[1]), float(q2[2]), float(q2[3]), MARK_Y, q2[4])
+	for kt in ParkingMarks.kerb_tiles(rc):                                # task 42: dropped kerb = the driveway paving over the footway tile
+		fa.quad(float(kt.x), float(kt.y), float(kt.x + 1), float(kt.y + 1), MARK_Y * 0.5, _floor_color(LotParking.floor_name(), kt))
 	(ch["floor"] as MeshInstance3D).mesh = fa.commit()
 	(ch["grass"] as MeshInstance3D).mesh = ga.commit()
 	(ch["snow"] as MeshInstance3D).mesh = sa.commit()

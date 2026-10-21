@@ -1,0 +1,9 @@
+{
+ "_doc": "Where cars stand (task 42; VIEW layer reads it, LotParking builds it when the map is made). Cause: a car stands where a person would park it: a house with room has a driveway (a paved strip from the kerb through the front fence, with a dropped kerb; a house with a garage room has a carport at the head of it), a shop, office or the car park has marked bays on its forecourt, a lot with neither gets a paved lay-by of parallel bays beside the kerb. Never on the footway, a crossing, a junction, the lawn or in a lane. Sizes in tiles (a tile is a metre).",
+ "floor": "driveway",
+ "driveway": {"width": 3, "width_two": 6, "min_depth": 6, "max_depth": 9, "two_for": ["large", "townie_c", "classic_03"], "min_gate_gap": 2, "floors": ["lawn", "grass", "dirt"]},
+ "bay": {"w": 2.8, "d": 5.0, "max": 8, "walkway": [12.0, 24.5], "margin": 1.0, "floors": ["concrete", "lawn", "grass", "dirt", "driveway"], "skip_venues": ["park"]},
+ "layby": {"len": 6.0, "d": 2.0, "max": 3, "floors": ["lawn", "grass", "dirt", "concrete", "driveway"], "walkway": [12.0, 24.5]},
+ "garage_objects": ["workbench"],
+ "car": {"w": 1.8, "l": 4.2}
+}

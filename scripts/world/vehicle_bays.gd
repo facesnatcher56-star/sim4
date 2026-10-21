@@ -1,8 +1,8 @@
 class_name VehicleBays
 extends RefCounted
-## Parking bays of a lot for the vehicle layer: car-sized strips of the front yard, beside the walkway from the gate, that are open ground (no object,
-## no wall, outdoors). Read from the World when asked and cached per lot until the map is rebuilt. No bay = no visible parked car at that lot.
-##   VehicleBays.of(lot_id) -> [{x, z, pos}]      VehicleBays.forget()      VehicleBays.length_of(bay)
+## The places a car of the vehicle layer can stand at a lot (task 42): the driveway, forecourt bays or lay-by built by LotParking when the map was made, checked against the
+## live world (a tile that is no longer paved or free, e.g. the player built on it, drops the place). Cached per lot until the map is rebuilt. No place = no visible parked car at that lot.
+##   VehicleBays.of(lot_id) -> [place]  (place: kind, pos, face, rect, kerb, back, carport, entry_x, x, z)      VehicleBays.forget()      VehicleBays.valid(place)
 
 static var _cache: Dictionary = {}
 
@@ -19,34 +19,32 @@ static func of(lot_id: String) -> Array:
 	if _cache.has(lot_id):
 		return _cache[lot_id]
 	var out: Array = []
-	var rc: Rect2i = NeighborhoodLots.rect_of(lot_id)
 	var w = WorldIface.world()
-	if rc.size != Vector2i.ZERO and w != null and w.get("width") != null and rc.position.x > 0:
-		var c: Dictionary = cfg()
-		var zc: float = float(rc.end.y) - float(c.get("rows_from_edge", 2.0))
-		for ox in c.get("x_offsets", [3.0, 9.0, 22.0, 28.0]):
-			var cx: float = float(rc.position.x) + float(ox)
-			if _free(w, cx, zc):
-				out.append({"x": cx, "z": zc, "pos": Vector2(cx, zc)})
-		var cap: int = int(c.get("max_per_lot", 4))
-		if out.size() > cap:
-			out.resize(cap)
+	if w != null and w.get("width") != null and NeighborhoodLots.rect_of(lot_id).position.x > 0:
+		for pl in LotParking.places_of(lot_id):
+			if valid(pl):
+				var p: Dictionary = (pl as Dictionary).duplicate()
+				p["x"] = (p["pos"] as Vector2).x
+				p["z"] = (p["pos"] as Vector2).y
+				out.append(p)
+	var cap: int = int(cfg().get("max_per_lot", 8))
+	if out.size() > cap:
+		out.resize(cap)
 	_cache[lot_id] = out
 	return out
 
 
-static func _free(w, cx: float, zc: float) -> bool:
-	for tx in range(int(floorf(cx - 2.4)), int(floorf(cx + 2.4)) + 1):
-		for ty in [int(floorf(zc - 0.9)), int(floorf(zc + 0.85))]:
+## Still paved (or forecourt) and free of objects and walls.
+static func valid(place: Dictionary) -> bool:
+	var w = WorldIface.world()
+	var rc: Rect2 = place["rect"]
+	var pc: Dictionary = LotParking.cfg()
+	var floors: Array = [LotParking.floor_name(), "concrete"]
+	if str(place["kind"]) != "driveway":
+		floors.append_array((pc.get("bay", {}) as Dictionary).get("floors", []))
+	for tx in range(int(floorf(rc.position.x)), int(ceilf(rc.end.x))):
+		for ty in range(int(floorf(rc.position.y)), int(ceilf(rc.end.y))):
 			var t := Vector2i(tx, ty)
-			if not w.in_bounds(t) or not w.is_walkable(t) or w.object_at(t) != null:
+			if not w.in_bounds(t) or w.object_at(t) != null or not floors.has(w.get_floor(t)):
 				return false
-			var f: String = w.get_floor(t)
-			if f == "" or f == "water" or f == "asphalt" or f == "sidewalk" or f == "crosswalk":
-				return false
-			if not w.is_outdoor(t):
-				return false
-			for e in w.edges_of_tile(t):
-				if w.wall_at(e) != "":
-					return false
 	return true

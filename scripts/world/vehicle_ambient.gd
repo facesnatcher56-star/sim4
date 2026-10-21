@@ -91,7 +91,7 @@ func _populate(lot_id: String) -> void:
 		var bay: Dictionary = bays[k2]
 		var pos: Vector2 = bay["pos"]
 		var h: int = hash("%s|%d|%d" % [lot_id, k2, SysUtil.day()])
-		var face := Vector2(-1, 0) if (h & 1) == 0 else Vector2(1, 0)
+		var face: Vector2 = bay["face"]
 		if not owner_cars.is_empty():
 			var c2: Dictionary = owner_cars.pop_front()
 			var ov: Dictionary = view.sim.add_parked("car", owner_glb(c2), pos, face, {"tag": "owner", "key": "car:%d" % int(c2["id"])})
@@ -125,31 +125,30 @@ func _free_bay(v: Dictionary) -> void:
 ## A moving ambient car that has reached its bay is now a parked one; its driver gets out and walks away to the lot.
 func _finish_arrivals() -> void:
 	for v in view.sim.vehicles:
+		if str(v["tag"]) == "trip" and v.has("dest_lot") and str(v["state"]) == "parked":        # a player's car that has parked: it now stands in that place
+			v["lot"] = v["dest_lot"]
+			v["bay"] = v["dest_bay"]
+			v.erase("dest_lot")
+			v["dir"] = (v["path"] as VehiclePath).dir_at(float((v["path"] as VehiclePath).length))
 		if str(v["tag"]) == "ambient" and v.has("dest_lot") and str(v["state"]) == "parked":
 			v["lot"] = v["dest_lot"]
 			v["bay"] = v["dest_bay"]
 			v.erase("dest_lot")
 			v["stay_until"] = view.sim.vt + view.rng.randf_range(20.0, 90.0)
 			v["dir"] = (v["path"] as VehiclePath).dir_at(float((v["path"] as VehiclePath).length))
-			var fr: Dictionary = VehicleRoads.frontage(str(v["lot"]))
-			if not fr.is_empty():
-				view.walkers.add((v["pos"] as Vector2) + Vector2(0, -1.2), door_of(fr), int(v["id"]) * 7)
+			var bay_a: Array = _bays(str(v["lot"]))
+			if int(v["bay"]) < bay_a.size():
+				view.walkers.add(VehiclePlaces.side_of(bay_a[int(v["bay"])]), door_of(str(v["lot"])), int(v["id"]) * 7)
 
 
-## The front yard of a lot (bays, gate): one car moves about in it at a time.
-static func yard_rect(fr: Dictionary) -> Rect2:
-	var rc: Rect2i = fr["rc"]
-	return Rect2(float(rc.position.x), float(rc.end.y) - 6.0, float(rc.size.x), 6.5)
+## Where an arriving car waits on the lane (just before it turns in) while the place is busy.
+static func yard_entry(pl: Dictionary, path: VehiclePath, fr: Dictionary) -> Dictionary:
+	var s_turn: float = path.closest_s(Vector2(VehiclePlaces.in_x(pl), float(fr["lane_z"])), maxf(path.length - 32.0, 0.0), 40.0)
+	return {"s": maxf(s_turn - 3.0, 0.5), "rect": VehiclePlaces.yard_rect(pl)}
 
 
-## Where an arriving car waits on the lane (just before it turns in) while the yard is busy.
-static func yard_entry(fr: Dictionary, path: VehiclePath) -> Dictionary:
-	var s_turn: float = path.closest_s(Vector2(float(fr["gate"]) + VehicleRoutes.GATE_LANE, float(fr["lane_z"])), maxf(path.length - 32.0, 0.0), 40.0)
-	return {"s": maxf(s_turn - 3.0, 0.5), "rect": yard_rect(fr)}
-
-
-func door_of(fr: Dictionary) -> Vector2:
-	return Vector2(float(fr["gate"]), float(fr["hy"]) - 9.0)
+static func door_of(lot_id: String) -> Vector2:
+	return VehiclePlaces.door_of(lot_id)
 
 
 func moving_count() -> int:
@@ -196,14 +195,13 @@ func _depart() -> void:
 
 ## The driver walks down from the lot to the parked car; the car goes when the walker has arrived.
 func _begin_departure(v: Dictionary, dest_lot: String, dest_bay: int) -> void:
-	var fr: Dictionary = VehicleRoads.frontage(str(v["lot"]))
 	var bay: Dictionary = _bays(str(v["lot"]))[int(v["bay"])]
 	v["leaving"] = true
 	v["plan_lot"] = dest_lot
 	if dest_lot != "":
 		_occ(dest_lot)[dest_bay] = int(v["id"])
 		v["plan_bay"] = dest_bay
-	view.walkers.add(door_of(fr), (bay["pos"] as Vector2) + Vector2(0, -1.2), int(v["id"]) * 5, Callable(self, "_depart_now").bind(v))
+	view.walkers.add(door_of(str(v["lot"])), VehiclePlaces.side_of(bay), int(v["id"]) * 5, Callable(self, "_depart_now").bind(v))
 
 
 func _depart_now(v: Dictionary) -> void:
@@ -246,13 +244,13 @@ func _arrive_somewhere() -> bool:
 func drive_in(end: Dictionary, lot_id: String, k: int, s0: float, glb: String) -> bool:
 	var fr: Dictionary = VehicleRoads.frontage(lot_id)
 	var bay: Dictionary = _bays(lot_id)[k]
-	var g: float = float(fr["gate"])
-	var r: Dictionary = VehicleRoads.entry_route(end, fr, g + VehicleRoutes.GATE_LANE, float(view.cfg.get("lane", 1.0)))
+	var r: Dictionary = VehicleRoads.entry_route(end, fr, VehiclePlaces.in_x(bay) + VehiclePlaces.LANE_RUN, float(view.cfg.get("lane", 1.0)))
 	if r.is_empty():
 		return false
 	var pts: Array = (r["pts"] as Array).duplicate()
-	pts.append(Vector2(g + VehicleRoutes.GATE_LANE, (bay["pos"] as Vector2).y))
-	pts.append(bay["pos"])
+	pts.append(Vector2(VehiclePlaces.in_x(bay), float(fr["lane_z"])))
+	pts.append_array(VehiclePlaces.in_mid(bay))
+	pts.append(VehiclePlaces.arrive_pt(bay))
 	var path: VehiclePath = VehiclePath.make(pts, 1.8)
 	s0 = minf(s0, path.length - 8.0)
 	var p0: Vector2 = path.at(s0)
@@ -261,7 +259,7 @@ func drive_in(end: Dictionary, lot_id: String, k: int, s0: float, glb: String) -
 	if not view.sim.spot_free(p0, 4.2, 1.8, 2.0):
 		return false
 	var v: Dictionary = view.sim.add("car", glb, path, {"end": "park", "tag": "ambient", "key": "", "visits": r["visits"], "s": s0})
-	v["yard"] = yard_entry(fr, path)
+	v["yard"] = yard_entry(bay, path, fr)
 	v["dest_lot"] = lot_id
 	v["dest_bay"] = k
 	v["from_edge"] = true
@@ -269,21 +267,21 @@ func drive_in(end: Dictionary, lot_id: String, k: int, s0: float, glb: String) -
 	return true
 
 
-## The car drives out of its bay, along the lane, through the streets to the nearest road end of the map and out of it.
+## The car drives out of its place, along the lane, through the streets to the nearest road end of the map and out of it.
 func _leave(v: Dictionary) -> void:
 	var lot_id: String = str(v["lot"])
 	var fr: Dictionary = VehicleRoads.frontage(lot_id)
 	var bay: Dictionary = _bays(lot_id)[int(v["bay"])]
-	var g: float = float(fr["gate"])
 	if not _exits.has(lot_id):
 		_exits[lot_id] = VehicleRoads.nearest_end(fr, float(view.cfg.get("lane", 1.0)))
-	var r: Dictionary = VehicleRoads.exit_route(fr, g - VehicleRoutes.GATE_LANE, _exits[lot_id], float(view.cfg.get("lane", 1.0)))
-	var pts: Array = [bay["pos"], Vector2(g - VehicleRoutes.GATE_LANE, (bay["pos"] as Vector2).y)]
+	var r: Dictionary = VehicleRoads.exit_route(fr, VehiclePlaces.out_x(bay), _exits[lot_id], float(view.cfg.get("lane", 1.0)))
+	var pts: Array = [VehiclePlaces.depart_pt(bay, float(fr["lane_z"]))]
+	pts.append_array(VehiclePlaces.out_mid(bay))
 	pts.append_array(r["pts"])
-	v["bay_free_s"] = BAY_CLEAR_S                          # the bay is only free for the next car once this one has really driven out of it
+	v["bay_free_s"] = BAY_CLEAR_S                          # the place is only free for the next car once this one has really driven out of it
 	var lp: VehiclePath = VehiclePath.make(pts, 1.8)
-	var gyl: Dictionary = {"s": 0.3, "x": g, "z": float(fr["lane_z"]), "hy": float(fr["hy"]), "rect": yard_rect(fr)}
-	view.sim.restart(v, lp, r["visits"], "dead", gyl)
+	var gyl: Dictionary = {"s": 0.3, "x": VehiclePlaces.out_x(bay), "z": float(fr["lane_z"]), "hy": float(fr["hy"]), "rect": VehiclePlaces.yard_rect(bay)}
+	view.sim.restart(v, lp, r["visits"], "dead", gyl, VehiclePlaces.back_m(bay, fr))
 
 
 func _send(v: Dictionary, dest_lot: String, dest_bay: int) -> bool:
@@ -291,13 +289,13 @@ func _send(v: Dictionary, dest_lot: String, dest_bay: int) -> bool:
 	var fb: Dictionary = VehicleRoads.frontage(dest_lot)
 	var bay_a: Dictionary = _bays(str(v["lot"]))[int(v["bay"])]
 	var bay_b: Dictionary = _bays(dest_lot)[dest_bay]
-	var r: Dictionary = VehicleRoutes.trip(fa, bay_a["pos"], fb, bay_b["pos"])
+	var r: Dictionary = VehicleRoutes.trip(fa, bay_a, fb, bay_b)
 	if r.is_empty():
 		return false
 	v["bay_free_s"] = BAY_CLEAR_S
 	_occ(dest_lot)[dest_bay] = int(v["id"])
 	v["dest_lot"] = dest_lot
 	v["dest_bay"] = dest_bay
-	view.sim.restart(v, r["path"], r["visits"], "park", r["gate_yield"])
-	v["yard"] = yard_entry(fb, r["path"])
+	view.sim.restart(v, r["path"], r["visits"], "park", r["gate_yield"], float(r["back_m"]))
+	v["yard"] = yard_entry(bay_b, r["path"], fb)
 	return true
