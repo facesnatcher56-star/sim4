@@ -1,0 +1,15 @@
+{
+ "_doc": "Task 53 physical acts on people (scripts/systems/person_acts.gd). Offered on anyone the pawn can reach; nothing in the menu says how it will go. close: the pawn walks up to them first. check: the SkillCheck act (opposed by the target's skill there). Each act: what the target feels (victim_buff), what it is on the record if it's reported (charge: assault | theft | robbery | threats | harassment, sev), and the noise / visibility for witnesses (Notice). The target's reaction is drawn from notice.json reactions.person.victim, a witness's from reactions.person.passerby. coins: [min, max] taken (never more than they have). needs: what the pawn must have on them (phone).",
+ "acts": {
+  "shove": {"label": "Shove", "close": true, "noise": 0.5, "visibility": 0.9, "charge": "assault", "sev": 1, "victim_buff": "offended", "friendship": -6, "line": ["You shove {t} hard."]},
+  "punch": {"label": "Punch", "close": true, "check": "fight", "noise": 0.8, "visibility": 1.0, "charge": "assault", "sev": 2, "victim_buff": "furious", "friendship": -15, "injure": 1, "line_ok": ["Your fist connects. {t} staggers back."], "line_fail": ["{t} slips the punch."]},
+  "pickpocket": {"label": "Pick their pocket", "close": true, "check": "pickpocket", "noise": 0.0, "visibility": 0.3, "charge": "theft", "sev": 1, "coins": [4, 30], "friendship": -10, "secret": true, "line_ok": ["Your fingers find {c} coins."], "line_none": ["Nothing in that pocket."], "line_fail": ["{t} feels the hand in the pocket."]},
+  "grab_bag": {"label": "Grab their bag", "close": true, "check": "outrun", "noise": 0.7, "visibility": 1.0, "charge": "robbery", "sev": 2, "coins": [15, 80], "victim_buff": "anxious_jitters", "friendship": -20, "line_ok": ["You snatch the bag and run: {c} coins in it."], "line_fail": ["{t} hangs on to the strap."]},
+  "threaten": {"label": "Threaten them", "check": "threaten", "noise": 0.4, "visibility": 0.8, "charge": "threats", "sev": 1, "victim_buff": "anxious_jitters", "friendship": -12, "line_ok": ["{t} goes pale and backs away."], "line_fail": ["{t} just stares back, unimpressed."]},
+  "demand_money": {"label": "Demand their money", "close": true, "check": "threaten", "noise": 0.4, "visibility": 0.8, "charge": "robbery", "sev": 2, "coins": [10, 60], "victim_buff": "anxious_jitters", "friendship": -25, "line_ok": ["{t} hands over {c} coins with shaking hands."], "line_fail": ["{t} refuses."]},
+  "follow": {"label": "Follow them", "check": "sneak", "noise": 0.0, "visibility": 0.4, "charge": "harassment", "sev": 1, "friendship": -5, "line_fail": ["{t} glances back at you. Twice."]},
+  "photo": {"label": "Take their photo", "needs": "phone", "table": "photo", "noise": 0.1, "visibility": 0.7, "friendship": -1, "line": ["You snap a photo of {t}."]}
+ },
+ "follow_every_min": 3,
+ "follow_check_min": 6
+}

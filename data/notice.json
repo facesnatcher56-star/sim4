@@ -16,6 +16,27 @@
  },
  "knows_mods": {"call": 0.4, "confront": 1.5, "fight": 0.6},
  "reactions": {
+  "photo": {
+   "victim": {
+    "confront": {"w": 0.8, "lines": ["\"Did you just take my picture?\" {n} asks.", "{n} frowns. \"Delete that.\""]},
+    "pose": {"w": 0.5, "lines": ["{n} grins and strikes a pose.", "{n} laughs and waves at the camera."]},
+    "ignore": {"w": 1.2, "lines": []}
+   }
+  },
+  "person": {
+   "victim": {
+    "fight": {"w": 0.6, "lines": ["{n} comes straight back at {a}, fists up.", "{n} shoves {a} right back, harder."]},
+    "confront": {"w": 1.2, "lines": ["\"What is wrong with you?\" {n} shouts.", "{n} rounds on {a}. \"Don't you ever do that again.\"", "\"Hey! Back off!\" says {n}."]},
+    "flee": {"w": 0.7, "lines": ["{n} backs away fast and doesn't look back.", "{n} hurries off, looking over {their} shoulder."]},
+    "call": {"w": 0.8, "lines": ["{n} gets out a phone. \"I want to report someone.\"", "{n} steps away and calls the police."]},
+    "ignore": {"w": 0.4, "lines": ["{n} just shakes {their} head and walks on."]}
+   },
+   "passerby": {
+    "confront": {"w": 0.6, "lines": ["\"Leave them alone!\" {n} calls out.", "{n} steps closer. \"Everything all right here?\""]},
+    "call": {"w": 0.8, "lines": ["{n} is on the phone, watching you.", "{n} calls someone, staring at you."]},
+    "ignore": {"w": 1.4, "lines": []}
+   }
+  },
   "car": {
    "owner": {
     "confront": {"w": 1.4, "lines": ["{n} comes running. \"Hey! That's my car!\"", "\"Get away from my car!\" {n} shouts.", "{n} stops dead. \"What do you think you're doing with my car?\""]},
