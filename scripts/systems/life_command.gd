@@ -45,5 +45,16 @@ static func run(_player_id: int, folk_id: int, action: String, args: Dictionary 
 		"post":
 			return SocialFeed.post(folk_id, str(args.get("kind", "")))
 		"job_apply":
+			var nojob: String = PhoneJobs.why_not(folk_id, str(args.get("career", "")))
+			if nojob != "":
+				return {"ok": false, "reason": nojob}
 			return EduJobs.apply(folk_id, str(args.get("career", "")))
+		"phone_buy":
+			return PhoneOwn.buy(folk_id, str(args.get("kind", "old")))
+		"phone_sell":
+			var got: int = PhoneOwn.sell(folk_id)
+			return {"ok": got > 0, "reason": "" if got > 0 else "You have no phone to sell."}
+		"paper":
+			var pr: Dictionary = PhoneJobs.read_paper(folk_id)
+			return {"ok": bool(pr.get("ok", false)), "reason": str(pr.get("reason", ""))}
 	return {"ok": false, "reason": "That action is not available."}

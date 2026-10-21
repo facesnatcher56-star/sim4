@@ -68,10 +68,14 @@ func _process(_d: float) -> bool:
 			for k in 3:
 				vv.walkers.add(Vector2(at.x - 2 + k, at.z + 3), Vector2(at.x + 6 + k, at.z + 3), 11 + k * 97)
 		print("WALKER view=%s count=%d" % [str(vv != null), vv.walkers.count() if vv != null else -1])
-	if _frames == 60 and _scn == "jobs":
+	if _frames == 60 and _scn in ["jobs", "phone", "nophone", "messages"]:
 		var hud5 = _main.hud
-		hud5.life_hub.tab = "jobs"
-		hud5.life_hub.show_for(hud5.selected_folk_id)
+		var pid5: int = hud5.selected_folk_id
+		if _scn == "nophone":
+			PhoneOwn.lose(pid5, "stolen", "Your phone was taken as well.")
+		load("res://scripts/ui/life_hub_phone.gd").set("app", {"jobs": "jobs", "messages": "messages"}.get(_scn, ""))
+		hud5.life_hub.tab = "phone"
+		hud5.life_hub.show_for(pid5)
 	if _frames == 60 and _scn == "homes":
 		var hud2 = _main.hud
 		hud2.money_hub.tab = "homes"

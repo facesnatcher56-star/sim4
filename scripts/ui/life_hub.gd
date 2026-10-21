@@ -5,7 +5,7 @@ extends UIDialog
 ## command through the command layer (Commands.run action "life"), never a change made by the UI. Opened from the top bar "Town" button.
 
 const PLAYER_ID := 1
-const TABS := [["places", "Places"], ["study", "Study"], ["health", "Health"], ["pets", "Pets"], ["phone", "Phone"], ["news", "News"], ["jobs", "Jobs"]]
+const TABS := [["places", "Places"], ["study", "Study"], ["health", "Health"], ["pets", "Pets"], ["phone", "Phone"], ["news", "News"]]
 var tab: String = "places"
 var place_id: String = ""
 var kind: String = ""
@@ -15,7 +15,7 @@ func _ready() -> void:
 	super._ready()
 
 func build() -> void:
-	title_label.text = "Town life"
+	title_label.text = "Phone" if tab == "phone" else "Town life"
 	var row := HBoxContainer.new()
 	body.add_child(row)
 	for t in TABS:
@@ -34,7 +34,6 @@ func build() -> void:
 		"pets": LifeHubPets.build(self)
 		"phone": LifeHubPhone.build(self)
 		"news": LifeHubMedia.build(self)
-		"jobs": LifeHubJobs.build(self)
 		_: LifeHubPlaces.build(self)
 
 func _pick(t: String) -> void:

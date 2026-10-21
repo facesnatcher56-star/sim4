@@ -10,4 +10,4 @@ Every panel follows these rules (owner item 45). The building blocks are in `scr
 6. **World labels** get a backing plate and show only when relevant.
 7. **Look.** The sober theme of `UITheme` (muted accents), readable at 1280x720 and 1920x1080.
 
-Text rules for toasts, chronicle, thoughts and errors: short and plain, the right pronouns (`Sexes.fill`), no repeats, no internal ids, one name for one thing (Town & Money, Homes), and a toast that offers an action names where it is ("Apply in Town > Jobs").
+Text rules for toasts, chronicle, thoughts and errors: short and plain, the right pronouns (`Sexes.fill`), no repeats, no internal ids, one name for one thing (Town & Money, Homes), and a toast that offers an action names where it is ("Apply in the Phone's Jobs app").

@@ -46,11 +46,11 @@
    ],
    "moved_in": "You've just moved in with nothing but a bag. Click %s to get started.",
    "tips_no_computer": {
-    "1": "Nobody feeds you. Food costs coins and cooking costs ingredients. Your first goal is a job: click Town at the top and open the Jobs tab, or click the mailbox for Odd Jobs."
+    "1": "Nobody feeds you. Food costs coins and cooking costs ingredients. Your first goal is a job: click Phone at the top and open the Jobs app, or click the mailbox for Odd Jobs."
    },
    "tips": [
     "This is you. You choose everything your Folk does: if you give no orders they stand and wait while hunger and tiredness build. Click things in the world to choose what they do.",
-    "Nobody feeds you. Food costs coins (the bakery, Zip Burger, a vending machine) and cooking costs ingredients. Your first goal is a job: click Town at the top and open the Jobs tab, or click the mailbox for Odd Jobs.",
+    "Nobody feeds you. Food costs coins (the bakery, Zip Burger, a vending machine) and cooking costs ingredients. Your first goal is a job: click Phone at the top and open the Jobs app, or click the mailbox for Odd Jobs.",
     "Rent and bills come every week; miss the rent and you can lose the flat. Click Myself (next to your face) for things you can do with no furniture, like sleeping on the floor.",
     "Space pauses. Keys 1, 2 and 3 set the speed. Press B to buy furniture, M for the map, F1 for all controls."
    ],
@@ -59,7 +59,7 @@
      "id": "job",
      "label": "Get a job",
      "hint": "Click the computer, choose Look for Jobs, then Accept the offer.",
-     "hint_no_computer": "No computer yet: click Town at the top, open the Jobs tab and apply there. Or press B and buy a computer.",
+     "hint_no_computer": "No computer yet: click Phone at the top, open the Jobs app and apply there. Or press B and buy a computer.",
      "check": {
       "jobs": 1
      },

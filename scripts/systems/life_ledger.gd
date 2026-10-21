@@ -30,6 +30,7 @@ static func reset() -> void:
 
 ## From ChronicleHook.note: who = the subjects, or the residents of the household named by lot "home:<hid>".
 static func from_chronicle(p: Dictionary) -> void:
+	PhoneOwn.on_chronicle(p)          # a robbery takes the phone, a fall breaks it
 	if int(p.get("severity", 1)) < 2:
 		return
 	var who: Array = (p.get("subjects", []) as Array).duplicate()

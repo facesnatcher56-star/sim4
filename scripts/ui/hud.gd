@@ -190,9 +190,20 @@ func _build_top_bar() -> void:
 	money_button.tooltip_text = "Shops, your business, homes and the bank (optional)"
 	money_button.pressed.connect(func(): money_hub.toggle_for(selected_folk_id))
 	h.add_child(money_button)
+	var phone_button := Button.new()
+	phone_button.text = "Phone"
+	phone_button.tooltip_text = "Messages, contacts, the Jobs app and your bank"
+	phone_button.pressed.connect(func():
+		if life_hub.visible and life_hub.tab == "phone":
+			life_hub.hide_dialog()
+			return
+		LifeHubPhone.app = ""
+		life_hub.tab = "phone"
+		life_hub.show_for(selected_folk_id))
+	h.add_child(phone_button)
 	life_button = Button.new()
 	life_button.text = "Town"
-	life_button.tooltip_text = "School, college, clinic, food, fun and the job board (optional)"
+	life_button.tooltip_text = "School, college, clinic, food and fun (optional)"
 	life_button.pressed.connect(func(): life_hub.toggle_for(selected_folk_id))
 	h.add_child(life_button)
 	var town_button := Button.new()

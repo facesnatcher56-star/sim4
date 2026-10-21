@@ -17,7 +17,7 @@ static func has_computer(hid: int) -> bool:
 ## How to answer a job offer, for the offer toast: names the route the household really has (task 33c).
 static func accept_hint(f) -> String:
 	if f != null and not has_computer(int(f.household_id)):
-		return "Click Town, open the Jobs tab and apply there (or accept it in the Work window)."
+		return "Click Phone and open the Jobs app (no phone: the job centre at city hall, or the paper) (or accept it in the Work window)."
 	return "Use a computer's 'Look for Jobs' to accept (or accept it in the Work window)."
 
 static func is_seeking(f) -> bool:

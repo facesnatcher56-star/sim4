@@ -6,7 +6,7 @@ Thank you for playing. Start the game with `Folk.exe` (or the Folk shortcut on t
 
 1. Title screen: **New Game**, **Continue**, **Load Game...**, **Co-op**, **Settings**, **Quit**.
 2. **New Game** is the one-character game: you play ONE Folk. Choose a name, traits, look and a heritage (or leave it random), a difficulty (Easy 350 coins, Normal 200, Hard 100) and a storyteller.
-3. You start broke in a rented, empty studio. **Nobody feeds you** and your Folk does nothing unless you tell them: no free food, cooking costs ingredients, rent and bills come every week. Find work (Town > Jobs, or the mailbox for Odd Jobs), eat from your pocket (bakery, burger place, vending machine) and buy a bed (B).
+3. You start broke in a rented, empty studio. **Nobody feeds you** and your Folk does nothing unless you tell them: no free food, cooking costs ingredients, rent and bills come every week. Find work (Phone > Jobs, or the mailbox for Odd Jobs), eat from your pocket (bakery, burger place, vending machine) and buy a bed (B).
 4. **Myself** (next to your face) lists things you can do with no furniture: sleep on the floor, sleep rough, a day's labour at the Works.
 5. Miss the rent and the landlord evicts you. You are then homeless: sleep rough, use the night shelter (a few nights a week, no food), take day labour. Money > Homes shows the ladder (bedsit, council flat, studio, better flat, house) and lets you move; your things go with you.
 6. The Kiln Quarter (south-east) is the rough district: cheap rooms, more crime, slow police, crews that make offers to broke people. Settings > Gameplay > Gang violence turns the violence down or off.
@@ -40,7 +40,7 @@ Top bar buttons: **Map**, **Money** (shops, your business, homes, bank), **Town*
 
 ## Things worth trying
 
-- **Jobs**: open **Town** > Jobs tab (the Town window has tabs: Places, Study, Health, Pets, Phone, News, Jobs). Try the **factory** and other careers; watch the commute, the shift and promotions.
+- **Jobs**: open **Phone** > Jobs (the Town window has tabs: Places, Study, Health, Pets, Phone, News). Try the **factory** and other careers; watch the commute, the shift and promotions.
 - **Stay-at-home parent**: have a parent with a small child skip work and look after the child at home.
 - **A baby**: a couple can try for a baby; pregnancy, birth, toddler care, growing up.
 - **School**: children and teens go to school; college is under **Town**.

@@ -37,6 +37,9 @@ static func contacts(fid: int, limit: int = 14) -> Array:
 	return rows.slice(0, limit)
 
 static func _check(fid: int, other: int) -> String:
+	var nophone: String = PhoneOwn.block(fid)
+	if nophone != "":
+		return nophone
 	if SysUtil.folk(fid) == null:
 		return "Nobody is calling."
 	if not RelationshipService.knows(fid, other):

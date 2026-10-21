@@ -7,6 +7,7 @@ extends RefCounted
 
 static func on_day(day: int) -> void:
 	PhoneState.on_day(day)
+	PhoneOwn.on_day(day)
 	var pc: Dictionary = PhoneState.cfg()
 	var p: float = float(pc.get("incoming_per_day", 0.25))
 	for f in SysUtil.residents():
@@ -18,6 +19,8 @@ static func on_day(day: int) -> void:
 		_one(f, fid)
 
 static func _one(f, fid: int) -> void:
+	if PhoneOwn.block(fid) != "":
+		return          # no working phone: nobody can text the pawn
 	var min_fr: float = float(PhoneState.cfg().get("incoming_min_friendship", 25.0))
 	var friends: Array = PhoneCmd.contacts(fid, 30).filter(func(c): return bool(c["townie"]) and float(c["friendship"]) >= min_fr and str(c["reason"]) == "" and EduState.stage_of(int(c["id"])) in ["teen", "adult", "elder"])
 	if friends.is_empty():

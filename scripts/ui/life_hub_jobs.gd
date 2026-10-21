@@ -12,7 +12,8 @@ static func _days_text(days: Array) -> String:
 		return "%s-%s" % [DAYS[int(d[0])], DAYS[int(d[d.size() - 1])]]
 	return ", ".join(d.map(func(x): return DAYS[int(x)]))
 
-static func build(dlg: LifeHub) -> void:
+## `only` = just these lines of work (the paper's ads); [] = the whole board.
+static func build(dlg: LifeHub, only: Array = []) -> void:
 	var f = dlg.folk_obj()
 	var why: String = Careers.why_not_work(f)
 	if why != "":
@@ -23,6 +24,8 @@ static func build(dlg: LifeHub) -> void:
 		dlg.line("Now: %s. Applying to another job means leaving this one." % Careers.title_of(dlg.folk_id), 13, UITheme.MUTED)
 	CareerDialog.offer_card(dlg, dlg.folk_id)          # a pending offer (the toast) is answered right here: Accept / Decline
 	var rows: Array = EduJobs.board_for(f)
+	if not only.is_empty():
+		rows = rows.filter(func(r): return only.has(str(r["career"])))
 	if rows.is_empty():
 		dlg.line("No openings this week. Check again on day %d." % (((SysUtil.day() - 1) / 7 + 1) * 7 + 1), 14, UITheme.MUTED)
 		return

@@ -1,6 +1,17 @@
 {
   "version": 1,
   "notes": "One-character play (docs/ONE_CHARACTER_PLAN.md Revision 3). Every number the owner may tune by playing lives here. Per-difficulty values are keyed relaxed (Easy) / normal / hard. Read through SoloCfg.",
+  "phone": {
+    "start_kind": "old",
+    "kinds": {"old": {"label": "old phone", "price": 18, "sell": 6}, "new": {"label": "new phone", "price": 60, "sell": 28}},
+    "bill": {"every_days": 7, "due_after_days": 3},
+    "bill_amount": {"relaxed": 3, "normal": 5, "hard": 7},
+    "stolen_chance": 0.45, "broken_chance": 0.25, "lost_per_day": 0.004,
+    "steal_words": ["robb", "burglar", "mugg", "theft", "pickpocket"],
+    "break_words": ["hospital", "fall", "crash", "fight", "assault", "injur"],
+    "job_centre": {"lot": "city_hall", "hours": [9, 17]},
+    "paper": {"price": 2, "ads": 3}
+  },
   "start": {
     "coins": {"relaxed": 350, "normal": 200, "hard": 100},
     "rent": {"relaxed": 55, "normal": 70, "hard": 85},

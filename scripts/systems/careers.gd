@@ -248,7 +248,8 @@ static func make_offer(f, cid: String = "", level: int = 0) -> Dictionary:
 	var o: Dictionary = {"career": cid, "level": level, "expires_day": SysUtil.day() + int(settings().get("offer_expire_days", 3))}
 	offers[int(f.id)] = o
 	var ld: Dictionary = level_def(cid, level)
-	SysUtil.notify("Job offer for %s: %s, %d/h. Answer it in Town > Jobs." % [f.name, str(ld.get("title", cid)), int(ld.get("pay", 0))], "job_offer")
+	var where: String = "A message on your phone" if PhoneOwn.block(int(f.id)) == "" else "A letter came"
+	SysUtil.notify("%s: job offer for %s, %s, %d/h." % [where, f.name, str(ld.get("title", cid)), int(ld.get("pay", 0))], "job_offer")
 	SysUtil.game_event("job_offer", {"folk_id": f.id, "career": cid, "level": level})
 	if auto_accept_offers:
 		accept_offer(int(f.id))
