@@ -78,8 +78,6 @@ static func do_act(f, target, aid: String) -> void:
 	if ok and d.has("coins") and coins <= 0 and d.has("line_none"):
 		key = "line_none"
 	var text: String = _say(key, d, {"t": tn, "c": coins})
-	if text != "":
-		SysUtil.notify(text, "story" if bool(d.get("secret", false)) else "bad")
 	if ok and int(d.get("injure", 0)) > 0:
 		Health.injure(target, int(d["injure"]), aid)
 	RelationshipService.add_value(tid, fid, "friendship", float(d.get("friendship", -5)))
@@ -88,17 +86,17 @@ static func do_act(f, target, aid: String) -> void:
 	if victim_knows and d.has("victim_buff"):
 		CrimePerson.add_buff_safe(tid, str(d["victim_buff"]))
 	var witnesses: Array = Notice.who(fid, f.tile, {"noise": float(d.get("noise", 0.3)), "visibility": float(d.get("visibility", 0.8)), "unseen": bool(d.get("secret", false)), "ignore": [tid]})
-	_react(f, target, aid, d, victim_knows, witnesses, coins)
+	_react(f, target, aid, d, victim_knows, witnesses, coins, text)
 
-static func _react(f, target, aid: String, d: Dictionary, victim_knows: bool, witnesses: Array, coins: int) -> void:
+## One line per outcome (owner rule): what you did and how they took it, said together.
+static func _react(f, target, aid: String, d: Dictionary, victim_knows: bool, witnesses: Array, coins: int, said: String = "") -> void:
 	var fid: int = int(f.id)
 	var tid: int = int(target.id)
 	var reported: bool = false
 	var wid: int = int(witnesses[0]["id"]) if not witnesses.is_empty() else -1
 	if victim_knows:
 		var re: Dictionary = Notice.react(tid, fid, str(d.get("table", "person")), "victim")
-		if str(re["line"]) != "":
-			SysUtil.notify(str(re["line"]), "bad")
+		said = (said + " " + str(re["line"])).strip_edges()
 		match str(re["id"]):
 			"fight":
 				var back: Dictionary = SkillCheck.attempt(tid, "fight", {"opponent": fid})
@@ -109,10 +107,12 @@ static func _react(f, target, aid: String, d: Dictionary, victim_knows: bool, wi
 				reported = true
 			"confront":
 				reported = wid >= 0 and SysUtil.rng.randf() < 0.3
+	if said != "":
+		SysUtil.notify(said, "story" if bool(d.get("secret", false)) and not victim_knows else "bad")
 	if wid >= 0 and not reported:
 		var rw: Dictionary = Notice.react(wid, fid, "person", "passerby")
 		if str(rw["line"]) != "":
-			SysUtil.notify(str(rw["line"]), "bad")
+			SysUtil.notify(str(rw["line"]), "bad")          # someone else entirely stepping in: their own moment
 		reported = str(rw["id"]) == "call"
 	if (victim_knows or wid >= 0) and d.has("charge"):
 		_case(fid, tid, str(d["charge"]), int(d.get("sev", 1)), aid, wid, reported, coins)
@@ -153,5 +153,4 @@ static func on_minute() -> void:
 			if not bool(r["ok"]):
 				following.erase(fid)
 				var d: Dictionary = _act("follow")
-				SysUtil.notify(_say("line_fail", d, {"t": str(t.name).get_slice(" (", 0)}), "story")
-				_react(f, t, "follow", d, true, [], 0)
+				_react(f, t, "follow", d, true, [], 0, _say("line_fail", d, {"t": str(t.name).get_slice(" (", 0)}))

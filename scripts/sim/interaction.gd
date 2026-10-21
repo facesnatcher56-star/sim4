@@ -148,6 +148,8 @@ static func def_runnable(d: Dictionary, f: Folk, o, target: Folk) -> bool:
 	var atests: Array = d.get("tests", [])
 	if kind == "folk" and SocialFit.player_controlled(f):
 		atests = SocialFit.hard_tests(atests)
+	elif SocialFit.player_controlled(f):
+		atests = AttemptGates.hard_tests(d, atests)          # task 53: skill and coin gates become attempts (AttemptGates.resolve at the end)
 	return Cond.check(atests, {"folk": f, "object": o, "target": target})
 
 ## Reserve, plan the walk, and begin. Returns false (and leaves no reservation) when impossible.
@@ -309,7 +311,13 @@ func finish(p_success: bool = true) -> void:
 	var ctx := ctx_for(actor)
 	ctx["reason"] = str(def.get("label", def_id))          # ledger text for any coins this interaction moves (Loot coins_add)
 	if p_success:
-		Loot.apply(def.get("on_finish", []), ctx)
+		match AttemptGates.resolve(self):
+			"refused":
+				pass          # nothing bought, nothing paid
+			"poor":
+				Loot.apply(AttemptGates.poor_effects(def_id), ctx)
+			_:
+				Loot.apply(def.get("on_finish", []), ctx)
 	else:
 		Loot.apply(def.get("on_cancel", []), ctx)
 	_step_off_seat()

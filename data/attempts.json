@@ -1,0 +1,19 @@
+{
+ "_doc": "Task 53 sweep (scripts/systems/attempt_gates.gd): for the player's person, these tests of object / self interactions no longer hide the action; they decide how it goes. skill_at_least: below the level the attempt is rolled (closer to the level = better odds; chance = base + share x level / needed). A miss gives a poor result: the fallback interaction's own effects (a lesser dish), or none, a line by tag, and still a little practice. Cooking misses can set the stove alight through SkillCheck 'cook'. stat_below / stat_above (need levels) no longer hide anything for the pawn and change nothing. coins_at_least: the purchase is refused at the moment of paying (the real 'you're short' moment), nothing is bought or paid. keep_coins: interactions that need the coin itself (tossing one, counting them), where it stays a real limit.",
+ "skill": {"base": 0.15, "share": 0.6},
+ "keep_coins": ["count_coins", "toss_coin"],
+ "fallback": {"cook_meal_good": "cook_meal", "cook_meal_gourmet": "cook_meal_good", "cook_fish_dinner": "cook_meal", "prep_food_good": "prep_food", "grill_gourmet": "grill_food", "fish_deep_water": "fish_pond", "harvest_crops_bountiful": "harvest_crops"},
+ "fail_xp": 4,
+ "lines": {
+  "poor": {
+   "cook": ["It comes out burnt at the edges.", "Not your finest: edible, just about.", "The recipe gets away from you halfway through."],
+   "creative": ["It doesn't come together.", "You stare at it. It isn't what you meant at all.", "Nothing you'd show anyone."],
+   "music": ["The notes don't land.", "You lose your way in the middle of it."],
+   "fish": ["Nothing bites out in the deep water."],
+   "garden": ["The harvest comes up thin."],
+   "repair": ["The parts don't fit together the way you hoped."],
+   "default": ["It doesn't go well."]
+  },
+  "refused": ["Not enough coins for that.", "You count what you have. It isn't enough.", "The coins in your pocket don't cover it."]
+ }
+}
