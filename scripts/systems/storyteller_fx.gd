@@ -158,7 +158,7 @@ static func _visit(ctx: Dictionary, delay: int, duration: int) -> void:
 	var other: int = int(ctx.get("other", -1))
 	var host: int = int(ctx.get("folk_id", -1))
 	if other >= 0 and Story.townies.has(other) and SysUtil.folk(host) != null:
-		StoryVisits.schedule_visit([other], host, SysUtil.now() + delay, duration, "visit")
+		StoryVisits.schedule_visit([other], host, StoryVisits.daytime(SysUtil.now() + delay), duration, "visit")
 
 static func _jealous(hid: int, fid: int) -> void:
 	if not SimEnv.data().buff_def("jealous_pang").is_empty():

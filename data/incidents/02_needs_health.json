@@ -243,7 +243,7 @@
     "hypothermia": "{name} is dangerously cold and needs warmth right now.",
     "overheating": "{name} is overheating. Find shade and some water.",
     "heat_exhaustion": "{name} is dizzy from the heat and needs water and shade right now.",
-    "collapsed_hunger": "{name} has collapsed from hunger. Someone needs to feed {them}, or call a doctor.",
+    "collapsed_hunger": "{name} has collapsed from hunger.",
     "collapsed_exhaustion": "{name} collapsed from exhaustion and is sleeping on the floor.",
     "collapsed_cold": "{name} has collapsed in the cold and needs help right now.",
     "collapsed_heat": "{name} has collapsed in the heat and needs help right now.",

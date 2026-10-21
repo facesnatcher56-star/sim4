@@ -187,7 +187,7 @@ static func _neighbours(a: Dictionary) -> void:
 		var t: Dictionary = cands[idx]["t"]
 		cands.remove_at(idx)
 		names.append(str(t["name"]))
-		StoryVisits.schedule_visit([int(t["id"])], int(host.id), SysUtil.now() + int(c.get("visit_delay_min", 180)), int(c.get("visit_minutes", 100)), "visit")
+		StoryVisits.schedule_visit([int(t["id"])], int(host.id), StoryVisits.daytime(SysUtil.now() + int(c.get("visit_delay_min", 180))), int(c.get("visit_minutes", 100)), "visit")
 		RelationshipService.add_both(int(host.id), int(t["id"]), "friendship", 5.0)
 	if names.is_empty():
 		return

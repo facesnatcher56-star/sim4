@@ -15,6 +15,8 @@ static func on_day(_day: int) -> void:
 	for f in SysUtil.residents():
 		if str(f.age_stage) not in RomanceRules.ADULT_STAGES or SysUtil.is_away(f) or not is_single(int(f.id)):
 			continue
+		if SocialFit.player_controlled(f):
+			continue                             # the player's character: no romance nudge, move-in or adoption from nowhere (48, no magic events)
 		if StoryPursuit.any_active(int(f.id)):
 			continue                             # still getting to know someone: no second nudge
 		var hid: int = int(f.household_id)

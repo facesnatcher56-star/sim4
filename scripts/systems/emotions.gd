@@ -416,7 +416,8 @@ static func on_day(_day: int) -> Array:
 	peaks.clear()
 	if not lines.is_empty():
 		var shown: Array = lines.slice(0, int(jc.get("max_lines", 3)))
-		SysUtil.notify("Mood journal: " + "; ".join(shown) + ".", str(jc.get("kind", "info")))
+		if bool(jc.get("toast", false)):          # quiet depth: the nightly journal is kept (last_journal, the mood_journal event), not shown as a toast
+			SysUtil.notify("Mood journal: " + "; ".join(shown) + ".", str(jc.get("kind", "info")))
 		SysUtil.game_event("mood_journal", {"lines": lines})
 	return lines
 

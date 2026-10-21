@@ -151,7 +151,7 @@ static func travel(folk_ids: Array, lot_id: String, opts: Dictionary = {}) -> Di
 	if not pat.is_empty():
 		verb = "go%s to the hospital to visit %s" % ["es" if names.size() == 1 else "", str(pat["name"])]
 	if not bool(opts.get("silent", false)):          # silent = an unplayed household's own outing (PlaceAuto): no toast
-		SysUtil.notify("%s %s (%d min%s)." % [" and ".join(names), verb, minutes, "" if not fast else ", fast travel"], "travel")
+		SysUtil.notify("%s %s%s." % [" and ".join(names), verb, " (%d min on foot)" % minutes if not fast and minutes > 0 else ""], "travel")
 	SysUtil.game_event("lot_changed", {"from": from_lot, "to": lot_id, "folk_ids": moved.duplicate(), "minutes": minutes, "entry": spot, "walk": not fast})
 	if fast:
 		Neighborhood.focus_camera(spot)

@@ -95,6 +95,15 @@ static func schedule_visit(guest_ids: Array, host_id: int, arrive_min: int, dura
 	Story.situations.append(sit)
 	return sit
 
+## A visit nobody asked for comes in daytime: a time between 22:00 and 09:00 moves to 10:00 (the next morning when needed). Player invites keep their time.
+static func daytime(arrive_min: int) -> int:
+	var h: int = (arrive_min % 1440) / 60
+	if h >= 22:
+		return arrive_min - arrive_min % 1440 + 1440 + 600
+	if h < 9:
+		return arrive_min - arrive_min % 1440 + 600
+	return arrive_min
+
 ## Player-driven: invite a townie over right now (arrives in ~15 minutes).
 static func invite_over(townie_id: int, host_id: int, duration: int = 180) -> Dictionary:
 	if not Story.townies.has(townie_id) or not bool(Story.townies[townie_id]["alive"]):
@@ -117,7 +126,9 @@ static func on_minute() -> void:
 	for sit in Story.situations:
 		match str(sit["state"]):
 			"scheduled":
-				if now >= int(sit["arrive_min"]):
+				if now >= int(sit["arrive_min"]) and (Circadian.guests_curfew() or now > int(sit["arrive_min"]) + 180):
+					sit["state"] = "done"          # the moment passed (the host was away, or it is night now): nobody turns up at 3 a.m.
+				elif now >= int(sit["arrive_min"]):
 					_arrive(sit)
 			"arrive":
 				if now >= int(sit["arrive_min"]) + 10:
@@ -248,7 +259,7 @@ static func _finish_situation(sit: Dictionary) -> void:
 			h.add_to_stat("social", 25.0)
 			Economy.deposit(int(h.household_id), reward, "visitor gifts")
 	sit["state"] = "done"
-	var msg: String = "The %s is over. Score: %d%s" % [str(sit["kind"]), int(round(score)), (" - a hit! (+%d coins in gifts)" % reward) if success else "."]
+	var msg: String = "The %s is over.%s" % [str(sit["kind"]), (" It went well: they left %d coins in gifts." % reward) if success and reward > 0 else ""]          # no score on screen (quiet depth)
 	SysUtil.notify(msg, "visit")
 	Story._log(msg)
 	SysUtil.game_event("visit_finished", {"situation": sit["id"], "score": score, "success": success, "reward": reward,

@@ -112,7 +112,7 @@ static func _revenge_or_forgive(t: Dictionary, victim: int, cheater: int) -> voi
 static func _visit(t: Dictionary, host: int, guest: int) -> void:
 	if host < 0 or SysUtil.folk(host) == null or not Story.townies.has(guest) or not bool(Story.townies[guest]["alive"]):
 		return
-	var arrive: int = SysUtil.now() + 60
+	var arrive: int = StoryVisits.daytime(SysUtil.now() + 60)
 	StoryVisits.schedule_visit([guest], host, arrive, 120, "visit")
 	var txt: String = str(t.get("text", "{other} came by.")).replace("{other}", Story.name_of(guest)).replace("{subject}", Story.name_of(guest))
 	SysUtil.notify(txt, "visit")

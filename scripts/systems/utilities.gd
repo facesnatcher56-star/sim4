@@ -132,7 +132,8 @@ static func finish(o: Dictionary) -> void:
 	if bool(o.get("apply", true)):
 		UtilityHomes.on_end(o)
 	if bool(o["told"]):
-		SysUtil.notify("The %s is back on %s." % [short(str(o["util"])), CityState.zone_label(str(o["zone"]))], "good")
+		var what: String = short(str(o["util"]))
+		SysUtil.notify("The %s %s back on %s." % [what, "are" if " and " in what else "is", CityState.zone_label(str(o["zone"]))], "good")
 	# a burst main leaves a boil water notice behind (sometimes)
 	var spec: Dictionary = ((cfg().get("causes", {}) as Dictionary).get(str(o["util"]), {}) as Dictionary).get(str(o["cause"]), {})
 	if str(o["cause"]) == "burst_main" and CityState.chance(float(spec.get("boil_after", 0.0))):
