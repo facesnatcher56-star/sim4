@@ -11,7 +11,6 @@ const SPEED := 1.5
 var view: VehicleView
 var list: Array = []
 var _root: Node3D = null
-var _mats: Dictionary = {}
 
 
 func _init(v: VehicleView) -> void:
@@ -36,30 +35,38 @@ func add(from: Vector2, to: Vector2, color_seed: int, on_done: Callable = Callab
 	list.append({"pos": from, "to": to, "seed": color_seed, "on_done": on_done, "node": null})
 
 
+## The same adult model and rig as FolkView, a stable look from the seed (never primitives). A missing model is an error, not a drawn stand-in.
 func _body(seed: int) -> Node3D:
-	var col := Color.from_hsv(float(absi(seed) % 360) / 360.0, 0.45, 0.8)
 	var n := Node3D.new()
-	var m := StandardMaterial3D.new()
-	m.albedo_color = col
-	var body := MeshInstance3D.new()
-	var cap := CapsuleMesh.new()
-	cap.radius = 0.2
-	cap.height = 1.1
-	body.mesh = cap
-	body.position.y = 0.65
-	body.material_override = m
-	n.add_child(body)
-	var head := MeshInstance3D.new()
-	var sph := SphereMesh.new()
-	sph.radius = 0.14
-	sph.height = 0.28
-	head.mesh = sph
-	head.position.y = 1.32
-	var hm := StandardMaterial3D.new()
-	hm.albedo_color = Color(0.86, 0.7, 0.58)
-	head.material_override = hm
-	n.add_child(head)
+	var path: String = FolkView.variant_path("adult")
+	var ps = load(path) if path != "" else null
+	if not (ps is PackedScene):
+		push_error("VehicleWalkers: no folk model to draw a walker with (%s)" % path)
+		return n
+	var rig: Node = (ps as PackedScene).instantiate()
+	n.add_child(rig)
+	var g := RandomNumberGenerator.new()
+	g.seed = absi(seed) * 2654435761 + 17
+	var ap: Dictionary = Genetics.random_appearance(g)
+	var shirt_d := Color.from_hsv(float(absi(seed) % 360) / 360.0, 0.55, 0.85)
+	FolkRigStyle.apply(rig, ap, "adult", shirt_d)
+	var anim: AnimationPlayer = _find_anim(rig)
+	if anim != null:
+		FolkView.prepare_player(anim)
+		var clip: String = str(FolkView.anim_map().get("walk_clip", "Walk"))
+		if anim.has_animation(clip):
+			anim.play(clip)
 	return n
+
+
+static func _find_anim(n: Node) -> AnimationPlayer:
+	if n is AnimationPlayer:
+		return n
+	for c in n.get_children():
+		var r := _find_anim(c)
+		if r != null:
+			return r
+	return null
 
 
 func tick(dt: float) -> void:
@@ -78,7 +85,10 @@ func tick(dt: float) -> void:
 					view.add_child(_root)
 				w["node"] = _body(int(w["seed"]))
 				_root.add_child(w["node"])
-			(w["node"] as Node3D).position = Vector3((w["pos"] as Vector2).x, 0.0, (w["pos"] as Vector2).y)
+			var nd := w["node"] as Node3D
+			nd.position = Vector3((w["pos"] as Vector2).x, 0.0, (w["pos"] as Vector2).y)
+			if pos.distance_to(to) > 0.01:
+				nd.rotation.y = atan2(-(to.x - pos.x), -(to.y - pos.y))
 		if arrived:
 			if w["node"] != null and is_instance_valid(w["node"]):
 				(w["node"] as Node).queue_free()

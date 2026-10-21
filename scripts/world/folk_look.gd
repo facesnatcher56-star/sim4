@@ -82,6 +82,7 @@ func _build_visual() -> void:
 			clip = ""
 			_play_clip("Idle")
 			return
+	push_error("FolkView: no folk model could be loaded for stage %s" % variant)
 	_build_placeholder()
 	_apply_appearance(f)
 

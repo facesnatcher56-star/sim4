@@ -60,6 +60,14 @@ func _process(_d: float) -> bool:
 		for c in fp.get_children():
 			if c is TabContainer:
 				c.current_tab = c.get_tab_idx_from_control(fp.family_box.get_parent()) if fp.family_box.get_parent() != null else 0
+	if _frames == 60 and _scn == "walker":
+		var pf = _main.hud._resolve(_main.hud.selected_folk_id)
+		var vv = _main.find_child("VehicleView", true, false)
+		var at: Vector3 = root.get_node("World").tile_to_pos(pf.tile)
+		if vv != null:
+			for k in 3:
+				vv.walkers.add(Vector2(at.x - 2 + k, at.z + 3), Vector2(at.x + 6 + k, at.z + 3), 11 + k * 97)
+		print("WALKER view=%s count=%d" % [str(vv != null), vv.walkers.count() if vv != null else -1])
 	if _frames == 60 and _scn == "jobs":
 		var hud5 = _main.hud
 		hud5.life_hub.tab = "jobs"
