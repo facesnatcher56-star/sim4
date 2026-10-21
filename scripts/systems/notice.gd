@@ -52,7 +52,7 @@ static func who(actor_id: int, tile: Vector2i, opts: Dictionary = {}) -> Array:
 			p_see = vis * (1.0 - d / maxf(range_s, 1.0)) * per * busy * (1.0 - sneak)
 		var p_hear: float = 0.0
 		if hear > 0.0 and d <= hear:
-			p_hear = noise * (1.0 - d / hear) * (0.3 if asleep else 1.0)
+			p_hear = noise * (1.0 - d / hear) * (0.3 * Creation.mult(fid, "wake_on_noise") if asleep else 1.0)
 		if SysUtil.rng.randf() < p_see:
 			out.append({"id": fid, "how": "saw", "dist": d})
 		elif SysUtil.rng.randf() < p_hear:

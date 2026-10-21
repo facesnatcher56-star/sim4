@@ -26,7 +26,7 @@ static func create(kind: String, culprit: int, victim: int, scene: String, opts:
 		vh = int(scene.get_slice(":", 1))
 	var c: Dictionary = {"id": JusticeState.next_case, "kind": kind, "scene": scene, "day": SysUtil.day(), "minute": SysUtil.now(), "culprit": culprit,
 		"victim": victim, "vhid": vh, "witnessed": bool(opts.get("witnessed", false)), "witnesses": SysUtil.to_ints(opts.get("witnesses", [])),
-		"witness_clarity": float(opts.get("witness_clarity", 0.0)), "trace": float(opts.get("trace", 0.2)), "loot": opts.get("loot", []),
+		"witness_clarity": clampf(float(opts.get("witness_clarity", 0.0)) * Creation.mult(culprit, "witness_id_mult"), 0.0, 1.0), "trace": float(opts.get("trace", 0.2)), "loot": opts.get("loot", []),
 		"loot_value": int(opts.get("loot_value", 0)), "stolen_coins": int(opts.get("stolen_coins", 0)), "state": "hidden", "disc_day": -1, "reporter": -1,
 		"progress": 0.0, "tips": 0.0, "recovered": false, "accused": -1, "suspect_ids": [], "wrongful": false, "charge": "", "bail": 0, "lawyer": -1,
 		"plea": false, "trial": {}, "verdict": "", "sentence": {}, "serial": int(opts.get("serial", -1)), "notes": [], "reopened": 0,

@@ -267,6 +267,7 @@ func _refresh() -> void:
 
 func _open_creator(with_home: bool) -> void:
 	var custom: bool = bool(Scenario.def(selected_id).get("custom", false))
+	creator.editor.difficulty = str(difficulty)          # task 55: the points budget follows the difficulty
 	creator.open(household, start_id, with_home, "Start Playing" if custom else "Use this household")
 	creator.visible = true
 

@@ -22,6 +22,8 @@ var preview: FolkPreview
 var tabs: FolkLookTabs
 var others_provider: Callable = Callable()   # -> Array of the other members' appearances (set by the household creator)
 var sex_opt: OptionButton
+var points: CreationPanel          # task 55: the Points column (the first member only)
+var difficulty: String = "normal"
 var _prev_traits: Array = [-1, -1, -1]
 static var _fitted: Array = []            # member dictionaries already given their sex's starting look
 
@@ -115,6 +117,12 @@ func _ready() -> void:
 	mid.add_child(look)
 	preview = FolkPreview.new()
 	add_child(preview)
+	points = CreationPanel.new()
+	points.changed.connect(func():
+		if not _loading:
+			fd["creation"] = points.spec
+			changed.emit())
+	add_child(points)
 
 func _build_trait_opts(parent: Control) -> void:
 	var traits: Dictionary = SimEnv.data().traits()
@@ -161,6 +169,12 @@ func load_folk(data: Dictionary, first: bool, first_member_name: String) -> void
 		_fitted.append(fd)                    # a member the creator has not shown yet starts with the look its sex usually has (any look stays selectable)
 		GeneticsSex.creator_fit(fd["appearance"], str(fd["sex"]), str(fd.get("name", "")))
 	tabs.load_ap(fd["appearance"])
+	points.visible = first
+	points.difficulty = difficulty
+	if first:
+		if not fd.has("creation"):
+			fd["creation"] = Creation.empty_spec()
+		points.set_spec(fd["creation"])
 	_loading = false
 	preview.show_folk(str(fd.get("stage", "adult")), fd["appearance"])
 

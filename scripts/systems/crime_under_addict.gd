@@ -57,6 +57,7 @@ static func onset_chance(pid: int, sub: String) -> float:
 		p *= float(k.get("onset_stress", 1.3))
 	if CrimePerson.in_custody(pid) or str(rec(pid).get("state", "")) == "using":
 		return 0.0
+	p *= Creation.mult(pid, "addiction_mult")          # task 55: addictive personality
 	return minf(p, float(k.get("onset_cap", 0.3)))
 
 ## One buyer tries a substance. Returns true when they became an addict.
@@ -206,7 +207,8 @@ static func _rehab_day(pid: int, r: Dictionary) -> void:
 	if SysUtil.day() < int(r.get("rehab_until", 0)):
 		return
 	var rc: Dictionary = rehab_cfg()
-	var p: float = float(rc.get("success", 0.45)) + (0.06 if CrimePerson.has_trait(pid, "ambitious") else 0.0)          # willpower is a nature and support, not a skill - float(r["level"]) * 0.3 + (float(rc.get("support", 0.12)) if not CrimePerson.close_alive(pid).is_empty() else 0.0)
+	# willpower is a nature and support, not a skill (task 55: Strong-willed / Weak-willed add to it)
+	var p: float = float(rc.get("success", 0.45)) + (0.06 if CrimePerson.has_trait(pid, "ambitious") else 0.0) + 0.04 * Creation.add(pid, "willpower") 		- float(r["level"]) * 0.3 + (float(rc.get("support", 0.12)) if not CrimePerson.close_alive(pid).is_empty() else 0.0)
 	if CrimePerson.has_trait(pid, "stubborn"):
 		p += 0.08
 	if CrimeUnderState.chance(clampf(p, 0.05, 0.95)):

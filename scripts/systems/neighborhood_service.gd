@@ -86,7 +86,7 @@ static func _meetings() -> void:
 			var rid: int = int(r.id)
 			if not RelationshipService.knows(rid, tid):
 				if SysUtil.chance(0.55):
-					RelationshipService.add_both(rid, tid, "friendship", float(Story.cfg().get("visits", {}).get("acquaintance_friendship", 6)))
+					RelationshipService.add_both(rid, tid, "friendship", float(Story.cfg().get("visits", {}).get("acquaintance_friendship", 6)) + 3.0 * Creation.add(rid, "first_impression"))          # task 55: clean-cut
 					RelationshipService.add_history(rid, tid, "met", 0.3, tid)
 					SysUtil.notify("%s met %s at %s." % [r.name, n.name, lot_label], "relationship")
 					SysUtil.game_event("met_townie", {"folk_id": rid, "townie_id": tid, "lot_id": lot_id})

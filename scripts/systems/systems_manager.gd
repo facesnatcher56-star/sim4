@@ -103,6 +103,8 @@ static func reset_all() -> void:
 	RestrictedPlaces.reset()
 	PersonActs.reset()
 	BankBranch.reset()
+	Creation.reset()
+	Inventory.reset()
 	VenueStaff.first_asked = {}
 	SoloDistricts.reset()
 	SuccessionNobody.reset()

@@ -55,6 +55,7 @@ static func temper(pid: int) -> float:
 		for bf in cfg().get("drunk_buffs", []):
 			if f.has_buff(str(bf)):
 				m *= float(k.get("drunk", 2.0))
+	m *= Creation.mult(pid, "fight_start_mult")          # task 55: short fuse
 	m = minf(m, float(cfg().get("trait_cap", 3.0)))
 	if int(JusticeState.coursed.get(pid, -1)) >= SysUtil.day():
 		m *= float(cfg().get("course_mult", 0.25))

@@ -209,7 +209,7 @@ static func dose_mult(f) -> float:
 		m *= num("dose_injured", 0.8)
 	if f.has_buff("sick"):
 		m *= num("dose_sick", 0.8)
-	return m * (1.0 + num("dose_fitness", 0.02) * float(mini(f.skill_level("fitness"), 8)))
+	return m * (1.0 + num("dose_fitness", 0.02) * float(mini(f.skill_level("fitness"), 8))) * Creation.mult(int(f.id), "smoke_dose_mult")          # task 55: asthma
 
 ## How easily a sleeper wakes (1 = average). 0 = cannot wake (passed out, drunk).
 static func wake_mult(f) -> float:
@@ -222,7 +222,7 @@ static func wake_mult(f) -> float:
 			m *= float(tr[t])
 	if f.has_buff("exhausted") or f.get_stat_value("energy") < -60.0:
 		m *= num("wake_exhausted", 0.5)
-	return m
+	return m * Creation.mult(int(f.id), "wake_on_noise")          # task 55: light / heavy sleeper
 
 static func trait_score(f) -> float:
 	var s: float = 0.0

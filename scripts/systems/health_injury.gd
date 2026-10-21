@@ -13,7 +13,7 @@ static func injure(f, severity: int, cause: String = "") -> bool:
 	var cur: int = int(r.get("inj", 0)) if f.has_buff("injured") else 0
 	r["inj"] = maxi(cur, severity)
 	r["inj_cause"] = cause
-	var hours: float = float(IncidentDefs.cfg("hospital", {}).get("injured_hours", {}).get(str(r["inj"]), 24.0))
+	var hours: float = float(IncidentDefs.cfg("hospital", {}).get("injured_hours", {}).get(str(r["inj"]), 24.0)) / maxf(Creation.mult(int(f.id), "heal_mult"), 0.1)          # task 55: tough
 	HealthIllness.timed(f, "injured", hours * 60.0)
 	Health.count("injured")
 	SysUtil.game_event("injured", {"folk_id": int(f.id), "severity": severity, "reason": cause})

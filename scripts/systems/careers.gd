@@ -321,7 +321,7 @@ static func on_day(day: int) -> void:
 			continue
 		# offers
 		if not jobs.has(fid) and not offers.has(fid) and not homemakers.has(fid) and JobSeeking.cooled_down(f) and stage == min_stage and Aging.stage_index(stage) >= Aging.stage_index(min_stage):
-			if SysUtil.chance(float(s.get("offer_chance_per_day", 0.3)) * StoryPacing.mult("job", int(f.household_id))):
+			if SysUtil.chance(float(s.get("offer_chance_per_day", 0.3)) * StoryPacing.mult("job", int(f.household_id)) * clampf(1.0 + 0.2 * Creation.hiring(fid, "all"), 0.2, 2.0)):          # task 55: a record or a background
 				make_offer(f)
 
 static func _retire(f) -> void:

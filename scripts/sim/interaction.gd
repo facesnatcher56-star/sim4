@@ -288,8 +288,14 @@ func _still_valid() -> bool:
 
 func _apply_rates(m: float) -> void:
 	var pm: Dictionary = def.get("per_min", {})
+	var sleep_q: float = 1.0
+	if (def.get("tags", []) as Array).has("sleep"):
+		sleep_q = maxf(1.0 + Creation.add(actor.id, "sleep_quality"), 0.2)          # task 55: insomniac, heavy / light sleeper
 	for k in pm:
-		actor.add_to_stat(str(k), float(pm[k]) * m)
+		var v: float = float(pm[k]) * m
+		if str(k) == "energy" and v > 0.0:
+			v *= sleep_q
+		actor.add_to_stat(str(k), v)
 	var xp: Dictionary = def.get("skill_xp_per_min", {})
 	for s in xp:
 		actor.add_skill_xp(str(s), float(xp[s]) * m)

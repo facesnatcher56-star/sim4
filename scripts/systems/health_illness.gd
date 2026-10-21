@@ -32,6 +32,8 @@ static func fall_ill(f, kind: String, severity: int = 1, cause: String = "") -> 
 	if f == null:
 		return false
 	severity = clampi(severity, 1, 3)
+	if kind == "food_poisoning" and SysUtil.rng.randf() > Creation.mult(int(f.id), "food_sickness_mult"):
+		return false          # task 55: an iron stomach shrugs it off
 	var kd: Dictionary = kind_def(kind)
 	var r: Dictionary = Health.rec_of(int(f.id))
 	var mins: float = float(kd.get("hours", 24.0)) * 60.0 * (1.0 + 0.5 * float(severity - 1))

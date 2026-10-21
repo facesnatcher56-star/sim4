@@ -56,7 +56,7 @@ static func install() -> void:
 static func to_dict() -> Dictionary:
 	return {"economy": MarketEconomy.to_dict(), "shops": ShopStock.to_dict(), "gamble": BankGamble.to_dict(), "accounts": BankAccounts.to_dict(),
 		"insurance": BankInsurance.to_dict(), "wills": BankWill.to_dict(), "props": HousingProps.to_dict(), "rent": HousingRent.to_dict(),
-		"business": BusinessState.to_dict(), "work": MarketWork.to_dict()}
+		"business": BusinessState.to_dict(), "work": MarketWork.to_dict(), "creation": Creation.to_dict(), "inventory": Inventory.to_dict()}
 
 ## A save without the block (made before task 13) switches the economy on with fresh state.
 static func from_dict(d: Dictionary, has_block: bool) -> void:
@@ -73,4 +73,6 @@ static func from_dict(d: Dictionary, has_block: bool) -> void:
 	HousingProps.from_dict(d.get("props", {}))
 	HousingRent.from_dict(d.get("rent", {}))
 	BusinessState.from_dict(d.get("business", {}))
+	Creation.from_dict(d.get("creation", {}))
+	Inventory.from_dict(d.get("inventory", {}))
 	MarketWork.from_dict(d.get("work", {}))

@@ -251,6 +251,7 @@ func add_skill_xp(skill: String, xp: float) -> void:
 		skills[skill] = {"xp": 0.0, "level": 0}
 	var sk: Dictionary = skills[skill]
 	if xp > 0.0:
+		xp *= Creation.mult(id, "skill_xp_mult")          # task 55: fast / slow learner
 		xp /= 1.0 + XP_TAPER_STEP * maxf(float(sk["level"]) - XP_TAPER_FROM, 0.0)
 	sk["xp"] = float(sk["xp"]) + xp
 	var lvl := int(sk["level"])

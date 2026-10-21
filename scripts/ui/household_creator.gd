@@ -113,7 +113,7 @@ func open(h: Dictionary, p_start_id: String, with_home: bool, go_text: String) -
 	selected = 0
 	name_edit.text = str(household.get("name", "Fernwood"))
 	go_btn.text = go_text
-	intro.text = "You play one Folk. Pick a name, three traits (they change what a Folk enjoys and how they behave), a life aspiration and a look. Hover for details."
+	intro.text = "You play one Folk. Pick a name, three traits (they change what a Folk enjoys and how they behave), a life aspiration and a look, then spend your points on a background, skills, perks and flaws. Hover for details."
 	var h0: String = str(_members()[0].get("heritage", ""))
 	for i in heritage_opt.item_count:
 		if str(heritage_opt.get_item_metadata(i)) == h0:
@@ -224,6 +224,9 @@ func submit() -> void:
 		error_label.text = "Give your household a name."
 		return
 	var err := HouseholdSetup.validate(household)
+	var first: Dictionary = (household.get("folk", []) as Array)[0] if not (household.get("folk", []) as Array).is_empty() else {}
+	if err == "" and first.has("creation") and Creation.left(first["creation"], editor.difficulty) < 0:
+		err = "Too many points spent. Drop a perk, a skill level, or take a flaw."          # task 55
 	error_label.text = err
 	if err == "":
 		done.emit(household, start_id)

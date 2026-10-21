@@ -25,6 +25,7 @@ static func level(pid: int, skill: String) -> float:
 	var v: float = own(pid, skill)
 	for h in (def.get("helpers", {}) as Dictionary):
 		v += own(pid, str(h)) * float(def["helpers"][h])
+	v += Creation.check(pid, skill)          # task 55: perks and flaws (strong, keen eye, bad back, poor eyesight ...)
 	return clampf(v, 0.0, 10.0)
 
 ## The place and moment (dark, noisy, crowded, raining) plus the shared body condition (SkillCondition: age, injury, drunk or high, tired, hungry, sick).
@@ -58,9 +59,13 @@ static func chance(pid: int, act: String, ctx: Dictionary = {}) -> float:
 	if d.is_empty():
 		return 0.5
 	var mine: float = level(pid, str(d["skill"])) / 10.0
+	if act == "outrun":
+		mine *= Creation.mult(pid, "chase_mult")          # asthma, a smoker's lungs
 	var theirs: float = float(d.get("difficulty", 0.5))
 	if ctx.has("opponent") and d.has("opposed"):
 		theirs = clampf(0.25 + level(int(ctx["opponent"]), str(d["opposed"])) / 10.0 * 0.6 + (0.1 if bool(ctx.get("watching", true)) else -0.1), 0.05, 0.95)
+		if act in ["threaten", "lie"]:
+			theirs = clampf(theirs + 0.05 * Creation.add(int(ctx["opponent"]), "willpower"), 0.05, 0.95)          # task 55: hard to push around
 	var p: float = 0.5 + (mine - theirs) * 0.9 + _tools(pid, d, ctx) + _conditions(pid, ctx)
 	for tr in (ctx.get("traits", {}) as Dictionary):
 		if SocialDynamics.has_t(pid, str(tr)):

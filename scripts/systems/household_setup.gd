@@ -177,6 +177,8 @@ static func apply(h: Dictionary, folk: Array) -> void:
 			Goals.set_aspiration(int(folk[i].id), asp)
 		if bool(specs[i].get("homemaker", false)):
 			Homemaker.set_role(folk[i], true)
+		if specs[i].has("creation"):
+			Creation.apply(folk[i], specs[i]["creation"])          # task 55: background, bought skills, perks and flaws (a new game only; heirs never)
 	var mate: int = _mate_index(specs)
 	var sib_parent: int = -1
 	for i in range(1, folk.size()):
