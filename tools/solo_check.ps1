@@ -18,3 +18,6 @@ Run "housing run" "--headless,--path,.,--script,res://tools/solo_smoke.gd,--,1,-
 Run "rough district run" "--headless,--path,.,--script,res://tools/solo_smoke.gd,--,1,--rough"
 Run "main scene boots" "--headless,--path,.,--quit-after,1500,--,--autostart"
 Write-Output (& powershell -File (Join-Path $PSScriptRoot "heritage_guard.ps1") | Out-String)
+$g = "C:\Users\lloyd\AppData\Local\Godot47\Godot_v4.7-stable_win64_console.exe"
+$p = Start-Process $g -ArgumentList "--path",".","--quit-after","300" -PassThru -Wait -NoNewWindow -WorkingDirectory $root
+if ($p.ExitCode -eq 0) { Write-Output "ok   windowed title screen quits clean" } else { Write-Output "FAIL windowed title screen exit code $($p.ExitCode)" }

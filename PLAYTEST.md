@@ -4,16 +4,14 @@ Thank you for playing. Start the game with `Folk.exe` (or the Folk shortcut on t
 
 ## Starting a game
 
-1. Title screen: **New Game**, **Continue** (your latest save), **Load Game...**, **Co-op**, **Settings**, **Quit**.
-2. **New Game** shows the scenario cards:
-   - **Solo Start**: one Folk in a small flat. Find work, make a friend, pay the bills.
-   - **Couple**: two partners moving in together.
-   - **Young Family**: two parents and a child on a tight budget.
-   - **Roommates**: three unrelated Folk in a big house.
-   - **Free Play**: design your own household of 1 to 6 Folk, any age, any home. This opens the household creator (names, looks, traits, clothes, home).
-3. Pick a difficulty (relaxed / normal / hard).
-4. **Storyteller** row: Calm, Classic, Chaotic or Custom. This decides how often unexpected things happen (accidents, visitors, trouble, windfalls). Calm = few surprises, Chaotic = lots. Custom gives four sliders. "Surprises" in Settings > Gameplay is a separate switch (off / rare / normal / chaotic).
-5. Start. The first time, short welcome tips appear (you can show them again from the help window).
+1. Title screen: **New Game**, **Continue**, **Load Game...**, **Co-op**, **Settings**, **Quit**.
+2. **New Game** is the one-character game: you play ONE Folk. Choose a name, traits, look and a heritage (or leave it random), a difficulty (Easy 350 coins, Normal 200, Hard 100) and a storyteller.
+3. You start broke in a rented, empty studio. **Nobody feeds you** and your Folk does nothing unless you tell them: no free food, cooking costs ingredients, rent and bills come every week. Find work (Town > Jobs, or the mailbox for Odd Jobs), eat from your pocket (bakery, burger place, vending machine) and buy a bed (B).
+4. **Myself** (next to your face) lists things you can do with no furniture: sleep on the floor, sleep rough, a day's labour at the Works.
+5. Miss the rent and the landlord evicts you. You are then homeless: sleep rough, use the night shelter (a few nights a week, no food), take day labour. Money > Homes shows the ladder (bedsit, council flat, studio, better flat, house) and lets you move; your things go with you.
+6. The Kiln Quarter (south-east) is the rough district: cheap rooms, more crime, slow police, crews that make offers to broke people. Settings > Gameplay > Gang violence turns the violence down or off.
+7. At speed 3 the clock races ahead while you sleep, work or walk, and slows when something needs you.
+8. When your Folk dies, a summary of the life (what happened, why, and what your choices set in motion) is shown, then the heir takes over.
 
 ## Controls
 

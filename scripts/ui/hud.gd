@@ -114,8 +114,10 @@ func _ready() -> void:
 	tips.tracker = tracker      # the tips stack under the checklist in the left column
 	UIDialog.overlay_hook = func(open: bool):
 		var a: float = 0.0 if open else 1.0          # one overlay at a time: the tips and the checklist step aside for a window
-		tips.modulate.a = a
-		tracker.modulate.a = a
+		if is_instance_valid(tips) and is_instance_valid(tracker) and is_inside_tree():
+			tips.modulate.a = a
+			tracker.modulate.a = a
+	tree_exiting.connect(func(): UIDialog.overlay_hook = Callable())
 	var coop_hud := CoopHud.new()      # pace / why time is skipping / pause vote / alerts / name tags; invisible outside a co-op session
 	coop_hud.hud = self
 	add_child(coop_hud)
