@@ -10,13 +10,11 @@ extends RefCounted
 static var known_locked: Dictionary = {}          # "fid|lot" -> true once the door was tried
 static var forced: Dictionary = {}                # lot -> day the door was forced / picked open (stays open that day)
 static var intruders: Dictionary = {}             # fid -> lot id they are in without being invited
-static var working: Dictionary = {}               # fid -> {lot, act, r}: an attempt under way (it takes the minutes the skill says)
 
 static func reset() -> void:
 	known_locked = {}
 	forced = {}
 	intruders = {}
-	working = {}
 
 static func cfg() -> Dictionary:
 	return SysUtil.table("doors")
@@ -200,37 +198,21 @@ static func _ctx(lot_id: String) -> Dictionary:
 
 const WORK_LABEL := {"pick_lock": "Picking the lock", "force_door": "Forcing the door", "break_window": "Breaking a window"}
 
-## An attempt takes the time the skill says (an expert picks a lock in a minute, a novice in ten, and every minute at the door is a minute to be seen).
-## The roll is made now; what happens lands when the work is done. Cancelling it means giving up (nothing happens).
+## An attempt takes the time the skill says (TimedAttempt), and every minute at the door is a minute to be heard. It resolves only if the pawn is still at this door.
 static func _attempt(f, lot_id: String, act: String) -> void:
-	var r: Dictionary = SkillCheck.attempt(int(f.id), act, _ctx(lot_id))
-	var ir: Interaction = Interaction.create("wait_here", f, -1, true)
-	if ir == null:
-		_resolve(f, lot_id, act, r)
-		return
-	ir.def = ir.def.duplicate(true)
-	ir.def["duration_min"] = maxf(float(r["minutes"]), 1.0)
-	ir.def["label"] = str(WORK_LABEL.get(act, "Working at the door"))
-	ir.def.erase("thought")
-	working[int(f.id)] = {"lot": lot_id, "act": act, "r": r}
-	f.enqueue(ir)
+	TimedAttempt.start(f, act, str(WORK_LABEL.get(act, "Working at the door")), _ctx(lot_id), func(r):
+		if str(f.get_meta("at_door", "")) == lot_id:
+			_resolve(f, lot_id, act, r))
 
-static func on_interaction_finished(folk_id: int, iid: String, success: bool) -> void:
-	if iid == "go_here":
-		var g = SysUtil.folk(folk_id)
-		if g != null and g.has_meta("door_walk"):
-			var lot: String = str(g.get_meta("door_walk"))
-			g.remove_meta("door_walk")
-			if str(g.get_meta("at_door", "")) == lot:
-				SysUtil.game_event("doorstep", {"folk_id": folk_id, "lot_id": lot})
+static func on_interaction_finished(folk_id: int, iid: String, _success: bool) -> void:
+	if iid != "go_here":
 		return
-	if iid != "wait_here" or not working.has(folk_id):
-		return
-	var w: Dictionary = working[folk_id]
-	working.erase(folk_id)
-	var f = SysUtil.folk(folk_id)
-	if success and f != null and str(f.get_meta("at_door", "")) == str(w["lot"]):
-		_resolve(f, str(w["lot"]), str(w["act"]), w["r"])
+	var g = SysUtil.folk(folk_id)
+	if g != null and g.has_meta("door_walk"):
+		var lot: String = str(g.get_meta("door_walk"))
+		g.remove_meta("door_walk")
+		if str(g.get_meta("at_door", "")) == lot:
+			SysUtil.game_event("doorstep", {"folk_id": folk_id, "lot_id": lot})
 
 static func pick(f, lot_id: String) -> void:
 	_attempt(f, lot_id, "pick_lock")

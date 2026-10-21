@@ -45,6 +45,8 @@ static func sell(hid: int, id: int) -> Dictionary:
 		return {"ok": false, "reason": "That is not your car."}
 	if bool(c["towed"]):
 		return {"ok": false, "reason": "The car is at the pound."}
+	if bool(c.get("stolen", false)):
+		return {"ok": false, "reason": "The dealer asks for the papers. There are none."}
 	var v: int = value(c)
 	TransportParking.leave(c)
 	Transport.cars.erase(str(id))

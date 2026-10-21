@@ -66,6 +66,19 @@ func _ready() -> void:
 	var w = WorldIface.world()
 	if w != null and w.has_signal("world_reset"):
 		w.world_reset.connect(reset)
+	var ev = get_node_or_null("/root/Events")
+	if ev != null:
+		ev.game_event.connect(_on_game_event)
+
+
+## Task 53: a parked car the pawn drove off with is now theirs: the same body, tagged as an owner car (it leaves only with them).
+func _on_game_event(ev_name: String, p: Dictionary) -> void:
+	if ev_name != "car_taken":
+		return
+	for v in sim.vehicles:
+		if str(v.get("key", "")) == str(p.get("key", "")):
+			v["tag"] = "owner"
+			v["key"] = "car:%d" % int(p.get("car", -1))
 
 
 func reset() -> void:

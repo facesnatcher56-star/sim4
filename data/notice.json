@@ -1,0 +1,32 @@
+{
+ "_doc": "Task 53 (no hints): who notices an act (scripts/systems/notice.gd) and what they do. sight / hear: tiles (hear is scaled by the act's noise 0..1); night outdoors halves the sight range. busy_mult: someone doing something else notices less. stealth_cut: how much a fully skilled sneak cuts the chance to be seen. reactions.<table>.<role>.<reaction>: w = weight, lines = what they say ({n} the noticer, {a} the actor). trait_mods: per trait, a multiplier per reaction id. knows_mods: when the noticer knows the actor.",
+ "sight": 14,
+ "hear": 16,
+ "busy_mult": 0.6,
+ "stealth_cut": 0.5,
+ "trait_mods": {
+  "hot_headed": {"confront": 2.0, "fight": 3.0, "ignore": 0.4},
+  "shy": {"ignore": 2.5, "call": 1.5, "confront": 0.4, "fight": 0.2},
+  "loner": {"ignore": 1.8},
+  "gossip": {"ignore": 0.5, "call": 1.3},
+  "honest": {"call": 1.6, "ignore": 0.5},
+  "easygoing": {"ignore": 1.6, "fight": 0.5},
+  "active": {"chase": 2.0}
+ },
+ "knows_mods": {"call": 0.4, "confront": 1.5, "fight": 0.6},
+ "reactions": {
+  "car": {
+   "owner": {
+    "confront": {"w": 1.4, "lines": ["{n} comes running. \"Hey! That's my car!\"", "\"Get away from my car!\" {n} shouts.", "{n} stops dead. \"What do you think you're doing with my car?\""]},
+    "call": {"w": 0.8, "lines": ["{n} already has the phone out. \"Someone's breaking into my car.\"", "{n} backs off, dialling. \"Police, please. My car.\""]},
+    "fight": {"w": 0.3, "lines": ["{n} grabs {a} by the collar. \"Not my car, you don't.\""]},
+    "chase": {"w": 0.3, "lines": ["{n} runs at {a}, yelling."]}
+   },
+   "passerby": {
+    "confront": {"w": 0.8, "lines": ["\"Oi! Is that your car?\" {n} calls over.", "{n} slows down. \"Everything all right there?\"", "\"That's not your car, is it?\" {n} asks."]},
+    "call": {"w": 0.7, "lines": ["{n} walks on quickly, phone to the ear.", "{n} stops at a distance and makes a call, watching."]},
+    "ignore": {"w": 1.3, "lines": []}
+   }
+  }
+ }
+}

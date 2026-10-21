@@ -512,9 +512,25 @@ func _on_selection_changed(kind: String, id: int) -> void:
 			var f = _resolve(selected_folk_id)
 			if f != null:
 				pie.open_for(f, "object", id, _menu_pos())
+		"car":
+			_open_car(id, _menu_pos())
 		_:
 			selected_object_id = -1
 			pie.close()
+
+## Task 53: a parked car's menu (CarActs): what a person standing at it could try. Your own car (or a car with nothing to try) gets the ground menu.
+func _open_car(vid: int, at: Vector2) -> void:
+	var f = _resolve(selected_folk_id)
+	var vv = lot_view.get_node_or_null("VehicleView") if lot_view != null else null
+	if f == null or vv == null:
+		return
+	for v in vv.sim.vehicles:
+		if int(v["id"]) == vid:
+			var car := {"key": str(v.get("key", "")), "lot": str(v.get("lot", "")), "pos": v["pos"], "glb": str(v.get("glb", ""))}
+			var entries: Array = CarActs.entries(f, car)
+			if not entries.is_empty():
+				pie.open_with_entries(f, "car", -1, entries, at)
+			return
 
 func _on_coins_changed(_hh: int, amount: int) -> void:
 	if _hh <= 0:
@@ -623,6 +639,8 @@ func _on_context_requested(kind: String, id: int, tile: Vector2i) -> void:
 		"object":
 			selected_object_id = id
 			pie.open_for(f, "object", id, at)
+		"car":
+			_open_car(id, at)
 		"folk":
 			if id == int(UIU.prop(f, "id", -1)):
 				pie.open_with_entries(f, "self", -1, InteractionQuery.self_entries(f), at)

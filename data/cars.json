@@ -1,0 +1,24 @@
+{
+ "_doc": "Task 53 cars (scripts/systems/car_acts.gd). Any parked car that is not yours can be tried: the door, then (once found locked by trying it) picking it or breaking a window; inside, searching it and hotwiring it. Hidden until tried, stable per car and day: locked (by day / night), keys left inside, a car alarm, coins in the cup holder [chance, min, max]. Taking it is car theft (justice.json car_theft): a witness who saw it reports it at once, otherwise it is found missing later (discover_hours). owner_looks: chance the owner at home glances out at the car. model_of_glb: which car model a parked body is, once it is yours to drive.",
+ "locked": {"day": 0.8, "night": 0.93},
+ "keys_inside": 0.03,
+ "alarm": 0.25,
+ "coins_inside": [0.3, 2, 15],
+ "discover_hours": [1, 6],
+ "owner_looks": 0.2,
+ "model_of_glb": {"car_sedan": "banger", "car_hatchback": "hatch", "car_van": "estate"},
+ "lines": {
+  "locked": ["The door is locked.", "The handle lifts, the door does not.", "Locked."],
+  "open": ["The door opens.", "It isn't locked.", "The door swings open."],
+  "searched_none": ["Nothing in the glovebox but old receipts.", "Some napkins, a map, nothing else.", "Nothing worth taking."],
+  "searched_keys": ["The keys are tucked behind the sun visor."],
+  "searched_coins": ["A few coins in the cup holder: {c} coins."],
+  "started": ["The engine catches.", "It coughs, then turns over."],
+  "drive": ["You pull away from the kerb.", "The car rolls out into the street."],
+  "hotwire_fail": ["The engine turns over and dies.", "Nothing. Wrong wires."],
+  "pick_fail": ["The lock won't give.", "The slim jim slips."],
+  "window_fail": ["The glass cracks but holds."],
+  "window_ok": ["The window gives in a shower of glass."],
+  "alarm": ["The car alarm starts screaming.", "Lights flash and the horn blares."]
+ }
+}

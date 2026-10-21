@@ -32,6 +32,8 @@
   "lie": {"skill": "manipulation", "difficulty": 0.5, "minutes": 2, "noise": 0.0, "opposed": "perception"},
   "threaten": {"skill": "intimidation", "tools": ["weapon"], "difficulty": 0.5, "minutes": 1, "noise": 0.2, "opposed": "fighting", "catastrophe": {"injure": [2, "fight"], "noise": 1.0, "line": ["They do not back off. They swing first."]}},
   "sneak": {"skill": "stealth", "difficulty": 0.5, "minutes": 3, "noise": 0.0, "opposed": "perception"},
+  "car_lock": {"skill": "lockpicking", "tools": ["slim_jim", "lockpick"], "difficulty": 0.5, "minutes": 5, "noise": 0.1, "catastrophe": {"trace": 0.5, "noise": 0.6, "line": ["The tool snaps inside the door."]}},
+  "car_window": {"skill": "handiness", "tools": ["crowbar"], "difficulty": 0.25, "minutes": 1, "noise": 0.7, "catastrophe": {"injure": [1, "cut hand"], "trace": 0.5, "line": ["The glass slices your forearm on the way in."]}},
   "cook": {"skill": "cooking", "difficulty": 0.3, "minutes": 30, "noise": 0.0, "catastrophe": {"fire": true, "fire_source": "cooking", "weight": 0.5, "line": ["The pan flares up."]}},
   "fight": {"skill": "fighting", "tools": ["weapon"], "difficulty": 0.5, "minutes": 2, "noise": 0.9, "opposed": "fighting", "catastrophe": {"injure": [2, "fight"], "line": ["A fist lands that you never saw coming."]}}
  },

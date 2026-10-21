@@ -146,6 +146,21 @@ func pick(mp: Vector2) -> Dictionary:
 				best_t = t
 				kind = "object"
 				id = o.id
+	if not _building_tools():          # task 53: a parked car can be right-clicked (try the door ...); folk and furniture in front of it still win
+		var vv = get_node_or_null("VehicleView")
+		if vv != null and vv.sim != null:
+			for v in vv.sim.vehicles:
+				if str(v.get("state", "")) != "parked" or str(v.get("kind", "car")) != "car":
+					continue
+				var pp: Vector2 = v["pos"]
+				if gp != null and (absf(pp.x - gp.x) > 6.0 or absf(pp.y - gp.z) > 6.0):
+					continue
+				var half: float = maxf(float(v.get("len", 4.0)), float(v.get("wid", 1.8))) * 0.5
+				var hit = AABB(Vector3(pp.x - half, _plane_y, pp.y - half), Vector3(half * 2.0, 1.5, half * 2.0)).intersects_ray(ro, rd)
+				if hit != null and ro.distance_to(hit) + 1.0 < best_t:
+					best_t = ro.distance_to(hit) + 1.0
+					kind = "car"
+					id = int(v["id"])
 	return {"kind": kind, "id": id, "tile": tile_at_screen(mp)}
 
 

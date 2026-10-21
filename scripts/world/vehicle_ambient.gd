@@ -32,6 +32,8 @@ func _glb_for_hash(h: int) -> String:
 
 
 func owner_glb(c: Dictionary) -> String:
+	if c.has("glb"):
+		return str(c["glb"])          # task 53: a taken car keeps the body it was parked with
 	var m: Dictionary = (view.cfg.get("models", {}) as Dictionary).get(str(c.get("model", "hatch")), {"glb": "car_hatchback", "paint": ["red"]})
 	var paints: Array = m.get("paint", ["red"])
 	return "%s_%s" % [str(m.get("glb", "car_hatchback")), str(paints[int(c.get("id", 0)) % paints.size()])]
@@ -172,7 +174,7 @@ func _depart() -> void:
 		return
 	var cands: Array = []
 	for v in view.sim.vehicles:
-		if str(v["tag"]) == "ambient" and str(v["state"]) == "parked" and not v.has("dest_lot") and not v.has("leaving") and view.sim.vt >= float(v.get("stay_until", 0.0)) and view.in_range(v["pos"], 1.0):
+		if str(v["tag"]) == "ambient" and str(v["state"]) == "parked" and not v.has("dest_lot") and not v.has("leaving") and view.sim.vt >= float(v.get("stay_until", 0.0)) and view.in_range(v["pos"], 1.0) 				and not CarActs.held(str(v.get("key", ""))):          # task 53: nobody drives off a car someone is working at or sitting in
 			cands.append(v)
 	if cands.is_empty():
 		return
