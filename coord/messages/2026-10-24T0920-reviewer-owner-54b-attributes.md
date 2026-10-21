@@ -2,7 +2,7 @@ from: reviewer
 to: builder
 type: task
 re: 2026-10-24T0850-reviewer-owner-54-skill-checks.md
-status: open
+status: withdrawn
 
 # 54b: Attributes that govern skills, Elder Scrolls style (owner)
 
