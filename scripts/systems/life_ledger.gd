@@ -18,14 +18,18 @@ const CAUSES := {
 	"revenge": ["secret_out", "crime", "fight"], "forgiveness": ["secret_out", "crime", "fight", "revenge"], "separation": ["secret_out"],
 	"recovery": ["addiction", "hospital"], "redemption": ["jailed", "released"], "child_placed": ["child_services"], "child_returned": ["child_placed"]}
 
+## A kind matches a rule word when it is that word, or the word ends in "_" and names a family ("civil_" = civil_suit, civil_won...): "fired" is not "fire".
+static func kind_is(kind: String, word: String) -> bool:
+	return kind == word or (word.ends_with("_") and kind.begins_with(word))
+
 static func _can_cause(effect: String, e: Dictionary) -> bool:
 	var rule: Array = CAUSES.get(effect, [])
 	for k in CAUSES:
-		if rule.is_empty() and effect.begins_with(str(k)):
+		if rule.is_empty() and kind_is(effect, str(k)):
 			rule = CAUSES[k]
 	var ck: String = "choice" if bool(e["choice"]) else str(e["kind"])
 	for w in rule:
-		if ck.begins_with(str(w)):
+		if kind_is(ck, str(w)):
 			return true
 	return false
 
@@ -119,7 +123,7 @@ static func _find_causes(kind: String, who: Array, kinds: Array) -> Array:
 		var e: Dictionary = entries[i]
 		if int(e["day"]) < from:
 			break
-		var ok: bool = _can_cause(kind, e) if kinds.is_empty() else kinds.any(func(k): return ("choice" if bool(e["choice"]) else str(e["kind"])).begins_with(str(k)))
+		var ok: bool = _can_cause(kind, e) if kinds.is_empty() else kinds.any(func(k): return kind_is("choice" if bool(e["choice"]) else str(e["kind"]), str(k)))
 		if not ok:
 			continue
 		for w in who:
