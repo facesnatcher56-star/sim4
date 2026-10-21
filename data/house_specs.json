@@ -1749,32 +1749,32 @@
      "open_default": 1.0,
      "rooms": [
       {
-       "type": "cafe_bar",
+       "type": "cafe_dance",
        "rect": [
         0,
         0,
-        5,
-        14
+        8,
+        7
        ],
        "g": "m"
       },
       {
-       "type": "cafe_dance",
+       "type": "cafe_bar",
        "rect": [
-        5,
         0,
-        17,
-        4
+        7,
+        8,
+        7
        ],
        "g": "m"
       },
       {
        "type": "cafe_floor",
        "rect": [
-        5,
-        4,
-        17,
-        10
+        8,
+        0,
+        14,
+        14
        ],
        "g": "m"
       }
@@ -1789,7 +1789,7 @@
        "type": "cafe_floor",
        "rect": [
         0,
-        5,
+        0,
         22,
         9
        ],
@@ -1799,17 +1799,17 @@
        "type": "cafe_bar",
        "rect": [
         0,
-        0,
+        9,
         12,
         5
        ],
-       "g": "b"
+       "g": "a"
       },
       {
        "type": "cafe_dance",
        "rect": [
         12,
-        0,
+        9,
         10,
         5
        ],
@@ -1836,7 +1836,7 @@
        "type": "cafe_dance",
        "rect": [
         14,
-        6,
+        0,
         8,
         8
        ],
@@ -1846,7 +1846,7 @@
        "type": "cafe_bar",
        "rect": [
         14,
-        0,
+        8,
         8,
         6
        ],
@@ -2209,18 +2209,28 @@
        "rect": [
         0,
         0,
-        15,
-        14
+        22,
+        9
+       ],
+       "g": "m"
+      },
+      {
+       "type": "market_aisles",
+       "rect": [
+        0,
+        9,
+        9,
+        5
        ],
        "g": "m"
       },
       {
        "type": "market_checkout",
        "rect": [
-        15,
-        0,
-        7,
-        14
+        9,
+        9,
+        13,
+        5
        ],
        "g": "m"
       }

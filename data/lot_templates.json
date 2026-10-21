@@ -2146,26 +2146,26 @@
     {
      "def": "cafe_counter",
      "tile": [
-      7,
-      5
+      18,
+      14
      ],
-     "rot": 0
+     "rot": 2
     },
     {
      "def": "cafe_counter",
      "tile": [
-      10,
-      5
+      20,
+      14
      ],
-     "rot": 0
+     "rot": 2
     },
     {
      "def": "cafe_counter",
      "tile": [
-      13,
-      5
+      22,
+      14
      ],
-     "rot": 0
+     "rot": 2
     },
     {
      "def": "coffee_maker",
@@ -2422,15 +2422,15 @@
     {
      "role": "barista",
      "tile": [
-      8,
-      4
+      19,
+      13
      ]
     },
     {
      "role": "bartender",
      "tile": [
-      11,
-      4
+      21,
+      13
      ],
      "hours": [
       17,
@@ -3804,26 +3804,26 @@
     {
      "def": "counter",
      "tile": [
-      20,
-      7
+      17,
+      14
      ],
-     "rot": 0
+     "rot": 2
     },
     {
      "def": "counter",
      "tile": [
-      21,
-      7
+      18,
+      14
      ],
-     "rot": 0
+     "rot": 2
     },
     {
      "def": "counter",
      "tile": [
-      22,
-      7
+      19,
+      14
      ],
-     "rot": 0
+     "rot": 2
     },
     {
      "def": "plant",
@@ -3888,8 +3888,8 @@
     {
      "role": "cashier",
      "tile": [
-      21,
-      6
+      18,
+      13
      ]
     }
    ],
