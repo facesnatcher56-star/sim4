@@ -4,7 +4,7 @@ extends RefCounted
 ## every Folk (to_dict) and the state of all systems. Slot 0 is the daily autosave.
 ## Version 4 = multi-floor (world.levels, level on folk and objects). Version 3 = one continuous map (regions in the world dict, no lot stash). Older saves are refused with OLD_SAVE_MSG.
 
-const DIR := "user://saves"
+static var DIR := "user://saves"      # static var: the test runners point it at a private folder (TestFixture.isolate_user_files)
 const FORMAT := "sim4"
 const VERSION := 4
 const OLD_SAVE_MSG := "This is an old save from an earlier version of the game and can't be loaded."

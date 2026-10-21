@@ -12,6 +12,7 @@ func _process(_delta: float) -> bool:
 		print("usage: -- <test file base name>")
 		quit(2)
 		return true
+	TestFixture.isolate_user_files()
 	var wd = Watchdog.start(Watchdog.budget_from(OS.get_cmdline_user_args(), 300.0), args[0])
 	var script: Variant = load("res://tests/%s.gd" % args[0])
 	var inst: Variant = (script as GDScript).new()
@@ -24,5 +25,6 @@ func _process(_delta: float) -> bool:
 		for m in failures:
 			print("      - " + str(m))
 	wd.stop()
+	TestFixture.clean_user_files()
 	quit(0 if failures.is_empty() else 1)
 	return true

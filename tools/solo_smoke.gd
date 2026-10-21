@@ -9,6 +9,7 @@ func _process(_d: float) -> bool:
 	if _done:
 		return true
 	_done = true
+	TestFixture.isolate_user_files()          # never touch the owner's real settings, UI flags or save slots
 	var days := 1
 	for a in OS.get_cmdline_user_args():
 		if a.is_valid_int():
@@ -140,6 +141,7 @@ func _process(_d: float) -> bool:
 	print("SMOKE housing: rung=%s homeless=%s lot_here=%s shelter_nights=%d" % [SoloHome.rung, str(SoloHome.homeless), Neighborhood.lot_of(f), SoloHome.shelter_nights])
 	print("SMOKE end: alive=%s coins=%d hunger=%.0f energy=%.0f day=%d current=%s bills=%d" % [str(SysUtil.folk(f.id) != null), Economy.balance(f.household_id), f.get_stat_value("hunger"), f.get_stat_value("energy"), Kit.clock().day(), str(f.current.def_id) if f.current != null else "-", Economy.outstanding(f.household_id).size()])
 	Kit.teardown()
+	TestFixture.clean_user_files()
 	quit(0)
 	return true
 

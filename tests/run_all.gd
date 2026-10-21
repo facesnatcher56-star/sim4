@@ -125,6 +125,7 @@ func _run(args: PackedStringArray) -> int:
 	var total_fail := 0
 	var ran := 0
 	var t_all := Time.get_ticks_msec()
+	TestFixture.isolate_user_files()      # settings / ui flags / save slots in a private folder (parallel shards must not share user:// files)
 	var wd = Watchdog.start(Watchdog.budget_from(args, 2400.0 if slow else 900.0), "run_all")
 	for f in files:
 		var file_budget := SLOW_FILE_BUDGET_S if SLOW.has(f) else FILE_BUDGET_S
@@ -156,6 +157,7 @@ func _run(args: PackedStringArray) -> int:
 				for m in failures:
 					print("      - " + str(m))
 	wd.stop()
+	TestFixture.clean_user_files()
 	print("---- %d test files, %d failed, %.1f s ----" % [ran, total_fail, float(Time.get_ticks_msec() - t_all) / 1000.0])
 	print("RESULT: " + ("PASS" if total_fail == 0 and ran > 0 else "FAIL"))
 	return 0 if (total_fail == 0 and ran > 0) else 1

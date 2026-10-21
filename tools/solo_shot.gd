@@ -9,6 +9,7 @@ var _scn := "start"
 
 func _process(_d: float) -> bool:
 	if _main == null:
+		TestFixture.isolate_user_files()          # the shot resets UI flags (tips_seen): keep them off the owner's real prefs
 		root.unfocusable = true          # never take the keyboard / mouse focus from the user's other apps
 		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_MINIMIZED)          # and never sit on top of anything: the run is rendered minimized
 		var args := OS.get_cmdline_user_args()
