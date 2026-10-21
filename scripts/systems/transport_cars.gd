@@ -18,6 +18,9 @@ static func buy(hid: int, model: String) -> Dictionary:
 	var d: Dictionary = Transport.model_def(model)
 	if d.is_empty():
 		return {"ok": false, "reason": "There is no such car for sale."}
+	var buyer = SysUtil.folk(Pawn.of())
+	if buyer != null and int(buyer.household_id) == hid and SocialFit.player_controlled(buyer) and not Licences.has(int(buyer.id), "driving"):
+		return {"ok": false, "reason": "The dealer asks to see a driving licence."}          # task 55
 	if Transport.cars_of(hid).size() >= int(Transport.num("cars", "limit_per_household", 3)):
 		return {"ok": false, "reason": "There is no room for another car."}
 	var cost: int = price(model)

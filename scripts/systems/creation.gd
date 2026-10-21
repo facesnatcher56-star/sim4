@@ -150,6 +150,23 @@ static func check(pid: int, skill: String) -> float:
 			s += float(c[skill])
 	return s
 
+## The kind of a career (data/job_kinds.json), "" when not listed.
+static func job_kind(career_id: String) -> String:
+	var k: Dictionary = SysUtil.table("job_kinds").get("kinds", {})
+	for kind in k:
+		if (k[kind] as Array).has(career_id):
+			return str(kind)
+	return ""
+
+## The hiring bonus for one kind only (without "all"): which offers come.
+static func hiring_kind(pid: int, kind: String) -> float:
+	var s: float = 0.0
+	if kind == "":
+		return s
+	for e in _effects(pid):
+		s += float(((e as Dictionary).get("hiring", {}) as Dictionary).get(kind, 0))
+	return s
+
 ## Hiring bonus by job kind ("all" applies to every job).
 static func hiring(pid: int, kind: String) -> float:
 	var s: float = 0.0

@@ -71,6 +71,13 @@ static func receive(hid: int, sid: String, iid: String, qty: int, folk_id: int) 
 			BankGamble.add_tickets(hid, qty, folk_id)
 		"object":
 			ShopStock.parcel_add(hid, str(it.get("def", iid)), qty)
+		"inventory":          # task 55: carried by the buyer (glasses)
+			var who: int = folk_id if folk_id >= 0 else Pawn.of()
+			for _q in qty:
+				if int(it.get("pack", 0)) > 0:
+					Inventory.add(who, iid, {"stack": true, "n": int(it["pack"])})          # a pack of cigarettes is ten of them
+				else:
+					Inventory.add(who, iid)
 		_:
 			ShopStock.inv_add(hid, iid, qty)
 			if folk_id >= 0 and str(it.get("kind", "")) in ["buff", "skill"]:

@@ -45,7 +45,7 @@ static func pick(f, ids: Array) -> String:
 	for cid in ids:
 		if teen and not teen_careers().has(cid):
 			continue
-		var w: float = weight(f, str(cid))
+		var w: float = weight(f, str(cid)) * clampf(1.0 + 0.5 * Creation.hiring_kind(int(f.id), Creation.job_kind(str(cid))), 0.2, 3.0)          # task 55: easier shop hiring
 		if w > 0.0:
 			pool.append(cid)
 			ws.append(w)

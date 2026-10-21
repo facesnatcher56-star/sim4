@@ -136,7 +136,7 @@ static func self_entries(folk) -> Array:
 		if d.has("_solo") and (d.get("tests", []) as Array).has({"is_pawn": false}):
 			continue          # not for the pawn at all (the welcome basket)
 		ids.append(id)
-	return build_entries(folk, ids, table, make_checker(folk, null))
+	return build_entries(folk, ids, table, make_checker(folk, null)) + Habits.self_entries(folk)          # task 55: the smoker's cigarette
 
 ## target_kind: "object" | "folk"
 static func entries_for(folk, target_kind: String, target_id: int) -> Array:
@@ -158,4 +158,4 @@ static func entries_for(folk, target_kind: String, target_id: int) -> Array:
 			var d: Dictionary = table[id]
 			if d.get("target", "") == "folk":
 				ids.append(id)
-	return build_entries(folk, ids, table, make_checker(folk, target)) + PersonActs.entries(folk, target)          # task 53: physical acts
+	return build_entries(folk, ids, table, make_checker(folk, target)) + PersonActs.entries(folk, target) + Licences.person_entries(folk, target)          # task 53: physical acts; 55: the driving test

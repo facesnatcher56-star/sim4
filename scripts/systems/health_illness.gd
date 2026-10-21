@@ -158,6 +158,7 @@ static func on_started(f, iid: String, target_id: int) -> void:
 	per = minf(per, float(fc.get("max", 0.5)))
 	if f.skill_level("cooking") >= int(fc.get("cook_skill_notices", 5)):
 		per *= float(fc.get("skilled_mult", 0.5))
+	per *= maxf(Creation.mult(int(f.id), "food_sickness_mult"), 1.0)          # task 55: a weak stomach falls ill more often (an iron stomach is the fall_ill roll)
 	per = minf(per * Incidents.surprise_mult(), 0.95)
 	Health.count("spoiled_meals")
 	if Health.rng.randf() < per and not _pending_poison(int(f.id)):

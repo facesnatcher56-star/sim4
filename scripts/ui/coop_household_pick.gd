@@ -85,7 +85,7 @@ func _refresh() -> void:
 	_summary.text = "%s: %s" % [household.get("name", ""), ", ".join(names)]
 
 func _customise() -> void:
-	_creator.open(household, "classic", false, "Use this household")
+	_creator.open(household, "classic", false, "Use this character" if (household.get("folk", []) as Array).size() <= 1 else "Use this household")
 	_creator.visible = true
 
 func show_error(msg: String) -> void:

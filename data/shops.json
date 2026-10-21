@@ -69,6 +69,7 @@
      "restock": 9,
      "demand": 8
     },
+    "cigarettes": {"label": "Pack of cigarettes", "base": 4, "kind": "inventory", "units": 1, "pack": 10, "stock": 30, "restock": 10, "demand": 3},
     "frozen_meals": {
      "label": "Frozen meals",
      "base": 24,
@@ -163,6 +164,7 @@
      "restock": 3,
      "demand": 3
     },
+    "glasses": {"label": "Reading glasses", "base": 30, "kind": "inventory", "units": 1, "stock": 10, "restock": 7, "demand": 1},
     "first_aid_kit": {
      "label": "First aid kit",
      "base": 25,

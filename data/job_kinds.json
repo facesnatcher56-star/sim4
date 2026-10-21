@@ -1,0 +1,15 @@
+{
+ "_doc": "Task 55: the kind of each job, so a background or flaw can make some jobs easier or harder to land (creation.json effects.hiring {kind: bonus}; 'all' counts for every job). Read by CareerSpread.pick (which offer comes) and Careers (how often offers come).",
+ "kinds": {
+  "shop": ["barista"],
+  "kitchen": ["cook", "chef"],
+  "office": ["coder", "scientist", "writer"],
+  "works": ["factory_worker", "warehouse_worker", "construction_worker", "mechanic", "utility_tech", "handyperson"],
+  "care": ["doctor", "teacher"],
+  "creative": ["painter", "musician"],
+  "outdoor": ["gardener"],
+  "sport": ["athlete", "fitness_coach"],
+  "security": ["security_guard", "night_watchman"],
+  "justice": ["police_officer", "detective", "lawyer", "judge"]
+ }
+}

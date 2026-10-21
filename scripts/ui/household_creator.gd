@@ -175,6 +175,7 @@ func _rebuild_members() -> void:
 		var idx := i
 		b.pressed.connect(func(): _select(idx))
 		member_row.add_child(b)
+	member_row.visible = folk.size() > 1          # one character: no member chip
 	_load_selected()          # one-character play: no adding or removing Folk
 
 func _select(i: int) -> void:
