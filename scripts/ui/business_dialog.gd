@@ -9,7 +9,7 @@ static func build(dlg: BankHub) -> void:
 	var h: int = dlg.hid()
 	var mine: Array = BusinessState.of_owner("player", h)
 	if mine.is_empty():
-		dlg.line("You do not run a business. Opening one is optional: it can earn a steady income, or lose money.", 13, UITheme.MUTED)
+		dlg.line("You don't run a business. One can earn steady money, or lose it.", 13, UITheme.MUTED)
 	for b in mine:
 		_mine(dlg, b)
 	_open_menu(dlg, h)
@@ -24,7 +24,7 @@ static func _mine(dlg: BankHub, b: Dictionary) -> void:
 	for p in b["hist"]:
 		week += float(p)
 	var pf: int = int(last.get("profit", 0))
-	UICard.chips(dlg.body, [["Reputation", "%d/100" % int(b["rep"])], ["Stars", "%.1f" % float(b["stars"])], ["Level", "%d" % int(b["level"])], ["Customers", "%d" % int(last.get("customers", 0))]])
+	UICard.chips(dlg.body, [["Stars", "%.1f" % float(b["stars"])], ["Size", "%d" % int(b["level"])], ["Customers", "%d" % int(last.get("customers", 0))]])          # no hidden reputation score: the stars are what an owner sees
 	UICard.chips(dlg.body, [["In", "%d" % int(last.get("revenue", 0))], ["Out", "%d" % int(last.get("costs", 0))], ["Profit", "%+d" % pf, UICard.OK if pf >= 0 else UICard.NO],
 		["%dd" % (b["hist"] as Array).size(), "%+d" % int(week)], ["All time", "%+d" % int(b["profit_total"])]])
 	if not bool(b["open"]):
@@ -82,13 +82,25 @@ static func _open_menu(dlg: BankHub, h: int) -> void:
 	if lots.is_empty():
 		dlg.line("No free space for a %s right now." % str(td["label"]).to_lower(), 13, UITheme.MUTED)
 		return
+	var w: float = dlg.dialog_width - 50.0
+	var have: int = Economy.balance(h)
 	for lot in lots:
 		var rent: int = BusinessCmd.open_cost(new_type, str(lot), "rent")
 		var own: int = BusinessCmd.open_cost(new_type, str(lot), "own")
 		var day_rent: int = int(round(float((BusinessState.cfg().get("lot_rent", {}) as Dictionary).get(str(lot), 30)) * MarketEconomy.rent_mult()))
-		dlg.row_with("%s at %s: fit-out %d (rent %d a day), or buy the space for %d." % [str(td["label"]), Neighborhood.label_of(str(lot)), rent, day_rent, own], [
-			dlg.button("Rent", "", func(): dlg.act("biz_open", {"type": new_type, "lot": lot, "mode": "rent"}), Economy.can_afford(h, rent)),
-			dlg.button("Buy", "", func(): dlg.act("biz_open", {"type": new_type, "lot": lot, "mode": "own"}), Economy.can_afford(h, own))])
+		var c: VBoxContainer = UICard.card(dlg.body, w, Neighborhood.label_of(str(lot)))
+		UICard.chips(c, [["Fit-out", "%d" % rent], ["Rent", "%d/day" % day_rent], ["Buy the space", "%d" % own]])
+		var acts := HBoxContainer.new()
+		c.add_child(acts)
+		var sp := Control.new()
+		sp.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		acts.add_child(sp)
+		acts.add_child(dlg.button("Rent it", "Pay the fit-out, then rent by the day", func(): dlg.act("biz_open", {"type": new_type, "lot": lot, "mode": "rent"}), have >= rent))
+		acts.add_child(dlg.button("Buy it", "Pay for the space and the fit-out once", func(): dlg.act("biz_open", {"type": new_type, "lot": lot, "mode": "own"}), have >= own))
+		if have < rent:
+			UICard.note(c, "Renting needs %d coins; you have %d." % [rent, have])
+		elif have < own:
+			UICard.note(c, "Buying needs %d coins; you have %d." % [own, have])
 
 static func _rivals(dlg: BankHub) -> void:
 	var others: Array = []
