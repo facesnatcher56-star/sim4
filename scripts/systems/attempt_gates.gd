@@ -63,7 +63,10 @@ static func resolve(ir) -> String:
 			if have >= need:
 				continue
 			var c: Dictionary = cfg().get("skill", {})
-			if SysUtil.rng.randf() < float(c.get("base", 0.15)) + float(c.get("share", 0.6)) * have / maxf(need, 1.0):
+			var ratio: float = clampf(have / maxf(need, 1.0), 0.0, 1.0)
+			var near: float = float(c.get("base", 0.15)) + float(c.get("share", 0.6)) * ratio          # the curve close to the level
+			var p: float = lerpf(float(c.get("floor", 0.03)), near, pow(ratio, float(c.get("gap_curve", 1.5)))) + SkillCondition.modifier(int(f.id))
+			if SysUtil.rng.randf() < clampf(p, 0.01, 0.95):
 				continue          # a lucky go: it works this time
 			f.add_skill_xp(str(sk[0]), float(cfg().get("fail_xp", 4)))
 			SysUtil.notify(_line("poor", tags), "story")
