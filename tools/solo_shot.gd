@@ -52,7 +52,14 @@ func _process(_d: float) -> bool:
 		var dd = {"household": h7.household_dialog, "council": h7.town_dialog, "goals": h7.goals_dialog, "career": h7.career_dialog, "settings": h7.settings_dialog, "casebd": h7.case_board}[_scn]
 		dd.show_for(h7.selected_folk_id)
 	if _frames == 60 and _scn == "buildmode":
-		_main.hud.build_panel.call("open") if _main.hud.build_panel.has_method("open") else null
+		_main.hud.build_panel.set_active(true)
+	if _frames == 60 and _scn == "family":
+		var fp = _main.hud.folk_panel
+		fp.show_folk(_main.hud._resolve(_main.hud.selected_folk_id))
+		var tabs = fp.find_child("*", true, false)
+		for c in fp.get_children():
+			if c is TabContainer:
+				c.current_tab = c.get_tab_idx_from_control(fp.family_box.get_parent()) if fp.family_box.get_parent() != null else 0
 	if _frames == 60 and _scn == "jobs":
 		var hud5 = _main.hud
 		hud5.life_hub.tab = "jobs"

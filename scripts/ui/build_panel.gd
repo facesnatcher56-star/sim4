@@ -38,7 +38,6 @@ func _ready() -> void:
 	u.tooltip_text = "Undo last build action (Ctrl+Z)"
 	u.pressed.connect(undo)
 	tools.add_child(u)
-	root.add_child(LevelBuildBar.new())
 	var opts := HBoxContainer.new()
 	root.add_child(opts)
 	wall_option = OptionButton.new()
@@ -75,6 +74,7 @@ func _ready() -> void:
 	sc.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	root.add_child(sc)
+	root.add_child(LevelBuildBar.new())          # floors and roofs: below the things to buy (docs/UI_STYLE.md: the first thing a poor player needs is a bed)
 	catalog_box = VBoxContainer.new()
 	catalog_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	sc.add_child(catalog_box)

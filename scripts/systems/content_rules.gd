@@ -1,4 +1,4 @@
-﻿class_name ContentRules
+class_name ContentRules
 extends RefCounted
 ## Data-driven daily rules for the extra content (data/content_rules.json + state-spec keys in data/objects.json).
 ## Called once per game day from Careers.on_day. Object state specs may carry:
@@ -39,7 +39,9 @@ static func on_day(_day: int) -> void:
 	var spoiled_total: int = 0
 	for o in _all_objects():
 		if _has_daily(str(o.def_id)):               # only the few object kinds with a daily rule (the other 90% cost one lookup, not a state walk)
-			spoiled_total += apply_object_day(o)
+			var n_sp: int = apply_object_day(o)
+			if not SoloHome.active or int(Economy.owner.get(int(o.id), -1)) == Economy.primary_household():
+				spoiled_total += n_sp          # the toast is about YOUR fridge, not every fridge in town
 	if spoiled_total > 0:
 		var st: Dictionary = cfg().get("spoil_toast", {})
 		if spoiled_total >= int(st.get("min_items", 4)) and _day - _last_spoil_toast >= int(st.get("gap_days", 3)):

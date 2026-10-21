@@ -204,7 +204,10 @@ func _build_top_bar() -> void:
 	build_button.text = "Build/Buy"
 	build_button.toggle_mode = true
 	build_button.tooltip_text = "Toggle Build/Buy mode (B)"
-	build_button.pressed.connect(func(): build_panel.set_active(build_button.button_pressed))
+	build_button.pressed.connect(func():
+		build_panel.set_active(build_button.button_pressed)
+		if UIDialog.overlay_hook.is_valid():
+			UIDialog.overlay_hook.call(build_button.button_pressed))          # one overlay at a time: tips step aside
 	h.add_child(build_button)
 	save_button = Button.new()
 	save_button.text = "Save/Load"
