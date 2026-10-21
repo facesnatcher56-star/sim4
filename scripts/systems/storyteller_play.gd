@@ -256,13 +256,12 @@ static func _run_incident(c: Dictionary, ctx: Dictionary) -> Dictionary:
 		fctx = {"townie_id": s.id, "folk_id": s.id}
 	else:
 		fctx = {"lot": s.lot_key}
-	var r: Dictionary = Incidents.force(iid, fctx)
-	var text: String = str(r.get("text", ""))
-	if text == "":
-		text = str(c.get("text", c.get("title", "")))
 	if ctx.has("target"):
 		ctx.erase("target")
-	return {"text": text, "ok": bool(r.get("ok", false)), "incident": iid}
+	# owner rule 43: the card never creates the outcome. It raises the odds of the incident's own roll for this subject; the roll runs the incident's conditions
+	# and prevention. Silent: no text, no toast, no warning.
+	StorytellerTilt.add(iid, StorytellerTilt.key_of(s), str(c.get("size", "small")))
+	return {"text": "", "ok": true, "incident": iid, "silent": true, "tilt": true}
 
 ## A foreshadowed card plays on the same lot or person that was chosen when it was drawn (when that is still possible).
 static func _same_target(subs: Array, ctx: Dictionary):

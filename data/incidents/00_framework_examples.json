@@ -53,7 +53,7 @@
    ]}
   },
   "found_money": {
-   "label": "Found money", "scope": "lot", "check": "day", "base_rate_per_year": 1.0,
+   "label": "Found money", "scope": "lot", "check": "day", "base_rate_per_year": 0,
    "notify_policy": "household", "chronicle_min_severity": 2,
    "outcomes": [
     {"weight": 1, "effects": [{"coins_range": [15, 60]}, {"add_buff": "lucky_day"}], "text": "{name} found {amount} coins tucked inside an old coat.", "kind": "good"}

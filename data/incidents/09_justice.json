@@ -15,7 +15,7 @@
    "label": "Small claims dispute",
    "scope": "lot",
    "check": "day",
-   "base_rate_per_year": 0.1,
+   "base_rate_per_year": 0,
    "notify_policy": "quiet",
    "severity": 1,
    "public": false,

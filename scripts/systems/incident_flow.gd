@@ -26,7 +26,7 @@ static func toast(def: Dictionary, subj, text: String, kind: String) -> void:
 ## A roll succeeded for `subj`: warn first when the incident has a lead time (full subjects only), else resolve now.
 static func start(def_id: String, subj, immediate: bool = false) -> Dictionary:
 	var def: Dictionary = IncidentDefs.get_def(def_id)
-	var w: Dictionary = def.get("warning", {})
+	var w: Dictionary = def.get("warning", {}) if bool(IncidentDefs.cfg("warnings", false)) else {}          # owner: nothing warns the player of what is coming (data/incidents.json config.warnings)
 	var lead: int = int(w.get("lead_min", 0))
 	var ctx := {"subject": subj, "lot_key": subj.lot_key, "amount": 0}
 	if str(w.get("thought", "")) != "" and subj.folk != null:

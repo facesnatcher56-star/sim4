@@ -2,6 +2,7 @@
  "_doc": "Incident framework base file (scripts/systems/incidents.gd). Every data/incidents/*.json is merged on top (by id, later file name wins). Sections: config, handlers {name: {script, method}}, content (ContentMerge format: buffs/interactions/objects/object_interactions), incidents {id: def}. See docs/INCIDENTS.md.",
  "config": {
   "year_days": 28,
+  "warnings": false,
   "max_chance": 0.9,
   "history_cap": 200,
   "levels": {"off": 0, "rare": 1, "normal": 3, "chaotic": 10},

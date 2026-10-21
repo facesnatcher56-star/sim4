@@ -1,4 +1,4 @@
-﻿class_name CrimeMurder
+class_name CrimeMurder
 extends RefCounted
 ## Murder: never random. It needs a MOTIVE built over days (RAGE per ordered pair from tension, grudges, hatred, cheating, money), TRAITS
 ## (hot-headed, jealous, grudge-holding push it; forgiving, empathic, easy-going almost forbid it) and an OPPORTUNITY (alone together, at night).
@@ -136,7 +136,7 @@ static func _warn(a: int, b: int) -> void:
 		RelationshipKnowledge.add_gossip(int(h), a, "%s has been glaring at %s lately." % [an, bn], "murder_threat", -1, b)
 	JusticeState.count("murder_warning")
 	SysUtil.game_event("murder_warning", {"folk_id": a, "target_id": b})
-	if CrimePerson.is_player(a) or CrimePerson.is_player(b):
+	if (CrimePerson.is_player(a) or CrimePerson.is_player(b)) and bool(cfg().get("player_prompts", false)):          # owner: nothing warns the player of what is coming
 		var pid: int = a if CrimePerson.is_player(a) else b
 		var text: String = ("%s is consumed by rage at %s. This could end very badly." % [an, bn]) if CrimePerson.is_player(a) \
 			else ("%s has been glaring at %s with real hatred. %s may be in danger." % [an, bn, bn])
@@ -162,7 +162,7 @@ static func defuse(a: int, b: int) -> void:
 
 # ------------------------------------------------------------------ the act
 static func _begin(a: int, b: int) -> void:
-	var lead: int = int(cfg().get("player_lead_min", 180)) if (CrimePerson.is_player(a) or CrimePerson.is_player(b)) else 0
+	var lead: int = int(cfg().get("player_lead_min", 180)) if (bool(cfg().get("player_prompts", false)) and (CrimePerson.is_player(a) or CrimePerson.is_player(b))) else 0
 	if lead > 0:
 		var an: String = CrimePerson.name_of(a)
 		var bn: String = CrimePerson.name_of(b)
@@ -197,13 +197,20 @@ static func due(p: Dictionary) -> void:
 
 static func execute(a: int, b: int, forced_scene: String = "") -> Dictionary:
 	var scene: String = forced_scene
+	var entry: String = ""
 	if scene == "":
-		scene = CrimePlace.where_now(b)
-		if scene in ["work", "away", "unknown"]:
-			scene = CrimePerson.home_key(b)
+		var g: Dictionary = CrimeIntrusion.gate(a, b)          # a killing needs both people in one place; a home must be broken into (security against determination)
+		if not bool(g["ok"]):
+			return {"failed": true, "reason": str(g["reason"])}
+		scene = str(g["scene"])
+		entry = str(g.get("entry", ""))
 	var kk: String = key(a, b)
 	JusticeState.grudges.erase(kk)
-	return kill(a, b, scene, "murder", {})
+	var c: Dictionary = kill(a, b, scene, "murder", {})
+	if entry == "forced":
+		c["trace"] = minf(float(c.get("trace", 0.3)) + 0.15, 0.95)          # a forced entry leaves marks
+		c["forced_entry"] = true
+	return c
 
 ## The killing, shared by murder, a mugging gone wrong, serial killers. kind: murder | manslaughter | serial.
 static func kill(culprit: int, victim: int, scene: String, kind: String, opts: Dictionary) -> Dictionary:

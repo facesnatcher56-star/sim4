@@ -43,6 +43,11 @@ func _process(_d: float) -> bool:
 		return true
 	for h in 24 * days:
 		Kit.run(60)
+	if "--bills" in OS.get_cmdline_user_args():
+		for b in Economy.bills:
+			print("SMOKE bill id=%s reason=%s amount=%s issued=%s due=%s paid=%s late=%s" % [str(b.get("id")), str(b.get("reason", "util")), str(b.get("amount")), str(b.get("issued")), str(b.get("due")), str(b.get("paid")), str(b.get("late"))])
+		var pp: Dictionary = SoloHome.prop()
+		print("SMOKE prop: %s" % str(pp))
 	print("SMOKE housing: rung=%s homeless=%s lot_here=%s shelter_nights=%d" % [SoloHome.rung, str(SoloHome.homeless), Neighborhood.lot_of(f), SoloHome.shelter_nights])
 	print("SMOKE end: alive=%s coins=%d hunger=%.0f energy=%.0f day=%d current=%s bills=%d" % [str(SysUtil.folk(f.id) != null), Economy.balance(f.household_id), f.get_stat_value("hunger"), f.get_stat_value("energy"), Kit.clock().day(), str(f.current.def_id) if f.current != null else "-", Economy.outstanding(f.household_id).size()])
 	Kit.teardown()

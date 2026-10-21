@@ -1,4 +1,4 @@
-﻿{
+{
  "_doc": "Crime and justice (tasks 04 / 09 / 09b), read by scripts/systems/justice_state.gd (table 'justice'). Sections: general, evidence, discovery, investigation, police, burglary, robbery, assault, murder, serial, process, lawyers, trial, charges (severity, bail, weighted sentence options), sentences, prison, appeal, civil, careers. Days are game days (a game year = 28). Tune rates here, not in code.",
  "general": {
   "case_cap": 160,
@@ -204,7 +204,8 @@
   "witness_home": 0.25,
   "witness_alone": 0.04,
   "trace_min": 0.25,
-  "trace_max": 0.55
+  "trace_max": 0.55,
+  "player_prompts": false
  },
  "serial": {
   "witness_mult": 0.4,
@@ -4426,5 +4427,21 @@
    "return_min_days": 14,
    "fine_none": 0
   }
+ },
+ "intrusion": {
+  "_doc": "Physical access for murder and serial killing (CrimeIntrusion): each of three steps (approach, entry, reach) is stopped with chance s / (s + determination x k). Determination = base + rage_weight x rage/100 + traits + criminal path. With a full security system an ordinary angry person is stopped 97 to 99 percent of the time; a very determined one has a real chance.",
+  "k": 1.5,
+  "base": 0.25,
+  "rage_weight": 0.5,
+  "traits": {
+   "hot_headed": 0.15,
+   "grudgeholder": 0.15,
+   "jealous": 0.05,
+   "dishonest": 0.05
+  },
+  "path_member": 0.2,
+  "watch": 0.4,
+  "patrol": 0.2,
+  "awake_each": 0.5
  }
 }

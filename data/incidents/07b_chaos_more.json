@@ -68,7 +68,7 @@
    ]}
   },
   "layoff": {
-   "label": "Layoff", "scope": "folk", "check": "day", "base_rate_per_year": 0.04, "notify_policy": "household", "severity": 3, "public": false,
+   "label": "Layoff", "scope": "folk", "check": "day", "base_rate_per_year": 0, "notify_policy": "household", "severity": 3, "public": false,
    "conditions": [{"age_stage_is": ["adult"]}, {"chaos": {"employed": true}}],
    "risk_mults": [{"label": "Heavy industry feels a slump first", "when": [{"any": [{"career_is": "factory_worker"}, {"career_is": "construction_worker"}, {"career_is": "warehouse_worker"}]}], "mult": 1.5},
                 {"label": "The grid and the garage are steadier", "when": [{"any": [{"career_is": "utility_tech"}, {"career_is": "mechanic"}]}], "mult": 0.7}],
@@ -87,7 +87,7 @@
    ]}
   },
   "midlife_crisis": {
-   "label": "Midlife crisis", "scope": "folk", "check": "day", "base_rate_per_year": 0.3, "notify_policy": "household", "severity": 2, "public": false,
+   "label": "Midlife crisis", "scope": "folk", "check": "day", "base_rate_per_year": 0, "notify_policy": "household", "severity": 2, "public": false,
    "conditions": [{"age_stage_is": ["adult"]}, {"chaos": {"midlife": true}}],
    "risk_mults": [{"label": "Workaholic", "when": [{"has_trait": "workaholic"}], "mult": 2.0}],
    "prevent": [{"label": "Happy and busy", "when": [{"mood_is": "happy"}], "mult": 0.6}],
@@ -100,7 +100,7 @@
    "statistical": {"outcomes": [{"weight": 1, "effects": [], "summary": "{name} is going through a midlife crisis."}]}
   },
   "identity_theft": {
-   "label": "Identity theft", "scope": "folk", "check": "day", "base_rate_per_year": 0.03, "notify_policy": "household", "severity": 3, "public": false,
+   "label": "Identity theft", "scope": "folk", "check": "day", "base_rate_per_year": 0, "notify_policy": "household", "severity": 3, "public": false,
    "conditions": [{"age_stage_is": ["adult", "elder"]}, {"coins_at_least": 150}, {"chaos": {"theft_open": false}}],
    "risk_mults": [{"label": "Banks and shops online", "when": [{"has_object": "computer"}], "mult": 1.5}],
    "prevent": [{"label": "Sharp with passwords", "when": [{"skill_at_least": ["logic", 3]}], "mult": 0.5}],
@@ -127,7 +127,7 @@
    "statistical": {"outcomes": [{"weight": 1, "effects": [], "summary": "{name} ran off for a few days and came back."}]}
   },
   "lottery_win": {
-   "label": "Lottery win", "scope": "lot", "check": "day", "base_rate_per_year": 0.4, "notify_policy": "household", "severity": 2, "public": false,
+   "label": "Lottery win", "scope": "lot", "check": "day", "base_rate_per_year": 0, "notify_policy": "household", "severity": 2, "public": false,
    "conditions": [{"any_member": [{"age_stage_is": ["adult", "elder"]}]}, {"chaos": {"tickets": true}}],
    "outcomes": [
     {"weight": 80, "effects": [{"coins_range": [25, 60]}], "text": "A ticket from the market won a small prize in the town raffle: {amount} coins.", "kind": "good"},
@@ -136,12 +136,12 @@
    ]
   },
   "inheritance": {
-   "label": "Inheritance", "scope": "lot", "check": "day", "base_rate_per_year": 0.25, "notify_policy": "household", "severity": 2, "public": false,
+   "label": "Inheritance", "scope": "lot", "check": "day", "base_rate_per_year": 0, "notify_policy": "household", "severity": 2, "public": false,
    "conditions": [{"any_member": [{"age_stage_is": ["adult", "elder"]}]}, {"chaos": {"estate_relative": true}}],
    "outcomes": [{"weight": 1, "effects": [{"handler": "chaos_trouble", "args": {"kind": "inheritance"}}], "text": "A relative left an inheritance.", "kind": "good"}]
   },
   "long_lost_family": {
-   "label": "Long-lost family", "scope": "lot", "check": "day", "base_rate_per_year": 0.12, "notify_policy": "household", "severity": 2, "public": false,
+   "label": "Long-lost family", "scope": "lot", "check": "day", "base_rate_per_year": 0, "notify_policy": "household", "severity": 2, "public": false,
    "conditions": [{"any_member": [{"age_stage_is": ["adult", "elder"]}]}],
    "outcomes": [{"weight": 1, "effects": [{"handler": "chaos_trouble", "args": {"kind": "kin"}}], "text": "A long-lost sibling turned up.", "kind": "good"}],
    "statistical": {"outcomes": [{"weight": 1, "effects": [], "summary": ""}]}

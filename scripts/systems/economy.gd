@@ -312,6 +312,24 @@ static func issue_bill(hid: int) -> Dictionary:
 	SysUtil.game_event("bill_issued", {"household_id": hid, "amount": amount, "due": bill["due"]})
 	return bill
 
+## Autopay of ONE bill when the household can afford it. Returns false when it cannot (the bill then goes late as usual).
+static func _pay_single(bl: Dictionary) -> bool:
+	var hid: int = int(bl["hid"])
+	var amount: int = int(bl["amount"])
+	if not spend(hid, amount, str(bl.get("reason", "bills"))):
+		return false
+	bl["paid"] = true
+	var still_late: bool = false
+	for o in outstanding(hid):
+		if bool(o["late"]):
+			still_late = true
+	if not still_late:
+		missed[hid] = 0
+	SysUtil.notify("Paid bill: %d coins." % amount, "bill")
+	SysUtil.game_event("bill_paid", {"household_id": hid, "amount": amount})
+	BillPaying.refresh()
+	return true
+
 ## Pay every outstanding bill of the household if it can afford all of them. Returns coins paid.
 static func pay_bill(hid: int) -> int:
 	var total: int = owed(hid)
@@ -341,8 +359,8 @@ static func on_day(day: int) -> void:
 		if day < int(bl["due"]):
 			continue
 		if autopay_for(hid) and balance(hid) >= int(bl["amount"]):
-			pay_bill(hid)
-			continue
+			if _pay_single(bl):          # this bill only: the old all-or-nothing payment left every bill "not late" while a bigger one (a hospital bill) was unaffordable
+				continue
 		if not bool(bl["late"]):
 			bl["late"] = true
 			var fee: int = maxi(int(b.get("late_fee_min", 10)), int(round(float(bl["amount"]) * float(b.get("late_fee_rate", 0.1)))))
@@ -375,7 +393,7 @@ static func _repossess(hid: int) -> void:
 		for t in od.get("tags", []):
 			if protected_tags.has(t):
 				skip = true
-		if skip:
+		if skip or str(o.def_id) == "mailbox":          # the mailbox is the way to odd jobs and the post: never taken for debts
 			continue
 		var p: int = object_price(o)
 		if p > best_price:

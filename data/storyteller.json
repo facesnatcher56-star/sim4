@@ -2,6 +2,8 @@
   "_doc": "Task 29: the Storyteller. Personalities, the hidden chaos walk, the drama budget, districts, contagion, hard rarity caps, town cycles. The event deck is in storyteller_cards.json, the multi-day arcs in storyteller_arcs.json. Every number here is data.",
   "default": "classic",
   "seed_salt": 2929,
+  "foreshadow_signs": false,
+  "tilt": {"small": [6.0, 2], "medium": [10.0, 3], "big": [15.0, 4]},
   "personalities": {
     "calm": {
       "label": "Calm",

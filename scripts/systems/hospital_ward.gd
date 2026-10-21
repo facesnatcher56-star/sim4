@@ -127,6 +127,12 @@ static func release(f, rec: Dictionary) -> void:
 static func _home(f) -> void:
 	f.cancel_current("discharged")
 	f.clear_queue()
+	if SoloHome.locked_out(f):          # one-character play: evicted, so there is no home to go to: they leave by the hospital door onto the street
+		f.tile = NeighborhoodLots.street_tile(lot_id())
+		f.level = 0
+		NeighborhoodLots.mark_inside(f, "")
+		Neighborhood.refresh_view(int(f.id))
+		return
 	var hl: String = PlayerLots.home_of(f)          # their own home (a co-op guest's lot), else the home lot
 	NeighborhoodTravel.travel([int(f.id)], hl, {"instant": true, "free": true, "quiet": true})
 	if NeighborhoodLots.lot_at(f.tile) != hl:         # not movable (should not happen): put them at the home door by hand

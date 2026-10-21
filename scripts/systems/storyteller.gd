@@ -57,6 +57,7 @@ static func reset() -> void:
 	StorytellerLog.reset()
 	StorytellerArcs.reset()
 	StorytellerCycles.reset()
+	StorytellerTilt.reset()
 
 static func cfg() -> Dictionary:
 	return SysUtil.table("storyteller")
@@ -185,6 +186,7 @@ static func on_day(day: int) -> void:
 	PerfProf.stop("story/chaos+keys", tp)
 	tp = PerfProf.start()
 	StorytellerCycles.on_day(day)
+	StorytellerTilt.on_day(day)
 	StorytellerArcs.on_day(day)
 	StorytellerQueue.on_day(day)
 	PerfProf.stop("story/cycles+arcs+queue", tp)
@@ -221,7 +223,7 @@ static func pets_exist(hid: int = 0) -> bool:
 static func to_dict() -> Dictionary:
 	return {"personality": personality_id(), "custom": custom.duplicate(), "off": off_cats.keys(), "rng_seed": str(rng.seed), "rng_state": str(rng.state),
 		"entries": entries.duplicate(true), "heat": heat.duplicate(true), "queue": queue.duplicate(true), "choices": choices.duplicate(true), "ripples": ripples.duplicate(true),
-		"played": played.duplicate(), "stats": stats.duplicate(), "log": StorytellerLog.to_dict(), "arcs": StorytellerArcs.to_dict(), "cycles": StorytellerCycles.to_dict()}
+		"played": played.duplicate(), "stats": stats.duplicate(), "log": StorytellerLog.to_dict(), "arcs": StorytellerArcs.to_dict(), "cycles": StorytellerCycles.to_dict(), "tilts": StorytellerTilt.to_dict()}
 
 static func from_dict(d: Dictionary) -> void:
 	reset()
@@ -248,6 +250,7 @@ static func from_dict(d: Dictionary) -> void:
 	StorytellerLog.from_dict(d.get("log", {}))
 	StorytellerArcs.from_dict(d.get("arcs", {}))
 	StorytellerCycles.from_dict(d.get("cycles", {}))
+	StorytellerTilt.from_dict(d.get("tilts", []))
 
 static func _ints(src: Dictionary) -> Dictionary:
 	var out: Dictionary = {}

@@ -85,8 +85,14 @@ static func _kill_one(s: Dictionary, killer: int) -> void:
 		s["active"] = false
 		return
 	var victim: int = int(ids[i])
-	var scene: String = "street" if JusticeState.chance(0.5) else CrimePerson.home_key(victim)
+	var g: Dictionary = CrimeIntrusion.gate(killer, victim)          # the victim must be somewhere the killer can reach; a home must be broken into
+	if not bool(g["ok"]):
+		s["next_kill"] = SysUtil.day() + 1
+		return
+	var scene: String = str(g["scene"])
 	var c: Dictionary = CrimeMurder.kill(killer, victim, scene, "serial", {})
+	if str(g.get("entry", "")) == "forced":
+		c["trace"] = minf(float(c.get("trace", 0.3)) + 0.1, 0.95)
 	c["serial"] = 1
 	(s["victims"] as Array).append(victim)
 	(s["cases"] as Array).append(int(c["id"]))

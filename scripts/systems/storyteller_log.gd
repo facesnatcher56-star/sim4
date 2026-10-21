@@ -85,6 +85,8 @@ static func toast(hid: int, text: String, kind: String = "info") -> void:
 # ------------------------------------------------------------------ foreshadowing
 ## Returns true when the card was postponed behind a sign.
 static func foreshadow(key: String, cid: String, c: Dictionary, ctx: Dictionary, extra: Dictionary) -> bool:
+	if not bool(Storyteller.cfg().get("foreshadow_signs", false)):
+		return false          # owner: no signs, no warnings: things just happen from their own causes
 	if str(c.get("size", "small")) == "small" or str(c.get("tone", "")) != "bad" or (c.get("signs", []) as Array).is_empty():
 		return false
 	if extra.has("from_sign") or extra.has("chain") or extra.has("followup") or extra.has("guard") or extra.has("for_key"):
