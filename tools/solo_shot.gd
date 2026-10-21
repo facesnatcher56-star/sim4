@@ -59,10 +59,7 @@ func _process(_d: float) -> bool:
 	if _frames == 60 and _scn == "family":
 		var fp = _main.hud.folk_panel
 		fp.show_folk(_main.hud._resolve(_main.hud.selected_folk_id))
-		var tabs = fp.find_child("*", true, false)
-		for c in fp.get_children():
-			if c is TabContainer:
-				c.current_tab = c.get_tab_idx_from_control(fp.family_box.get_parent()) if fp.family_box.get_parent() != null else 0
+		fp.tabs.current_tab = fp.tabs.get_tab_idx_from_control(fp.family_box.get_parent())
 	if _frames == 60 and _scn == "court":
 		JusticeCareers.staff_town()
 		var tids: Array = Story.alive_townies().filter(func(t): return str(t.get("career", "")) == "").map(func(t): return int(t["id"]))

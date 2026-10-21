@@ -624,24 +624,30 @@ func _on_family_event(ev: String, _payload: Dictionary = {}) -> void:
 		_rel_pending = true
 		call_deferred("_build_relationships")
 
-func _family_line(n: Dictionary, extra: String = "") -> String:
-	var s := "%s  (%s)" % [str(n.get("name", "?")), UIU.sentence(str(n.get("stage_text", n.get("stage", ""))))]
-	if not bool(n.get("alive", true)):
-		s += "  [passed away]"
-	elif not bool(n.get("on_lot", false)):
-		s += "  [elsewhere]"
+## One person in the Family tab: the name, then one muted line of plain facts (45: "Mother · Adult · elsewhere", no brackets).
+func _family_line(n: Dictionary, extra: String = "") -> Array:
+	var bits: Array = []
 	if extra != "":
-		s += "  - " + extra
-	return s
+		bits.append(extra)
+	bits.append(UIU.sentence(str(n.get("stage_text", n.get("stage", "")))))
+	if not bool(n.get("alive", true)):
+		bits.append("passed away")
+	elif not bool(n.get("on_lot", false)):
+		bits.append("elsewhere")
+	return [str(n.get("name", "?")), " · ".join(bits)]
+
+var _family_shown: int = 0
 
 func _family_section(title: String, lines: Array) -> void:
+	if lines.is_empty():          # empty sections stay out: a newcomer with no family sees one line, not five dashes
+		return
+	_family_shown += 1
 	family_box.add_child(UIU.make_label(title, 12, UITheme.ACCENT))
-	if lines.is_empty():
-		family_box.add_child(UIU.make_label("  -", 13, UITheme.MUTED))
 	for l in lines:
-		var lab := UIU.make_label("  " + str(l), 13)
-		lab.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		family_box.add_child(lab)
+		family_box.add_child(UIU.make_label("  " + str(l[0]), 13))
+		var sub := UIU.make_label("    " + str(l[1]), 11, UITheme.MUTED)
+		sub.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		family_box.add_child(sub)
 
 func _build_family() -> void:
 	if family_box == null:
@@ -652,6 +658,7 @@ func _build_family() -> void:
 	if folk == null or folk_id < 0:
 		return
 	var t: Dictionary = Family.tree_for(folk_id, 1, 1)
+	_family_shown = 0
 	var partner: Dictionary = t["partner"]
 	var plines: Array = []
 	if not partner.is_empty():
@@ -674,6 +681,8 @@ func _build_family() -> void:
 		for e in t["exes"]:
 			ex.append(_family_line(e))
 		_family_section("EXES", ex)
+	if _family_shown == 0:
+		family_box.add_child(UIU.make_label("No family in town yet.", 13, UITheme.MUTED))
 	# actions go through the same interaction ids as the pie menu
 	var stage := str(UIU.prop(folk, "age_stage", "adult"))
 	var grown := stage == "adult" or stage == "elder"
@@ -682,10 +691,13 @@ func _build_family() -> void:
 	var here := not partner.is_empty() and bool(partner.get("on_lot", false))
 	var row := HFlowContainer.new()
 	family_box.add_child(row)
-	_family_button(row, "propose", "Propose", grown and here and pst in ["sweetheart", "partner"], pid, "Needs a sweetheart or partner who is here.")
-	var baby_why: String = Conception.why_not(folk_id, pid) if here else ""
-	_family_button(row, "try_for_baby", "Try for Baby", grown and here and pst in ["sweetheart", "partner", "spouse", "fiance"] and baby_why == "", pid, baby_why if baby_why != "" else "Needs a partner who is here.")
-	_family_button(row, "have_wedding", "Hold Wedding", grown and here and pst == "fiance", pid, "Needs a fiance(e) who is here.")
+	if not partner.is_empty():          # the partner shortcuts only when there is a partner (anyone else is asked from their own menu)
+		if pst in ["sweetheart", "partner"]:
+			_family_button(row, "propose", "Propose", grown and here, pid, "%s isn't here." % str(partner.get("name", "")))
+		var baby_why: String = Conception.why_not(folk_id, pid) if here else ""
+		_family_button(row, "try_for_baby", "Try for Baby", grown and here and baby_why == "", pid, baby_why if baby_why != "" else "%s isn't here." % str(partner.get("name", "")))
+		if pst == "fiance":
+			_family_button(row, "have_wedding", "Hold Wedding", grown and here, pid, "%s isn't here." % str(partner.get("name", "")))
 	_family_button(row, "adopt_child", "Adopt a Child", grown, -1, "Adults only.")
 	_heir_row()
 
@@ -696,6 +708,8 @@ func _heir_row() -> void:
 		return
 	var head: int = Succession.head_of(pid)
 	var line: Array = HeirLine.candidates(head, Players.household_of(pid), pid)
+	if line.is_empty() and folk_id == head:          # living alone: nobody to name, so no heir row (it would only be a greyed button)
+		return
 	family_box.add_child(UIU.make_label("HEAD OF THE FAMILY: %s" % Family.name_of(head), 12, UITheme.ACCENT))
 	var heir_txt := "Next in line: %s" % str(line[0]["label"]) if not line.is_empty() else "Nobody is next in line. You would choose who to play."
 	var lab := UIU.make_label("  " + heir_txt, 13)

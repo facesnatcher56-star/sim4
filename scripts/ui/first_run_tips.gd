@@ -63,14 +63,27 @@ static func already_seen() -> bool:
 	return UIPrefs.get_flag("tips_seen", false)
 
 ## Keep the panel in the left column, below the checklist (which grows and shrinks).
+var _folded: bool = false          # we folded the checklist to make room (one overlay at a time, 45 rule 5); unfolded when the tips close
+var _was_up: bool = false
+
 func _process(_d: float) -> void:
+	if visible != _was_up:          # fold the checklist once when the tips open (the player can open it again), unfold it when they close
+		_was_up = visible
+		if tracker != null and visible and not tracker.collapsed:
+			_folded = true
+			tracker.collapsed = true
+			tracker.refresh()
+		elif tracker != null and not visible and _folded:
+			_folded = false
+			tracker.collapsed = false
+			tracker.refresh()
 	if not visible:
 		return
 	var top := 62.0
 	if tracker != null and tracker.visible:
 		top = tracker.offset_top + tracker.size.y + 8.0
 	offset_top = top
-	offset_bottom = top + size.y
+	offset_bottom = top + get_combined_minimum_size().y          # shrink back when the text gets shorter or the panel moves up
 
 ## Shows the tips unless the player has dismissed them before (force = ignore the flag). `list` = scenario-specific tips.
 ## `basics` = the home started bare: keep a 'Next step' note after the tips (always shown for a bare start, even to a returning player).

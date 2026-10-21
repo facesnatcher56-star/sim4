@@ -16,27 +16,14 @@ func _ready() -> void:
 	super._ready()
 
 func build() -> void:
-	title_label.text = "Police case board"
-	var law := Button.new()
-	law.text = "Town Law (every charge and sentence)"
-	law.pressed.connect(func(): TownLawDialog.open_from(self))
-	body.add_child(law)
-	var sec := Button.new()
-	sec.text = "Security of your home and businesses"
-	sec.pressed.connect(func(): SecurityDialog.open_from(self, folk_id))
-	body.add_child(sec)
-	var shady := Button.new()
-	shady.text = "The criminal life"
-	shady.tooltip_text = "Jobs, planned heists, fences and what they cost."
-	shady.pressed.connect(func(): UnderworldDialog.open_from(self, folk_id))
-	body.add_child(shady)
-	line("Crime in town: %s (%d)%s" % [CrimeRate.label(), int(JusticeState.rate_now), "   |   neighbourhood watch active" if CrimeRate.watch_active() else ""], 14)
+	title_label.text = "Crime and the law"
+	line("Crime in town: %s%s" % [CrimeRate.label(), "   |   neighbourhood watch active" if CrimeRate.watch_active() else ""], 14)
 	if Police.is_uneasy():
 		line("Folk are uneasy after dark until the case is solved.", 12, UITheme.MUTED)
-	var open: Array = CaseStore.in_state(["open", "cold"])
+	var open: Array = CaseStore.in_state(["open", "cold"]).filter(func(c): return _known(c))
 	heading("Open and cold cases (%d)" % open.size())
 	if open.is_empty():
-		line("No open cases. The town is quiet.", 13, UITheme.MUTED)
+		line("No open cases that you know of.", 13, UITheme.MUTED)
 	for c in open.slice(maxi(open.size() - 8, 0)):
 		_case_row(c)
 	heading("In court and recent verdicts")
@@ -44,7 +31,7 @@ func build() -> void:
 	var all: Array = JusticeState.cases.values()
 	all.sort_custom(func(a, b): return int(a["id"]) > int(b["id"]))
 	for c2 in all:
-		if str(c2["state"]) in ["trial", "charged", "arrested"] or (str(c2["state"]) == "closed" and str(c2["verdict"]) != ""):
+		if _known(c2) and (str(c2["state"]) in ["trial", "charged", "arrested"] or (str(c2["state"]) == "closed" and str(c2["verdict"]) != "")):
 			_case_row(c2)
 			shown += 1
 			if shown >= 6:
@@ -55,7 +42,7 @@ func build() -> void:
 	var any: bool = false
 	for pid in JusticeState.inmates:
 		var ins: Dictionary = JusticeState.inmates[pid]
-		if str(ins["kind"]) not in ["jail", "prison", "remand"]:
+		if str(ins["kind"]) not in ["jail", "prison", "remand"] or not _knows_of(int(pid)):
 			continue
 		any = true
 		var row := HBoxContainer.new()
@@ -72,7 +59,8 @@ func build() -> void:
 				refresh())
 			row.add_child(b)
 	if not any:
-		line("Nobody.", 13, UITheme.MUTED)
+		line("Nobody you know.", 13, UITheme.MUTED)
+	_links()
 	if not JusticeState.civil.is_empty():
 		heading("Civil cases")
 		for cv in JusticeState.civil.slice(maxi(JusticeState.civil.size() - 4, 0)):
@@ -91,6 +79,44 @@ func _case_row(c: Dictionary) -> void:
 		tips.append("Day %d: %s" % [int(n["day"]) + 1, str(n["text"])])
 	l.tooltip_text = "\n".join(tips)
 	l.mouse_filter = Control.MOUSE_FILTER_STOP
+
+## The law book, home security and the criminal life: one row of small buttons under the cases (45: no stack of full-width buttons on top).
+func _links() -> void:
+	var row := HFlowContainer.new()
+	body.add_child(row)
+	var law := Button.new()
+	law.text = "Town law"
+	law.tooltip_text = "Every charge and its sentence."
+	law.pressed.connect(func(): TownLawDialog.open_from(self))
+	row.add_child(law)
+	var sec := Button.new()
+	sec.text = "Security"
+	sec.tooltip_text = "Locks, alarms and cameras for your home and businesses."
+	sec.pressed.connect(func(): SecurityDialog.open_from(self, folk_id))
+	row.add_child(sec)
+	var shady := Button.new()
+	shady.text = "The criminal life"
+	shady.tooltip_text = "Jobs, planned heists, fences and what they cost."
+	shady.pressed.connect(func(): UnderworldDialog.open_from(self, folk_id))
+	row.add_child(shady)
+
+## Owner rule (quiet depth): the board shows only what the pawn would know. Police, detectives, lawyers and judges see the town's cases; anyone else sees
+## cases they are part of (victim, accused, witness, the one who did it), cases about someone they know, and what went to court in public.
+func _known(c: Dictionary) -> bool:
+	var me: int = Pawn.of()
+	if me < 0 or Careers.career_of(me) in ["police_officer", "detective", "lawyer", "judge"]:
+		return true
+	var who: Array = [int(c.get("victim", -1)), int(c.get("accused", -1)), int(c.get("culprit", -1))] + SysUtil.to_ints(c.get("witnesses", []))
+	if who.has(me):
+		return true
+	for p in [int(c.get("victim", -1)), int(c.get("accused", -1))]:
+		if p >= 0 and RelationshipService.knows(me, p):
+			return true
+	return str(c["state"]) == "trial" or (bool(c.get("public", true)) and str(c["state"]) == "closed" and str(c.get("verdict", "")) != "")          # courts are open to the public
+
+func _knows_of(pid: int) -> bool:
+	var me: int = Pawn.of()
+	return me < 0 or pid == me or Careers.career_of(me) in ["police_officer", "detective", "lawyer", "judge"] or RelationshipService.knows(me, pid)
 
 ## A household folk the inmate knows well enough to visit.
 func _visitor_for(inmate: int) -> int:
@@ -120,7 +146,7 @@ static func details(c: Dictionary) -> String:
 		ev.append("physical traces")
 	if bool(c.get("recovered", false)):
 		ev.append("recovered goods")
-	if not ev.is_empty():
+	if not ev.is_empty() and (Pawn.of() < 0 or Careers.career_of(Pawn.of()) in ["police_officer", "detective", "lawyer", "judge"] or int(c.get("accused", -1)) == Pawn.of()):
 		bits.append("evidence: " + ", ".join(ev))
 	if c.get("sentence", {}) is Dictionary and not (c["sentence"] as Dictionary).is_empty() and str(c.get("verdict", "")) in ["guilty", "plea"]:
 		bits.append("sentence: " + CaseText.sentence(c["sentence"]))
