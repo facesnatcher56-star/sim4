@@ -135,14 +135,20 @@ static func def_runnable(d: Dictionary, f: Folk, o, target: Folk) -> bool:
 			return false
 		if WorldIface.private_use(target):
 			return false                       # nobody chats to somebody in the shower
-		if not Cond.check(d.get("target_tests", []), {"folk": target, "object": null, "target": f}):
+		var ttests: Array = d.get("target_tests", [])
+		if SocialFit.player_controlled(f):
+			ttests = SocialFit.hard_tests(ttests)          # the player may try anything that is possible; the other person's reaction is the consequence (SocialReaction)
+		if not Cond.check(ttests, {"folk": target, "object": null, "target": f}):
 			return false
 		if RomanceRules.is_romantic_def(d) and not RomanceRules.allowed(int(f.id), int(target.id)):
 			return false
 		var req: Array = (d.get("social", {}) as Dictionary).get("requires", [])
 		if not req.is_empty() and SocialScoring.check_requires(int(f.id), int(target.id), req) != "":
 			return false
-	return Cond.check(d.get("tests", []), {"folk": f, "object": o, "target": target})
+	var atests: Array = d.get("tests", [])
+	if kind == "folk" and SocialFit.player_controlled(f):
+		atests = SocialFit.hard_tests(atests)
+	return Cond.check(atests, {"folk": f, "object": o, "target": target})
 
 ## Reserve, plan the walk, and begin. Returns false (and leaves no reservation) when impossible.
 func start() -> bool:

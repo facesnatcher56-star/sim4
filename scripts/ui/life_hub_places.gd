@@ -32,7 +32,7 @@ static func build(dlg: LifeHub) -> void:
 	var f = dlg.folk_obj()
 	var kinds_here: Array = []
 	for pid in Places.all():
-		if not kinds_here.has(Places.kind_of(pid)):
+		if Places.usable_by(str(pid), f) and not kinds_here.has(Places.kind_of(pid)):
 			kinds_here.append(Places.kind_of(pid))
 	var row := HFlowContainer.new()
 	dlg.body.add_child(row)
@@ -48,7 +48,7 @@ static func build(dlg: LifeHub) -> void:
 			dlg.place_id = ""
 			dlg.refresh())
 		row.add_child(b)
-	var ids: Array = Places.ids_of_kind(dlg.kind)
+	var ids: Array = Places.ids_of_kind(dlg.kind).filter(func(p): return Places.usable_by(str(p), f))          # a TV, a radio or a pet at home only when the home has one
 	var open_ids: Array = ids.filter(func(p): return Places.is_open(str(p)))
 	var closed_ids: Array = ids.filter(func(p): return not Places.is_open(str(p)))
 	open_ids.sort_custom(func(a, b): return _walk(dlg, f, str(a)) < _walk(dlg, f, str(b)))          # nearest first

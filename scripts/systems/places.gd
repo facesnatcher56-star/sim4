@@ -27,6 +27,26 @@ static func lot_of(pid: String) -> String:
 static func kind_of(pid: String) -> String:
 	return str(def(pid).get("kind", ""))
 
+## Is this place something this person could actually use? A home entry needs the thing in the home (a TV, a stereo, a pet); everything else is always there.
+static func usable_by(pid: String, f) -> bool:
+	var need: Dictionary = def(pid).get("needs_home", {})
+	if need.is_empty() or f == null:
+		return true
+	var home: String = PlayerLots.home_of(f)
+	var rc: Rect2i = NeighborhoodLots.rect_of(home)
+	if bool(need.get("pet", false)) and PetState.of_household(int(f.household_id)).is_empty():
+		return false
+	var objs: Array = need.get("objects", [])
+	if not objs.is_empty():
+		var found: bool = false
+		for o in WorldIface.objects_near(rc.get_center(), 80):
+			if rc.has_point(o.tile) and objs.has(str(o.def_id)):
+				found = true
+				break
+		if not found:
+			return false
+	return true
+
 static func ids_of_kind(kind: String) -> Array:
 	var out: Array = []
 	for pid in all():

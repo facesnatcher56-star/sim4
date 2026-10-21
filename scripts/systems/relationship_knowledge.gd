@@ -35,6 +35,10 @@ static func knows_aspiration(a: int, b: int) -> bool:
 static func knows_interest(a: int, b: int, topic: String) -> bool:
 	return knows_everything(a, b) or (_know(a, b)["interests"] as Array).has(topic)
 
+## The interests of `b` that `a` has learned (the topics "Talk about ..." names).
+static func known_interests(a: int, b: int) -> Array:
+	return (_know(a, b)["interests"] as Array).duplicate()
+
 static func known_traits(a: int, b: int) -> Array:
 	var out: Array = []
 	for t in RelationshipBits.traits_of(b):

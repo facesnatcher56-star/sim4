@@ -95,7 +95,7 @@
  "places": {
   "pet_care": {
    "label": "Pets at Home",
-   "lot": "@home",
+   "lot": "@home", "needs_home": {"pet": true},
    "kind": "pets",
    "hours": [
     0,

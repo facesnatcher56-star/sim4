@@ -73,10 +73,7 @@ func open_with_entries(f, kind: String, id: int, entries: Array, screen_pos: Vec
 		"folk":
 			title_text = "Interact"
 			if target != null:
-				title_text = str(UIU.prop(target, "name", "them"))
-				var bit := RelationshipService.bit_for(int(UIU.prop(f, "id", -1)), id)
-				if bit != "stranger":
-					title_text += "  (%s)" % RelationshipService.bit_label(bit)
+				title_text = str(UIU.prop(target, "name", "them"))          # the menu shows the person, never how well you know them
 		"self":
 			title_text = "Myself"
 		"ground":
@@ -195,6 +192,19 @@ func _fill_social(f, target, entries: Array) -> void:
 		var c: String = str(e["category"])
 		if not cats.has(c):
 			cats[c] = []
+		if str(e["id"]) == "talk_interests":          # "Talk about fishing": one entry per interest you have learned, nothing until you know one
+			for topic in RelationshipKnowledge.known_interests(int(UIU.prop(f, "id", -1)), int(UIU.prop(target, "id", -1))):
+				var te: Dictionary = e.duplicate()
+				te["label"] = "Talk about %s" % UIU.sentence(str(topic)).to_lower()
+				var tp: String = str(topic)
+				var fid0: int = int(UIU.prop(f, "id", -1))
+				var tgt0: int = int(UIU.prop(target, "id", -1))
+				te["action"] = func():
+					Conversation.active_topic[fid0] = tp
+					UIU.enqueue(f, "talk_interests", tgt0)
+				te["id"] = "talk_interests_" + tp
+				(cats[c] as Array).append(te)
+			continue
 		(cats[c] as Array).append(e)
 	if cats.is_empty():
 		box.add_child(UIU.make_label("Nothing to do with them right now.", 14))

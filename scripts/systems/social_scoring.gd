@@ -88,6 +88,9 @@ static func check_requires(actor: int, target: int, req: Array) -> String:
 			"knows_aspiration":
 				if not RelationshipKnowledge.knows_aspiration(actor, target):
 					return "You don't know their dreams yet."
+			"knows_interest":
+				if RelationshipKnowledge.known_interests(actor, target).is_empty():
+					return "You don't know what they are into yet."
 			"knows_trait":
 				if RelationshipKnowledge.known_traits(actor, target).is_empty():
 					return "You don't know them well enough yet."
@@ -151,12 +154,17 @@ static func reason_unavailable(actor, target, iid: String, include_cooldown: boo
 	if target != null and str(d.get("target", "")) == "folk" and RomanceRules.is_romantic_def(d) and not RomanceRules.allowed(int(actor.id), int(target.id)):
 		return RomanceRules.why_not(int(actor.id), int(target.id))
 	var ctx := {"folk": actor, "object": null, "target": target}
+	var free: bool = target != null and SocialFit.player_controlled(actor)          # the player's person may try anything possible (SocialFit)
 	for c in d.get("tests", []):
+		if free and SocialFit.is_soft(c):
+			continue
 		if not Cond.check([c], ctx):
 			return "You: " + describe_cond(c, "you")
 	if target != null and str(d.get("target", "")) == "folk":
 		var tctx := {"folk": target, "object": null, "target": actor}
 		for c2 in d.get("target_tests", []):
+			if free and SocialFit.is_soft(c2):
+				continue
 			if not Cond.check([c2], tctx):
 				return "%s: %s" % [target.name, describe_cond(c2, "they")]
 		var req: Array = (d.get("social", {}) as Dictionary).get("requires", [])

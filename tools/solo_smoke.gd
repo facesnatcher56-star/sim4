@@ -39,7 +39,7 @@ func _process(_d: float) -> bool:
 			for o in options:
 				print("    - %s" % str(o["label"]))
 			on_choice.call(default_id)
-		var t0: Dictionary = Story.alive_townies()[0]
+		var t0: Dictionary = Story.alive_townies().filter(func(x): return Story.stage_of(x) == "adult")[0]
 		var tid: int = int(t0["id"])
 		t0["coins"] = 0
 		t0["career"] = ""
@@ -49,6 +49,22 @@ func _process(_d: float) -> bool:
 			PlayerPrompt.asked.clear()
 			PlayerPrompt.ask("loan", f.id, tid, {"amount": 30}, func(_c): pass)
 			PlayerPrompt.asked.clear()
+		Kit.teardown()
+		quit(0)
+		return true
+	if "--react" in OS.get_cmdline_user_args():
+		var t0: Dictionary = Story.alive_townies().filter(func(x): return Story.stage_of(x) == "adult")[0]
+		var other: Folk = Crowd.spawn_npc(t0, "market", "market")
+		var tally := {}
+		for iid in ["kiss", "flirt", "share_secret", "insult", "prank", "hug"]:
+			tally.clear()
+			for i in 60:
+				other.set_meta("x", i)
+				var d: Dictionary = SimEnv.data().interaction_def(iid)
+				var res: Dictionary = SocialDynamics.resolve(f.id, other.id, iid, d)
+				var k: String = str(res.get("reaction", res.get("tier", "?")))
+				tally[k] = int(tally.get(k, 0)) + 1
+			print("REACT %-12s gap=%.2f runnable=%s %s" % [iid, SocialFit.gap(f.id, other.id, SimEnv.data().interaction_def(iid)), str(Interaction.def_runnable(SimEnv.data().interaction_def(iid), f, null, other)), str(tally)])
 		Kit.teardown()
 		quit(0)
 		return true

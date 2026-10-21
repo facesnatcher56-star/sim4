@@ -1,0 +1,75 @@
+{
+ "_doc": "Task 52: how the world reacts when the player does something that does not fit (SocialFit.gap: how far the act is from what the two people have between them). Below min_gap the normal scored outcome runs. Above it the act still works with the probability (1 - gap)^success_pow (a close fit often works), otherwise one reaction is drawn from the act's group by weight. A weight is multiplied by: the target's traits (traits), their mood (moods), the kind of place (places), whether the target has a partner (partner), and gap_scale (up = more likely the further out of place, down = less likely). Effects: fr / ro / tr / te = friendship, romance, trust, tension of the target towards the player; abuf / tbuf = buff on the player's person / on the other; witness = reputation lost with onlookers (and gossip); act = a special consequence (report = they go to the police with a harassment complaint); tier = how the result reads (good, meh, bad). lines: what the other person says or does ({t} = them, {a} = the player's person); a line is never used twice in a row for the same pair (PlayerPrompt._pick). Groups: touch (kiss, cuddle, hold hands, sneak kiss, slow dance), romance (flirt, wink, sweet nothings, ask out, confess, make official), deep (secrets, advice, dreams, confiding), mean (insults, rumours, blame, mock, yell), funny (pranks, tickling, teasing, roasts), friendly (hugs, hangouts, high fives).",
+ "min_gap": 0.3,
+ "success_pow": 1.4,
+ "groups": {
+  "touch": {"ids": ["kiss", "sneak_kiss", "cuddle", "hold_hands", "slow_dance", "get_intimate_careful", "get_intimate_open"], "outcomes": [
+   {"id": "flattered", "weight": 0.07, "gap_scale": "down", "tier": "good", "ro": 3.0, "fr": 1.0, "traits": {"flirty": 4.0, "romantic": 2.0, "outgoing": 1.5}, "moods": {"flirty": 3.0, "playful": 1.6, "happy": 1.3}, "places": {"cafe": 1.4},
+    "lines": ["{t} blinks, then smiles. \"Well. That was bold.\"", "{t} laughs, flushed. \"You are something else.\"", "{t} takes a moment, then smiles back."]},
+   {"id": "laugh_off", "weight": 0.18, "gap_scale": "down", "tier": "meh", "ro": -0.5, "fr": 0.0, "traits": {"cheerful": 1.5, "easygoing": 1.5, "hot_headed": 0.4},
+    "lines": ["{t} laughs it off, a little awkward.", "{t} chuckles and steps back. \"Easy there.\"", "{t} shakes {their} head, amused."]},
+   {"id": "pull_away", "weight": 0.34, "gap_scale": "up", "tier": "bad", "ro": -4.0, "fr": -3.0, "te": 3.0, "abuf": "embarrassed", "traits": {"shy": 1.6, "prudish": 1.4},
+    "lines": ["{t} pulls away, startled.", "{t} recoils. \"What are you doing?\"", "{t} steps back, face tight. \"Please don't.\""]},
+   {"id": "shove", "weight": 0.14, "gap_scale": "up", "tier": "bad", "ro": -6.0, "fr": -5.0, "te": 8.0, "abuf": "embarrassed", "tbuf": "offended", "witness": 2.0, "traits": {"hot_headed": 2.0, "brave": 1.4}, "partner": 1.5,
+    "lines": ["{t} shoves {a} away. \"Back off!\"", "{t} pushes {a} back hard.", "{t} shoves {a} off."]},
+   {"id": "slap", "weight": 0.11, "gap_scale": "up", "tier": "bad", "ro": -10.0, "fr": -8.0, "te": 12.0, "abuf": "embarrassed", "tbuf": "offended", "witness": 4.0, "traits": {"hot_headed": 2.5, "proud": 1.5}, "moods": {"angry": 1.6}, "partner": 1.8,
+    "lines": ["{t} slaps {a} across the face.", "{t} slaps {a}. The sound carries.", "\"How dare you!\" {t} slaps {a}."]},
+   {"id": "shout", "weight": 0.1, "gap_scale": "up", "tier": "bad", "ro": -5.0, "fr": -4.0, "te": 6.0, "abuf": "embarrassed", "witness": 3.0, "traits": {"hot_headed": 1.5, "loud": 1.5},
+    "lines": ["{t} shouts at {a} to keep {their} hands to {themself}.", "\"Get away from me!\" {t} yells, heads turning.", "{t} makes a scene. \"Who do you think you are?\""]},
+   {"id": "report", "weight": 0.05, "gap_scale": "up", "gap_min": 0.75, "tier": "bad", "ro": -8.0, "fr": -8.0, "te": 14.0, "abuf": "embarrassed", "witness": 5.0, "act": "report", "traits": {"shy": 1.5, "anxious": 1.8, "lawful": 2.0}, "partner": 1.6,
+    "lines": ["{t} backs away, shaking. \"I'm calling the police.\"", "\"That is harassment,\" {t} says, and reaches for {their} phone."]}
+  ]},
+  "romance": {"ids": ["flirt", "wink", "sweet_nothings", "ask_out", "confess_feelings", "make_official", "serenade", "go_on_date", "rekindle", "propose"], "outcomes": [
+   {"id": "flattered", "weight": 0.14, "gap_scale": "down", "tier": "good", "ro": 2.0, "fr": 0.8, "traits": {"flirty": 3.0, "romantic": 1.8}, "moods": {"flirty": 2.5, "happy": 1.3, "playful": 1.4},
+    "lines": ["{t} smiles, caught off guard. \"Is that so?\"", "{t} raises an eyebrow, but looks pleased.", "{t} laughs softly. \"You don't waste time.\""]},
+   {"id": "laugh_off", "weight": 0.28, "gap_scale": "down", "tier": "meh", "ro": -0.3, "traits": {"cheerful": 1.4, "easygoing": 1.4},
+    "lines": ["{t} laughs. \"Nice try.\"", "{t} waves it off. \"I don't even know you.\"", "{t} smiles politely and changes the subject."]},
+   {"id": "brush_off", "weight": 0.3, "gap_scale": "up", "tier": "bad", "ro": -2.0, "fr": -1.0, "abuf": "embarrassed", "traits": {"shy": 1.3, "prudish": 1.4},
+    "lines": ["{t} gives {a} a flat look. \"No.\"", "{t} turns away without a word.", "{t} says, \"I'm not interested,\" and leaves it there."]},
+   {"id": "scoff", "weight": 0.18, "gap_scale": "up", "tier": "bad", "ro": -3.0, "fr": -2.0, "te": 3.0, "abuf": "embarrassed", "witness": 1.0, "traits": {"proud": 1.6, "hot_headed": 1.3},
+    "lines": ["{t} snorts. \"You're joking.\"", "{t} looks {a} up and down. \"Really?\"", "{t} lets out a short, unkind laugh."]},
+   {"id": "report", "weight": 0.03, "gap_scale": "up", "gap_min": 0.8, "tier": "bad", "ro": -6.0, "fr": -6.0, "te": 10.0, "abuf": "embarrassed", "witness": 3.0, "act": "report", "traits": {"anxious": 1.8, "lawful": 2.0}, "partner": 1.5,
+    "lines": ["{t} stares at {a}. \"Stay away from me, or I'll tell the police.\""]}
+  ]},
+  "deep": {"ids": ["share_secret", "confide", "ask_for_advice", "give_advice", "deep_talk", "discuss_dreams", "reminisce", "comfort", "tutor", "heartfelt_apology", "forgive", "make_up"], "outcomes": [
+   {"id": "opens_up", "weight": 0.1, "gap_scale": "down", "tier": "good", "fr": 2.0, "tr": 1.5, "traits": {"outgoing": 1.6, "kind": 1.5, "lonely": 1.5}, "moods": {"lonely": 2.0, "sad": 1.6},
+    "lines": ["{t} hesitates, then answers more honestly than expected.", "{t} seems to need someone to talk to, and does."]},
+   {"id": "awkward", "weight": 0.34, "gap_scale": "down", "tier": "meh", "fr": 0.0, "abuf": "embarrassed", "traits": {"shy": 1.4},
+    "lines": ["{t} shifts, unsure what to say. \"That's... a lot.\"", "{t} gives a polite, stiff answer.", "An awkward silence settles between {a} and {t}."]},
+   {"id": "brush_off", "weight": 0.4, "gap_scale": "up", "tier": "bad", "fr": -1.5, "te": 1.0, "traits": {"proud": 1.3, "private": 1.8},
+    "lines": ["\"Who are you to ask me that?\" {t} says.", "{t} closes up. \"That's personal.\"", "{t} changes the subject, firmly."]},
+   {"id": "put_off", "weight": 0.16, "gap_scale": "up", "tier": "bad", "fr": -3.0, "te": 4.0, "abuf": "embarrassed", "witness": 1.0, "traits": {"hot_headed": 1.5},
+    "lines": ["{t} frowns. \"I don't know you well enough for this.\"", "{t} takes a step back, uncomfortable."]}
+  ]},
+  "mean": {"ids": ["insult", "mock", "snub", "blame", "spread_rumor", "yell_at", "argue", "storm_off", "confront"], "outcomes": [
+   {"id": "shrugs", "weight": 0.18, "gap_scale": "down", "tier": "meh", "fr": -1.0, "te": 1.5, "traits": {"easygoing": 1.8, "confident": 1.4},
+    "lines": ["{t} shrugs it off. \"Whatever.\"", "{t} raises an eyebrow and says nothing."]},
+   {"id": "snaps_back", "weight": 0.32, "gap_scale": "up", "tier": "bad", "fr": -4.0, "te": 8.0, "tbuf": "offended", "witness": 1.5, "traits": {"hot_headed": 2.0, "proud": 1.5},
+    "lines": ["{t} snaps back. \"Who asked you?\"", "{t} glares. \"Say that again.\"", "\"Excuse me?\" {t} says, loudly."]},
+   {"id": "cold", "weight": 0.2, "gap_scale": "up", "tier": "bad", "fr": -3.0, "te": 5.0, "traits": {"shy": 1.3, "proud": 1.2},
+    "lines": ["{t} stares at {a}, then walks off.", "{t} turns {their} back on {a}."]},
+   {"id": "shove", "weight": 0.1, "gap_scale": "up", "gap_min": 0.5, "tier": "bad", "fr": -6.0, "te": 12.0, "tbuf": "offended", "witness": 3.0, "traits": {"hot_headed": 2.5, "brave": 1.5},
+    "lines": ["{t} shoves {a}. \"Try that again.\"", "{t} squares up and shoves {a} back."]},
+   {"id": "report", "weight": 0.02, "gap_scale": "up", "gap_min": 0.8, "tier": "bad", "fr": -6.0, "te": 10.0, "witness": 3.0, "act": "report", "traits": {"anxious": 1.8, "lawful": 2.0},
+    "lines": ["{t} stares at {a}. \"I'm telling the police about this.\""]}
+  ]},
+  "funny": {"ids": ["prank", "tickle", "tease", "friendly_roast", "tease_quirk", "do_impression", "funny_story", "tell_pun", "tell_joke", "share_riddle"], "outcomes": [
+   {"id": "laughs", "weight": 0.22, "gap_scale": "down", "tier": "good", "fr": 2.0, "traits": {"playful": 2.0, "cheerful": 1.6, "easygoing": 1.4}, "moods": {"playful": 2.0, "happy": 1.5},
+    "lines": ["{t} bursts out laughing.", "{t} grins despite {themself}.", "{t} laughs, then shakes {their} head. \"Fine. That was funny.\""]},
+   {"id": "blank", "weight": 0.3, "gap_scale": "down", "tier": "meh", "fr": -0.3, "abuf": "embarrassed", "traits": {"serious": 1.5},
+    "lines": ["{t} stares at {a}. Nothing.", "{t} doesn't get it. {a} explains. It gets worse."]},
+   {"id": "angry", "weight": 0.26, "gap_scale": "up", "tier": "bad", "fr": -5.0, "te": 9.0, "tbuf": "offended", "witness": 1.5, "traits": {"hot_headed": 2.0, "proud": 1.4},
+    "lines": ["{t} does not laugh. \"That is not funny.\"", "{t} is furious. \"What is wrong with you?\""]},
+   {"id": "fight", "weight": 0.08, "gap_scale": "up", "gap_min": 0.5, "tier": "bad", "fr": -7.0, "te": 14.0, "tbuf": "offended", "witness": 3.0, "traits": {"hot_headed": 2.5, "brave": 1.5},
+    "lines": ["{t} lunges at {a}, and bystanders pull them apart.", "{t} shoves {a} hard. \"Do that again.\""]}
+  ]},
+  "friendly": {"ids": ["hug", "hang_out", "high_five", "offer_help", "swap_stories", "thank", "cheer_up", "board_game", "play_together", "ask_to_move_in", "group_hug"], "outcomes": [
+   {"id": "warms", "weight": 0.3, "gap_scale": "down", "tier": "good", "fr": 1.5, "traits": {"outgoing": 1.6, "friendly": 1.5, "kind": 1.3},
+    "lines": ["{t} is surprised, then returns it warmly.", "{t} smiles. \"Well, aren't you friendly.\""]},
+   {"id": "stiff", "weight": 0.4, "gap_scale": "down", "tier": "meh", "fr": 0.0, "traits": {"shy": 1.4},
+    "lines": ["{t} goes stiff and waits for it to be over.", "{t} gives a small, polite smile and edges away."]},
+   {"id": "uncomfortable", "weight": 0.26, "gap_scale": "up", "tier": "bad", "fr": -2.5, "te": 3.0, "abuf": "embarrassed", "traits": {"private": 1.6, "shy": 1.3},
+    "lines": ["{t} steps back. \"Personal space, please.\"", "{t} frowns. \"Do I know you?\""]}
+  ]}
+ }
+}

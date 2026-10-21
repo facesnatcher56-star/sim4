@@ -272,7 +272,7 @@
  "places": {
   "radio": {
    "label": "The Radio at Home",
-   "lot": "@home",
+   "lot": "@home", "needs_home": {"objects": ["stereo"]},
    "kind": "media",
    "hours": [
     0,
@@ -296,7 +296,7 @@
   },
   "tv": {
    "label": "The TV at Home",
-   "lot": "@home",
+   "lot": "@home", "needs_home": {"objects": ["tv"]},
    "kind": "media",
    "hours": [
     0,

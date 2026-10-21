@@ -83,6 +83,14 @@ static func resolve(actor_id: int, target_id: int, iid: String, d: Dictionary) -
 	var req_fail := SocialScoring.check_requires(actor_id, target_id, sd.get("requires", []))
 	if req_fail == "" and RomanceRules.is_romantic_def(d) and not RomanceRules.allowed(actor_id, target_id):
 		req_fail = "not_allowed"
+	if req_fail == "" and SocialFit.player_controlled(a):          # task 52: out of place for what you two have = the other person reacts (SocialReaction)
+		var fit_gap: float = SocialFit.gap(actor_id, target_id, d)
+		if fit_gap >= SocialReaction.min_gap() and not SocialReaction.passes(fit_gap):
+			var rx: Dictionary = SocialReaction.react(a, t, iid, d, fit_gap)
+			if not rx.is_empty():
+				_count_tier(str(rx["tier"]))
+				outcome_log.append({"actor": actor_id, "target": target_id, "iid": iid, "tier": rx["tier"], "label": rx["label"], "score": rx["score"], "day": SysUtil.day()})
+				return rx
 	var sc := SocialScoring.success_score(a, t, iid, d, sd, teff)
 	var tier: String = "meh" if req_fail != "" else SocialScoring.tier_for(float(sc["score"]), sd)
 	var fx: Dictionary = {} if req_fail != "" else SocialScoring.fx_for(sd, tier)
