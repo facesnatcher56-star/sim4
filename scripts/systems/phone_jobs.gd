@@ -38,7 +38,7 @@ static func why_not(fid: int, cid: String) -> String:
 	var h: String = how(fid)
 	if h in ["phone", "centre"]:
 		return ""
-	if h == "paper" and paper_careers(fid).has(cid):
+	if (h == "paper" and paper_careers(fid).has(cid)) or JobLeads.has(fid, cid):
 		return ""
 	return "%s Find the board at the job centre in city hall or read the paper." % PhoneOwn.block(fid)
 

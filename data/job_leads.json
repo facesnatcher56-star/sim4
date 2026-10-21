@@ -1,0 +1,72 @@
+{
+ "_doc": "Task 51: finding work in person. A business with an opening in a job done there (careers.json workplace = the lot's type) puts a 'Help wanted' card in its front window; the pawn can ask the staff there, and people they know mention openings in a chat. Either one is a lead: that job can be applied for in person for lead_days. Read by JobLeads and HelpWantedView.",
+ "lead_days": 3,
+ "word_of_mouth": {
+  "chance": 0.15,
+  "pair_cooldown_days": 3,
+  "min_friendship": 15,
+  "interactions": [
+   "chat",
+   "talk_interests",
+   "deep_talk",
+   "gossip",
+   "group_chat",
+   "talk_shop",
+   "funny_story"
+  ]
+ },
+ "sign": {
+  "text": "HELP WANTED",
+  "color": "#b3261e",
+  "card": "#f3efe4"
+ },
+ "lines": {
+  "hiring": [
+   "{who} nods. \"We need {job}, actually.\"",
+   "\"Funny you ask,\" {who} says. \"We're short {job}.\"",
+   "{who} glances at the sign. \"Yes, {job}. You interested?\"",
+   "\"We are,\" {who} says. \"We need {job}. It's hard work.\""
+  ],
+  "not_hiring": [
+   "{who} shakes their head. \"Nothing going right now.\"",
+   "\"Sorry, we're full up,\" {who} says.",
+   "\"Not at the moment,\" {who} says. \"Try again in a week or two.\""
+  ],
+  "no_one": [
+   "Nobody here to ask."
+  ],
+  "turned_down": [
+   "{who} looks you over. \"We need someone with more experience.\"",
+   "\"I don't think you're ready for it yet,\" {who} says.",
+   "{who} hesitates. \"Maybe once you've got more under your belt.\""
+  ],
+  "mention": [
+   "{who} heard the {place} is after {job}.",
+   "\"The {place} needs {job},\" {who} says. \"Just so you know.\"",
+   "{who} says the {place} is looking for {job}."
+  ],
+  "mention_own": [
+   "\"We're hiring {job} at the {place},\" {who} says.",
+   "{who} says their place is short {job}.",
+   "\"We need {job} at work,\" {who} says. \"You'd get on fine.\""
+  ]
+ },
+ "prompt": {
+  "title": "A job going",
+  "apply": "Ask for the job",
+  "later": "Not now"
+ },
+ "job_words": {
+  "warehouse_worker": "warehouse hand",
+  "construction_worker": "builder",
+  "utility_tech": "utility tech",
+  "police_officer": "police officer",
+  "security_guard": "security guard",
+  "night_watchman": "night watchman",
+  "factory_worker": "factory hand"
+ },
+ "place_words": {
+  "cafe": "café",
+  "works": "works yard"
+ }
+}

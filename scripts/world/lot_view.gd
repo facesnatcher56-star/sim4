@@ -24,6 +24,7 @@ func _ready() -> void:
 	PlotView.ensure_on(self)       # scaffolding, building sites and finished buildings on the reserved plots of the east side (scripts/world/plot_view.gd; view only)
 	VehicleView.ensure_on(self)    # cars, buses, taxis, emergency vehicles, bikes on the roads near the camera (scripts/world/vehicle_view.gd; view only)
 	DisasterView.ensure_on(self)   # siren / tornado / flood / quake shake / blizzard / blackout visuals (scripts/world/disaster_view.gd)
+	HelpWantedView.ensure_on(self)  # "Help wanted" cards in the windows of businesses that are hiring (scripts/world/help_wanted_view.gd; view only)
 	rebuild_all()
 	frame_home()
 

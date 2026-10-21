@@ -24,6 +24,7 @@ static func reset() -> void:
 	rng.seed = SEED
 	PhoneOwn.reset()
 	PhoneJobs.reset()
+	JobLeads.reset()
 
 static func cfg() -> Dictionary:
 	return LifeDefs.cfg("phone")
@@ -73,7 +74,7 @@ static func on_day(day: int) -> void:
 			companions.erase(fid)
 
 static func to_dict() -> Dictionary:
-	return {"inbox": inbox.duplicate(true), "log": contact_log.duplicate(true), "next_id": next_id, "rng_state": str(rng.state), "own": PhoneOwn.to_dict()}
+	return {"inbox": inbox.duplicate(true), "log": contact_log.duplicate(true), "next_id": next_id, "rng_state": str(rng.state), "own": PhoneOwn.to_dict(), "leads": JobLeads.to_dict()}
 
 static func from_dict(d: Dictionary) -> void:
 	reset()
@@ -87,5 +88,6 @@ static func from_dict(d: Dictionary) -> void:
 			contact_log[k2][kk] = int(contact_log[k2][kk])
 	next_id = int(d.get("next_id", 1))
 	PhoneOwn.from_dict(d.get("own", {}))
+	JobLeads.from_dict(d.get("leads", {}))
 	if d.has("rng_state"):
 		rng.state = int(str(d["rng_state"]))

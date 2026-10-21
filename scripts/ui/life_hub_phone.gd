@@ -82,7 +82,7 @@ static func _no_phone(dlg: LifeHub, fid: int, why: String) -> void:
 	CareerDialog.offer_card(dlg, fid)          # a pending offer (it came by letter) is answered here
 	dlg.heading("Finding work without a phone")
 	var hrs: Array = (SoloCfg.sect("phone").get("job_centre", {}) as Dictionary).get("hours", [9, 17])
-	dlg.line("The job centre counter at city hall shows the same board (%02d:00-%02d:00). The paper has a few of this week's openings." % [int(hrs[0]), int(hrs[1])], 13, UITheme.MUTED)
+	dlg.line("The job centre counter at city hall shows the same board (%02d:00-%02d:00). The paper has a few of this week's openings, and shops with a \"Help wanted\" card will tell you if you ask." % [int(hrs[0]), int(hrs[1])], 13, UITheme.MUTED)
 	var h: String = PhoneJobs.how(fid)
 	if h == "centre":
 		LifeHubJobs.build(dlg)
@@ -90,9 +90,13 @@ static func _no_phone(dlg: LifeHub, fid: int, why: String) -> void:
 	var price: int = int((SoloCfg.sect("phone").get("paper", {}) as Dictionary).get("price", 2))
 	if PhoneJobs.paper_careers(fid).is_empty():
 		dlg.body.add_child(dlg.button("Buy the paper (%d)" % price, "Today's job ads", func(): dlg.act("paper")))
-	else:
-		dlg.line("Today's paper:", 13, UITheme.MUTED)
-		LifeHubJobs.build(dlg, PhoneJobs.paper_careers(fid))
+	var heard: Array = PhoneJobs.paper_careers(fid).duplicate()
+	for c in JobLeads.careers(fid):          # asked at a shop with a "Help wanted" card, or someone mentioned it
+		if not heard.has(c):
+			heard.append(c)
+	if not heard.is_empty():
+		dlg.line("Jobs you've heard about:", 13, UITheme.MUTED)
+		LifeHubJobs.build(dlg, heard)
 
 static func _messages(dlg: LifeHub, f, fid: int) -> void:
 	var inbox: Array = PhoneState.inbox_of(fid)

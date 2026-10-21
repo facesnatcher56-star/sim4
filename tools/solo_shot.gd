@@ -1,4 +1,4 @@
-extends SceneTree
+﻿extends SceneTree
 ## Screenshot helper for one-character play (not a test). Owner rule: windowed runs go on the SECOND monitor at 1080p, never the main one:
 ## powershell -File tools/quiet_godot.ps1 --script res://tools/solo_shot.gd -- <scene> out.png
 ## scenes: start | myself | homes | picker
@@ -139,6 +139,21 @@ func _process(_d: float) -> bool:
 		pw2.tile = NeighborhoodLots.street_tile(dl) + Vector2i(0, 1)
 		root.get_node("Events").selection_changed.emit("folk", Pawn.of())
 		DoorActs.arrive(pw2, dl)
+	if _frames == 60 and _scn == "hiring":          # 51: a "Help wanted" card in a shop window
+		var pw3 = _main.hud._resolve(_main.hud.selected_folk_id)
+		for lid in Neighborhood.lot_ids():
+			if not JobLeads.hiring_at(str(lid)).is_empty() and not StaffPosts.front(str(lid)).is_empty():
+				var fr: Dictionary = StaffPosts.front(str(lid))
+				pw3.tile = Vector2i(fr["door"]) - Vector2i(fr["inward"]) * 4 - Vector2i(3, 0)
+				print("HIRING shot at %s door=%s" % [lid, str(fr["door"])])
+				break
+		root.get_node("Events").selection_changed.emit("folk", Pawn.of())
+	if _frames == 290 and _scn == "hiring":
+		var hv = _main.find_child("HelpWantedView", true, false)
+		print("HIRING view=%s signs=%d" % [str(hv != null), hv.sign_count() if hv != null else -1])
+		if hv != null:
+			for c in hv.get_children():
+				print("  sign at %s" % str(c.global_position))
 	if _frames == 60 and _scn == "cell":
 		JusticePlayer.hold(SysUtil.folk(Pawn.of()), 360.0, "custody", "In custody")
 		root.get_node("Events").selection_changed.emit("folk", Pawn.of())
@@ -190,7 +205,7 @@ func _process(_d: float) -> bool:
 		print("PAWNMETA away=%s info=%s tile=%s lvl=%d cur=%s" % [str(pw.has_meta("away")), str(Away.info(pw.id)), str(pw.tile), pw.level, str(pw.current.def_id) if pw.current else "-"])
 		for k in (lvw.level_nodes if lvw else {}):
 			print("  L%s objs=%d" % [str(k), (lvw.level_nodes[k]["objs"] as Dictionary).size()])
-	if _frames == (900 if _scn in ["court", "cell"] else (300 if _scn == "door" else (100000 if _scn in ["click", "tour"] else 100))):
+	if _frames == (900 if _scn in ["court", "cell"] else (300 if _scn in ["door", "hiring"] else (100000 if _scn in ["click", "tour"] else 100))):
 		var img := root.get_texture().get_image()
 		img.save_png(_out)
 		print("saved ", _out, " ", img.get_size())
