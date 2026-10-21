@@ -47,10 +47,12 @@ func _process(_d: float) -> bool:
 		var h6 = _main.hud
 		h6.money_hub.tab = _scn.substr(6)
 		h6.money_hub.show_for(h6.selected_folk_id)
-	if _frames == 60 and _scn in ["household", "council", "goals", "career"]:
+	if _frames == 60 and _scn in ["household", "council", "goals", "career", "settings", "casebd"]:
 		var h7 = _main.hud
-		var dd = {"household": h7.household_dialog, "council": h7.town_dialog, "goals": h7.goals_dialog, "career": h7.career_dialog}[_scn]
+		var dd = {"household": h7.household_dialog, "council": h7.town_dialog, "goals": h7.goals_dialog, "career": h7.career_dialog, "settings": h7.settings_dialog, "casebd": h7.case_board}[_scn]
 		dd.show_for(h7.selected_folk_id)
+	if _frames == 60 and _scn == "buildmode":
+		_main.hud.build_panel.call("open") if _main.hud.build_panel.has_method("open") else null
 	if _frames == 60 and _scn == "jobs":
 		var hud5 = _main.hud
 		hud5.life_hub.tab = "jobs"

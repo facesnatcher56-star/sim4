@@ -31,7 +31,10 @@ static func build(dlg: BankHub) -> void:
 		var d: Dictionary = defs[pid]
 		var on: bool = BankInsurance.has(h, str(pid))
 		var what: String = "pays %d%% of medical bills" % int(round(float(d.get("cover", 0.0)) * 100.0)) if d.has("cover") and pid != "car" else ("pays out after a road accident" if pid == "car" else "pays %d if someone dies" % int(d.get("payout", 0)))
-		dlg.row_with("%s: %d a week, %s." % [str(d["label"]), BankInsurance.weekly(str(pid)), what], [dlg.button("Cancel" if on else "Buy", "", func(): dlg.act("insurance_toggle", {"policy": str(pid)}))])
+		var card: VBoxContainer = UICard.card(dlg.body, dlg.dialog_width - 50.0, str(d["label"]), "COVERED" if on else "", what.capitalize())
+		UICard.chips(card, [["Cost", "%d/wk" % BankInsurance.weekly(str(pid))]])
+		var pol: String = str(pid)
+		UICard.action(card, "Cancel" if on else "Buy", func(): dlg.act("insurance_toggle", {"policy": pol}))
 	_will(dlg, h)
 	_gamble(dlg, h)
 

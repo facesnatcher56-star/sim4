@@ -20,12 +20,15 @@ static func _mine(dlg: BankHub, b: Dictionary) -> void:
 	var td: Dictionary = BusinessState.type_def(str(b["type"]))
 	dlg.heading("%s (%s, %s)" % [str(b["name"]), str(td.get("label", "")), Neighborhood.label_of(str(b["lot"]))])
 	var last: Dictionary = b["last"]
-	dlg.line("Reputation %d/100, %.1f stars. Last day: %d customers, %d coins in, %d out, profit %d. Level %d." % [int(b["rep"]), float(b["stars"]), int(last.get("customers", 0)),
-		int(last.get("revenue", 0)), int(last.get("costs", 0)), int(last.get("profit", 0)), int(b["level"])], 13)
 	var week: float = 0.0
 	for p in b["hist"]:
 		week += float(p)
-	dlg.line("Last %d days: %d coins profit. All time: %d. %s" % [(b["hist"] as Array).size(), int(week), int(b["profit_total"]), ("Closed for the day." if not bool(b["open"]) else "")], 12, UITheme.MUTED)
+	var pf: int = int(last.get("profit", 0))
+	UICard.chips(dlg.body, [["Reputation", "%d/100" % int(b["rep"])], ["Stars", "%.1f" % float(b["stars"])], ["Level", "%d" % int(b["level"])], ["Customers", "%d" % int(last.get("customers", 0))]])
+	UICard.chips(dlg.body, [["In", "%d" % int(last.get("revenue", 0))], ["Out", "%d" % int(last.get("costs", 0))], ["Profit", "%+d" % pf, UICard.OK if pf >= 0 else UICard.NO],
+		["%dd" % (b["hist"] as Array).size(), "%+d" % int(week)], ["All time", "%+d" % int(b["profit_total"])]])
+	if not bool(b["open"]):
+		dlg.line("Closed for the day.", 12, UITheme.MUTED)
 	var prices: Array = BusinessState.cfg().get("price_levels", [1.0])
 	var pr := HBoxContainer.new()
 	dlg.body.add_child(pr)

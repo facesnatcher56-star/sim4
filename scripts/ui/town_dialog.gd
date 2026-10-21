@@ -40,12 +40,16 @@ func build() -> void:
 func _mayor() -> void:
 	heading("Mayor")
 	var plat: String = str(((CityGov.cfg().get("platforms", {}) as Dictionary).get(str(CityGov.mayor.get("platform", "")), {}) as Dictionary).get("label", ""))
-	line("Mayor %s%s." % [str(CityGov.mayor["name"]), (" (%s)" % plat) if plat != "" else ""], 14)
-	line(CityMood.words(), 12, UITheme.MUTED)
 	var pol: Array = []
 	for pid in CityGov.policies:
 		pol.append(str(((CityPolicy.cfg()[pid]) as Dictionary).get("label", pid)).to_lower())
-	line("Laws in force: %s." % (", ".join(pol) if not pol.is_empty() else "none"), 12, UITheme.MUTED)
+	var inner: VBoxContainer = UICard.card(body, dialog_width - 50.0, str(CityGov.mayor["name"]), "MAYOR", CityMood.words())
+	var chips: Array = []
+	if plat != "":
+		chips.append(["Platform", plat])
+	chips.append(["Laws", ", ".join(pol) if not pol.is_empty() else "none"])
+	UICard.chips(inner, chips)
+	UICard.note(inner, CityMood.words())
 
 
 func _budget() -> void:

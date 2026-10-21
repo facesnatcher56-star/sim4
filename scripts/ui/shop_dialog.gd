@@ -28,22 +28,24 @@ static func build(dlg: BankHub) -> void:
 	var lot: String = str(sh2["lot"])
 	var inside: bool = ShopStock.is_open(shop_id) and here == lot
 	var where: String = "You are here and it is open." if inside else ("Open %02d:00 to %02d:00 at %s." % [int(sh2["hours"][0]), int(sh2["hours"][1]), Neighborhood.label_of(lot)])
-	dlg.line("%s. %s" % [str(sh2["label"]), where], 13, UITheme.MUTED)
+	dlg.line(where, 12, UITheme.MUTED)
 	if ShopStock.on_sale(shop_id):
 		dlg.line("SALE: %d%% off today." % int(round(ShopStock.deal_pct(shop_id) * 100.0)), 14, Color("#f2c94c"))
+	var cw: float = dlg.dialog_width - 50.0
 	var online: bool = bool(sh2.get("online", false))
 	var items: Dictionary = sh2["items"]
 	for iid in items.keys():
 		var it: Dictionary = items[iid]
 		var have: int = ShopStock.units(shop_id, iid)
 		var price: int = ShopStock.price(shop_id, iid)
-		var txt: String = "%s: %d coins%s" % [str(it["label"]), price, " (sold out)" if have <= 0 else (" (%d left)" % have)]
-		var bs: Array = []
 		var can_walk: bool = inside and have > 0
-		bs.append(dlg.button("Buy", "Buy one here", func(): dlg.act("shop_buy", {"shop": shop_id, "item": iid, "qty": 1, "online": false}), can_walk))
+		var card: VBoxContainer = UICard.card(dlg.body, cw, str(it["label"]), "SOLD OUT" if have <= 0 else "")
+		UICard.chips(card, [["Price", "%d" % price], ["Left", "%d" % have]])
+		var why: String = "" if can_walk else ("Sold out." if have <= 0 else "Go to %s while it is open, or order." % Neighborhood.label_of(lot))
+		var buy: Button = UICard.action(card, "Buy", func(): dlg.act("shop_buy", {"shop": shop_id, "item": iid, "qty": 1, "online": false}), can_walk, why)
 		if online:
-			bs.append(dlg.button("Order", "Delivered tomorrow for +%d coins" % int(ShopStock.cfg().get("delivery_fee", 8)), func(): dlg.act("shop_buy", {"shop": shop_id, "item": iid, "qty": 1, "online": true}), have > 0))
-		dlg.row_with(txt, bs)
+			var ob: Button = dlg.button("Order +%d" % int(ShopStock.cfg().get("delivery_fee", 8)), "Delivered tomorrow", func(): dlg.act("shop_buy", {"shop": shop_id, "item": iid, "qty": 1, "online": true}), have > 0)
+			buy.get_parent().add_child(ob)
 	_owned(dlg, folk_id)
 	_work(dlg, folk_id, here)
 
