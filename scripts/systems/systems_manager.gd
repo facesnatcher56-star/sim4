@@ -63,7 +63,7 @@ func teardown() -> void:
 		return
 	_connected = false
 	TimedAttempt.reset()          # these hold callables: drop them before the scripts go away
-	CarActs.reset()
+	WalkThen.reset()
 	if _sched != null:
 		_sched.remove_group(SimRegistry.systems_group(self))
 		_sched = null
@@ -96,6 +96,8 @@ static func reset_all() -> void:
 	DoorActs.reset()
 	TimedAttempt.reset()
 	CarActs.reset()
+	WalkThen.reset()
+	ShopActs.reset()
 	VenueStaff.first_asked = {}
 	SoloDistricts.reset()
 	SuccessionNobody.reset()
@@ -196,7 +198,7 @@ func _on_interaction_finished(folk_id: int, iid: String, success: bool) -> void:
 	AccidentMarks.on_interaction_finished(folk_id, iid, success)
 	DoorActs.on_interaction_finished(folk_id, iid, success)
 	TimedAttempt.on_interaction_finished(folk_id, iid, success)
-	CarActs.on_interaction_finished(folk_id, iid, success)
+	WalkThen.on_interaction_finished(folk_id, iid, success)
 	var rec: Dictionary = Away.on_finished(folk_id, iid, success)
 	if not rec.is_empty():
 		var f = SysUtil.folk(folk_id)

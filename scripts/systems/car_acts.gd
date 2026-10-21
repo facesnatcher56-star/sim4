@@ -14,7 +14,6 @@ static var running: Dictionary = {}               # key -> true: started (keys o
 static var searched: Dictionary = {}              # key -> day
 static var taken: Dictionary = {}                 # key -> car id (Transport.cars)
 static var seen_by: Dictionary = {}               # key -> noticer id (a witness while working at it)
-static var pending: Dictionary = {}               # fid -> {key, then: Callable}: walking up to the car
 static var reports: Array = []                    # [{case, due_min}] a theft that will be found out
 
 static func reset() -> void:
@@ -25,7 +24,6 @@ static func reset() -> void:
 	searched = {}
 	taken = {}
 	seen_by = {}
-	pending = {}
 	reports = []
 
 static func cfg() -> Dictionary:
@@ -53,9 +51,6 @@ static func has_alarm(key: String) -> bool:
 static func held(key: String) -> bool:
 	if inside.values().has(key) or taken.has(key):
 		return true
-	for p in pending.values():
-		if str(p["key"]) == key:
-			return true
 	return false
 
 static func own_car(f, car: Dictionary) -> bool:
@@ -78,16 +73,7 @@ static func _scene(car: Dictionary) -> String:
 
 static func _tile(car: Dictionary) -> Vector2i:
 	var p: Vector2 = car.get("pos", Vector2.ZERO)
-	var w = WorldIface.world()
-	var c := Vector2i(floori(p.x), floori(p.y))
-	if w == null:
-		return c
-	for rad in 4:
-		for dy in range(-rad, rad + 1):
-			for dx in range(-rad, rad + 1):
-				if maxi(absi(dx), absi(dy)) == rad and w.is_walkable(c + Vector2i(dx, dy)):
-					return c + Vector2i(dx, dy)
-	return c
+	return WalkThen.near(Vector2i(floori(p.x), floori(p.y)))
 
 static func _entry(id: String, label: String, fn: Callable) -> Dictionary:
 	return {"id": id, "label": label, "category": "Car", "enabled": true, "reason": "", "action": fn}
@@ -112,21 +98,8 @@ static func entries(f, car: Dictionary) -> Array:
 		out.append(_entry("car_window", "Break a window", func(): _go(f, car, func(): window(f, car))))
 	return out
 
-# ------------------------------------------------------------------ walking up to it
 static func _go(f, car: Dictionary, then: Callable) -> void:
-	var t: Vector2i = _tile(car)
-	if f.tile == t or not NeighborhoodLots.walk_to(f, t, ""):
-		then.call()
-		return
-	pending[int(f.id)] = {"key": str(car["key"]), "then": then}
-
-static func on_interaction_finished(folk_id: int, iid: String, success: bool) -> void:
-	if iid != "go_here" or not pending.has(folk_id):
-		return
-	var p: Dictionary = pending[folk_id]
-	pending.erase(folk_id)
-	if success:
-		(p["then"] as Callable).call()
+	WalkThen.go(f, _tile(car), then)
 
 # ------------------------------------------------------------------ the acts
 static func try_door(f, car: Dictionary) -> void:

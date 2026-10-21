@@ -1,0 +1,28 @@
+{
+ "_doc": "Task 53 shops (scripts/systems/shop_acts.gd). The pawn can take anything off a shelf (objects.<def>.goods) without paying, slip it into a pocket (SkillCheck shoplift, watched by staff and shoppers), or eat it in the aisle. Paying happens at the till (till_objects on a shop lot); with too little cash the cashier says how much is missing. Walking out with unpaid goods: a cashier on shift (cashier_roles) who is there notices by their own attention (watch, less when busy: busy_per_customer per shopper in the shop, perception helps) and asks; concealed goods are only seen if the pocketing was spotted or the concealment check fails. Not noticed: the goods are yours, and the theft may still be found (CrimePetty shoplifting). replaces: the old pay-at-the-shelf interactions the pawn no longer gets (NPCs keep them).",
+ "objects": {
+  "grocery_cooler": {
+   "replaces": ["buy_groceries", "buy_fresh_snack"],
+   "goods": [
+    {"id": "groceries", "what": "a bag of groceries", "take": "Take groceries", "price": 25, "kind": "pantry", "units": 6},
+    {"id": "snack", "what": "a fresh snack", "take": "Take a snack", "price": 5, "kind": "pantry", "units": 1, "eat": 30}
+   ]
+  }
+ },
+ "till_objects": ["counter"],
+ "cashier_roles": ["cashier", "barista", "bartender"],
+ "watch": 0.85,
+ "busy_per_customer": 0.06,
+ "lines": {
+  "ask": ["\"Are you going to pay for that?\" {n} calls from the till.", "{n} looks up. \"Excuse me, you haven't paid for that.\"", "\"Hang on,\" says {n}. \"Is that paid for?\""],
+  "short": ["\"That's {t} coins,\" says {n}. \"You're {s} short.\"", "{n} counts it. \"{t} altogether. You're {s} coins short.\""],
+  "paid": ["{n} rings it up: {t} coins.", "\"{t} coins, thanks,\" says {n}."],
+  "lie_ok": ["{n} hesitates, then waves you on.", "\"Oh. Sorry, my mistake,\" says {n}."],
+  "lie_fail": ["\"No, you didn't,\" says {n}, reaching for the phone.", "{n} isn't having it. \"I'm calling someone.\""],
+  "shout": ["\"Hey! Come back here!\" {n} shouts after you.", "{n} shouts something at your back as the door swings shut."],
+  "put_back": ["You put it back on the shelf.", "You leave it on the counter."],
+  "eat": ["You eat it right there in the aisle.", "You tear it open and eat it on the spot."],
+  "pocket_seen": ["{n} is staring right at you."],
+  "nothing_to_pay": ["\"Nothing to pay for,\" says {n}."]
+ }
+}
