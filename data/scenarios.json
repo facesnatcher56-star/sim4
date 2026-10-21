@@ -44,7 +44,7 @@
      "rel": "none"
     }
    ],
-   "moved_in": "You've just moved in with nothing but a bag. Click %s to get started.",
+   "moved_in": "You've just moved in with a bag and an old phone. Click %s to get started.",
    "tips_no_computer": {
     "1": "Nobody feeds you. Food costs coins and cooking costs ingredients. Your first goal is a job: click Phone at the top and open the Jobs app, or click the mailbox for Odd Jobs."
    },

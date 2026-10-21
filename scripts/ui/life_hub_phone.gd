@@ -28,6 +28,8 @@ static func build(dlg: LifeHub) -> void:
 			LifeHubJobs.build(dlg)
 		"bank":
 			_bank(dlg, f)
+		"news":
+			LifeHubMedia.build(dlg)
 		_:
 			_messages(dlg, f, fid)
 
@@ -35,7 +37,7 @@ static func _app_tile(dlg: LifeHub, row: Container, label: String, badge: String
 	var b: Button = dlg.button(label + ("  (%s)" % badge if badge != "" else ""), "Open " + label, func():
 		app = id
 		dlg.refresh())
-	b.custom_minimum_size = Vector2(150, 56)
+	b.custom_minimum_size = Vector2(92, 76)
 	row.add_child(b)
 
 static func _home(dlg: LifeHub, fid: int) -> void:
@@ -46,6 +48,7 @@ static func _home(dlg: LifeHub, fid: int) -> void:
 	_app_tile(dlg, fl, "Messages", "%d new" % msgs if msgs > 0 else "", "messages")
 	_app_tile(dlg, fl, "Jobs", "offer" if not Careers.pending_offer(fid).is_empty() else "", "jobs")
 	_app_tile(dlg, fl, "Bank", "", "bank")
+	_app_tile(dlg, fl, "News", "", "news")
 	var f = dlg.folk_obj()
 	var d: Dictionary = PhoneOwn.kind_def(str(PhoneOwn.own.get(fid, {}).get("kind", "")))
 	dlg.line("Your %s. Weekly line charge: %d coins." % [str(d.get("label", "phone")), int(SoloCfg.by_diff("phone", "bill_amount"))], 12, UITheme.MUTED)

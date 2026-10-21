@@ -30,6 +30,7 @@ var goals_dialog: GoalsDialog
 var career_dialog: CareerDialog
 var town_dialog: TownDialog
 var money_hub: BankHub                  # task 13: Town & Money window
+var phone_dialog: PhoneDialog
 var life_hub: LifeHub                   # task 14: Town Life window (places, study, jobs)
 var life_button: Button
 var vacation_dialog: VacationDialog
@@ -194,12 +195,11 @@ func _build_top_bar() -> void:
 	phone_button.text = "Phone"
 	phone_button.tooltip_text = "Messages, contacts, the Jobs app and your bank"
 	phone_button.pressed.connect(func():
-		if life_hub.visible and life_hub.tab == "phone":
-			life_hub.hide_dialog()
+		if phone_dialog.visible:
+			phone_dialog.hide_dialog()
 			return
 		LifeHubPhone.app = ""
-		life_hub.tab = "phone"
-		life_hub.show_for(selected_folk_id))
+		phone_dialog.show_for(selected_folk_id))
 	h.add_child(phone_button)
 	life_button = Button.new()
 	life_button.text = "Town"
@@ -261,6 +261,7 @@ func _build_dialogs() -> void:
 	career_dialog = CareerDialog.new()
 	money_hub = BankHub.new()
 	life_hub = LifeHub.new()
+	phone_dialog = PhoneDialog.new()
 	town_dialog = TownDialog.new()
 	vacation_dialog = VacationDialog.new()
 	UIU.connect_ev("game_event", func(n, p): if n == "vacation_open_booking": vacation_dialog.show_for(int(p.get("folk_id", selected_folk_id))))
@@ -284,12 +285,12 @@ func _build_dialogs() -> void:
 	case_prompt = CasePrompt.new()
 	JusticePlayer.ask_fn = case_prompt.ask
 	life_summary = LifeSummaryDialog.new()
-	for d in [goals_dialog, career_dialog, money_hub, life_hub, town_dialog, vacation_dialog, household_dialog, help_dialog, pause_menu, settings_dialog, confirm_dialog, incident_debug, case_board, case_prompt, share_hub, life_summary]:
+	for d in [goals_dialog, career_dialog, money_hub, life_hub, phone_dialog, town_dialog, vacation_dialog, household_dialog, help_dialog, pause_menu, settings_dialog, confirm_dialog, incident_debug, case_board, case_prompt, share_hub, life_summary]:
 		add_child(d)
 	save_menu.visibility_changed.connect(func(): UIDialog.track_open(save_menu.get_instance_id(), save_menu.visible))
 
 func dialogs() -> Array:
-	return [confirm_dialog, settings_dialog, share_hub, pause_menu, goals_dialog, career_dialog, money_hub, life_hub, town_dialog, vacation_dialog, household_dialog, help_dialog, incident_debug, case_board, case_prompt, life_summary]
+	return [confirm_dialog, settings_dialog, share_hub, pause_menu, goals_dialog, career_dialog, money_hub, life_hub, phone_dialog, town_dialog, vacation_dialog, household_dialog, help_dialog, incident_debug, case_board, case_prompt, life_summary]
 
 func _on_pause_choice(id: String) -> void:
 	pause_menu.hide_dialog()
@@ -427,7 +428,7 @@ func select_folk(id: int) -> void:
 	folk_panel.show_folk(f)
 	queue_bar.set_folk(f)
 	rebuild_folk_row()
-	for d in [goals_dialog, career_dialog, money_hub, life_hub]:
+	for d in [goals_dialog, career_dialog, money_hub, life_hub, phone_dialog]:
 		if d != null and d.visible:
 			d.show_for(id)
 

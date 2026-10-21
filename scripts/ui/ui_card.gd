@@ -37,8 +37,8 @@ static func badge_label(text: String, color: Color = Color("#3fb8af")) -> Contro
 	return pc
 
 ## A row of small labelled numbers: [["Rent", "25/wk"], ...]. An entry may carry a third element, a colour, for gain / loss only.
-static func chips(box: Control, items: Array) -> HBoxContainer:
-	var h := HBoxContainer.new()
+static func chips(box: Control, items: Array) -> HFlowContainer:
+	var h := HFlowContainer.new()
 	h.add_theme_constant_override("separation", 6)
 	box.add_child(h)
 	for it in items:
@@ -53,8 +53,8 @@ static func chips(box: Control, items: Array) -> HBoxContainer:
 	return h
 
 ## Requirement chips: [["Income 500/wk (you 0)", false], ...] drawn with a tick or a cross.
-static func reqs(box: Control, items: Array) -> HBoxContainer:
-	var h := HBoxContainer.new()
+static func reqs(box: Control, items: Array) -> HFlowContainer:
+	var h := HFlowContainer.new()
 	h.add_theme_constant_override("separation", 6)
 	box.add_child(h)
 	for it in items:

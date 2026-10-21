@@ -74,8 +74,7 @@ func _process(_d: float) -> bool:
 		if _scn == "nophone":
 			PhoneOwn.lose(pid5, "stolen", "Your phone was taken as well.")
 		load("res://scripts/ui/life_hub_phone.gd").set("app", {"jobs": "jobs", "messages": "messages"}.get(_scn, ""))
-		hud5.life_hub.tab = "phone"
-		hud5.life_hub.show_for(pid5)
+		hud5.phone_dialog.show_for(pid5)
 	if _frames == 60 and _scn == "homes":
 		var hud2 = _main.hud
 		hud2.money_hub.tab = "homes"
