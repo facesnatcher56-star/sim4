@@ -48,6 +48,7 @@ static func _interact(e: Dictionary) -> Dictionary:
 	var extra: Dictionary = a.get("extra", {})
 	var it = null
 	if extra.has("tile"):
+		_replace_walk(f)          # a new click to walk somewhere replaces the last one: it never queues several trips
 		it = Interaction.create_goto(f, extra["tile"], true, int(extra.get("level", 0)))
 	else:
 		it = Interaction.create(str(a.get("interaction_id", "")), f, int(a.get("target_id", -1)), true)
@@ -61,6 +62,14 @@ static func _interact(e: Dictionary) -> Dictionary:
 		f.queue.append(it)
 		SimEnv.events().queue_changed.emit(int(f.id))
 	return {"ok": true, "msg": ""}
+
+## The player's last "go here" is cancelled (the one running and any waiting); other queued orders and the job commute stay.
+static func _replace_walk(f) -> void:
+	if f.current != null and f.current.def_id == "go_here" and f.current.player and not f.current.params.has("commute"):
+		f.current.cancel("replaced")
+	for q in f.queue.duplicate():
+		if (q as Interaction).def_id == "go_here" and (q as Interaction).player and not (q as Interaction).params.has("commute"):
+			f.queue.erase(q)
 
 static func _build_place(e: Dictionary) -> Dictionary:
 	var a: Dictionary = e["args"]

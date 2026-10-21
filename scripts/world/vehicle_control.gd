@@ -77,13 +77,13 @@ func info(i: int, j: int) -> Dictionary:
 	if mr and mc:
 		d.merge({"type": "signal", "class": "major", "minor": -1, "main": 0})
 	elif mr:
-		d.merge({"type": "stop", "minor": 1, "main": 0})
+		d.merge({"type": "giveway", "minor": 1, "main": 0})          # task 47: a side street gives way to the main road (a stop sign made cars queue for nothing)
 	elif mc:
-		d.merge({"type": "stop", "minor": 0, "main": 1})
+		d.merge({"type": "giveway", "minor": 0, "main": 1})
 	elif i == 0 or j == 0 or i == nx - 1 or j == ny - 1:
 		d.merge({"type": "free", "minor": -1, "main": 0})
 	else:
-		d.merge({"type": "giveway" if (i + j) % 2 == 0 else "stop", "minor": 1, "main": 0})
+		d.merge({"type": "giveway" if (i + j) % 2 == 0 else "free", "minor": 1, "main": 0})
 	var ov: Dictionary = (t.get("junctions", {}) as Dictionary).get(key, {})
 	d.merge(ov, true)
 	if str(d["type"]) == "signal":

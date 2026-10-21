@@ -192,22 +192,49 @@ func _make_exit(t: Vector2i):
 		var g: Vector2i = r["entry"]
 		var rc: Rect2i = r["rect"]
 		var s := g + Vector2i(0, 1)
+		var direct: Array[Vector2i] = _direct_leg(t)          # no fence on this side: step straight onto the sidewalk (no invisible walls)
 		if rc.has_point(g) and graph.on_ribbon.has(s):
-			if world._blocked.has(s) or not world.edge_open(g, s):
-				return null                       # the gate is shut / fenced
 			var leg: Array[Vector2i] = []
-			if t != g:
-				leg = world.paths.find_path_rect(t, g, rc)
-				if leg.is_empty():
-					return null
-			leg.append(s)
-			return leg
+			if not (world._blocked.has(s) or not world.edge_open(g, s)):
+				if t != g:
+					leg = world.paths.find_path_rect(t, g, rc)
+				if t == g or not leg.is_empty():
+					leg.append(s)
+				else:
+					leg = []
+			if not leg.is_empty() and (direct.is_empty() or leg.size() <= direct.size()):
+				return leg
+			if not direct.is_empty():
+				return direct
+			return null
+		if not direct.is_empty():
+			return direct
 	var p := _nearest_ribbon(t)
 	if p.x < 0:
 		return null
 	var win := Rect2i(mini(t.x, p.x) - LEG_PAD, mini(t.y, p.y) - LEG_PAD, absi(t.x - p.x) + 1 + 2 * LEG_PAD, absi(t.y - p.y) + 1 + 2 * LEG_PAD)
 	var leg2 := world.paths.find_path_rect(t, p, win)
 	return null if leg2.is_empty() else leg2
+
+
+## The shortest walk from a tile of a lot straight out to the nearest ribbon tile in each of the four directions (walls, fences and objects are respected by the
+## windowed A*): [] when every side is walled in. So a lot's yard is open to the street wherever nothing is built.
+func _direct_leg(t: Vector2i) -> Array[Vector2i]:
+	var best: Array[Vector2i] = []
+	for d in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+		for k in range(1, 30):
+			var p: Vector2i = t + d * k
+			if not world.in_bounds(p):
+				break
+			if graph.on_ribbon.has(p):
+				if not best.is_empty() and k >= best.size():
+					break
+				var win := Rect2i(mini(t.x, p.x) - 3, mini(t.y, p.y) - 3, absi(t.x - p.x) + 7, absi(t.y - p.y) + 7)
+				var leg: Array[Vector2i] = world.paths.find_path_rect(t, p, win)
+				if not leg.is_empty() and (best.is_empty() or leg.size() < best.size()):
+					best = leg
+				break
+	return best
 
 
 func _nearest_ribbon(t: Vector2i) -> Vector2i:

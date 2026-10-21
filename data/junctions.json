@@ -31,9 +31,9 @@
   "3,3": {"type": "signal", "class": "minor", "zebra": ["S"], "poles": [1, 3], "box": true},
   "2,3": {"type": "roundabout"},
   "4,3": {"type": "roundabout"},
-  "1,1": {"type": "stop", "minor": 1, "zebra": ["W"], "worn": 0.6},
-  "2,2": {"type": "stop", "minor": 1, "worn": 0.3},
-  "4,2": {"type": "stop", "minor": 1, "worn": 0.5}
+  "1,1": {"type": "giveway", "minor": 1, "zebra": ["W"], "worn": 0.6},
+  "2,2": {"type": "giveway", "minor": 1, "worn": 0.3},
+  "4,2": {"type": "giveway", "minor": 1, "worn": 0.5}
  },
  "zebra_lots": ["school", "market", "hospital", "library", "cafe"],
  "bollards": ["3,2", "1,2", "3,3"]

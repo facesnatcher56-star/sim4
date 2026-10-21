@@ -30,7 +30,7 @@
  "ambient": {"max_parked": 40, "max_moving": 10, "depart_per_s": 0.35, "stay_s": [20, 90], "density_floor": 0.25},
  "filler": {
   "_doc": "Through traffic (VehicleFiller): cars per hour entering from the road ends, by hour (curve, weekday) or (curve_weekend), x the day of the week; floor_per_hour keeps a few cars at 3 am. Cause: a town has through traffic and customers, so the roads are busy at the rush hours, quiet at night, and the main road (main_weight) carries most.",
-  "per_hour_max": 34, "floor_per_hour": 1.6, "main_weight": 3.0, "through_share": 0.62, "max_alive": 24, "seed_back_min": 30, "retry_min": 6,
+  "per_hour_max": 11, "floor_per_hour": 0.6, "main_weight": 3.0, "through_share": 0.62, "max_alive": 10, "seed_back_min": 30, "retry_min": 6,
   "day_mult": [1.0, 1.0, 1.0, 1.0, 1.12, 0.85, 0.6],
   "curve": [0.05, 0.04, 0.05, 0.05, 0.1, 0.3, 0.65, 1.0, 0.9, 0.6, 0.5, 0.55, 0.65, 0.55, 0.5, 0.6, 0.85, 1.0, 0.8, 0.5, 0.35, 0.25, 0.15, 0.08],
   "curve_weekend": [0.08, 0.05, 0.05, 0.05, 0.05, 0.08, 0.15, 0.3, 0.5, 0.7, 0.85, 0.95, 1.0, 0.95, 0.9, 0.85, 0.8, 0.7, 0.55, 0.4, 0.3, 0.25, 0.18, 0.1],
