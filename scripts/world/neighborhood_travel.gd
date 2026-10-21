@@ -144,12 +144,13 @@ static func travel(folk_ids: Array, lot_id: String, opts: Dictionary = {}) -> Di
 	var names: Array = []
 	for id2 in moved:
 		names.append(SysUtil.folk_name(int(id2)))
-	var verb: String = "head home" if lot_id == Neighborhood.HOME else "head to %s" % Neighborhood.label_of(lot_id)
+	var s_: String = "s" if names.size() == 1 else ""          # "Tristan heads home", "Tristan and Mina head home"
+	var verb: String = "head%s home" % s_ if lot_id == Neighborhood.HOME else "head%s to %s" % [s_, Neighborhood.label_of(lot_id)]
 	var pat: Dictionary = HospitalVisits.patient_for(moved) if Venues.type_of_lot(lot_id) == "hospital" and not bool(opts.get("free", false)) else {}
 	if not pat.is_empty():
-		verb = "go to the hospital to visit %s" % str(pat["name"])
+		verb = "go%s to the hospital to visit %s" % ["es" if names.size() == 1 else "", str(pat["name"])]
 	if not bool(opts.get("silent", false)):          # silent = an unplayed household's own outing (PlaceAuto): no toast
-		SysUtil.notify("%s %s (%d min%s)." % [", ".join(names), verb, minutes, "" if not fast else ", fast travel"], "travel")
+		SysUtil.notify("%s %s (%d min%s)." % [" and ".join(names), verb, minutes, "" if not fast else ", fast travel"], "travel")
 	SysUtil.game_event("lot_changed", {"from": from_lot, "to": lot_id, "folk_ids": moved.duplicate(), "minutes": minutes, "entry": spot, "walk": not fast})
 	if fast:
 		Neighborhood.focus_camera(spot)

@@ -217,8 +217,9 @@ func _sync_shelters() -> void:
 			var lb := Label3D.new()
 			lb.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 			lb.pixel_size = 0.012
-			lb.font_size = 40
-			lb.outline_size = 10
+			lb.font_size = 32
+			lb.outline_size = 28          # a dark plate behind the text (docs/UI_STYLE.md: world labels get a backing)
+			lb.outline_modulate = Color(0.1, 0.13, 0.18, 0.92)
 			lb.modulate = Color(1.0, 0.92, 0.55)
 			lb.position = Vector3(0, 3.0, 0)
 			n.add_child(lb)

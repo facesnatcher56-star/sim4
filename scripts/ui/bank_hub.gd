@@ -80,14 +80,15 @@ func row_with(text: String, buttons: Array) -> void:
 
 func _town() -> void:
 	var s: Dictionary = MarketEconomy.stats()
+	var w: float = dialog_width - 50.0
 	heading("The economy")
-	line("%s. Prosperity %s." % [MarketEconomy.phase_label(), _bar(float(s["prosperity"]))], 16)
-	for t in MarketEconomy.lines():
-		line(t, 13, UITheme.MUTED)
+	var inner: VBoxContainer = UICard.card(body, w, MarketEconomy.phase_label(), "", "
+".join(MarketEconomy.lines()))
+	UICard.chips(inner, [["Prosperity", "%d%%" % int((float(s["prosperity"]) + 1.0) * 50.0)]])
 	heading("Where you stand")
 	var h: int = hid()
-	line("Cash %d coins, savings %d, debts %d. Credit score %d (%s)." % [Economy.balance(h), BankAccounts.balance(h), BankAccounts.debt(h), BankAccounts.credit_score(h),
-		BankAccounts.score_label(BankAccounts.credit_score(h))], 14)
+	var inner2: VBoxContainer = UICard.card(body, w, "Your money", "", "Credit score %d (%s)" % [BankAccounts.credit_score(h), BankAccounts.score_label(BankAccounts.credit_score(h))])
+	UICard.chips(inner2, [["Cash", "%d" % Economy.balance(h)], ["Savings", "%d" % BankAccounts.balance(h)], ["Debts", "%d" % BankAccounts.debt(h)], ["Credit", "%d" % BankAccounts.credit_score(h)]])
 	heading("Town news")
 	var shown: int = 0
 	for i in range(ChronicleHook.recent.size() - 1, -1, -1):
@@ -101,7 +102,6 @@ func _town() -> void:
 		line("Nothing to report yet.", 13, UITheme.MUTED)
 	for c2 in BusinessState.closed_log.slice(maxi(BusinessState.closed_log.size() - 2, 0)):
 		line("Day %d: %s closed (%s)." % [int(c2["day"]), str(c2["name"]), str(c2["why"])], 13, UITheme.MUTED)
-	line("Nothing here is required: the town carries on without you.", 12, UITheme.MUTED)
 
 static func _bar(v: float) -> String:
 	var n: int = int(round((v + 1.0) * 5.0))

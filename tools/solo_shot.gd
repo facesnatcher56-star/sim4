@@ -43,6 +43,14 @@ func _process(_d: float) -> bool:
 		for e in iq.self_entries(f3):
 			print("SELF %s | %s | enabled=%s | %s" % [e["id"], e["label"], str(e["enabled"]), e["reason"]])
 		quit(0)
+	if _frames == 60 and _scn.begins_with("money_"):
+		var h6 = _main.hud
+		h6.money_hub.tab = _scn.substr(6)
+		h6.money_hub.show_for(h6.selected_folk_id)
+	if _frames == 60 and _scn in ["household", "council", "goals", "career"]:
+		var h7 = _main.hud
+		var dd = {"household": h7.household_dialog, "council": h7.town_dialog, "goals": h7.goals_dialog, "career": h7.career_dialog}[_scn]
+		dd.show_for(h7.selected_folk_id)
 	if _frames == 60 and _scn == "jobs":
 		var hud5 = _main.hud
 		hud5.life_hub.tab = "jobs"

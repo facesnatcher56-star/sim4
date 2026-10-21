@@ -16,21 +16,28 @@ func build() -> void:
 
 func _bills(hid: int) -> void:
 	heading("Bills")
+	var w: float = dialog_width - 50.0
 	var due: Array = Economy.outstanding(hid)
 	var today := SysUtil.day()
 	if due.is_empty():
 		var nxt := int(Economy.next_bill_day)
-		line("Nothing to pay. Next bill arrives around day %d." % nxt if nxt > 0 else "Nothing to pay.", 14, UITheme.MUTED)
+		line("Nothing to pay. Next bill around day %d." % nxt if nxt > 0 else "Nothing to pay.", 14, UITheme.MUTED)
 	for bl in due:
 		var late := bool(bl.get("late", false))
 		var days_left := int(bl["due"]) - today
-		var when := "OVERDUE (includes a %d coin late fee)" % int(bl.get("fee", 0)) if late else ("due today" if days_left <= 0 else "due in %d day%s (day %d)" % [days_left, "" if days_left == 1 else "s", int(bl["due"])])
-		line("%d coins, %s" % [int(bl["amount"]), when], 15, Color("#e8913d") if late else UITheme.TEXT)
-		if bl.has("parts"):
-			line(UtilityBills.describe(bl["parts"]), 11, UITheme.MUTED)       # task 12: the bill split by utility
+		var what: String = str(bl.get("reason", "")).capitalize() if str(bl.get("reason", "")) != "" else "Household bills"
+		var inner: VBoxContainer = UICard.card(body, w, what, "OVERDUE" if late else "", UtilityBills.describe(bl["parts"]) if bl.has("parts") else "")
+		var chips: Array = [["Amount", "%d" % int(bl["amount"])], ["Due", "day %d" % int(bl["due"]) if days_left > 0 else "today"]]
+		if late:
+			chips.append(["Late fee", "%d" % int(bl.get("fee", 0)), UICard.NO])
+		UICard.chips(inner, chips)
+	var debt: int = JusticeDebt.owed(Pawn.of())
+	if debt > 0:
+		var di: VBoxContainer = UICard.card(body, w, "Court debt", "WEEKLY", "Paid every week from money above %d coins; with no income the court orders community service instead." % int(JusticeState.sect("debt").get("floor", 60)))
+		UICard.chips(di, [["Owed", "%d" % debt]])
 	if not due.is_empty():
 		var pay := Button.new()
-		pay.text = "Pay all bills (%d coins)" % Economy.owed(hid)
+		pay.text = "Pay all bills (%d)" % Economy.owed(hid)
 		pay.disabled = not Economy.can_afford(hid, Economy.owed(hid))
 		if pay.disabled:
 			pay.tooltip_text = "Not enough coins yet."
@@ -39,10 +46,7 @@ func _bills(hid: int) -> void:
 			Commands.run({"action": "pay_bill", "args": {"household_id": hid}})
 			refresh())
 		body.add_child(pay)
-	if Economy.autopay_for(hid):
-		line("Bills are paid automatically on the due date if you can afford them. Several missed bills lead to repossession.", 11, UITheme.MUTED)
-	else:
-		line("Auto-pay is off: someone at home will pay at the mailbox, or pay bills here before they go overdue.", 11, UITheme.MUTED)
+	line("Auto-pay is %s." % ("on: bills are paid on the due date when you can afford them" if Economy.autopay_for(hid) else "off: pay here before they go overdue"), 11, UITheme.MUTED)
 
 func _utilities(hid: int) -> void:
 	heading("Utilities")
@@ -67,7 +71,7 @@ func _week(hid: int) -> void:
 			spent -= amt
 		var key := _reason_text(str(e["reason"]), amt >= 0)
 		by_reason[key] = int(by_reason.get(key, 0)) + amt
-	line("Income: +%d      Spending: -%d" % [income, spent], 15)
+	UICard.chips(body, [["Income", "+%d" % income, UICard.OK], ["Spending", "-%d" % spent, UICard.NO]])
 	var keys: Array = by_reason.keys()
 	keys.sort_custom(func(a, b): return absi(int(by_reason[a])) > absi(int(by_reason[b])))
 	for k in keys.slice(0, 6):
