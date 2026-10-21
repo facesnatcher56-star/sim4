@@ -149,7 +149,7 @@ static func effects_of(id: int, depth: int = 4) -> Array:
 	return out
 
 static func to_dict() -> Dictionary:
-	return {"entries": entries.duplicate(true), "next": next_id, "books": LifeSummary.to_dict()}
+	return {"entries": entries.duplicate(true), "next": next_id, "books": LifeSummary.to_dict(), "prompts": PlayerPrompt.to_dict()}
 
 static func from_dict(d: Dictionary) -> void:
 	reset()
@@ -162,3 +162,4 @@ static func from_dict(d: Dictionary) -> void:
 		e["who"] = (e.get("who", []) as Array).map(func(x): return int(x))
 		e["causes"] = (e.get("causes", []) as Array).map(func(x): return int(x))
 	LifeSummary.from_dict(d.get("books", {}))
+	PlayerPrompt.from_dict(d.get("prompts", {}))

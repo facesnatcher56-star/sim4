@@ -90,6 +90,7 @@ static func reset_all() -> void:
 	SoloHome.reset()
 	LifeLedger.reset()
 	LifeSummary.reset()
+	PlayerPrompt.reset()
 	SoloDistricts.reset()
 	SuccessionNobody.reset()
 	Tiers.reset()

@@ -33,6 +33,25 @@ func _process(_d: float) -> bool:
 		Kit.teardown()
 		quit(0)
 		return true
+	if "--prompts" in OS.get_cmdline_user_args():
+		JusticePlayer.ask_fn = func(_pid, title, text, options, on_choice, default_id):
+			print("PROMPT [%s] %s" % [title, text])
+			for o in options:
+				print("    - %s" % str(o["label"]))
+			on_choice.call(default_id)
+		var t0: Dictionary = Story.alive_townies()[0]
+		var tid: int = int(t0["id"])
+		t0["coins"] = 0
+		t0["career"] = ""
+		for round in 2:
+			PlayerRequests.romance_step(f.id, tid, "sweetheart")
+			PlayerRequests.party(tid, f.id, 1)
+			PlayerPrompt.asked.clear()
+			PlayerPrompt.ask("loan", f.id, tid, {"amount": 30}, func(_c): pass)
+			PlayerPrompt.asked.clear()
+		Kit.teardown()
+		quit(0)
+		return true
 	if "--ledger" in OS.get_cmdline_user_args():
 		Economy.deposit(f.household_id, 100, "smoke")
 		Commands.run({"player_id": 1, "folk_id": f.id, "action": "solo", "args": {"action": "move", "rung": "bedsit"}})

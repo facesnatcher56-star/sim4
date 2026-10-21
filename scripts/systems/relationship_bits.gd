@@ -215,13 +215,15 @@ static func auto_status(a: int, b: int) -> void:
 	if not fl.get("sweetheart", false):
 		if minf(r1, r2) >= float(sw.get("romance_min", 45)) and minf(f1, f2) >= float(sw.get("friendship_min", 25)):
 			if not _is_bonded(a) and not _is_bonded(b):
-				set_flag(a, b, "sweetheart")
+				if not PlayerRequests.romance_step(a, b, "sweetheart"):
+					set_flag(a, b, "sweetheart")          # an NPC pair settles it themselves; a pair with the pawn asks the player instead
 	else:
 		var pt: Dictionary = c.get("partner", {})
 		var since: int = int((p["since"] as Dictionary).get("sweetheart", SysUtil.day()))
 		if minf(r1, r2) >= float(pt.get("romance_min", 70)) and minf(f1, f2) >= float(pt.get("friendship_min", 50)) \
 				and SysUtil.day() - since >= int(pt.get("days_as_sweethearts", 4)):
-			set_flag(a, b, "partner")
+			if not PlayerRequests.romance_step(a, b, "partner"):
+				set_flag(a, b, "partner")
 
 ## Explicit proposal: sweetheart -> partner, partner -> spouse. Returns "accepted" | "declined" | "too_soon" | "no_bond".
 static func propose(a: int, b: int) -> String:

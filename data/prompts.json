@@ -1,0 +1,104 @@
+{
+  "_doc": "Task 48: the questions the game puts to the player's character (PlayerPrompt). Each type has titles, and lines per VOICE (warm, formal, shy, bold: chosen from how well the two know each other and their traits, never stated). {name} the asker, {their}/{name}/{them} pronouns of the asker, {place}, {amount}, {why} a real reason. Options have several label variants and a hint that says what the answer DOES (never a prediction). No relationship words in any text. The same line is not used twice in a row for the same pair, and not again until most others were used.",
+  "types": {
+    "party_invite": {
+      "titles": ["A party tonight", "An invitation", "Come along?", "Something on this evening"],
+      "why": ["People are getting together at {place}.", "A few friends are meeting up.", "There is food and music at {place}.", "There is a get-together at {place}."],
+      "lines": {
+        "warm": ["{name} caught you with a big grin: \"We're doing something tonight. {why} Say you'll come.\"", "\"Don't say no,\" {name} says. \"{why} It would not be the same without you.\"", "{name} has saved you a seat. {why} Coming?", "\"I was hoping you'd be free,\" {name} says. \"{why}\""],
+        "formal": ["{name} has sent a note: \"{why} You would be very welcome.\"", "\"I would like to invite you,\" {name} writes. \"{why}\"", "An invitation from {name}. {why} Will you attend?", "{name} asks politely whether you can come. {why}"],
+        "shy": ["{name} hesitates. \"Um. {why} You don't have to...\"", "\"I wasn't sure whether to ask,\" {name} mumbles. \"{why}\"", "{name} shuffles a little. \"{why} Only if you want to.\"", "A small, nervous message from {name}: \"{why} Maybe?\""],
+        "bold": ["\"You're coming,\" {name} announces. \"{why}\"", "{name} doesn't wait: \"{why} I'm counting you in.\"", "\"Tonight. {why} Be there,\" says {name}.", "{name} grins: \"{why} Say yes before I make you.\""]
+      },
+      "options": [
+        {"id": "yes", "labels": ["Go", "I'll be there", "Count me in", "Yes, I'll come"], "hints": ["you spend the evening there", "you are away at the party for a few hours"]},
+        {"id": "no", "labels": ["Not tonight", "Another time", "I can't make it", "Say no"], "hints": ["you stay where you are; {name} will not mind much", "you skip it; it is a small thing"]}
+      ]
+    },
+    "romance_sweetheart": {
+      "titles": ["Something to say", "A question", "Can we talk?", "Between us"],
+      "why": ["I have been thinking about you a lot.", "I want to stop pretending this is nothing.", "I would like it to be real.", "I can't keep it in any more."],
+      "lines": {
+        "warm": ["{name} takes your hand. \"{why} Make it official with me?\"", "\"I've been wanting to ask,\" {name} says softly. \"{why} Will you be mine?\"", "{name} smiles and looks at you. \"{why} Shall we say it out loud?\"", "\"No more guessing,\" {name} says. \"{why} Yes?\""],
+        "formal": ["{name} clears {their} throat. \"{why} Would you consider seeing me properly?\"", "\"May I ask something personal?\" {name} says. \"{why}\"", "{name} speaks carefully: \"{why} Would you like to make this a real thing?\"", "\"I would like to be honest with you,\" says {name}. \"{why}\""],
+        "shy": ["{name} stares at the floor. \"{why} I mean... would you...?\"", "\"I'm no good at this,\" {name} says. \"{why} Maybe we could be... together?\"", "{name} blushes. \"{why} Is that all right?\"", "\"Um,\" says {name}. \"{why} Please say something.\""],
+        "bold": ["\"Let's stop dancing around it,\" {name} says. \"{why} Be with me.\"", "{name} steps closer. \"{why} I'm not asking twice.\"", "\"You and me,\" says {name}. \"{why} Well?\"", "{name} doesn't blink. \"{why} Say yes.\""]
+      },
+      "options": [
+        {"id": "yes", "labels": ["Yes", "I'd like that", "Yes, let's", "Make it official"], "hints": ["you two become sweethearts", "you start seeing each other for real"]},
+        {"id": "no", "labels": ["Not yet", "I need time", "Give me a while", "Not right now"], "hints": ["{name} will be a little hurt", "{name} will wait, but things cool a little"]}
+      ]
+    },
+    "romance_partner": {
+      "titles": ["Moving forward", "A serious question", "What are we?", "Together for good?"],
+      "why": ["I want this settled.", "I am sure about you.", "I don't want to share you with a maybe.", "I want a real commitment."],
+      "lines": {
+        "warm": ["\"I love being with you,\" {name} says. \"{why} Will you be my partner?\"", "{name} leans on you. \"{why} Let's make it permanent?\"", "\"Stay,\" {name} says gently. \"{why} Be my partner.\"", "{name} laughs a little nervously. \"{why} So? Partners?\""],
+        "formal": ["{name} says: \"{why} I would like us to commit to each other.\"", "\"I've thought about this carefully,\" {name} says. \"{why}\"", "{name} asks: \"{why} Would you agree to be my partner?\"", "\"There is something I'd like to settle,\" says {name}. \"{why}\""],
+        "shy": ["{name} fidgets. \"{why} Do you... want to be partners?\"", "\"I rehearsed this,\" {name} admits. \"{why} It's gone out of my head.\"", "{name} whispers: \"{why} Would you?\"", "\"It's a lot to ask,\" {name} says. \"{why}\""],
+        "bold": ["\"I'm done with maybe,\" {name} says. \"{why} Partners, starting now.\"", "{name} folds {their} arms. \"{why} Decide.\"", "\"I know what I want,\" says {name}. \"{why} You.\"", "{name} grins. \"{why} Say yes, you know you want to.\""]
+      },
+      "options": [
+        {"id": "yes", "labels": ["Yes, partners", "Let's do it", "I'm in", "Yes"], "hints": ["you become partners", "you two commit to each other"]},
+        {"id": "no", "labels": ["Not yet", "Let me think", "I'm not ready", "Later"], "hints": ["{name} will be hurt but will wait", "{name} backs off for now"]}
+      ]
+    },
+    "proposal": {
+      "titles": ["A question", "On one knee", "The big one", "Will you?"],
+      "why": ["I have been carrying a ring.", "I have decided.", "I can't picture anyone else.", "I want it all."],
+      "lines": {
+        "warm": ["{name} gets down on one knee. \"{why} Will you marry me?\"", "\"I want every day with you,\" {name} says. \"{why} Marry me?\"", "{name} holds out a ring, eyes shining. \"{why} Will you?\"", "\"Say you will,\" {name} whispers. \"{why}\""],
+        "formal": ["{name} says gravely: \"{why} I ask you to marry me.\"", "\"I would be honoured if you would marry me,\" {name} says. \"{why}\"", "{name} offers a ring. \"{why} Will you accept?\"", "\"I have a proposal,\" says {name}. \"{why}\""],
+        "shy": ["{name}'s hands shake. \"{why} Would you... marry me?\"", "\"I can't believe I'm doing this,\" {name} says. \"{why}\"", "{name} swallows. \"{why} Please?\"", "\"Um, will you?\" {name} manages. \"{why}\""],
+        "bold": ["\"Marry me,\" {name} says. \"{why}\"", "{name} slaps a ring in your hand. \"{why} Well?\"", "\"I'm not waiting any longer,\" says {name}. \"{why} Marry me.\"", "{name} grins wide. \"{why} Yes or yes?\""]
+      },
+      "options": [
+        {"id": "yes", "labels": ["Yes, I will", "Yes!", "I'd love to", "Of course"], "hints": ["you get engaged", "you two are engaged"]},
+        {"id": "no", "labels": ["I can't", "Not yet", "I'm sorry", "No"], "hints": ["{name} will be heartbroken and the two of you grow apart a little", "{name} is deeply hurt"]}
+      ]
+    },
+    "wedding": {
+      "titles": ["Setting the date", "The wedding", "Ready?", "A small ceremony"],
+      "why": ["I would like to marry at home.", "I want no more waiting.", "I have everything ready.", "I want to make it legal."],
+      "lines": {
+        "warm": ["{name} beams. \"{why} Today? Just us?\"", "\"Let's do it,\" {name} says. \"{why}\"", "{name} takes your hands. \"{why} Shall we?\"", "\"I can't wait,\" {name} says. \"{why}\""],
+        "formal": ["{name} proposes the day: \"{why} Does this suit you?\"", "\"I have arranged a simple ceremony,\" {name} says. \"{why}\"", "{name} asks: \"{why} Shall we proceed?\"", "\"If you are ready,\" says {name}, \"{why}\""],
+        "shy": ["{name} blushes. \"{why} Only if you want to.\"", "\"Maybe soon?\" {name} says. \"{why}\"", "{name} murmurs: \"{why} Is today all right?\"", "\"I'd understand if not,\" {name} says. \"{why}\""],
+        "bold": ["\"Today,\" says {name}. \"{why}\"", "{name} claps. \"{why} Let's go!\"", "\"No fuss,\" says {name}. \"{why} Now.\"", "{name} grins: \"{why} You in?\""]
+      },
+      "options": [
+        {"id": "yes", "labels": ["Let's marry", "Yes, today", "I'm ready", "Do it"], "hints": ["you marry", "a small wedding at home"]},
+        {"id": "no", "labels": ["Not today", "Wait a little", "Later", "Not yet"], "hints": ["the wedding waits a few days", "{name} will wait"]}
+      ]
+    },
+    "baby": {
+      "titles": ["A big thought", "A family?", "Something we should talk about", "A new chapter"],
+      "why": ["I have been dreaming of a child.", "I want a baby.", "I feel ready for a family.", "I want to try."],
+      "lines": {
+        "warm": ["{name} says softly: \"{why} Shall we try?\"", "\"I think about it all the time,\" {name} says. \"{why}\"", "{name} smiles. \"{why} What do you think?\"", "\"A little one,\" {name} says. \"{why}\""],
+        "formal": ["{name} raises the subject: \"{why} Would you be willing?\"", "\"I would like to discuss starting a family,\" {name} says. \"{why}\"", "{name} asks: \"{why} Is this something you want?\"", "\"There is something I wish to ask,\" says {name}. \"{why}\""],
+        "shy": ["{name} fidgets. \"{why} If you wanted to...\"", "\"I don't know how to say this,\" {name} says. \"{why}\"", "{name} looks away. \"{why} Maybe?\"", "\"It's silly,\" {name} says. \"{why}\""],
+        "bold": ["\"Let's have a baby,\" says {name}. \"{why}\"", "{name} doesn't hide it: \"{why} I want to try. Now.\"", "\"I've decided,\" {name} says. \"{why}\"", "{name} grins. \"{why} You in?\""]
+      },
+      "options": [
+        {"id": "yes", "labels": ["Let's try", "Yes", "I want that too", "Yes, let's"], "hints": ["you try for a baby", "a baby may come"]},
+        {"id": "no", "labels": ["Not now", "Not yet", "Let's wait", "Not this time"], "hints": ["you wait; {name} understands", "nothing changes for now"]}
+      ]
+    },
+    "loan": {
+      "titles": ["Could you help?", "A favour", "Short of money", "A hard moment"],
+      "why": ["I am out of work and the rent is due.", "I haven't eaten properly in days.", "I have run out of money before the week ends.", "I am {amount} coins short and have nowhere else to ask."],
+      "lines": {
+        "warm": ["{name} looks tired. \"{why} Could you lend me {amount} coins? I'll pay you back.\"", "\"I hate asking,\" {name} says. \"{why} Can you spare {amount} coins?\"", "{name} squeezes your arm. \"{why} {amount} coins would get me through.\"", "\"You're the only one I'd ask,\" {name} says. \"{why} {amount} coins?\""],
+        "formal": ["{name} asks: \"{why} Might I borrow {amount} coins?\"", "\"I am embarrassed to ask,\" {name} says. \"{why} {amount} coins would help.\"", "{name} states the problem plainly. \"{why} Could you lend {amount} coins?\"", "\"A loan of {amount} coins,\" {name} says. \"{why}\""],
+        "shy": ["{name} can hardly meet your eye. \"{why} {amount} coins... if you can.\"", "\"Sorry,\" {name} says. \"{why} I wouldn't ask, but {amount} coins...\"", "{name} mumbles: \"{why} Would {amount} coins be all right?\"", "\"I know it's a lot,\" {name} says. \"{why}\""],
+        "bold": ["\"I need {amount} coins,\" {name} says flatly. \"{why}\"", "{name} doesn't dress it up: \"{why} Lend me {amount}.\"", "\"Look, {amount} coins,\" says {name}. \"{why} You'll get it back.\"", "{name} shrugs. \"{why} {amount} coins. Yes?\""]
+      },
+      "options": [
+        {"id": "lend", "labels": ["Lend {amount} coins", "Give {amount} coins", "Lend it", "Help out with {amount}"], "hints": ["{name} will be grateful, you will be {amount} coins short", "you hand it over; {name} will remember it"]},
+        {"id": "half", "labels": ["Lend half", "Lend a little", "Give what you can spare"], "hints": ["{name} will be glad of something, you keep some", "half the amount changes hands"]},
+        {"id": "no", "labels": ["Say no", "Can't help", "Sorry, no", "Decline"], "hints": ["{name} will be hurt", "{name} goes without and is let down"]}
+      ]
+    }
+  }
+}

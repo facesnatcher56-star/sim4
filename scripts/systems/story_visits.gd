@@ -298,7 +298,8 @@ static func send_invite(townie_id: int, folk_id: int) -> Dictionary:
 		"expires_min": SysUtil.now() + int(float(ic.get("expire_hours", 24)) * 60.0)}
 	Story._seq += 1
 	Story.invites.append(inv)
-	SysUtil.notify("%s invites %s to a party!" % [Story.name_of(townie_id), SysUtil.folk_name(folk_id)], "invite")
+	if not PlayerRequests.party(townie_id, folk_id, int(inv["id"])):
+		SysUtil.notify("%s invites %s to a party!" % [Story.name_of(townie_id), SysUtil.folk_name(folk_id)], "invite")
 	SysUtil.game_event("party_invite", {"folk_id": folk_id, "townie_id": townie_id, "invite_id": inv["id"]})
 	return inv
 
