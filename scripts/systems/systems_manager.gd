@@ -190,6 +190,7 @@ func _on_interaction_finished(folk_id: int, iid: String, success: bool) -> void:
 	WeatherWorld.on_interaction_finished(folk_id, iid, success)
 	MoodSwings.on_finished(folk_id, iid, success)
 	AccidentMarks.on_interaction_finished(folk_id, iid, success)
+	DoorActs.on_interaction_finished(folk_id, iid, success)
 	var rec: Dictionary = Away.on_finished(folk_id, iid, success)
 	if not rec.is_empty():
 		var f = SysUtil.folk(folk_id)

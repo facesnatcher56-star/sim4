@@ -1,5 +1,5 @@
 {
- "_doc": "Task 54: the skill set, each skill independent. `helpers` = other skills that add a share of their level to this one in a check (charisma helps manipulation without replacing it). `xp_fail` = the share of XP a failed attempt still gives. Checks (scripts/systems/skill_check.gd) combine the primary skill and its helpers, tools, conditions and traits into one number and grade the attempt: clean, slow, partial, quiet_fail, loud_fail.",
+ "_doc": "Task 54: the skill set, each skill independent. `helpers` = other skills that add a share of their level to this one in a check (charisma helps manipulation without replacing it). `xp_fail` = the share of XP a failed attempt still gives. Checks (scripts/systems/skill_check.gd) combine the primary skill and its helpers, tools, conditions and traits into one number and grade the attempt: clean, slow, partial, quiet_fail, loud_fail, catastrophic (each act names its own catastrophe: scripts/systems/skill_catastrophe.gd). `conditions` and `age` feed the one shared condition modifier (scripts/systems/skill_condition.gd).",
  "xp_fail": 0.35,
  "skills": {
   "charisma": {"label": "Charisma", "helpers": {}},
@@ -18,16 +18,20 @@
   "logic": {"label": "Logic", "helpers": {}}
  },
  "tools": {"lockpick": 0.2, "crowbar": 0.15, "slim_jim": 0.2, "weapon": 0.2, "phone": 0.0},
- "conditions": {"dark": 0.06, "noisy": -0.04, "crowded": -0.08, "tired": -0.08, "hungry": -0.05, "injured": -0.12, "drunk": -0.15, "raining": -0.03},
+ "conditions": {"dark": 0.06, "noisy": -0.04, "crowded": -0.08, "raining": -0.03, "tired": -0.08, "hungry": -0.05, "injured": -0.12, "sick": -0.07, "tipsy": -0.06, "drunk": -0.15, "high": -0.12},
+ "age": {"child": -0.15, "teen": -0.04, "adult": 0.0, "elder": -0.08},
+ "catastrophe": {"_doc": "The deep miss: at_skill_0 .. at_skill_10 = share of rolls that end catastrophic (eased by sqrt of skill), times condition_mult, never more than max_fail_share of the failures. alarm_trace: extra trace when an alarm rings.", "at_skill_0": 0.16, "at_skill_10": 0.005, "max_fail_share": 0.6, "alarm_trace": 0.3, "condition_mult": {"drunk": 2.2, "tipsy": 1.4, "high": 1.9, "injured": 1.4, "tired": 1.3, "sick": 1.2}},
  "acts": {
-  "pick_lock": {"skill": "lockpicking", "difficulty": 0.55, "minutes": 14, "noise": 0.12},
-  "force_door": {"skill": "fitness", "difficulty": 0.5, "minutes": 2, "noise": 0.9},
-  "break_window": {"skill": "handiness", "difficulty": 0.3, "minutes": 2, "noise": 0.7},
-  "pickpocket": {"skill": "sleight", "difficulty": 0.5, "minutes": 1, "noise": 0.0, "opposed": "perception"},
-  "shoplift": {"skill": "sleight", "difficulty": 0.45, "minutes": 2, "noise": 0.0, "opposed": "perception"},
-  "hotwire": {"skill": "mechanics", "difficulty": 0.55, "minutes": 6, "noise": 0.2},
+  "pick_lock": {"skill": "lockpicking", "difficulty": 0.55, "minutes": 14, "noise": 0.12, "catastrophe": {"trace": 0.7, "line": ["The pick snaps off inside the lock.", "Something cracks in the lock and the pick comes out in two pieces."]}},
+  "force_door": {"skill": "fitness", "difficulty": 0.5, "minutes": 2, "noise": 0.9, "catastrophe": {"injure": [1, "shoulder"], "noise": 1.0, "line": ["Your shoulder hits the door wrong. Something gives, and it is not the door."]}},
+  "break_window": {"skill": "handiness", "difficulty": 0.3, "minutes": 2, "noise": 0.7, "catastrophe": {"injure": [1, "cut hand"], "trace": 0.5, "alarm": true, "line": ["The glass bites back: a deep cut across the hand, blood on the frame."]}},
+  "pickpocket": {"skill": "sleight", "difficulty": 0.5, "minutes": 1, "noise": 0.0, "opposed": "perception", "catastrophe": {"line": ["Their hand clamps over yours, still in their pocket."], "noise": 1.0}},
+  "shoplift": {"skill": "sleight", "difficulty": 0.45, "minutes": 2, "noise": 0.0, "opposed": "perception", "catastrophe": {"line": ["Half the shelf comes down with it."], "noise": 1.0}},
+  "hotwire": {"skill": "mechanics", "difficulty": 0.55, "minutes": 6, "noise": 0.2, "catastrophe": {"injure": [1, "electric shock"], "alarm": true, "noise": 0.8, "line": ["A wire bites. Your arm jumps and the car horn starts blaring."]}},
   "lie": {"skill": "manipulation", "difficulty": 0.5, "minutes": 2, "noise": 0.0, "opposed": "perception"},
-  "threaten": {"skill": "intimidation", "difficulty": 0.5, "minutes": 1, "noise": 0.2, "opposed": "fighting"},
-  "sneak": {"skill": "stealth", "difficulty": 0.5, "minutes": 3, "noise": 0.0, "opposed": "perception"}
+  "threaten": {"skill": "intimidation", "difficulty": 0.5, "minutes": 1, "noise": 0.2, "opposed": "fighting", "catastrophe": {"injure": [2, "fight"], "noise": 1.0, "line": ["They do not back off. They swing first."]}},
+  "sneak": {"skill": "stealth", "difficulty": 0.5, "minutes": 3, "noise": 0.0, "opposed": "perception"},
+  "cook": {"skill": "cooking", "difficulty": 0.3, "minutes": 30, "noise": 0.0, "catastrophe": {"fire": true, "fire_source": "cooking", "weight": 0.5, "line": ["The pan flares up."]}},
+  "fight": {"skill": "fighting", "difficulty": 0.5, "minutes": 2, "noise": 0.9, "opposed": "fighting", "catastrophe": {"injure": [2, "fight"], "line": ["A fist lands that you never saw coming."]}}
  }
 }

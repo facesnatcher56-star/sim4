@@ -10,11 +10,13 @@ extends RefCounted
 static var known_locked: Dictionary = {}          # "fid|lot" -> true once the door was tried
 static var forced: Dictionary = {}                # lot -> day the door was forced / picked open (stays open that day)
 static var intruders: Dictionary = {}             # fid -> lot id they are in without being invited
+static var working: Dictionary = {}               # fid -> {lot, act, r}: an attempt under way (it takes the minutes the skill says)
 
 static func reset() -> void:
 	known_locked = {}
 	forced = {}
 	intruders = {}
+	working = {}
 
 static func cfg() -> Dictionary:
 	return SysUtil.table("doors")
@@ -68,11 +70,38 @@ static func _say(f, text: String) -> void:
 # ------------------------------------------------------------------ arriving at the door
 ## The pawn reached the street in front of somebody's home: it stops there and the door options come up (no "closed", no walking home by itself).
 static func arrive(f, lot_id: String) -> void:
+	if str(f.get_meta("door_walk", "")) == lot_id or (str(f.get_meta("at_door", "")) == lot_id and f.tile == doorstep(lot_id)):
+		return          # already on the way up the path to this door, or already standing on its step
 	f.cancel_current("at_the_door")
 	f.clear_queue()
 	f.set_meta("at_door", lot_id)
-	NeighborhoodLots.walk_to(f, NeighborhoodLots.street_tile(lot_id), "")
-	SysUtil.game_event("doorstep", {"folk_id": int(f.id), "lot_id": lot_id})
+	var step: Vector2i = doorstep(lot_id)
+	if f.tile == step or not NeighborhoodLots.walk_to(f, step, ""):
+		SysUtil.game_event("doorstep", {"folk_id": int(f.id), "lot_id": lot_id})
+		return
+	f.set_meta("door_walk", lot_id)          # the door options come up once the pawn stands on the step (on_interaction_finished)
+
+## The step outside the lot's front door: the outdoor walkable tile next to a ground-floor door of the lot, the one nearest the street.
+## Falls back to the lot's street tile when the lot has no door object (an unbuilt plot).
+static func doorstep(lot_id: String) -> Vector2i:
+	var street: Vector2i = NeighborhoodLots.street_tile(lot_id)
+	var w = WorldIface.world()
+	if w == null:
+		return street
+	var rc: Rect2i = NeighborhoodLots.rect_of(lot_id)
+	var best: Vector2i = street
+	var best_d: int = 1 << 30
+	for o in w.objects_of_def("door"):
+		if ("level" in o and int(o.level) != 0) or not rc.has_point(o.tile):
+			continue
+		for dv in [Vector2i(0, 1), Vector2i(0, -1), Vector2i(1, 0), Vector2i(-1, 0)]:
+			var t: Vector2i = o.tile + dv
+			if rc.has_point(t) and w.is_walkable(t) and w.is_outdoor(t):
+				var d: int = (t - street).length_squared()
+				if d < best_d:
+					best_d = d
+					best = t
+	return best
 
 static func entries(f, lot_id: String) -> Array:
 	var fid: int = int(f.id)
@@ -160,41 +189,77 @@ static func try_door(f, lot_id: String) -> void:
 		return
 	_enter(f, lot_id, false)
 
+## The crime scene key of a lot (a townie home is "town:<n>", so its real alarm, cameras and dog apply).
+static func scene_of(lot_id: String) -> String:
+	for t in Neighborhood.residents_of(lot_id):
+		return "town:%d" % int(t.get("lot", 0))
+	return "venue:" + lot_id
+
+static func _ctx(lot_id: String) -> Dictionary:
+	return {"scene": scene_of(lot_id), "wants": "unseen"}
+
+const WORK_LABEL := {"pick_lock": "Picking the lock", "force_door": "Forcing the door", "break_window": "Breaking a window"}
+
+## An attempt takes the time the skill says (an expert picks a lock in a minute, a novice in ten, and every minute at the door is a minute to be seen).
+## The roll is made now; what happens lands when the work is done. Cancelling it means giving up (nothing happens).
+static func _attempt(f, lot_id: String, act: String) -> void:
+	var r: Dictionary = SkillCheck.attempt(int(f.id), act, _ctx(lot_id))
+	var ir: Interaction = Interaction.create("wait_here", f, -1, true)
+	if ir == null:
+		_resolve(f, lot_id, act, r)
+		return
+	ir.def = ir.def.duplicate(true)
+	ir.def["duration_min"] = maxf(float(r["minutes"]), 1.0)
+	ir.def["label"] = str(WORK_LABEL.get(act, "Working at the door"))
+	ir.def.erase("thought")
+	working[int(f.id)] = {"lot": lot_id, "act": act, "r": r}
+	f.enqueue(ir)
+
+static func on_interaction_finished(folk_id: int, iid: String, success: bool) -> void:
+	if iid == "go_here":
+		var g = SysUtil.folk(folk_id)
+		if g != null and g.has_meta("door_walk"):
+			var lot: String = str(g.get_meta("door_walk"))
+			g.remove_meta("door_walk")
+			if str(g.get_meta("at_door", "")) == lot:
+				SysUtil.game_event("doorstep", {"folk_id": folk_id, "lot_id": lot})
+		return
+	if iid != "wait_here" or not working.has(folk_id):
+		return
+	var w: Dictionary = working[folk_id]
+	working.erase(folk_id)
+	var f = SysUtil.folk(folk_id)
+	if success and f != null and str(f.get_meta("at_door", "")) == str(w["lot"]):
+		_resolve(f, str(w["lot"]), str(w["act"]), w["r"])
+
 static func pick(f, lot_id: String) -> void:
-	var c: Dictionary = cfg().get("pick", {})
-	var r: Dictionary = SkillCheck.attempt(int(f.id), "pick_lock", {})
-	_noise(lot_id, float(r["noise"]))
-	if bool(r["ok"]):
-		forced[lot_id] = SysUtil.day()
-		_enter(f, lot_id, false)
-	else:
-		_say(f, "The lock will not give.")
-		_again(f, lot_id)
+	_attempt(f, lot_id, "pick_lock")
 
 static func force(f, lot_id: String) -> void:
-	var c: Dictionary = cfg().get("force", {})
-	var r: Dictionary = SkillCheck.attempt(int(f.id), "force_door", {})
-	_noise(lot_id, float(r["noise"]))
-	if bool(r["ok"]):
-		forced[lot_id] = SysUtil.day()
-		_say(f, "The door gives way with a crack.")
-		_enter(f, lot_id, false)
-	else:
-		_say(f, "The door holds. That hurt.")
-		f.add_buff("embarrassed")
-		_again(f, lot_id)
+	_attempt(f, lot_id, "force_door")
 
 static func window(f, lot_id: String) -> void:
-	var c: Dictionary = cfg().get("window", {})
-	var r: Dictionary = SkillCheck.attempt(int(f.id), "break_window", {})
-	_noise(lot_id, float(r["noise"]))
-	CrimePetty.commit("vandalism", int(f.id), "venue:" + lot_id, {"seen": false})
+	_attempt(f, lot_id, "break_window")
+
+static func _resolve(f, lot_id: String, act: String, r: Dictionary) -> void:
+	var cat: bool = str(r["grade"]) == "catastrophic"
+	var act_min: float = float((SysUtil.table("skills").get("acts", {}) as Dictionary).get(act, {}).get("minutes", 5))
+	_noise(lot_id, 1.0 - pow(1.0 - float(r["noise"]), maxf(float(r["minutes"]) / act_min, 0.5)))
+	if act == "break_window":
+		CrimePetty.commit("vandalism", int(f.id), "venue:" + lot_id, {"seen": bool(r["alarm"]), "trace": float(r["trace"])})
+	elif cat:
+		CrimePetty.commit("vandalism", int(f.id), "venue:" + lot_id, {"seen": bool(r["alarm"]), "trace": float(r["trace"])})
 	if bool(r["ok"]):
-		_say(f, "Glass breaks. You climb in.")
+		if act != "break_window":
+			forced[lot_id] = SysUtil.day()
+		_say(f, {"pick_lock": "The lock clicks.", "force_door": "The door gives way with a crack.", "break_window": "Glass breaks. You climb in."}[act])
 		_enter(f, lot_id, false)
-	else:
-		_say(f, "Glass breaks, but the frame is too small.")
-		_again(f, lot_id)
+		return
+	if not cat:
+		_say(f, {"pick_lock": "The lock will not give.", "force_door": "The door holds. That hurt.", "break_window": "Glass breaks, but the frame is too small."}[act])
+	if act == "force_door":
+		f.add_buff("embarrassed")
+	_again(f, lot_id)
 
 ## Noise: a resident who is up may hear it (and the more noise, the likelier). Nobody is told that they did; the effect shows later (a light, a voice, a call).
 static func _noise(lot_id: String, loudness: float) -> void:

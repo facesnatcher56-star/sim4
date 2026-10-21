@@ -11,7 +11,7 @@ static func cfg() -> Dictionary:
 static func def(kind: String) -> Dictionary:
 	return (cfg().get(kind, {}) as Dictionary)
 
-## Someone commits a petty offence. scene: lot key or "street". Returns the case when the offender was identified, else {}.
+## Someone commits a petty offence. scene: lot key or "street". opts: seen, trace (evidence left, raises the odds of being identified). Returns the case when the offender was identified, else {}.
 static func commit(kind: String, pid: int, scene: String, opts: Dictionary = {}) -> Dictionary:
 	var d: Dictionary = def(kind)
 	if d.is_empty() or not CrimePerson.alive(pid):
@@ -28,11 +28,12 @@ static func commit(kind: String, pid: int, scene: String, opts: Dictionary = {})
 		SysUtil.notify("A noisy drunk kept the street awake last night.", "warn")
 	elif kind == "trespassing" and vhid > 0:
 		SysUtil.notify("Someone was seen wandering around %s." % CaseStore.house_label(scene), "warn")
-	var caught: float = float(d.get("caught", 0.35)) * Police.strength() * (1.5 if bool(opts.get("seen", false)) else 1.0)
+	var trace: float = float(opts.get("trace", 0.0))          # task 54: a catastrophe leaves evidence (a snapped pick, blood on the glass)
+	var caught: float = float(d.get("caught", 0.35)) * Police.strength() * (1.5 if bool(opts.get("seen", false)) else 1.0) * (1.0 + trace)
 	CrimePlace.place_at_scene(pid, scene)
 	if not JusticeState.chance(caught):
 		return {}
-	var c: Dictionary = CaseStore.create(kind, pid, -1, scene, {"witnessed": true, "witness_clarity": 0.9, "witnesses": [], "trace": 0.5, "vhid": vhid, "loot_value": cost})
+	var c: Dictionary = CaseStore.create(kind, pid, -1, scene, {"witnessed": true, "witness_clarity": 0.9, "witnesses": [], "trace": maxf(0.5, trace), "vhid": vhid, "loot_value": cost})
 	c["state"] = "open"
 	c["disc_day"] = SysUtil.day()
 	c["charge"] = kind

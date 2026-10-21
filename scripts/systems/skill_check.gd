@@ -3,7 +3,8 @@ extends RefCounted
 ## Task 54: one check behind every attempt. SkillCheck.attempt(actor_id, act, ctx) resolves an act from data/skills.json "acts" by the actor's primary skill plus helper
 ## shares, the tools carried, the conditions (dark, crowded, tired, drunk, injured ...) and traits, against the act's difficulty or, when somebody resists or watches,
 ## against THEIR skill (ctx.opponent: a person id). The result is graded, not pass or fail:
-##   {grade: clean | slow | partial | quiet_fail | loud_fail, ok, p, minutes, noise}
+##   {grade: clean | slow | partial | quiet_fail | loud_fail | catastrophic, ok, p, minutes, noise, trace, alarm}
+## catastrophic: the act's own deep miss from data (SkillCatastrophe: injury, evidence, alarm, fire); ctx.scene / ctx.object say where.
 ## The player never sees p or the grade as a number. Failures still teach (a share of the XP). Townies use the same skills (CrimeLifePath.skill).
 ##   SkillCheck.level(pid, skill)   effective level 0..10 with helpers      SkillCheck.attempt(pid, act, ctx)      SkillCheck.train(pid, skill, xp, ok)
 
@@ -24,19 +25,10 @@ static func level(pid: int, skill: String) -> float:
 		v += own(pid, str(h)) * float(def["helpers"][h])
 	return clampf(v, 0.0, 10.0)
 
+## The place and moment (dark, noisy, crowded, raining) plus the shared body condition (SkillCondition: age, injury, drunk or high, tired, hungry, sick).
 static func _conditions(pid: int, ctx: Dictionary) -> float:
 	var c: Dictionary = cfg().get("conditions", {})
-	var f = SysUtil.folk(pid)
-	var s: float = 0.0
-	if f != null:
-		if f.get_stat_value("energy") < -40.0:
-			s += float(c.get("tired", -0.08))
-		if f.get_stat_value("hunger") < -50.0:
-			s += float(c.get("hungry", -0.05))
-		if f.has_buff("drunk"):
-			s += float(c.get("drunk", -0.15))
-		if f.has_buff("injured"):
-			s += float(c.get("injured", -0.12))
+	var s: float = SkillCondition.modifier(pid)
 	var h: float = SysUtil.hour_f()
 	if (h >= 21.0 or h < 5.0) and str(ctx.get("wants", "")) == "unseen":
 		s += float(c.get("dark", 0.06))
@@ -73,7 +65,9 @@ static func attempt(pid: int, act: String, ctx: Dictionary = {}) -> Dictionary:
 	var p: float = chance(pid, act, ctx)
 	var r: float = SysUtil.rng.randf()
 	var grade: String
-	if r < p * 0.55:
+	if r >= 1.0 - SkillCatastrophe.chance(pid, act, p):
+		grade = "catastrophic"          # the deepest misses (the top of the roll) are the catastrophes
+	elif r < p * 0.55:
 		grade = "clean"
 	elif r < p:
 		grade = "slow" if r < p * 0.8 else "partial"
@@ -86,11 +80,19 @@ static func attempt(pid: int, act: String, ctx: Dictionary = {}) -> Dictionary:
 			minutes *= 2.0
 		"loud_fail":
 			noise = clampf(noise + 0.5, 0.0, 1.0)
+		"catastrophic":
+			noise = clampf(noise + 0.5, 0.0, 1.0)
 		"clean":
 			minutes *= 0.7
 	var ok: bool = grade in ["clean", "slow", "partial"]
 	train(pid, str(d.get("skill", "")), float(ctx.get("xp", 6.0)), ok)
-	return {"grade": grade, "ok": ok, "p": p, "minutes": minutes, "noise": noise, "act": act}
+	var out: Dictionary = {"grade": grade, "ok": ok, "p": p, "minutes": minutes, "noise": noise, "act": act, "trace": 0.0, "alarm": false}
+	if grade == "catastrophic":
+		var e: Dictionary = SkillCatastrophe.apply(pid, act, ctx)
+		out["trace"] = e["trace"]
+		out["alarm"] = e["alarm"]
+		out["noise"] = maxf(noise, float(e["noise"]))
+	return out
 
 static func train(pid: int, skill: String, xp: float, ok: bool) -> void:
 	if skill == "":

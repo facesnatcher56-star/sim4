@@ -136,7 +136,7 @@ static func _options(f, day: int) -> Array:
 	if Careers.has_job(fid):
 		out.append({"pool": ctx.get("work", []), "vars": {}})
 	var lot: String = Neighborhood.lot_of_folk(f)
-	if lot != "" and Venues.type_of_lot(lot) != "home":
+	if lot != "" and Venues.type_of_lot(lot) != "home" and (Venues.type_of_lot(lot) == "park" or not WeatherFolk.is_outside(f)):          # place thoughts only from inside the place, not its doorstep
 		var pv := {"place": Neighborhood.label_of(lot)}
 		var spec: Array = (c.get("venue_types", {}) as Dictionary).get(Venues.type_of_lot(lot), [])
 		if not spec.is_empty():
