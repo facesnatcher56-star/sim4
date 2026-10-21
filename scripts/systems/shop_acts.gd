@@ -216,9 +216,7 @@ static func _exit(f, lot: String) -> void:
 		var p: float = float(cfg().get("watch", 0.85)) * clampf(1.0 - busy, 0.2, 1.0) * (0.7 + SkillCheck.level(int(c.id), "perception") * 0.05)
 		seen = visible and (bool(flagged.get(fid, false)) or SysUtil.rng.randf() < p)
 	if not seen:
-		_own(f, items)
-		_drop(fid, lot)
-		CrimePetty.commit("shoplifting", fid, "venue:" + lot, {"seen": false})
+		_steal(f, lot, false)
 		return
 	var nm: String = _nm(c)
 	var tab_only: bool = items.all(func(it): return bool(it.get("tab", false)) or str(it["kind"]) == "eaten")
@@ -245,22 +243,39 @@ static func _answer(f, lot: String, c, ch: String) -> void:
 			var r: Dictionary = SkillCheck.attempt(fid, "lie", {"opponent": int(c.id)} if c != null else {})
 			if bool(r["ok"]):
 				SysUtil.notify(_line("lie_ok", {"n": nm}), "story")
-				_own(f, unpaid(fid, lot))
-				_drop(fid, lot)
-				CrimePetty.commit("shoplifting", fid, "venue:" + lot, {"seen": false})
+				_steal(f, lot, false)
 			else:
 				SysUtil.notify(_line("lie_fail", {"n": nm}), "bad")
 				_steal(f, lot, true)
 		_:
 			SysUtil.notify(_line("shout", {"n": nm}), "bad")
-			_steal(f, lot, true)
+			_steal(f, lot, true, ch == "run")
 			if ch == "run":
 				var away: Interaction = Interaction.create_goto(f, NeighborhoodLots.street_tile(lot) + Vector2i(0, 8), true, 0)
 				if away != null:
 					f.enqueue(away)
 
-static func _steal(f, lot: String, seen: bool) -> void:
+## The shop's real security (CrimeSecurity business profile): camera footage of the exit, and a guard on post who is awake.
+static func security(lot: String) -> Dictionary:
+	var vt: String = Venues.type_of_lot(lot)
+	var fx: Dictionary = CrimeSecurity.effects(CrimeSecurity.business_profile(vt), DoorActs.night())
+	var guard: int = -1
+	for g in CrimeSecurityGuards.guards_of("biz:" + vt):
+		if not CrimeSecurityGuards.is_asleep(int(g)) and CrimeSecurityGuards.is_night():
+			guard = int(g)
+	return {"footage": float(fx.get("footage", 0.0)), "guard": guard}
+
+static func _steal(f, lot: String, seen: bool, running: bool = false) -> void:
 	var fid: int = int(f.id)
+	var sec: Dictionary = security(lot)
+	var held: bool = false
+	if seen and int(sec["guard"]) >= 0:          # a guard at the door: walking past means being stopped, running means a chase
+		held = not running or not bool(SkillCheck.attempt(fid, "outrun", {"opponent": int(sec["guard"])})["ok"])
+		SysUtil.notify(("%s steps in front of you and takes your arm." if held else "%s gives chase, and falls behind.") % SysUtil.folk_name(int(sec["guard"])), "bad")
+	if held:
+		_drop(fid, lot)          # the goods go back on the shelf
+		CrimePetty.commit("shoplifting", fid, "venue:" + lot, {"seen": true, "trace": 1.0})
+		return
 	_own(f, unpaid(fid, lot))
 	_drop(fid, lot)
-	CrimePetty.commit("shoplifting", fid, "venue:" + lot, {"seen": seen})
+	CrimePetty.commit("shoplifting", fid, "venue:" + lot, {"seen": seen, "trace": float(sec["footage"])})

@@ -86,6 +86,7 @@ static func _take(f, lot: String, n: int, witness: int) -> void:
 		return
 	var cs: Dictionary = CaseStore.create("theft", fid, -1, "venue:" + lot, {"witnessed": witness >= 0, "witnesses": [witness] if witness >= 0 else [],
 		"witness_clarity": 0.8 if witness >= 0 else 0.0, "trace": 0.3, "stolen_coins": n, "loot_value": n})
+	cs["footage"] = float(ShopActs.security(lot)["footage"])          # the camera over the counter, if the shop has one
 	CrimePlace.place_at_scene(fid, "venue:" + lot)
 	if witness >= 0:
 		CaseDiscovery.report(cs, witness, "saw")
