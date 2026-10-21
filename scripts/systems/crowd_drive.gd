@@ -20,7 +20,7 @@ static func drive(now: int) -> void:
 		return
 	var gap: Array = Venues.cfg().get("npc_idle_gap", [4, 12])
 	for f in Crowd.crowd_folk():
-		if f.has_meta("leaving"):
+		if f.has_meta("leaving") or f.has_meta("court"):          # a person in the courtroom stays in their seat (CourtScene)
 			continue
 		var per: int = Tiers.period_of(int(f.id))      # NEAR / TOWN: decisions every few minutes (the gaps between activities are 4-12 min anyway)
 		if per > 1 and (now + int(f.id)) % per != 0:

@@ -18,11 +18,13 @@ static func open(c: Dictionary) -> void:
 	c["state"] = "trial"
 	var hours: float = float(cfg().get("court_hours", 3))
 	var f = CrimePerson.folk(pid)
-	if f != null and CrimePerson.is_player(pid):
+	var in_room: bool = CourtScene.begin(c, hours)          # task 46: played in the courtroom of the map lot (the cast walks in and sits)
+	var seated: Array = (c.get("court", {}) as Dictionary).get("seated", [])
+	if f != null and CrimePerson.is_player(pid) and not seated.has(pid):
 		JusticePlayer.hold(f, hours * 60.0 + 5.0, "court", "At court")
 	for w in witness_candidates(c):
 		var wf = CrimePerson.folk(w)
-		if wf != null and not SysUtil.is_away(wf):
+		if wf != null and not SysUtil.is_away(wf) and not seated.has(w):
 			JusticePlayer.hold(wf, hours * 60.0, "court", "Giving evidence")
 		_ask_testimony(c, w)
 	JusticeState.queue({"kind": "verdict", "case": int(c["id"]), "due_min": SysUtil.now() + int(hours * 60.0)})
@@ -37,6 +39,7 @@ static func verdict_day(c: Dictionary) -> void:
 		CaseStore.close_for_death(c, int(c.get("accused", -1)))
 		return
 	JusticeTrial.run(c)
+	CourtScene.verdict_read(c)
 
 ## Player folk who may be called: they know the accused or the victim, or saw the crime.
 static func witness_candidates(c: Dictionary) -> Array:

@@ -176,6 +176,8 @@ static func run_pending(p: Dictionary) -> void:
 		"verdict":
 			if not c.is_empty():
 				Courthouse.verdict_day(c)
+		"court_step":
+			CourtScene.step(p)
 
 # ------------------------------------------------------------------ events
 static func on_game_event(ev: String, p: Dictionary) -> void:

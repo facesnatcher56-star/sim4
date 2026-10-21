@@ -43,12 +43,13 @@ static func defence(c: Dictionary, pid: int) -> float:
 	d -= minf(float(CrimePerson.record_count(pid)), 3.0) * float(k.get("record_penalty", 0.04))
 	return d
 
-static func jury(pid: int) -> float:
+static func jury(pid: int, c: Dictionary = {}) -> float:
 	var total: float = 0.0
 	var pool: Array = CrimePerson.everyone().filter(func(p): return p != pid and CrimePerson.is_adult(p) and not CrimePerson.in_custody(p))
-	var n: int = mini(int(cfg().get("jurors", 6)), pool.size())
+	var seated: Array = (c.get("jurors", []) as Array).duplicate()          # the six who sat in the courtroom (CourtScene) are the ones who decide
+	var n: int = seated.size() if not seated.is_empty() else mini(int(cfg().get("jurors", 6)), pool.size())
 	for i in n:
-		var j: int = int(pool[JusticeState.rng.randi_range(0, pool.size() - 1)])
+		var j: int = int(seated[i]) if not seated.is_empty() else int(pool[JusticeState.rng.randi_range(0, pool.size() - 1)])
 		pool.erase(j)
 		var op: float = RelationshipService.value(j, pid, "friendship") / 100.0 + CrimePerson.reputation(pid) / 200.0
 		total += op
@@ -62,7 +63,7 @@ static func breakdown(c: Dictionary, pid: int, with_jury: bool = true) -> Dictio
 	var e: float = CaseEvidence.strength(pid, c)
 	var t: float = testimony(c, pid)
 	var d: float = defence(c, pid)
-	var j: float = jury(pid) if with_jury else 0.0
+	var j: float = jury(pid, c) if with_jury else 0.0
 	var z: float = float(k.get("k", 9.0)) * (e + t + j - float(k.get("doubt", 0.58)) - (0.04 if bool(c.get("reviewed", false)) else 0.0) - d)
 	return {"evidence": e, "testimony": t, "defence": d, "jury": j, "z": z, "p_guilty": 1.0 / (1.0 + exp(-z))}
 

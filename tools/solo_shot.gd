@@ -60,6 +60,15 @@ func _process(_d: float) -> bool:
 		for c in fp.get_children():
 			if c is TabContainer:
 				c.current_tab = c.get_tab_idx_from_control(fp.family_box.get_parent()) if fp.family_box.get_parent() != null else 0
+	if _frames == 60 and _scn == "court":
+		JusticeCareers.staff_town()
+		var tids: Array = Story.alive_townies().filter(func(t): return str(t.get("career", "")) == "").map(func(t): return int(t["id"]))
+		var cc: Dictionary = CaseStore.create("assault", int(tids[0]), int(tids[1]), "street", {})
+		cc["accused"] = Pawn.of()
+		cc["witnesses"] = [int(tids[2])]
+		Courthouse.open(cc)
+		root.get_node("Events").selection_changed.emit("folk", Pawn.of())
+		root.get_node("Clock").set_speed(2)
 	if _frames == 60 and _scn == "walker":
 		var pf = _main.hud._resolve(_main.hud.selected_folk_id)
 		var vv = _main.find_child("VehicleView", true, false)
@@ -100,7 +109,14 @@ func _process(_d: float) -> bool:
 		if _frames >= 600:
 			quit(0)
 		return false
-	if _frames == 100:
+	if _scn == "court" and _frames == 880:
+		var lvw = _main.find_child("LevelView", true, false)
+		print("LEVELVIEW exists=%s building=%s viewed=%s active=%s nodes=%s" % [str(lvw != null), str(lvw.building) if lvw else "-", str(lvw.viewed) if lvw else "-", str(lvw.active()) if lvw else "-", str(lvw.level_nodes.keys()) if lvw else "-"])
+		var pw = _main.hud._resolve(_main.hud.selected_folk_id)
+		print("PAWNMETA away=%s info=%s tile=%s lvl=%d cur=%s" % [str(pw.has_meta("away")), str(Away.info(pw.id)), str(pw.tile), pw.level, str(pw.current.def_id) if pw.current else "-"])
+		for k in (lvw.level_nodes if lvw else {}):
+			print("  L%s objs=%d" % [str(k), (lvw.level_nodes[k]["objs"] as Dictionary).size()])
+	if _frames == (900 if _scn == "court" else 100):
 		var img := root.get_texture().get_image()
 		img.save_png(_out)
 		print("saved ", _out, " ", img.get_size())

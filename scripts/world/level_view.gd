@@ -214,6 +214,8 @@ func _pick_building() -> void:
 	var b := -1
 	if f != null and not f.has_meta("away"):
 		b = World.levels.building_at(f.tile)
+		if b < 0 and f.level != 0:
+			b = World.lbuild.ensure_building(f.tile)          # a folk on an upper floor / basement of a civic building (courtroom, cells): the building exists from now on
 	if b < 0:
 		var t: Vector3 = lot.get("_target")
 		b = World.levels.building_at(Vector2i(floori(t.x), floori(t.z)))
