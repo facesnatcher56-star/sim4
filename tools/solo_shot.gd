@@ -265,7 +265,7 @@ func _click_script() -> void:
 
 
 # ---- "tour": open every window of the game in turn and save a shot of each (tools: look through them for anything that is not game-like)
-const TOUR := ["map", "money_town", "money_shops", "money_business", "money_homes", "money_bank", "town_life_places", "town_life_study", "town_life_health", "town_life_news", "council", "household", "goals", "career", "help", "settings", "pause", "saveload", "details", "myself", "build", "phone", "casebd"]
+const TOUR := ["map", "money_town", "money_shops", "money_business", "money_homes", "money_bank", "town_life_places", "town_life_study", "town_life_health", "town_life_news", "council", "household", "goals", "career", "help", "settings", "pause", "saveload", "details", "myself", "build", "phone", "casebd", "folkmenu"]
 func _tour() -> void:
 	var hud = _main.hud
 	var idx: int = (_frames - 60) / 14
@@ -281,7 +281,8 @@ func _tour() -> void:
 				d.visible = false
 		hud.save_menu.visible = false
 		hud.pie.close()
-		hud.travel_panel.visible = false
+		if hud.travel_panel.is_open():
+			hud.travel_panel.close_panel()
 		if hud.build_panel.active:
 			hud.build_panel.set_active(false)
 		match name:
@@ -311,6 +312,12 @@ func _tour() -> void:
 				load("res://scripts/ui/life_hub_phone.gd").set("app", "")
 				hud.phone_dialog.show_for(fid)
 			"casebd": hud.case_board.show_for(fid)
+			"folkmenu":
+				var me2 = hud._resolve(fid)
+				for f2 in root.get_node("World").all_folk():
+					if int(f2.id) != int(me2.id):
+						hud.pie.open_for(me2, "folk", int(f2.id), Vector2(600, 400))
+						break
 	elif phase == 10:
 		print("TOUR %s" % name)
 		_shot("tour_%02d_%s" % [idx, name])

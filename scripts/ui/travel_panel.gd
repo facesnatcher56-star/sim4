@@ -169,12 +169,25 @@ func _build() -> void:
 # ------------------------------------------------------------------ open / close
 func open_panel() -> void:
 	dialog.visible = true
+	UIDialog.track_open(get_instance_id(), true)          # the tips and the checklist step aside like for any window
 	if selected_lot == "":
 		selected_lot = _default_selection()
 	refresh()
+	call_deferred("_fit_to_screen")
+
+## The window is as wide as its content needs but never wider than the screen (a wide city map used to run off the right edge).
+func _fit_to_screen() -> void:
+	var vp: Vector2 = get_viewport_rect().size
+	var want_w: float = minf(dialog.get_combined_minimum_size().x + 24.0, vp.x - 24.0)
+	var want_h: float = minf(maxf(dialog.get_combined_minimum_size().y + 24.0, 620.0), vp.y - 90.0)
+	dialog.offset_left = -want_w * 0.5
+	dialog.offset_right = want_w * 0.5
+	dialog.offset_top = -want_h * 0.5 + 24.0
+	dialog.offset_bottom = want_h * 0.5 + 24.0
 
 func close_panel() -> void:
 	dialog.visible = false
+	UIDialog.track_open(get_instance_id(), false)
 
 func toggle() -> void:
 	if dialog.visible:
@@ -204,7 +217,7 @@ func _style_tile(l: Dictionary) -> void:
 	var cur: String = Neighborhood.lot_of_selected()
 	var open: bool = Neighborhood.is_open(lid)
 	var here: Array = Neighborhood.folk_at(lid)
-	var status: String = "You are here" if lid == cur else "~%d min walk" % _estimate(lid)
+	var status: String = "you are here" if lid == cur else "%d min" % _estimate(lid)
 	var open_txt: String = "Open" if open else "Closed"
 	var line3: String = ""
 	var parts: Array = []
@@ -217,9 +230,9 @@ func _style_tile(l: Dictionary) -> void:
 		if rc > 0:
 			parts.append("%d resident%s" % [rc, "" if rc == 1 else "s"])
 	line3 = ", ".join(parts)
-	b.text = "%s
-%s  -  %s%s" % [str(l["label"]), open_txt, status, ("
-" + line3) if line3 != "" else ""]
+	b.text = str(l["label"]) + "
+" + open_txt + ", " + status + (("
+" + line3) if line3 != "" else "")
 	var base := Color(str(l.get("color", "#556070")))
 	var bg: Color = base.darkened(0.55)
 	if not open:
