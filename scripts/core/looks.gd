@@ -25,6 +25,7 @@ const ENV_KEYS := ["night_sky", "twilight", "twilight_mix", "sun_warm", "sun_whi
 	"lamp_energy", "lamp_range", "window_glow", "window_color", "wet_dark", "wet_color", "vignette", "grain"]
 const UI_KEYS := ["bg", "panel", "panel_hi", "accent", "text", "muted", "radius"]
 const WEAR_KEYS := ["floor_dirt", "stain_chance", "stain_color", "corner_dark"]
+const DEFAULT_SHADER_CLASSES := []          # looks.json wear.shader_classes: surface classes drawn with WearShader (task 41a), e.g. wall and wood
 
 
 static func data() -> Dictionary:
@@ -208,15 +209,20 @@ static func _tint_node(n: Node, variant: String) -> void:
 			if cls == "":
 				continue
 			var key := "%d|%s|%s" % [src.get_instance_id(), _id, variant if cls == "glass" else ""]
-			var m: BaseMaterial3D = _mat_cache.get(key)
+			var m: Material = _mat_cache.get(key)
 			if m == null:
-				m = src.duplicate() as BaseMaterial3D
-				m.albedo_color = grade(cls, src.albedo_color)
-				if cls == "glass":
-					m.emission_enabled = true
-					m.emission = ec("window_color", Color(1.0, 0.78, 0.45))
-					m.emission_energy_multiplier = 0.0
-					_glass[key] = {"mat": m, "lit": 0.35 + 0.65 * _hash01(variant.hash() & 0xFFFF, 7, 5) if variant != "" else 1.0}
+				var wear_cfg: Dictionary = cur().get("wear", {})
+				if cls in (wear_cfg.get("shader_classes", DEFAULT_SHADER_CLASSES) as Array) and src.albedo_color.a >= 0.99:
+					m = WearShader.material(grade(cls, src.albedo_color), src.roughness, float(wear_cfg.get("wall_base", 0.1)), _id)
+				else:
+					var sm := src.duplicate() as BaseMaterial3D
+					sm.albedo_color = grade(cls, src.albedo_color)
+					if cls == "glass":
+						sm.emission_enabled = true
+						sm.emission = ec("window_color", Color(1.0, 0.78, 0.45))
+						sm.emission_energy_multiplier = 0.0
+						_glass[key] = {"mat": sm, "lit": 0.35 + 0.65 * _hash01(variant.hash() & 0xFFFF, 7, 5) if variant != "" else 1.0}
+					m = sm
 				_mat_cache[key] = m
 			mi.set_surface_override_material(s, m)
 	for c in n.get_children():

@@ -60,7 +60,7 @@ func _check_cond_keys(def_id: String, cond: Dictionary, d: Dictionary) -> void:
 		for sub in (cond["any"] as Array):
 			_check_cond_keys(def_id, sub, d)
 		return
-	if cond.has("key"):
+	if cond.has("key") and not str(cond["key"]).begins_with("_"):        # "_poverty" / "_pick" are view pseudo keys (task 41a)
 		_check((d.get("state", {}) as Dictionary).has(str(cond["key"])), "%s: condition on state '%s' the object does not have" % [def_id, cond["key"]])
 
 

@@ -13,6 +13,8 @@ class FakeLot:
 
 func run() -> Array:
 	var f: Array = []
+	var start_look: String = Looks.current_id()
+	Looks.set_look("reference")        # the default look is "grounded" (task 41a): dark nights and a permanent haze; these checks are the reference weather behaviour
 	var w: StubWorld = W.setup(321)
 	var lot := FakeLot.new()
 	var wv := WeatherView.new()
@@ -78,4 +80,5 @@ func run() -> Array:
 	W.expect(f, not is_nan(lot._sun.light_energy), "two years of daylight maths are finite")
 	lot.free()
 	W.teardown()
+	Looks.set_look(start_look)
 	return f

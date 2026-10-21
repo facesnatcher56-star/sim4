@@ -382,9 +382,10 @@
      13.5,
      22
     ],
-    "count": 50,
+    "count": 40,
     "seed": 5,
-    "tufts": 45
+    "tufts": 34,
+    "dead": 1
    },
    {
     "k": "chainlink",
@@ -573,7 +574,7 @@
    },
    {
     "k": "decal",
-    "tex": "graffiti_a",
+    "tex": "tag_rat",
     "face": "az",
     "pos": [
      5.0,
@@ -581,14 +582,14 @@
      22.1
     ],
     "size": [
-     2.8,
-     0.5,
-     1.05
+     2.6,
+     0.25,
+     0.975
     ]
    },
    {
     "k": "decal",
-    "tex": "graffiti_b",
+    "tex": "tag_koz",
     "face": "az",
     "pos": [
      9.6,
@@ -596,15 +597,14 @@
      22.1
     ],
     "size": [
-     2.8,
-     0.5,
-     1.05
-    ],
-    "spin": 180
+     2.6,
+     0.25,
+     0.975
+    ]
    },
    {
     "k": "decal",
-    "tex": "graffiti_a",
+    "tex": "tag_six",
     "face": "az",
     "pos": [
      18.2,
@@ -612,9 +612,9 @@
      22.1
     ],
     "size": [
-     2.4,
-     0.5,
-     0.8999999999999999
+     2.6,
+     0.25,
+     0.975
     ]
    },
    {
@@ -634,22 +634,22 @@
    },
    {
     "k": "decal",
-    "tex": "graffiti_b",
+    "tex": "tag_nek",
     "face": "az",
     "pos": [
      12.5,
-     1.5,
+     1.4,
      4.06
     ],
     "size": [
-     3.2,
-     0.5,
-     1.2
+     3.4,
+     0.25,
+     1.275
     ]
    },
    {
     "k": "decal",
-    "tex": "graffiti_a",
+    "tex": "tag_doa",
     "face": "ax",
     "pos": [
      4.06,
@@ -657,9 +657,9 @@
      9.5
     ],
     "size": [
-     1.125,
-     0.5,
-     3.0
+     1.275,
+     0.25,
+     3.4
     ]
    },
    {
@@ -1247,5 +1247,102 @@
     ]
    }
   ]
- }
+ },
+ "wear_map": {
+  "_doc": "What a district wear level 0..1 turns into (WearRules.density): [value at wear 0, value at wear 1], 0 below min_wear. Per tile = per perimeter / yard tile of the lot.",
+  "litter_ring": {
+   "range": [
+    0.0,
+    0.9
+   ],
+   "min_wear": 0.12
+  },
+  "litter_yard": {
+   "range": [
+    0.0,
+    0.1
+   ],
+   "min_wear": 0.3
+  },
+  "weed_clumps_yard": {
+   "range": [
+    0.0,
+    0.16
+   ],
+   "min_wear": 0.2
+  },
+  "weeds_yard": {
+   "range": [
+    0.0,
+    0.14
+   ],
+   "min_wear": 0.2
+  },
+  "dead_patches_100_yard": {
+   "range": [
+    0.0,
+    3.0
+   ],
+   "min_wear": 0.45
+  },
+  "cracks_ring": {
+   "range": [
+    0.0,
+    0.2
+   ],
+   "min_wear": 0.2
+  },
+  "door_stains": {
+   "range": [
+    0.0,
+    2.0
+   ],
+   "min_wear": 0.25
+  },
+  "boards_windows": {
+   "range": [
+    0.0,
+    0.5
+   ],
+   "min_wear": 0.7
+  },
+  "decal_cap": {
+   "range": [
+    24.0,
+    24.0
+   ]
+  },
+  "tags_per_run": {
+   "range": [
+    0.0,
+    0.6
+   ],
+   "min_wear": 0.3
+  }
+ },
+ "presets": {
+  "rough": {
+   "label": "Rough block",
+   "wear": 0.85,
+   "note": "the look-test scene (tests/art41_shot.gd) is this preset hand-placed"
+  },
+  "tired": {
+   "label": "Tired street",
+   "wear": 0.5
+  },
+  "tidy": {
+   "label": "Tidy street",
+   "wear": 0.08
+  }
+ },
+ "districts": [
+  {
+   "id": "rough_row",
+   "preset": "rough",
+   "lots": [
+    "townie_b"
+   ],
+   "note": "a district that declares a wear level is dressed in the game; WearLayer.set_district_wear(id, 0..1) changes it later (a block that improves or declines)"
+  }
+ ]
 }

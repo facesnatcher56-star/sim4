@@ -1,0 +1,41 @@
+{
+ "version": 1,
+ "notes": "Task 41a wear / poverty layer (view only, no sim state or rng). poverty: a household's funds give a 0..1 score (1 = broke); the score picks interior variants in data/object_poverty.json. mess: a room's mess per tile gives a level and floor clutter props (dishes, clothes, boxes, bags) that grow with the mess and go when it is tidied. wall: grime shader strength per wall. See scripts/world/wear_rules.gd.",
+ "poverty": {
+  "poor_funds": 600,
+  "comfy_funds": 4500,
+  "tiers": [
+   {"id": "poor", "min": 0.66},
+   {"id": "modest", "min": 0.33},
+   {"id": "comfortable", "min": 0.0}
+  ],
+  "district_floor": 0.9
+ },
+ "mess": {
+  "levels": [
+   {"id": "tidy", "min": 0.0},
+   {"id": "untidy", "min": 1.0},
+   {"id": "messy", "min": 3.0},
+   {"id": "squalid", "min": 6.0}
+  ],
+  "props_per_level": [0, 1, 2, 4],
+  "poverty_baseline": {"min_poverty": 0.6, "chance": 0.07, "kinds": ["box", "bag"]},
+  "max_per_tile": 4,
+  "kinds_by_room": {
+   "kitchen": ["dishes", "can", "bag", "dishes", "paper"],
+   "bathroom": ["towel", "paper", "bottle"],
+   "bedroom": ["clothes", "clothes", "box", "paper", "bottle"],
+   "living": ["box", "bag", "clothes", "can", "paper", "bottle"],
+   "default": ["box", "bag", "clothes", "dishes", "paper", "can", "bottle"]
+  },
+  "tint_floor": true
+ },
+ "wall": {
+  "base": 0.1,
+  "exterior_mult": 1.0,
+  "interior_mult": 0.55,
+  "poverty_weight": 0.8
+ },
+ "refresh_sec": 2.0,
+ "near_tiles": 44
+}

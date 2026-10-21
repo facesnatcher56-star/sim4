@@ -1,10 +1,10 @@
 {
  "version": 1,
  "notes": "Visual looks (task 41). 'reference' is today's look and must stay identical to the hard-coded values it replaced (tests/looks_test.gd). surfaces: per class {sat,val multiply HSV, tint multiplies rgb, lift adds}. palette: absolute colours per floor type (replaces the base colour before grading). wear: deterministic per-tile grime (view only). env: sky / sun / ambient / lamp / wet / post knobs read by WeatherView and LookOverlay. ui: UITheme colours. material_class maps glb material names (a trailing * = prefix) to surface classes.",
- "default": "reference",
+ "default": "grounded",
  "order": [
-  "reference",
-  "grounded"
+  "grounded",
+  "reference"
  ],
  "floor_class": {
   "wood": "floor_wood",
@@ -358,7 +358,9 @@
     "floor_dirt": 0.12,
     "stain_chance": 0.05,
     "stain_color": "#3a2f25",
-    "corner_dark": 0.1
+    "corner_dark": 0.1,
+    "shader_classes": ["wall", "wood"],
+    "wall_base": 0.12
    },
    "env": {
     "night_sky": "#05070f",

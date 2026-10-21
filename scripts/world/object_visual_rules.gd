@@ -7,6 +7,7 @@ extends RefCounted
 ## `resolve` reads the object's `state` Dictionary only; it never touches the sim, the rng or the world, so the same state always gives the same look.
 
 const PATH := "res://data/object_visuals.json"
+const POVERTY_PATH := "res://data/object_poverty.json"      # task 41a: poverty variants merged into the rules below
 static var _cfg: Dictionary = {}
 static var _loaded := false
 
@@ -20,7 +21,38 @@ static func cfg() -> Dictionary:
 		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(PATH))
 		if parsed is Dictionary:
 			_cfg = parsed
+	_merge_poverty()
 	return _cfg
+
+
+## Task 41a: data/object_poverty.json adds templates and per-def layers (appended after the 33b layers; `extends` is resolved first).
+static func _merge_poverty() -> void:
+	if not FileAccess.file_exists(POVERTY_PATH):
+		return
+	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(POVERTY_PATH))
+	if not parsed is Dictionary:
+		return
+	var tpl: Dictionary = _cfg.get("templates", {})
+	for k in (parsed.get("templates", {}) as Dictionary):
+		tpl[k] = parsed["templates"][k]
+	_cfg["templates"] = tpl
+	var objs: Dictionary = _cfg.get("objects", {})
+	var pov: Dictionary = parsed.get("objects", {})
+	for def_id in pov:
+		var base: Dictionary = (objs.get(def_id, {}) as Dictionary).duplicate(true)
+		var layers: Array = []
+		if base.has("extends"):
+			var parent: Dictionary = objs.get(str(base["extends"]), {})
+			layers = (parent.get("layers", []) as Array).duplicate(true)
+			base.erase("extends")
+		else:
+			layers = (base.get("layers", []) as Array).duplicate(true)
+		layers.append_array((pov[def_id].get("layers", []) as Array))
+		base["layers"] = layers
+		if pov[def_id].has("part_scale"):
+			base["part_scale"] = pov[def_id]["part_scale"]
+		objs[def_id] = base
+	_cfg["objects"] = objs
 
 
 static func reload() -> void:
@@ -184,7 +216,15 @@ static func resolve(def_id: String, state: Dictionary, def_state: Dictionary, us
 	var ps := _part_scale(def_id)
 	var look := {"ids": [], "surfaces": {}, "hide": [], "overlay": null, "scale": Vector3.ONE, "tilt": 0.0, "parts": [], "fx": []}
 	var any := false
-	for layer in _layers_of(def_id):
+	var layers := _layers_of(def_id)
+	var skipped: Array = []
+	for layer in layers:
+		var st0 := _pick(layer, state, def_state, use_tags)
+		for sk in (st0.get("skip", []) as Array):         # a poverty variant replaces some 33b layers (an unmade bed on a mattress on the floor)
+			skipped.append(str(sk))
+	for layer in layers:
+		if str(layer.get("id", "")) in skipped:
+			continue
 		var st := _pick(layer, state, def_state, use_tags)
 		if st.is_empty():
 			continue

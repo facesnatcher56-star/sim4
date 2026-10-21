@@ -14,7 +14,9 @@ func run() -> Array:
 	fails = []
 	var ids: Array = Looks.ids()
 	_check("reference" in ids and "grounded" in ids, "looks.json lists reference and grounded")
-	_check(str(Looks.data().get("default", "")) == "reference", "default look is reference")
+	_check(str(Looks.data().get("default", "")) == "grounded", "default look is grounded")
+	_check(str(GameSettings.def_of("visual_style").get("def", "")) == "grounded", "Settings default visual style is grounded")
+	_check("reference" in ids, "Reference stays selectable")
 	for id in ids:
 		var l: Dictionary = Looks.look(id)
 		_check(not l.is_empty(), "look %s exists" % id)

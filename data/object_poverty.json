@@ -1,0 +1,641 @@
+{
+ "version": 1,
+ "about": "Task 41a: poverty variants of object looks, merged into data/object_visuals.json at load by ObjectVisualRules (layers are appended, a state with `skip` removes those layers of the 33b rules). The view injects two pseudo state keys: _poverty (0..1, the lot's wealth score) and _pick (0..2, stable per object, so a poor flat has mismatched pieces). Same schema as object_visuals.json.",
+ "templates": {
+  "cheap_tint": {
+   "id": "cheap",
+   "states": [
+    {
+     "id": "worn",
+     "when": [
+      {
+       "key": "_poverty",
+       "gte": 0.62
+      },
+      {
+       "key": "_pick",
+       "eq": 0
+      }
+     ],
+     "overlay": "#7a6a4a55"
+    },
+    {
+     "id": "faded",
+     "when": [
+      {
+       "key": "_poverty",
+       "gte": 0.62
+      },
+      {
+       "key": "_pick",
+       "eq": 1
+      }
+     ],
+     "overlay": "#5a6a6a4a"
+    },
+    {
+     "id": "grimy",
+     "when": [
+      {
+       "key": "_poverty",
+       "gte": 0.62
+      }
+     ],
+     "overlay": "#3a302466"
+    },
+    {
+     "id": "fine"
+    }
+   ]
+  },
+  "bed_floor": {
+   "id": "bed_poor",
+   "states": [
+    {
+     "id": "mattress_on_floor",
+     "when": [
+      {
+       "key": "_poverty",
+       "gte": 0.62
+      }
+     ],
+     "skip": [
+      "made"
+     ],
+     "hide": [
+      "*"
+     ],
+     "parts": [
+      {
+       "shape": "box",
+       "size": [
+        1.7,
+        0.16,
+        1.85
+       ],
+       "pos": [
+        0,
+        0.08,
+        0
+       ],
+       "color": "#8d8a7a"
+      },
+      {
+       "shape": "box",
+       "size": [
+        1.45,
+        0.03,
+        0.9
+       ],
+       "pos": [
+        0.05,
+        0.17,
+        0.2
+       ],
+       "color": "#5f5a4c",
+       "rot": [
+        0,
+        6,
+        0
+       ]
+      },
+      {
+       "shape": "box",
+       "size": [
+        1.55,
+        0.05,
+        1.0
+       ],
+       "pos": [
+        -0.02,
+        0.19,
+        -0.35
+       ],
+       "color": "#8a6f5e",
+       "rot": [
+        0,
+        -9,
+        2
+       ]
+      },
+      {
+       "shape": "box",
+       "size": [
+        0.55,
+        0.1,
+        0.32
+       ],
+       "pos": [
+        -0.3,
+        0.2,
+        0.75
+       ],
+       "color": "#b4ad98",
+       "rot": [
+        0,
+        14,
+        0
+       ]
+      },
+      {
+       "shape": "box",
+       "size": [
+        0.3,
+        0.07,
+        0.4
+       ],
+       "pos": [
+        0.55,
+        0.19,
+        0.7
+       ],
+       "color": "#6f7780",
+       "rot": [
+        0,
+        -30,
+        0
+       ]
+      },
+      {
+       "shape": "box",
+       "size": [
+        0.55,
+        0.05,
+        0.18
+       ],
+       "pos": [
+        -0.82,
+        0.04,
+        -0.7
+       ],
+       "color": "#3d352d"
+      }
+     ]
+    },
+    {
+     "id": "bare_frame",
+     "when": [
+      {
+       "key": "_poverty",
+       "gte": 0.34
+      },
+      {
+       "key": "_pick",
+       "eq": 2
+      }
+     ],
+     "skip": [
+      "made"
+     ],
+     "surfaces": {
+      "fabric_*": "#8a8470",
+      "white": "#b9b4a2",
+      "wood": "#7a6a55",
+      "wood_dark": "#5a4a3a"
+     },
+     "overlay": "#40342a44"
+    },
+    {
+     "id": "ok"
+    }
+   ]
+  },
+  "chair_poor": {
+   "id": "chair_poor",
+   "states": [
+    {
+     "id": "broken_chair",
+     "when": [
+      {
+       "key": "_poverty",
+       "gte": 0.62
+      },
+      {
+       "key": "_pick",
+       "eq": 0
+      }
+     ],
+     "hide": [
+      "*"
+     ],
+     "parts": [
+      {
+       "shape": "box",
+       "size": [
+        0.4,
+        0.05,
+        0.38
+       ],
+       "pos": [
+        0.02,
+        0.36,
+        0
+       ],
+       "color": "#7a6347",
+       "rot": [
+        0,
+        4,
+        7
+       ]
+      },
+      {
+       "shape": "box",
+       "size": [
+        0.05,
+        0.36,
+        0.05
+       ],
+       "pos": [
+        0.17,
+        0.18,
+        0.15
+       ],
+       "color": "#5f4d37"
+      },
+      {
+       "shape": "box",
+       "size": [
+        0.05,
+        0.36,
+        0.05
+       ],
+       "pos": [
+        -0.17,
+        0.18,
+        0.15
+       ],
+       "color": "#5f4d37"
+      },
+      {
+       "shape": "box",
+       "size": [
+        0.05,
+        0.3,
+        0.05
+       ],
+       "pos": [
+        -0.17,
+        0.15,
+        -0.16
+       ],
+       "color": "#5f4d37",
+       "rot": [
+        12,
+        0,
+        0
+       ]
+      },
+      {
+       "shape": "box",
+       "size": [
+        0.05,
+        0.4,
+        0.05
+       ],
+       "pos": [
+        0.35,
+        0.03,
+        -0.2
+       ],
+       "color": "#5f4d37",
+       "rot": [
+        0,
+        20,
+        88
+       ]
+      },
+      {
+       "shape": "box",
+       "size": [
+        0.4,
+        0.07,
+        0.04
+       ],
+       "pos": [
+        0.0,
+        0.6,
+        0.19
+       ],
+       "color": "#6a553d",
+       "rot": [
+        -18,
+        0,
+        4
+       ]
+      }
+     ]
+    },
+    {
+     "id": "mismatched_chair",
+     "when": [
+      {
+       "key": "_poverty",
+       "gte": 0.5
+      },
+      {
+       "key": "_pick",
+       "eq": 1
+      }
+     ],
+     "surfaces": {
+      "wood": "#6d7f6a",
+      "wood_dark": "#4f5f4d"
+     }
+    },
+    {
+     "id": "ok"
+    }
+   ]
+  },
+  "tv_boxed": {
+   "id": "tv_boxed",
+   "states": [
+    {
+     "id": "boxed_tv",
+     "when": [
+      {
+       "key": "_poverty",
+       "gte": 0.62
+      }
+     ],
+     "hide": [
+      "*"
+     ],
+     "parts": [
+      {
+       "shape": "box",
+       "size": [
+        0.72,
+        0.5,
+        0.5
+       ],
+       "pos": [
+        0,
+        0.25,
+        0
+       ],
+       "color": "#8a6f4c"
+      },
+      {
+       "shape": "box",
+       "size": [
+        0.74,
+        0.03,
+        0.26
+       ],
+       "pos": [
+        -0.02,
+        0.5,
+        -0.19
+       ],
+       "color": "#7a6141",
+       "rot": [
+        -24,
+        0,
+        0
+       ]
+      },
+      {
+       "shape": "box",
+       "size": [
+        0.6,
+        0.4,
+        0.4
+       ],
+       "pos": [
+        0.0,
+        0.7,
+        0.0
+       ],
+       "color": "#2a2c2e",
+       "rot": [
+        0,
+        5,
+        0
+       ]
+      },
+      {
+       "shape": "box",
+       "size": [
+        0.46,
+        0.3,
+        0.03
+       ],
+       "pos": [
+        0.0,
+        0.7,
+        -0.21
+       ],
+       "color": "#3a4448",
+       "rot": [
+        0,
+        5,
+        0
+       ]
+      },
+      {
+       "shape": "box",
+       "size": [
+        0.03,
+        0.3,
+        0.03
+       ],
+       "pos": [
+        0.2,
+        1.0,
+        0.0
+       ],
+       "color": "#99999a",
+       "rot": [
+        0,
+        0,
+        -28
+       ]
+      },
+      {
+       "shape": "box",
+       "size": [
+        0.03,
+        0.3,
+        0.03
+       ],
+       "pos": [
+        0.1,
+        1.0,
+        0.0
+       ],
+       "color": "#99999a",
+       "rot": [
+        0,
+        0,
+        24
+       ]
+      }
+     ]
+    },
+    {
+     "id": "ok"
+    }
+   ]
+  },
+  "sofa_poor": {
+   "id": "sofa_poor",
+   "states": [
+    {
+     "id": "sagging_sofa",
+     "when": [
+      {
+       "key": "_poverty",
+       "gte": 0.62
+      }
+     ],
+     "scale": [
+      1,
+      0.88,
+      1
+     ],
+     "tilt": 2,
+     "surfaces": {
+      "fabric_*": "#6d6155"
+     },
+     "parts": [
+      {
+       "shape": "box",
+       "size": [
+        0.5,
+        0.04,
+        0.42
+       ],
+       "pos": [
+        -0.45,
+        0.5,
+        0.0
+       ],
+       "color": "#4a4038"
+      },
+      {
+       "shape": "box",
+       "size": [
+        0.4,
+        0.05,
+        0.3
+       ],
+       "pos": [
+        0.5,
+        0.52,
+        0.05
+       ],
+       "color": "#7a4a3c",
+       "rot": [
+        0,
+        20,
+        0
+       ]
+      }
+     ]
+    },
+    {
+     "id": "ok"
+    }
+   ]
+  },
+  "lamp_poor": {
+   "id": "lamp_poor",
+   "states": [
+    {
+     "id": "crooked_shade",
+     "when": [
+      {
+       "key": "_poverty",
+       "gte": 0.62
+      }
+     ],
+     "tilt": 9,
+     "surfaces": {
+      "shade": "#b9a97c"
+     }
+    },
+    {
+     "id": "ok"
+    }
+   ]
+  }
+ },
+ "objects": {
+  "bed": {
+   "layers": [
+    "@bed_floor",
+    "@cheap_tint"
+   ]
+  },
+  "single_bed": {
+   "layers": [
+    "@bed_floor",
+    "@cheap_tint"
+   ],
+   "part_scale": [
+    0.5,
+    1,
+    1
+   ]
+  },
+  "sofa_bed": {
+   "layers": [
+    "@bed_floor"
+   ]
+  },
+  "chair": {
+   "layers": [
+    "@chair_poor",
+    "@cheap_tint"
+   ]
+  },
+  "dining_chair": {
+   "layers": [
+    "@chair_poor",
+    "@cheap_tint"
+   ]
+  },
+  "tv": {
+   "layers": [
+    "@tv_boxed"
+   ]
+  },
+  "sofa": {
+   "layers": [
+    "@sofa_poor",
+    "@cheap_tint"
+   ]
+  },
+  "armchair": {
+   "layers": [
+    "@cheap_tint"
+   ]
+  },
+  "lamp": {
+   "layers": [
+    "@lamp_poor"
+   ]
+  },
+  "dresser": {
+   "layers": [
+    "@cheap_tint"
+   ]
+  },
+  "wardrobe": {
+   "layers": [
+    "@cheap_tint"
+   ]
+  },
+  "nightstand": {
+   "layers": [
+    "@cheap_tint"
+   ]
+  },
+  "coffee_table": {
+   "layers": [
+    "@cheap_tint"
+   ]
+  }
+ }
+}

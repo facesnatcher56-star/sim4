@@ -9,9 +9,12 @@ static var _cache: Dictionary = {}
 static func tex(name: String) -> ImageTexture:
 	if _cache.has(name):
 		return _cache[name]
+	if GraffitiTex.is_tag(name):           # task 41a: tags with outline, fill, highlight and shadow
+		return GraffitiTex.tex(name)
 	var rng := RandomNumberGenerator.new()
 	rng.seed = name.hash()
-	var img := Image.create(384 if name.begins_with("graffiti") else 256, 144 if name.begins_with("graffiti") else 256, false, Image.FORMAT_RGBA8)
+	var side := 128 if name in ["stain", "grime", "worn_mark", "dead_grass", "dirt_patch", "oil"] else 256
+	var img := Image.create(384 if name.begins_with("graffiti") else side, 144 if name.begins_with("graffiti") else side, false, Image.FORMAT_RGBA8)
 	match name:
 		"crack": _crack(img, rng)
 		"pothole": _pothole(img, rng)
@@ -19,6 +22,9 @@ static func tex(name: String) -> ImageTexture:
 		"grime": _blotch(img, rng, Color(0.05, 0.05, 0.04), 0.75)
 		"peel": _peel(img, rng)
 		"worn_mark": _blotch(img, rng, Color(0.18, 0.19, 0.21), 0.95)
+		"dead_grass": _blotch(img, rng, Color(0.4, 0.31, 0.17), 0.92)
+		"dirt_patch": _blotch(img, rng, Color(0.27, 0.2, 0.13), 0.9)
+		"oil": _blotch(img, rng, Color(0.03, 0.03, 0.035), 0.8)
 		"graffiti_a": _graffiti(img, rng, [Color(0.85, 0.15, 0.2), Color(0.95, 0.95, 0.9), Color(0.05, 0.05, 0.06)])
 		"graffiti_b": _graffiti(img, rng, [Color(0.15, 0.55, 0.85), Color(0.95, 0.8, 0.1), Color(0.05, 0.05, 0.06)])
 		"chainlink": _chainlink(img)
@@ -89,10 +95,12 @@ static func _blotch(img: Image, rng: RandomNumberGenerator, col: Color, alpha: f
 	n.seed = rng.randi()
 	n.frequency = 0.022
 	n.fractal_octaves = 4
-	for y in 256:
-		for x in 256:
-			var v := (n.get_noise_2d(x, y) + 1.0) * 0.5
-			var edge := clampf(1.0 - Vector2(x - 128, y - 128).length() / 128.0, 0.0, 1.0)
+	var sz := img.get_width()                          # 128 px blotches (a quarter of the pixels; decals scale them up softly): task 41a first-use hitch
+	var k := 256.0 / float(sz)
+	for y in sz:
+		for x in sz:
+			var v := (n.get_noise_2d(x * k, y * k) + 1.0) * 0.5
+			var edge := clampf(1.0 - Vector2(x - sz * 0.5, y - sz * 0.5).length() / (sz * 0.5), 0.0, 1.0)
 			var a := clampf((v - 0.5) * 4.0, 0.0, 1.0) * alpha * clampf(edge * 2.5, 0.0, 1.0)
 			img.set_pixel(x, y, Color(col.r, col.g, col.b, a))
 
