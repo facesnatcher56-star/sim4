@@ -7,6 +7,7 @@ extends PanelContainer
 var _label: Label
 
 func _ready() -> void:
+	UIIdentity.skin(self, "#ff9f43", "frame", 8)
 	visible = false
 	add_theme_stylebox_override("panel", UITheme.box(Color(UITheme.PANEL, 0.98), 8, Color("#d9a441"), 2, 10))
 	var v := VBoxContainer.new()

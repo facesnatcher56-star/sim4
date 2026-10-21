@@ -12,6 +12,7 @@ var dismissed := false
 var box: VBoxContainer
 
 func _ready() -> void:
+	UIIdentity.skin(self, "#5fcf80", "ribbon", 12)          # the checklist: green ribbon
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	anchor_left = 0.0
 	offset_left = 12

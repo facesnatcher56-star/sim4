@@ -7,6 +7,7 @@ var accept_btn: Button
 var decline_btn: Button
 
 func _ready() -> void:
+	UIIdentity.skin(self, "#4f8cff", "ribbon", 12)
 	visible = false
 	add_theme_stylebox_override("panel", UITheme.box(Color(UITheme.PANEL, 0.98), 8, Color("#4cc78a"), 2, 10))
 	var v := VBoxContainer.new()

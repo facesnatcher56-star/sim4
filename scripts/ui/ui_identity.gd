@@ -85,3 +85,8 @@ static func accent_button(b: Button, accent: Color) -> void:
 		sb.border_width_bottom = 3
 		sb.border_color = accent
 		b.add_theme_stylebox_override(st, sb)
+
+## Dress a small HUD panel (checklist, tips, banners) in an accent and a header style without the dialog machinery.
+static func skin(panel: PanelContainer, accent_hex: String, header: String, radius: int) -> void:
+	panel.add_theme_stylebox_override("panel", panel_box({"accent": accent_hex, "header": header, "radius": radius, "tint": 0.06}))
+	panel.theme = theme_for(Color(accent_hex))

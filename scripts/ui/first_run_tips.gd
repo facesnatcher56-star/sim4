@@ -23,6 +23,7 @@ var next_step_shown := false # the panel currently shows the 'Next step' note
 var tracker: Control         # the checklist this panel stacks under (set by the HUD)
 
 func _ready() -> void:
+	UIIdentity.skin(self, "#5bb8ff", "band", 14)          # the tips: blue band
 	visible = false
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	anchor_left = 0.0

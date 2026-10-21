@@ -163,6 +163,11 @@ func show_folk(f) -> void:
 	folk_id = int(UIU.prop(f, "id", -1))
 	name_label.text = str(UIU.prop(f, "name", "?"))
 	portrait.color = portrait_color(f)
+	var pc: Color = Genetics.ui_color(f)          # the person's own colour (their shirt) frames the panel: a coloured left edge and a tinted plate
+	var sb := UITheme.box(Color(UITheme.PANEL.lerp(pc, 0.10), 0.95), 12, Color(pc, 0.4), 1, 10)
+	sb.border_color = pc
+	sb.border_width_left = 6
+	add_theme_stylebox_override("panel", sb)
 	_build_mini()
 	_build_needs()      # (fills the mini bars too)
 	_build_traits()
