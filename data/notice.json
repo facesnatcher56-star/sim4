@@ -49,6 +49,21 @@
     "call": {"w": 0.7, "lines": ["{n} walks on quickly, phone to the ear.", "{n} stops at a distance and makes a call, watching."]},
     "ignore": {"w": 1.3, "lines": []}
    }
+  },
+  "weapon": {
+   "victim": {
+    "comply": {"w": 1.4, "lines": ["{n} freezes, hands up.", "{n} goes very still. \"Okay. Okay.\""]},
+    "flee": {"w": 1.2, "lines": ["{n} runs.", "{n} bolts across the street without looking back."]},
+    "call": {"w": 0.8, "lines": ["{n} backs off, already dialling the police.", "{n} gets clear and calls the police."]},
+    "fight": {"w": 0.3, "lines": ["{n} lunges at {a} anyway.", "{n} grabs for the weapon."]},
+    "confront": {"w": 0.3, "lines": ["\"Put that down!\" {n} shouts."]}
+   },
+   "passerby": {
+    "call": {"w": 1.4, "lines": ["{n} is on the phone to the police, staring at you.", "{n} calls the police from across the street."]},
+    "flee": {"w": 1.2, "lines": ["{n} crosses the street fast.", "{n} turns and walks the other way, quickly."]},
+    "confront": {"w": 0.2, "lines": ["\"Hey! Put that away!\" {n} shouts."]},
+    "ignore": {"w": 0.4, "lines": []}
+   }
   }
  }
 }

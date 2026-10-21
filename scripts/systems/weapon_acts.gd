@@ -215,7 +215,7 @@ static func do_act(f, target, aid: String) -> void:
 		line = (line + " " + _mishap(fid, st)).strip_edges()
 	if line != "":
 		SysUtil.notify(line, "bad" if aid != "threaten_w" else "story")
-	if float(st.get("noise", 0.3)) >= 1.0:
+	if aid == "attack_w" and float(st.get("noise", 0.3)) >= 1.0 and not bool(st.get("empty", false)):          # only a fired shot rings out
 		SysUtil.notify("The shot rings out across the street.", "story")
 
 	RelationshipService.add_value(tid, fid, "friendship", -12.0 if aid != "attack_w" else -18.0)
