@@ -51,13 +51,14 @@ static func idle_days(hid: int, day: int) -> int:
 ## Would the household furnish itself today? (not whether it can afford to)
 static func wanted(hid: int, day: int) -> bool:
 	var c: Dictionary = cfg()
-	if SoloHome.active or c.is_empty() or mode == "off" or idle_days(hid, day) < int(c.get("idle_days", 2)):
+	if (SoloHome.active and not Players.ids().is_empty()) or c.is_empty() or mode == "off" or idle_days(hid, day) < int(c.get("idle_days", 2)):          # solo: the player buys their own things; a home nobody plays replaces what burnt or was taken
 		return false
 	if mode == "auto" and last_order.has(hid):
 		return false                      # a played household keeps its furniture to the player unless they asked otherwise
 	if int(done.get(hid, -99)) == day:
 		return false
-	return HomeBare.factor_of(hid) >= float(c.get("min_bare", 0.4)) and not StartHome.next_basic(hid).is_empty()
+	var unplayed_solo: bool = SoloHome.active and Players.ids().is_empty()          # a missing toilet or fridge is enough: it burnt or was taken
+	return (unplayed_solo or HomeBare.factor_of(hid) >= float(c.get("min_bare", 0.4))) and not StartHome.next_basic(hid).is_empty()
 
 
 static func on_day(day: int) -> void:

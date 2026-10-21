@@ -26,6 +26,37 @@ static func _because(e: Dictionary) -> String:
 		parts.append(_lc(str(c["text"])))
 	return " Because: " + "; before that, ".join(parts) + "."
 
+const MILESTONES := ["job", "promotion", "layoff", "fired", "retired", "romance", "engaged", "wedding", "breakup", "moved_in", "bereaved", "relationship", "birth", "death", "jailed", "eviction"]
+const LIFE_LINES := 24
+
+## Who mattered: each person's story in tags, in order ("close friend, then partner, then married; died"), plus the cases they shared. Most tags first.
+static func _people(pid: int, mine: Array) -> Array:
+	var tags: Dictionary = {}
+	var cases: Dictionary = {}
+	for e in mine:
+		for w in e["who"]:
+			var o: int = int(w)
+			if o == pid:
+				continue
+			if e.has("tag"):
+				var l: Array = tags.get(o, [])
+				if l.is_empty() or str(l[l.size() - 1]) != str(e["tag"]):
+					l.append(str(e["tag"]))
+				tags[o] = l
+			elif str(e["kind"]) in ["crime", "jailed", "fight", "civil_", "revenge", "attempt"] or str(e["kind"]).begins_with("civil"):
+				cases[o] = str(e["text"])
+	var ids: Array = tags.keys()
+	ids.sort_custom(func(x, y): return (tags[x] as Array).size() > (tags[y] as Array).size())
+	var out: Array = []
+	for o2 in ids.slice(0, 8):
+		out.append("%s: %s." % [CrimePerson.name_of(int(o2)), ", then ".join(tags[o2])])
+	for o3 in cases.keys():
+		if out.size() >= 10:
+			break
+		if not tags.has(o3):
+			out.append("%s: %s" % [CrimePerson.name_of(int(o3)), str(cases[o3])])
+	return out
+
 static func build(pid: int, nm: String) -> Dictionary:
 	var mine: Array = []
 	var choices: Array = []
@@ -35,17 +66,22 @@ static func build(pid: int, nm: String) -> Dictionary:
 		if not (e["who"] as Array).has(pid):
 			continue
 		mine.append(e)
-		if bool(e["choice"]):
+		if bool(e["choice"]) or str(e["kind"]) in ["job", "engaged", "wedding", "retired"]:          # the big moves count as theirs even when autonomy made them
 			choices.append(e)
 		elif int(e["sev"]) >= 3:
 			hits.append(e)
 		for w in e["who"]:
 			if int(w) != pid:
 				others[int(w)] = e
+	# every milestone (a job, a partner, a loss) stays; the other events fill the rest, newest first, up to LIFE_LINES
+	var keep: Array = mine.filter(func(e): return not bool(e["choice"]) and int(e["sev"]) >= 2)
+	var miles: Array = keep.filter(func(e): return MILESTONES.has(str(e["kind"])))
+	var rest: Array = keep.filter(func(e): return not MILESTONES.has(str(e["kind"])))
+	var pick: Array = miles + rest.slice(maxi(rest.size() - maxi(LIFE_LINES - miles.size(), 6), 0))
+	pick.sort_custom(func(x, y): return int(x["id"]) < int(y["id"]))
 	var life: Array = []
-	for e in mine:
-		if not bool(e["choice"]) and int(e["sev"]) >= 2:
-			life.append("%s: %s%s" % [_day(e), str(e["text"]), _because(e)])
+	for e in pick:
+		life.append("%s: %s%s" % [_day(e), str(e["text"]), _because(e)])
 	var ranked: Array = []
 	for c in choices:
 		var eff: Array = LifeLedger.effects_of(int(c["id"]), 4)
@@ -59,6 +95,7 @@ static func build(pid: int, nm: String) -> Dictionary:
 	var motion: Array = []
 	for r in ranked.slice(0, 6):
 		if (r["eff"] as Array).is_empty():
+			motion.append("%s: %s." % [_day(r["c"]), _lc(str(r["c"]["text"]))])
 			continue
 		var bits: Array = []
 		for x in (r["eff"] as Array).slice(0, 3):
@@ -67,14 +104,12 @@ static func build(pid: int, nm: String) -> Dictionary:
 	var happened: Array = []
 	for e2 in hits.slice(maxi(hits.size() - 8, 0)):
 		happened.append("%s: %s%s" % [_day(e2), str(e2["text"]), _because(e2)])
-	var people_lines: Array = []
-	for oid in others.keys().slice(0, 8):
-		people_lines.append("%s: %s" % [CrimePerson.name_of(int(oid)), str(others[oid]["text"])])
+	var people_lines: Array = _people(pid, mine)
 	var friends: int = RelationshipBits.count_bit(pid, "friend", true)
 	var kids: int = (Aging.records.get(pid, {}) as Dictionary).get("children", []).size()
 	var numbers: Dictionary = {"events": mine.size(), "choices": choices.size(), "lives_touched": others.size(), "children": kids, "friends": friends}
 	var sections: Array = [
-		{"title": "Your life", "lines": life.slice(maxi(life.size() - 14, 0))},
+		{"title": "Your life", "lines": life},
 		{"title": "What you set in motion", "lines": motion},
 		{"title": "What happened to you, and why", "lines": happened},
 		{"title": "The people in your life", "lines": people_lines},

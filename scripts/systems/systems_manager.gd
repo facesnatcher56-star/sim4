@@ -277,6 +277,7 @@ func _on_object_removed(object_id: int) -> void:
 
 ## Generic bus: route systems-level game events and feed Goals.
 func _on_game_event(ev_name: String, payload: Dictionary) -> void:
+	LifeLedgerEvents.on_event(ev_name, payload)          # task 44: jobs, romance, a death in the family become entries of a life
 	if not enabled:
 		return
 	Family.on_event(ev_name, payload)
