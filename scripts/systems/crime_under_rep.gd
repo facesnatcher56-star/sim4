@@ -115,7 +115,7 @@ static func family_reaction(culprit: int, kin: int) -> String:
 			r["honour"] = float(r.get("honour", 0.0)) - 2.0
 			_put(culprit, r)
 			if CrimePerson.is_player(culprit) or CrimePerson.is_player(kin):
-				SysUtil.notify("%s has turned their back on %s. \"I can't know you any more.\"" % [CrimePerson.name_of(kin), CrimePerson.name_of(culprit)], "bad")
+				SysUtil.notify("%s has turned %s back on %s. \"I can't know you any more.\"" % [CrimePerson.name_of(kin), Sexes.their(kin), CrimePerson.name_of(culprit)], "bad")
 		"cover":
 			for c in CaseStore.cases_of_culprit(culprit):
 				if str(c["state"]) in ["hidden", "open"]:

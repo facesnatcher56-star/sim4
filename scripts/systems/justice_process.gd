@@ -104,7 +104,7 @@ static func decide_bail(c: Dictionary) -> void:
 		granted = false                        # a repeat domestic offender stays in until the trial
 	var amount: int = int(c["bail"])
 	if not granted or CrimePerson.coins(pid) < amount:
-		_remand(c, "Bail was refused." if not granted else "Bail was set at %d coins, more than they can pay." % amount)
+		_remand(c, "Bail was refused." if not granted else "Bail was set at %d coins, more than %s can pay." % [amount, Sexes.they(pid)])
 		return
 	if CrimePerson.is_player(pid):
 		JusticePlayer.ask(pid, "Bail", "%s can go home until the trial if they pay %d coins bail. Otherwise they stay in jail until the trial (day %d)." % [CrimePerson.name_of(pid), amount, int(c["trial_day"]) + 1],

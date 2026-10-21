@@ -97,7 +97,29 @@ static func on_finished(folk_id: int, iid: String, success: bool) -> Dictionary:
 	return rec
 
 ## Drop stale queued requests (the folk never got to start them).
+## Places that look after the people they hold (34 logic: a cell or a ward serves meals and has a toilet and a wash): at each meal time
+## hunger is brought up to `hunger_to` (never down), and the toilet and wash keep bladder and hygiene from hitting the floor.
+## The slow per-minute drift of sys_away (content_sys.json) still applies in between. Trips, work and school are not looked after.
+const CARE_REASONS := ["custody", "jail", "prison", "court", "hospital"]
+const CARE_MEALS_MIN := [480, 780, 1140]        # 08:00, 13:00, 19:00
+const CARE_FLOOR := {"hunger": 40.0, "bladder": 20.0, "hygiene": 0.0}
+
+static func _care() -> void:
+	if not (SysUtil.now() % 1440 in CARE_MEALS_MIN):
+		return
+	for fid in active:
+		if not str((active[fid] as Dictionary).get("reason", "")) in CARE_REASONS:
+			continue
+		var f = SysUtil.folk(int(fid))
+		if f == null:
+			continue
+		for nid in CARE_FLOOR:
+			var v: float = float(f.get_stat_value(nid))
+			if v < float(CARE_FLOOR[nid]):
+				f.add_to_stat(nid, float(CARE_FLOOR[nid]) - v)
+
 static func on_minute() -> void:
+	_care()
 	var stale: Array = []
 	for fid in pending:
 		if SysUtil.now() - int(pending[fid]["queued_min"]) > PENDING_TIMEOUT_MIN:
