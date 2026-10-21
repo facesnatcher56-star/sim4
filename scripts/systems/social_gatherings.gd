@@ -100,7 +100,7 @@ static func _finish_gathering(g: Dictionary) -> void:
 	for sit in Story.situations:
 		if (sit["roles"] as Dictionary).has(str(host)) and str(sit["state"]) in ["mingle", "arrive"]:
 			sit["score"] = float(sit["score"]) + score * float(gc.get("story_factor", 0.5))
-	SysUtil.notify("The %s gathering wraps up. Group score: %d." % [str(g["kind"]), int(round(score))], "relationship")
+	SysUtil.notify("The %s gathering wraps up." % str(g["kind"]), "relationship")          # no score on screen
 	SysUtil.game_event("gathering_done", {"folk_id": host, "score": score, "kind": str(g["kind"]), "participants": part.duplicate(), "id": int(g["id"])})
 
 static func group_score(host_id: int) -> float:

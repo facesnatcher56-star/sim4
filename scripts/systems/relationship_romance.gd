@@ -149,7 +149,7 @@ static func breakup(initiator: int, other: int, cause: String = "breakup", sever
 			fi.add_buff("heartbroken")
 		if fo != null:
 			fo.add_buff("guilty_pang")
-	SysUtil.notify("%s and %s broke up%s." % [SysUtil.folk_name(initiator), SysUtil.folk_name(other), " (cheating)" if cause == "cheating" else ""], "relationship")
+	SysUtil.notify("%s and %s broke up%s." % [SysUtil.folk_name(initiator), SysUtil.folk_name(other), " over the cheating" if cause == "cheating" else ""], "relationship")
 	SysUtil.game_event("breakup", {"folk_id": initiator, "target_id": other, "cause": cause, "severity": severity})
 	if fi != null and fo != null:
 		Emotions.imprint_pair(fi, fo, -0.5 * minf(severity, 1.4), "breakup", "the breakup")

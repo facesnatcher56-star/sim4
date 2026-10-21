@@ -209,7 +209,7 @@ static func _task_progress(folk_id: int, iid: String) -> void:
 			(ts["done"] as Array).append(tid)
 			var f = SysUtil.folk(folk_id)
 			if f != null:
-				SysUtil.notify("%s finished a work task: %s (+%d performance)" % [f.name, str(t["label"]), int(t.get("bonus", 5))], "career")
+				SysUtil.notify("%s finished a work task: %s." % [f.name, str(t["label"])], "career")          # no hidden performance number
 				SysUtil.game_event("daily_task_done", {"folk_id": folk_id, "career": str(j["career"]), "task": tid})
 				f.add_buff("on_a_roll")
 			add_performance(folk_id, float(t.get("bonus", 5)))

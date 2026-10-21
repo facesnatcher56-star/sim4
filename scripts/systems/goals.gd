@@ -175,7 +175,7 @@ static func _complete_whim(f, p: Dictionary, w: Dictionary) -> void:
 	var cd_h: float = float(wd.get("cooldown_hours", settings().get("whim_default_cooldown_hours", 18)))
 	p["cooldowns"][str(w["id"])] = SysUtil.now() + int(cd_h * 60.0)
 	f.add_buff("cheered_up")
-	SysUtil.notify("%s fulfilled a whim: %s (+%d)" % [f.name, str(w["label"]), pts], "goal")
+	SysUtil.notify("%s fulfilled a whim: %s (+%d satisfaction)" % [f.name, str(w["label"]), pts], "goal")
 	SysUtil.game_event("whim_completed", {"folk_id": f.id, "whim": w["id"], "points": pts})
 
 # ------------------------------------------------------------------ whim generation

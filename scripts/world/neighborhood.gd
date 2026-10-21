@@ -293,7 +293,7 @@ static func apply_pantry() -> int:
 			added += add
 	if added > 0:
 		pantry -= added
-		SysUtil.notify("Groceries from the market stocked the fridge (+%d)." % added, "good")
+		SysUtil.notify("Groceries from the market went into the fridge (%d meals)." % added, "good")
 	return added
 
 # ------------------------------------------------------------------ persistence
