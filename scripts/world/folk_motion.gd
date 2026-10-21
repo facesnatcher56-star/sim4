@@ -2,6 +2,7 @@
 ## FolkView layer: path following, facing, social partner alignment.
 
 
+const MAX_WP_PER_FRAME := 64     # task 56: waypoints the drawn walk may pass in one frame (the time skip on a slow frame)
 const MAX_SLICE := 24     # a tile jump longer than this x the game speed (fast travel, loading) is not animated: the folk is simply there
 
 
@@ -340,31 +341,53 @@ func _move(delta: float) -> void:
 	var speed := _walk_speed() * Weather.walk_speed_mult_at(Vector2i(int(floor(position.x)), int(floor(position.z))), _last_level)
 	if _waypoints.is_empty():
 		_route_far_goal()
-	var goal: Vector3 = _waypoints[0] if not _waypoints.is_empty() else _target
-	if _waypoints.is_empty():
-		goal += Vector3(_avoid.x, 0.0, _avoid.y)          # arriving beside somebody: stop where there is room
-	var gy: float = goal.y if not _waypoints.is_empty() else _level_y
-	var to := goal - position
-	to.y = 0
-	var dist := to.length()
-	if _avoid != Vector2.ZERO and not _waypoints.is_empty() and Vector2(to.x, to.z).dot(_avoid) < 0.0:
-		speed *= 0.5                                      # somebody is just ahead of us on the way: queue behind them
-	var step := speed * delta
-	_moving = dist > 0.03
-	_ybase = move_toward(_ybase, gy, (maxf(speed, 1.0) + 2.5) * delta)       # climbing: the height follows the route (a lift ride is vertical)
-	if dist <= step:
-		position.x = goal.x
-		position.z = goal.z
-		_speed_now = dist / maxf(delta, 0.0001)
-		if not _waypoints.is_empty() and absf(gy - _ybase) <= 0.06:
+	if _avoid != Vector2.ZERO and not _waypoints.is_empty():
+		var ahead := Vector2(_waypoints[0].x - position.x, _waypoints[0].z - position.z)
+		if ahead.dot(_avoid) < 0.0:
+			speed *= 0.5                                  # somebody is just ahead of us on the way: queue behind them
+	# Task 56: the step left over after reaching a waypoint carries on to the next ones in the same frame (capped), so the drawn walk keeps
+	# the sim's pace at any game speed and frame rate; height follows each waypoint passed.
+	var budget: float = speed * delta
+	var moved: float = 0.0
+	var passed: int = 0
+	var dist := 0.0
+	while true:
+		var goal: Vector3 = _waypoints[0] if not _waypoints.is_empty() else _target
+		if _waypoints.is_empty():
+			goal += Vector3(_avoid.x, 0.0, _avoid.y)          # arriving beside somebody: stop where there is room
+		var gy: float = goal.y if not _waypoints.is_empty() else _level_y
+		var to := goal - position
+		to.y = 0
+		dist = to.length()
+		if dist <= budget:
+			position.x = goal.x
+			position.z = goal.z
+			budget -= dist
+			moved += dist
+			if _waypoints.is_empty():
+				_ybase = move_toward(_ybase, gy, (maxf(speed, 1.0) + 2.5) * delta)
+				break
+			if budget > 0.0 and passed < MAX_WP_PER_FRAME:
+				_ybase = gy                                   # passed through this waypoint: on its floor / step
+			else:
+				_ybase = move_toward(_ybase, gy, (maxf(speed, 1.0) + 2.5) * delta)
+			if absf(gy - _ybase) > 0.06:
+				break                                     # still climbing to it (a stair step, a lift ride)
 			_waypoints.remove_at(0)
-	else:
+			passed += 1
+			if budget <= 0.0 or passed >= MAX_WP_PER_FRAME:
+				break
+			continue
 		var dir := to / dist
-		position += dir * step
-		_speed_now = speed
+		position += dir * budget
+		moved += budget
+		_ybase = move_toward(_ybase, gy, (maxf(speed, 1.0) + 2.5) * delta)          # climbing: the height follows the route (a lift ride is vertical)
 		_last_dir = Vector2(dir.x, dir.z)
 		if _waypoints.size() > 0 or _target_pose in ["idle", "walk"]:
 			_target_yaw = atan2(-dir.x, -dir.z)
+		break
+	_moving = moved > 0.0 or dist > 0.03
+	_speed_now = moved / maxf(delta, 0.0001)
 	# smooth turning (faster while locomoting)
 	var rate := 14.0 if _moving else 9.0
 	facing_yaw = lerp_angle(facing_yaw, _target_yaw, clampf(delta * rate, 0.0, 1.0))
