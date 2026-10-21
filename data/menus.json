@@ -3,6 +3,7 @@
  "max_flat": 7,
  "objects": {
   "ground": {"first": ["go_here"]},
+  "door": {"first": ["knock", "try_door", "pick_lock", "force_door", "break_window", "wait_door", "leave_door"]},
   "mailbox": {
    "first": ["check_mail", "pay_bills", "odd_job", "town_notice", "report_outage"],
    "groups": {"Vehicles": ["buy_*", "sell_car", "refuel_car", "repair_car", "collect_car", "change_insurance"], "Call for help": ["call_*"], "Town": ["bus_times", "check_utilities", "money_matters"]},

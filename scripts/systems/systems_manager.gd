@@ -91,6 +91,8 @@ static func reset_all() -> void:
 	LifeLedger.reset()
 	LifeSummary.reset()
 	PlayerPrompt.reset()
+	DoorActs.reset()
+	VenueStaff.first_asked = {}
 	SoloDistricts.reset()
 	SuccessionNobody.reset()
 	Tiers.reset()

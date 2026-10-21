@@ -1,7 +1,8 @@
 {
   "_doc": "One-character play content (merged by SoloContent): the bottom of the ladder. Self actions for the pawn only, ordered from the Myself menu. Numbers that may be tuned live in data/solo.json.",
   "interactions": {
-    "sleep_rough": {
+    "wait_here": {"label": "Wait Around", "kind": "super", "target": "self", "tags": ["rest"], "duration_min": 10, "posture": "stand", "tests": [], "per_min": {}, "on_finish": [], "autonomous": false, "player_menu": true, "priority": "normal", "thought": "Just waiting."},
+  "sleep_rough": {
       "label": "Sleep Rough",
       "kind": "super",
       "target": "self",

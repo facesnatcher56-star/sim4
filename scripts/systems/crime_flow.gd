@@ -1,4 +1,4 @@
-﻿class_name CrimeFlow
+class_name CrimeFlow
 extends RefCounted
 ## The one door of the crime and justice track into the rest of the game. SystemsManager calls reset / on_minute / on_hour / on_day /
 ## on_game_event; everything else is routed from here so the hooks in shared files stay one line each.
@@ -178,6 +178,8 @@ static func run_pending(p: Dictionary) -> void:
 				Courthouse.verdict_day(c)
 		"court_step":
 			CourtScene.step(p)
+		"door_notice":
+			DoorActs.notice(p)
 
 # ------------------------------------------------------------------ events
 static func on_game_event(ev: String, p: Dictionary) -> void:

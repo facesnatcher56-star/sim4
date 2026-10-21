@@ -1,4 +1,4 @@
-﻿class_name NeighborhoodService
+class_name NeighborhoodService
 extends RefCounted
 ## Per-minute / per-hour glue for the neighbourhood layer (called from SystemsManager). Every lot exists at once on the map, so
 ## all of this works PER LOT, using each folk's tile (Neighborhood.lot_of):
@@ -119,8 +119,13 @@ static func _closing() -> void:
 		if left == int(cfg().get("closing_notice_min", 20)):
 			SysUtil.notify("%s closes in %s." % [Neighborhood.label_of(lot_id), SysUtil.count_text(left, "minute")], "warn")
 		if not Venues.is_open(lot_id):
-			SysUtil.notify("%s is closed. Heading home." % Neighborhood.label_of(lot_id), "warn")
-			Neighborhood.travel(here, Neighborhood.HOME, {"quiet": true})
+			var movable: Array = here.filter(func(id): return not Pawn.is_pawn_id(int(id)))          # the player's person is never sent home by the game
+			for pid in here:
+				if Pawn.is_pawn_id(int(pid)):
+					VenueStaff.closing(SysUtil.folk(int(pid)), lot_id)
+			if not movable.is_empty():
+				SysUtil.notify("%s is closed. Heading home." % Neighborhood.label_of(lot_id), "warn")
+				Neighborhood.travel(movable, Neighborhood.HOME, {"quiet": true})
 
 # ------------------------------------------------------------------ hangouts
 ## Ask a townie to meet a folk at a venue (arrives `delay` minutes from now for `duration` minutes). Returns the record or {}.

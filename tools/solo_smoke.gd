@@ -68,6 +68,38 @@ func _process(_d: float) -> bool:
 		Kit.teardown()
 		quit(0)
 		return true
+	if "--door" in OS.get_cmdline_user_args():
+		var hl: String = ""
+		for l in Neighborhood.lots():
+			if str(l.get("type", "")) == "townie_home":
+				hl = str(l["id"])
+				break
+		var seen := []
+		SimEnv.events().game_event.connect(func(n, p): if n == "doorstep": seen.append(str(p)))
+		SimEnv.events().notification.connect(func(text, kind): print("  TOAST %s" % text))
+		print("DOOR travel to %s: %s" % [hl, str(Neighborhood.travel([f.id], hl, {}))])
+		for m in 40:
+			Kit.run(10)
+			if not seen.is_empty():
+				break
+		print("DOOR doorstep events=%s at_door=%s tile=%s lot_at=%s" % [str(seen), str(f.get_meta("at_door", "")), str(f.tile), NeighborhoodLots.lot_at(f.tile)])
+		var ents: Array = DoorActs.entries(f, hl)
+		print("DOOR options=%s" % str(ents.map(func(e): return e["label"])))
+		DoorActs.knock(f, hl)
+		DoorActs.try_door(f, hl)
+		print("DOOR after try: options=%s" % str(DoorActs.entries(f, hl).map(func(e): return e["label"])))
+		DoorActs.pick(f, hl)
+		DoorActs.force(f, hl)
+		print("DOOR inside=%s lot=%s" % [str(DoorActs.intruders), Neighborhood.lot_of(f)])
+		for m2 in 12:
+			Kit.run(1)
+			for pm in JusticeState.pending.duplicate():
+				if SysUtil.now() >= int(pm["due_min"]):
+					JusticeState.pending.erase(pm)
+					CrimeFlow.run_pending(pm)
+		Kit.teardown()
+		quit(0)
+		return true
 	if "--ledger" in OS.get_cmdline_user_args():
 		Economy.deposit(f.household_id, 100, "smoke")
 		Commands.run({"player_id": 1, "folk_id": f.id, "action": "solo", "args": {"action": "move", "rung": "bedsit"}})

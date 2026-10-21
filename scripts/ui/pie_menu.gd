@@ -10,7 +10,7 @@ signal chosen(def_id: String, target_id: int)
 const SOCIAL_ORDER := ["Friendly", "Funny", "Romantic", "Deep", "Group", "Mean"]
 const CAT_COLORS := {"Friendly": Color("#4cc78a"), "Funny": Color("#f2c94c"), "Romantic": Color("#ee86a6"), "Deep": Color("#35a7b0"),
 	"Group": Color("#8f6bf0"), "Mean": Color("#e5534b")}
-const KIND_ACCENT := {"object": "#f2a33c", "folk": "#ee86a6", "self": "#3fb8af", "ground": "#5bb8ff"}
+const KIND_ACCENT := {"object": "#f2a33c", "folk": "#ee86a6", "self": "#3fb8af", "ground": "#5bb8ff", "door": "#c98f5b"}
 ## Which groups stay open between openings (the player's choice persists).
 static var open_cats: Dictionary = {"Friendly": true}
 
@@ -78,6 +78,8 @@ func open_with_entries(f, kind: String, id: int, entries: Array, screen_pos: Vec
 			title_text = "Myself"
 		"ground":
 			title_text = "Here"
+		"door":
+			title_text = "The front door"
 	box.add_child(UIU.make_label(title_text, 16, Color(str(KIND_ACCENT.get(kind, "#f2a33c"))).lightened(0.3)))
 	if kind == "folk" and target != null:
 		_fill_social(f, target, entries)

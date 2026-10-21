@@ -50,7 +50,8 @@ static func can_travel(folk_ids: Array, lot_id: String, opts: Dictionary = {}) -
 		return {"ok": false, "reason": "", "silent": true}          # already walking there: no second plan, no second toast
 	if Venues.type_of_lot(lot_id) == "hospital" and not bool(opts.get("free", false)) and HospitalVisits.patient_for(ids).is_empty():
 		return {"ok": false, "reason": "The hospital is for patients and the people who visit them."}
-	if lot_id != Neighborhood.HOME:
+	var pawn_walks: bool = ids.any(func(i): return Pawn.is_pawn_id(int(i)))
+	if lot_id != Neighborhood.HOME and not pawn_walks:          # the player's person may walk anywhere: a shut or private place is met at its door, not refused up front
 		var chk := Venues.check_entry(lot_id, ids)
 		if not bool(chk["ok"]):
 			return {"ok": false, "reason": str(chk["reason"])}

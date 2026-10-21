@@ -244,6 +244,9 @@ static func _on_enter(f, lot_id: String) -> void:
 		return
 	if f.has_meta("denied") and str(f.get_meta("denied")) == lot_id:
 		return
+	if Pawn.is_pawn(f) and DoorActs.door_lot(lot_id, f):          # somebody's home or a shut place: the pawn stops at the front door (knock, wait, try the door, leave)
+		DoorActs.arrive(f, lot_id)
+		return
 	var chk: Dictionary = Venues.check_entry(lot_id, [fid], int(f.household_id))
 	if not bool(chk["ok"]):
 		SysUtil.notify(str(chk["reason"]), "warn")

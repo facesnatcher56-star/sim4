@@ -1,0 +1,28 @@
+{
+ "_doc": "Doors of private homes (task 49 / 53; scripts/systems/door_acts.gd). A private home is a townie_home lot that is not the player's. Walking to it ends at its front door: the player is offered Knock, Wait, Try the door, Leave (and, once they have found the door locked by trying it, Pick the lock, Force it, Break a window). Nothing says whether anyone is home or whether it is locked until it is tried. awake_from / awake_to: the hours people in a home are up. lock_chance: how likely a door is locked by day / night (stable per door and day). Answering: weights by what the resident feels about the visitor. Entering uninvited: the reaction of a resident who is home and awake is drawn from `intruder` by their traits and what they hold; the player decides from the options that follow.",
+ "awake_from": 7,
+ "awake_to": 23,
+ "lock_chance": {"day": 0.3, "night": 0.92},
+ "answer": {
+  "open": 0.35, "through_door": 0.3, "ignore": 0.35,
+  "friend_open_bonus": 0.0045, "stranger_open_malus": 0.25, "late_hour": 21, "late_open_factor": 0.4, "traits_open": {"friendly": 1.6, "kind": 1.4, "outgoing": 1.4}, "traits_closed": {"shy": 1.6, "anxious": 1.8, "paranoid": 2.0}
+ },
+ "pick": {"base": 0.3, "per_stealth": 0.07, "noise": 0.12, "minutes": 14},
+ "force": {"base": 0.25, "per_fitness": 0.06, "noise": 0.9, "minutes": 2},
+ "window": {"base": 0.7, "noise": 0.7, "minutes": 2},
+ "lines": {
+  "knock_open": ["{r} opens the door. \"Yes?\"", "The door opens a little. It is {r}.", "{r} opens up, looking surprised."],
+  "knock_through": ["A voice behind the door: \"Who is it?\" Then: \"Not now, sorry.\"", "{r} calls through the door: \"Can I help you?\" and does not open it.", "\"We are not buying anything,\" {r} says through the door."],
+  "knock_none": ["Nobody comes to the door.", "No answer.", "You wait. Nothing."],
+  "locked": ["The door is locked.", "The handle will not turn: it is locked.", "Locked."],
+  "invited_in": ["{r} lets you in.", "\"Come in, then,\" says {r}."],
+  "heard": ["Somebody inside heard that.", "A light comes on inside."],
+  "intruder": {
+   "scream": ["{r} screams at the sight of {a}.", "{r} shrieks: \"Who are you?\""],
+   "order_out": ["{r} stares at {a}. \"Get out of my house.\"", "\"What are you doing in here?\" {r} demands."],
+   "grab": ["{r} grabs the nearest heavy thing and holds it up. \"Out!\""],
+   "flee": ["{r} backs out of the room and locks a door behind {them}."],
+   "call": ["{r} is already on the phone. \"Yes, someone is in my home.\""]
+  }
+ }
+}
