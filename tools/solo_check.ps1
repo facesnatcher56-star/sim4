@@ -19,5 +19,8 @@ Run "rough district run" "--headless,--path,.,--script,res://tools/solo_smoke.gd
 Run "main scene boots" "--headless,--path,.,--quit-after,1500,--,--autostart"
 Write-Output (& powershell -File (Join-Path $PSScriptRoot "heritage_guard.ps1") | Out-String)
 $g = "C:\Users\lloyd\AppData\Local\Godot47\Godot_v4.7-stable_win64_console.exe"
+$ov = Join-Path $root "override.cfg"
+Set-Content -Path $ov -Value "[display]`nwindow/size/no_focus=true`n" -Encoding ascii          # non-activating window: never steals focus
 $p = Start-Process $g -ArgumentList "--path",".","--position","3440,164","--resolution","1920x1080","--quit-after","300" -PassThru -Wait -NoNewWindow -WorkingDirectory $root
+Remove-Item $ov -ErrorAction SilentlyContinue
 if ($p.ExitCode -eq 0) { Write-Output "ok   windowed title screen quits clean" } else { Write-Output "FAIL windowed title screen exit code $($p.ExitCode)" }

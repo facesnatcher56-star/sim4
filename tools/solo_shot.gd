@@ -1,6 +1,6 @@
 extends SceneTree
 ## Screenshot helper for one-character play (not a test). Owner rule: windowed runs go on the SECOND monitor at 1080p, never the main one:
-## godot --path . --position 3440,164 --resolution 1920x1080 --script res://tools/solo_shot.gd -- <scene> out.png
+## powershell -File tools/quiet_godot.ps1 --script res://tools/solo_shot.gd -- <scene> out.png
 ## scenes: start | myself | homes | picker
 var _frames := 0
 var _main: Node = null
