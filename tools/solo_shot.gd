@@ -1,5 +1,6 @@
 extends SceneTree
-## Screenshot helper for one-character play (not a test): godot --path . --resolution 1600x900 --script res://tools/solo_shot.gd -- <scene> out.png
+## Screenshot helper for one-character play (not a test). Owner rule: windowed runs go on the SECOND monitor at 1080p, never the main one:
+## godot --path . --position 3440,164 --resolution 1920x1080 --script res://tools/solo_shot.gd -- <scene> out.png
 ## scenes: start | myself | homes | picker
 var _frames := 0
 var _main: Node = null
@@ -8,6 +9,7 @@ var _scn := "start"
 
 func _process(_d: float) -> bool:
 	if _main == null:
+		root.unfocusable = true          # never take the keyboard / mouse focus from the user's other apps
 		var args := OS.get_cmdline_user_args()
 		if args.size() > 0: _scn = args[0]
 		if args.size() > 1: _out = args[1]
