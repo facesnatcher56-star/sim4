@@ -1,0 +1,26 @@
+{
+ "_doc": "Every window has its own identity so the UI does not all look the same (scripts/ui/ui_identity.gd): accent colour (borders, title badge, button hover and press), glyph in the title badge, header style (band = coloured top edge, ribbon = coloured left edge, frame = coloured frame, plain = centred title), corner radius, and how much of the accent tints the panel. Keyed by the dialog's script class name; 'default' is used for anything not listed.",
+ "default": {"accent": "#3fb8af", "glyph": "*", "header": "band", "radius": 10, "tint": 0.05},
+ "dialogs": {
+  "BankHub":          {"accent": "#e0b341", "glyph": "$", "header": "ribbon", "radius": 6,  "tint": 0.07},
+  "CareerDialog":     {"accent": "#4f8cff", "glyph": "W", "header": "band",   "radius": 12, "tint": 0.06},
+  "CaseBoard":        {"accent": "#d6545a", "glyph": "!", "header": "frame",  "radius": 4,  "tint": 0.09},
+  "CasePrompt":       {"accent": "#a86bd6", "glyph": "?", "header": "plain",  "radius": 14, "tint": 0.08},
+  "ConfirmDialog":    {"accent": "#aab4c0", "glyph": "?", "header": "plain",  "radius": 16, "tint": 0.02},
+  "GoalsDialog":      {"accent": "#5fcf80", "glyph": "G", "header": "band",   "radius": 14, "tint": 0.06},
+  "HelpDialog":       {"accent": "#5bb8ff", "glyph": "i", "header": "ribbon", "radius": 12, "tint": 0.05},
+  "HouseholdDialog":  {"accent": "#ff9f43", "glyph": "H", "header": "band",   "radius": 8,  "tint": 0.07},
+  "IncidentDebug":    {"accent": "#7c8da1", "glyph": "#", "header": "frame",  "radius": 3,  "tint": 0.0},
+  "LifeHub":          {"accent": "#3fb8af", "glyph": "T", "header": "band",   "radius": 10, "tint": 0.05},
+  "LifeSummaryDialog":{"accent": "#c8a2f0", "glyph": "L", "header": "plain",  "radius": 18, "tint": 0.10},
+  "PauseMenu":        {"accent": "#aab4c0", "glyph": "=", "header": "plain",  "radius": 18, "tint": 0.03},
+  "SecurityDialog":   {"accent": "#7c8da1", "glyph": "S", "header": "frame",  "radius": 5,  "tint": 0.04},
+  "SettingsDialog":   {"accent": "#8fa3b8", "glyph": "O", "header": "ribbon", "radius": 6,  "tint": 0.03},
+  "ShareHub":         {"accent": "#ff6b9d", "glyph": "+", "header": "band",   "radius": 16, "tint": 0.06},
+  "TownDialog":       {"accent": "#9b6bd6", "glyph": "C", "header": "frame",  "radius": 8,  "tint": 0.08},
+  "TownLawDialog":    {"accent": "#6b8be8", "glyph": "L", "header": "ribbon", "radius": 5,  "tint": 0.06},
+  "UnderworldDialog": {"accent": "#c0504d", "glyph": "X", "header": "frame",  "radius": 3,  "tint": 0.12},
+  "VacationDialog":   {"accent": "#35c4e0", "glyph": "V", "header": "band",   "radius": 18, "tint": 0.06}
+ },
+ "top_bar": {"Map": "#5bb8ff", "Money": "#e0b341", "Phone": "#5fcf80", "Town": "#3fb8af", "Council": "#9b6bd6", "Build/Buy": "#ff9f43", "Save/Load": "#8fa3b8"}
+}

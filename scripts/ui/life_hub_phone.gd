@@ -18,11 +18,8 @@ static func build(dlg: LifeHub) -> void:
 		_no_phone(dlg, fid, why)
 		return
 	if app == "":
-		_home(dlg, fid)
+		dlg.call("build_home", fid)
 		return
-	dlg.body.add_child(dlg.button("< Home", "Back to the phone's home screen", func():
-		app = ""
-		dlg.refresh()))
 	match app:
 		"jobs":
 			LifeHubJobs.build(dlg)
@@ -30,6 +27,10 @@ static func build(dlg: LifeHub) -> void:
 			_bank(dlg, f)
 		"news":
 			LifeHubMedia.build(dlg)
+		"contacts":
+			_contacts(dlg, f, fid)
+		"social":
+			_social(dlg, f, fid)
 		_:
 			_messages(dlg, f, fid)
 
@@ -95,12 +96,14 @@ static func _no_phone(dlg: LifeHub, fid: int, why: String) -> void:
 
 static func _messages(dlg: LifeHub, f, fid: int) -> void:
 	var inbox: Array = PhoneState.inbox_of(fid)
-	if not inbox.is_empty():
-		dlg.heading("Messages")
+	if inbox.is_empty():
+		dlg.line("No new messages.", 14, UITheme.MUTED)
+	else:
 		for m in inbox:
 			dlg.row_with(str(m["text"]), [dlg.button("Yes", "Go along", func(): dlg.act("phone_respond", {"id": m["id"], "yes": true})),
 				dlg.button("No thanks", "Say no politely", func(): dlg.act("phone_respond", {"id": m["id"], "yes": false}))])
-	dlg.heading("Contacts")
+
+static func _contacts(dlg: LifeHub, f, fid: int) -> void:
 	var cs: Array = PhoneCmd.contacts(fid)
 	if cs.is_empty():
 		dlg.line("Nobody in the contacts yet. Meet people around town.", 13, UITheme.MUTED)
@@ -122,7 +125,8 @@ static func _messages(dlg: LifeHub, f, fid: int) -> void:
 					asking = -1
 					dlg.act("phone_invite", {"other": c["id"], "outing": o["id"]}), w == "")
 				fl.add_child(b)
-	dlg.heading("Social media")
+
+static func _social(dlg: LifeHub, f, fid: int) -> void:
 	var fl2 := HFlowContainer.new()
 	dlg.body.add_child(fl2)
 	for kind in SocialFeed.kinds():

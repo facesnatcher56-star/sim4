@@ -6,6 +6,7 @@ var body: VBoxContainer
 var title_label: Label
 var folk_id := -1
 var dialog_width := 460.0
+var accent_color: Color = UITheme.ACCENT          # this window's accent (UIIdentity); headings and card buttons use it
 
 func _ready() -> void:
 	visible = false
@@ -32,6 +33,7 @@ func _ready() -> void:
 	sc.add_child(body)
 	_scroll = sc
 	visibility_changed.connect(_track_pause)
+	UIIdentity.dress(self)          # accent, badge, header style and radius of this window (data/ui_identity.json)
 	tree_exiting.connect(func():
 		_open.erase(get_instance_id())
 		_resume_if_none())
@@ -96,6 +98,7 @@ func toggle_for(fid: int) -> void:
 		show_for(fid)
 
 func refresh() -> void:
+	UICard.accent = accent_color
 	for c in body.get_children():
 		body.remove_child(c)
 		c.queue_free()
@@ -119,7 +122,7 @@ func line(text: String, size: int = 14, color: Color = UITheme.TEXT) -> Label:
 	return l
 
 func heading(text: String) -> Label:
-	return line(text.to_upper(), 12, UITheme.ACCENT)
+	return line(text.to_upper(), 12, accent_color)
 
 func bar(value: float, maxv: float, tip: String = "") -> ProgressBar:
 	var b := ProgressBar.new()

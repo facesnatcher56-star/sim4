@@ -237,6 +237,10 @@ func _build_top_bar() -> void:
 	menu_button.tooltip_text = "Pause menu and settings (Esc)"
 	menu_button.pressed.connect(func(): pause_menu.toggle_for(-1))
 	h.add_child(menu_button)
+	var accents: Dictionary = SysUtil.table("ui_identity").get("top_bar", {})          # each top-bar button its own colour (data/ui_identity.json)
+	for bc in h.get_children():
+		if bc is Button and accents.has((bc as Button).text):
+			UIIdentity.accent_button(bc, Color(str(accents[(bc as Button).text])))
 
 func _build_left() -> void:
 	var left := VBoxContainer.new()

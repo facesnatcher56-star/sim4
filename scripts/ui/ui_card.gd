@@ -1,5 +1,7 @@
 class_name UICard
 extends RefCounted
+## Cards take the colour of the window they sit in (set by UIDialog.refresh).
+static var accent: Color = Color("#3fb8af")
 ## Building blocks of the panel style in docs/UI_STYLE.md: scan first, read second. A CARD has a title (and a badge), a row of labelled CHIPS for the key
 ## numbers, a row of requirement chips (check / cross) and ONE primary action with its reason underneath; flavour goes into the tooltip.
 ##   var inner := UICard.card(body, width, "Bedsit at Elm Court", "YOU LIVE HERE", "A room in somebody else's house ...")
@@ -25,6 +27,8 @@ static func card(parent: Control, width: float, title: String, badge: String = "
 	v.add_child(head)
 	var t := UIU.make_label(title, 15, UITheme.TEXT)
 	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	t.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART          # a long title wraps instead of widening the window
+	t.custom_minimum_size = Vector2(60, 0)
 	head.add_child(t)
 	if badge != "":
 		head.add_child(badge_label(badge))
@@ -75,8 +79,8 @@ static func action(box: Control, text: String, fn: Callable, enabled: bool = tru
 	b.disabled = not enabled
 	b.custom_minimum_size = Vector2(120, 28)
 	if enabled:
-		b.add_theme_stylebox_override("normal", UITheme.box(UITheme.ACCENT.darkened(0.45), 6, UITheme.ACCENT, 1, 6))
-		b.add_theme_stylebox_override("hover", UITheme.box(UITheme.ACCENT.darkened(0.25), 6, UITheme.ACCENT, 1, 6))
+		b.add_theme_stylebox_override("normal", UITheme.box(accent.darkened(0.45), 6, accent, 1, 6))
+		b.add_theme_stylebox_override("hover", UITheme.box(accent.darkened(0.25), 6, accent, 1, 6))
 	b.tooltip_text = reason
 	b.mouse_filter = Control.MOUSE_FILTER_STOP
 	b.pressed.connect(fn)

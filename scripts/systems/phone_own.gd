@@ -43,6 +43,10 @@ static func block(fid: int) -> String:
 			return "You lost your phone."
 	return "You have no phone."
 
+## Cosmetic: the battery shown on the phone. Charged at 07:00 every day, it drains through the day (never below 5 percent).
+static func battery() -> int:
+	return clampi(int(100.0 - fposmod(SysUtil.hour_f() - 7.0, 24.0) * 3.2), 5, 100)
+
 static func cut_off(fid: int) -> bool:
 	var f = SysUtil.folk(fid)
 	if f == null:
