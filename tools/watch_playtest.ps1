@@ -3,6 +3,7 @@
 # Finds Godot 4.7 itself (the usual install folder, then anything on PATH, then a search of the user folders).
 $root = Split-Path -Parent $PSScriptRoot
 $cands = @(
+    (Join-Path $root "tools\godot\Godot_v4.7-stable_win64.exe"),          # the copy next to the game (the app's own AppData is not visible to the user's Windows)
     "C:\Users\lloyd\AppData\Local\Godot47\Godot_v4.7-stable_win64_console.exe",
     "C:\Users\lloyd\AppData\Local\Godot47\Godot_v4.7-stable_win64.exe",
     (Join-Path $env:LOCALAPPDATA "Godot47\Godot_v4.7-stable_win64_console.exe")
