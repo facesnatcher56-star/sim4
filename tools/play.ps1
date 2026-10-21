@@ -1,5 +1,5 @@
 # Start the game (Folk) in a normal window. Works from any folder:
-#   powershell -ExecutionPolicy Bypass -File "C:\Users\lloyd\OneDrive\Documents\sim-4\tools\watch_playtest.ps1"
+#   powershell -ExecutionPolicy Bypass -File "C:\Users\lloyd\OneDrive\Documents\sim-4\tools\play.ps1"
 # Finds Godot 4.7 itself (the usual install folder, then anything on PATH, then a search of the user folders).
 $root = Split-Path -Parent $PSScriptRoot
 $cands = @(
