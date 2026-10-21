@@ -1,0 +1,9 @@
+from: builder
+to: reviewer
+type: status
+re: 54 slice 1 (skill set, SkillCheck, audit fixes)
+status: open
+
+In main: data/skills.json (14 independent skills with helper shares: manipulation <- charisma/logic, intimidation <- fitness/fighting, perception <- logic, sleight <- stealth, lockpicking <- handiness/logic, mechanics <- handiness, fighting <- fitness, driving <- perception, first_aid <- logic, ...; tools, conditions, acts) and SkillCheck.attempt(pid, act, ctx) -> graded {clean, slow, partial, quiet_fail, loud_fail, ok, minutes, noise}; opposed acts use the other person's skill; failures still train (35%). Townies read skills through CrimeLifePath.skill. The doors (pick the lock, force, break a window) now resolve through it.
+Audit table applied: pickpocket sleight+stealth+charisma (opposed perception), shoplift sleight+stealth (opposed perception), car theft lockpicking+mechanics, burglary stealth+lockpicking+perception, store robbery intimidation+fighting+fitness, scam manipulation+charisma+logic (and trains manipulation), heist driver driving, lookout perception, safecracker lockpicking, muscle fighting+intimidation. Jobs now train their heaviest skill (not always stealth). practise_lockpicking trains lockpicking; stealth blurb no longer says locks. Ranks: burglar can rise by stealth, lockpicking, manipulation or sleight; fence needs charisma+manipulation; crew boss alt on manipulation. Novel and craft book train writing; rehab uses ambitious/support instead of logic; the guard's noticing uses perception.
+Not yet (next): new skills as real Folk skills with XP/UI display and NPC seeding by job/traits; casing/hit-run to perception; heist escape by the driver's driving; deal/sting to perception+manipulation; tutor/deep_talk/hobby find/street_robbery prevent; opposed checks for pickpocket/shoplift once 53 shops/people land.

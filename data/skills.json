@@ -1,0 +1,33 @@
+{
+ "_doc": "Task 54: the skill set, each skill independent. `helpers` = other skills that add a share of their level to this one in a check (charisma helps manipulation without replacing it). `xp_fail` = the share of XP a failed attempt still gives. Checks (scripts/systems/skill_check.gd) combine the primary skill and its helpers, tools, conditions and traits into one number and grade the attempt: clean, slow, partial, quiet_fail, loud_fail.",
+ "xp_fail": 0.35,
+ "skills": {
+  "charisma": {"label": "Charisma", "helpers": {}},
+  "manipulation": {"label": "Manipulation", "helpers": {"charisma": 0.35, "logic": 0.25}},
+  "intimidation": {"label": "Intimidation", "helpers": {"fitness": 0.3, "fighting": 0.3}},
+  "perception": {"label": "Perception", "helpers": {"logic": 0.3}},
+  "stealth": {"label": "Stealth", "helpers": {"fitness": 0.2}},
+  "sleight": {"label": "Sleight of hand", "helpers": {"stealth": 0.3}},
+  "lockpicking": {"label": "Lockpicking", "helpers": {"handiness": 0.3, "logic": 0.2}},
+  "mechanics": {"label": "Mechanics", "helpers": {"handiness": 0.4}},
+  "fighting": {"label": "Fighting", "helpers": {"fitness": 0.4}},
+  "driving": {"label": "Driving", "helpers": {"perception": 0.25}},
+  "fitness": {"label": "Fitness", "helpers": {}},
+  "first_aid": {"label": "First aid", "helpers": {"logic": 0.3}},
+  "handiness": {"label": "Handiness", "helpers": {}},
+  "logic": {"label": "Logic", "helpers": {}}
+ },
+ "tools": {"lockpick": 0.2, "crowbar": 0.15, "slim_jim": 0.2, "weapon": 0.2, "phone": 0.0},
+ "conditions": {"dark": 0.06, "noisy": -0.04, "crowded": -0.08, "tired": -0.08, "hungry": -0.05, "injured": -0.12, "drunk": -0.15, "raining": -0.03},
+ "acts": {
+  "pick_lock": {"skill": "lockpicking", "difficulty": 0.55, "minutes": 14, "noise": 0.12},
+  "force_door": {"skill": "fitness", "difficulty": 0.5, "minutes": 2, "noise": 0.9},
+  "break_window": {"skill": "handiness", "difficulty": 0.3, "minutes": 2, "noise": 0.7},
+  "pickpocket": {"skill": "sleight", "difficulty": 0.5, "minutes": 1, "noise": 0.0, "opposed": "perception"},
+  "shoplift": {"skill": "sleight", "difficulty": 0.45, "minutes": 2, "noise": 0.0, "opposed": "perception"},
+  "hotwire": {"skill": "mechanics", "difficulty": 0.55, "minutes": 6, "noise": 0.2},
+  "lie": {"skill": "manipulation", "difficulty": 0.5, "minutes": 2, "noise": 0.0, "opposed": "perception"},
+  "threaten": {"skill": "intimidation", "difficulty": 0.5, "minutes": 1, "noise": 0.2, "opposed": "fighting"},
+  "sneak": {"skill": "stealth", "difficulty": 0.5, "minutes": 3, "noise": 0.0, "opposed": "perception"}
+ }
+}

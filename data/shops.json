@@ -234,7 +234,7 @@
      "label": "Novel",
      "base": 18,
      "kind": "skill",
-     "skill": "charisma",
+     "skill": "writing",
      "xp": 25,
      "stock": 14,
      "restock": 3,

@@ -147,7 +147,7 @@ static func run(pid: int, jid: String, target: Dictionary, opts: Dictionary = {}
 	if not m.is_empty():
 		m["last_job_day"] = SysUtil.day()
 	CrimeLifeState.count("job_" + jid)
-	CrimeLifePath.train(pid, str(j.get("xp_skill", "stealth")), float(j.get("xp", 8)) * (1.0 if outcome in ["clean", "seen", "caught"] else 0.4))
+	CrimeLifePath.train(pid, str(j.get("xp_skill", _primary_skill(j))), float(j.get("xp", 8)) * (1.0 if outcome in ["clean", "seen", "caught"] else 0.4))
 	if outcome in ["fail", "fail_seen"]:
 		_failed(pid, j, res, outcome)
 		return res
@@ -270,3 +270,13 @@ static func _caught(pid: int, _j: Dictionary, _c: Dictionary) -> void:
 		return
 	m["caught"] = int(m.get("caught", 0)) + 1
 	CrimeLifePath.add_cred(pid, float(CrimeLifeState.sect("path").get("cred_caught_quiet", 4)) * 0.5, "caught")
+
+## The skill a job is mostly about (the heaviest weight in its skills): what doing it trains.
+static func _primary_skill(j: Dictionary) -> String:
+	var best: String = "stealth"
+	var bw: float = -1.0
+	for k in (j.get("skills", {}) as Dictionary):
+		if float(j["skills"][k]) > bw:
+			bw = float(j["skills"][k])
+			best = str(k)
+	return best

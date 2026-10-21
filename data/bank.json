@@ -30,7 +30,7 @@
     "benefit": {"per_day": 18, "max_days": 14, "wait_days": 1},
     "crafts": {
       "painting": {"label": "Painting", "price": 30, "skill": "painting", "demand": 5},
-      "book": {"label": "Book", "price": 34, "skill": "charisma", "demand": 4},
+      "book": {"label": "Book", "price": 34, "skill": "writing", "demand": 4},
       "produce": {"label": "Garden produce", "price": 8, "skill": "gardening", "demand": 12},
       "fish": {"label": "Fish", "price": 7, "skill": "fishing", "demand": 12}
     },

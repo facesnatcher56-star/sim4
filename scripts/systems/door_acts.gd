@@ -162,10 +162,9 @@ static func try_door(f, lot_id: String) -> void:
 
 static func pick(f, lot_id: String) -> void:
 	var c: Dictionary = cfg().get("pick", {})
-	var p: float = float(c.get("base", 0.3)) + float(c.get("per_stealth", 0.07)) * float(f.skill_level("stealth"))
-	f.add_skill_xp("stealth", 6.0)
-	_noise(lot_id, float(c.get("noise", 0.12)))
-	if SysUtil.rng.randf() < p:
+	var r: Dictionary = SkillCheck.attempt(int(f.id), "pick_lock", {})
+	_noise(lot_id, float(r["noise"]))
+	if bool(r["ok"]):
 		forced[lot_id] = SysUtil.day()
 		_enter(f, lot_id, false)
 	else:
@@ -174,9 +173,9 @@ static func pick(f, lot_id: String) -> void:
 
 static func force(f, lot_id: String) -> void:
 	var c: Dictionary = cfg().get("force", {})
-	var p: float = float(c.get("base", 0.25)) + float(c.get("per_fitness", 0.06)) * float(f.skill_level("fitness"))
-	_noise(lot_id, float(c.get("noise", 0.9)))
-	if SysUtil.rng.randf() < p:
+	var r: Dictionary = SkillCheck.attempt(int(f.id), "force_door", {})
+	_noise(lot_id, float(r["noise"]))
+	if bool(r["ok"]):
 		forced[lot_id] = SysUtil.day()
 		_say(f, "The door gives way with a crack.")
 		_enter(f, lot_id, false)
@@ -187,9 +186,10 @@ static func force(f, lot_id: String) -> void:
 
 static func window(f, lot_id: String) -> void:
 	var c: Dictionary = cfg().get("window", {})
-	_noise(lot_id, float(c.get("noise", 0.7)))
+	var r: Dictionary = SkillCheck.attempt(int(f.id), "break_window", {})
+	_noise(lot_id, float(r["noise"]))
 	CrimePetty.commit("vandalism", int(f.id), "venue:" + lot_id, {"seen": false})
-	if SysUtil.rng.randf() < float(c.get("base", 0.7)):
+	if bool(r["ok"]):
 		_say(f, "Glass breaks. You climb in.")
 		_enter(f, lot_id, false)
 	else:

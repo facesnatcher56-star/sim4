@@ -180,7 +180,7 @@ static func on_round(folk_id: int) -> void:
 	var f = CrimePerson.folk(folk_id)
 	if f == null:
 		return
-	var p: float = 0.06 + 0.012 * float(f.skill_level("fitness")) + (0.05 if SysUtil.hour_f() >= 21.0 or SysUtil.hour_f() < 5.0 else 0.0)
+	var p: float = 0.06 + 0.012 * SkillCheck.level(folk_id, "perception")          # a guard notices with perception + (0.05 if SysUtil.hour_f() >= 21.0 or SysUtil.hour_f() < 5.0 else 0.0)
 	for c in CaseStore.in_state(["open"]):
 		if str(c["kind"]) in ["burglary", "theft", "robbery"] and SysUtil.day() - int(c["day"]) <= 5 and CrimeLifeState.chance(p):
 			CaseInvestigation.assist(int(c["id"]))

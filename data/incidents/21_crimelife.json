@@ -484,7 +484,7 @@
      "fun": 0.05
     },
     "skill_xp_per_min": {
-     "stealth": 0.35
+     "lockpicking": 0.35
     },
     "on_finish": [],
     "autonomous": false,

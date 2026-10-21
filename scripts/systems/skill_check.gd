@@ -1,0 +1,98 @@
+class_name SkillCheck
+extends RefCounted
+## Task 54: one check behind every attempt. SkillCheck.attempt(actor_id, act, ctx) resolves an act from data/skills.json "acts" by the actor's primary skill plus helper
+## shares, the tools carried, the conditions (dark, crowded, tired, drunk, injured ...) and traits, against the act's difficulty or, when somebody resists or watches,
+## against THEIR skill (ctx.opponent: a person id). The result is graded, not pass or fail:
+##   {grade: clean | slow | partial | quiet_fail | loud_fail, ok, p, minutes, noise}
+## The player never sees p or the grade as a number. Failures still teach (a share of the XP). Townies use the same skills (CrimeLifePath.skill).
+##   SkillCheck.level(pid, skill)   effective level 0..10 with helpers      SkillCheck.attempt(pid, act, ctx)      SkillCheck.train(pid, skill, xp, ok)
+
+static func cfg() -> Dictionary:
+	return SysUtil.table("skills")
+
+static func own(pid: int, skill: String) -> float:
+	var f = SysUtil.folk(pid)
+	if f != null:
+		return float(f.skill_level(skill))
+	return float(CrimeLifePath.skill(pid, skill))
+
+## Own level plus the helpers' shares, 0..10.
+static func level(pid: int, skill: String) -> float:
+	var def: Dictionary = (cfg().get("skills", {}) as Dictionary).get(skill, {})
+	var v: float = own(pid, skill)
+	for h in (def.get("helpers", {}) as Dictionary):
+		v += own(pid, str(h)) * float(def["helpers"][h])
+	return clampf(v, 0.0, 10.0)
+
+static func _conditions(pid: int, ctx: Dictionary) -> float:
+	var c: Dictionary = cfg().get("conditions", {})
+	var f = SysUtil.folk(pid)
+	var s: float = 0.0
+	if f != null:
+		if f.get_stat_value("energy") < -40.0:
+			s += float(c.get("tired", -0.08))
+		if f.get_stat_value("hunger") < -50.0:
+			s += float(c.get("hungry", -0.05))
+		if f.has_buff("drunk"):
+			s += float(c.get("drunk", -0.15))
+		if f.has_buff("injured"):
+			s += float(c.get("injured", -0.12))
+	var h: float = SysUtil.hour_f()
+	if (h >= 21.0 or h < 5.0) and str(ctx.get("wants", "")) == "unseen":
+		s += float(c.get("dark", 0.06))
+	for k in ["noisy", "crowded", "raining"]:
+		if bool(ctx.get(k, false)):
+			s += float(c.get(k, 0.0))
+	return s
+
+static func _tools(ctx: Dictionary) -> float:
+	var t: float = 0.0
+	var tools: Dictionary = cfg().get("tools", {})
+	for k in (ctx.get("tools", []) as Array):
+		t += float(tools.get(str(k), 0.0))
+	return t
+
+static func chance(pid: int, act: String, ctx: Dictionary = {}) -> float:
+	var d: Dictionary = (cfg().get("acts", {}) as Dictionary).get(act, {})
+	if d.is_empty():
+		return 0.5
+	var mine: float = level(pid, str(d["skill"])) / 10.0
+	var theirs: float = float(d.get("difficulty", 0.5))
+	if ctx.has("opponent") and d.has("opposed"):
+		theirs = clampf(0.25 + level(int(ctx["opponent"]), str(d["opposed"])) / 10.0 * 0.6 + (0.1 if bool(ctx.get("watching", true)) else -0.1), 0.05, 0.95)
+	var p: float = 0.5 + (mine - theirs) * 0.9 + _tools(ctx) + _conditions(pid, ctx)
+	for tr in (ctx.get("traits", {}) as Dictionary):
+		if SocialDynamics.has_t(pid, str(tr)):
+			p += float(ctx["traits"][tr])
+	if SocialDynamics.has_t(pid, "clumsy"):
+		p -= 0.06
+	return clampf(p, 0.03, 0.97)
+
+static func attempt(pid: int, act: String, ctx: Dictionary = {}) -> Dictionary:
+	var d: Dictionary = (cfg().get("acts", {}) as Dictionary).get(act, {})
+	var p: float = chance(pid, act, ctx)
+	var r: float = SysUtil.rng.randf()
+	var grade: String
+	if r < p * 0.55:
+		grade = "clean"
+	elif r < p:
+		grade = "slow" if r < p * 0.8 else "partial"
+	else:
+		grade = "quiet_fail" if SysUtil.rng.randf() < 0.55 else "loud_fail"
+	var minutes: float = float(d.get("minutes", 5))
+	var noise: float = float(d.get("noise", 0.0))
+	match grade:
+		"slow":
+			minutes *= 2.0
+		"loud_fail":
+			noise = clampf(noise + 0.5, 0.0, 1.0)
+		"clean":
+			minutes *= 0.7
+	var ok: bool = grade in ["clean", "slow", "partial"]
+	train(pid, str(d.get("skill", "")), float(ctx.get("xp", 6.0)), ok)
+	return {"grade": grade, "ok": ok, "p": p, "minutes": minutes, "noise": noise, "act": act}
+
+static func train(pid: int, skill: String, xp: float, ok: bool) -> void:
+	if skill == "":
+		return
+	CrimeLifePath.train(pid, skill, xp * (1.0 if ok else float(cfg().get("xp_fail", 0.35))))
