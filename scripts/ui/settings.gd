@@ -45,7 +45,7 @@ const DEFS := [
 	{"k": "autosave_days", "tab": "gameplay", "t": "range", "label": "Autosave every", "def": 1, "min": 1, "max": 7, "step": 1, "unit": " day(s)",
 		"tip": "How many game days between autosaves."},
 	{"k": "auto_pay", "tab": "gameplay", "t": "bool", "label": "Pay bills automatically", "def": true,
-		"tip": "Pays a bill on its due date when your household has the Coins. On by default: a bill is paid on its due date when you have the Coins; if not, it goes late. Switch it off to pay from the Coins button yourself. Other households always pay by themselves."},
+		"tip": "On by default: a bill is paid on its due date when you have the Coins; if not, it goes late. Switch it off to pay from the Coins button yourself. Other households always pay by themselves."},
 	{"k": "auto_furnish", "tab": "gameplay", "t": "enum", "label": "Furnish for me when I am away", "def": "auto", "opts": [["auto", "Only if I never play"], ["on", "Yes"], ["off", "No"]],
 		"tip": "A household with a bare home that nobody has given orders to for 2 days buys the basics (beds, toilet, fridge, shower, stove, seats) from its own coins. Only if I never play: a game you are not playing furnishes itself, a game you play never does. Yes: also when you go away. No: never."},
 	{"k": "pause_on_dialog", "tab": "gameplay", "t": "bool", "label": "Pause when a window is open", "def": true,

@@ -1583,7 +1583,7 @@
        }
       }
      ],
-     "text": "{name} slipped and bruised themselves.",
+     "text": "{name} slipped and bruised {themself}.",
      "kind": "warn",
      "when": [
       {
@@ -1619,7 +1619,7 @@
        }
       }
      ],
-     "text": "{name} slipped but caught themselves just in time.",
+     "text": "{name} slipped but caught {themself} just in time.",
      "kind": "info"
     }
    ],
@@ -1664,7 +1664,7 @@
         }
        }
       ],
-      "summary": "{name} slipped and bruised themselves."
+      "summary": "{name} slipped and bruised {themself}."
      },
      {
       "weight": 40,

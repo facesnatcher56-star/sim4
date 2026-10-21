@@ -401,7 +401,7 @@ static func legacy_summary(folk_id: int) -> Dictionary:
 		summary += " %s in all." % SysUtil.count_text(desc, "descendant")
 	var shady: String = CrimeLifeMoral.legacy_line(folk_id)
 	if shady != "":
-		summary += " They %s" % shady
+		summary += " %s %s" % [nm, shady]          # the name, so a known sex never gets "They was"
 	for hl in CrimeUnderRep.legacy_lines(folk_id):             # task 23: the honour side of the legacy
 		summary += " " + str(hl)
 	return {"folk_id": folk_id, "notoriety": CrimeLifeMoral.notoriety(folk_id), "honour": int(float(CrimeUnderRep.rec(folk_id).get("honour", 0.0)) + CrimeUnderRep.hero(folk_id)), "name": nm, "years": years, "stage": stage_now, "career": career_txt, "best_skill": best_skill, "best_skill_level": best_lvl,

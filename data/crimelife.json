@@ -3,9 +3,9 @@
  "general": {"seed": 21021, "contacts_cap": 12, "ledger_cap": 40, "footage_cap": 24, "stash_cap": 30, "heist_cap": 6, "toast_gap_days": 1},
  "ranks": [
   {"id": "petty_thief", "label": "Petty thief", "cred": 0, "blurb": "Small thefts. Nobody in the underworld knows your name."},
-  {"id": "burglar", "label": "Burglar", "cred": 18, "skills": {"stealth": 2}, "jobs": 3, "blurb": "You work houses and shops. A few people take your calls."},
+  {"id": "burglar", "label": "Burglar", "cred": 18, "skills": {"stealth": 2}, "skills_alt": [{"charisma": 2}], "jobs": 3, "blurb": "You work houses and shops. A few people take your calls."},
   {"id": "fence", "label": "Fence", "cred": 38, "skills": {"charisma": 3}, "fenced": 3, "blurb": "You move stolen goods for others and keep a cut."},
-  {"id": "crew_boss", "label": "Crew boss", "cred": 62, "skills": {"stealth": 4, "logic": 3}, "heists": 1, "blurb": "You plan the jobs and others carry them out."},
+  {"id": "crew_boss", "label": "Crew boss", "cred": 62, "skills": {"stealth": 4, "logic": 3}, "skills_alt": [{"charisma": 4, "logic": 3}], "heists": 1, "blurb": "You plan the jobs and others carry them out."},
   {"id": "mastermind", "label": "Mastermind", "cred": 85, "skills": {"logic": 6, "stealth": 5}, "heists": 3, "blurb": "Whole crews work for you. The police have a file on you, thin as it is."}
  ],
  "path": {"start_cred": 2, "drift_pressure": 0.55, "drift_daily": 0.04, "snitch_cred": -30, "cred_caught_quiet": 4, "cred_decay_day": 0.04, "going_straight_days": 28, "town_rep_per_conviction": -6},

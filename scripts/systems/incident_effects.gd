@@ -45,7 +45,10 @@ static func pick(outcomes: Array, subj, forced_index: int = -1) -> Dictionary:
 static func fill(text: String, ctx: Dictionary) -> String:
 	var subj = ctx.get("subject", null)
 	var nm: String = subj.display_name() if subj != null else "Someone"
-	return text.replace("{name}", nm).replace("{house}", subj.house_name() if subj != null else "A house").replace("{amount}", str(int(ctx.get("amount", 0)))) \
+	var filled: String = text
+	if subj != null and str(subj.kind) in ["folk", "townie"]:
+		filled = Sexes.fill(text, int(subj.id))          # {they} {them} {themself}: the right words for a known sex
+	return filled.replace("{name}", nm).replace("{house}", subj.house_name() if subj != null else "A house").replace("{amount}", str(int(ctx.get("amount", 0)))) \
 		.replace("{lot}", str(ctx.get("lot_key", "")))
 
 # ------------------------------------------------------------------ run

@@ -16,6 +16,11 @@ static func eval(gate: String, f, kind: String, d: Dictionary, day: int) -> Dict
 		"bare":
 			var bf: float = HomeBare.factor(f)                 # free park outings only for a home with little to do in (task 32f)
 			return {"mult": bf} if bf >= 0.3 and stage not in ["baby", "toddler"] else NO
+		"hungry":
+			# a broke or homeless person eats the cheapest food they can afford rather than starving: the gate opens when hunger is low and they have the coins
+			if f.get_stat_value("hunger") < -30.0 and WorldIface.get_coins(int(f.household_id)) >= 3:
+				return {"mult": 1.0}
+			return NO
 		"ill":
 			return {"mult": 1.0} if _sick(f) else NO          # once the doctor has seen them they rest for a couple of days
 		"checkup":

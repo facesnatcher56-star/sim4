@@ -1,4 +1,4 @@
-﻿class_name JusticeSentence
+class_name JusticeSentence
 extends RefCounted
 ## Sentences (task 20): the sentence comes from the charge GUIDELINES in data/justice.json through JusticeGuideline (aggravating and mitigating
 ## factors, a small judge spread), not from dice. Parts: fine, restitution, community service, probation, jail, prison, mandatory courses,
@@ -105,6 +105,8 @@ static func _apply(c: Dictionary, pid: int, s: Dictionary) -> void:
 		var paid: int = CrimePerson.pay(pid, int(s["restitution"]), "restitution")
 		if paid > 0:
 			CrimePerson.add_coins(int(c["victim"]), paid, "restitution")
+		if paid < int(s["restitution"]):
+			JusticeDebt.add_restitution(pid, int(c["victim"]), int(s["restitution"]) - paid)          # the rest is a civil claim by the victim, paid by instalments
 	for co in (s.get("courses", []) as Array):
 		var list: Array = JusticeState.courses.get(pid, [])
 		list.append({"kind": str(co["kind"]), "days_left": int(co["days"]), "last_day": -1})
@@ -113,15 +115,11 @@ static func _apply(c: Dictionary, pid: int, s: Dictionary) -> void:
 static func _fine(pid: int, amount: int) -> void:
 	if amount <= 0:
 		return
-	if CrimePerson.is_player(pid):
-		var hid: int = CrimePerson.hid(pid)
-		if not Economy.spend(hid, amount, "court fine"):
-			Economy.bills.append({"id": Economy._seq, "hid": hid, "amount": amount, "base": amount, "issued": SysUtil.day(), "due": SysUtil.day() + 3,
-				"paid": false, "late": false, "fee": 0, "reason": "court fine"})
-			Economy._seq += 1
-			SysUtil.notify("A court fine of %d coins is waiting to be paid." % amount, "bill")
-	else:
-		CrimePerson.pay(pid, amount, "fine")
+	var paid: int = CrimePerson.pay(pid, amount, "court fine")
+	if paid < amount:
+		JusticeDebt.add_fine(pid, amount - paid)          # what cannot be paid becomes court debt, taken from income by instalments
+		if CrimePerson.is_player(pid):
+			SysUtil.notify("A court fine of %d coins is unpaid. It is now court debt: a share of your money goes to it every day." % (amount - paid), "bill")
 
 static func _lose_job(pid: int) -> void:
 	var f = CrimePerson.folk(pid)
@@ -148,6 +146,7 @@ static func on_day() -> void:
 			if CrimePerson.is_player(int(pid)):
 				SysUtil.notify("%s finished their community service." % CrimePerson.name_of(int(pid)), "good")
 	_courses_day()
+	JusticeDebt.on_day()
 	for pid2 in JusticeState.probation.keys():
 		if int(JusticeState.probation[pid2]) < SysUtil.day():
 			JusticeState.probation.erase(pid2)

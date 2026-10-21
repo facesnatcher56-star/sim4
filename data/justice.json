@@ -4443,5 +4443,12 @@
   "watch": 0.4,
   "patrol": 0.2,
   "awake_each": 0.5
+ },
+ "debt": {
+  "_doc": "Court debt (JusticeDebt): unpaid fines and restitution become debt taken from income by instalments.",
+  "share": 0.25,
+  "min_coins": 15,
+  "miss_days": 7,
+  "service_days": 3
  }
 }

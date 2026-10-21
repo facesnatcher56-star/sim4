@@ -147,11 +147,21 @@ static func update_rank(pid: int) -> void:
 			SysUtil.notify(text, "story" if up else "warn")
 		SysUtil.game_event("crime_rank_changed", {"folk_id": pid, "rank": nw, "up": up})
 
+static func _skills_ok(pid: int, req: Dictionary) -> bool:
+	for sk in req:
+		if skill(pid, str(sk)) < int(req[sk]):
+			return false
+	return true
+
 static func _meets(pid: int, m: Dictionary, r: Dictionary) -> bool:
 	if float(m.get("cred", 0.0)) < float(r.get("cred", 0.0)):
 		return false
-	for sk in (r.get("skills", {}) as Dictionary):
-		if skill(pid, str(sk)) < int(r["skills"][sk]):
+	if not _skills_ok(pid, r.get("skills", {})):
+		var alt_ok: bool = false          # a con artist can rise by charm and logic instead of stealth (rank "skills_alt")
+		for alt in r.get("skills_alt", []):
+			if _skills_ok(pid, alt):
+				alt_ok = true
+		if not alt_ok:
 			return false
 	if int(m.get("jobs", 0)) < int(r.get("jobs", 0)) or int(m.get("heists", 0)) < int(r.get("heists", 0)) or int(m.get("fenced", 0)) < int(r.get("fenced", 0)):
 		return false

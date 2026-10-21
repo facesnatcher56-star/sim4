@@ -44,7 +44,7 @@
    ],
    "warning": {"lead_min": 0, "thought": "Whoa!"},
    "outcomes": [
-    {"weight": 8, "effects": [{"injure": {"severity": 1, "reason": "a fall"}}], "text": "{name} slipped and bruised themselves.", "kind": "warn"},
+    {"weight": 8, "effects": [{"injure": {"severity": 1, "reason": "a fall"}}], "text": "{name} slipped and bruised {themself}.", "kind": "warn"},
     {"weight": 2, "effects": [{"injure": {"severity": 2, "reason": "a bad fall"}}], "text": "{name} had a bad fall and was taken to the clinic.", "kind": "bad"}
    ],
    "statistical": {"outcomes": [

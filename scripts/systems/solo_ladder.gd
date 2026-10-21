@@ -26,7 +26,7 @@ static func income_week(hid: int) -> int:
 	return total
 
 static func unpaid_total(hid: int) -> int:
-	return Economy.owed(hid)
+	return Economy.owed(hid) + JusticeDebt.owed(Pawn.of())          # court debt blocks a tenancy too
 
 ## {ok, reason, rent, bills, deposit, due (coins to pay now), fee, rung, checks: [[text, passed]]}. `reason` is the first failed check (or why the rung is not a move).
 static func quote(rung_id: String) -> Dictionary:

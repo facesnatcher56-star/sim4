@@ -79,6 +79,8 @@
      "traits": {"social": 1.6, "night_owl": 1.4, "early_bird": 0.6, "loner": 0.6, "frugal": 0.5, "showoff": 1.2}, "partner": 1.3, "stage_mult": {"elder": 0.5}, "windows": [[18, 23]], "cool": 3, "company": "drink"},
     "nightclub": {"place": "nightclub", "services": ["club_entry", "club_cocktail"], "base": 0.04, "needs": {"fun": 1.5, "social": 1.2},
      "traits": {"night_owl": 1.8, "social": 1.5, "showoff": 1.5, "early_bird": 0.3, "lazy": 0.5, "frugal": 0.5, "shy": 0.5}, "stage_mult": {"elder": 0.2}, "windows": [[21, 23]], "cool": 4, "company": "dancing"},
+    "hungry_bakery": {"place": "bakery", "services": ["croissant"], "gate": "hungry", "base": 0.95, "essential": true, "windows": [[8, 17]], "cool": 0},
+    "hungry_street": {"place": "fast_food", "services": ["fries"], "gate": "hungry", "base": 0.95, "essential": true, "windows": [[10, 23]], "cool": 0},
     "clinic_sick": {"place": "clinic", "services": ["treat"], "gate": "ill", "base": 0.9, "essential": true, "windows": [[8, 17.5]], "cool": 3},
     "clinic_checkup": {"place": "clinic", "services": ["flu_shot", "checkup"], "gate": "checkup", "base": 0.012, "traits": {"germaphobe": 3.0, "frugal": 0.5, "lazy": 0.6, "perfectionist": 1.5},
      "stage_mult": {"elder": 2.0}, "windows": [[9, 16]], "cool": 3},

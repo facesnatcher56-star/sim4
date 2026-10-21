@@ -237,9 +237,9 @@
     }
    },
    "text": {
-    "weak_hunger": "{name} is faint with hunger. Get them something to eat soon.",
+    "weak_hunger": "{name} is faint with hunger. Get {them} something to eat soon.",
     "worn_out": "{name} is worn out and can hardly stay awake. They need real sleep.",
-    "shivering": "{name} is shivering. Get them inside and warm.",
+    "shivering": "{name} is shivering. Get {them} inside and warm.",
     "hypothermia": "{name} is dangerously cold. They need warmth right now.",
     "overheating": "{name} is overheating. Find shade and some water.",
     "heat_exhaustion": "{name} is dizzy from the heat. They need water and shade right now.",

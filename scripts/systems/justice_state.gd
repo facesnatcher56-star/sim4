@@ -1,4 +1,4 @@
-﻿class_name JusticeState
+class_name JusticeState
 extends RefCounted
 ## All state of the crime and justice track (tasks 04 / 09 / 09b) in one place, plus the data accessor and the save round trip.
 ## Data: data/justice.json (table "justice"). The CASE RECORD lives in `cases` (see CaseStore for the fields); everything else is
@@ -13,6 +13,7 @@ const INT_ARRAYS := ["witnesses", "suspect_ids", "acquitted"]
 static var rng: RandomNumberGenerator = RandomNumberGenerator.new()
 static var cases: Dictionary = {}         # case id -> case record (JSON safe)
 static var next_case: int = 1
+static var debts: Dictionary = {}         # person id -> {fine, rest: {victim id: coins}, missed}: court debt the person could not pay at once (JusticeDebt)
 static var records: Dictionary = {}       # person id -> [{day, charge, case, result}]
 static var inmates: Dictionary = {}       # person id -> {case, kind: jail|prison, since, until, behaviour, parole_day}
 static var grudges: Dictionary = {}       # "a>b" -> {rage, since, warned, vow}
@@ -52,6 +53,7 @@ static func reset() -> void:
 	cases.clear()
 	next_case = 1
 	records.clear()
+	debts.clear()
 	inmates.clear()
 	grudges.clear()
 	pending.clear()
@@ -126,7 +128,7 @@ static func to_dict() -> Dictionary:
 		"uneasy_until": uneasy_until, "fresh_start": SysUtil.str_keys(fresh_start), "lawyers": SysUtil.str_keys(lawyers).duplicate(true),
 		"year_log": year_log.duplicate(true), "blackmail": blackmail.duplicate(true), "revenge": revenge.duplicate(true),
 		"relief": SysUtil.str_keys(relief).duplicate(true), "watch_until": watch_until, "rate_now": rate_now, "rate_hist": rate_hist.duplicate(true),
-		"violence": violence.duplicate(true), "calm": SysUtil.str_keys(calm), "coursed": SysUtil.str_keys(coursed), "orders": orders.duplicate(true), "next_order": next_order, "courses": SysUtil.str_keys(courses).duplicate(true), "abuse": _abuse_out(), "life": CrimeLifeState.to_dict()}
+		"violence": violence.duplicate(true), "calm": SysUtil.str_keys(calm), "coursed": SysUtil.str_keys(coursed), "orders": orders.duplicate(true), "next_order": next_order, "courses": SysUtil.str_keys(courses).duplicate(true), "abuse": _abuse_out(), "life": CrimeLifeState.to_dict(), "debts": SysUtil.str_keys(debts).duplicate(true)}
 
 static func _abuse_out() -> Dictionary:
 	var out: Dictionary = {}
@@ -152,6 +154,12 @@ static func from_dict(d: Dictionary) -> void:
 		fix_case(c)
 		cases[int(str(k))] = c
 	records = SysUtil.int_keys((d.get("records", {}) as Dictionary).duplicate(true))
+	debts = SysUtil.int_keys((d.get("debts", {}) as Dictionary).duplicate(true))
+	for dk in debts:
+		var dd: Dictionary = debts[dk]
+		dd["fine"] = int(dd.get("fine", 0))
+		dd["missed"] = int(dd.get("missed", 0))
+		dd["rest"] = SysUtil.int_keys((dd.get("rest", {}) as Dictionary).duplicate())
 	inmates = SysUtil.int_keys((d.get("inmates", {}) as Dictionary).duplicate(true))
 	for k2 in inmates:
 		SysUtil.ints_in(inmates[k2], ["case", "since", "until", "parole_day"])
