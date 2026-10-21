@@ -48,6 +48,7 @@ static func systems_rows(sm: Object) -> Array:
 		["Utilities", "Utilities", 1, 315, N, "", Utilities.on_minute, Callable(Utilities, "busy"), "zone outages only (a few records); idle = one emptiness test"],
 		["Transport", "Transport", 1, 316, N, "", Transport.on_minute, Callable(Transport, "busy"), "trips in progress only (the player's households); finished at their arrival minute"],
 		["ShopActs", "ShopActs", 1, 317, N, "", ShopActs.on_minute, Callable(ShopActs, "busy"), "task 53: only while someone holds unpaid goods (the exit check)"],
+		["RestrictedPlaces", "RestrictedPlaces", 1, 318, N, "", RestrictedPlaces.on_minute, null, "task 53: the pawn only, and only on a lot with a staff-only part (a few comparisons)"],
 		["CityAmbulance", "CityServices", 1, 317, N, "", CityAmbulance.on_minute, Callable(CityAmbulance, "busy"), "ambulances on their way (residents on the real map); idle = one emptiness test"],
 		["NeighborhoodService.after", "NeighborhoodService", 1, 320, N, "", NeighborhoodService.after_minute, null, "Crowd.update loops only the lots near an anchor (Tiers.lot_distances, cached); crowd checks per lot every 10 min; NEAR / TOWN crowd on their turn, they leave / arrive without walks; far lots dropped"],
 		["WeatherFolk", "WeatherFolk", 1, 330, N, "", WeatherFolk.on_minute, null, "ACTIVE every minute, NEAR / TOWN folk on their turn with the exposure scaled to the period"],

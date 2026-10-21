@@ -260,6 +260,9 @@ static func security(lot: String) -> Dictionary:
 	var vt: String = Venues.type_of_lot(lot)
 	var fx: Dictionary = CrimeSecurity.effects(CrimeSecurity.business_profile(vt), DoorActs.night())
 	var guard: int = -1
+	var day_guard = StaffPosts.guard_at(lot)          # a guard on a day post (data/staff_posts.json), else the night posts
+	if day_guard != null:
+		return {"footage": float(fx.get("footage", 0.0)), "guard": int(day_guard.id)}
 	for g in CrimeSecurityGuards.guards_of("biz:" + vt):
 		if not CrimeSecurityGuards.is_asleep(int(g)) and CrimeSecurityGuards.is_night():
 			guard = int(g)

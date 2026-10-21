@@ -43,7 +43,9 @@ static func who(actor_id: int, tile: Vector2i, opts: Dictionary = {}) -> Array:
 			continue
 		var asleep: bool = CrimePlace.is_asleep(f)
 		var per: float = 0.6 + SkillCheck.level(fid, "perception") / 10.0 * 0.6
-		var busy: float = float(c.get("busy_mult", 0.6)) if f.current != null and str(f.current.def_id) not in ["go_here", "wait_here", "idle"] else 1.0
+		var busy: float = float(c.get("busy_mult", 0.6)) if f.current != null and str(f.current.def_id) not in ["go_here", "wait_here", "idle", "sys_staff"] else 1.0
+		if f.has_meta("staff"):
+			busy *= float(c.get("staff_watch", 1.4))          # staff at a post are watching the place: that is the job
 		var range_s: float = sight * (0.5 if night and bool(w.is_outdoor(tile, level)) else 1.0) if w != null else sight
 		var p_see: float = 0.0
 		if not asleep and d <= range_s and _sees(w, f.tile, tile, level):

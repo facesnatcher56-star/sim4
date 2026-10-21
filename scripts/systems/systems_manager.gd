@@ -99,6 +99,8 @@ static func reset_all() -> void:
 	WalkThen.reset()
 	ShopActs.reset()
 	TillActs.reset()
+	StaffPosts.reset()
+	RestrictedPlaces.reset()
 	VenueStaff.first_asked = {}
 	SoloDistricts.reset()
 	SuccessionNobody.reset()

@@ -1,0 +1,23 @@
+{
+ "_doc": "Task 53 restricted places + the day guards (scripts/systems/staff_posts.gd, restricted_places.gd). posts.<venue type>: staff who stand at a post while the place is open, worked out from the building's front door: `depth` tiles in from the door, `side` tiles to the left (-) or right (+) of the walk in. guard: a security guard (stops or escorts people). hours: only then (the market's busy hours). These add to the posts a template already has. public_depth: how far in from the front door the public part of the building goes; past that (or on any upper floor) is staff only, unless you work there. The bank is not a building on the map yet, so it has no post.",
+ "posts": {
+  "police": [{"role": "desk_officer", "depth": 3, "side": 0}],
+  "courthouse": [{"role": "security", "depth": 1, "side": 2, "guard": true}, {"role": "receptionist", "depth": 3, "side": -2}],
+  "city_hall": [{"role": "security", "depth": 1, "side": 2, "guard": true}, {"role": "receptionist", "depth": 4, "side": -2}],
+  "hospital": [{"role": "security", "depth": 1, "side": 2, "guard": true}, {"role": "receptionist", "depth": 3, "side": -2}],
+  "office": [{"role": "receptionist", "depth": 2, "side": 2}],
+  "works": [{"role": "security", "depth": 1, "side": 2, "guard": true}],
+  "shelter": [{"role": "receptionist", "depth": 2, "side": 2}],
+  "market": [{"role": "security", "depth": 1, "side": -2, "guard": true, "hours": [16, 20]}]
+ },
+ "public_depth": {"police": 5, "courthouse": 9, "city_hall": 10, "hospital": 7, "office": 4, "works": 3, "shelter": 6},
+ "ask_again_min": 30,
+ "lines": {
+  "stop": ["\"Sorry, you can't be back here,\" says {n}.", "{n} steps into your way. \"Staff only past this point.\"", "\"Can I help you?\" {n} asks, in a voice that means turn around."],
+  "lie_ok": ["{n} nods. \"Go on, then.\"", "\"Right. Don't wander,\" says {n}."],
+  "lie_fail": ["\"Who's that, then?\" {n} doesn't move.", "{n} isn't buying it."],
+  "escort": ["{n} takes you by the elbow and walks you back out the front door.", "{n} walks you out without another word."],
+  "call": ["{n} picks up the phone, watching you.", "{n} radios someone about you."],
+  "turn_back": ["You turn back.", "You head back the way you came."]
+ }
+}

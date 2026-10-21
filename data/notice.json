@@ -3,6 +3,7 @@
  "sight": 14,
  "hear": 16,
  "busy_mult": 0.6,
+ "staff_watch": 1.4,
  "stealth_cut": 0.5,
  "trait_mods": {
   "hot_headed": {"confront": 2.0, "fight": 3.0, "ignore": 0.4},

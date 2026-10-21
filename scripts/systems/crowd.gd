@@ -372,7 +372,7 @@ static func _step_leavers(now: int) -> void:
 
 # ------------------------------------------------------------------ staff
 static func update_staff(lot_id: String) -> void:
-	var staff_defs: Array = LotLoader.template(Neighborhood.template_of(lot_id)).get("staff", [])
+	var staff_defs: Array = (LotLoader.template(Neighborhood.template_of(lot_id)).get("staff", []) as Array) + StaffPosts.defs(lot_id)          # task 53: front posts (desk, reception, guard)
 	var origin: Vector2i = NeighborhoodLots.rect_of(lot_id).position
 	var vtype := Venues.type_of_lot(lot_id)
 	var open: bool = Venues.is_open_type(vtype)
