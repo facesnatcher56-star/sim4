@@ -15,7 +15,8 @@
   "fitness": {"label": "Fitness", "helpers": {}},
   "first_aid": {"label": "First aid", "helpers": {"logic": 0.3}},
   "handiness": {"label": "Handiness", "helpers": {}},
-  "logic": {"label": "Logic", "helpers": {}}
+  "logic": {"label": "Logic", "helpers": {}},
+  "shooting": {"label": "Shooting", "helpers": {"perception": 0.2}}
  },
  "tools": {"lockpick": 0.2, "crowbar": 0.15, "slim_jim": 0.2, "weapon": 0.2, "phone": 0.0},
  "tools_from_gear": {"_doc": "crime gear the person owns (crimelife.json gear) counts as carried: gear id -> tool", "lockpicks": "lockpick", "tools": "crowbar"},
