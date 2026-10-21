@@ -59,7 +59,7 @@
      "id": "job",
      "label": "Get a job",
      "hint": "Click the computer, choose Look for Jobs, then Accept the offer.",
-     "hint_no_computer": "No computer yet: click Phone at the top, open the Jobs app and apply there. Or press B and buy a computer.",
+     "hint_no_computer": "No computer yet: click Phone at the top, open the Jobs app and apply there. Or look for Help wanted signs and ask in person.",
      "check": {
       "jobs": 1
      },

@@ -139,7 +139,7 @@ func _process(_d: float) -> bool:
 		pw2.tile = NeighborhoodLots.street_tile(dl) + Vector2i(0, 1)
 		root.get_node("Events").selection_changed.emit("folk", Pawn.of())
 		DoorActs.arrive(pw2, dl)
-	if _frames == 60 and _scn == "hiring":          # 51: a "Help wanted" card in a shop window
+	if _frames == 60 and _scn.begins_with("hiring"):          # 51: a "Help wanted" card in a shop window
 		var pw3 = _main.hud._resolve(_main.hud.selected_folk_id)
 		for lid in Neighborhood.lot_ids():
 			if not JobLeads.hiring_at(str(lid)).is_empty() and not StaffPosts.front(str(lid)).is_empty():
@@ -147,8 +147,10 @@ func _process(_d: float) -> bool:
 				pw3.tile = Vector2i(fr["door"]) - Vector2i(fr["inward"]) * 4 - Vector2i(3, 0)
 				print("HIRING shot at %s door=%s" % [lid, str(fr["door"])])
 				break
+		if _scn == "hiringnight":
+			root.get_node("Clock").total_minutes = 21 * 60 + 30
 		root.get_node("Events").selection_changed.emit("folk", Pawn.of())
-	if _frames == 290 and _scn == "hiring":
+	if _frames == 290 and _scn.begins_with("hiring"):
 		var hv = _main.find_child("HelpWantedView", true, false)
 		print("HIRING view=%s signs=%d" % [str(hv != null), hv.sign_count() if hv != null else -1])
 		if hv != null:
@@ -205,7 +207,7 @@ func _process(_d: float) -> bool:
 		print("PAWNMETA away=%s info=%s tile=%s lvl=%d cur=%s" % [str(pw.has_meta("away")), str(Away.info(pw.id)), str(pw.tile), pw.level, str(pw.current.def_id) if pw.current else "-"])
 		for k in (lvw.level_nodes if lvw else {}):
 			print("  L%s objs=%d" % [str(k), (lvw.level_nodes[k]["objs"] as Dictionary).size()])
-	if _frames == (900 if _scn in ["court", "cell"] else (300 if _scn in ["door", "hiring"] else (100000 if _scn in ["click", "tour"] else 100))):
+	if _frames == (900 if _scn in ["court", "cell"] else (300 if _scn in ["door", "hiring", "hiringnight"] else (100000 if _scn in ["click", "tour"] else 100))):
 		var img := root.get_texture().get_image()
 		img.save_png(_out)
 		print("saved ", _out, " ", img.get_size())

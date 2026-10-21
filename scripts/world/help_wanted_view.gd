@@ -49,7 +49,7 @@ func _make(fr: Dictionary) -> Node3D:
 	var spot: Vector2i = _window_by(fr)
 	var c: Vector2 = Vector2(spot) + Vector2(0.5, 0.5) - inward * 0.68 + (Vector2.ZERO if spot != Vector2i(fr["door"]) else side * 1.1)
 	var root := Node3D.new()
-	root.position = Vector3(c.x, 1.35, c.y)
+	root.position = Vector3(c.x, 1.25, c.y)
 	root.rotation.y = atan2(-inward.x, -inward.y)          # face the street
 	if _card_mat == null:
 		_card_mat = StandardMaterial3D.new()
@@ -58,15 +58,23 @@ func _make(fr: Dictionary) -> Node3D:
 		_card_mat.cull_mode = BaseMaterial3D.CULL_DISABLED
 	var card := MeshInstance3D.new()
 	var q := QuadMesh.new()
-	q.size = Vector2(1.2, 0.38)
+	q.size = Vector2(1.5, 0.5)
 	card.mesh = q
 	card.material_override = _card_mat
 	card.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	root.add_child(card)
+	var rim := MeshInstance3D.new()          # a red border, so the card reads as a sign from the street camera
+	var q2 := QuadMesh.new()
+	q2.size = q.size + Vector2(0.1, 0.1)
+	rim.mesh = q2
+	rim.material_override = _rim_mat(Color(str(sc.get("color", "#b3261e"))))
+	rim.position = Vector3(0, 0, -0.01)
+	rim.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	root.add_child(rim)
 	var l := Label3D.new()
 	l.text = str(sc.get("text", "HELP WANTED"))
 	l.font_size = 64
-	l.pixel_size = 0.0026
+	l.pixel_size = 0.0033
 	l.modulate = Color(str(sc.get("color", "#b3261e")))
 	l.outline_size = 10          # same colour: thicker letters that still read from the street camera
 	l.outline_modulate = l.modulate
@@ -75,6 +83,13 @@ func _make(fr: Dictionary) -> Node3D:
 	l.position = Vector3(0, 0, 0.01)
 	root.add_child(l)
 	return root
+
+func _rim_mat(c: Color) -> StandardMaterial3D:
+	var m := StandardMaterial3D.new()
+	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED          # unshaded: the card stays bright at night, like a lit window
+	m.albedo_color = c
+	m.cull_mode = BaseMaterial3D.CULL_DISABLED
+	return m
 
 ## The ground-floor window in the same front wall nearest the door (the card goes in it); the door tile itself when there is none.
 func _window_by(fr: Dictionary) -> Vector2i:
