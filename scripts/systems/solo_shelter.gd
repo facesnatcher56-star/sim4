@@ -16,9 +16,32 @@ static func nights_allowed() -> int:
 static func week_of(day: int) -> int:
 	return (day - 1) / 7
 
+## Broke people other than the pawn (housemates, townies with no job) take a day's labour at the Works yard so they can afford the cheapest food:
+## a coin-free way to survive, the same 4 hours the pawn can take (data/solo.json day_labour).
+static func npc_labour() -> void:
+	var dl: Dictionary = SoloCfg.sect("day_labour")
+	var pay: int = int(round(float(dl.get("pay_per_hour", 10)) * float(dl.get("minutes", 240)) / 60.0))
+	for f in SysUtil.residents():
+		if Pawn.is_pawn(f) or str(f.age_stage) not in ["adult", "elder"] or SysUtil.is_away(f):
+			continue
+		if WorldIface.get_coins(int(f.household_id)) < 20 and not Careers.has_job(int(f.id)):
+			Economy.deposit(int(f.household_id), pay, "day labour")
+	for f2 in SysUtil.residents():          # an NPC criminal sells what they stole (to a fence if they know one, else on the street) instead of letting it sit
+		if Pawn.is_pawn(f2) or CrimeLifeFence.items_of(int(f2.id)).is_empty():
+			continue
+		var ids: Array = []
+		for it in CrimeLifeFence.items_of(int(f2.id)):
+			ids.append(int(it["id"]))
+		var fences: Array = CrimeLifeFence.fences_for(int(f2.id))
+		CrimeLifeFence.sell(int(f2.id), ids, int(fences[0]) if not fences.is_empty() else -1)
+	for t in Story.alive_townies():
+		if Story.stage_of(t) in ["adult", "elder"] and int(t["coins"]) < 20 and str(t.get("career", "")) == "":
+			t["coins"] = int(t["coins"]) + pay
+
 static func on_day(day: int) -> void:
 	if not SoloHome.active:
 		return
+	npc_labour()
 	if week_of(day) != SoloHome.shelter_week:
 		SoloHome.shelter_week = week_of(day)
 		SoloHome.shelter_nights = 0

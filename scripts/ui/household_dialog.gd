@@ -50,8 +50,15 @@ func _bills(hid: int) -> void:
 
 func _utilities(hid: int) -> void:
 	heading("Utilities")
+	var items: Array = []
 	for l in Utilities.status_lines(hid):
-		line(str(l), 12, UITheme.MUTED if str(l).find("working") >= 0 else Color("#e8913d"))
+		var txt: String = str(l)
+		var ok: bool = txt.find("working") >= 0
+		items.append([txt.get_slice(":", 0), ok])
+	UICard.reqs(body, items)
+	for l2 in Utilities.status_lines(hid):
+		if str(l2).find("working") < 0:
+			line(str(l2), 12, Color("#e8913d"))
 
 func _week(hid: int) -> void:
 	heading("Last 7 days")

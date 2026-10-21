@@ -68,7 +68,7 @@
   "districts": {
     "kiln": {
       "label": "Kiln Quarter",
-      "lots": ["townie_b", "apartments", "works", "car_park", "shelter", "plot_4"],
+      "lots": ["apartments", "works", "car_park", "shelter", "plot_4"],
       "roughness": 0.85,
       "rent_mult": 0.7,
       "hood": 0.25,

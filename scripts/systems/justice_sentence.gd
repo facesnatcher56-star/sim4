@@ -144,7 +144,7 @@ static func on_day() -> void:
 		if int(sv["days_left"]) <= 0:
 			JusticeState.service.erase(pid)
 			if CrimePerson.is_player(int(pid)):
-				SysUtil.notify("%s finished their community service." % CrimePerson.name_of(int(pid)), "good")
+				SysUtil.notify("%s finished the community service." % CrimePerson.name_of(int(pid)), "good")
 	_courses_day()
 	JusticeDebt.on_day()
 	for pid2 in JusticeState.probation.keys():

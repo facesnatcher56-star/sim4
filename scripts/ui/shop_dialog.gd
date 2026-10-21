@@ -44,7 +44,7 @@ static func build(dlg: BankHub) -> void:
 		var why: String = "" if can_walk else ("Sold out." if have <= 0 else "Go to %s while it is open, or order." % Neighborhood.label_of(lot))
 		var buy: Button = UICard.action(card, "Buy", func(): dlg.act("shop_buy", {"shop": shop_id, "item": iid, "qty": 1, "online": false}), can_walk, why)
 		if online:
-			var ob: Button = dlg.button("Order +%d" % int(ShopStock.cfg().get("delivery_fee", 8)), "Delivered tomorrow", func(): dlg.act("shop_buy", {"shop": shop_id, "item": iid, "qty": 1, "online": true}), have > 0)
+			var ob: Button = dlg.button("Order (+%d delivery)" % int(ShopStock.cfg().get("delivery_fee", 8)), "Delivered tomorrow", func(): dlg.act("shop_buy", {"shop": shop_id, "item": iid, "qty": 1, "online": true}), have > 0)
 			buy.get_parent().add_child(ob)
 	_owned(dlg, folk_id)
 	_work(dlg, folk_id, here)
@@ -83,7 +83,8 @@ static func _work(dlg: BankHub, folk_id: int, here: String) -> void:
 			dlg.button("At the market", "Full price; you must be at the market", func(): dlg.act("craft_sell", {"at_market": true}), here == "market"),
 			dlg.button("Online", "Sell from home, keeping a share", func(): dlg.act("craft_sell", {"at_market": false}))])
 	else:
-		dlg.line("Paint, write, garden or fish, then sell your crafts here.", 13, UITheme.MUTED)
+		var mc: VBoxContainer = UICard.card(dlg.body, dlg.dialog_width - 50.0, "Nothing to sell yet", "", "Paint, write, garden or fish, then sell your crafts here. Freelance work and odd jobs are on your computer and mailbox.")
+		UICard.note(mc, "Odd jobs: click the mailbox. Crafts: paint, write, garden or fish first.")
 	if f != null and f.age_stage == "teen":
 		var pt: String = MarketWork.parttime_text(folk_id)
 		if pt == "":
@@ -92,4 +93,4 @@ static func _work(dlg: BankHub, folk_id: int, here: String) -> void:
 			dlg.row_with(pt, [dlg.button("Quit", "", func(): dlg.act("work_teen", {"take": false}))])
 	if MarketWork.jobless.has(folk_id):
 		dlg.line("You are on unemployment benefit.", 13, UITheme.MUTED)
-	dlg.line("Freelance work and odd jobs are on your computer and mailbox.", 12, UITheme.MUTED)
+	pass
