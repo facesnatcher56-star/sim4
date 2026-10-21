@@ -1,5 +1,5 @@
 {
- "_doc": "Task 53 shops (scripts/systems/shop_acts.gd). The pawn can take anything off a shelf (objects.<def>.goods) without paying, slip it into a pocket (SkillCheck shoplift, watched by staff and shoppers), or eat it in the aisle. Paying happens at the till (till_objects on a shop lot); with too little cash the cashier says how much is missing. Walking out with unpaid goods: a cashier on shift (cashier_roles) who is there notices by their own attention (watch, less when busy: busy_per_customer per shopper in the shop, perception helps) and asks; concealed goods are only seen if the pocketing was spotted or the concealment check fails. Not noticed: the goods are yours, and the theft may still be found (CrimePetty shoplifting). replaces: the old pay-at-the-shelf interactions the pawn no longer gets (NPCs keep them).",
+ "_doc": "Task 53 shops (scripts/systems/shop_acts.gd). The pawn can take anything off a shelf (objects.<def>.goods) without paying, slip it into a pocket (SkillCheck shoplift, watched by staff and shoppers), or eat it in the aisle. Cafe and bar orders go on a tab (orders: the real interaction, served without paying first) and are paid at the counter like goods. Paying happens at the till (till_objects on a shop lot); with too little cash the cashier says how much is missing. Walking out with unpaid goods: a cashier on shift (cashier_roles) who is there notices by their own attention (watch, less when busy: busy_per_customer per shopper in the shop, perception helps) and asks; concealed goods are only seen if the pocketing was spotted or the concealment check fails. Not noticed: the goods are yours, and the theft may still be found (CrimePetty shoplifting). replaces: the old pay-at-the-shelf interactions the pawn no longer gets (NPCs keep them).",
  "objects": {
   "grocery_cooler": {
    "replaces": ["buy_groceries", "buy_fresh_snack"],
@@ -7,14 +7,35 @@
     {"id": "groceries", "what": "a bag of groceries", "take": "Take groceries", "price": 25, "kind": "pantry", "units": 6},
     {"id": "snack", "what": "a fresh snack", "take": "Take a snack", "price": 5, "kind": "pantry", "units": 1, "eat": 30}
    ]
+  },
+  "cafe_counter": {
+   "replaces": ["order_coffee", "order_meal", "order_round"],
+   "orders": [
+    {"iid": "order_coffee", "what": "a coffee", "price": 4},
+    {"iid": "order_meal", "what": "a meal", "price": 12},
+    {"iid": "order_round", "what": "a round", "price": 6}
+   ]
   }
  },
- "till_objects": ["counter"],
+ "till_objects": ["counter", "cafe_counter"],
+ "till": {
+  "_doc": "The till (scripts/systems/till_acts.gd): float + per_hour of opening (times a stable 0.5..1.5) while open; empty after closing or once taken today. staff_sees: chance the staff at the post sees you open it.",
+  "float": 20, "per_hour": 12, "staff_sees": 0.95,
+  "lines": {
+   "caught": ["\"Hey! Get away from the till!\" {n} snaps.", "{n} slams a hand on the drawer. \"What do you think you're doing?\"", "\"That's staff only,\" says {n}, stepping in."],
+   "back_off": ["You step back. {n} watches you closely.", "{n} shuts the drawer and keeps an eye on you."],
+   "lie_ok": ["\"Ask next time,\" {n} says, and lets it go."],
+   "lie_fail": ["\"Change, my foot,\" says {n}, reaching for the phone."],
+   "empty": ["The drawer slides open. It's empty.", "Nothing in it but a few receipts."],
+   "took": ["You scoop out {c} coins.", "{c} coins, stuffed into your pockets."]
+  }
+ },
  "cashier_roles": ["cashier", "barista", "bartender"],
  "watch": 0.85,
  "busy_per_customer": 0.06,
  "lines": {
   "ask": ["\"Are you going to pay for that?\" {n} calls from the till.", "{n} looks up. \"Excuse me, you haven't paid for that.\"", "\"Hang on,\" says {n}. \"Is that paid for?\""],
+  "ask_tab": ["\"Excuse me! You haven't paid!\" {n} calls across the room.", "{n} catches you at the door. \"Settling up before you go?\"", "\"Hey, the bill!\" {n} calls after you."],
   "short": ["\"That's {t} coins,\" says {n}. \"You're {s} short.\"", "{n} counts it. \"{t} altogether. You're {s} coins short.\""],
   "paid": ["{n} rings it up: {t} coins.", "\"{t} coins, thanks,\" says {n}."],
   "lie_ok": ["{n} hesitates, then waves you on.", "\"Oh. Sorry, my mistake,\" says {n}."],

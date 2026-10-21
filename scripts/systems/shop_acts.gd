@@ -7,11 +7,13 @@ extends RefCounted
 static var carried: Dictionary = {}          # fid -> [{lot, id, what, price, kind, units, hidden}]
 static var flagged: Dictionary = {}          # fid -> true: somebody saw them pocket something
 static var asking: Dictionary = {}           # fid -> lot: the cashier asked, waiting for the answer
+static var was_in: Dictionary = {}           # "fid|lot" -> true: has been inside that shop holding its goods (walking out = going from in to out)
 
 static func reset() -> void:
 	carried = {}
 	flagged = {}
 	asking = {}
+	was_in = {}
 
 static func busy() -> bool:
 	return not carried.is_empty()
@@ -50,6 +52,10 @@ static func entries(f, obj) -> Array:
 		out.append(_entry("pocket_" + str(good["id"]), "Slip %s into a pocket" % str(good["what"]), func(): WalkThen.go(f, spot, func(): take(f, lot, good, true))))
 		if good.has("eat"):
 			out.append(_entry("eat_" + str(good["id"]), "Eat %s here" % str(good["what"]), func(): WalkThen.go(f, spot, func(): eat_here(f, lot, good))))
+	for o in (cfg().get("objects", {}) as Dictionary).get(str(obj.def_id), {}).get("orders", []):
+		var od: Dictionary = o
+		var lbl: String = str(SimEnv.data().interaction_def(str(od["iid"])).get("label", od["what"]))
+		out.append(_entry("tab_" + str(od["iid"]), lbl, func(): order(f, lot, obj, od)))
 	if (cfg().get("till_objects", []) as Array).has(str(obj.def_id)) and not unpaid(int(f.id), lot).is_empty():
 		out.append(_entry("pay_till", "Pay", func(): WalkThen.go(f, spot, func(): pay(f, lot))))
 	return out
@@ -94,6 +100,19 @@ static func eat_here(f, lot: String, good: Dictionary) -> void:
 	carried[int(f.id)] = list
 	if not Notice.who(int(f.id), f.tile, {"visibility": 0.6}).is_empty():
 		flagged[int(f.id)] = true
+
+## A cafe or bar order: the real interaction, served now, owed on the tab (no coins test, no coins taken at the counter).
+static func order(f, lot: String, obj, od: Dictionary) -> void:
+	var ir: Interaction = Interaction.create(str(od["iid"]), f, int(obj.id), true)
+	if ir == null:
+		return
+	ir.def = ir.def.duplicate(true)
+	ir.def["tests"] = (ir.def.get("tests", []) as Array).filter(func(t): return not (t is Dictionary and (t as Dictionary).has("coins_at_least")))
+	ir.def["on_finish"] = (ir.def.get("on_finish", []) as Array).filter(func(e): return not (e is Dictionary and (e as Dictionary).has("coins_add")))
+	f.enqueue(ir)
+	var list: Array = carried.get(int(f.id), [])
+	list.append({"lot": lot, "id": str(od["iid"]), "what": str(od["what"]), "price": int(od["price"]), "kind": "eaten", "hidden": false, "tab": true})          # staff served it: they know
+	carried[int(f.id)] = list
 
 # ------------------------------------------------------------------ the till
 static func _cashier(lot: String):
@@ -172,8 +191,12 @@ static func on_minute() -> void:
 		if asking.has(fid):
 			continue
 		for lot in _lots_of(int(fid)):
-			if Neighborhood.lot_of(f) != lot or WeatherFolk.is_outside(f):
+			var k: String = "%d|%s" % [int(fid), lot]
+			if Neighborhood.lot_of(f) != lot or (WeatherFolk.is_outside(f) and was_in.has(k)):
+				was_in.erase(k)
 				_exit(f, lot)
+			elif not WeatherFolk.is_outside(f):
+				was_in[k] = true
 
 static func _lots_of(fid: int) -> Array:
 	var out: Array = []
@@ -198,13 +221,14 @@ static func _exit(f, lot: String) -> void:
 		CrimePetty.commit("shoplifting", fid, "venue:" + lot, {"seen": false})
 		return
 	var nm: String = _nm(c)
-	var line: String = Sexes.fill(_line("ask", {"n": nm}), int(c.id))
+	var tab_only: bool = items.all(func(it): return bool(it.get("tab", false)) or str(it["kind"]) == "eaten")
+	var line: String = Sexes.fill(_line("ask_tab" if tab_only else "ask", {"n": nm}), int(c.id))
 	SysUtil.notify(line, "bad")
 	f.cancel_current("stopped at the door")
 	f.clear_queue()
 	asking[fid] = lot          # still held until the answer
 	JusticePlayer.ask(fid, "At the door", line,
-		[{"id": "pay", "label": "Pay"}, {"id": "back", "label": "Put it back"}, {"id": "lie", "label": "Say you already paid"}, {"id": "walk", "label": "Keep walking"}, {"id": "run", "label": "Run"}],
+		([{"id": "pay", "label": "Pay"}] + ([] if tab_only else [{"id": "back", "label": "Put it back"}]) + [{"id": "lie", "label": "Say you already paid"}, {"id": "walk", "label": "Keep walking"}, {"id": "run", "label": "Run"}]),
 		func(ch): _answer(f, lot, c, str(ch)), "pay")
 
 static func _answer(f, lot: String, c, ch: String) -> void:
