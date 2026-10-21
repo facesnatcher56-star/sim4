@@ -151,7 +151,7 @@ static func entries_for(folk, target_kind: String, target_id: int) -> Array:
 		ids = (odef.get("interactions", []) as Array).duplicate()
 		for gone in ShopActs.hides(folk, target):          # task 53: in a shop the pawn takes goods and pays at the till (ShopActs)
 			ids.erase(gone)
-		return build_entries(folk, ids, table, make_checker(folk, target)) + ShopActs.entries(folk, target) + TillActs.entries(folk, target)
+		return build_entries(folk, ids, table, make_checker(folk, target)) + ShopActs.entries(folk, target) + TillActs.entries(folk, target) + BankBranch.entries(folk, target)
 	else:
 		target = UIU.get_folk(target_id)
 		for id in table:

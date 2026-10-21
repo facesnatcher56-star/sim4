@@ -22,6 +22,10 @@ static func run(player_id: int, folk_id: int, action: String, args: Dictionary =
 	while history.size() > LOG_CAP:
 		history.pop_front()
 	var a: Dictionary = args
+	if action in ["bank_deposit", "bank_withdraw", "loan_take"]:          # task 46: done at the bank counter (the phone keeps balance, repaying, insurance)
+		var bf = SysUtil.folk(folk_id)
+		if BankBranch.needs_branch(bf) and not BankBranch.at_counter(bf):
+			return {"ok": false, "reason": "That's done at the bank counter."}
 	match action:
 		# shops
 		"shop_buy":

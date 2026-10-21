@@ -7,11 +7,16 @@ static func build(dlg: BankHub) -> void:
 	var score: int = BankAccounts.credit_score(h)
 	dlg.heading("Your accounts")
 	dlg.line("Cash %d coins. Savings %d (earning %.1f%% a year). Debts %d." % [Economy.balance(h), BankAccounts.balance(h), BankAccounts.savings_rate() * 100.0, BankAccounts.debt(h)], 14)
-	dlg.row_with("Move money to or from savings.", [
-		dlg.button("Save 100", "", func(): dlg.act("bank_deposit", {"amount": 100}), Economy.balance(h) >= 100),
-		dlg.button("Save 500", "", func(): dlg.act("bank_deposit", {"amount": 500}), Economy.balance(h) >= 500),
-		dlg.button("Take 100", "", func(): dlg.act("bank_withdraw", {"amount": 100}), BankAccounts.balance(h) >= 100),
-		dlg.button("Take all", "", func(): dlg.act("bank_withdraw", {"amount": BankAccounts.balance(h)}), BankAccounts.balance(h) > 0)])
+	var me = dlg.folk_obj()
+	var counter: bool = not BankBranch.needs_branch(me) or BankBranch.at_counter(me)          # task 46: saving, taking out and borrowing happen at the counter
+	if counter:
+		dlg.row_with("Move money to or from savings.", [
+			dlg.button("Save 100", "", func(): dlg.act("bank_deposit", {"amount": 100}), Economy.balance(h) >= 100),
+			dlg.button("Save 500", "", func(): dlg.act("bank_deposit", {"amount": 500}), Economy.balance(h) >= 500),
+			dlg.button("Take 100", "", func(): dlg.act("bank_withdraw", {"amount": 100}), BankAccounts.balance(h) >= 100),
+			dlg.button("Take all", "", func(): dlg.act("bank_withdraw", {"amount": BankAccounts.balance(h)}), BankAccounts.balance(h) > 0)])
+	else:
+		dlg.line("Saving, taking money out and borrowing are done at the bank counter.", 13)
 	dlg.heading("Loans")
 	var hist: Dictionary = BankAccounts.history(h)
 	dlg.line("Credit score %d (%s): %d bills paid on time, %d late." % [score, BankAccounts.score_label(score), int(hist["on_time"]), int(hist["late"])], 13)
@@ -21,7 +26,8 @@ static func build(dlg: BankHub) -> void:
 			[dlg.button("Pay 200", "", func(): dlg.act("loan_repay", {"loan": lid, "amount": 200}), Economy.balance(h) >= 200),
 			dlg.button("Pay off", "", func(): dlg.act("loan_repay", {"loan": lid, "amount": int(ceil(float(l["balance"])))}), Economy.balance(h) >= int(ceil(float(l["balance"]))))])
 	var lim: int = BankAccounts.loan_limit(h)
-	dlg.row_with("The bank would lend you up to %d coins at %.1f%% a year." % [lim, BankAccounts.loan_rate(h) * 100.0], [
+	if counter:
+		dlg.row_with("The bank would lend you up to %d coins at %.1f%% a year." % [lim, BankAccounts.loan_rate(h) * 100.0], [
 		dlg.button("Borrow 500", "", func(): dlg.act("loan_take", {"amount": 500}), lim >= 500),
 		dlg.button("Borrow 1000", "", func(): dlg.act("loan_take", {"amount": 1000}), lim >= 1000)])
 	dlg.heading("Insurance")

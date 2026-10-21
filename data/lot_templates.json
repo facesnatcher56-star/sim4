@@ -7514,6 +7514,522 @@
    ],
    "staff": [],
    "price": 0
+  },
+  "bank": {
+   "label": "Greenbarrow Savings Bank",
+   "description": "A public hall with the teller counter, a loans office, and behind them the back office and the vault.",
+   "kind": "venue",
+   "venue": "bank",
+   "floors": [
+    {
+     "rect": [
+      0,
+      18,
+      31,
+      18
+     ],
+     "type": "stone"
+    },
+    {
+     "rect": [
+      0,
+      19,
+      31,
+      23
+     ],
+     "type": "concrete"
+    },
+    {
+     "rect": [
+      10,
+      11,
+      26,
+      17
+     ],
+     "type": "tile"
+    },
+    {
+     "rect": [
+      5,
+      11,
+      9,
+      17
+     ],
+     "type": "carpet"
+    },
+    {
+     "rect": [
+      5,
+      4,
+      21,
+      10
+     ],
+     "type": "wood"
+    },
+    {
+     "rect": [
+      22,
+      4,
+      26,
+      10
+     ],
+     "type": "stone"
+    }
+   ],
+   "walls": [
+    {
+     "a": [
+      5,
+      4
+     ],
+     "b": [
+      27,
+      4
+     ],
+     "type": "wall"
+    },
+    {
+     "a": [
+      5,
+      18
+     ],
+     "b": [
+      27,
+      18
+     ],
+     "type": "wall"
+    },
+    {
+     "a": [
+      5,
+      4
+     ],
+     "b": [
+      5,
+      18
+     ],
+     "type": "wall"
+    },
+    {
+     "a": [
+      27,
+      4
+     ],
+     "b": [
+      27,
+      18
+     ],
+     "type": "wall"
+    },
+    {
+     "a": [
+      5,
+      11
+     ],
+     "b": [
+      12,
+      11
+     ],
+     "type": "wall"
+    },
+    {
+     "a": [
+      19,
+      11
+     ],
+     "b": [
+      27,
+      11
+     ],
+     "type": "wall"
+    },
+    {
+     "a": [
+      10,
+      11
+     ],
+     "b": [
+      10,
+      18
+     ],
+     "type": "wall"
+    },
+    {
+     "a": [
+      22,
+      4
+     ],
+     "b": [
+      22,
+      11
+     ],
+     "type": "wall"
+    }
+   ],
+   "objects": [
+    {
+     "def": "door",
+     "tile": [
+      15,
+      17
+     ],
+     "rot": 2
+    },
+    {
+     "def": "door",
+     "tile": [
+      20,
+      10
+     ],
+     "rot": 2
+    },
+    {
+     "def": "door",
+     "tile": [
+      10,
+      14
+     ],
+     "rot": 3
+    },
+    {
+     "def": "door",
+     "tile": [
+      22,
+      7
+     ],
+     "rot": 3
+    },
+    {
+     "def": "window",
+     "tile": [
+      12,
+      17
+     ],
+     "rot": 2
+    },
+    {
+     "def": "window",
+     "tile": [
+      19,
+      17
+     ],
+     "rot": 2
+    },
+    {
+     "def": "window",
+     "tile": [
+      24,
+      17
+     ],
+     "rot": 2
+    },
+    {
+     "def": "window",
+     "tile": [
+      26,
+      14
+     ],
+     "rot": 1
+    },
+    {
+     "def": "window",
+     "tile": [
+      8,
+      4
+     ],
+     "rot": 0
+    },
+    {
+     "def": "window",
+     "tile": [
+      16,
+      4
+     ],
+     "rot": 0
+    },
+    {
+     "def": "window",
+     "tile": [
+      5,
+      15
+     ],
+     "rot": 3
+    },
+    {
+     "def": "counter",
+     "tile": [
+      12,
+      10
+     ],
+     "rot": 0
+    },
+    {
+     "def": "counter",
+     "tile": [
+      13,
+      10
+     ],
+     "rot": 0
+    },
+    {
+     "def": "counter",
+     "tile": [
+      14,
+      10
+     ],
+     "rot": 0
+    },
+    {
+     "def": "counter",
+     "tile": [
+      15,
+      10
+     ],
+     "rot": 0
+    },
+    {
+     "def": "counter",
+     "tile": [
+      16,
+      10
+     ],
+     "rot": 0
+    },
+    {
+     "def": "counter",
+     "tile": [
+      17,
+      10
+     ],
+     "rot": 0
+    },
+    {
+     "def": "counter",
+     "tile": [
+      18,
+      10
+     ],
+     "rot": 0
+    },
+    {
+     "def": "desk",
+     "tile": [
+      7,
+      13
+     ],
+     "rot": 0
+    },
+    {
+     "def": "chair",
+     "tile": [
+      7,
+      14
+     ],
+     "rot": 2
+    },
+    {
+     "def": "computer",
+     "tile": [
+      8,
+      13
+     ],
+     "rot": 0
+    },
+    {
+     "def": "plant",
+     "tile": [
+      6,
+      17
+     ],
+     "rot": 0
+    },
+    {
+     "def": "desk",
+     "tile": [
+      7,
+      6
+     ],
+     "rot": 0
+    },
+    {
+     "def": "desk",
+     "tile": [
+      10,
+      6
+     ],
+     "rot": 0
+    },
+    {
+     "def": "chair",
+     "tile": [
+      7,
+      7
+     ],
+     "rot": 2
+    },
+    {
+     "def": "chair",
+     "tile": [
+      10,
+      7
+     ],
+     "rot": 2
+    },
+    {
+     "def": "computer",
+     "tile": [
+      8,
+      6
+     ],
+     "rot": 0
+    },
+    {
+     "def": "trash_bin",
+     "tile": [
+      20,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "vault_safe",
+     "tile": [
+      24,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "vault_safe",
+     "tile": [
+      25,
+      5
+     ],
+     "rot": 0
+    },
+    {
+     "def": "safe",
+     "tile": [
+      26,
+      7
+     ],
+     "rot": 1
+    },
+    {
+     "def": "plant",
+     "tile": [
+      11,
+      16
+     ],
+     "rot": 0
+    },
+    {
+     "def": "plant",
+     "tile": [
+      26,
+      12
+     ],
+     "rot": 0
+    },
+    {
+     "def": "chair",
+     "tile": [
+      23,
+      14
+     ],
+     "rot": 2
+    },
+    {
+     "def": "chair",
+     "tile": [
+      24,
+      14
+     ],
+     "rot": 2
+    },
+    {
+     "def": "chair",
+     "tile": [
+      25,
+      14
+     ],
+     "rot": 2
+    },
+    {
+     "def": "trash_bin",
+     "tile": [
+      21,
+      16
+     ],
+     "rot": 0
+    },
+    {
+     "def": "security_camera",
+     "tile": [
+      15,
+      13
+     ],
+     "rot": 0
+    },
+    {
+     "def": "security_camera",
+     "tile": [
+      9,
+      8
+     ],
+     "rot": 0
+    },
+    {
+     "def": "security_camera",
+     "tile": [
+      24,
+      9
+     ],
+     "rot": 0
+    }
+   ],
+   "spawn": [
+    [
+     15,
+     19
+    ],
+    [
+     16,
+     19
+    ],
+    [
+     14,
+     19
+    ]
+   ],
+   "entry": [
+    15,
+    19
+   ],
+   "staff": [
+    {
+     "role": "teller",
+     "tile": [
+      13,
+      9
+     ]
+    },
+    {
+     "role": "cashier",
+     "tile": [
+      16,
+      9
+     ]
+    },
+    {
+     "role": "loan_officer",
+     "tile": [
+      6,
+      13
+     ]
+    }
+   ],
+   "price": 0
   }
  }
 }

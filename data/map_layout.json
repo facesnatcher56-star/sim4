@@ -90,11 +90,11 @@
   "fire_station": [4, 0],
   "city_hall": [4, 1],
   "car_park": [4, 3],
-  "shelter": [5, 2]
+  "shelter": [5, 2],
+  "bank": [5, 1]
  },
  "plots": {
   "plot_1": [5, 0],
-  "plot_2": [5, 1],
   "plot_4": [5, 3]
  },
  "green": {

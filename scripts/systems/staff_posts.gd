@@ -60,7 +60,7 @@ static func defs(lot: String) -> Array:
 	return out
 
 static func is_guard(f) -> bool:
-	return str(f.get_meta("staff", "")) == "security"
+	return str(f.get_meta("staff", "")) in ["security", "counter_guard"]
 
 ## The guard on duty at a lot (a staff Folk at a post), or null.
 static func guard_at(lot: String):

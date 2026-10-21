@@ -1,6 +1,7 @@
 {
- "_doc": "Task 53 restricted places + the day guards (scripts/systems/staff_posts.gd, restricted_places.gd). posts.<venue type>: staff who stand at a post while the place is open, worked out from the building's front door: `depth` tiles in from the door, `side` tiles to the left (-) or right (+) of the walk in. guard: a security guard (stops or escorts people). hours: only then (the market's busy hours). These add to the posts a template already has. public_depth: how far in from the front door the public part of the building goes; past that (or on any upper floor) is staff only, unless you work there. The bank is not a building on the map yet, so it has no post.",
+ "_doc": "Task 53 restricted places + the day guards (scripts/systems/staff_posts.gd, restricted_places.gd). posts.<venue type>: staff who stand at a post while the place is open, worked out from the building's front door: `depth` tiles in from the door, `side` tiles to the left (-) or right (+) of the walk in. guard: a security guard (stops or escorts people). hours: only then (the market's busy hours). These add to the posts a template already has. public_depth: how far in from the front door the public part of the building goes; past that (or on any upper floor) is staff only, unless you work there. The bank (task 46) has a guard at the door and one by the counter.",
  "posts": {
+  "bank": [{"role": "security", "depth": 1, "side": 3, "guard": true}, {"role": "counter_guard", "depth": 5, "side": -4, "guard": true}],
   "police": [{"role": "desk_officer", "depth": 3, "side": 0}],
   "courthouse": [{"role": "security", "depth": 1, "side": 2, "guard": true}, {"role": "receptionist", "depth": 3, "side": -2}],
   "city_hall": [{"role": "security", "depth": 1, "side": 2, "guard": true}, {"role": "receptionist", "depth": 4, "side": -2}],
@@ -10,7 +11,7 @@
   "shelter": [{"role": "receptionist", "depth": 2, "side": 2}],
   "market": [{"role": "security", "depth": 1, "side": -2, "guard": true, "hours": [16, 20]}]
  },
- "public_depth": {"police": 5, "courthouse": 9, "city_hall": 10, "hospital": 7, "office": 4, "works": 3, "shelter": 6},
+ "public_depth": {"bank": 6, "police": 5, "courthouse": 9, "city_hall": 10, "hospital": 7, "office": 4, "works": 3, "shelter": 6},
  "ask_again_min": 30,
  "lines": {
   "stop": ["\"Sorry, you can't be back here,\" says {n}.", "{n} steps into your way. \"Staff only past this point.\"", "\"Can I help you?\" {n} asks, in a voice that means turn around."],
