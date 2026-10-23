@@ -142,7 +142,8 @@ func _enter_game() -> void:
 	if all.size() > 0:
 		hud.select_folk(all[0].id)
 	hud.tracker.reset_for_game()
-	hud.tips.start(false, StartHome.tips_for(Scenario.def(Scenario.active_id)), StartHome.is_bare(Economy.primary_household()))
+	if not SoloHome.active:          # task 61: the solo start teaches by doing (SoloTeach), one line at a time; the keys are on the Help screen
+		hud.tips.start(false, StartHome.tips_for(Scenario.def(Scenario.active_id)), StartHome.is_bare(Economy.primary_household()))
 	if World.has_method("get_coins"):
 		Events.coins_changed.emit(1, int(World.call("get_coins")))
 

@@ -65,6 +65,25 @@ static func board_for(f) -> Array:
 	out.sort_custom(func(a, b): return (bool(a["qualified"]) and not bool(b["qualified"])) or (a["qualified"] == b["qualified"] and float(a["match"]) > float(b["match"])))
 	return out
 
+## Can this person apply for that line of work now? {ok, reason, level} (the gates of apply, without hiring: JobApps sends the application).
+static func check(fid: int, cid: String) -> Dictionary:
+	var f = SysUtil.folk(fid)
+	if f == null:
+		return {"ok": false, "reason": "Nobody is looking for work."}
+	refresh(SysUtil.day())
+	var why: String = Careers.why_not_work(f, cid, 1)
+	if why != "":
+		return {"ok": false, "reason": "%s is %s." % [f.name, why]}
+	if openings(cid) <= 0:
+		return {"ok": false, "reason": "No openings in that line of work this week."}
+	for r in board_for(f):
+		if str(r["career"]) == cid:
+			if bool(r["qualified"]):
+				return {"ok": true, "reason": "", "level": int(r["level"])}
+			return {"ok": false, "reason": "Not yet: needs %s." % ", ".join(r.get("missing", ["more experience"]))}
+	return {"ok": false, "reason": "No openings in that line of work this week."}
+
+## Instant hire (townie and test paths; the player's Apply goes through JobApps.send).
 static func apply(fid: int, cid: String) -> Dictionary:
 	var f = SysUtil.folk(fid)
 	if f == null:

@@ -6,7 +6,9 @@ extends RefCounted
 ##   {"events": [names]}                             any of these events happened
 ##   {"jobs": n}                                     at least n residents are employed
 ##   {"cond": [SysCond...]}                          true for ANY resident
-## Completing a goal pays its reward (coins to the household, satisfaction points to every resident) and fires
+##   {"finished": [interaction ids]}                the pawn finished one of these (on_finished, from the interaction_finished bus)
+## Event checks may narrow the event: "reason" (one of the bill_paid payload's reasons), "rung_in" (the moved_house rung).
+## Completing a goal pays nothing: its done_line is said once and every resident gets a small mood lift (buff small_step). It fires
 ## game_event "scenario_goal_done" {goal}; the last one fires "scenario_finished".
 
 const POLL_EVENTS := ["hired", "promoted", "left_job", "relationship_bit_changed", "relationship_status", "married", "engaged", "aged_up"]
@@ -45,6 +47,10 @@ static func _on_event(ev_name: String, payload: Dictionary) -> void:
 			continue
 		if bool(ck.get("on_time", false)) and not _paid_on_time(int(payload.get("household_id", 0))):
 			continue
+		if ck.has("reason") and not (payload.get("reasons", []) as Array).has(str(ck["reason"])):
+			continue
+		if ck.has("rung_in") and not (ck["rung_in"] as Array).has(str(payload.get("rung", ""))):
+			continue
 		Scenario.progress[gid] = int(Scenario.progress.get(gid, 0)) + 1
 		touched = true
 		if int(Scenario.progress[gid]) >= int(ck.get("count", 1)):
@@ -53,6 +59,14 @@ static func _on_event(ev_name: String, payload: Dictionary) -> void:
 		poll()
 	elif touched:
 		SimEnv.emit("game_event", "scenario_progress", {})
+
+## The pawn finished an interaction: goals of kind {finished: [...]}.
+static func on_finished(folk_id: int, iid: String, success: bool) -> void:
+	if not success or not Scenario.active() or Scenario.finished or not CrimePerson.is_player(folk_id):
+		return
+	for g in Scenario.goals():
+		if not Scenario.is_done(str(g["id"])) and ((g.get("check", {}) as Dictionary).get("finished", []) as Array).has(iid):
+			complete(str(g["id"]))
 
 static func _paid_on_time(hid: int) -> bool:
 	for b in Economy.bills:
@@ -95,18 +109,11 @@ static func complete(goal_id: String) -> void:
 	if goal.is_empty():
 		return
 	Scenario.done[goal_id] = SysUtil.day()
-	var rw: Dictionary = goal.get("reward", {})
-	var coins: int = int(rw.get("coins", 0))
-	var pts: int = int(rw.get("points", 0))
-	if coins > 0:
-		Economy.deposit(Economy.primary_household(), coins, "goal: " + str(goal["label"]))
 	for f in SysUtil.residents():
-		var p: Dictionary = Goals.ensure_profile(f)
-		p["points"] = int(p["points"]) + pts
-		p["lifetime"] = int(p["lifetime"]) + pts
-	SysUtil.notify("Goal done: %s  (+%d coins, +%d satisfaction)" % [str(goal["label"]), coins, pts], "goal")
+		f.add_buff("small_step")
+	SysUtil.notify(str(goal.get("done_line", str(goal["label"]) + ".")), "goal")
 	SysUtil.game_event("scenario_goal_done", {"goal": goal_id})
 	if Scenario.done_count() >= Scenario.goals().size():
 		Scenario.finished = true
-		SysUtil.notify("Getting Started complete! Open Goals to pick a life aspiration and keep dreaming.", "goal")
+		SysUtil.notify("Out of the bare room and on your feet. What you want next is up to you (Goals).", "goal")
 		SysUtil.game_event("scenario_finished", {"scenario": Scenario.active_id})

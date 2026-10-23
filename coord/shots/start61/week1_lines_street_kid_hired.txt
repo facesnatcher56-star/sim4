@@ -1,0 +1,60 @@
+NOTE d1 09:00 [bill] A note under the door from Tavish Kirby, the landlord: "Rent's due Sunday. 35 coins."
+NOTE d1 11:10 [relationship] Tamsin met Felix Kettle.
+NOTE d1 11:10 [visit] Felix from next door knocks to say hello.
+NOTE d1 11:36 [career] You send your details to Moss & Mug Cafe.
+APPLY barista -> { "ok": true, "reason": "" }
+NOTE d1 11:58 [visit] The visit is over.
+NOTE d1 21:00 [story] No bed yet. The floor it is.
+NOTE d1 23:00 [story] Your stomach growls. 200 coins and nothing in the cupboard.
+NOTE d2 16:02 [relationship] Tamsin met Ivy Dalton.
+NOTE d2 16:02 [visit] Ivy Dalton arrived for a visit.
+NOTE d2 18:48 [visit] The visit is over.
+NOTE d2 19:00 [story] Felix texts: "Heard you got a place. Come find me in the Kiln Quarter."
+NOTE d3 12:17 [relationship] Tamsin met Bea Perry.
+NOTE d3 12:17 [visit] Bea Perry arrived for a visit.
+NOTE d3 12:33 [career] A message from Moss & Mug Cafe: The job is yours. You start tomorrow, 6:00, at Moss & Mug Cafe.
+NOTE d3 15:05 [visit] The visit is over.
+NOTE d3 23:00 [warn] A cable fault knocked out phones and internet on the north side.
+NOTE d4 00:01 [bad] Vandals defaced your home. The cleanup cost 31 coins.
+NOTE d4 00:13 [bill] Household bills: 47 coins (electricity 28, phone and internet 19), due on day 7.
+NOTE d4 00:13 [bill] Rent due for Starter Studio: 35 coins.
+NOTE d4 01:00 [story] The first bill. It pays itself on the day it's due, if the coins are there.
+NOTE d4 04:19 [career] Work at 6:00, Moss & Mug Cafe. You set off around 5:19.
+NOTE d4 07:20 [relationship] Tamsin met Bridget Young at Moss & Mug Cafe.
+NOTE d4 08:40 [relationship] Tamsin met Alder Kemp at Moss & Mug Cafe.
+NOTE d4 09:01 [warn] Tamsin has caught a cold.
+NOTE d4 10:20 [relationship] Tamsin met Isadora Sterling at Moss & Mug Cafe.
+NOTE d4 12:00 [career] Tamsin earned 72 coins at work.
+NOTE d4 12:00 [goal] Your first wage is in your pocket.
+NOTE d4 14:53 [visit] Felix Kettle arrived for a visit.
+NOTE d4 17:30 [visit] The visit is over.
+NOTE d5 00:00 [warn] Several street lamps are out on the north side. People feel uneasy after dark.
+NOTE d5 04:23 [career] Work at 6:00, Moss & Mug Cafe. You set off around 5:22.
+NOTE d5 09:20 [relationship] Tamsin met Tavish Kirby at Moss & Mug Cafe.
+NOTE d5 12:00 [career] Tamsin earned 72 coins at work.
+NOTE d5 12:16 [story] "The works yard needs a utility tech," Pascal says. "Just so you know."
+NOTE d5 16:17 [visit] Alder Kemp arrived for a visit.
+NOTE d5 17:02 [warn] Alder Kemp and Tamsin are screaming at each other!
+NOTE d5 17:05 [warn] Alder Kemp and Tamsin are screaming at each other!
+NOTE d5 19:07 [relationship] Tamsin now sees Alder Kemp as: Enemy
+NOTE d5 19:20 [visit] The visit is over.
+NOTE d6 04:23 [career] Work at 6:00, Moss & Mug Cafe. You set off around 5:22.
+NOTE d6 12:00 [career] Tamsin earned 71 coins at work.
+NOTE d6 12:59 [visit] Pascal Rutherford arrived for a visit.
+NOTE d6 15:42 [goal] Tamsin fulfilled a whim: Make a friend (+60 satisfaction)
+NOTE d6 15:42 [goal] Somebody in this town is glad to see you.
+NOTE d6 15:42 [relationship] Tamsin now sees Pascal Rutherford as: Friend
+NOTE d6 16:06 [visit] The visit is over.
+NOTE d7 00:13 [bill] Paid bill: 47 coins.
+NOTE d7 00:13 [bill] Paid bill: 35 coins.
+NOTE d7 00:13 [goal] Rent paid. The roof is yours for another week.
+NOTE d7 02:00 [warn] A cable fault knocked out phones and internet on the north side.
+NOTE d7 02:07 [warn] Lightning struck: the stereo is broken!
+NOTE d7 04:23 [career] Work at 6:00, Moss & Mug Cafe. You set off around 5:23.
+NOTE d7 10:40 [relationship] Pascal Rutherford now sees Tamsin as: Friend
+NOTE d7 12:00 [career] Tamsin earned 72 coins at work.
+NOTE d8 00:13 [bill] Phone bill: 5 coins.
+NOTE d8 04:23 [career] Work at 6:00, Moss & Mug Cafe. You set off around 5:23.
+NOTE d8 08:18 [story] Felix says the works yard is looking for a utility tech.
+NOTE d8 12:00 [career] Tamsin earned 72 coins at work.
+END job=barista start_day=4 coins=446

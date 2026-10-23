@@ -66,7 +66,7 @@ static func chance(pid: int, act: String, ctx: Dictionary = {}) -> float:
 		theirs = clampf(0.25 + level(int(ctx["opponent"]), str(d["opposed"])) / 10.0 * 0.6 + (0.1 if bool(ctx.get("watching", true)) else -0.1), 0.05, 0.95)
 		if act in ["threaten", "lie"]:
 			theirs = clampf(theirs + 0.05 * Creation.add(int(ctx["opponent"]), "willpower"), 0.05, 0.95)          # task 55: hard to push around
-	var p: float = 0.5 + (mine - theirs) * 0.9 + _tools(pid, d, ctx) + _conditions(pid, ctx)
+	var p: float = 0.5 + (mine - theirs) * 0.9 + _tools(pid, d, ctx) + _conditions(pid, ctx) + float(ctx.get("bonus", 0.0))
 	for tr in (ctx.get("traits", {}) as Dictionary):
 		if SocialDynamics.has_t(pid, str(tr)):
 			p += float(ctx["traits"][tr])

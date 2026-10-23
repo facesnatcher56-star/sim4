@@ -128,6 +128,9 @@ static func reset_all() -> void:
 	Story.reset()
 	Away.reset()
 	Commute.reset()
+	JobApps.reset()
+	CalendarBook.reset()
+	SoloOpening.reset()
 	Family.reset()
 	BabyCare.reset()
 	Weather.reset()
@@ -209,6 +212,7 @@ func _on_interaction_finished(folk_id: int, iid: String, success: bool) -> void:
 	DoorActs.on_interaction_finished(folk_id, iid, success)
 	TimedAttempt.on_interaction_finished(folk_id, iid, success)
 	WalkThen.on_interaction_finished(folk_id, iid, success)
+	ScenarioGoals.on_finished(folk_id, iid, success)
 	var rec: Dictionary = Away.on_finished(folk_id, iid, success)
 	if not rec.is_empty():
 		var f = SysUtil.folk(folk_id)

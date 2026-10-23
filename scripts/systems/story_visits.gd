@@ -213,7 +213,7 @@ static func _arrive(sit: Dictionary) -> void:
 		sit["state"] = "done"
 		return
 	sit["state"] = "arrive"
-	SysUtil.notify("%s arrived for a %s." % [", ".join(_names(sit["spawned"])), str(sit["kind"])], "visit")
+	SysUtil.notify(str(sit["line"]) if sit.has("line") else "%s arrived for a %s." % [", ".join(_names(sit["spawned"])), str(sit["kind"])], "visit")
 	SysUtil.game_event("visit_started", {"folk_id": int(hosts_alive[0]), "situation": sit["id"], "guests": sit["spawned"].duplicate()})
 
 static func _names(ids: Array) -> Array:

@@ -2,7 +2,7 @@
  "version": 1,
  "default_scenario": "solo",
  "default_difficulty": "normal",
- "notes": "One-character play: the only scenario is solo. Start coins, rent, odd-job pay, wages and eviction rules per difficulty are in data/solo.json (funds_mult here is unused). goals[].check: {event,count,on_time?,events?} counts game events; {cond:[...]} = SysCond for any resident; {jobs:n} = n employed residents. reward {coins, points}.",
+ "notes": "One-character play: the only scenario is solo. Start coins, rent, odd-job pay, wages and eviction rules per difficulty are in data/solo.json (funds_mult here is unused). goals[].check: {event,count,on_time?,events?} counts game events; {cond:[...]} = SysCond for any resident; {jobs:n} = n employed residents; {finished:[interaction ids]} = the pawn finished one of them; event checks may add reason (bill_paid payload reasons) or rung_in (moved_house rung). No rewards: done_line is said once and the pawn gets a small mood lift (buff small_step).",
  "difficulties": {
   "relaxed": {
    "label": "Easy",
@@ -16,7 +16,7 @@
    "funds_mult": 1.0,
    "bill_mult": 1.0,
    "need_mult": 1.0,
-   "desc": "200 coins, an empty flat, rent 70. Hardly any money; you can just get by if you work from the first days."
+   "desc": "200 coins, an empty flat, rent 70 (half the first week paid, the rest due on Sunday). Hardly any money; you can just get by if you work from the first days."
   },
   "hard": {
    "label": "Hard",
@@ -56,22 +56,63 @@
    ],
    "goals": [
     {
-     "id": "job",
-     "label": "Get a job",
-     "hint": "Click the computer, choose Look for Jobs, then Accept the offer.",
-     "hint_no_computer": "No computer yet: click Phone at the top, open the Jobs app and apply there. Or look for Help wanted signs and ask in person.",
+     "id": "meal",
+     "label": "Eat a meal you paid for",
+     "hint": "Food costs coins: a vending machine, the bakery or Zip Burger, or groceries for a stove.",
      "check": {
-      "jobs": 1
+      "finished": [
+       "grab_snack",
+       "cook_meal",
+       "prep_food",
+       "eat_meal",
+       "cook_meal_good",
+       "cook_meal_gourmet",
+       "cook_fish_dinner",
+       "prep_food_good",
+       "eat_meal_good",
+       "eat_meal_gourmet",
+       "microwave_meal",
+       "grill_food",
+       "grill_gourmet",
+       "buy_snack"
+      ]
      },
-     "reward": {
-      "coins": 150,
-      "points": 25
-     }
+     "done_line": "A real meal, paid for with your own coins."
+    },
+    {
+     "id": "bed",
+     "label": "A night in a real bed",
+     "hint": "Buy a bed (B) or find a place that has one.",
+     "check": {
+      "finished": [
+       "sleep_bed"
+      ]
+     },
+     "done_line": "A proper bed. You slept like a log."
+    },
+    {
+     "id": "wage",
+     "label": "Your first wage",
+     "hint": "Find work: the Jobs app on the phone, a Help wanted card in a shop window, or the job centre at city hall.",
+     "check": {
+      "event": "returned_from_work"
+     },
+     "done_line": "Your first wage is in your pocket."
+    },
+    {
+     "id": "rent",
+     "label": "Pay your first rent",
+     "hint": "The rent pays itself when the coins are there on the day it is due.",
+     "check": {
+      "event": "bill_paid",
+      "reason": "rent"
+     },
+     "done_line": "Rent paid. The roof is yours for another week."
     },
     {
      "id": "friend",
      "label": "Make a friend",
-     "hint": "Open the Map (M), visit the park or cafe and chat with someone, or invite a neighbour over.",
+     "hint": "Talk to the same person a few times: a neighbour, someone at work, the regulars at the cafe.",
      "check": {
       "cond": [
        {
@@ -79,39 +120,20 @@
        }
       ]
      },
-     "reward": {
-      "coins": 200,
-      "points": 25
-     }
+     "done_line": "Somebody in this town is glad to see you."
     },
     {
-     "id": "promotion",
-     "label": "Earn your first promotion",
-     "hint": "Go to work every day and keep performance up. Skills help too.",
+     "id": "move_up",
+     "label": "Move up out of the studio",
+     "hint": "A better flat needs a steady income and the deposit (Household, Home).",
      "check": {
-      "cond": [
-       {
-        "career_level_at_least": 2
-       }
+      "event": "moved_house",
+      "rung_in": [
+       "better",
+       "house"
       ]
      },
-     "reward": {
-      "coins": 300,
-      "points": 50
-     }
-    },
-    {
-     "id": "bill",
-     "label": "Pay a bill on time",
-     "hint": "Bills arrive weekly. Keep enough coins in the household (the Coins button shows what is owed).",
-     "check": {
-      "event": "bill_paid",
-      "on_time": true
-     },
-     "reward": {
-      "coins": 150,
-      "points": 25
-     }
+     "done_line": "A better place. You've come a long way from the bare room."
     }
    ]
   }

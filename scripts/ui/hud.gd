@@ -10,6 +10,7 @@ var theme_res: Theme
 var top_bar: PanelContainer
 var time_label: Label
 var day_label: Label
+var work_label: Label          # task 61: "Work 9:00" on a work day
 var coins_label: Button
 var coin_tick: CoinTick
 var speed_buttons: Dictionary = {}     # speed int -> Button
@@ -172,6 +173,9 @@ func _build_top_bar() -> void:
 	time_label = UIU.make_label("--:--", 18, UITheme.ACCENT)
 	time_label.custom_minimum_size = Vector2(70, 0)
 	h.add_child(time_label)
+	work_label = UIU.make_label("", 14, UITheme.MUTED)
+	work_label.mouse_filter = Control.MOUSE_FILTER_PASS
+	h.add_child(work_label)
 	h.add_child(VSeparator.new())
 	for s in [[0, "||"], [1, ">"], [2, ">>"], [3, ">>>"]]:
 		var b := Button.new()
@@ -537,6 +541,14 @@ func _update_clock(_t = 0) -> void:
 	if TimeSkip.active:
 		lot_label.text = ">> skipping ahead (%s)  " % TimeSkip.reason()
 	day_label.text = "Day %d" % UIU.day_number()
+	_update_work_note()
+
+## Task 61: a small note by the clock on the selected person's work days, until the shift is over.
+func _update_work_note() -> void:
+	var ns: Dictionary = CalendarBook.next_shift(selected_folk_id) if selected_folk_id >= 0 else {}
+	var on: bool = not ns.is_empty() and int(ns["day"]) == SysUtil.day()
+	work_label.text = ("Work %d:%02d  " % [int(ns["hour"]), int(round(fmod(float(ns["hour"]), 1.0) * 60.0))]) if on else ""
+	work_label.tooltip_text = ("At %s" % str(ns["place"])) if on and str(ns["place"]) != "" else ""
 
 func set_speed(s: int) -> void:
 	if build_panel.active:

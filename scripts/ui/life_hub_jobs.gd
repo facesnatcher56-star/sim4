@@ -47,4 +47,6 @@ static func build(dlg: LifeHub, only: Array = []) -> void:
 		if not missing.is_empty():
 			UICard.reqs(inner, missing.map(func(m): return [str(m), false]))
 		var rr: Dictionary = r
-		UICard.action(inner, "Apply", func(): dlg.act("job_apply", {"career": rr["career"]}), bool(r["qualified"]), "Needs " + ", ".join(missing) if not bool(r["qualified"]) else "")
+		var sent: bool = JobApps.pending(dlg.folk_id).any(func(ap): return str(ap["cid"]) == str(rr["career"]))          # task 61: an answer comes in a day or two
+		UICard.action(inner, "Applied" if sent else "Apply", func(): dlg.act("job_apply", {"career": rr["career"]}), bool(r["qualified"]) and not sent,
+			"Needs " + ", ".join(missing) if not bool(r["qualified"]) else ("Waiting to hear back." if sent else ""))

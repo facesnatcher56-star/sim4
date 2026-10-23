@@ -53,6 +53,8 @@ static func on_minute() -> void:
 			continue
 		if Careers.jobs.has(fid):
 			var j: Dictionary = Careers.jobs[fid]
+			if day < int(j.get("start_day", 0)):
+				continue                          # task 61: an offer starts on a set day
 			if int(j["attempt_day"]) != day and is_work_day(str(j["career"]), day, str(j.get("shift", "day"))) \
 					and in_shift_window(h + _lead(f, h, f.work_start, f.work_end), f.work_start, f.work_end):
 				j["attempt_day"] = day

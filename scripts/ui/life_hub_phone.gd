@@ -22,7 +22,10 @@ static func build(dlg: LifeHub) -> void:
 		return
 	match app:
 		"jobs":
+			SoloOpening.once("t_jobs_app")
 			LifeHubJobs.build(dlg)
+		"calendar":
+			_calendar(dlg, fid)
 		"bank":
 			_bank(dlg, f)
 		"news":
@@ -54,6 +57,22 @@ static func _home(dlg: LifeHub, fid: int) -> void:
 	var d: Dictionary = PhoneOwn.kind_def(str(PhoneOwn.own.get(fid, {}).get("kind", "")))
 	dlg.line("Your %s. Weekly line charge: %d coins." % [str(d.get("label", "phone")), int(SoloCfg.by_diff("phone", "bill_amount"))], 12, UITheme.MUTED)
 	dlg.body.add_child(dlg.button("Pawn the phone (%d coins)" % int(d.get("sell", 0)), "You will have no phone until you buy another", func(): dlg.act("phone_sell")))
+
+## Task 61B: shifts, bills and rent, interviews, check-ins and court for the coming week, one line each, grouped by day.
+static func _calendar(dlg: LifeHub, fid: int) -> void:
+	var rows: Array = CalendarBook.entries(fid, 7)
+	if rows.is_empty():
+		dlg.line("Nothing on this week.", 14, UITheme.MUTED)
+		return
+	var last: int = -1
+	for r in rows:
+		var d: int = int(r["day"])
+		if d != last:
+			last = d
+			dlg.heading("Today" if d == SysUtil.day() else ("Tomorrow" if d == SysUtil.day() + 1 else "%s, day %d" % [Seasons.weekday_long(d), d]))
+		var t: String = ("%d:%02d  " % [int(r["hour"]), int(round(fmod(float(r["hour"]), 1.0) * 60.0))]) if float(r["hour"]) > 0.0 else ""
+		var col: Color = Color("#ff9f6b") if str(r["kind"]) in ["bill", "court"] else UITheme.TEXT
+		dlg.line(t + str(r["label"]), 14, col)
 
 static func _bank(dlg: LifeHub, f) -> void:
 	var hid: int = int(f.household_id)
