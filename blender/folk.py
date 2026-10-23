@@ -29,12 +29,12 @@ FPS = 24
 # ------------------------------------------------------------------ variants
 VARIANTS = {
     #  name          scale  head-scale  stoop  baby
-    "folk_adult":   dict(s=1.00, hs=1.00, stoop=0.0, w=1.00),
-    "folk_teen":    dict(s=0.92, hs=1.05, stoop=0.0, w=0.95),
-    "folk_child":   dict(s=0.68, hs=1.30, stoop=0.0, w=0.95),
-    "folk_elder":   dict(s=0.96, hs=1.00, stoop=1.0, w=1.00),
-    "folk_toddler": dict(s=0.50, hs=1.45, stoop=0.0, w=1.05),
-    "folk_baby":    dict(s=0.30, hs=1.65, stoop=0.0, w=1.15),
+    "folk_adult":   dict(s=1.00, hs=1.08, stoop=0.0, w=1.00),
+    "folk_teen":    dict(s=0.92, hs=1.12, stoop=0.0, w=0.95),
+    "folk_child":   dict(s=0.68, hs=1.36, stoop=0.0, w=1.02),
+    "folk_elder":   dict(s=0.96, hs=1.08, stoop=1.0, w=1.00),
+    "folk_toddler": dict(s=0.50, hs=1.45, stoop=0.0, w=1.12),
+    "folk_baby":    dict(s=0.30, hs=1.65, stoop=0.0, w=1.22),
 }
 
 
