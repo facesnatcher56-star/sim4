@@ -88,6 +88,7 @@
  "nostalgic_glow": {"label": "Nostalgic", "mood": {"nostalgic": 3, "happy": 1}, "duration_min": 240, "autonomy_mult": {"deep": 1.3}, "thought": "This takes me back..."},
  "uneasy_memory": {"label": "Uneasy", "mood": {"anxious": 2, "tense": 1}, "duration_min": 180, "thought": "I don't like being reminded of this."},
  "anxious_jitters": {"label": "Anxious", "mood": {"anxious": 3}, "duration_min": 180, "thought": "My stomach is in knots."},
+ "shift_strain": {"label": "Hard Shift", "mood": {"sad": 1, "tense": 2}, "duration_min": 300, "thought": "Some days stay with you."},
  "small_step": {"label": "A Step Up", "mood": {"content": 2, "proud": 1}, "duration_min": 240, "thought": "One more thing sorted."},
  "content_calm": {"label": "Content", "mood": {"content": 3}, "duration_min": 300, "thought": "All is well."},
  "guilty_pang": {"label": "Guilty", "mood": {"guilty": 3, "sad": 1}, "duration_min": 360, "autonomy_mult": {"reconcile": 1.8}, "thought": "I shouldn't have done that."},

@@ -32,20 +32,34 @@
     "fear": "a fear trigger id (dogs, heights): the person refuses or panics near it",
     "item": "an item they start with (bike, glasses, phone is standard)",
     "licence": "a licence they start with",
-    "debt": "a real debt to a real lender: {amount, lender, repay_per_week}",
+    "debt": "a real debt to a real lender: {amount, lender, repay_per_week, pausable}: pausable = the bank can pause it while unemployed (interest still builds)",
     "credit": "bank credit standing used for loans: good / bad",
-    "record": "a criminal record in the justice system: {charges: [...], years_ago}",
+    "record": "a criminal record in the justice system: {charges: [...], years_ago, clean_days}: clean_days of clean living expunge it",
     "habit": "a daily habit with a real cost and need: {need, item, cost_per_day}",
     "contact": "a starting acquaintance: {where, kind}",
     "hiring": "bonus (+) or malus (-) on being hired, by job kind",
-    "fixed": "requires an item to remove the malus (e.g. glasses)"
+    "fixed": "requires an item to remove the malus (e.g. glasses)",
+    "up": "card line: the upside, in words",
+    "cost": "card line: the cost, in words",
+    "college_credit": "share of a degree already done when re-enrolling at the college (fewer days, a lower fee)",
+    "crew_pull": "the crews come sooner and more often (SoloPressure first and repeat days, minus this many)",
+    "old_boss": "week 2: the old boss calls in a day's unpaid work at the works yard; skipped = the background's hiring bonus is lost",
+    "full_time": "job kinds whose first job is full-time (no part-time first job)",
+    "barred_place": "one workplace in town (rolled at the start) never hires them",
+    "wear": "{kinds, shifts, chance, flaw}: after `shifts` shifts in those job kinds, each shift may add the flaw for good",
+    "pay_mult": "{kind: multiplier} on the wage in those job kinds",
+    "strain": "{kinds, chance, buff}: a buff after a shift in those job kinds",
+    "kitchen_fire_mult": "multiplier on cooking fires at home",
+    "first_kitchen_job": "{start, end, pay_mult}: the hours and pay of their first kitchen job"
   },
   "backgrounds": {
     "nobody": {
       "label": "Nobody special",
       "text": "No experience to speak of. More points to spend.",
       "points": 6,
-      "skills": {}
+      "skills": {},
+      "up": "Plenty of points to spend, and a clean slate.",
+      "cost": "No skills and nobody to call."
     },
     "street_kid": {
       "label": "Street kid",
@@ -60,8 +74,12 @@
         "contact": {
           "where": "kiln_quarter",
           "kind": "acquaintance"
-        }
-      }
+        },
+        "witness_id_mult": 1.25,
+        "crew_pull": 1
+      },
+      "up": "Knows the streets, and someone in the Kiln Quarter.",
+      "cost": "The police know your face, and the crews lean on you harder."
     },
     "trade_apprentice": {
       "label": "Trade apprentice",
@@ -70,12 +88,21 @@
       "skills": {
         "handiness": 2,
         "mechanics": 1
+      },
+      "up": "Handy, a toolbox of your own, and works jobs come easier.",
+      "cost": "You still owe your old boss a day's work, or you lose the reference.",
+      "effects": {
+        "hiring": {
+          "works": 1
+        },
+        "item": "toolbox",
+        "old_boss": true
       }
     },
     "college_dropout": {
       "label": "College dropout",
       "text": "A year of classes and a loan to show for it.",
-      "points": 3,
+      "points": 5,
       "skills": {
         "logic": 1,
         "writing": 1
@@ -84,9 +111,16 @@
         "debt": {
           "amount": 600,
           "lender": "student_loan",
-          "repay_per_week": 25
-        }
-      }
+          "repay_per_week": 25,
+          "pausable": true
+        },
+        "hiring": {
+          "office": 1
+        },
+        "college_credit": 0.5
+      },
+      "up": "Office jobs come easier, and going back to college is quicker and cheaper.",
+      "cost": "A student loan to pay off; the bank lets you pause it while you are out of work, but it keeps growing."
     },
     "retail_worker": {
       "label": "Retail worker",
@@ -99,8 +133,14 @@
       "effects": {
         "hiring": {
           "shop": 1
-        }
-      }
+        },
+        "full_time": [
+          "shop"
+        ],
+        "barred_place": true
+      },
+      "up": "Good with people, and the first shop job is full-time.",
+      "cost": "Your old manager talks; one place in town won't take you on."
     },
     "delivery_driver": {
       "label": "Delivery driver",
@@ -112,8 +152,24 @@
       },
       "effects": {
         "item": "bike",
-        "licence": "driving"
-      }
+        "licence": "driving",
+        "hiring": {
+          "outdoor": 1,
+          "sport": 1
+        },
+        "wear": {
+          "kinds": [
+            "works",
+            "outdoor",
+            "sport"
+          ],
+          "shifts": 12,
+          "chance": 0.06,
+          "flaw": "bad_back"
+        }
+      },
+      "up": "A bike, a licence, and outdoor and sports work come easier.",
+      "cost": "Weeks of heavy work can put your back out for good."
     },
     "care_worker": {
       "label": "Care worker",
@@ -122,6 +178,23 @@
       "skills": {
         "first_aid": 2,
         "charisma": 1
+      },
+      "up": "First aid, and care jobs come easier.",
+      "cost": "Care work pays little, and hard shifts stay with you.",
+      "effects": {
+        "hiring": {
+          "care": 1
+        },
+        "pay_mult": {
+          "care": 0.9
+        },
+        "strain": {
+          "kinds": [
+            "care"
+          ],
+          "chance": 0.35,
+          "buff": "shift_strain"
+        }
       }
     },
     "kitchen_hand": {
@@ -130,6 +203,19 @@
       "points": 3,
       "skills": {
         "cooking": 2
+      },
+      "up": "A cook, kitchen jobs come easier, and fewer pans catch fire at home.",
+      "cost": "The first kitchen job is long, early and low-paid.",
+      "effects": {
+        "hiring": {
+          "kitchen": 1
+        },
+        "kitchen_fire_mult": 0.5,
+        "first_kitchen_job": {
+          "start": 6,
+          "end": 15,
+          "pay_mult": 0.9
+        }
       }
     },
     "ex_con": {
@@ -146,12 +232,15 @@
           "charges": [
             "burglary"
           ],
-          "years_ago": 0
+          "years_ago": 0,
+          "clean_days": 84
         },
         "hiring": {
           "all": -2
         }
-      }
+      },
+      "up": "The most points, and skills learned inside.",
+      "cost": "A record and probation; keep it clean to the end and both fade."
     }
   },
   "perks": {

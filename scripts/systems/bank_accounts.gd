@@ -148,6 +148,23 @@ static func open_loan(hid: int, amount: int, term: int, rate: float, kind: Strin
 	loans.append(l)
 	return l
 
+## Task 62: a pausable loan (the student loan) can be paused while nobody in the household has a job, and starts again on its own with a job.
+static func set_paused(hid: int, loan_id: int, on: bool) -> Dictionary:
+	var l: Dictionary = find(loan_id)
+	if l.is_empty() or int(l["hid"]) != hid or not bool(l.get("pausable", false)):
+		return {"ok": false, "reason": "That loan can't be paused."}
+	if on and SysUtil.residents().any(func(f): return int(f.household_id) == hid and Careers.has_job(int(f.id))):
+		return {"ok": false, "reason": "The bank only pauses it while you are out of work."}
+	l["paused"] = on
+	return {"ok": true, "reason": ""}
+
+## A job came: paused loans of the household start again.
+static func resume_paused(hid: int) -> void:
+	for l in loans:
+		if int(l["hid"]) == hid and bool(l.get("paused", false)):
+			l["paused"] = false
+			SysUtil.notify("With a job again, your %s payments start back up." % str(l["kind"]).replace("_", " "), "bill")
+
 static func find(loan_id: int) -> Dictionary:
 	for l in loans:
 		if int(l["id"]) == loan_id:
@@ -191,6 +208,10 @@ static func _installment(l: Dictionary) -> void:
 	var c: Dictionary = cfg().get("loans", {})
 	var step: float = float(l["rate"]) * float(_pay_days()) / _year_days()
 	var interest: float = float(l["balance"]) * step
+	if bool(l.get("paused", false)):          # task 62: paused while out of work: nothing is taken, the interest still builds
+		l["balance"] = float(l["balance"]) + interest
+		l["next_due"] = int(l["next_due"]) + _pay_days()
+		return
 	var due: int = mini(int(l["payment"]), int(ceil(float(l["balance"]) + interest)))
 	l["next_due"] = int(l["next_due"]) + _pay_days()
 	if Economy.spend(hid, due, "%s payment" % str(l["kind"])):

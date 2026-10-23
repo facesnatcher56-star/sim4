@@ -165,6 +165,10 @@ static func apply_schedule(f) -> void:
 	if not sv.is_empty() and int(j["level"]) >= int(sv.get("min_level", 1)):
 		f.work_start = float(sv.get("start", f.work_start))
 		f.work_end = float(sv.get("end", f.work_end))
+	if Creation.first_kitchen(int(f.id), cid):          # task 62: the kitchen hand's first kitchen job starts early and runs long
+		var fk: Dictionary = Creation._bg_effect(int(f.id), "first_kitchen_job")
+		f.work_start = float(fk.get("start", f.work_start))
+		f.work_end = float(fk.get("end", f.work_end))
 
 ## Who may hold a job: the household's own people (never crew, crowd NPCs, visitors), adults and elders; teens only in the part-time careers
 ## (settings.teen_careers, level 1). "" = fine, else a reason.
@@ -197,6 +201,7 @@ static func hire(f, cid: String, level: int = 1, quiet: bool = false) -> bool:
 	seeking.erase(int(f.id))
 	changed_day[int(f.id)] = SysUtil.day()
 	apply_schedule(f)
+	BankAccounts.resume_paused(int(f.household_id))          # task 62: a paused loan starts again with a job
 	SysUtil.game_event("hired", {"folk_id": f.id, "career": cid, "level": level})
 	if not quiet:
 		SysUtil.notify("%s is now a %s (%s)!" % [f.name, str(career_def(cid).get("label", cid)), title_of(int(f.id))], "career")

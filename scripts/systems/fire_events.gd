@@ -125,7 +125,7 @@ static func on_interaction_started(folk_id: int, iid: String, target_id: int) ->
 	for a in armed:
 		if int(a["hid"]) != int(f.household_id) or int(a["ignite_at"]) >= 0:
 			continue
-		if str(a["source"]) == "cooking" and (FireRules.cfg().get("cooking_iids", []) as Array).has(iid):
+		if str(a["source"]) == "cooking" and (FireRules.cfg().get("cooking_iids", []) as Array).has(iid) and Fire.rng.randf() < Creation.mult(folk_id, "kitchen_fire_mult"):          # task 62: a kitchen hand keeps the pan in hand
 			var fr: Array = FireRules.cfg().get("cook_ignite_frac", [0.3, 0.75])
 			a["ignite_at"] = now + maxi(int(dur * Fire.rng.randf_range(float(fr[0]), float(fr[1]))), 2)
 			a["obj"] = target_id

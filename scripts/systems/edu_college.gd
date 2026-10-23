@@ -39,6 +39,7 @@ static func lecture(f, major: String) -> Dictionary:
 	var col: Dictionary = r["college"]
 	if col.is_empty() or str(col.get("major", "")) != major:
 		var start: int = int(cc().get("diploma_credits", 2)) if str(r.get("diploma", "")) in ["A", "B"] else 0
+		start = maxi(start, int(round(Creation.add(fid, "college_credit") * float(cc().get("credits_needed", 12)))))          # task 62: the year a dropout did counts
 		col = {"major": major, "credits": start, "lectures": 0, "scores": []}
 		r["college"] = col
 	col["credits"] = int(col["credits"]) + 1

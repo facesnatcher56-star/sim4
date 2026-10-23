@@ -48,6 +48,13 @@ static func _tools(pid: int, d: Dictionary, ctx: Dictionary) -> float:
 		if gid != "_doc" and CrimeLifeRoll.has_gear(pid, str(gid)):
 			have.append(str(from_gear[gid]))
 	var t: float = 0.0
+	var from_items: Dictionary = cfg().get("tools_from_items", {})          # task 62: a toolbox (and the weapons with a "tool") carried
+	for e in Inventory.items(pid):
+		for tl in (from_items.get(str(e["id"]), []) as Array):
+			have.append(str(tl))
+		var wt: String = str(WeaponPermits.def_weapon(str(e["id"])).get("tool", ""))
+		if wt != "":
+			have.append(wt)
 	var tools: Dictionary = cfg().get("tools", {})
 	for k in (d.get("tools", []) as Array):
 		if have.has(k):

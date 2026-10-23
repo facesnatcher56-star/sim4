@@ -23,8 +23,8 @@ static func works_on(fid: int, day: int) -> bool:
 ## The weekdays of a part-time first job ([] = full time).
 static func part_time_days(fid: int) -> Array:
 	var j: Dictionary = Careers.jobs.get(fid, {})
-	if j.is_empty() or int(j.get("level", 1)) > 1 or not SoloHome.active or not Pawn.is_pawn_id(fid):
-		return []
+	if j.is_empty() or int(j.get("level", 1)) > 1 or not SoloHome.active or not Pawn.is_pawn_id(fid) or Creation.full_time(fid, str(j["career"])):
+		return []          # task 62: the retail worker's first shop job is full-time
 	var sv: Dictionary = Careers.shift_def(str(j["career"]), str(j.get("shift", "day")))
 	var f = SysUtil.folk(fid)
 	var len_h: float = 8.0 if f == null or f.work_start < 0.0 else fposmod(f.work_end - f.work_start, 24.0)
@@ -209,7 +209,7 @@ static func on_returned(f, rec: Dictionary) -> void:
 			var hours: float = float(rec["worked_min"]) / 60.0
 			var sv: Dictionary = Careers.shift_def(cid, str(j.get("shift", "day")))
 			var smult: float = float(sv.get("pay_mult", 1.0)) if (not sv.is_empty() and int(j["level"]) >= int(sv.get("min_level", 1))) else 1.0
-			var pay: int = int(round(hours * float(ld.get("pay", 0)) * CareerProgress.pay_multiplier(perf) * smult * MarketEconomy.wage_mult() * EduGate.pay_mult(fid, cid) * SoloRules.wage_mult(f)))
+			var pay: int = int(round(hours * float(ld.get("pay", 0)) * CareerProgress.pay_multiplier(perf) * smult * MarketEconomy.wage_mult() * EduGate.pay_mult(fid, cid) * SoloRules.wage_mult(f) * Creation.pay_mult(fid, cid)))
 			var delta: float
 			if completed:
 				delta = CareerProgress.shift_gain(f, cid, int(j["level"]))
@@ -228,6 +228,8 @@ static func on_returned(f, rec: Dictionary) -> void:
 				"performance": perf_now, "skipped": not completed})
 			_trim_log()
 			SysUtil.notify("%s earned %d coins at work%s." % [f.name, pay, "" if completed else " (left early!)"], "career")
+			if completed:
+				Creation.on_shift(f, cid)          # task 62: the wear and the strain of the background's kind of work
 			SysUtil.game_event("returned_from_work", {"folk_id": fid, "pay": pay, "performance": perf_now, "delta": delta,
 				"skipped": not completed, "career": cid})
 		"school":

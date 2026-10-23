@@ -147,7 +147,8 @@ static func _moment(fid: int, m: Dictionary) -> void:
 			var day: int = start_day + int(m.get("on_day", 3))
 			var hrs: Array = m.get("hours", [10, 16])
 			checkin = {"day": day, "hours": hrs, "lot": str(m.get("lot", "police")), "done": str(m.get("done", "")), "missed": str(m.get("missed", "")),
-				"warning": str(m.get("warning", "")), "every": int(m.get("every_days", 7)), "misses": 0}
+				"warning": str(m.get("warning", "")), "every": int(m.get("every_days", 7)), "misses": 0, "over": str(m.get("over", "")),
+				"label": "Probation check-in, %d:00-%d:00" % [int(hrs[0]), int(hrs[1])]}
 			if int(JusticeState.probation.get(fid, -1)) < SysUtil.day():
 				JusticeState.probation[fid] = SysUtil.day() + int(m.get("probation_days", 60))          # the sentence's probation, now on file
 			CalendarBook.add(fid, day, float(hrs[0]), str(checkin["lot"]), "Probation check-in, %d:00-%d:00" % [int(hrs[0]), int(hrs[1])], "probation")
@@ -183,12 +184,39 @@ static func _follow(fid: int, fl: Dictionary) -> void:
 				if int(l["hid"]) == SoloHome.hid() and str(l["kind"]) == str(fl.get("lender", "")):
 					SysUtil.notify(_fill(str(fl["line"]), {"pay": int(round(float(l["payment"]))), "due": Seasons.weekday_long(int(l["next_due"]))}), "warn")
 					return
+		"old_boss":          # task 62: the apprentice owes a day's unpaid work, or the reference (the hiring bonus) is gone
+			if not checkin.is_empty():
+				return
+			var day: int = SysUtil.day() + int(fl.get("on_day", 2))
+			var hrs: Array = fl.get("hours", [8, 12])
+			var when: String = "%s, %d:00" % [Seasons.weekday_long(day), int(hrs[0])]
+			JusticePlayer.ask(fid, "Your old boss", _fill(str(fl["ask"]), {"when": when}), [{"id": "yes", "label": str(fl.get("yes", "Yes"))}, {"id": "no", "label": str(fl.get("no", "No"))}],
+				func(ch):
+					if str(ch) != "yes":
+						checkin = {"kind": "old_boss", "lost": str(fl.get("lost", ""))}
+						_old_boss_lost()
+						return
+					checkin = {"kind": "old_boss", "day": day, "hours": hrs, "lot": str(fl.get("lot", "works")), "minutes": int(fl.get("minutes", 480)),
+						"kept": str(fl.get("kept", "")), "lost": str(fl.get("lost", ""))}
+					CalendarBook.add(fid, day, float(hrs[0]), str(fl.get("lot", "works")), "A day's work for your old boss", "probation"), "no")
 		"contact_visit":          # the contact was never looked up: they turn up at the door
 			var cid: int = int((Creation.picks.get(fid, {}) as Dictionary).get("contact_id", -1))
 			if cid < 0 or RelationshipService.value(fid, cid, "friendship") >= float(fl.get("met_above", 22)):
 				return
 			var sv: Dictionary = StoryVisits.schedule_visit([cid], fid, SysUtil.now() + 15, int(fl.get("minutes", 60)), "visit")
 			sv["line"] = _fill(str(fl["line"]), {"who": _first(Story.name_of(cid))})
+
+static func _old_boss_kept(f) -> void:
+	SysUtil.notify(str(checkin.get("kept", "")), "good")
+	Away.send(f, float(checkin.get("minutes", 480)), "errand", {"label": "A day's work for the old boss"})
+	checkin = {}
+
+static func _old_boss_lost() -> void:
+	var fid: int = Pawn.of()
+	if Creation.picks.has(fid):
+		Creation.picks[fid]["no_reference"] = true
+	SysUtil.notify(str(checkin.get("lost", "")), "warn")
+	checkin = {}
 
 ## An adult townie (the creation contact, else the neighbour, else anyone): who passes a lead on.
 static func _someone(fid: int) -> int:
@@ -211,11 +239,25 @@ static func on_minute() -> void:
 	var hrs: Array = checkin["hours"]
 	var h: float = SysUtil.hour_f()
 	if f != null and SysUtil.day() == day and h >= float(hrs[0]) and h < float(hrs[1]) and NeighborhoodLots.lot_at(f.tile) == str(checkin["lot"]):
-		SysUtil.notify(str(checkin["done"]), "story")
-		checkin = {}
 		CalendarBook.appts = CalendarBook.appts.filter(func(a): return str(a["kind"]) != "probation")
+		if str(checkin.get("kind", "")) == "old_boss":
+			_old_boss_kept(f)
+			return
+		var next: int = day + int(checkin.get("every", 7))          # task 62: kept every week to the end of the term, probation is over
+		if next > int(JusticeState.probation.get(int(f.id), -1)):
+			SysUtil.notify(str(checkin.get("over", checkin["done"])), "good")
+			JusticeState.probation.erase(int(f.id))
+			checkin = {}
+			return
+		SysUtil.notify(str(checkin["done"]), "story")
+		checkin["day"] = next
+		checkin["misses"] = 0
+		CalendarBook.add(int(f.id), next, float(hrs[0]), str(checkin["lot"]), str(checkin.get("label", "Probation check-in")), "probation")
 	elif SysUtil.day() > day or (SysUtil.day() == day and h >= float(hrs[1])):
 		CalendarBook.appts = CalendarBook.appts.filter(func(a): return str(a["kind"]) != "probation")
+		if str(checkin.get("kind", "")) == "old_boss":
+			_old_boss_lost()
+			return
 		checkin["misses"] = int(checkin.get("misses", 0)) + 1
 		if int(checkin["misses"]) >= 2 and f != null:
 			SysUtil.notify(str(checkin["missed"]), "warn")

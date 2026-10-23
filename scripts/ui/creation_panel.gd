@@ -107,6 +107,8 @@ func _refresh() -> void:
 	for sk in (bg.get("skills", {}) as Dictionary):
 		free.append("%s %d" % [ContentRules.skill_label(str(sk)), int(bg["skills"][sk])])
 	_bg_line.text = str(bg.get("text", "")) + ("\nStarts with: " + ", ".join(free) if not free.is_empty() else "")
+	if str(bg.get("up", "")) != "":          # task 62: the trade, in words
+		_bg_line.text += "\n+ " + str(bg["up"]) + "\n- " + str(bg.get("cost", ""))
 	for c in _body.get_children():
 		c.queue_free()
 	_bg_box.visible = _tab == 0

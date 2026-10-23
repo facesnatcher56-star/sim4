@@ -89,9 +89,10 @@ static func on_day(day: int) -> void:
 	elif rough and in_trouble(f):
 		if trouble_since < 0:
 			trouble_since = day
-		var first: int = int(SoloCfg.by_diff("pressure", "first_offer_days"))
+		var pull: int = int(Creation.add(int(f.id), "crew_pull"))          # task 62: a street kid is known on the block
+		var first: int = maxi(int(SoloCfg.by_diff("pressure", "first_offer_days")) - pull, 1)
 		var due_first: bool = last_offer < trouble_since and day - trouble_since >= first
-		var due_again: bool = last_offer >= trouble_since and day - last_offer >= int(cfg().get("repeat_days", 4))
+		var due_again: bool = last_offer >= trouble_since and day - last_offer >= maxi(int(cfg().get("repeat_days", 4)) - pull, 2)
 		if (due_first or due_again) and not waiting:
 			due = {"day": day, "district": d}
 	else:
@@ -125,6 +126,10 @@ static func record_tick(f) -> void:
 	if member:
 		return
 	clean_days += 1
+	for r in JusticeState.records.get(int(f.id), []):          # task 62: the sentence served before the game, expunged by its own clean days
+		if str(r.get("from", "")) == "creation" and not bool(r.get("expunged", false)) and int(r.get("clean_days", 0)) > 0 and clean_days >= int(r["clean_days"]):
+			r["expunged"] = true
+			SysUtil.notify("A letter from the court: your old conviction has been wiped. The record is clean.", "good")
 	var need: int = int(cfg().get("record_expunge_days", 56))
 	if clean_days >= need and JusticeState.records.has(int(f.id)):
 		var left: Array = []
