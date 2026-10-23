@@ -69,7 +69,16 @@
      "restock": 9,
      "demand": 8
     },
-    "cigarettes": {"label": "Pack of cigarettes", "base": 4, "kind": "inventory", "units": 1, "pack": 10, "stock": 30, "restock": 10, "demand": 3},
+    "cigarettes": {
+     "label": "Pack of cigarettes",
+     "base": 4,
+     "kind": "inventory",
+     "units": 1,
+     "pack": 10,
+     "stock": 30,
+     "restock": 10,
+     "demand": 3
+    },
     "frozen_meals": {
      "label": "Frozen meals",
      "base": 24,
@@ -106,6 +115,14 @@
      "stock": 200,
      "restock": 200,
      "demand": 40
+    },
+    "kitchen_knife": {
+     "label": "Kitchen knife",
+     "base": 8,
+     "kind": "inventory",
+     "stock": 4,
+     "restock": 1,
+     "demand": 1
     }
    }
   },
@@ -164,7 +181,15 @@
      "restock": 3,
      "demand": 3
     },
-    "glasses": {"label": "Reading glasses", "base": 30, "kind": "inventory", "units": 1, "stock": 10, "restock": 7, "demand": 1},
+    "glasses": {
+     "label": "Reading glasses",
+     "base": 30,
+     "kind": "inventory",
+     "units": 1,
+     "stock": 10,
+     "restock": 7,
+     "demand": 1
+    },
     "first_aid_kit": {
      "label": "First aid kit",
      "base": 25,
@@ -219,6 +244,46 @@
      "def": "lamp",
      "stock": 8,
      "restock": 2,
+     "demand": 1
+    },
+    "pipe": {
+     "label": "Length of pipe",
+     "base": 6,
+     "kind": "inventory",
+     "stock": 4,
+     "restock": 1,
+     "demand": 1
+    },
+    "crowbar": {
+     "label": "Crowbar",
+     "base": 15,
+     "kind": "inventory",
+     "stock": 4,
+     "restock": 1,
+     "demand": 1
+    },
+    "hammer": {
+     "label": "Hammer",
+     "base": 10,
+     "kind": "inventory",
+     "stock": 4,
+     "restock": 1,
+     "demand": 1
+    },
+    "screwdriver": {
+     "label": "Screwdriver",
+     "base": 4,
+     "kind": "inventory",
+     "stock": 4,
+     "restock": 1,
+     "demand": 1
+    },
+    "machete": {
+     "label": "Machete",
+     "base": 35,
+     "kind": "inventory",
+     "stock": 4,
+     "restock": 1,
      "demand": 1
     }
    }
@@ -382,6 +447,124 @@
      "stock": 4,
      "restock": 1,
      "demand": 0.3
+    }
+   }
+  },
+  "sporting_goods": {
+   "label": "Sporting Goods",
+   "lot": "gym",
+   "hours": [
+    9,
+    19
+   ],
+   "online": false,
+   "items": {
+    "baseball_bat": {
+     "label": "Baseball bat",
+     "base": 25,
+     "kind": "inventory",
+     "stock": 4,
+     "restock": 1,
+     "demand": 1
+    },
+    "hunting_knife": {
+     "label": "Hunting knife",
+     "base": 30,
+     "kind": "inventory",
+     "stock": 4,
+     "restock": 1,
+     "demand": 1
+    },
+    "pepper_spray": {
+     "label": "Pepper spray",
+     "base": 15,
+     "kind": "inventory",
+     "stock": 6,
+     "restock": 1,
+     "demand": 1
+    },
+    "hunting_rifle": {
+     "label": "Hunting rifle",
+     "base": 400,
+     "kind": "gun",
+     "stock": 2,
+     "restock": 1,
+     "demand": 1,
+     "permit": "hunting"
+    },
+    "rifle_rounds": {
+     "label": "Rifle rounds",
+     "base": 20,
+     "kind": "ammo",
+     "stock": 6,
+     "restock": 2,
+     "demand": 1,
+     "permit": "hunting"
+    }
+   }
+  },
+  "gun_counter": {
+   "label": "Gun Counter",
+   "lot": "market",
+   "hours": [
+    10,
+    18
+   ],
+   "online": false,
+   "items": {
+    "revolver": {
+     "label": "Revolver",
+     "base": 250,
+     "kind": "gun",
+     "stock": 2,
+     "restock": 1,
+     "demand": 1,
+     "permit": "gun"
+    },
+    "pistol": {
+     "label": "Pistol",
+     "base": 300,
+     "kind": "gun",
+     "stock": 2,
+     "restock": 1,
+     "demand": 1,
+     "permit": "gun"
+    },
+    "shotgun": {
+     "label": "Shotgun",
+     "base": 350,
+     "kind": "gun",
+     "stock": 2,
+     "restock": 1,
+     "demand": 1,
+     "permit": "gun"
+    },
+    "revolver_rounds": {
+     "label": "Revolver rounds",
+     "base": 15,
+     "kind": "ammo",
+     "stock": 6,
+     "restock": 2,
+     "demand": 1,
+     "permit": "gun"
+    },
+    "pistol_rounds": {
+     "label": "Pistol rounds",
+     "base": 15,
+     "kind": "ammo",
+     "stock": 6,
+     "restock": 2,
+     "demand": 1,
+     "permit": "gun"
+    },
+    "shotgun_shells": {
+     "label": "Shotgun shells",
+     "base": 18,
+     "kind": "ammo",
+     "stock": 6,
+     "restock": 2,
+     "demand": 1,
+     "permit": "gun"
     }
    }
   }

@@ -52,6 +52,7 @@ func build() -> void:
 	_jobs(pid)
 	_heist(pid)
 	_stash(pid)
+	_under_counter(pid)
 	_contacts(pid)
 	_ledger(pid)
 	var leave := Button.new()
@@ -222,6 +223,20 @@ func _stash(pid: int) -> void:
 	sb.text = "Sell it on the street (worst price, easiest to trace)"
 	sb.pressed.connect(func(): _cmd({"action": "fence", "ids": [], "fence_pid": -1}))
 	body.add_child(sb)
+
+## Task 57: what a fence or the crew can get you under the counter (no papers, no registration).
+func _under_counter(pid: int) -> void:
+	var rows: Array = WeaponShop.underground(pid)
+	if rows.is_empty():
+		return
+	heading("Under the counter")
+	for r in rows:
+		var b := Button.new()
+		b.text = "%s (%d coins)" % [str(r["label"]), int(r["price"])]
+		var wid: String = str(r["id"])
+		b.pressed.connect(func(): _cmd({"action": "buy_weapon", "weapon": wid}))
+		body.add_child(b)
+	line("Unregistered, no questions asked. Carrying one is a crime.", 11, UITheme.MUTED)
 
 func _contacts(pid: int) -> void:
 	heading("People you know")

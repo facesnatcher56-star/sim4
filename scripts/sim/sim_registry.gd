@@ -35,6 +35,7 @@ static func systems_rows(sm: Object) -> Array:
 		["Tiers", "Tiers", 1, 90, C, "total", Tiers.refresh, null, "all tiers: assigns ACTIVE / NEAR per person (hysteresis, ACTIVE cap); loops the world's folk once, classification cached until someone moves"],
 		["NeighborhoodService.before", "NeighborhoodService", 1, 210, N, "", NeighborhoodService.before_minute, null, "ACTIVE: scheduled visits waiting for a resident at home (situations list only)"],
 		["CareerShifts", "CareerShifts", 1, 220, N, "", CareerShifts.on_minute, null, "ACTIVE residents with a shift today; townie shifts are the TOWN schedule (CommuteTownies windows), not polled"],
+		["WeaponShop", "WeaponShop", 1, 228, N, "", WeaponShop.on_minute, null, "task 57: the pawn walking onto a lot with a screening post (one comparison a minute)"],
 		["JobApps", "JobApps", 1, 225, N, "", JobApps.on_minute, Callable(JobApps, "busy"), "task 61: the pawn's open job applications and interviews only (idle = zero)"],
 		["SoloOpening", "SoloOpening", 1, 226, N, "", SoloOpening.on_minute, Callable(SoloOpening, "busy"), "task 61: a pending probation check-in only (idle = zero)"],
 		["WorkNudge", "WorkNudge", 1, 227, N, "", WorkNudge.on_minute, null, "task 61: the pawn's next shift, one comparison a minute"],
