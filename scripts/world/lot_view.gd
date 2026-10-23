@@ -20,6 +20,7 @@ func _ready() -> void:
 	LookOverlay.ensure_on(self)    # vignette + grain of the current look (scripts/world/look_overlay.gd)
 	WeatherView.ensure_on(self)    # sky / sun / weather particles / seasons (scripts/world/weather_view.gd)
 	ClutterView.ensure_on(self)    # floor clutter that grows with a room's mess (scripts/world/clutter_view.gd; view only)
+	OrderMarker.ensure_on(self)    # task 58b: where the player's character is going (scripts/world/order_marker.gd; view only)
 	WearView.ensure_on(self)       # district wear dressing near the camera: litter, graffiti, weeds, cracks (scripts/world/wear_view.gd; view only)
 	ObjectStateView.ensure_on(self)    # objects show their state: soil, grime, sparks, burners, screens (scripts/world/object_state_view.gd; view only)
 	FireView.ensure_on(self)       # flames / smoke / scorch marks (scripts/world/fire_view.gd)
