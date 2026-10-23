@@ -295,7 +295,9 @@ static func notice(p: Dictionary) -> void:
 	var line: String = str(lines[PlayerPrompt._pick("door|intruder|" + str(pick), lines.size())]).replace("{r}", who).replace("{a}", str(pawn.name))
 	line = Sexes.fill(line, tid)
 	SysUtil.notify(line, "bad")
-	SimEnv.emit("speech", tid, line, int(pawn.id))
+	var said: String = ThoughtVoice.spoken_part(line)          # only their words in the balloon (the narration is the notification)
+	if said != "":
+		SimEnv.emit("speech", tid, said, int(pawn.id))
 	if str(pick) == "call":
 		CrimePetty.commit("trespassing", int(pawn.id), CrimePlace.where_now(int(pawn.id)), {"seen": true})
 	JusticePlayer.ask(int(pawn.id), "Caught in %s's home" % who, line,

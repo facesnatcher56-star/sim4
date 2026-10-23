@@ -392,13 +392,22 @@ static func update_staff(lot_id: String) -> void:
 		for n in sf.needs:
 			(sf.needs[n] as Stat).set_value(60.0)
 
+## The name over someone's head and on their menu: staff carry their job ("Elias, barista"); everyone else just their name.
+static func tag_name(f) -> String:
+	if f == null:
+		return ""
+	if f.has_meta("staff"):
+		return "%s (%s)" % [str(f.name), str(f.get_meta("staff")).capitalize().replace("_", " ")]
+	return str(f.name)
+
 static func _spawn_staff(role: String, tile: Vector2i, lot_id: String) -> Folk:
 	_staff_seq += 1
 	var nr := RandomNumberGenerator.new()
 	nr.seed = _staff_seq * 7919 + role.length()
-	var nm: String = "%s (%s)" % [Names.pick_first([], nr), role.capitalize()]
+	var first: String = Names.pick_first([], nr)
+	var nm: String = "%s (%s)" % [first, role.capitalize()]          # seeds the uniform below (same look as before); the name itself is just the first name
 	var keep_next: int = Folk._next_id
-	var f := Folk.create(nm, [], STAFF_ID_BASE + _staff_seq)
+	var f := Folk.create(first, [], STAFF_ID_BASE + _staff_seq)          # the job is shown on the name tag (tag_name), never said in a line
 	Folk._next_id = keep_next
 	f.household_id = -1
 	f.age_stage = "adult"

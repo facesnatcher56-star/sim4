@@ -74,7 +74,7 @@ func open_with_entries(f, kind: String, id: int, entries: Array, screen_pos: Vec
 		"folk":
 			title_text = "Interact"
 			if target != null:
-				title_text = str(UIU.prop(target, "name", "them"))          # the menu shows the person, never how well you know them
+				title_text = Crowd.tag_name(target)          # the menu shows the person, never how well you know them
 		"self":
 			title_text = "Myself"
 		"ground":
@@ -190,6 +190,12 @@ func _fill_compact(cur: Dictionary) -> void:
 		list.add_child(_make_button(e))
 	for g in groups:
 		_group_button(list, str(g["name"]), g["entries"], Color(str(KIND_ACCENT.get(target_kind, "#f2a33c"))).lightened(0.2))
+	for b in cur["blocked"]:          # what is here but out of reach for now, and why (things that are not here at all were left out)
+		var why: String = str(b["reason"])
+		var l := UIU.make_label("%s: %s" % [b["label"], why.left(1).to_lower() + why.substr(1)], 12, UITheme.MUTED)
+		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		l.custom_minimum_size.x = 230
+		list.add_child(l)
 	_fit_scroll()
 
 func _fill_social(f, target, entries: Array) -> void:

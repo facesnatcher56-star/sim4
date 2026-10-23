@@ -124,10 +124,10 @@ static func quote(hid: int, dest: String, opts: Dictionary = {}) -> Dictionary:
 		res["end_min"] = _day_start(sail) + days * 1440 + int(float(sc.get("home_arrive_hour", 7.0)) * 60.0)
 		res["return_min"] = _day_start(sail) + days * 1440 + int(float(sc.get("disembark_hour", 9.0)) * 60.0) + int(sc.get("transit_min", 30))
 	res["leave"] = VacationWork.plan(res["who"], depart, int(res["return_min"]))
-	var reserve: int = Economy.owed(hid) + int(round(float(Economy.compute_bill(hid)) * ceil(float(days + 3) / 7.0) * float(Vacation.cfg().get("reserve_for_bills", 1.0))))
+	var reserve: int = int(round(float(Upkeep.needed_for(hid, days + 3)) * float(Vacation.cfg().get("reserve_for_bills", 1.0))))          # the same rent and bills the money window lists
 	if Economy.balance(hid) - total < reserve and not bool(opts.get("force_afford", false)):
 		res["ok"] = false
-		res["reason"] = "That costs %d coins, and the bills still to come need %d. The household has %d." % [total, reserve, Economy.balance(hid)]
+		res["reason"] = "That costs %d coins, and the rent and bills due before you are back need %d. The household has %d." % [total, reserve, Economy.balance(hid)]
 	return res
 
 ## Honeymoon = two of the party are married to each other, anniversary = any couple.

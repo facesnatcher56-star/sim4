@@ -17,8 +17,8 @@ static func _keeps_coins(d: Dictionary) -> bool:
 	return false
 
 static func _soft(d: Dictionary, t) -> bool:
-	if not (t is Dictionary) or (t as Dictionary).size() != 1:
-		return false
+	if not (t is Dictionary) or (t as Dictionary).size() != 1 or bool(d.get("hard_gates", false)):
+		return false          # hard_gates: the gate is a rule of the world, not a skill to try (nobody votes for a candidate who cannot speak)
 	if (t as Dictionary).has("skill_at_least") or (t as Dictionary).has("stat_below") or (t as Dictionary).has("stat_above"):
 		return true          # a need level never hides an act (you can cook when full, work out when tired); the effects are what they are
 	if (t as Dictionary).has("coins_at_least"):

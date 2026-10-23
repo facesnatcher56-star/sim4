@@ -24,7 +24,7 @@ func show_thought(folk_id: int, text: String) -> void:
 		return
 	# rate, variety and no-repeats are decided upstream (ThoughtVoice gate in SimEnv.emit), so every thought that arrives is shown
 	var to: int = _talking_to(folk_id)
-	if to >= 0:
+	if to >= 0 and not ThoughtVoice.about_them(text):          # a line about the other person stays a thought
 		show_speech(folk_id, text, to)          # someone in a conversation says it out loud, to the person they are talking with
 	else:
 		_add(folk_id, text, false, 0.0)          # thinking to themselves: the quieter "thinks" balloon

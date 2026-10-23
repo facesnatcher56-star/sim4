@@ -72,6 +72,10 @@ static func describe_tests(def: Dictionary, folk = null, target = null) -> Strin
 				"owns_car": parts.append("You have no car" if bool(v) else "You already have a car")
 				"car_impounded": parts.append("No car of yours is at the pound")
 				"bills_due": parts.append("Nothing to pay")
+				"has_licence": parts.append("needs a driving licence (the test is at City Hall)")
+				"election_open": parts.append("No election on right now")
+				"has_guests": parts.append("You don't know anyone to invite yet")
+				"not": parts.append("Not at your own home" if (v is Dictionary and (v as Dictionary).has("at_home_lot")) else "not possible right now")
 				"circadian": parts.append("Not time to sleep yet")
 				"no_free_bed": parts.append("You have a bed to use")
 				"time_between": parts.append("Only between %d:00 and %d:00" % [int(v[0]), int(v[1])])
@@ -151,7 +155,11 @@ static func entries_for(folk, target_kind: String, target_id: int) -> Array:
 		ids = (odef.get("interactions", []) as Array).duplicate()
 		for gone in ShopActs.hides(folk, target):          # task 53: in a shop the pawn takes goods and pays at the till (ShopActs)
 			ids.erase(gone)
-		return build_entries(folk, ids, table, make_checker(folk, target)) + ShopActs.entries(folk, target) + TillActs.entries(folk, target) + BankBranch.entries(folk, target)
+		var shop: Array = ShopActs.entries(folk, target)
+		for e in shop:          # a greyed order says why, in the same words as any other entry
+			if not bool(e["enabled"]) and str(e["reason"]) == "" and e.has("iid"):
+				e["reason"] = describe_tests(table.get(str(e["iid"]), {}), folk, target)
+		return build_entries(folk, ids, table, make_checker(folk, target)) + shop + TillActs.entries(folk, target) + BankBranch.entries(folk, target)
 	else:
 		target = UIU.get_folk(target_id)
 		for id in table:

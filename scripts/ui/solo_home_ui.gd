@@ -33,7 +33,7 @@ static func _now_card(dlg: BankHub, w: float) -> void:
 	var p: Dictionary = SoloHome.prop()
 	var badge: String = "EVICTION NOTICE" if bool(p.get("notice", false)) else "YOU LIVE HERE"
 	var inner2: VBoxContainer = UICard.card(dlg.body, w, str(r.get("label", "Home")), badge, str(r.get("cause", "")))
-	UICard.chips(inner2, [["Rent", "%d/wk" % SoloCfg.rung_rent(r)], ["Bills", "%d/wk" % SoloCfg.rung_bills(r)], ["Deposit held", "%d" % SoloHome.deposit]])
+	UICard.chips(inner2, [["Rent", "%d/wk" % Upkeep.weekly_rent(dlg.hid())], ["Bills", "about %d/wk" % Economy.compute_bill(dlg.hid())], ["Deposit held", "%d" % SoloHome.deposit]])          # what you actually pay here (Upkeep)
 	if bool(p.get("notice", false)):
 		UICard.reqs(inner2, [["Pay the overdue rent to cancel the notice", false]])
 	var owed2: int = Economy.owed(dlg.hid())
@@ -51,7 +51,7 @@ static func _rung_card(dlg: BankHub, w: float, r: Dictionary) -> void:
 	var q: Dictionary = SoloLadder.quote(id)
 	var tags: Array = Heritage.tags_for_lot(str(r.get("lot", "")), SysUtil.folk(Pawn.of()))
 	var inner: VBoxContainer = UICard.card(dlg.body, w, str(r["label"]), "", str(r.get("cause", "")))
-	UICard.chips(inner, [["Rent", "%d/wk" % SoloCfg.rung_rent(r)], ["Bills", "%d/wk" % SoloCfg.rung_bills(r)], ["Deposit", "%d" % SoloCfg.rung_deposit(r)]])
+	UICard.chips(inner, [["Rent", "%d/wk" % SoloCfg.rung_rent(r)], ["Bills", "about %d/wk" % SoloCfg.rung_bills(r)], ["Deposit", "%d" % SoloCfg.rung_deposit(r)]])
 	UICard.reqs(inner, q.get("checks", []))
 	var did: String = SoloDistricts.district_of(str(r.get("lot", "")))
 	var line: Array = []

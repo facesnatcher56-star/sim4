@@ -23,6 +23,7 @@ static var outcome_log: Array = []         # recent resolved interactions (debug
 static var stats: Dictionary = {}          # counters
 static var last_social: Dictionary = {}    # folk_id -> game minute of their last social (for the "needs contact" nudge)
 static var _next_gathering: int = 1
+static var _met_ok: Dictionary = {}           # "a|t|iid" -> true: the other person's reaction was rolled when they met and it went fine (resolve does not roll again)
 
 static func reset() -> void:
 	goals.clear()
@@ -32,6 +33,7 @@ static func reset() -> void:
 	outcome_log.clear()
 	stats = {"arguments": 0, "tiers": {}, "gossip": 0, "backfires": 0, "dates": 0, "breakups": 0, "cheats": 0, "gatherings": 0}
 	_next_gathering = 1
+	_met_ok.clear()
 
 static func cfg() -> Dictionary:
 	return SysUtil.table("social")
@@ -63,6 +65,33 @@ static func has_t(fid: int, tr: String) -> bool:
 	return RelationshipBits.traits_of(fid).has(tr)
 
 # ------------------------------------------------------------------ resolution
+static func _met_key(a: int, t: int, iid: String) -> String:
+	return "%d|%d|%s" % [a, t, iid]
+
+## The player's person has just reached someone for an act that is out of place for what the two have: the other person reacts now (the
+## same roll resolve() would make at the end). true = they said no: the act stops here, so a refused hug or kiss is never played out.
+static func rebuffed_on_meeting(a, t, iid: String, d: Dictionary) -> bool:
+	if a == null or t == null or (d.get("social", {}) as Dictionary).is_empty() or not SocialFit.player_controlled(a):
+		return false
+	var aid: int = int(a.id)
+	var tid: int = int(t.id)
+	if SocialScoring.check_requires(aid, tid, (d["social"] as Dictionary).get("requires", [])) != "":
+		return false
+	if RomanceRules.is_romantic_def(d) and not RomanceRules.allowed(aid, tid):
+		return false
+	var gap: float = SocialFit.gap(aid, tid, d)
+	if gap < SocialReaction.min_gap():
+		return false
+	if SocialReaction.passes(gap):
+		_met_ok[_met_key(aid, tid, iid)] = true
+		return false
+	var rx: Dictionary = SocialReaction.react(a, t, iid, d, gap)
+	if rx.is_empty():
+		return false
+	_count_tier(str(rx["tier"]))
+	outcome_log.append({"actor": aid, "target": tid, "iid": iid, "tier": rx["tier"], "label": rx["label"], "score": rx["score"], "day": SysUtil.day()})
+	return true
+
 static func resolve(actor_id: int, target_id: int, iid: String, d: Dictionary) -> Dictionary:
 	var sd: Dictionary = d.get("social", {})
 	if sd.is_empty():
@@ -85,7 +114,9 @@ static func resolve(actor_id: int, target_id: int, iid: String, d: Dictionary) -
 		req_fail = "not_allowed"
 	if req_fail == "" and SocialFit.player_controlled(a):          # task 52: out of place for what you two have = the other person reacts (SocialReaction)
 		var fit_gap: float = SocialFit.gap(actor_id, target_id, d)
-		if fit_gap >= SocialReaction.min_gap() and not SocialReaction.passes(fit_gap):
+		var met_ok: bool = _met_ok.has(_met_key(actor_id, target_id, iid))
+		_met_ok.erase(_met_key(actor_id, target_id, iid))
+		if fit_gap >= SocialReaction.min_gap() and not met_ok and not SocialReaction.passes(fit_gap):
 			var rx: Dictionary = SocialReaction.react(a, t, iid, d, fit_gap)
 			if not rx.is_empty():
 				_count_tier(str(rx["tier"]))

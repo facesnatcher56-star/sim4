@@ -20,8 +20,10 @@ func _bills(hid: int) -> void:
 	var due: Array = Economy.outstanding(hid)
 	var today := SysUtil.day()
 	if due.is_empty():
-		var nxt := int(Economy.next_bill_day)
-		line("Nothing to pay. Next bill around day %d." % nxt if nxt > 0 else "Nothing to pay.", 14, UITheme.MUTED)
+		line("Nothing to pay right now.", 14, UITheme.MUTED)
+	for u in Upkeep.upcoming(hid):          # what comes next, with the same numbers that will charge it
+		var ui: VBoxContainer = UICard.card(body, w, str(u["what"]), "COMING UP", "")
+		UICard.chips(ui, [["About" if str(u["what"]) != "Rent" else "Amount", "%d" % int(u["amount"])], ["Due", "day %d" % int(u["day"])], ["Every", "week"]])
 	for bl in due:
 		var late := bool(bl.get("late", false))
 		var days_left := int(bl["due"]) - today

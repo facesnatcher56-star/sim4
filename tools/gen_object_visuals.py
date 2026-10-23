@@ -166,6 +166,8 @@ def easel(w, h, y0, zf, hide):
 
 O["easel"] = easel(0.58, 0.78, 0.67, -0.135, ["paint_*"])
 O["easel_large"] = easel(1.28, 1.08, 0.72, -0.115, ["paint_*"])
+# guitar: off the stand while somebody plays it (they hold the guitar prop); the amp stays
+O["guitar_stand"] = {"layers": [{"id": "guitar", "states": [st("played", [{"in_use": True}], hide=["wood_light", "wood", "wood_dark"])]}]}
 O["trash_bin"] = {"layers": [{"id": "full", "states": [
     st("overflowing", [{"key": "fullness", "ratio_gte": 0.8}], fx=[{"kind": "stink", "pos": [0, 0.05, 0], "on_top": True}]), st("ok")]}]}
 

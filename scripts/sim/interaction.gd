@@ -31,6 +31,7 @@ var actor: Folk = null
 var obj = null
 var target_folk: Folk = null
 var _bad: float = 0.0
+var fail_reason: String = ""         # why start() refused: gone | busy | no_way (the player is told, OrderRefusal)
 
 ## Build an instance. Returns null for an unknown definition id.
 static func create(p_def_id: String, p_actor: Folk, p_target_id: int = -1, p_player: bool = false) -> Interaction:
@@ -159,13 +160,18 @@ func start() -> bool:
 	var use_tile := actor.tile
 	if target_kind == "object":
 		if obj == null:
+			fail_reason = "gone"
 			return false
 		slot_idx = WorldIface.reserve_any(obj, actor.id)
 		if slot_idx < 0:
+			fail_reason = "busy"
 			return false
 		use_tile = WorldIface.use_tile(obj, slot_idx)
+		if obj.has_method("slot_count") and int(obj.slot_count()) == 0:
+			use_tile = WorldIface.meet_tile(obj.tile, int(obj.level), actor.tile)          # no slots (a door, a ceiling lamp): stand beside it
 	elif target_kind == "folk":
 		if target_folk == null:
+			fail_reason = "gone"
 			return false
 		use_tile = WorldIface.meet_tile(target_folk.tile, target_folk.level, actor.tile)      # a target on a seat or bed is met beside it, never on the furniture
 	elif goto_tile.x >= 0:
@@ -186,6 +192,7 @@ func start() -> bool:
 		n = path.size() if not path.is_empty() else WorldIface.path_length(actor.tile, use_tile)
 	if n < 0:
 		_release()
+		fail_reason = "no_way"
 		return false
 	travel_total = n * WALK_MIN_PER_TILE / (Health.speed_mult(actor) * Weather.walk_speed_mult()) + float(params.get("delay_min", 0.0))      # injured folk and snow / rain walk slower; delay_min = traffic wait (commutes)
 	if params.has("ride_minutes"):
@@ -197,7 +204,7 @@ func start() -> bool:
 	var th: String = str(def.get("thought", ""))
 	if th != "":
 		actor.last_thought_min = SimEnv.now_min()
-		if str(def.get("target", "")) == "folk" and target_id >= 0:          # said to someone: a speech balloon with the speaker's name, pointing at them
+		if str(def.get("target", "")) == "folk" and target_id >= 0 and not ThoughtVoice.about_them(th):          # said to someone: a speech balloon with the speaker's name, pointing at them
 			var said: String = ThoughtVoice.filter(actor.id, th)
 			if said != "":
 				SimEnv.emit("speech", actor.id, said, target_id)
@@ -244,6 +251,8 @@ func _arrive() -> void:
 		actor.tile = goto_tile
 		actor.level = goto_level
 	actor.posture = str(def.get("posture", "stand"))
+	if target_kind == "folk" and SocialDynamics.rebuffed_on_meeting(actor, target_folk, def_id, def):
+		cancel("rebuffed")          # they said no as you reached them: the hug or kiss is never played out
 
 func tick(minutes: float) -> void:
 	var left := minutes

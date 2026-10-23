@@ -103,6 +103,15 @@ static func check_one(c: Variant, ctx: Dictionary) -> bool:
 			"car_impounded":                   # one of the household's cars is at the pound
 				if folk == null or Transport.cars_of(int(folk.household_id)).filter(func(c): return bool(c.get("towed", false)) or int(c.get("pound_day", -1)) >= 0).is_empty() == bool(v):
 					return false
+			"has_licence":                     # the folk holds this licence ("driving"): Licences
+				if folk == null or Licences.has(int(folk.id), str(v)) != true:
+					return false
+			"has_guests":                      # somebody to invite to a gathering (SocialGatherings.invitees)
+				if folk == null or SocialGatherings.has_invitee(folk) != bool(v):
+					return false
+			"election_open":                   # an election campaign is on (votes can be cast)
+				if (CityElection.phase == "campaign") != bool(v):
+					return false
 			"bills_due":                       # the household has an unpaid bill
 				if folk == null or (Economy.outstanding(int(folk.household_id)).size() > 0) != bool(v):
 					return false

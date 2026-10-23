@@ -66,7 +66,7 @@ static func _apply(a, t, iid: String, d: Dictionary, group: String, o: Dictionar
 	var lines: Array = o.get("lines", [""])
 	var key: String = "react|%s|%s|%s" % [group, str(o["id"]), SysUtil.pair_key(aid, tid)]
 	var line: String = str(lines[PlayerPrompt._pick(key, lines.size())])
-	line = line.replace("{t}", str(t.name)).replace("{a}", str(a.name))
+	line = line.replace("{t}", str(t.name).get_slice(" ", 0)).replace("{a}", str(a.name).get_slice(" ", 0))          # first names: "Benno closes up", not the full name every time
 	line = Sexes.fill(line, tid)
 	# --- what it does to the relationship (the other person's view in full, the player's person feels it a little)
 	for track in [["fr", "friendship"], ["ro", "romance"], ["tr", "trust"], ["te", "tension"]]:
@@ -78,7 +78,9 @@ static func _apply(a, t, iid: String, d: Dictionary, group: String, o: Dictionar
 		a.add_buff(str(o["abuf"]))
 	if o.has("tbuf"):
 		t.add_buff(str(o["tbuf"]))
-	SimEnv.emit("speech", tid, line, aid)
+	var said: String = ThoughtVoice.spoken_part(line)          # the balloon carries only their words; the narration is the notification
+	if said != "":
+		SimEnv.emit("speech", tid, said, aid)
 	if SocialFit.player_controlled(a) or SocialFit.player_controlled(t):
 		SysUtil.notify(line, "story")
 	LifeLedger.add("reaction", line, [aid, tid], false, 2)

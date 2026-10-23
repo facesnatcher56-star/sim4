@@ -135,6 +135,7 @@ func _ready() -> void:
 	UIU.connect_ev("folk_added", func(_i): rebuild_folk_row())
 	UIU.connect_ev("folk_removed", func(_i): rebuild_folk_row())
 	UIU.connect_ev("game_event", func(n, _p): if n == "open_town_law": TownLawDialog.open_from(case_board))
+	OrderRefusal.hook()          # an order that can't start says why
 	UIU.connect_ev("game_event", func(n, p): if n == "head_changed" and int(p.get("player_id", 1)) == Players.local_id: _follow_new_head(int(p.get("folk_id", -1))))
 	UIU.connect_ev("game_event", func(n, p):          # arriving at somebody's front door: the door options open (DoorActs)
 		if n == "doorstep":

@@ -480,7 +480,7 @@
     ],
     "duration_min": 30,
     "posture": "stand",
-    "tests": [],
+    "tests": [{"not": {"at_home_lot": true}}],
     "per_min": {
      "fun": 0.05
     },
@@ -558,7 +558,7 @@
     ],
     "duration_min": 30,
     "posture": "stand",
-    "tests": [],
+    "tests": [{"not": {"at_home_lot": true}}],
     "per_min": {},
     "skill_xp_per_min": {
      "stealth": 0.2

@@ -196,8 +196,8 @@ static func install_content() -> void:
 	var inter: Dictionary = {}
 	var mayor_test: Array = [{"has_buff": "mayor"}]
 	inter["town_notice"] = _def("Read the Town Notice", "town_notice", [], "What is the town up to?")
-	inter["vote_mayor"] = _def("Vote for Mayor", "vote_mayor", [], "Time to have my say.")
-	inter["run_for_mayor"] = _def("Run for Mayor", "run_for_mayor", [], "Maybe I should stand for mayor.")
+	inter["vote_mayor"] = _def("Vote for Mayor", "vote_mayor", [{"election_open": true}, {"age_stage_is": ["adult", "elder"]}], "Time to have my say.")
+	inter["run_for_mayor"] = _def("Run for Mayor", "run_for_mayor", [{"age_stage_is": ["adult", "elder"]}, {"skill_at_least": ["charisma", 1]}], "Maybe I should stand for mayor.", ["mailbox"], {"hard_gates": true})          # the same limits CityElection.declare checks
 	inter["tax_up"] = _def("Raise Taxes", "tax_up", mayor_test, "The town needs the money.")
 	inter["tax_down"] = _def("Lower Taxes", "tax_down", mayor_test, "People could do with a break.")
 	for d in (g.get("dept_labels", {}) as Dictionary):

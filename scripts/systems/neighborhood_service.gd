@@ -116,7 +116,8 @@ static func _closing() -> void:
 		if here.is_empty():
 			continue
 		var left: int = Venues.minutes_to_close(lot_id)
-		if left == int(cfg().get("closing_notice_min", 20)):
+		var home: bool = DoorActs.private_lot(lot_id)          # somebody's house has no opening hours to announce: guests just go home
+		if left == int(cfg().get("closing_notice_min", 20)) and not home:
 			SysUtil.notify("%s closes in %s." % [Neighborhood.label_of(lot_id), SysUtil.count_text(left, "minute")], "warn")
 		if not Venues.is_open(lot_id):
 			var movable: Array = here.filter(func(id): return not Pawn.is_pawn_id(int(id)))          # the player's person is never sent home by the game
@@ -124,7 +125,8 @@ static func _closing() -> void:
 				if Pawn.is_pawn_id(int(pid)):
 					VenueStaff.closing(SysUtil.folk(int(pid)), lot_id)
 			if not movable.is_empty():
-				SysUtil.notify("%s is closed. Heading home." % Neighborhood.label_of(lot_id), "warn")
+				if not home:
+					SysUtil.notify("%s is closed. Heading home." % Neighborhood.label_of(lot_id), "warn")
 				Neighborhood.travel(movable, Neighborhood.HOME, {"quiet": true})
 
 # ------------------------------------------------------------------ hangouts
