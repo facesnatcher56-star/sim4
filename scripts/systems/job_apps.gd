@@ -153,7 +153,8 @@ static func _decide(a: Dictionary, interviewed: bool, pre: String) -> void:
 	var cid: String = str(a["cid"])
 	a["state"] = "done"
 	var p: float = chance(fid, cid, int(a["applicants"]), interviewed)
-	if JusticeRecords.bans(fid, cid) or SysUtil.rng.randf() >= p:
+	var barred: bool = str(a["lot"]) != "" and str((Creation.picks.get(fid, {}) as Dictionary).get("barred_lot", "")) == str(a["lot"])          # task 62: the old manager's word
+	if JusticeRecords.bans(fid, cid) or barred or SysUtil.rng.randf() >= p:
 		if interviewed:
 			SkillCheck.train(fid, "charisma", 4.0, false)
 			_walk_home(fid)

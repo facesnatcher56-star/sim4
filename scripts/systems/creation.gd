@@ -163,17 +163,67 @@ static func hiring_kind(pid: int, kind: String) -> float:
 	var s: float = 0.0
 	if kind == "":
 		return s
-	for e in _effects(pid):
+	for e in _hiring_effects(pid):
 		s += float(((e as Dictionary).get("hiring", {}) as Dictionary).get(kind, 0))
 	return s
 
 ## Hiring bonus by job kind ("all" applies to every job).
 static func hiring(pid: int, kind: String) -> float:
 	var s: float = 0.0
-	for e in _effects(pid):
+	for e in _hiring_effects(pid):
 		var h: Dictionary = (e as Dictionary).get("hiring", {})
 		s += float(h.get(kind, 0)) + float(h.get("all", 0))
 	return s
+
+## The effects that count for hiring: the background's bonus is gone once its reference is lost (task 62: the apprentice's old boss).
+static func _hiring_effects(pid: int) -> Array:
+	var ef: Array = _effects(pid)
+	if bool((picks.get(pid, {}) as Dictionary).get("no_reference", false)) and not ef.is_empty():
+		ef = ef.slice(1)
+	return ef
+
+# ------------------------------------------------------------------ task 62: the background's trade at work
+## Wage multiplier for this job: lower pay in some kinds (care), and the first kitchen job of a kitchen hand.
+static func pay_mult(pid: int, cid: String) -> float:
+	var m: float = 1.0
+	var kind: String = job_kind(cid)
+	for e in _effects(pid):
+		m *= float(((e as Dictionary).get("pay_mult", {}) as Dictionary).get(kind, 1.0))
+	if first_kitchen(pid, cid):
+		m *= float(_bg_effect(pid, "first_kitchen_job").get("pay_mult", 1.0))
+	return m
+
+static func _bg_effect(pid: int, key: String) -> Dictionary:
+	var e: Variant = (background(str((picks.get(pid, {}) as Dictionary).get("background", ""))).get("effects", {}) as Dictionary).get(key, {})
+	return e if e is Dictionary else {}
+
+## Their first kitchen job (level 1, before the first promotion), which runs long, early and low-paid.
+static func first_kitchen(pid: int, cid: String) -> bool:
+	return not _bg_effect(pid, "first_kitchen_job").is_empty() and job_kind(cid) == "kitchen" and Careers.level_of(pid) <= 1
+
+## A first job in these kinds is full-time (no part-time start).
+static func full_time(pid: int, cid: String) -> bool:
+	for e in _effects(pid):
+		if ((e as Dictionary).get("full_time", []) as Array).has(job_kind(cid)):
+			return true
+	return false
+
+## After a shift: the wear of heavy work (a flaw for good after many shifts) and the strain of hard ones (a buff).
+static func on_shift(f, cid: String) -> void:
+	var pid: int = int(f.id)
+	var kind: String = job_kind(cid)
+	var w: Dictionary = _bg_effect(pid, "wear")
+	var spec: Dictionary = picks.get(pid, {})
+	if not w.is_empty() and (w.get("kinds", []) as Array).has(kind) and not (spec.get("flaws", []) as Array).has(str(w.get("flaw", ""))):
+		spec["wear_shifts"] = int(spec.get("wear_shifts", 0)) + 1
+		if int(spec["wear_shifts"]) >= int(w.get("shifts", 12)) and SysUtil.chance(float(w.get("chance", 0.06))):
+			if not spec.has("flaws"):
+				spec["flaws"] = []
+			(spec["flaws"] as Array).append(str(w["flaw"]))
+			SysUtil.notify("Your back goes halfway through the shift. It never quite comes right after that.", "bad")
+	var st: Dictionary = _bg_effect(pid, "strain")
+	if not st.is_empty() and (st.get("kinds", []) as Array).has(kind) and SysUtil.chance(float(st.get("chance", 0.3))):
+		f.add_buff(str(st.get("buff", "shift_strain")))
 
 static func has_licence(pid: int, id: String) -> bool:
 	for e in _effects(pid):
@@ -218,7 +268,8 @@ static func apply(f, spec: Dictionary) -> void:
 			var dd: Dictionary = ed["debt"]
 			var amount: int = int(dd.get("amount", 500))
 			var weeks: int = maxi(int(ceil(float(amount) / maxf(float(dd.get("repay_per_week", 25)), 1.0))), 1)
-			BankAccounts.open_loan(hid, amount, weeks, BankAccounts.loan_rate(hid), str(dd.get("lender", "loan")), "")
+			var ln: Dictionary = BankAccounts.open_loan(hid, amount, weeks, BankAccounts.loan_rate(hid), str(dd.get("lender", "loan")), "")
+			ln["pausable"] = bool(dd.get("pausable", false))          # task 62: the student loan can be paused while out of work
 		if str(ed.get("credit", "")) == "bad":
 			var r: Dictionary = BankAccounts.record.get(hid, {})
 			r["defaults"] = maxi(int(r.get("defaults", 0)), 1)
@@ -227,8 +278,18 @@ static func apply(f, spec: Dictionary) -> void:
 			var rec: Dictionary = ed["record"]
 			var recs: Array = JusticeState.records.get(fid, [])
 			for ch in rec.get("charges", []):
-				recs.append({"day": SysUtil.day() - 365 * int(rec.get("years_ago", 0)), "charge": str(ch), "case": -1, "result": "guilty"})          # a conviction that counts (job bans, the hiring malus)
+				recs.append({"day": SysUtil.day() - 365 * int(rec.get("years_ago", 0)), "charge": str(ch), "case": -1, "result": "guilty",          # a conviction that counts (job bans, the hiring malus)
+					"from": "creation", "clean_days": int(rec.get("clean_days", 0))})          # task 62: clean living expunges it
 			JusticeState.records[fid] = recs
+		if bool(ed.get("barred_place", false)):          # task 62: the old manager's word: one workplace in town never hires them
+			var lots: Array = []
+			for cid in Careers.career_ids():
+				var lot: String = Workplace.lot_for(str(cid))
+				if lot != "" and lot != "cafe" and not lots.has(lot):
+					lots.append(lot)
+			lots.sort()
+			if not lots.is_empty():
+				picks[fid]["barred_lot"] = str(lots[absi(hash("%d|barred" % fid)) % lots.size()])
 		if ed.has("contact"):
 			var cands: Array = Story.alive_townies().filter(func(t): return Story.stage_of(t) in ["adult", "elder"])
 			if not cands.is_empty():

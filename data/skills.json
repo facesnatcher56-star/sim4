@@ -19,6 +19,7 @@
   "shooting": {"label": "Shooting", "helpers": {"perception": 0.2}}
  },
  "tools": {"lockpick": 0.2, "crowbar": 0.15, "slim_jim": 0.2, "weapon": 0.2, "phone": 0.0},
+ "tools_from_items": {"_doc": "task 62: items carried (Inventory) that count as tools", "toolbox": ["crowbar", "lockpick"]},
  "tools_from_gear": {"_doc": "crime gear the person owns (crimelife.json gear) counts as carried: gear id -> tool", "lockpicks": "lockpick", "tools": "crowbar"},
  "conditions": {"dark": 0.06, "noisy": -0.04, "crowded": -0.08, "raining": -0.03, "tired": -0.08, "hungry": -0.05, "injured": -0.12, "sick": -0.07, "tipsy": -0.06, "drunk": -0.15, "high": -0.12},
  "age": {"child": -0.15, "teen": -0.04, "adult": 0.0, "elder": -0.08},

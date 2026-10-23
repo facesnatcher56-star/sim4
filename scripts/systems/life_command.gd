@@ -49,6 +49,8 @@ static func run(_player_id: int, folk_id: int, action: String, args: Dictionary 
 			if nojob != "":
 				return {"ok": false, "reason": nojob}
 			return JobApps.send(folk_id, str(args.get("career", "")))
+		"loan_pause":
+			return BankAccounts.set_paused(int(SysUtil.folk(folk_id).household_id), int(args.get("loan", -1)), bool(args.get("on", true)))
 		"phone_buy":
 			return PhoneOwn.buy(folk_id, str(args.get("kind", "old")))
 		"phone_sell":

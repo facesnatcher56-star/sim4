@@ -84,6 +84,17 @@ static func _bank(dlg: LifeHub, f) -> void:
 	for bl in due:
 		var what: String = str(bl.get("reason", "")).capitalize() if str(bl.get("reason", "")) != "" else "Household bills"
 		dlg.line("%s: %d coins, due day %d%s" % [what, int(bl["amount"]), int(bl["due"]), " (late)" if bool(bl["late"]) else ""], 13, UITheme.MUTED)
+	for l in BankAccounts.loans:          # task 62: a loan, and the pause a student loan allows while out of work
+		if int(l["hid"]) != hid:
+			continue
+		var paused: bool = bool(l.get("paused", false))
+		dlg.line("%s: %d coins left, %d a week%s" % [str(l["kind"]).replace("_", " ").capitalize(), int(ceil(float(l["balance"]))), int(l["payment"]),
+			" (paused, still growing)" if paused else ""], 13, UITheme.MUTED)
+		if bool(l.get("pausable", false)):
+			var lid: int = int(l["id"])
+			var jobless: bool = not Careers.has_job(int(f.id))
+			dlg.body.add_child(dlg.button("Start the payments again" if paused else "Pause the payments", "The interest keeps building while it is paused." if not paused else "",
+				func(): dlg.act("loan_pause", {"loan": lid, "on": not paused}), paused or jobless))
 
 ## No working phone: why, how to get one, and the other ways to find work (the job centre counter at city hall, the paper).
 static func _no_phone(dlg: LifeHub, fid: int, why: String) -> void:
