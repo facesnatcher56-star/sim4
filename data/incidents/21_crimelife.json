@@ -176,7 +176,9 @@
       "security",
       "ceiling"
      ],
-     "model": "res://assets/models/smoke_alarm.glb",
+     "layer": "floor",
+     "blocks": false,
+     "model": "res://assets/models/security_camera.glb",
      "color": "#222a33",
      "height": 2.6,
      "slots": [
@@ -212,7 +214,9 @@
       "security",
       "ceiling"
      ],
-     "model": "res://assets/models/smoke_alarm.glb",
+     "layer": "floor",
+     "blocks": false,
+     "model": "res://assets/models/motion_sensor.glb",
      "color": "#d9a441",
      "height": 2.6,
      "slots": [
@@ -245,7 +249,7 @@
       "safety",
       "security"
      ],
-     "model": "res://assets/models/lamp.glb",
+     "model": "res://assets/models/security_light.glb",
      "color": "#f2e394",
      "height": 2.2,
      "slots": [
@@ -278,7 +282,7 @@
       "safety",
       "security"
      ],
-     "model": "res://assets/models/dresser.glb",
+     "model": "res://assets/models/safe.glb",
      "color": "#555b63",
      "height": 0.9,
      "slots": [
@@ -311,7 +315,7 @@
       "safety",
       "security"
      ],
-     "model": "res://assets/models/dresser.glb",
+     "model": "res://assets/models/vault_safe.glb",
      "color": "#2f343a",
      "height": 1.2,
      "slots": [
@@ -344,7 +348,7 @@
       "safety",
       "security"
      ],
-     "model": "res://assets/models/nightstand.glb",
+     "model": "res://assets/models/guard_dog_kennel.glb",
      "color": "#8a5a2b",
      "height": 0.8,
      "slots": [

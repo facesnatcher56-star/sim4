@@ -245,6 +245,9 @@ def chair():
 def bed():
     b = Builder()
     b.box("wood_dark", 0, 0.25, 0, 1.9, 0.3, 1.95)
+    for x in (-0.88, 0.88):          # task 60: short legs, so the frame (bottom at y=0.1) stands on the floor instead of hovering
+        for z in (-0.9, 0.9):
+            b.box("wood_dark", x, 0.05, z, 0.1, 0.1, 0.1)
     b.box("white", 0, 0.45, -0.03, 1.8, 0.2, 1.85)
     b.box("wood", 0, 0.6, 0.95, 1.9, 0.6, 0.08)
     b.box("wood", 0, 0.4, -0.97, 1.9, 0.3, 0.06)

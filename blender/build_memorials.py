@@ -15,7 +15,7 @@ PALETTE.update({"grave_stone": ((0.58, 0.60, 0.62), 0.8, 0.0), "grave_moss": ((0
 
 def grave():
     b = Builder()
-    b.box("grave_moss", 0, 0.03, 0.12, 0.62, 0.06, 0.95)        # low grass mound
+    b.box("grave_moss", 0, 0.03, 0.02, 0.62, 0.06, 0.92)        # low grass mound (task 60: inside its tile; it stuck out 0.1 m)
     b.box("grave_stone", 0, 0.08, -0.25, 0.5, 0.16, 0.14)       # base
     b.box("grave_stone", 0, 0.45, -0.25, 0.38, 0.6, 0.1)        # slab
     b.cyl("grave_stone", 0, 0.75, -0.25, 0.19, 0.1, seg=16)     # rounded top (disc on its side approximated by a short cylinder)
