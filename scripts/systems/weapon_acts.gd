@@ -17,8 +17,8 @@ const MISHAP := {
 
 ## weapons.json charge ids -> the real justice.json charges (the weapon file names charges justice.json does not have).
 const CHARGE_MAP := {
-	"assault_weapon": "assault", "armed_assault": "aggravated_assault",
-	"assault": "assault", "banned_weapon": "assault", "unlicensed_gun": "assault",
+	"assault_weapon": "aggravated_assault", "armed_assault": "aggravated_assault",
+	"assault": "assault", "banned_weapon": "weapon_possession", "unlicensed_gun": "weapon_possession", "weapon_possession": "weapon_possession",
 	"robbery": "robbery", "threats": "threats"
 }
 const CARRY_ACT := {"threaten_w": "threaten", "demand_w": "threaten", "attack_w": "fight"}
@@ -140,7 +140,11 @@ static func entries(f, target) -> Array:
 			"action": func(): holster(f)})
 	else:
 		out.append({"id": "weapon_draw", "label": "Draw the %s" % nm, "category": "Weapon", "enabled": true, "reason": "",
-			"action": func(): draw(f)})
+			"action": func():
+				draw(f)
+				var rt: Dictionary = Notice.react(int(target.id), int(f.id), "weapon", "victim")          # the person it is drawn on reacts first
+				if str(rt["line"]) != "":
+					SysUtil.notify(str(rt["line"]), "bad")})
 	return out
 
 static func _start(f, target, aid: String) -> void:
@@ -200,7 +204,8 @@ static func do_act(f, target, aid: String) -> void:
 	elif aid == "threaten_w":
 		line = "%s backs away from the %s." % [tn, wn] if ok else "%s does not flinch." % tn
 	elif aid == "attack_w":
-		line = "You catch %s with the %s." % [tn, wn] if ok else "You swing and miss %s." % tn
+		var shot: bool = str(st.get("kind", "")) == "firearm" and not bool(st.get("empty", false))
+		line = ("You hit %s." % tn if shot else "You catch %s with the %s." % [tn, wn]) if ok else ("The shot misses %s." % tn if shot else "You swing and miss %s." % tn)
 
 	if ok and aid == "attack_w":
 		var injury: int = clampi(1 + int(st.get("injury_step", 0)), 1, 3)
@@ -279,5 +284,5 @@ static func _case(fid: int, tid: int, kind: String, charge: String, st: Dictiona
 	CrimePlace.place_at_scene(fid, str(c["scene"]))
 	if reported:
 		CaseDiscovery.report(c, wid if wid >= 0 else tid, "victim")
-	if float(st.get("noise", 0.0)) >= 1.0:
-		Police.respond(c)                     # a gunshot: neighbours and a patrol come
+	if float(st.get("noise", 0.0)) >= 1.0 and kind == "assault" and charge != "threats" and not bool(st.get("empty", false)):
+		Police.respond(c)                     # a gunshot (an attack that fired): neighbours and a patrol come; a threat fires nothing

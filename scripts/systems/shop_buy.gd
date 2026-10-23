@@ -20,6 +20,10 @@ static func why_not(hid: int, folk_id: int, sid: String, iid: String, qty: int, 
 			return "The shop is closed."
 		if folk_id >= 0 and not _at_shop(folk_id, str(sh.get("lot", ""))):
 			return "You have to go to the shop first."
+	if folk_id >= 0 and WeaponShop.why_not(folk_id, it) != "":
+		return WeaponShop.why_not(folk_id, it)          # task 57: the gun counter checks the permit and the age
+	if online and str(it.get("kind", "")) in ["gun", "ammo"]:
+		return "Guns and rounds are sold over the counter only."
 	if ShopStock.units(sid, iid) < qty:
 		return "Sold out." if ShopStock.units(sid, iid) <= 0 else "Not enough in stock."
 	var total: int = ShopStock.price(sid, iid) * qty + (_fee() if online else 0)
@@ -71,6 +75,9 @@ static func receive(hid: int, sid: String, iid: String, qty: int, folk_id: int) 
 			BankGamble.add_tickets(hid, qty, folk_id)
 		"object":
 			ShopStock.parcel_add(hid, str(it.get("def", iid)), qty)
+		"gun", "ammo":          # task 57: registered to the buyer at the counter / rounds by the box
+			for _q in qty:
+				WeaponShop.receive(folk_id if folk_id >= 0 else Pawn.of(), iid, it)
 		"inventory":          # task 55: carried by the buyer (glasses)
 			var who: int = folk_id if folk_id >= 0 else Pawn.of()
 			for _q in qty:

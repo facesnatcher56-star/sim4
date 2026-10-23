@@ -1746,6 +1746,29 @@
    "custody_loss": false,
    "stub": false
   },
+  "weapon_possession": {
+   "label": "Weapon possession",
+   "class": "misdemeanour",
+   "grade": 1,
+   "severity": 1,
+   "bail": 60,
+   "phrase": "carrying an illegal weapon",
+   "description": "Carrying a banned weapon, or a gun with no permit or not registered, in public.",
+   "elements": [
+    "carried in public",
+    "banned, or a gun without a permit or registration"
+   ],
+   "guideline": {"fine": [60, 150], "service": [2, 4], "probation": [6, 12], "jail": [1, 3], "custody_at": 0.7, "prison_at": 1.4},
+   "petty": true,
+   "jury": false,
+   "aggravating": ["prior_record", "same_charge_prior", "on_probation"],
+   "mitigating": ["first_offence", "plea", "remorse"],
+   "record": {"job_bans": ["police_officer", "security_guard", "night_watchman"], "expunge_days": 168},
+   "family": "weapon_possession",
+   "restitution": false,
+   "custody_loss": false,
+   "consecutive": false
+  },
   "probation_violation": {
    "label": "Probation violation",
    "class": "misdemeanour",

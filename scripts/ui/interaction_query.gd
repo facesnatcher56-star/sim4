@@ -166,7 +166,7 @@ static func entries_for(folk, target_kind: String, target_id: int) -> Array:
 			var d: Dictionary = table[id]
 			if d.get("target", "") == "folk":
 				ids.append(id)
-	var acts: Array = PersonActs.entries(folk, target) + Licences.person_entries(folk, target) + JobLeads.person_entries(folk, target) + WeaponActs.entries(folk, target)
+	var acts: Array = PersonActs.entries(folk, target) + Licences.person_entries(folk, target) + JobLeads.person_entries(folk, target) + WeaponShop.permit_entries(folk, target) + WeaponActs.entries(folk, target)
 	var have: Dictionary = {}
 	for e in acts:
 		have[str(e["label"]).to_lower()] = true

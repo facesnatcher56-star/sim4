@@ -74,6 +74,9 @@ static func do_act(f, target, aid: String) -> void:
 		if coins > 0:
 			CrimePerson.pay(tid, coins, "taken")
 			CrimePerson.add_coins(fid, coins, "taken from %s" % tn)
+		var lifted: String = WeaponShop.lift(tid, fid, bool(d.get("secret", false)))          # task 57: whatever they carried goes too
+		if lifted != "":
+			SysUtil.notify("You also come away with %s %s." % ["an" if lifted.left(1) in ["a", "e", "i", "o", "u"] else "a", lifted], "story")
 	var key: String = "line_ok" if ok and d.has("line_ok") else ("line_fail" if not ok and d.has("line_fail") else "line")
 	if ok and d.has("coins") and coins <= 0 and d.has("line_none"):
 		key = "line_none"

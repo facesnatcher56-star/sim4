@@ -45,6 +45,8 @@ static func run(e: Dictionary) -> Dictionary:
 			return CrimeLifeHeist.go(fid, int(a.get("heist", -1)))
 		"gear":
 			return CrimeLifeHeist.buy_gear(fid, str(a.get("gear", "")))
+		"buy_weapon":
+			return WeaponShop.buy_underground(fid, str(a.get("weapon", "")))
 		"fence":
 			return CrimeLifeFence.sell(fid, SysUtil.to_ints(a.get("ids", [])), int(a.get("fence_pid", -1)))
 		"biz_upgrade":
