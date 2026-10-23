@@ -9,6 +9,35 @@ static func is_work_day(cid: String, day: int, shift: String = "day") -> bool:
 		return SysUtil.has_int(sv["days"], SysUtil.weekday(day))
 	return SysUtil.has_int(Careers.career_def(cid).get("days", []), SysUtil.weekday(day))
 
+## Does this person work on `day`? The career's days, from the job's start day; task 61c: the solo pawn's first job is part-time until the first
+## promotion: about jobs.part_time_hours a week (data/solo.json), as whole shifts spread over the career's days (Mon, Wed, Fri for three of Mon-Fri).
+static func works_on(fid: int, day: int) -> bool:
+	var j: Dictionary = Careers.jobs.get(fid, {})
+	if j.is_empty() or day < int(j.get("start_day", 0)):
+		return false
+	var cid: String = str(j["career"])
+	if not is_work_day(cid, day, str(j.get("shift", "day"))):
+		return false
+	return part_time_days(fid).is_empty() or SysUtil.has_int(part_time_days(fid), SysUtil.weekday(day))
+
+## The weekdays of a part-time first job ([] = full time).
+static func part_time_days(fid: int) -> Array:
+	var j: Dictionary = Careers.jobs.get(fid, {})
+	if j.is_empty() or int(j.get("level", 1)) > 1 or not SoloHome.active or not Pawn.is_pawn_id(fid):
+		return []
+	var sv: Dictionary = Careers.shift_def(str(j["career"]), str(j.get("shift", "day")))
+	var f = SysUtil.folk(fid)
+	var len_h: float = 8.0 if f == null or f.work_start < 0.0 else fposmod(f.work_end - f.work_start, 24.0)
+	var n: int = maxi(int(round(float(SoloCfg.by_diff("jobs", "part_time_hours")) / maxf(len_h, 1.0))), 1)
+	var days: Array = (sv.get("days", Careers.career_def(str(j["career"])).get("days", [])) as Array).map(func(x): return int(x))
+	days.sort()
+	if n <= 0 or n >= days.size():
+		return []
+	var out: Array = []
+	for i in n:
+		out.append(days[int(round(float(i) * float(days.size() - 1) / float(maxi(n - 1, 1))))])
+	return out
+
 ## Is hour `h` inside the window in which a shift may START? Overnight shifts (end <= start) start any time from `start`.
 static func in_shift_window(h: float, start: float, end: float) -> bool:
 	if end > start:
@@ -55,7 +84,7 @@ static func on_minute() -> void:
 			var j: Dictionary = Careers.jobs[fid]
 			if day < int(j.get("start_day", 0)):
 				continue                          # task 61: an offer starts on a set day
-			if int(j["attempt_day"]) != day and is_work_day(str(j["career"]), day, str(j.get("shift", "day"))) \
+			if int(j["attempt_day"]) != day and works_on(fid, day) \
 					and in_shift_window(h + _lead(f, h, f.work_start, f.work_end), f.work_start, f.work_end):
 				j["attempt_day"] = day
 				if _hired_after_start(f, j, h, day):

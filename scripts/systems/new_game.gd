@@ -48,6 +48,7 @@ static func start(mgr: SystemsManager, h0: Dictionary, start_id: String, opts: D
 	Neighborhood.finish_new_game(start_id, SoloCfg.start_coins())
 	SoloRent.begin(Economy.primary_household())          # the studio is rented from a landlord; the first rent is due on day 8; no allowance, no free food
 	SoloOpening.begin(Economy.primary_household())       # task 61: the landlord's note, the neighbour, a Help wanted card near home, the background's first week
+	TownDrama.seed_town()                                # task 61d: the town's own stories, rolled from the world seed, then left to chance
 	SoloStart.finish(folk)
 	return folk
 

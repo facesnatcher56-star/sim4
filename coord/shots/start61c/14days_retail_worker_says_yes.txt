@@ -1,0 +1,64 @@
+NOTE d1 09:00 [bill] A note under the door from Inga Sinclair, the landlord: "Rent's due Sunday. 35 coins."
+NOTE d1 11:10 [relationship] Osric met Rune Jarvis.
+NOTE d1 11:10 [visit] Rune from next door knocks to say hello.
+NOTE d1 11:36 [career] You send your details to Fernwood City Hall.
+APPLY politician -> { "ok": true, "reason": "" }
+NOTE d1 11:36 [career] Application sent to Ironbridge Works.
+APPLY construction_worker -> { "ok": true, "reason": "" }
+NOTE d1 11:58 [visit] The visit is over.
+MONEY d1 191
+NOTE d1 21:00 [story] No bed yet. The floor it is.
+NOTE d1 23:00 [story] Your stomach growls. 191 coins and nothing in the cupboard.
+NOTE d2 06:01 [warn] Osric has caught a cold.
+NOTE d2 16:18 [career] A message from Fernwood City Hall: The job is yours. You start tomorrow, 10:00, at Fernwood City Hall.
+MONEY d2 182
+NOTE d3 08:35 [career] Work at 10:00, Fernwood City Hall. You set off around 8:50.
+NOTE d3 13:00 [story] Rune, who used to work the till with you, says the café is after a cashier.
+NOTE d3 15:00 [career] A message from Ironbridge Works: They'd like to meet you: tomorrow, 15:00.
+NOTE d3 16:01 [career] Osric earned 72 coins at work.
+NOTE d3 16:01 [goal] Your first wage is in your pocket.
+MONEY d3 245
+NOTE d4 00:07 [bill] Household bills: 50 coins (electricity 30, home internet 20), due on day 7.
+NOTE d4 00:13 [bill] Rent due for Starter Studio: 35 coins.
+NOTE d4 01:00 [story] The first bill. It pays itself on the day it's due, if the coins are there.
+NOTE d4 14:45 [story] Ironbridge Works: The job has gone.
+NOTE d4 17:10 [visit] Rune from next door drops by again. "A word about the landlord: pay on the day. The locks get changed fast round here."
+NOTE d4 18:03 [visit] The visit is over.
+MONEY d4 236
+NOTE d4 22:00 [warn] A water main burst on the north side. Taps are dry until it is repaired.
+NOTE d5 00:00 [warn] Several street lamps are out on the north side. People feel uneasy after dark.
+NOTE d5 04:50 [warn] The water on the north side is not safe to drink. Boil it first until the notice ends.
+NOTE d5 08:35 [career] Work at 10:00, Fernwood City Hall. You set off around 8:50.
+TILT [{ "id": "catch_cold", "key": "folk:1", "mult": 250.0, "until": 11 }]
+NOTE d5 16:01 [career] Osric earned 72 coins at work.
+MONEY d5 299
+NOTE d6 07:01 [warn] Osric has caught a cold.
+MONEY d6 290
+ASK d7 00:00 [A neighbour asks a favour] Nils Gilbert, a neighbour, asked Osric for a small favour. -> 
+NOTE d7 00:07 [bill] Paid bill: 50 coins.
+NOTE d7 00:07 [bill] Paid bill: 35 coins.
+NOTE d7 00:07 [goal] Rent paid. The roof is yours for another week.
+MONEY d7 196
+NOTE d8 00:13 [bill] Mobile plan: 5 coins.
+NOTE d8 16:01 [career] Osric earned 73 coins at work.
+MONEY d8 260
+NOTE d9 19:00 [warn] A storm brought power lines down on the north side.
+MONEY d9 251
+NOTE d10 10:01 [warn] Osric has caught a cold.
+ASK d10 12:00 [A party tonight] An invitation from Rune Jarvis. People are getting together at home. Will you attend? -> yes
+NOTE d10 16:01 [career] Osric earned 75 coins at work.
+NOTE d10 19:58 [visit] Osric had a great time at the party.
+MONEY d10 317
+NOTE d11 00:13 [bill] Paid bill: 5 coins.
+NOTE d11 00:13 [bill] Household bills: 50 coins (electricity 30, home internet 20), due on day 14.
+NOTE d11 00:13 [bill] Rent due for Starter Studio: 70 coins.
+MONEY d11 303
+NOTE d12 16:01 [career] Osric earned 74 coins at work.
+NOTE d12 18:25 [warn] Osric is overheating. Find shade and some water.
+MONEY d12 368
+MONEY d13 359
+NOTE d14 00:13 [bill] Paid bill: 50 coins.
+NOTE d14 00:13 [bill] Paid bill: 70 coins.
+MONEY d14 230
+NOTE d15 00:13 [bill] Mobile plan: 5 coins.
+END job=politician start_day=3 coins=230

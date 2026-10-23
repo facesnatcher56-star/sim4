@@ -16,17 +16,19 @@ static func _visits_and_invites(day: int) -> void:
 	var residents: Array = SysUtil.residents()
 	if residents.is_empty():
 		return
-	# schedule a visit
-	if SysUtil.chance(float(v.get("daily_chance", 0.55)) * StoryPacing.mult("visit", int(residents[0].household_id))):
+	# schedule a visit: only friends drop in unasked (task 61b: nobody visits a stranger who just moved in), a few a week at most
+	var this_week: int = Story.alive_townies().filter(func(t): return day - int(t.get("last_visit_day", -99)) < 7).size()
+	if this_week < int(v.get("max_per_week", 2)) and SysUtil.chance(float(v.get("daily_chance", 0.55)) * StoryPacing.mult("visit", int(residents[0].household_id))):
 		var cands: Array = []
 		var weights: Array = []
 		for t in Story.free_townies():
 			if Story.stage_of(t) in ["baby", "toddler"] or day - int(t["last_visit_day"]) < 2:
 				continue
-			var w: float = 1.0
+			var w: float = 0.0
 			for r in residents:
-				if RelationshipService.knows(int(r.id), int(t["id"])):
-					w += 2.0
+				w = maxf(w, RelationshipService.value(int(r.id), int(t["id"]), "friendship"))
+			if w < float(v.get("min_friendship", 30)):
+				continue
 			cands.append(t)
 			weights.append(w)
 		var pick = SysUtil.pick_weighted(cands, weights)

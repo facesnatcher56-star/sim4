@@ -25,7 +25,7 @@ static func next_shift(fid: int) -> Dictionary:
 	var cid: String = str(j["career"])
 	for i in 8:
 		var d: int = SysUtil.day() + i
-		if d < int(j.get("start_day", 0)) or not CareerShifts.is_work_day(cid, d, str(j.get("shift", "day"))):
+		if not CareerShifts.works_on(fid, d):
 			continue
 		if i == 0 and (int(j.get("attempt_day", -1)) == d or SysUtil.hour_f() >= f.work_end):
 			continue
@@ -43,7 +43,7 @@ static func entries(fid: int, days: int = 7) -> Array:
 	if not j.is_empty() and f != null and f.work_start >= 0.0:
 		var lot: String = Workplace.lot_of_folk(f)
 		for d in range(today, last + 1):
-			if d >= int(j.get("start_day", 0)) and CareerShifts.is_work_day(str(j["career"]), d, str(j.get("shift", "day"))):
+			if CareerShifts.works_on(fid, d):
 				out.append({"day": d, "hour": f.work_start, "label": "Work, %d:00-%d:00%s" % [int(f.work_start), int(f.work_end) % 24,
 					(" at " + Neighborhood.label_of(lot)) if lot != "" else ""], "kind": "work", "lot": lot})
 	var hid: int = int(f.household_id) if f != null else -1

@@ -1,0 +1,64 @@
+NOTE d1 09:00 [bill] A note under the door from Rowan Porter, the landlord: "Rent's due Sunday. 35 coins."
+NOTE d1 11:10 [relationship] Zara met Caspian Nash.
+NOTE d1 11:10 [visit] Caspian from next door knocks to say hello.
+NOTE d1 11:36 [career] You send your details to Fernwood City Hall.
+APPLY politician -> { "ok": true, "reason": "" }
+NOTE d1 11:36 [career] Application sent to Ironbridge Works.
+APPLY construction_worker -> { "ok": true, "reason": "" }
+NOTE d1 11:58 [visit] The visit is over.
+MONEY d1 191
+NOTE d1 21:00 [story] No bed yet. The floor it is.
+NOTE d1 23:00 [story] Your stomach growls. 191 coins and nothing in the cupboard.
+NOTE d2 10:18 [career] A message from Ironbridge Works: They'd like to meet you: tomorrow, 11:00.
+MONEY d2 182
+NOTE d3 10:45 [story] Ironbridge Works: The job has gone.
+NOTE d3 11:00 [bill] The loan shop rings: 55 coins a week, the first on Monday. "Don't make us come round."
+NOTE d3 16:10 [career] A message from Fernwood City Hall: They'd like to meet you: tomorrow, 12:00.
+MONEY d3 173
+NOTE d3 23:00 [warn] A cable fault knocked out phones and internet on the north side.
+NOTE d4 00:13 [bill] Household bills: 48 coins (electricity 29, home internet 19), due on day 7.
+NOTE d4 00:13 [bill] Rent due for Starter Studio: 35 coins.
+NOTE d4 01:00 [story] The first bill. It pays itself on the day it's due, if the coins are there.
+NOTE d4 11:43 [story] Fernwood City Hall: Not this time.
+NOTE d4 17:10 [visit] Caspian from next door drops by again. "A word about the landlord: pay on the day. The locks get changed fast round here."
+NOTE d4 18:03 [visit] The visit is over.
+MONEY d4 164
+NOTE d5 00:01 [warn] Zara has caught a cold.
+ASK d5 13:00 [Fell off a truck] Caspian has a box of trainers that "fell off a truck". "Sell them on and keep 50. Easy." -> no
+MONEY d5 155
+ASK d6 00:00 [A neighbour asks a favour] Zora Calloway, a neighbour, asked Zara for a small favour. -> 
+MONEY d6 146
+NOTE d7 00:07 [bill] Paid bill: 48 coins.
+NOTE d7 00:07 [bill] Paid bill: 35 coins.
+NOTE d7 00:07 [goal] Rent paid. The roof is yours for another week.
+MONEY d7 54
+NOTE d8 00:13 [warn] A loan shop payment of 55 coins was missed. A late fee was added.
+NOTE d8 00:13 [bill] Mobile plan: 5 coins.
+MONEY d8 45
+ASK d9 00:18 [A shady offer] Money is desperately tight. An acquaintance says there is quick cash for someone who can keep quiet. Does Zara take it? -> no
+NOTE d9 04:01 [warn] Zara has caught a cold.
+NOTE d9 12:00 [warn] A storm brought power lines down on the north side.
+MONEY d9 36
+ASK d10 00:00 [A neighbour asks a favour] Avery Jasper, a neighbour, asked Zara for a small favour. -> 
+NOTE d10 11:00 [warn] A water main burst on the north side. Taps are dry until it is repaired.
+ASK d10 12:00 [Something on this evening] "I would like to invite you," Caspian Nash writes. "There is a get-together at home." -> no
+NOTE d10 16:25 [warn] The water on the north side is not safe to drink. Boil it first until the notice ends.
+NOTE d10 17:00 [warn] A storm brought power lines down on the north side.
+NOTE d10 18:01 [warn] Lightning struck: the television is broken!
+NOTE d10 19:00 [warn] The loan shop rings again, after dark. "55 on Monday. We know where the studio is."
+MONEY d10 27
+NOTE d11 00:13 [bill] Paid bill: 5 coins.
+NOTE d11 00:13 [bill] Household bills: 47 coins (electricity 28, home internet 19), due on day 14.
+NOTE d11 00:13 [bill] Rent due for Starter Studio: 70 coins.
+MONEY d11 13
+ASK d12 13:00 [Fell off a truck] Caspian has a box of trainers that "fell off a truck". "Sell them on and keep 50. Easy." -> no
+MONEY d12 4
+MONEY d13 4
+NOTE d14 00:13 [warn] Bill overdue! Late fee 10 added (now 57 coins).
+NOTE d14 00:13 [warn] Bill overdue! Late fee 10 added (now 80 coins).
+MONEY d14 4
+NOTE d15 00:00 [birthday] It's Zara's birthday today!
+NOTE d15 00:00 [warn] The rent is overdue. Pay it, or the landlord starts eviction.
+NOTE d15 00:13 [warn] A loan shop payment of 55 coins was missed. A late fee was added.
+NOTE d15 00:13 [bill] Mobile plan: 5 coins.
+END job= start_day=- coins=4

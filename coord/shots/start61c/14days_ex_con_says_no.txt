@@ -1,0 +1,66 @@
+NOTE d1 09:00 [bill] A note under the door from Clara Gale, the landlord: "Rent's due Sunday. 35 coins."
+NOTE d1 11:10 [relationship] Galen met Dov Eaton.
+NOTE d1 11:10 [visit] Dov from next door knocks to say hello.
+NOTE d1 11:36 [career] Application sent to Fernwood City Hall.
+APPLY politician -> { "ok": true, "reason": "" }
+NOTE d1 11:36 [career] You send your details to Ironbridge Works.
+APPLY construction_worker -> { "ok": true, "reason": "" }
+NOTE d1 11:58 [visit] The visit is over.
+MONEY d1 191
+NOTE d1 21:00 [story] No bed yet. The floor it is.
+NOTE d1 23:00 [story] Your stomach growls. 191 coins and nothing in the cupboard.
+NOTE d2 09:00 [story] A letter from the probation office: check in at the police station on Thursday, 10:00-16:00.
+MONEY d2 182
+NOTE d3 14:06 [story] A message from Ironbridge Works: The job has gone.
+NOTE d3 15:10 [story] A message from Fernwood City Hall: The job has gone.
+MONEY d3 173
+NOTE d3 23:00 [warn] A cable fault knocked out phones and internet on the north side.
+NOTE d4 00:07 [bill] Household bills: 49 coins (electricity 29, home internet 20), due on day 7.
+NOTE d4 00:13 [bill] Rent due for Starter Studio: 35 coins.
+NOTE d4 01:00 [story] The first bill. It pays itself on the day it's due, if the coins are there.
+NOTE d4 16:00 [warn] A letter from the probation office: you missed your check-in. Report on Thursday, 10:00-16:00, or it goes to court.
+NOTE d4 17:10 [visit] Dov from next door drops by again. "A word about the landlord: pay on the day. The locks get changed fast round here."
+NOTE d4 18:03 [visit] The visit is over.
+MONEY d4 164
+ASK d5 13:00 [Fell off a truck] Dov has a box of trainers that "fell off a truck". "Sell them on and keep 50. Easy." -> no
+MONEY d5 155
+MONEY d6 146
+NOTE d7 00:00 [warn] Several street lamps are out on the north side. People feel uneasy after dark.
+NOTE d7 00:07 [bill] Paid bill: 49 coins.
+NOTE d7 00:07 [bill] Paid bill: 35 coins.
+NOTE d7 00:07 [goal] Rent paid. The roof is yours for another week.
+NOTE d7 07:01 [warn] Galen slipped and bruised himself.
+MONEY d7 53
+NOTE d8 00:13 [bill] Mobile plan: 5 coins.
+NOTE d8 03:00 [warn] Everyone's air conditioning or heating overloaded the power grid on the north side.
+MONEY d8 44
+MONEY d9 35
+NOTE d10 00:01 [warn] The power has gone out across town.
+NOTE d10 00:01 [warn] Your home lost power. Lights, the TV and the heating are off until the repair crew arrives.
+ASK d10 12:00 [Come along?] Dov Eaton asks politely whether you can come. A few friends are meeting up. -> no
+MONEY d10 26
+NOTE d11 00:13 [bill] Paid bill: 5 coins.
+NOTE d11 00:13 [bill] Household bills: 47 coins (electricity 28, home internet 19), due on day 14.
+NOTE d11 00:13 [bill] Rent due for Starter Studio: 70 coins.
+NOTE d11 14:00 [warn] A pumping station failed and the taps ran dry on the north side.
+NOTE d11 16:00 [warn] A letter from the probation office: you missed another check-in, and they have told the police.
+NOTE d11 16:00 [bad] Galen was arrested over breaking probation.
+NOTE d11 16:00 [bad] Bail was set at 100 coins, more than he can pay. Galen is held until the trial on day 16.
+ASK d11 16:00 [Arrested] Galen was arrested over breaking probation. -> 
+MONEY d11 12
+MONEY d12 3
+NOTE d12 22:00 [warn] A cable fault knocked out phones and internet on the north side.
+MONEY d13 3
+NOTE d14 00:13 [warn] Bill overdue! Late fee 10 added (now 57 coins).
+NOTE d14 00:13 [warn] Bill overdue! Late fee 10 added (now 80 coins).
+MONEY d14 3
+NOTE d15 00:00 [warn] The rent is overdue. Pay it, or the landlord starts eviction.
+NOTE d15 00:13 [bill] Mobile plan: 5 coins.
+NOTE d15 06:00 [warn] A cable fault knocked out phones and internet on the north side.
+NOTE d15 09:00 [story] The trial of Galen has begun.
+NOTE d15 09:25 [story] Zenith Osborne: Be seated. The court is hearing the case of Galen.
+NOTE d15 11:20 [relationship] Galen met Isadora Norton at Fernwood Courthouse.
+NOTE d15 11:30 [story] Zenith Osborne: The jury will retire to consider its verdict.
+NOTE d15 12:00 [story] Galen was found not guilty of breaking probation; the case stays open.
+NOTE d15 12:00 [story] Zenith Osborne: The jury finds the accused not guilty.
+END job= start_day=- coins=3

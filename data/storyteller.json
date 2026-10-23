@@ -3,7 +3,7 @@
   "default": "classic",
   "seed_salt": 2929,
   "foreshadow_signs": false,
-  "tilt": {"small": [6.0, 2], "medium": [10.0, 3], "big": [15.0, 4]},
+  "tilt": {"small": [6.0, 2], "medium": [10.0, 3], "big": [15.0, 4], "opening": [250.0, 6]},
   "personalities": {
     "calm": {
       "label": "Calm",

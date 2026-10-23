@@ -6,6 +6,10 @@ var _out := "user://start61/"
 var _bg := "nobody"
 var _job := ""
 var _iv := false
+var _days := 8
+var _answer := "no"
+var _logged := 0
+var _money_day := 0
 var m
 var hud
 var lv
@@ -19,6 +23,10 @@ func _ready() -> void:
 			_bg = a.substr(3)
 		elif a.begins_with("job="):
 			_job = a.substr(4)
+		elif a.begins_with("days="):
+			_days = int(a.substr(5))
+		elif a.begins_with("answer="):
+			_answer = a.substr(7)
 		elif a == "iv":
 			_iv = true
 		elif a == "yes":
@@ -54,6 +62,14 @@ func _note(text: String, kind: String) -> void:
 func _until(d: int, h: float) -> void:
 	var target: int = (d - 1) * 1440 + int(h * 60.0)
 	while clk.total_minutes < target:
+		while _logged < JusticePlayer.log.size():
+			var e: Dictionary = JusticePlayer.log[_logged]
+			_logged += 1
+			print("ASK d%d %02d:%02d [%s] %s -> %s" % [clk.day(), clk.hour(), clk.minute(), str(e["title"]), str(e["text"]).left(160), str(e["choice"])])
+		if _money_day != clk.day() and clk.hour() >= 20:
+			_money_day = clk.day()
+			Economy.spend(SoloHome.hid(), 9, "food (review run: three meals of ingredients a day)")
+			print("MONEY d%d %d" % [clk.day(), Economy.balance(SoloHome.hid())])
 		clk.advance_minutes(mini(6, target - clk.total_minutes))
 		if clk.day() >= 2:
 			var f = WorldIface.get_folk(fid)
@@ -76,14 +92,9 @@ func _go() -> void:
 	hud = m.hud
 	lv = m.find_child("LotView", true, false)
 	fid = Pawn.of()
-	var spec: Dictionary = Creation.picks.get(fid, {})
-	spec["background"] = _bg
-	if _bg == "street_kid":
-		for t in Story.alive_townies():
-			if Story.stage_of(t) == "adult":
-				spec["contact_id"] = int(t["id"])
-				break
-	Creation.picks[fid] = spec
+	var spec: Dictionary = {"background": "nobody" if _bg == "in_debt" else _bg, "skills": {}, "perks": [], "flaws": ["in_debt"] if _bg == "in_debt" else []}
+	Creation.apply(WorldIface.get_folk(fid), spec)          # the background's real effects: a loan, a record, a contact
+	JusticePlayer.auto = _answer          # every question to the player is logged (ASK) and answered this way
 	print("START bg=%s diff=%s coins=%d rent next_cycle=%d share=%s" % [_bg, Scenario.difficulty, Economy.balance(SoloHome.hid()), HousingRent.next_cycle,
 		str(SoloHome.prop().get("first_rent_share", "-"))])
 	lv.focus_on("folk", fid)
@@ -100,16 +111,20 @@ func _go() -> void:
 	if _iv:
 		(JobApps.cfg()["interview"] as Dictionary)["chance"] = 1.0          # the review run: always an interview
 	var rows: Array = EduJobs.board_for(WorldIface.get_folk(fid)).filter(func(r): return bool(r["qualified"]) and (_job == "" or str(r["career"]) == _job))
+	if _job == "":          # a careful player: two jobs anyone can start in, best pay first
+		rows = rows.filter(func(r): return int(r["level"]) == 1 and (Careers.level_def(str(r["career"]), 1).get("requires", {}) as Dictionary).is_empty())
 	if rows.is_empty() and _job != "":
 		EduState.board["openings"][_job] = 1
 		rows = EduJobs.board_for(WorldIface.get_folk(fid)).filter(func(r): return str(r["career"]) == _job)
-	if not rows.is_empty():
-		var r: Dictionary = Commands.run({"folk_id": fid, "action": "life", "args": {"action": "job_apply", "args": {"career": rows[0]["career"]}}})
-		print("APPLY %s -> %s" % [rows[0]["career"], str(r)])
+	for row in rows.slice(0, 1 if _job != "" else 2):
+		var r: Dictionary = Commands.run({"folk_id": fid, "action": "life", "args": {"action": "job_apply", "args": {"career": row["career"]}}})
+		print("APPLY %s -> %s" % [row["career"], str(r)])
 	await _until(1, 22.0)
 	await _shot("d1_2200_night")
-	for d in range(2, 8):
+	for d in range(2, _days):
 		await _until(d, 12.0)
+		if d == 5:
+			print("TILT %s" % str(StorytellerTilt.tilts))
 		print("CAL d%d %s" % [d, str(CalendarBook.entries(fid, 7).map(func(e): return "d%d %s" % [int(e["day"]), str(e["label"])]))])
 		if d in [3, 4, 6]:
 			LifeHubPhone.app = "calendar"
@@ -119,13 +134,13 @@ func _go() -> void:
 			hud.career_dialog.show_for(fid)
 			await _shot("d%d_work" % d)
 			hud.career_dialog.visible = false
-	await _until(8, 5.1)
+	await _until(_days, 5.1)
 	lv.focus_on("folk", fid)
 	await _shot("d8_0505_work_note")
 	hud.career_dialog.show_for(fid)
 	await _shot("d8_0506_work_window")
 	hud.career_dialog.visible = false
-	await _until(8, 12.0)
+	await _until(_days, 12.0)
 	lv.focus_on("folk", fid)
 	await _shot("d8_1200")
 	print("END job=%s start_day=%s coins=%d" % [Careers.career_of(fid), str(Careers.jobs.get(fid, {}).get("start_day", "-")), Economy.balance(SoloHome.hid())])

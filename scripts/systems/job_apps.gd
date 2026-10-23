@@ -156,13 +156,27 @@ static func _decide(a: Dictionary, interviewed: bool, pre: String) -> void:
 	if JusticeRecords.bans(fid, cid) or SysUtil.rng.randf() >= p:
 		if interviewed:
 			SkillCheck.train(fid, "charisma", 4.0, false)
+			_walk_home(fid)
 		SysUtil.notify((pre if pre != "" else place(cid) + ": ") + _line("no", {}), "story")
 		return
 	if interviewed:
 		SkillCheck.train(fid, "charisma", 6.0, true)
+	if interviewed:
+		_walk_home(fid)
 	var sd: Dictionary = _offer(fid, cid, int(a["level"]))
 	if not sd.is_empty():
 		SysUtil.notify((pre if pre != "" else place(cid) + ": ") + _line("offer", {"when": "%s, at %s" % [when(int(sd["day"]), float(sd["hour"])), place(cid)]}), "career")
+
+## After an interview the pawn walks home again, like after a shift (nobody waits around in the building until it closes).
+static func _walk_home(fid: int) -> void:
+	var f = SysUtil.folk(fid)
+	if f == null or SoloHome.homeless:
+		return
+	var ir := Interaction.create_goto(f, NeighborhoodLots.entry_tile(Neighborhood.HOME), false)
+	if ir != null:
+		ir.def = ir.def.duplicate(true)
+		ir.def["priority"] = "high"
+		f.enqueue(ir)
 
 ## The share of a yes (never shown).
 static func chance(fid: int, cid: String, applicants: int, interviewed: bool) -> float:
@@ -192,7 +206,7 @@ static func _offer(fid: int, cid: String, level: int) -> Dictionary:
 	var j: Dictionary = Careers.jobs[fid]
 	var day: int = SysUtil.day() + 1
 	for i in 8:
-		if CareerShifts.is_work_day(cid, day, str(j.get("shift", "day"))):
+		if CareerShifts.works_on(fid, day):          # the first shift of a part-time first job too
 			break
 		day += 1
 	j["start_day"] = day

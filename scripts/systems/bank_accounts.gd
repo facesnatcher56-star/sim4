@@ -207,7 +207,7 @@ static func _installment(l: Dictionary) -> void:
 	var r: Dictionary = record.get(hid, {})
 	r["late_loan"] = int(r.get("late_loan", 0)) + 1
 	record[hid] = r
-	SysUtil.notify("A %s payment of %d coins was missed. A late fee was added." % [str(l["kind"]), due], "warn")
+	SysUtil.notify("A %s payment of %d coins was missed. A late fee was added." % [str(l["kind"]).replace("_", " "), due], "warn")
 	SysUtil.game_event("loan_missed", {"household_id": hid, "kind": str(l["kind"]), "prop": str(l["prop"]), "missed": int(l["missed"])})
 	if int(l["missed"]) >= int(c.get("default_after_missed", 3)):
 		_default(l)

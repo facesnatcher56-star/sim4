@@ -11,11 +11,11 @@ const CAP := 700
 const LINK_DAYS := 30
 ## effect kind -> kinds that can cause it (prefixes; "choice" = a choice of the player). Chronicle kinds and the LifeLedgerEvents kinds.
 const CAUSES := {
-	"jailed": ["crime", "attempt", "heist", "fight", "gang", "choice"], "released": ["jailed"], "civil_": ["crime", "fight", "fraud"],
+	"jailed": ["crime", "attempt", "heist", "fight", "gang", "choice", "drama"], "released": ["jailed"], "civil_": ["crime", "fight", "fraud", "drama"],
 	"eviction": ["layoff", "fired", "debt", "foreclosure"], "foreclosure": ["layoff", "fired", "debt"], "move": ["eviction", "fire", "foreclosure", "choice"],
 	"moved": ["eviction", "fire", "foreclosure", "choice"], "hospital": ["fight", "car_crash", "fire", "collapse", "crime", "attempt", "gas_leak", "addiction"],
 	"death": ["hospital", "fire", "collapse", "fight", "car_crash", "crime", "addiction", "gas_leak"], "fire": ["gas_leak", "fire"],
-	"revenge": ["secret_out", "crime", "fight"], "forgiveness": ["secret_out", "crime", "fight", "revenge"], "separation": ["secret_out"],
+	"revenge": ["secret_out", "crime", "fight", "drama"], "forgiveness": ["secret_out", "crime", "fight", "revenge", "drama"], "separation": ["secret_out", "drama"],
 	"recovery": ["addiction", "hospital"], "redemption": ["jailed", "released"], "child_placed": ["child_services"], "child_returned": ["child_placed"]}
 
 ## A kind matches a rule word when it is that word, or the word ends in "_" and names a family ("civil_" = civil_suit, civil_won...): "fired" is not "fire".

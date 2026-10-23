@@ -39,7 +39,7 @@ static func snapshot(label: String = "") -> Dictionary:
 		"world": world_d, "folk": folk,
 		"systems": {
 			"economy": Economy.to_dict(), "careers": Careers.to_dict(), "relationships": RelationshipService.to_dict(),
-			"goals": Goals.to_dict(), "aging": Aging.to_dict(), "story": Story.to_dict(), "away": Away.to_dict(), "commute": Commute.to_dict(), "job_apps": JobApps.to_dict(), "calendar": CalendarBook.to_dict(), "opening": SoloOpening.to_dict(),
+			"goals": Goals.to_dict(), "aging": Aging.to_dict(), "story": Story.to_dict(), "away": Away.to_dict(), "commute": Commute.to_dict(), "job_apps": JobApps.to_dict(), "calendar": CalendarBook.to_dict(), "opening": SoloOpening.to_dict(), "town_drama": TownDrama.to_dict(),
 			"family": Family.to_dict(), "babycare": BabyCare.to_dict(), "weather": Weather.to_dict(),
 			"neighborhood": Neighborhood.to_dict(), "scenario": Scenario.to_dict(), "incidents": Incidents.to_dict(), "justice": JusticeState.to_dict(), "fire": Fire.to_dict(), "share": ShareState.to_dict(), "econ": MarketTick.to_dict(), "vacation": Vacation.to_dict(), "players": Players.to_dict(), "tiers": Tiers.to_dict(), "city": CityState.to_dict(), "life": LifeTick.to_dict(), "solo": SoloHome.to_dict(), "ledger": LifeLedger.to_dict(),
 		},
@@ -150,6 +150,7 @@ static func restore(d: Dictionary) -> bool:
 	JobApps.from_dict(sy.get("job_apps", {}))
 	CalendarBook.from_dict(sy.get("calendar", {}))
 	SoloOpening.from_dict(sy.get("opening", {}))
+	TownDrama.from_dict(sy.get("town_drama", []))
 	Weather.from_dict(sy.get("weather", {}))
 	SysContent.install_all()
 	NeighborhoodService.install()

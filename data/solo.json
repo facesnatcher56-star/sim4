@@ -32,14 +32,24 @@
     "landlord": {"day": 0, "hour": 9, "line": "A note under the door from {who}, the landlord: \"Rent's due {due}. {amount} coins.\"",
       "line_paid": "A note under the door from {who}, the landlord: \"Rent's paid till {due}. {amount} coins a week after that.\""},
     "neighbour": {"day": 0, "hour": 11, "minutes": 40, "line": "{who} from next door knocks to say hello."},
+    "neighbour_again": [
+      {"day": 3, "hour": 17, "minutes": 45, "line": "{who} from next door drops by again. \"A word about the landlord: pay on the day. The locks get changed fast round here.\""},
+      {"day": 9, "hour": 12, "kind": "invite"}
+    ],
+    "problem": {"day": 4, "size": "opening", "incidents": [{"id": "burst_pipe", "subject": "home"}, {"id": "catch_cold", "subject": "folk"}]},
     "moments": {
-      "college_dropout": {"day": 1, "hour": 10, "kind": "loan", "lender": "student_loan", "line": "A letter from the student loan office: {pay} coins a week, the first on {due}."},
-      "in_debt": {"day": 2, "hour": 11, "kind": "loan", "lender": "loan_shop", "line": "The loan shop rings: {pay} coins a week, the first on {due}. \"Don't make us come round.\""},
+      "college_dropout": {"day": 1, "hour": 10, "kind": "loan", "lender": "student_loan", "line": "A letter from the student loan office: {pay} coins a week, the first on {due}.",
+        "follow": {"day": 8, "hour": 11, "kind": "loan_due", "lender": "student_loan", "line": "The first student loan payment went out: {pay} coins."}},
+      "in_debt": {"day": 2, "hour": 11, "kind": "loan", "lender": "loan_shop", "line": "The loan shop rings: {pay} coins a week, the first on {due}. \"Don't make us come round.\"",
+        "follow": {"day": 9, "hour": 19, "kind": "lender_again", "lender": "loan_shop", "line": "The loan shop rings again, after dark. \"{pay} on {due}. We know where the studio is.\""}},
       "ex_con": {"day": 1, "hour": 9, "kind": "probation", "on_day": 3, "hours": [10, 16], "lot": "police",
         "line": "A letter from the probation office: check in at the police station on {when}.",
-        "done": "You check in at the front desk. The officer stamps your card.", "missed": "A letter from the probation office: you missed your check-in."},
+        "done": "You check in at the front desk. The officer stamps your card.", "every_days": 7, "probation_days": 60,
+        "warning": "A letter from the probation office: you missed your check-in. Report on {when}, or it goes to court.",
+        "missed": "A letter from the probation office: you missed another check-in, and they have told the police."},
       "street_kid": {"day": 1, "hour": 19, "kind": "contact", "line": "{who} texts: \"Heard you got a place. Come find me in the Kiln Quarter.\"",
-        "line_no_phone": "{who} catches you in the street: \"Heard you got a place. Come find me in the Kiln Quarter.\""},
+        "line_no_phone": "{who} catches you in the street: \"Heard you got a place. Come find me in the Kiln Quarter.\"",
+        "follow": {"day": 8, "hour": 18, "kind": "contact_visit", "met_above": 22, "line": "{who} turns up at your door. \"You never came by. Thought I'd come to you.\""}},
       "retail_worker": {"day": 2, "hour": 13, "kind": "lead", "career": "barista", "line": "{who}, who used to work the till with you, says the {place} is after a cashier."},
       "trade_apprentice": {"day": 2, "hour": 10, "kind": "lead", "career": "handyperson", "who": "neighbour", "line": "{who} from next door has a gate that sticks, and says the market is after an odd-jobber."},
       "delivery_driver": {"day": 1, "hour": 12, "kind": "lead", "career": "warehouse_worker", "line": "{who} says the depot at the works yard is taking on pickers and packers this week."},
@@ -59,7 +69,8 @@
   },
   "jobs": {
     "first_board": ["cook", "writer", "handyperson", "gardener", "barista", "fitness_coach", "painter", "teacher"],
-    "min_openings": {"relaxed": 3, "normal": 2, "hard": 1}
+    "min_openings": {"relaxed": 3, "normal": 2, "hard": 1},
+    "part_time_hours": {"relaxed": 24, "normal": 16, "hard": 14}
   },
   "moving": {
     "fee": 15,
@@ -127,6 +138,20 @@
     "min_roughness": 0.6,
     "broke_coins": 150,
     "first_offer_days": {"relaxed": 5, "normal": 3, "hard": 2},
+    "grey_first_days": {"relaxed": 6, "normal": 3, "hard": 2},
+    "grey": {
+      "_doc": "Task 61c, read by SoloGrey: outside the rough districts someone the pawn knows (friendship >= min_friendship) offers grey money once the pawn is in trouble (broke_coins, no job, a late bill). caught = the chance it comes back 2-5 days later as a fine and a petty record.",
+      "repeat_days": 7,
+      "min_friendship": 5,
+      "offers": [
+        {"id": "moving", "title": "Cash in hand", "line": "{who} has a van and a flat to clear. \"Four hours, {pay} cash, nobody needs to know.\"", "yes": "Do it ({pay} cash)",
+          "pay": 60, "minutes": 240, "away": "Moving furniture, cash in hand", "ledger": "cash in hand", "caught": 0.08, "fine": 45, "charge": "undeclared work",
+          "caught_line": "A letter from the tax office: undeclared cash work. A fine of {fine} coins."},
+        {"id": "truck", "title": "Fell off a truck", "line": "{who} has a box of trainers that \"fell off a truck\". \"Sell them on and keep {pay}. Easy.\"", "yes": "Take the box ({pay})",
+          "pay": 50, "minutes": 90, "away": "Selling trainers out of a box", "ledger": "sold goods", "caught": 0.12, "fine": 60, "charge": "handling stolen goods",
+          "caught_line": "The police traced the trainers back to you: handling stolen goods. A fine of {fine} coins."}
+      ]
+    },
     "repeat_days": 4,
     "offers": [
       {"id": "lookout", "label": "Be a lookout", "minutes": 120, "pay": 40, "heat": 8, "arrest": 0.03},
