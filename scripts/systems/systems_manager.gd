@@ -131,6 +131,7 @@ static func reset_all() -> void:
 	JobApps.reset()
 	CalendarBook.reset()
 	SoloOpening.reset()
+	TownDrama.reset()
 	Family.reset()
 	BabyCare.reset()
 	Weather.reset()

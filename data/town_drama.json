@@ -1,0 +1,43 @@
+{
+ "_doc": "Task 61d, read by TownDrama: at world creation the town gets a random handful of stories already running, rolled from the world seed (never hand-written families), each a real state in an existing system as if it had been going for a while. After the seed nothing is scripted: the usual systems (discovery, gossip, fights, cases, autonomy, chance) run it. count = [min, max] per 40 adult townies (scaled by town size, clamped to clamp). weights = how often each kind is rolled; rough_mult = the weight multiplier when the people involved live in a rough district (never by heritage). ledger = the life-summary line when the player gets involved with someone in the thread ({who} = the person the player got close to, {a} and {b} = the two people in the thread).",
+ "count": [
+  4,
+  8
+ ],
+ "clamp": [
+  3,
+  10
+ ],
+ "weights": {
+  "feud": 3,
+  "affair": 2,
+  "secret": 3,
+  "debt": 2,
+  "crew": 1.5,
+  "cold_case": 1.5,
+  "business": 1.5,
+  "family": 2,
+  "addiction": 1,
+  "tension": 2
+ },
+ "rough_mult": {
+  "crew": 2.5,
+  "debt": 2.0,
+  "addiction": 1.6
+ },
+ "rough_at": 0.6,
+ "involved_friendship": 30,
+ "involved_grudge": 0.2,
+ "ledger": {
+  "feud": "Got to know {who}, in the middle of the feud between {a} and {b}.",
+  "affair": "Got close to {who}, in the middle of {a}'s affair with {b}.",
+  "secret": "Got close to {who}, around a secret of {a}'s that {b} already knew.",
+  "debt": "Got to know {who}, around {a}'s overdue debt to {b}.",
+  "crew": "Got to know {a}, who runs with a crew.",
+  "cold_case": "Got to know {who}, around the old break-in at {b}'s that {a} was never caught for.",
+  "business": "Got to know {a}, whose business was struggling.",
+  "family": "Got to know {who}, around the rift between {a} and {b}.",
+  "addiction": "Got to know {a}, who was using.",
+  "tension": "Got close to {who}, around what was going on between {a} and {b}."
+ }
+}
