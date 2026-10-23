@@ -120,6 +120,52 @@ class Mesher:
             bmesh.ops.delete(bm, geom=kill, context='VERTS')
         return faces
 
+    def loft(self, rows, mat, wfn=None, wrows=None, closed=True, caps=True):
+        """rows: list of point lists (adult units, same count per row; a one-point row is a pole). Weights come from
+        wrows[i] (a dict per row) when given, else from wfn(point). closed=False leaves each row an open strip."""
+        bm = self.bm
+        mid = self.mi(mat)
+        grid = []
+        for i, row in enumerate(rows):
+            g = []
+            for p in row:
+                vv = bm.verts.new(p * self.S)
+                self._w(vv, wrows[i] if wrows is not None else wfn(p))
+                g.append(vv)
+            grid.append(g)
+        faces = []
+
+        def addf(vs):
+            try:
+                f = bm.faces.new(vs)
+                f.material_index = mid
+                f.smooth = True
+                faces.append(f)
+            except ValueError:
+                pass
+        for i in range(len(grid) - 1):
+            a, b = grid[i], grid[i + 1]
+            n = max(len(a), len(b))
+            m = n if closed else n - 1
+            for k in range(m):
+                k2 = (k + 1) % n
+                if len(a) == 1 and len(b) > 1:
+                    addf((a[0], b[k2], b[k]))
+                elif len(b) == 1 and len(a) > 1:
+                    addf((a[k], a[k2], b[0]))
+                elif len(a) > 1:
+                    addf((a[k], a[k2], b[k2], b[k]))
+        if caps and closed:
+            for row in (grid[0], grid[-1]):
+                if len(row) > 2:
+                    cen = bm.verts.new(sum((v.co for v in row), Vector()) / len(row))
+                    for g, w in row[0][self.dl].items():
+                        cen[self.dl][g] = w
+                    n = len(row)
+                    for k in range(n):
+                        addf((cen, row[(k + 1) % n], row[k]) if row is grid[0] else (cen, row[k], row[(k + 1) % n]))
+        return faces
+
     # --- primitives
     def tube(self, p0, p1, prof, mat, wfn, seg=10):
         a, c = Vector(p0), Vector(p1)
