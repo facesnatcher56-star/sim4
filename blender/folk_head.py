@@ -294,16 +294,16 @@ def fall(M, hd, z_end, thick, span=200.0, z_top=0.02, flare=0.04, front_z=None, 
             v = abs(j / (seg - 1) * 2 - 1)                       # 0 at the back, 1 at the sides
             ze = z_end if front_z is None else lerp(z_end, front_z, sstep(0.55, 1.0, v))
             z = lerp(z_top, ze, u)
+            th = lerp(th, -PI / 2, 0.6 * v * sstep(-0.08, -0.26, z))      # below the jaw the side locks fall in behind the shoulders
             phi = zphi(max(z, -0.06))
             base = skull_pt(phi, th)
-            tk = thick * (1 - 0.75 * sstep(0.6, 1.0, v)) * lerp(0.55, 1.0, sstep(0.0, 0.2, u))
+            tk = thick * (1 - 0.75 * sstep(0.6, 1.0, v)) * lerp(0.6, 1.0, sstep(0.0, 0.35, u)) * lerp(1.0, 0.45, sstep(0.7, 1.0, u))
             r = V((base.x, base.y, 0)).length + tk
-            if z < -0.06:                                        # below the jaw the hair hangs straight, flaring a little
-                r += flare * (-0.06 - z) / 0.3
+            if z < -0.06:                                        # below the jaw it falls in towards the neck, then rests on the shoulders
+                r = lerp(r, 0.07 / hd.hs + tk, sstep(-0.06, -0.17, z) * (0.35 + 0.65 * v)) + flare * (-0.06 - z) / 0.3
             d = V((math.cos(th), math.sin(th), 0))
             p = V((d.x * r * (1.0 if base.x == 0 else 1.0), d.y * r, z))
             ab = hd.L(p)
-            ab.x *= lerp(1.0, 0.58, sstep(1.48, 1.25, ab.z))           # long hair gathers towards the middle of the back
             if ab.z < 1.42:                                      # rest on the shoulders and back instead of passing through
                 hw, fr, bk, sq = torso_at(ab.z - 0.035, (1, 1, 1, 1), 1.0)
                 dx, dy = ab.x, ab.y
@@ -360,7 +360,7 @@ def hair(M, hd, i):
         cap(M, hd, LINE, 0.0035, edge=0.001)
     elif i == 2:      # long (to the shoulders), ears covered
         cap(M, hd, LINE_EARS, 0.012, top=0.006, side_bulge=0.008, locks=7)
-        fall(M, hd, -0.24, 0.016, span=215, front_z=-0.13, flare=0.03)
+        fall(M, hd, -0.24, 0.016, span=215, front_z=-0.075, flare=0.03)
     elif i == 3:      # ponytail
         cap(M, hd, LINE, 0.006, top=0.003)
         hd.E(M, (0, -0.112, 0.020), (0.022, 0.018, 0.020), "accent", rings=4, seg=8)          # hair tie
@@ -413,7 +413,7 @@ def hair(M, hd, i):
         M.loft(rows, "hair", W("head"), closed=True, caps=False)
     elif i == 11:     # long straight, centre parting
         cap(M, hd, LINE, 0.010, top=0.002, side_bulge=0.010)
-        fall(M, hd, -0.36, 0.014, span=215, front_z=-0.16, flare=0.02)
+        fall(M, hd, -0.36, 0.014, span=215, front_z=-0.085, flare=0.02)
     elif i == 12:     # bob with a fringe
         cap(M, hd, LINE_FRINGE, 0.014, top=0.006, side_bulge=0.012, edge=0.006)
         fall(M, hd, -0.105, 0.020, span=250, front_z=-0.085, flare=0.0)
@@ -433,7 +433,7 @@ def hair(M, hd, i):
 # ------------------------------------------------------------------ face extras
 def _jaw_shell(M, hd, top_z, centre_z, thick, mat="hair"):
     """Beard over the jaw and chin: from the sideburns (top_z at the ears) down under the chin; centre_z = top at the chin middle."""
-    cols = [lerp(-0.25, PI + 0.25, k / 16) for k in range(17)]
+    cols = [lerp(-0.08, PI + 0.08, k / 16) for k in range(17)]
 
     def prow(th):
         a = _alpha(th)
@@ -441,8 +441,8 @@ def _jaw_shell(M, hd, top_z, centre_z, thick, mat="hair"):
         return zphi(z), lerp(2.62, 2.40, sstep(0.2, 1.4, a))
 
     def tk(u, v, th):
-        e = sstep(0.0, 0.15, u) * sstep(0.0, 0.10, v) * sstep(1.0, 0.90, v) * sstep(1.0, 0.75, u)
-        return 0.001 + thick * e
+        e = sstep(0.0, 0.45, u) * sstep(0.0, 0.18, v) * sstep(1.0, 0.82, v) * sstep(1.0, 0.8, u)     # soft on the cheeks, thin at the sides
+        return 0.0008 + thick * e
     shell(M, hd, cols, prow, tk, mat, False, nrow=9)
 
 
@@ -465,7 +465,7 @@ def fhair(M, hd, i):
         shell(M, hd, cols, lambda th: (zphi(-0.068), 2.7), tk, "hair", False, nrow=8)
     else:             # full beard
         moustache(M, hd)
-        _jaw_shell(M, hd, 0.006, -0.066, 0.008)
+        _jaw_shell(M, hd, -0.012, -0.066, 0.0045)
 
 
 def mark(M, hd, i):
@@ -533,9 +533,15 @@ def bag(M, hd, i):
         for sx in (-1, 1):
             _tube_path(M, (V((sx * 0.085, -0.09, 1.33)), V((sx * 0.11, 0.0, 1.43)), V((sx * 0.12, 0.112, 1.30))), [0.008] * 4, "accent", wc, seg=5, flat=0.4)
             _tube_path(M, (V((sx * 0.12, 0.112, 1.30)), V((sx * 0.15, 0.06, 1.12)), V((sx * 0.10, -0.10, 1.08))), [0.008] * 4, "accent", wc, seg=5, flat=0.4)
-    else:             # satchel: strap across the chest + bag at the hip
-        wh = lambda p: {"chest": 0.5, "hips": 0.5}
-        _tube_path(M, (V((0.10, 0.02, 1.40)), V((0.0, 0.14, 1.27)), V((-0.17, 0.10, 1.05))), [0.010] * 4, "accent", wc, seg=5, flat=0.4)
-        _tube_path(M, (V((0.10, 0.02, 1.40)), V((0.04, -0.13, 1.25)), V((-0.17, -0.06, 1.02))), [0.010] * 4, "accent", wc, seg=5, flat=0.4)
-        M.ellipsoid(V((-0.215, 0.015, 0.95)), (0.040, 0.115, 0.085), "accent", wh, rings=6, seg=10)
-        M.ellipsoid(V((-0.24, 0.015, 0.99)), (0.018, 0.112, 0.045), "accent", wh, rings=4, seg=8)          # flap
+    else:             # satchel: strap across the chest, a flat leather bag resting on the back of the hip
+        wh = lambda p: {"hips": 1.0}
+        _tube_path(M, (V((0.10, 0.02, 1.40)), V((0.0, 0.135, 1.27)), V((-0.15, 0.06, 1.02))), [0.010] * 4, "shoes", wc, seg=5, flat=0.4)
+        _tube_path(M, (V((0.10, 0.02, 1.40)), V((0.02, -0.13, 1.25)), V((-0.13, -0.11, 1.03))), [0.010] * 4, "shoes", wc, seg=5, flat=0.4)
+        rows = []
+        for z in (1.03, 1.02, 0.94, 0.88, 0.875):
+            k = 0.6 if z in (1.03, 0.875) else 1.0
+            rows.append([V((-0.135 + 0.095 * k * math.cos(TAU * j / 12), -0.125 + 0.030 * k * math.sin(TAU * j / 12) - 0.04 * math.cos(TAU * j / 12), z))
+                         for j in range(12)])
+        M.loft(rows, "shoes", wh, closed=True, caps=True)
+        M.ellipsoid(V((-0.135, -0.162, 0.985)), (0.085, 0.006, 0.040), "shoes", wh, rings=4, seg=8)        # flap
+        M.ellipsoid(V((-0.135, -0.168, 0.955)), (0.010, 0.004, 0.008), "accent", wh, rings=3, seg=6)      # buckle
