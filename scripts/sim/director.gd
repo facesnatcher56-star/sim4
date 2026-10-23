@@ -179,6 +179,7 @@ func _fill(f: Folk) -> void:
 			return
 		if ir.player:
 			ThoughtVoice.urgent(f.id, "I can't do that right now.")
+			SimEnv.emit("game_event", "order_refused", {"folk_id": f.id, "interaction": ir.def_id, "target_id": ir.target_id, "why": ir.fail_reason})
 	if f.current != null or not f.queue.is_empty() or not autonomy_enabled:
 		return
 	if Pawn.is_pawn(f):          # zero autonomy for the player's character

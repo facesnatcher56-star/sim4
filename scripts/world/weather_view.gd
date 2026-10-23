@@ -53,6 +53,7 @@ func _build_visuals() -> void:
 	snow = _make_snow()
 	snow.visible = false
 	add_child(snow)
+	RainRoofs.ensure_on(self)          # single-storey rooms stop the rain too
 	scenery = Node3D.new()
 	scenery.name = "Scenery"
 	add_child(scenery)

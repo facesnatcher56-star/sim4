@@ -16,7 +16,7 @@ func run() -> Array:
 	# --- the Night brightness setting
 	var d := GameSettings.def_of("night_brightness")
 	_check(not d.is_empty() and d.get("t") == "range" and int(d["min"]) == 0 and int(d["max"]) == 100, "Night brightness is a 0..100 range setting")
-	_check(GameSettings.default_of("night_brightness") == 35, "Night brightness defaults to 35%")
+	_check(GameSettings.default_of("night_brightness") == 65, "Night brightness defaults to 65%")
 	_check(LightMood.floor_energy(0.0) < LightMood.floor_energy(0.5) and LightMood.floor_energy(0.5) < LightMood.floor_energy(1.0), "floor energy rises with the setting")
 	# --- readability floor: never darker than the floor at night, no effect by day
 	var night_look := 0.22

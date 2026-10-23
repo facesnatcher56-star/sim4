@@ -113,6 +113,8 @@ static func reserve_any(obj, folk_id: int) -> int:
 	var w = world()
 	if w == null or not w.has_method("reserve"):
 		return 0
+	if obj.has_method("slot_count") and int(obj.slot_count()) == 0:
+		return 0          # a door or a ceiling lamp has no spot to hold: anyone may use it (has_free_slot counts it as one free slot)
 	for i in slot_count(obj):
 		if w.reserve(obj.id, i, folk_id):
 			return i

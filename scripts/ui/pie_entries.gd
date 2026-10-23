@@ -2,7 +2,7 @@ class_name PieEntries
 extends RefCounted
 ## Keeps the interaction menu digestible: hides things this Folk can never do to this target, rewords "why not"
 ## reasons for players (no internal ids), and floats recently used actions to the top.
-const NEVER_PATTERNS := ["already together", "divorce instead", "only for exes", "only after being cheated", "not for ", "needs trait", "already attached", "is away", "Too young", "Only adults", "Nothing to do here"]
+const NEVER_PATTERNS := ["already together", "divorce instead", "only for exes", "only after being cheated", "not for ", "needs trait", "already attached", "is away", "Too young", "Only adults", "Nothing to do here", "No election on", "Not at your own home", "You have no car", "No car of yours"]          # hidden: the thing is not there at all
 const NOT_NEEDED := {"hunger": "Not hungry enough", "energy": "Not tired enough", "bladder": "Doesn't need the toilet", "hygiene": "Already clean",
 	"social": "Doesn't need company", "fun": "Not bored", "comfort": "Already comfortable"}
 const TOO_LOW := {"hunger": "Too hungry", "energy": "Too tired", "bladder": "Too desperate", "hygiene": "Too grimy", "social": "Too lonely", "fun": "Too bored", "comfort": "Too uncomfortable"}
@@ -129,8 +129,9 @@ static func curate(entries: Array, object_def: String) -> Dictionary:
 			continue
 		if not bool(e["enabled"]):
 			var why: String = polish_reason(str(e["reason"]))
-			if not is_never(why) and blocked.size() < 4 and why != "Not possible right now" and why != "":
-				blocked.append({"label": str(e["label"]), "reason": why})
+			var short: String = str(e["label"]).get_slice(":", 0)          # "Buy a Car: Old Banger" and the other cars are one line
+			if not is_never(why) and blocked.size() < 4 and why != "Not possible right now" and why != "" and not blocked.any(func(b): return b["label"] == short):
+				blocked.append({"label": short, "reason": why})
 			continue
 		var g: String = str(e.get("group", ""))
 		for gname in groups_cfg:

@@ -55,7 +55,10 @@ static func entries(f, obj) -> Array:
 	for o in (cfg().get("objects", {}) as Dictionary).get(str(obj.def_id), {}).get("orders", []):
 		var od: Dictionary = o
 		var lbl: String = str(SimEnv.data().interaction_def(str(od["iid"])).get("label", od["what"]))
-		out.append(_entry("tab_" + str(od["iid"]), lbl, func(): order(f, lot, obj, od)))
+		var e: Dictionary = _entry("tab_" + str(od["iid"]), lbl, func(): order(f, lot, obj, od))
+		e["enabled"] = _order_ir(f, obj, od) != null          # the menu says no when the order could not be served now (a round only in the evening)
+		e["iid"] = str(od["iid"])          # InteractionQuery words the reason from this interaction's tests
+		out.append(e)
 	if (cfg().get("till_objects", []) as Array).has(str(obj.def_id)) and not unpaid(int(f.id), lot).is_empty():
 		out.append(_entry("pay_till", "Pay", func(): WalkThen.go(f, spot, func(): pay(f, lot))))
 	return out
@@ -103,16 +106,23 @@ static func eat_here(f, lot: String, good: Dictionary) -> void:
 
 ## A cafe or bar order: the real interaction, served now, owed on the tab (no coins test, no coins taken at the counter).
 static func order(f, lot: String, obj, od: Dictionary) -> void:
-	var ir: Interaction = Interaction.create(str(od["iid"]), f, int(obj.id), true)
+	var ir: Interaction = _order_ir(f, obj, od)
 	if ir == null:
-		return
-	ir.def = ir.def.duplicate(true)
-	ir.def["tests"] = (ir.def.get("tests", []) as Array).filter(func(t): return not (t is Dictionary and (t as Dictionary).has("coins_at_least")))
-	ir.def["on_finish"] = (ir.def.get("on_finish", []) as Array).filter(func(e): return not (e is Dictionary and (e as Dictionary).has("coins_add")))
+		return          # nothing is served, so nothing goes on the tab
 	f.enqueue(ir)
 	var list: Array = carried.get(int(f.id), [])
 	list.append({"lot": lot, "id": str(od["iid"]), "what": str(od["what"]), "price": int(od["price"]), "kind": "eaten", "hidden": false, "tab": true})          # staff served it: they know
 	carried[int(f.id)] = list
+
+## The order as an interaction that goes on the tab (no coin test, no payment on finish), or null when it cannot be served now.
+static func _order_ir(f, obj, od: Dictionary) -> Interaction:
+	var ir: Interaction = Interaction.create(str(od["iid"]), f, int(obj.id), true)
+	if ir == null:
+		return null
+	ir.def = ir.def.duplicate(true)
+	ir.def["tests"] = (ir.def.get("tests", []) as Array).filter(func(t): return not (t is Dictionary and (t as Dictionary).has("coins_at_least")))
+	ir.def["on_finish"] = (ir.def.get("on_finish", []) as Array).filter(func(e): return not (e is Dictionary and (e as Dictionary).has("coins_add")))
+	return ir if ir.can_run(f, obj, false) else null
 
 # ------------------------------------------------------------------ the till
 static func _cashier(lot: String):

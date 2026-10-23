@@ -183,7 +183,7 @@
    "target": "folk",
    "duration_min": 5,
    "posture": "stand",
-   "tests": [],
+   "tests": [{"relationship_above": ["tension", 5]}],
    "on_finish": [
     {
      "relationship_add": [

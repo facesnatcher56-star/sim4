@@ -4,6 +4,31 @@ extends RefCounted
 
 # ------------------------------------------------------------------ gatherings
 ## Host invites friends / family on the lot; they walk over and chat, raising a group score used by Story parties.
+## Who the host could invite: family, a partner, or anyone friendly enough (data: social gathering.min_friendship). [{f, close, fam}]
+static func invitees(host_id: int) -> Array:
+	var gc: Dictionary = SocialDynamics.cfg().get("gathering", {})
+	var cands: Array = []
+	for f in WorldIface.all_folk():
+		if int(f.id) == host_id or SysUtil.is_away(f) or str(f.age_stage) in ["baby", "toddler"]:
+			continue
+		var close: float = RelationshipService.value(int(f.id), host_id, "friendship")
+		var fam: bool = RelationshipBits.has_flag(host_id, int(f.id), "family") or RelationshipBits.has_flag(host_id, int(f.id), "partner") or RelationshipBits.has_flag(host_id, int(f.id), "spouse")
+		if close >= float(gc.get("min_friendship", 12)) or fam:
+			cands.append({"f": f, "close": close + (30.0 if fam else 0.0), "fam": fam})
+	return cands
+
+## Cheap check for the menu and autonomy: anyone the host knows who would come (walks the host's own relationships, not the town).
+static func has_invitee(host) -> bool:
+	var need: float = float(SocialDynamics.cfg().get("gathering", {}).get("min_friendship", 12))
+	for oid in host.relationships:
+		var o = SysUtil.folk(int(oid))
+		if o == null or SysUtil.is_away(o) or str(o.age_stage) in ["baby", "toddler"]:
+			continue
+		var hid: int = int(host.id)
+		if RelationshipService.value(int(oid), hid, "friendship") >= need or RelationshipBits.has_flag(hid, int(oid), "family") or RelationshipBits.has_flag(hid, int(oid), "partner") or RelationshipBits.has_flag(hid, int(oid), "spouse"):
+			return true
+	return false
+
 static func start_gathering(host_id: int) -> Dictionary:
 	var gc: Dictionary = SocialDynamics.cfg().get("gathering", {})
 	var host = SysUtil.folk(host_id)
@@ -14,14 +39,7 @@ static func start_gathering(host_id: int) -> Dictionary:
 	var hour: int = (SysUtil.now() % 1440) / 60
 	if hour < int(gc.get("earliest_hour", 9)) or hour >= int(gc.get("latest_hour", 22)):
 		return {}                     # gatherings are for waking hours
-	var cands: Array = []
-	for f in WorldIface.all_folk():
-		if int(f.id) == host_id or SysUtil.is_away(f) or str(f.age_stage) in ["baby", "toddler"]:
-			continue
-		var close: float = RelationshipService.value(int(f.id), host_id, "friendship")
-		var fam: bool = RelationshipBits.has_flag(host_id, int(f.id), "family") or RelationshipBits.has_flag(host_id, int(f.id), "partner") or RelationshipBits.has_flag(host_id, int(f.id), "spouse")
-		if close >= float(gc.get("min_friendship", 12)) or fam:
-			cands.append({"f": f, "close": close + (30.0 if fam else 0.0), "fam": fam})
+	var cands: Array = invitees(host_id)
 	cands.sort_custom(func(x, y): return float(x["close"]) > float(y["close"]))
 	var guests: Array = []
 	var fam_n := 0

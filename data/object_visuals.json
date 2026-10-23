@@ -1812,6 +1812,28 @@
     }
    ]
   },
+  "guitar_stand": {
+   "layers": [
+    {
+     "id": "guitar",
+     "states": [
+      {
+       "id": "played",
+       "when": [
+        {
+         "in_use": true
+        }
+       ],
+       "hide": [
+        "wood_light",
+        "wood",
+        "wood_dark"
+       ]
+      }
+     ]
+    }
+   ]
+  },
   "trash_bin": {
    "layers": [
     {

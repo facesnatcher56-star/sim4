@@ -121,6 +121,7 @@ func _on_game_event(ev_name: String, _payload: Dictionary) -> void:
 var _tower_top: float = -1.0          # tallest building of the map (m); the sky the precipitation falls from follows it
 var _rain_y: float = 17.0
 var _snow_y: float = 12.0
+var _indoor_look: float = 0.0          # 0..1, smoothed: the camera looks at an indoor tile
 
 
 ## Rain and snow start ABOVE the tallest roof (a 15-storey tower is 45 m): lifetime and amount grow with the fall so the density stays the same.
@@ -160,8 +161,10 @@ func _update_particles(_delta: float) -> void:
 	rain.position = Vector3(ctr.x, _rain_y, ctr.z)
 	snow.position = Vector3(ctr.x, _snow_y, ctr.z)
 	var q: float = [0.0, 0.5, 1.0][clampi(GameSettings.effects_quality(), 0, 2)]
-	var rp: float = float(p["rain"]) * q
-	var sp: float = float(p["snow"]) * q
+	_indoor_look = lerpf(_indoor_look, 1.0 if zoom < 16.0 and RainRoofs.indoor_at(ctr) else 0.0, minf(_delta * 3.0, 1.0))
+	var thin: float = lerpf(1.0, 0.05, _indoor_look)          # looking into a room up close: drops falling in front of it would cover the room
+	var rp: float = float(p["rain"]) * q * thin
+	var sp: float = float(p["snow"]) * q * thin
 	_set_precip(rain, rp > 0.03)
 	rain.amount_ratio = clampf(rp, 0.05, 1.0)
 	(rain.process_material as ParticleProcessMaterial).direction = Vector3(0.1 + wind * 0.35, -1.0, 0.04)

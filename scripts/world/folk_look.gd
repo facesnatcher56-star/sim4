@@ -11,7 +11,7 @@ func setup(p_folk_id: int) -> void:
 		position = World.tile_to_pos(f.tile)
 		_target = position
 	_name_label = Label3D.new()
-	_name_label.text = str(f.name) if f != null else ""
+	_name_label.text = Crowd.tag_name(f)
 	_name_label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	_name_label.position = Vector3(0, 2.0, 0)
 	_name_label.fixed_size = true          # constant on-screen size at every zoom level

@@ -39,6 +39,26 @@ static func emit_raw(fid: int, text: String) -> void:
 
 # ------------------------------------------------------------------ gate
 ## Called by SimEnv.emit for every "thought". Returns the text to show, or "" to drop it.
+static var _about_rx: RegEx = null
+
+## A line that talks ABOUT the other person ("How's their day going?", "I owe them an apology") is a thought: said to their face it reads wrong.
+static func about_them(text: String) -> bool:
+	if _about_rx == null:
+		_about_rx = RegEx.create_from_string("(?i)\\b(they|them|their|theirs|they're|themselves|he|she|him|his|her|hers)\\b")
+	return _about_rx.search(text) != null
+
+## The words actually said in a narrated line: 'Elias steps back. "Personal space, please."' -> 'Personal space, please.'. "" when the line is
+## only narration ("Elias shoves you off."): that is shown as a notification, never as a speech balloon over the person.
+static func spoken_part(line: String) -> String:
+	var parts: PackedStringArray = line.split("\"")
+	if parts.size() < 3:
+		return ""
+	var said: Array = []
+	for i in range(1, parts.size(), 2):
+		var q: String = parts[i].strip_edges()
+		said.append(q.trim_suffix(",") + "." if q.ends_with(",") else q)          # 'says, "I'm not interested," and' -> I'm not interested.
+	return " ".join(said)
+
 static func filter(fid, text: String) -> String:
 	var c: Dictionary = conf()
 	if _raw or c.is_empty() or text == "":
@@ -70,6 +90,8 @@ static func filter(fid, text: String) -> String:
 		if cat == "" and day - int((st["used"] as Dictionary).get(text, -99)) < int(c.get("pass_lookback_days", 2)):
 			return ""
 		line = text
+	if not fits_now(line):          # "Birdsong and sunshine" stays unthought at midnight in the rain
+		return ""
 	record(st, line, day, now)
 	if cat != "":
 		(st["cats"] as Dictionary)[cat] = int((st["cats"] as Dictionary).get(cat, 0)) + 1
@@ -153,9 +175,32 @@ static func pick_fresh(pool: Array, st: Dictionary, day: int, h: int) -> String:
 	var start := absi(h) % pool.size()
 	for i in pool.size():
 		var line := str(pool[(start + i) % pool.size()])
-		if day - int(used.get(line, -99)) >= look:
+		if day - int(used.get(line, -99)) >= look and fits_now(line):
 			return line
 	return ""
+
+## Does the line fit the hour and the weather? ("Birdsong and sunshine" not at midnight in the rain; data: thought_voice.json "fits")
+static func fits_now(line: String) -> bool:
+	var fc: Dictionary = cfg().get("fits", {})
+	if fc.is_empty():
+		return true
+	var low := line.to_lower()
+	var has := func(key: String) -> bool:
+		for w in (fc.get(key, []) as Array):
+			if low.contains(str(w)):
+				return true
+		return false
+	var wet: bool = Weather.is_precipitating()
+	if has.call("fine_day"):
+		var hrs: Array = fc.get("day_hours", [7, 20])
+		var hour: int = (SimEnv.now_min() % 1440) / 60
+		if wet or hour < int(hrs[0]) or hour >= int(hrs[1]):
+			return false
+	if has.call("wet") and not wet:
+		return false
+	if has.call("cold") and Weather.temperature() >= float(fc.get("cold_below", 5)):
+		return false
+	return true
 
 ## "cheerful" | "grumpy" | "anxious" | "any": mood first, then traits.
 static func tone_of(f) -> String:

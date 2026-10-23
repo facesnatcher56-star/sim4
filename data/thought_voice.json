@@ -974,6 +974,14 @@
    "What's the news, {you}?"
   ]
  },
+ "fits": {
+  "_doc": "A line containing one of these words is only thought when it fits the moment (ThoughtVoice.fits_now): fine_day = daylight (hours below) and no rain or snow; wet = it is raining or snowing; cold = below cold_below C.",
+  "fine_day": ["sunshine", "sunny", "lovely day", "kite", "birdsong", "jogger", "slide", "picnic", "lie on the lawn", "swings", "fresh cut grass", "flower beds", "lovely out there", "sunbath", "blue sky", "ducks", "squirrel", "a dog just ran"],
+  "wet": ["drenched", "soaked", "the rain"],
+  "cold": ["freezing", "brr"],
+  "day_hours": [7, 20],
+  "cold_below": 5
+ },
  "venue_types": {
   "park": [
    "The pond looks lovely today.",

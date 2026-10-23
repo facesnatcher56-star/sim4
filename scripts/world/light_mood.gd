@@ -7,7 +7,7 @@ extends RefCounted
 
 ## Lowest ambient energy at full night for the Night brightness setting 0..1 (0 = true dark, 1 = bright moonlit).
 static func floor_energy(nb: float) -> float:
-	return lerpf(0.06, 0.40, clampf(nb, 0.0, 1.0))
+	return lerpf(0.08, 0.48, clampf(nb, 0.0, 1.0))          # playtest: people at night were near-black silhouettes
 
 
 const NB_DEFAULT := 0.35        # the setting's default: the look's own night, untouched
