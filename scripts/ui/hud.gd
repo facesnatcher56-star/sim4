@@ -11,6 +11,7 @@ var top_bar: PanelContainer
 var time_label: Label
 var day_label: Label
 var coins_label: Button
+var coin_tick: CoinTick
 var speed_buttons: Dictionary = {}     # speed int -> Button
 var build_button: Button
 var save_button: Button
@@ -22,6 +23,7 @@ var folk_panel: FolkPanel
 var queue_bar: QueueBar
 var pie: PieMenu
 var thoughts: ThoughtLayer
+var flourish: SkillFlourish
 var progress: ProgressLayer          # task 33.4: progress rings over heads
 var toasts: ToastFeed
 var build_panel: BuildPanel
@@ -76,6 +78,8 @@ func _ready() -> void:
 	thoughts = ThoughtLayer.new()
 	thoughts.rings = progress
 	add_child(thoughts)
+	flourish = SkillFlourish.new()          # task 59: a quiet flourish when the player's character gets better at something
+	add_child(flourish)
 	# top-centre column under the bar: job-offer card first, then the toast stack (never overlaps the folk panel or the build panel)
 	var top_center := VBoxContainer.new()
 	top_center.anchor_left = 0.5
@@ -179,10 +183,12 @@ func _build_top_bar() -> void:
 		h.add_child(b)
 		speed_buttons[s[0]] = b
 	h.add_child(WeatherHud.new())    # weather + season + date widget (scripts/ui/weather_hud.gd)
-	var sp := Control.new()
-	sp.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	h.add_child(sp)
-	lot_label = UIU.make_label("", 15, UITheme.ACCENT)
+	lot_label = UIU.make_label("", 15, UITheme.MUTED)
+	lot_label.clip_text = true
+	lot_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	lot_label.custom_minimum_size = Vector2(60, 0)
+	lot_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL          # the place name gives way first on a narrow screen
+	lot_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	h.add_child(lot_label)
 	coins_label = Button.new()
 	coins_label.text = "0 Coins"
@@ -193,19 +199,15 @@ func _build_top_bar() -> void:
 	coins_label.tooltip_text = "Household money, bills and last week's income and spending"
 	coins_label.pressed.connect(func(): household_dialog.toggle_for(selected_folk_id))
 	h.add_child(coins_label)
-	map_button = Button.new()
-	map_button.text = "Map"
-	map_button.tooltip_text = "Neighbourhood map and travel (M)"
+	coin_tick = CoinTick.new(coins_label)          # task 59: a small +/- under the coins when money comes in or goes out
+	add_child(coin_tick)
+	h.add_child(VSeparator.new())
+	# task 59: the everyday windows as icon buttons (name and key in the tooltip); the rare ones (council, save / load, help) live under Menu
+	var ic: Color = UITheme.TEXT.darkened(0.08)
+	map_button = UIIcons.IconButton.new("map", "Map and travel (M)", ic)
 	map_button.pressed.connect(func(): travel_panel.toggle())
 	h.add_child(map_button)
-	money_button = Button.new()
-	money_button.text = "Money"
-	money_button.tooltip_text = "Shops, your business, homes and the bank (optional)"
-	money_button.pressed.connect(func(): money_hub.toggle_for(selected_folk_id))
-	h.add_child(money_button)
-	var phone_button := Button.new()
-	phone_button.text = "Phone"
-	phone_button.tooltip_text = "Messages, contacts, the Jobs app and your bank"
+	var phone_button := UIIcons.IconButton.new("phone", "Phone: messages, contacts, jobs, bank", ic)
 	phone_button.pressed.connect(func():
 		if phone_dialog.visible:
 			phone_dialog.hide_dialog()
@@ -213,46 +215,24 @@ func _build_top_bar() -> void:
 		LifeHubPhone.app = ""
 		phone_dialog.show_for(selected_folk_id))
 	h.add_child(phone_button)
-	life_button = Button.new()
-	life_button.text = "Town"
-	life_button.tooltip_text = "School, college, clinic, food and fun (optional)"
+	life_button = UIIcons.IconButton.new("house", "Town: places, study, health, pets, news", ic)
 	life_button.pressed.connect(func(): life_hub.toggle_for(selected_folk_id))
 	h.add_child(life_button)
-	var town_button := Button.new()
-	town_button.text = "Council"
-	town_button.tooltip_text = "The mayor, taxes and budget, the next election, building projects, outages and bus times"
-	town_button.pressed.connect(func(): town_dialog.toggle_for(selected_folk_id))
-	h.add_child(town_button)
-	build_button = Button.new()
-	build_button.text = "Build/Buy"
+	money_button = UIIcons.IconButton.new("bank", "Money: shops, business, homes, bank", ic)
+	money_button.pressed.connect(func(): money_hub.toggle_for(selected_folk_id))
+	h.add_child(money_button)
+	build_button = UIIcons.IconButton.new("hammer", "Build and buy (B)", ic)
 	build_button.toggle_mode = true
-	build_button.tooltip_text = "Toggle Build/Buy mode (B)"
 	build_button.pressed.connect(func():
 		build_panel.set_active(build_button.button_pressed)
 		if UIDialog.overlay_hook.is_valid():
 			UIDialog.overlay_hook.call(build_button.button_pressed))          # one overlay at a time: tips step aside
 	h.add_child(build_button)
-	save_button = Button.new()
-	save_button.text = "Save/Load"
-	save_button.tooltip_text = "Save, load, or go back to the title screen"
-	save_button.pressed.connect(func():
-		_refresh_save_menu()
-		save_menu.visible = not save_menu.visible)
-	h.add_child(save_button)
-	help_button = Button.new()
-	help_button.text = "?"
-	help_button.tooltip_text = "Controls and help (F1)"
-	help_button.pressed.connect(func(): help_dialog.toggle_for(selected_folk_id))
-	h.add_child(help_button)
-	menu_button = Button.new()
-	menu_button.text = "Menu"
-	menu_button.tooltip_text = "Pause menu and settings (Esc)"
+	menu_button = UIIcons.IconButton.new("menu", "Menu: council, save, load, settings, help (Esc)", ic)
 	menu_button.pressed.connect(func(): pause_menu.toggle_for(-1))
 	h.add_child(menu_button)
-	var accents: Dictionary = SysUtil.table("ui_identity").get("top_bar", {})          # each top-bar button its own colour (data/ui_identity.json)
-	for bc in h.get_children():
-		if bc is Button and accents.has((bc as Button).text):
-			UIIdentity.accent_button(bc, Color(str(accents[(bc as Button).text])))
+	save_button = null
+	help_button = null
 
 func _build_left() -> void:
 	var left := VBoxContainer.new()
@@ -330,6 +310,8 @@ func _on_pause_choice(id: String) -> void:
 			share_hub.show_for(-1)
 		"help":
 			help_dialog.show_for(selected_folk_id)
+		"council":
+			town_dialog.show_for(selected_folk_id)
 		"quit":
 			request_quit_to_title()
 
@@ -427,6 +409,7 @@ func set_lot_view(lv) -> void:
 	floor_selector.lot_view = lv
 	thoughts.lot_view = lv
 	progress.lot_view = lv
+	flourish.lot_view = lv
 	build_panel.lot_view = lv
 	if lv != null and lv.has_signal("tile_clicked"):
 		lv.tile_clicked.connect(_on_tile_clicked)

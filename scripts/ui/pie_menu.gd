@@ -12,6 +12,8 @@ const CAT_KEYS := {"Friendly": "friendly", "Funny": "funny", "Romantic": "romanc
 static func cat_color(cat: String) -> Color:
 	return UITheme.sem(CAT_KEYS[cat]) if CAT_KEYS.has(cat) else UITheme.ACCENT
 const KIND_ACCENT := {"object": "#f2a33c", "folk": "#ee86a6", "self": "#3fb8af", "ground": "#5bb8ff", "door": "#c98f5b", "car": "#c98f5b"}
+const ROW_H := 30
+const GAP := 36.0          # space kept between the menu and the person or thing it is about
 ## Which groups stay open between openings (the player's choice persists).
 static var open_cats: Dictionary = {"Friendly": true}
 
@@ -98,7 +100,26 @@ func open_with_entries(f, kind: String, id: int, entries: Array, screen_pos: Vec
 func _place(screen_pos: Vector2) -> void:
 	panel.reset_size()
 	var vp := get_viewport_rect().size
-	panel.position = Vector2(clampf(screen_pos.x + 8, 8, maxf(vp.x - panel.size.x - 8, 8)), clampf(screen_pos.y - 12, 62, maxf(vp.y - panel.size.y - 8, 62)))
+	var anchor := screen_pos
+	var tp: Vector2 = _target_screen_pos()
+	if tp.x >= 0.0:
+		anchor = tp          # task 59: beside the person or thing, not on top of them
+	var x := anchor.x + GAP
+	if x + panel.size.x > vp.x - 8.0 and anchor.x - GAP - panel.size.x >= 8.0:
+		x = anchor.x - GAP - panel.size.x          # no room on the right: the left side
+	panel.position = Vector2(clampf(x, 8, maxf(vp.x - panel.size.x - 8, 8)), clampf(anchor.y - 40.0, 62, maxf(vp.y - panel.size.y - 8, 62)))
+
+
+## Where the menu's target is on screen (its head for a person, the top of an object; yourself for the Myself menu), or (-1, -1).
+func _target_screen_pos() -> Vector2:
+	var kind := target_kind
+	var id := target_id
+	if kind == "self" and folk != null:
+		kind = "folk"
+		id = int(UIU.prop(folk, "id", -1))
+	if kind != "folk" and kind != "object":
+		return Vector2(-1, -1)
+	return LotView.screen_pos_of(kind, id)
 
 func _scroll_list() -> VBoxContainer:
 	if _list != null:
@@ -123,7 +144,7 @@ func _make_button(e: Dictionary, reason: String = "") -> Button:
 	var b := Button.new()
 	b.text = e["label"]
 	b.alignment = HORIZONTAL_ALIGNMENT_LEFT
-	b.custom_minimum_size = Vector2(230, 30)
+	b.custom_minimum_size = Vector2(230, ROW_H)
 	b.disabled = not e["enabled"]
 	if not e["enabled"]:
 		b.tooltip_text = reason
@@ -144,7 +165,11 @@ func _group_button(parent: Control, name: String, entries: Array, col: Color) ->
 	var header := Button.new()
 	header.flat = true
 	header.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	header.custom_minimum_size = Vector2(230, ROW_H)          # task 59: every row the same height
 	header.name = "cat_" + name
+	var gi := UIIcons.Badge.new(str(UIIcons.GROUP.get(name, "talk")), col, 18.0)          # one glyph per group
+	gi.position = Vector2(6, (ROW_H - 18.0) * 0.5)
+	header.add_child(gi)
 	header.add_theme_color_override("font_color", col)
 	header.add_theme_color_override("font_hover_color", col.lightened(0.3))
 	parent.add_child(header)
@@ -164,7 +189,8 @@ func _group_button(parent: Control, name: String, entries: Array, col: Color) ->
 		var mb := Button.new()
 		mb.flat = true
 		mb.alignment = HORIZONTAL_ALIGNMENT_LEFT
-		mb.text = "   More (%d)" % (entries.size() - SHOW)
+		mb.text = "        More (%d)" % (entries.size() - SHOW)          # lined up under the group's rows
+		mb.custom_minimum_size = Vector2(230, ROW_H)
 		mb.add_theme_color_override("font_color", UITheme.MUTED)
 		mb.pressed.connect(func():
 			more_box.visible = true
@@ -267,7 +293,7 @@ func _fill_social(f, target, entries: Array) -> void:
 	_fit_scroll()
 
 func _set_header_text(header: Button, cat: String, n: int, is_open: bool) -> void:
-	header.text = "%s %s  (%d)" % ["▾" if is_open else "▸", cat, n]
+	header.text = "       %s  (%d)  %s" % [cat, n, "▾" if is_open else "▸"]          # room for the group glyph on the left
 
 func _toggle_category(cat: String, header: Button, sect: Control, n: int) -> void:
 	var now_open := not sect.visible

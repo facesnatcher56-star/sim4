@@ -4,6 +4,11 @@ extends RefCounted
 
 ## Colours come from the current look (data/looks.json "ui"; reference = the values below). They are static vars so a look switch re-colours
 ## everything built afterwards; build() re-reads them, main.gd re-themes the HUD / menus on Looks.bus.changed.
+## Task 59: one type scale for every window and HUD element.
+const TITLE := 20
+const BODY := 15
+const SMALL := 12
+
 static var BG := Color("#1b2430")
 static var PANEL := Color("#232f3e")
 static var PANEL_HI := Color("#2d3c4f")

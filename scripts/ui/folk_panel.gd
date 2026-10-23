@@ -33,6 +33,7 @@ var mood_area: Control
 var _why_timer: Timer
 var expanded := false                  # compact by default (task 32d): the portrait, mood and need pips; click the header or Details to open everything
 var mini_box: HFlowContainer              # compact view: one thin bar per need
+var mini_icons: Dictionary = {}           # need id -> NeedIcon over its mini bar
 var mini_bars: Dictionary = {}
 var details_btn: Button
 var goal_row: HBoxContainer
@@ -240,6 +241,8 @@ func _update_need(nid: String, stat, raw_value = null) -> void:
 	if mini_bars.has(nid):
 		(mini_bars[nid] as ProgressBar).value = r
 		(mini_bars[nid] as ProgressBar).add_theme_stylebox_override("fill", UITheme.box(UIU.level_color(r), 3, Color(0, 0, 0, 0), 0, 0))
+		if mini_icons.has(nid):
+			(mini_icons[nid] as NeedIcon).set_ratio(r)
 	var num: Label = need_rows[nid].get_node_or_null("num")
 	if num != null:
 		num.visible = GameSettings.get_bool("need_numbers")
@@ -782,6 +785,7 @@ func _build_mini() -> void:
 	for c in mini_box.get_children():
 		c.queue_free()
 	mini_bars.clear()
+	mini_icons.clear()
 	var defs := UIU.tbl("needs")
 	for nid in UIU.prop(folk, "needs", {}):
 		var cell := VBoxContainer.new()
@@ -795,8 +799,10 @@ func _build_mini() -> void:
 		bar.custom_minimum_size = Vector2(36, 8)
 		bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		cell.add_child(bar)
-		var lab := UIU.make_label(str((defs.get(nid, {}) as Dictionary).get("label", UIU.sentence(str(nid)))).substr(0, 4), 10, UITheme.MUTED)
-		lab.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		cell.add_child(lab)
+		var ic := NeedIcon.new(str(nid), str((defs.get(nid, {}) as Dictionary).get("label", UIU.sentence(str(nid)))))          # task 59: a glyph, the full name on hover
+		ic.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		cell.add_child(ic)
+		cell.move_child(ic, 0)
+		mini_icons[nid] = ic
 		mini_box.add_child(cell)
 		mini_bars[nid] = bar
