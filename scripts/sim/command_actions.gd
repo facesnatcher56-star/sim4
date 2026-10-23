@@ -61,6 +61,9 @@ static func _interact(e: Dictionary) -> Dictionary:
 	else:
 		f.queue.append(it)
 		SimEnv.events().queue_changed.emit(int(f.id))
+	var sd = _director()
+	if sd != null and sd.has_method("start_now"):
+		sd.start_now(f)          # task 58: the order starts in this frame, not on the next game minute (a pre-empted one was cancelled by enqueue)
 	return {"ok": true, "msg": ""}
 
 ## The player's last "go here" is cancelled (the one running and any waiting); other queued orders and the job commute stay.
