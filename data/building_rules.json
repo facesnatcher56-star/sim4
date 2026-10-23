@@ -65,7 +65,7 @@
       },
       "operating_table": {
         "clone": "single_bed",
-        "override": {
+        "override": {"model": "res://assets/models/operating_table.glb", 
           "label": "Operating Table",
           "price": 2400,
           "tags": [
@@ -98,7 +98,7 @@
       },
       "pew": {
         "clone": "sofa",
-        "override": {
+        "override": {"model": "res://assets/models/pew.glb", 
           "label": "Pew",
           "price": 200,
           "tags": [
@@ -143,7 +143,7 @@
       },
       "parking_bay": {
         "clone": "rug",
-        "override": {
+        "override": {"model": "res://assets/models/parking_bay.glb", 
           "label": "Parking Bay",
           "price": 40,
           "tags": [

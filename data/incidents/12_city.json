@@ -171,18 +171,10 @@
       "seat",
       "civic"
      ],
-     "model": "res://assets/models/bench.glb",
+     "model": "res://assets/models/park_bench.glb",
      "color": "#8a6a3e",
      "height": 0.8,
-     "slots": [
-      {
-       "offset": [
-        0,
-        1
-       ],
-       "pose": "stand"
-      }
-     ],
+     "slots": [{"offset": [0, 0], "use": [0.5, 0.5], "pose": "sit", "inside": true, "y": 0.13}, {"offset": [1, 0], "use": [1.5, 0.5], "pose": "sit", "inside": true, "y": 0.13}],
      "state": {},
      "advertises": {
       "comfort": 1.0
@@ -243,13 +235,15 @@
      "model": "res://assets/models/public_toilet.glb",
      "color": "#7a8a93",
      "height": 2.2,
+     "private": true,
      "slots": [
       {
        "offset": [
         0,
         1
        ],
-       "pose": "stand"
+       "use": [0.5, 0.7],
+       "pose": "sit"
       }
      ],
      "state": {},

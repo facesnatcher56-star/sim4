@@ -809,7 +809,7 @@
   "objects": {
    "assembly_line": {
     "clone": "workbench",
-    "override": {
+    "override": {"model": "res://assets/models/assembly_line.glb", 
      "label": "Assembly Line",
      "price": 2400,
      "tags": [
@@ -824,7 +824,7 @@
    },
    "pallet_rack": {
     "clone": "bookcase_tall",
-    "override": {
+    "override": {"model": "res://assets/models/pallet_rack.glb", 
      "label": "Pallet Rack",
      "price": 900,
      "tags": [
@@ -840,7 +840,7 @@
    },
    "forklift": {
     "clone": "workbench",
-    "override": {
+    "override": {"model": "res://assets/models/forklift.glb", 
      "label": "Forklift",
      "price": 3200,
      "tags": [
@@ -855,7 +855,7 @@
    },
    "site_materials": {
     "clone": "workbench",
-    "override": {
+    "override": {"model": "res://assets/models/site_materials.glb", 
      "label": "Site Materials",
      "price": 600,
      "tags": [
@@ -870,7 +870,7 @@
    },
    "vehicle_lift": {
     "clone": "workbench",
-    "override": {
+    "override": {"model": "res://assets/models/vehicle_lift.glb", 
      "label": "Vehicle Lift",
      "price": 2800,
      "tags": [

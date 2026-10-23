@@ -179,7 +179,9 @@
       "security",
       "ceiling"
      ],
-     "model": "res://assets/models/smoke_alarm.glb",
+     "layer": "floor",
+     "blocks": false,
+     "model": "res://assets/models/burglar_alarm.glb",
      "color": "#c0392b",
      "height": 2.6,
      "slots": [
@@ -211,7 +213,7 @@
       "electronics",
       "utility"
      ],
-     "model": "res://assets/models/lamp.glb",
+     "model": "res://assets/models/phone.glb",
      "color": "#2e86ab",
      "height": 1.0,
      "slots": [

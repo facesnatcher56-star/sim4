@@ -33,5 +33,5 @@ for ($run = 0; $run -lt 20; $run++) {
 	Get-Content $log -Tail 15 | ForEach-Object { Add-Content $main ("WATCH | " + $_) }
 	if ($kind -eq $null) { break }          # froze before the object phase: nothing to skip past
 	$Skip = [int]$kind.Matches[0].Groups[1].Value + 1
-	$Phases = "objects social"
+	if ($Phases -notmatch "run=") { $Phases = "objects social" }          # a bench run (run=...) resumes the same bench
 }

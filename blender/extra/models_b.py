@@ -78,9 +78,9 @@ def easel_large(B, tube):
     b.box("paint_b", 0.2, 1.15, -0.12, 0.6, 0.4, 0.01)
     b.box("paint_c", 0.1, 1.55, -0.12, 0.25, 0.2, 0.01)
     b.box("leaf", -0.4, 1.0, -0.12, 0.3, 0.25, 0.01)
-    b.box("wood_dark", 0.95, 0.5, -0.3, 0.3, 0.04, 0.3)
-    b.cyl("paint_a", 0.9, 0.54, -0.3, 0.04, 0.05, seg=8)
-    b.cyl("paint_b", 1.0, 0.54, -0.28, 0.04, 0.05, seg=8)
+    b.box("wood_dark", 0.78, 0.5, -0.3, 0.3, 0.04, 0.3)          # task 60: the paint tray inside the 2x1 footprint (it stuck out 0.1 m)
+    b.cyl("paint_a", 0.73, 0.54, -0.3, 0.04, 0.05, seg=8)
+    b.cyl("paint_b", 0.83, 0.54, -0.28, 0.04, 0.05, seg=8)
     return [("easel_large", b, (0, 0, 0))]
 
 
