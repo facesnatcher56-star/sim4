@@ -24,9 +24,11 @@ func _process(delta: float) -> void:
 			_build_visual()
 		elif hash(_appearance_of(f)) + 31 * hash(_stage_now) + 977 * bump_of(f) != _look_sig:
 			_apply_appearance(f)
-	_update_waypoints(f)
+	if not _lead_walk(f):
+		_update_waypoints(f)
 	_urgent = FolkClipRules.urgent_move(f)
 	_resolve_target(f)
+	_lead_target(f)
 	_move(delta)
 	if _res_tick % 3 == 0:
 		_update_avoid(f)

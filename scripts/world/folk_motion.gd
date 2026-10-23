@@ -33,6 +33,56 @@ func _route_slice3(f, a: Vector3i, b: Vector3i) -> Array:
 	return out
 
 
+var _lead_id := 0          # task 58: the walk whose route the view was handed at once (instance id), 0 = none
+var _lead_fed := 0         # route tiles of it already handed to the walk
+var _lead_pace := 0.0      # the sim's walking pace on it (tiles per real second)
+
+
+## Task 58: a walk is drawn from the frame it starts. The view takes the walk's own route (Interaction.path) and keeps one tile ahead of
+## where the sim walker is, counting the part of a game minute already gone (Clock._accum), so it never waits for f.tile to change.
+## Returns true while it leads (the tile-jump replay of _update_waypoints is then skipped). Multi-floor routes and rides keep the old way.
+func _lead_walk(f) -> bool:
+	var ir = f.current
+	if ir == null or str(ir.state) != "walking" or ir.path.is_empty() or not ir.path3.is_empty() or ir.travel_total <= 0.0 or ir.params.has("ride_minutes"):
+		if _lead_id != 0:
+			_lead_id = 0
+			_last_tile = f.tile          # the route was already handed over: nothing to replay
+			_last_level = f.level
+		return false
+	var p: Array = ir.path
+	if ir.get_instance_id() != _lead_id:
+		_lead_id = ir.get_instance_id()
+		_waypoints.clear()
+		_lead_fed = 0
+		var here := Vector2(position.x, position.z)
+		for i in mini(3, p.size() - 1):          # a new route starts at the sim tile, which the view may already be past: don't walk back
+			var a: Vector3 = World.tile_to_pos(p[i])
+			var b: Vector3 = World.tile_to_pos(p[i + 1])
+			if here.distance_to(Vector2(b.x, b.z)) < Vector2(a.x, a.z).distance_to(Vector2(b.x, b.z)):
+				_lead_fed = i + 1
+	var clk := get_node_or_null("/root/Clock")
+	var frac_min: float = float(clk.get("_accum")) if clk != null and int(clk.get("speed")) > 0 else 0.0
+	var lead_in: float = float(ir.params.get("lead_in", 0.0))          # the part of a minute gone before the click (SimDirector.start_now)
+	var done: float = maxf(ir.travel_total - ir.travel_left + minf(frac_min, ir.travel_left) - lead_in, 0.0)
+	var walk_min: float = maxf(ir.travel_total - lead_in, 0.001)
+	var want: int = clampi(int(done / walk_min * float(p.size())) + 1, 1, p.size())          # one tile ahead of the sim walker
+	while _lead_fed < want:
+		_waypoints.append(_wp(p[_lead_fed], f.level))
+		_lead_fed += 1
+	_lead_pace = float(p.size()) / walk_min * (float(clk.call("real_rate")) if clk != null else 1.0)
+	_level_y = World.walk_y(f.tile, f.level)
+	_last_tile = f.tile
+	_last_level = f.level
+	return true
+
+
+## While leading a walk the view heads for the last route tile it was given, not for the sim tile behind it.
+func _lead_target(f) -> void:
+	if _lead_id != 0 and _lead_fed > 0 and f.current != null and not f.current.path.is_empty():
+		var t: Vector3 = World.tile_to_pos(f.current.path[_lead_fed - 1])
+		_target = Vector3(t.x, 0.0, t.z)
+
+
 func _update_waypoints(f) -> void:
 	_level_y = World.walk_y(f.tile, f.level)
 	if f.tile == _last_tile and f.level == _last_level:
@@ -273,6 +323,8 @@ func _use_pose(f) -> String:
 func _walk_speed() -> float:
 	var loco: Dictionary = anim_map().get("locomotion", {})
 	var m: float = maxf(_speed_mult(), 1.0)
+	if _lead_id != 0 and not _urgent:
+		return maxf(float(loco.get("walk_base_speed", BASE_SPEED)) * m, _lead_pace * 1.05)          # task 58: the sim's own pace (never behind it)
 	if _urgent:
 		return float(loco.get("run_speed", 4.6)) * m
 	var behind: float = float(_waypoints.size()) / m          # the catch-up looks at how far behind in time, not in waypoints
@@ -335,6 +387,11 @@ func _move(delta: float) -> void:
 	_speed_now = 0.0
 	if mult <= 0.0:
 		_moving = false
+		if not _waypoints.is_empty():          # task 58: paused, an order still shows at once: they turn to where they are going
+			var to0: Vector3 = _waypoints[0] - position
+			if Vector2(to0.x, to0.z).length() > 0.05:
+				_target_yaw = atan2(-to0.x, -to0.z)
+				facing_yaw = _target_yaw
 		return
 	_trim_backlog()
 	_skip_blocked_waypoints()

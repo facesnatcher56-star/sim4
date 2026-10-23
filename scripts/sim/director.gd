@@ -122,6 +122,20 @@ func tick_folk(f: Folk, minutes: float = 1.0, passive_minutes: float = -1.0) -> 
 	if ticks % 360 == 0:
 		f.prune_memory()
 
+## Task 58: a player order starts in the frame it is given (not on the next minute tick): the head of the queue begins now if nothing is running.
+func start_now(f: Folk) -> void:
+	if f == null or f.current != null or f.queue.is_empty():
+		return
+	_fill(f)
+	var clk := get_node_or_null("/root/Clock")
+	var part: float = float(clk.get("_accum")) if clk != null and int(clk.get("speed")) > 0 else 0.0
+	if f.current != null and str(f.current.state) == "walking" and part > 0.0:
+		# started part-way through a game minute: the next tick credits that whole minute, so the walk is that much longer
+		# (it still arrives on time) and the view counts from the click (params.lead_in, FolkMotion._lead_walk)
+		f.current.travel_total += part
+		f.current.travel_left += part
+		f.current.params["lead_in"] = part
+
 ## Player command: queue `interaction_id` on `target_id` (object id or folk id). Returns false if it cannot run.
 func command(folk_id: int, interaction_id: String, target_id: int = -1) -> bool:
 	var f = WorldIface.get_folk(folk_id)
