@@ -1,5 +1,5 @@
 {
- "_doc": "Every window has its own identity so the UI does not all look the same (scripts/ui/ui_identity.gd): accent colour (borders, title badge, button hover and press), glyph in the title badge, header style (band = coloured top edge, ribbon = coloured left edge, frame = coloured frame, plain = centred title), corner radius, and how much of the accent tints the panel. Keyed by the dialog's script class name; 'default' is used for anything not listed.",
+ "_doc": "Each window's accent colour (thin top line, title badge, button hover and press) and the glyph in its title badge (scripts/ui/ui_identity.gd). Since task 59 every window shares one frame: header, radius and tint are no longer used. Keyed by the dialog's script class name; 'default' is used for anything not listed.",
  "default": {"accent": "#3fb8af", "glyph": "*", "header": "band", "radius": 10, "tint": 0.05},
  "dialogs": {
   "BankHub":          {"accent": "#e0b341", "glyph": "$", "header": "ribbon", "radius": 6,  "tint": 0.07},

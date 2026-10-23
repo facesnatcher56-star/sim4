@@ -72,18 +72,18 @@ func _add(folk_id: int, text: String, speech: bool, delay: float) -> void:
 	p.add_child(v)
 	if speech:
 		p.add_theme_stylebox_override("panel", UITheme.box(Color(UITheme.sem("bubble"), 0.97), 12, UITheme.sem("bubble_edge"), 2, 8))
-		var who := UIU.make_label(SysUtil.folk_name(folk_id).get_slice(" ", 0), 12, Color(UITheme.sem("bubble_text"), 0.75))          # dark on the light bubble: readable
+		var who := UIU.make_label(SysUtil.folk_name(folk_id).get_slice(" ", 0), UITheme.SMALL, Color(UITheme.sem("bubble_text"), 0.75))          # dark on the light bubble: readable
 		v.add_child(who)
-		v.add_child(UIU.make_label(text, 14, UITheme.sem("bubble_text")))
+		v.add_child(UIU.make_label(text, UITheme.BODY - 1, UITheme.sem("bubble_text")))
 		var tail := Polygon2D.new()          # the tail points down at the speaker
 		tail.color = Color(UITheme.sem("bubble"), 0.97)
 		tail.polygon = PackedVector2Array([Vector2(-7, 0), Vector2(7, 0), Vector2(0, 9)])
 		tail.name = "Tail"
 		p.add_child(tail)
 	else:
-		p.add_theme_stylebox_override("panel", UITheme.box(Color(UITheme.PANEL, 0.82), 16, Color(1, 1, 1, 0.15), 1, 8))
-		v.add_child(UIU.make_label(SysUtil.folk_name(folk_id).get_slice(" ", 0) + " thinks", 10, UITheme.MUTED))
-		v.add_child(UIU.make_label(text, 13, UITheme.MUTED.lightened(0.3)))
+		p.add_theme_stylebox_override("panel", UITheme.box(Color(UITheme.PANEL, 0.93), 12, Color(1, 1, 1, 0.18), 1, 8))          # task 59: one balloon shape and size; solid enough to read at night
+		v.add_child(UIU.make_label(SysUtil.folk_name(folk_id).get_slice(" ", 0) + " thinks", UITheme.SMALL, UITheme.MUTED))
+		v.add_child(UIU.make_label(text, UITheme.BODY - 1, UITheme.TEXT.darkened(0.08)))
 		var dots := Node2D.new()          # two small circles under it: thinking, not saying
 		dots.name = "Tail"
 		for k in 2:
@@ -93,7 +93,7 @@ func _add(folk_id: int, text: String, speech: bool, delay: float) -> void:
 			for a in 10:
 				pts.append(Vector2(cos(a * TAU / 10.0), sin(a * TAU / 10.0)) * r + Vector2(-3.0 * k, 4.0 + 8.0 * k))
 			d.polygon = pts
-			d.color = Color(UITheme.PANEL, 0.82)
+			d.color = Color(UITheme.PANEL, 0.93)
 			dots.add_child(d)
 		p.add_child(dots)
 	p.modulate.a = 0.0

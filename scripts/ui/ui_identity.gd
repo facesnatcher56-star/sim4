@@ -1,7 +1,8 @@
 class_name UIIdentity
 extends RefCounted
-## Every window its own look (data/ui_identity.json): an accent colour, a glyph badge in the title, a header style (coloured top edge / left edge / frame /
-## centred title), a corner radius and a tint of the panel. UIDialog._ready calls dress(); the HUD top bar buttons get a coloured underline (accent_button).
+## Task 59 (owner: one frame style): every window shares one frame, title size and close button; what is left of each window's identity
+## (data/ui_identity.json) is its accent colour (a thin top line, the title badge, button hover) and the badge glyph. The old per-window header
+## styles, radii and tints are no longer used. UIDialog._ready calls dress(); HUD panels call skin().
 
 static var _themes: Dictionary = {}
 
@@ -28,24 +29,10 @@ static func theme_for(accent: Color) -> Theme:
 	return t
 
 static func panel_box(id: Dictionary) -> StyleBoxFlat:
-	var accent := Color(str(id["accent"]))
-	var bg: Color = UITheme.PANEL.lerp(accent, float(id["tint"]))
-	var sb := UITheme.box(Color(bg, 0.96), int(id["radius"]), Color(accent, 0.55), 1, 12)
+	var sb := UITheme.box(Color(UITheme.PANEL, 0.97), 10, Color(str(id["accent"])), 0, 12)
+	sb.border_width_top = 3          # the accent is one thin line along the top; the rest of the frame is the same for every window
 	sb.shadow_color = Color(0, 0, 0, 0.35)
 	sb.shadow_size = 10
-	match str(id["header"]):
-		"band":
-			sb.border_color = accent
-			sb.border_width_top = 6
-		"ribbon":
-			sb.border_color = accent
-			sb.border_width_left = 7
-			sb.content_margin_left = 14
-		"frame":
-			sb.border_color = accent
-			sb.set_border_width_all(2)
-		_:
-			sb.border_color = Color(accent, 0.4)
 	return sb
 
 ## Called at the end of UIDialog._ready (the title label and the dialog's panel exist).
@@ -68,14 +55,8 @@ static func dress(dlg) -> void:
 	holder.add_child(badge)
 	head.add_child(holder)
 	head.move_child(holder, 0)
-	dlg.title_label.add_theme_color_override("font_color", accent.lerp(Color.WHITE, 0.35))
-	if str(id["header"]) == "plain":
-		dlg.title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		dlg.title_label.add_theme_font_size_override("font_size", 24)
-	elif str(id["header"]) == "frame":
-		dlg.title_label.add_theme_font_size_override("font_size", 19)
-	else:
-		dlg.title_label.add_theme_font_size_override("font_size", 21)
+	dlg.title_label.add_theme_color_override("font_color", UITheme.TEXT)
+	dlg.title_label.add_theme_font_size_override("font_size", UITheme.TITLE)
 
 ## A coloured underline for a top-bar button.
 static func accent_button(b: Button, accent: Color) -> void:

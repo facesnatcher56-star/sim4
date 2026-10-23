@@ -36,7 +36,7 @@ Thank you for playing. Start the game with `Folk.exe` (or the Folk shortcut on t
 | Case board (crime cases) | F10 |
 | Help (all controls) | F1 or ? |
 
-Top bar buttons: **Map**, **Money** (shops, your business, homes, bank), **Town** (school, college, clinic, food, fun, the job board, the phone), **Council** (mayor, taxes and budget, elections, building projects, outages, bus times), **Build/Buy**, **Save/Load**, **?**, **Menu** (pause menu and Settings). All keys can be changed in Settings > Controls. The game autosaves; the interval is in Settings.
+Top bar: the clock, speed, weather, where you are and your coins (click them for bills), then icon buttons (hover for the name): **Map**, **Phone**, **Town** (places, study, health, pets, news), **Money** (shops, your business, homes, bank), **Build and buy**, and **Menu** (council, save, load, settings, share, help, quit). All keys can be changed in Settings > Controls. The game autosaves; the interval is in Settings.
 
 ## Things worth trying
 

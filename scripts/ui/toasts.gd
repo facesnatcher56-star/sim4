@@ -8,10 +8,9 @@ static func kind_color(look: String) -> Color:
 ## Systems use many kinds; they map onto four looks. Warn / bad also carry a "!" so colour is never the only cue.
 const KIND_LOOK := {"birthday": "good", "goal": "good", "career": "good", "holiday": "info", "weather": "info", "relationship": "info",
 	"story": "info", "visit": "info", "invite": "info", "travel": "info", "bill": "warn", "death": "bad", "job_offer": "good"}
-## Each kind its own colour and badge glyph (the toast is a card with a coloured left edge and a round badge), so a bill, a story and a death do not look alike.
-const KIND_STYLE := {"bill": ["#e0b341", "$"], "story": ["#9b6bd6", "~"], "travel": ["#5bb8ff", ">"], "relationship": ["#ff6b9d", "+"], "job_offer": ["#4f8cff", "W"],
-	"birthday": ["#ffd166", "*"], "weather": ["#7fb3d5", "o"], "death": ["#8a8f98", "x"], "goal": ["#5fcf80", "v"], "career": ["#4f8cff", "W"], "holiday": ["#f59e0b", "*"],
-	"visit": ["#3fb8af", "i"], "invite": ["#3fb8af", "@"], "warn": ["#e8913d", "!"], "bad": ["#e5534b", "!"], "good": ["#4cc78a", "v"], "info": ["#3fb8af", "i"]}
+## Task 59: one toast style. The colour is the meaning (the four semantic looks above); the drawn glyph says what kind of news it is.
+const KIND_GLYPH := {"bill": "coin", "story": "book", "travel": "map", "relationship": "heart", "job_offer": "bank", "birthday": "star", "weather": "drop",
+	"death": "moon", "goal": "star", "career": "bank", "holiday": "star", "visit": "house", "invite": "talk", "warn": "bolt", "bad": "bolt", "good": "star", "info": "talk"}
 
 var policy := ToastPolicy.new()
 var offer: OfferToast = null
@@ -51,27 +50,17 @@ func _show(text: String, kind: String) -> void:
 	var p := PanelContainer.new()
 	p.mouse_filter = Control.MOUSE_FILTER_STOP
 	p.tooltip_text = "Click to dismiss"
-	var st: Array = KIND_STYLE.get(kind, KIND_STYLE.get(look, KIND_STYLE["info"]))
-	col = Color(str(st[0]))
-	var sb := UITheme.box(Color(UITheme.PANEL, 0.96), 10, Color(col, 0.35), 1, 10)
+	var sb := UITheme.box(Color(UITheme.PANEL, 0.96), 8, Color(1, 1, 1, 0.06), 1, 10)
 	sb.border_color = col
-	sb.border_width_left = 6
+	sb.border_width_left = 4
 	sb.shadow_color = Color(0, 0, 0, 0.3)
 	sb.shadow_size = 6
 	p.add_theme_stylebox_override("panel", sb)
 	var row := HBoxContainer.new()
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	p.add_child(row)
-	var badge := PanelContainer.new()
-	badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	badge.add_theme_stylebox_override("panel", UITheme.box(col, 12, Color(0, 0, 0, 0), 0, 2))
-	var gl := UIU.make_label(str(st[1]), 14, Color("#10161d"))
-	gl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	gl.custom_minimum_size = Vector2(20, 0)
-	gl.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	badge.add_child(gl)
-	row.add_child(badge)
-	var l := UIU.make_label(text, 14)
+	row.add_child(UIIcons.Badge.new(str(KIND_GLYPH.get(kind, KIND_GLYPH.get(look, "talk"))), col))
+	var l := UIU.make_label(text, UITheme.BODY - 1)
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	l.custom_minimum_size = Vector2(300, 0)
 	l.mouse_filter = Control.MOUSE_FILTER_IGNORE

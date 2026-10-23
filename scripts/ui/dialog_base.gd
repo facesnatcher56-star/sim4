@@ -33,6 +33,7 @@ func _ready() -> void:
 	sc.add_child(body)
 	_scroll = sc
 	visibility_changed.connect(_track_pause)
+	resized.connect(func(): if visible: _place_centre())
 	UIIdentity.dress(self)          # accent, badge, header style and radius of this window (data/ui_identity.json)
 	tree_exiting.connect(func():
 		_open.erase(get_instance_id())
@@ -84,6 +85,10 @@ func _center() -> void:
 	var max_h := clampf(minf(get_viewport_rect().size.y - 150.0, 560.0), 120.0, 560.0)
 	_scroll.custom_minimum_size = Vector2(0, clampf(body.get_combined_minimum_size().y + 6.0, 80.0, max_h))
 	reset_size()
+	_place_centre()
+
+## Task 59: every window opens in the same place, the middle of the screen, and stays there when its content grows after the first frame.
+func _place_centre() -> void:
 	var vp := get_viewport_rect().size
 	position = ((vp - size) / 2.0).floor()
 	position.y = maxf(position.y, 56.0)       # never under the top bar
