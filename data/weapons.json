@@ -21,6 +21,27 @@
     "shotgun": {"label": "Shotgun", "kind": "firearm", "skill": "shooting", "check": 2.5, "intimidate": 5, "injury_step": 2, "charge": "armed_assault", "noise": 1.2, "conceal": "none", "legal": "permit", "carry_charge": "weapon_possession", "evidence": ["prints", "casing"], "ammo": "shotgun_shells", "empty": {"check": 1, "intimidate": 5, "injury_step": 1}, "sources": ["shop:gun_shop", "underground"], "price": 350, "model": "shotgun", "mishap": "jam"},
     "hunting_rifle": {"label": "Hunting rifle", "kind": "firearm", "skill": "shooting", "check": 2, "intimidate": 4, "injury_step": 2, "charge": "armed_assault", "noise": 1.2, "conceal": "none", "legal": "permit", "permit": "hunting", "carry_charge": "weapon_possession", "evidence": ["prints", "casing", "ballistics"], "ammo": "rifle_rounds", "empty": {"check": 1, "intimidate": 4, "injury_step": 1}, "sources": ["shop:sporting_goods", "shop:gun_shop"], "price": 400, "model": "hunting_rifle", "mishap": "jam"}
   },
+  "hold": {
+    "_doc": "Task 57: where a drawn weapon sits in the hand (FolkProps): position and rotation (degrees) of the model in the hand_R bone frame, measured in Blender on folk_adult (models from blender/build_weapons.py, grip at the origin).",
+    "broken_bottle": {"pos": [-0.0, 0.07, 0.0], "rot": [89.9, -0.6, 5.2]},
+    "brick": {"pos": [-0.0, 0.07, 0.0], "rot": [89.9, -0.6, 5.2]},
+    "pipe": {"pos": [-0.0, 0.07, 0.0], "rot": [89.9, -0.6, 5.2]},
+    "kitchen_knife": {"pos": [-0.0, 0.07, 0.0], "rot": [89.9, -0.6, 5.2]},
+    "screwdriver": {"pos": [-0.0, 0.07, 0.0], "rot": [89.9, -0.6, 5.2]},
+    "baseball_bat": {"pos": [-0.0, 0.07, 0.0], "rot": [89.9, -0.6, 5.2]},
+    "crowbar": {"pos": [-0.0, 0.07, 0.0], "rot": [89.9, -0.6, 5.2]},
+    "hammer": {"pos": [-0.0, 0.07, 0.0], "rot": [89.9, -0.6, 5.2]},
+    "hunting_knife": {"pos": [-0.0, 0.07, 0.0], "rot": [89.9, -0.6, 5.2]},
+    "switchblade": {"pos": [-0.0, 0.07, 0.0], "rot": [89.9, -0.6, 5.2]},
+    "machete": {"pos": [-0.0, 0.07, 0.0], "rot": [89.9, -0.6, 5.2]},
+    "brass_knuckles": {"pos": [-0.0, 0.07, 0.0], "rot": [89.9, -0.6, 5.2]},
+    "pepper_spray": {"pos": [-0.0, 0.07, 0.0], "rot": [89.9, -0.6, 5.2]},
+    "taser": {"pos": [-0.0, 0.07, -0.0], "rot": [0.0, 3.5, -0.0]},
+    "revolver": {"pos": [-0.0, 0.07, -0.0], "rot": [0.0, 3.5, -0.0]},
+    "pistol": {"pos": [-0.0, 0.07, -0.0], "rot": [0.0, 3.5, -0.0]},
+    "shotgun": {"pos": [-0.0, 0.07, -0.0], "rot": [0.0, 3.5, -0.0]},
+    "hunting_rifle": {"pos": [-0.0, 0.07, -0.0], "rot": [0.0, 3.5, -0.0]}
+  },
   "ammo": {
     "revolver_rounds": {"label": "Revolver rounds", "per_box": 12, "price": 15, "legal": "permit"},
     "pistol_rounds": {"label": "Pistol rounds", "per_box": 15, "price": 15, "legal": "permit"},

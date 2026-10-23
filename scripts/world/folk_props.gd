@@ -49,7 +49,8 @@ static func prop_for(def_id: String, tags: Array, clip: String) -> String:
 static func update(fv, inter: Variant, clip: String) -> void:
 	if fv._rig == null or fv._is_placeholder:
 		return
-	var sig: int = (inter.get_instance_id() if inter != null else 0) * 31 + hash(clip)
+	var wm: String = _shown_weapon(int(fv.folk_id))          # task 57: a drawn weapon is in the right hand
+	var sig: int = (inter.get_instance_id() if inter != null else 0) * 31 + hash(clip) + hash(wm)
 	if sig == fv._prop_sig:
 		return
 	fv._prop_sig = sig
@@ -57,6 +58,8 @@ static func update(fv, inter: Variant, clip: String) -> void:
 	if inter != null and not fv._moving and fv._waypoints.is_empty():
 		var tags: Array = inter.def.get("tags", []) if inter.def is Dictionary else []
 		want = props_for(str(inter.def_id), tags, clip)
+	if wm != "":
+		want.append("weapon:" + wm)
 	for k in fv._props:
 		(fv._props[k] as Node3D).visible = (k in want)
 	for w in want:
@@ -76,7 +79,38 @@ static func _find_skeleton(n: Node) -> Skeleton3D:
 	return null
 
 
+## The weapon this folk holds out (WeaponActs.draw), as its weapons.json id; "" when none.
+static func _shown_weapon(fid: int) -> String:
+	for e in Inventory.items(fid):
+		if bool(e.get("shown", false)) and not WeaponPermits.def_weapon(str(e["id"])).is_empty():
+			return str(e["id"])
+	return ""
+
+
+## A weapon's own model on hand_R, placed by weapons.json "hold" (measured in Blender on the same rig).
+static func _build_weapon(fv, wid: String) -> Node3D:
+	var sk := _find_skeleton(fv._rig)
+	var d: Dictionary = WeaponPermits.def_weapon(wid)
+	var path: String = "res://assets/models/%s.glb" % str(d.get("model", wid))
+	if sk == null or sk.find_bone("hand_R") < 0 or not ResourceLoader.exists(path):
+		return null
+	var att := BoneAttachment3D.new()
+	att.name = "%s_weapon" % NODE
+	att.bone_name = "hand_R"
+	sk.add_child(att)
+	var model: Node3D = (load(path) as PackedScene).instantiate()
+	var h: Dictionary = (SysUtil.table("weapons").get("hold", {}) as Dictionary).get(wid, {})
+	var o: Array = h.get("pos", [0, 0.07, 0])
+	var r: Array = h.get("rot", [90, 0, 0])
+	model.position = Vector3(float(o[0]), float(o[1]), float(o[2]))
+	model.rotation_degrees = Vector3(float(r[0]), float(r[1]), float(r[2]))
+	att.add_child(model)
+	return att
+
+
 static func _build(fv, name: String) -> Node3D:
+	if name.begins_with("weapon:"):
+		return _build_weapon(fv, name.substr(7))
 	var d: Dictionary = (_cfg().get("defs", {}) as Dictionary).get(name, {})
 	var sk := _find_skeleton(fv._rig)
 	if d.is_empty() or sk == null:
