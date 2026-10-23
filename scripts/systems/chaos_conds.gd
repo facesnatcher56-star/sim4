@@ -42,7 +42,13 @@ static func check(v: Variant, subj) -> bool:
 	return true
 
 static func fixtures(hid: int) -> Array:
-	return _objs(hid, FIXTURES, false)
+	var out: Array = _objs(hid, FIXTURES, false)
+	if out.is_empty() and SoloHome.active and hid == SoloHome.hid() and not SoloHome.homeless:          # task 61c: a tenant's flat has the landlord's pipes
+		var rc: Rect2i = NeighborhoodLots.rect_of(Neighborhood.HOME)
+		for o in SysUtil.all_world_objects():
+			if FIXTURES.has(str(o.def_id)) and rc.has_point(o.tile):
+				out.append(o)
+	return out
 
 static func appliances(hid: int) -> Array:
 	return _objs(hid, ChaosState.cfg("appliance").get("objects", []), true)

@@ -1,0 +1,149 @@
+NOTE d1 09:00 [bill] A note under the door from Dahlia Rayne, the landlord: "Rent's due Sunday. 35 coins."
+NOTE d1 11:10 [relationship] Wick met Dahlia Rayne.
+NOTE d1 11:10 [visit] Dahlia from next door knocks to say hello.
+NOTE d1 11:36 [career] You send your details to Fernwood City Hall.
+APPLY politician -> { "ok": true, "reason": "" }
+NOTE d1 11:36 [career] You send your details to Ironbridge Works.
+APPLY construction_worker -> { "ok": true, "reason": "" }
+NOTE d1 11:58 [visit] The visit is over.
+MONEY d1 191
+NOTE d1 21:00 [story] No bed yet. The floor it is.
+NOTE d1 23:00 [story] Your stomach growls. 191 coins and nothing in the cupboard.
+NOTE d2 10:21 [career] A message from Fernwood City Hall: They'd like to meet you: tomorrow, 10:00.
+NOTE d2 16:09 [career] A message from Ironbridge Works: The job is yours. You start Friday, 6:00, at Ironbridge Works.
+MONEY d2 182
+NOTE d3 09:43 [story] Fernwood City Hall: Not this time.
+MONEY d3 173
+NOTE d3 23:00 [warn] A cable fault knocked out phones and internet on the north side.
+NOTE d4 00:00 [birthday] It's Wick's birthday today!
+NOTE d4 00:13 [bill] Household bills: 49 coins (electricity 29, home internet 19, council charges 1), due on day 7.
+NOTE d4 00:13 [bill] Rent due for Starter Studio: 35 coins.
+NOTE d4 01:00 [story] The first bill. It pays itself on the day it's due, if the coins are there.
+NOTE d4 17:10 [visit] Dahlia from next door drops by again. "A word about the landlord: pay on the day. The locks get changed fast round here."
+NOTE d4 18:03 [visit] The visit is over.
+MONEY d4 164
+NOTE d5 04:48 [career] Work at 6:00, Ironbridge Works. You set off around 5:02.
+NOTE d5 07:00 [relationship] Wick met Ida Cooper at Ironbridge Works.
+NOTE d5 07:20 [relationship] Wick met Tavish Osborne at Ironbridge Works.
+NOTE d5 08:40 [relationship] Wick met Darcy Flynn at Ironbridge Works.
+NOTE d5 09:00 [relationship] Wick met Sinead Tresidder at Ironbridge Works.
+NOTE d5 10:00 [relationship] Wick met Zenith Pryce at Ironbridge Works.
+NOTE d5 11:40 [relationship] Wick met Matilda Murray at Ironbridge Works.
+TILT [{ "id": "vandalism", "key": "home:1", "mult": 6.0, "until": 5 }, { "id": "catch_cold", "key": "folk:1", "mult": 6.0, "until": 6 }, { "id": "burst_pipe", "key": "home:1", "mult": 250.0, "until": 11 }]
+NOTE d5 12:20 [relationship] Wick met Philippa Hayes at Ironbridge Works.
+NOTE d5 13:30 [story] "The works yard needs a utility tech," Ida says. "Just so you know."
+NOTE d5 14:00 [career] Wick earned 128 coins at work.
+NOTE d5 14:00 [goal] Your first wage is in your pocket.
+NOTE d5 14:00 [warn] A water main burst on the north side. Taps are dry until it is repaired.
+MONEY d5 283
+MONEY d6 274
+ASK d7 00:00 [A neighbour asks a favour] Lorcan Thorn, a neighbour, asked Wick for a small favour. -> 
+NOTE d7 00:13 [bill] Paid bill: 49 coins.
+NOTE d7 00:13 [bill] Paid bill: 35 coins.
+NOTE d7 00:13 [goal] Rent paid. The roof is yours for another week.
+MONEY d7 181
+NOTE d8 00:13 [bill] Mobile plan: 5 coins.
+NOTE d8 04:52 [career] Work at 6:00, Ironbridge Works. You set off around 5:07.
+NOTE d8 08:43 [goal] Wick fulfilled a whim: Make a friend (+60 satisfaction)
+NOTE d8 08:43 [goal] Somebody in this town is glad to see you.
+NOTE d8 08:43 [relationship] Wick now sees Darcy Flynn as: Friend
+NOTE d8 08:52 [relationship] Darcy Flynn now sees Wick as: Friend
+NOTE d8 10:00 [relationship] Wick met Tristan Pryce at Ironbridge Works.
+NOTE d8 11:43 [relationship] Darcy Flynn now sees Winifred as: Friend
+NOTE d8 12:46 [relationship] Philippa Hayes now sees Wick as: Friend
+NOTE d8 12:46 [relationship] Wick now sees Philippa Hayes as: Friend
+NOTE d8 12:46 [story] Philippa says the café is looking for a barista.
+NOTE d8 14:00 [career] Wick earned 128 coins at work.
+NOTE d8 14:01 [warn] Lightning struck: the computer is broken!
+NOTE d8 14:27 [relationship] Sinead Tresidder now sees Philippa Hayes as: Friend
+NOTE d8 14:27 [relationship] Philippa Hayes now sees Sinead Tresidder as: Friend
+NOTE d8 17:59 [relationship] Winifred is hosting a friends gathering.
+NOTE d8 19:49 [relationship] The friends gathering wraps up.
+MONEY d8 284
+ASK d9 00:00 [A neighbour asks a favour] Benno Slater, a neighbour, asked Wick for a small favour. -> 
+NOTE d9 10:48 [relationship] Darcy Flynn now sees Tavish Osborne as: Best Friend
+NOTE d9 10:48 [relationship] Tavish Osborne now sees Darcy Flynn as: Best Friend
+NOTE d9 13:53 [relationship] Sinead Tresidder now sees Darcy Flynn as: Friend
+NOTE d9 13:53 [relationship] Darcy Flynn now sees Sinead Tresidder as: Friend
+NOTE d9 17:08 [visit] Darcy Flynn arrived for a visit.
+NOTE d9 17:31 [story] Darcy heard the  is after a lawyer.
+NOTE d9 18:21 [relationship] Winifred is hosting a friends gathering.
+NOTE d9 19:35 [visit] The visit is over.
+MONEY d9 275
+NOTE d9 20:07 [relationship] The friends gathering wraps up.
+NOTE d10 10:35 [relationship] Ida Cooper now sees Philippa Hayes as: Friend
+NOTE d10 10:35 [relationship] Philippa Hayes now sees Ida Cooper as: Friend
+ASK d10 12:00 [An invitation] "I would like to invite you," Dahlia Rayne writes. "A few friends are meeting up." -> yes
+NOTE d10 12:19 [relationship] Benno Slater now sees Darcy Flynn as: Friend
+NOTE d10 15:01 [visit] Wick had a great time at the party.
+NOTE d10 19:57 [relationship] Winifred is hosting a friends gathering.
+MONEY d10 266
+NOTE d10 21:43 [relationship] The friends gathering wraps up.
+ASK d11 00:00 [Someone needs a bed] Zenith Pryce has lost their home for a while and asked if they could stay with Wick. -> yes
+NOTE d11 00:13 [bill] Paid bill: 5 coins.
+NOTE d11 00:13 [bill] Household bills: 47 coins (electricity 28, home internet 19), due on day 14.
+NOTE d11 00:13 [bill] Rent due for Starter Studio: 70 coins.
+NOTE d11 03:01 [warn] Lightning struck: the treadmill is broken!
+NOTE d11 06:00 [warn] A cable fault knocked out phones and internet on the north side.
+NOTE d11 06:07 [relationship] Darcy Flynn now sees Ida Cooper as: Best Friend
+NOTE d11 06:07 [relationship] Ida Cooper now sees Darcy Flynn as: Best Friend
+NOTE d11 09:43 [relationship] Darcy Flynn now sees Benno Slater as: Friend
+NOTE d11 10:00 [visit] Zenith Pryce arrived for a visit.
+NOTE d11 12:55 [visit] Philippa Hayes arrived for a visit.
+NOTE d11 13:22 [relationship] Winifred now sees Darcy Flynn as: Friend
+NOTE d11 16:59 [visit] The visit is over.
+MONEY d11 252
+NOTE d11 21:30 [relationship] Bridget is hosting a friends gathering.
+NOTE d11 23:19 [relationship] The friends gathering wraps up.
+ASK d12 00:00 [Someone needs a bed] Tristan Pryce has lost their home for a while and asked if they could stay with Wick. -> yes
+NOTE d12 00:38 [visit] The visit is over.
+NOTE d12 07:23 [story] Benno says the market is looking for a handyperson.
+NOTE d12 07:38 [relationship] Tavish Osborne now sees Wick as: Friend
+NOTE d12 07:38 [relationship] Wick now sees Tavish Osborne as: Friend
+NOTE d12 07:40 [relationship] Darcy Flynn now sees Winifred as: Best Friend
+NOTE d12 08:24 [relationship] Ida Cooper now sees Wick as: Friend
+NOTE d12 08:24 [relationship] Wick now sees Ida Cooper as: Friend
+NOTE d12 09:21 [relationship] Winifred is hosting a friends gathering.
+NOTE d12 11:07 [relationship] The friends gathering wraps up.
+NOTE d12 11:13 [relationship] Philippa Hayes now sees Sinead Tresidder as: Best Friend
+NOTE d12 11:31 [relationship] Winifred now sees Darcy Flynn as: Best Friend
+NOTE d12 12:35 [relationship] Sinead Tresidder now sees Philippa Hayes as: Best Friend
+NOTE d12 12:40 [relationship] Wick now sees Sinead Tresidder as: Friend
+NOTE d12 12:40 [relationship] Sinead Tresidder now sees Wick as: Friend
+NOTE d12 14:00 [career] Wick earned 128 coins at work.
+NOTE d12 14:02 [relationship] Philippa Hayes now sees Benno Slater as: Friend
+NOTE d12 15:00 [visit] Tristan Pryce arrived for a visit.
+MONEY d12 371
+NOTE d12 22:57 [relationship] Matilda Murray now sees Sinead Tresidder as: Friend
+NOTE d12 22:57 [relationship] Sinead Tresidder now sees Matilda Murray as: Friend
+ASK d13 00:12 [Come along?] Tristan Pryce asks politely whether you can come. People are getting together at home. -> yes
+NOTE d13 00:38 [visit] The visit is over.
+NOTE d13 07:51 [relationship] Sinead Tresidder now sees Zenith Pryce as: Friend
+NOTE d13 08:17 [relationship] Zenith Pryce now sees Sinead Tresidder as: Friend
+NOTE d13 16:44 [relationship] Winifred is hosting a friends gathering.
+NOTE d13 17:01 [warn] Wick has caught a cold.
+NOTE d13 18:31 [relationship] The friends gathering wraps up.
+MONEY d13 362
+NOTE d14 00:13 [bill] Paid bill: 47 coins.
+NOTE d14 00:13 [bill] Paid bill: 70 coins.
+ASK d14 00:18 [Come along?] Zenith Pryce asks politely whether you can come. There is a get-together at home. -> yes
+NOTE d14 10:58 [relationship] Dahlia Rayne now sees Darcy Flynn as: Friend
+NOTE d14 15:43 [relationship] Philippa Hayes now sees Matilda Murray as: Friend
+NOTE d14 15:43 [relationship] Matilda Murray now sees Philippa Hayes as: Friend
+NOTE d14 17:44 [relationship] Winifred is hosting a friends gathering.
+NOTE d14 19:04 [relationship] Darcy Flynn now sees Dahlia Rayne as: Friend
+NOTE d14 19:31 [relationship] The friends gathering wraps up.
+MONEY d14 236
+NOTE d15 00:13 [bill] Mobile plan: 5 coins.
+ASK d15 00:18 [An invitation] Philippa Hayes has saved you a seat. There is a get-together at home. Coming? -> yes
+NOTE d15 06:33 [relationship] Benno Slater now sees Wick as: Friend
+NOTE d15 06:33 [relationship] Wick now sees Benno Slater as: Friend
+NOTE d15 08:20 [relationship] Wick now sees Darcy Flynn as: Best Friend
+NOTE d15 09:34 [story] Benno heard the  is after a night watchman.
+NOTE d15 10:07 [story] Rhea says the works yard is looking for a factory hand.
+NOTE d15 10:18 [relationship] Winifred now sees Tavish Osborne as: Best Friend
+NOTE d15 10:20 [relationship] Darcy Flynn now sees Wick as: Best Friend
+NOTE d15 10:56 [relationship] Tavish Osborne now sees Fable Weaver as: Friend
+NOTE d15 10:56 [relationship] Fable Weaver now sees Tavish Osborne as: Friend
+NOTE d15 10:56 [relationship] Philippa Hayes now sees Tavish Osborne as: Friend
+END job=construction_worker start_day=5 coins=236

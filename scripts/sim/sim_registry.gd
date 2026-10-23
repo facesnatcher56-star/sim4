@@ -75,6 +75,8 @@ static func systems_rows(sm: Object) -> Array:
 		["hour/Vacation.on_hour", "Vacation", 60, 310, N, "", Vacation.on_hour, Callable(Vacation, "busy"), "active trips only"],
 		["hour/PlaceAuto.on_hour", "PlaceAuto", 60, 312, N, "hour", PlaceAuto.on_hour, null, "residents ACTIVE: who is ill, which pets need care (O(residents + pets), a few comparisons each)"],
 		["hour/SoloOpening.on_hour", "SoloOpening", 60, 315, N, "hour", SoloOpening.on_hour, null, "task 61: the first week's moments (a few comparisons an hour)"],
+		["hour/SoloPressure.on_hour", "SoloPressure", 60, 316, N, "hour", SoloPressure.on_hour, null, "task 61c: a crew offer the evening it is ready (one comparison an hour)"],
+		["hour/SoloGrey.on_hour", "SoloGrey", 60, 316, N, "hour", SoloGrey.on_hour, null, "task 61c: an offer of grey money the day it is ready (one comparison an hour)"],
 		["hour/SoloTeach.on_hour", "SoloTeach", 60, 317, N, "hour", SoloTeach.on_hour, null, "task 61: first-time lines (the pawn only)"],
 		["hour/SoloCrews.on_hour", "SoloCrews", 60, 314, N, "hour", SoloCrews.on_hour, null, "one-character play: the planned drive-by of a rough district (one comparison an hour)"],
 		["hour/CarActs.on_hour", "CarActs", 60, 316, N, "", CarActs.on_hour, null, "task 53: stolen cars found missing (a handful of pending reports)"],

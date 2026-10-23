@@ -16,6 +16,7 @@ static var trouble_since: int = -1        # first day of the present trouble (-1
 static var last_offer: int = -99
 static var clean_days: int = 0            # days without a crew job (the record is expunged after expunge days of clean living)
 static var waiting: bool = false          # an offer is on the screen
+static var due: Dictionary = {}           # task 61c: {day, district} an offer is ready; it is made in the evening on the block (on_hour)
 
 static func reset() -> void:
 	member = false
@@ -76,20 +77,39 @@ static func on_day(day: int) -> void:
 	if member:
 		_member_day(f, day)
 		if not waiting and day - last_offer >= 2:
-			_offer(f, district_of_pawn(f), day)          # a member is asked for work every other day; a "no" costs standing
+			due = {"day": day, "district": district_of_pawn(f)}          # a member is asked for work every other day; a "no" costs standing
 		return
 	var d: String = district_of_pawn(f)
 	var rough: bool = SoloDistricts.roughness_of(d) >= float(cfg().get("min_roughness", 0.6)) and SoloDistricts.setting_factor() > 0.0
-	if rough and in_trouble(f):
+	SoloGrey.fine_due(f, day)
+	if not rough and in_trouble(f):          # task 61c: away from the rough blocks, someone the pawn knows offers grey money (rarer)
+		if trouble_since < 0:
+			trouble_since = day
+		SoloGrey.on_day(f, day, trouble_since)
+	elif rough and in_trouble(f):
 		if trouble_since < 0:
 			trouble_since = day
 		var first: int = int(SoloCfg.by_diff("pressure", "first_offer_days"))
 		var due_first: bool = last_offer < trouble_since and day - trouble_since >= first
 		var due_again: bool = last_offer >= trouble_since and day - last_offer >= int(cfg().get("repeat_days", 4))
 		if (due_first or due_again) and not waiting:
-			_offer(f, d, day)
+			due = {"day": day, "district": d}
 	else:
 		trouble_since = -1
+
+## The evening of a day an offer is ready (17:00 to 21:00), while the pawn is about.
+static func on_hour(h: int) -> void:
+	if due.is_empty() or h < 17 or h > 21 or waiting:
+		return
+	if int(due["day"]) != SysUtil.day():
+		due = {}
+		return
+	var f = SysUtil.folk(Pawn.of())
+	if f == null or SysUtil.is_away(f):
+		return
+	var d: String = str(due["district"])
+	due = {}
+	_offer(f, d, SysUtil.day())
 
 static func _member_day(f, day: int) -> void:
 	var dues: int = int(cfg().get("dues_per_day", 3))

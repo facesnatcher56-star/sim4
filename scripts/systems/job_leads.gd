@@ -92,6 +92,7 @@ static func on_social_done(a: int, b: int, iid: String) -> void:
 		return
 	EduJobs.refresh(SysUtil.day())
 	var pool: Array = Careers.career_ids().filter(func(c): return EduJobs.openings(str(c)) > 0 and str(c) != Careers.career_of(pawn) and not has(pawn, str(c)))
+	pool = pool.filter(func(c): return str(Careers.career_def(str(c)).get("workplace", "")) != "")          # only jobs with a real place someone can name
 	if pool.is_empty():
 		return
 	var own: String = Careers.career_of(other)

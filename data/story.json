@@ -26,6 +26,8 @@
   },
   "visits": {
     "daily_chance": 0.55,
+    "max_per_week": 2,
+    "min_friendship": 30,
     "hour_min": 10,
     "hour_max": 19,
     "duration_min": [120, 240],

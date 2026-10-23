@@ -93,6 +93,6 @@ static func describe(p: Dictionary) -> String:
 		var v: int = int(p.get(k, 0))
 		if v <= 0:
 			continue
-		var name: String = {"power": "electricity", "water": "water", "internet": "phone and internet", "rates": "council charges", "cover": "insurance"}[k]
+		var name: String = {"power": "electricity", "water": "water", "internet": "home internet", "rates": "council charges", "cover": "insurance"}[k]
 		bits.append("%s %d" % [name, v])
 	return ", ".join(bits)

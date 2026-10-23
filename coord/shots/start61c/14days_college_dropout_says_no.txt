@@ -1,0 +1,64 @@
+NOTE d1 09:00 [bill] A note under the door from Yarrow Tresidder, the landlord: "Rent's due Sunday. 35 coins."
+NOTE d1 11:10 [relationship] Dahlia met Nerys Jarvis.
+NOTE d1 11:10 [visit] Nerys from next door knocks to say hello.
+NOTE d1 11:36 [career] You send your details to Fernwood City Hall.
+APPLY politician -> { "ok": true, "reason": "" }
+NOTE d1 11:36 [career] You send your details to Ironbridge Works.
+APPLY construction_worker -> { "ok": true, "reason": "" }
+NOTE d1 11:58 [visit] The visit is over.
+MONEY d1 191
+NOTE d1 21:00 [story] No bed yet. The floor it is.
+NOTE d1 23:00 [story] Your stomach growls. 191 coins and nothing in the cupboard.
+NOTE d2 10:00 [bill] A letter from the student loan office: 36 coins a week, the first on Monday.
+NOTE d2 10:03 [career] A message from Ironbridge Works: They'd like to meet you: tomorrow, 13:00.
+NOTE d2 11:31 [story] A message from Fernwood City Hall: They went with someone else.
+MONEY d2 182
+NOTE d3 12:44 [story] Ironbridge Works: They went with someone else.
+MONEY d3 173
+NOTE d3 23:00 [warn] A cable fault knocked out phones and internet on the north side.
+NOTE d4 00:00 [birthday] It's Dahlia's birthday today!
+NOTE d4 00:13 [bill] Household bills: 49 coins (electricity 29, home internet 20), due on day 7.
+NOTE d4 00:13 [bill] Rent due for Starter Studio: 35 coins.
+NOTE d4 01:00 [story] The first bill. It pays itself on the day it's due, if the coins are there.
+NOTE d4 17:10 [visit] Nerys from next door drops by again. "A word about the landlord: pay on the day. The locks get changed fast round here."
+NOTE d4 18:03 [visit] The visit is over.
+MONEY d4 164
+NOTE d5 01:01 [warn] Dahlia has caught a cold.
+ASK d5 13:00 [Cash in hand] Nerys has a van and a flat to clear. "Four hours, 60 cash, nobody needs to know." -> no
+MONEY d5 155
+MONEY d6 146
+NOTE d7 00:00 [warn] Several street lamps are out on the north side. People feel uneasy after dark.
+NOTE d7 00:13 [bill] Paid bill: 49 coins.
+NOTE d7 00:13 [bill] Paid bill: 35 coins.
+NOTE d7 00:13 [goal] Rent paid. The roof is yours for another week.
+NOTE d7 01:01 [warn] Dahlia has caught a cold.
+MONEY d7 53
+ASK d8 00:00 [A neighbour asks a favour] Tamsin Fairchild, a neighbour, asked Dahlia for a small favour. -> 
+NOTE d8 00:13 [bill] Mobile plan: 5 coins.
+NOTE d8 03:00 [warn] Everyone's air conditioning or heating overloaded the power grid on the north side.
+NOTE d8 12:01 [warn] Lightning struck: the television is broken!
+MONEY d8 8
+NOTE d9 01:01 [warn] Dahlia has caught a cold.
+NOTE d9 11:00 [bill] The first student loan payment went out: 36 coins.
+MONEY d9 8
+ASK d10 12:00 [Something on this evening] Nerys Jarvis asks politely whether you can come. People are getting together at home. -> no
+MONEY d10 8
+NOTE d11 00:13 [bill] Paid bill: 5 coins.
+NOTE d11 00:13 [bill] Household bills: 48 coins (electricity 29, home internet 19), due on day 14.
+NOTE d11 00:13 [bill] Rent due for Starter Studio: 70 coins.
+ASK d11 00:18 [A shady offer] Money is desperately tight. An acquaintance says there is quick cash for someone who can keep quiet. Does Dahlia take it? -> no
+MONEY d11 3
+NOTE d12 00:00 [warn] A failed transformer cut the power on the north side.
+ASK d12 13:00 [Cash in hand] Tamsin has a van and a flat to clear. "Four hours, 60 cash, nobody needs to know." -> no
+MONEY d12 0
+NOTE d13 04:00 [bad] Something was stolen at your home. The police have been told.
+MONEY d13 0
+NOTE d14 00:13 [warn] Bill overdue! Late fee 10 added (now 58 coins).
+NOTE d14 00:13 [warn] Bill overdue! Late fee 10 added (now 80 coins).
+NOTE d14 19:00 [warn] Everyone's air conditioning or heating overloaded the power grid on the north side.
+MONEY d14 0
+NOTE d15 00:00 [warn] The rent is overdue. Pay it, or the landlord starts eviction.
+NOTE d15 00:13 [warn] A student loan payment of 36 coins was missed. A late fee was added.
+NOTE d15 00:13 [bill] Mobile plan: 5 coins.
+NOTE d15 03:00 [warn] A pumping station failed and the taps ran dry on the north side.
+END job= start_day=- coins=0

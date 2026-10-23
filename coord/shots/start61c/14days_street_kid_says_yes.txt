@@ -1,0 +1,117 @@
+NOTE d1 09:00 [bill] A note under the door from Sable Rhodes, the landlord: "Rent's due Sunday. 35 coins."
+NOTE d1 11:10 [relationship] Jules met Valda Merriweather.
+NOTE d1 11:10 [visit] Valda from next door knocks to say hello.
+NOTE d1 11:36 [career] Application sent to Fernwood City Hall.
+APPLY politician -> { "ok": true, "reason": "" }
+NOTE d1 11:36 [career] Application sent to Ironbridge Works.
+APPLY construction_worker -> { "ok": true, "reason": "" }
+NOTE d1 11:58 [visit] The visit is over.
+MONEY d1 191
+NOTE d1 21:00 [story] No bed yet. The floor it is.
+NOTE d1 23:00 [story] Your stomach growls. 191 coins and nothing in the cupboard.
+NOTE d2 00:00 [birthday] It's Jules's birthday today!
+ASK d2 00:00 [A neighbour asks a favour] Felix Hargrove, a neighbour, asked Jules for a small favour. -> 
+NOTE d2 11:43 [career] A message from Ironbridge Works: The job is yours. You start Friday, 6:00, at Ironbridge Works.
+NOTE d2 16:49 [story] A message from Fernwood City Hall: The job has gone.
+NOTE d2 19:00 [story] Nash texts: "Heard you got a place. Come find me in the Kiln Quarter."
+MONEY d2 182
+NOTE d3 08:00 [warn] A cable fault knocked out phones and internet on the north side.
+MONEY d3 173
+NOTE d4 00:13 [bill] Household bills: 49 coins (electricity 30, home internet 20), due on day 7.
+NOTE d4 00:13 [bill] Rent due for Starter Studio: 35 coins.
+NOTE d4 01:00 [story] The first bill. It pays itself on the day it's due, if the coins are there.
+NOTE d4 17:10 [visit] Valda from next door drops by again. "A word about the landlord: pay on the day. The locks get changed fast round here."
+NOTE d4 18:00 [warn] A storm brought power lines down on the north side.
+NOTE d4 18:03 [visit] The visit is over.
+MONEY d4 164
+NOTE d4 22:00 [warn] A cable fault knocked out phones and internet on the north side.
+NOTE d5 00:00 [warn] Several street lamps are out on the north side. People feel uneasy after dark.
+NOTE d5 04:45 [career] Work at 6:00, Ironbridge Works. You set off around 5:00.
+NOTE d5 07:00 [relationship] Jules met Perrin Rowan at Ironbridge Works.
+NOTE d5 08:00 [relationship] Jules met Rowan Bishop at Ironbridge Works.
+TILT [{ "id": "burst_pipe", "key": "home:1", "mult": 250.0, "until": 11 }]
+NOTE d5 12:09 [relationship] Nash Swift now sees Jules as: Friend
+NOTE d5 12:09 [goal] Jules fulfilled a whim: Make a friend (+60 satisfaction)
+NOTE d5 12:09 [goal] Somebody in this town is glad to see you.
+NOTE d5 12:09 [relationship] Jules now sees Nash Swift as: Friend
+NOTE d5 14:00 [career] Jules earned 128 coins at work.
+NOTE d5 14:00 [goal] Your first wage is in your pocket.
+MONEY d5 283
+NOTE d6 13:52 [visit] Nash Swift arrived for a visit.
+NOTE d6 14:14 [story] Nash heard the works yard is after a utility tech.
+NOTE d6 16:34 [visit] The visit is over.
+MONEY d6 274
+NOTE d7 00:01 [bad] Vandals defaced your home. The cleanup cost 56 coins.
+NOTE d7 00:07 [bill] Paid bill: 49 coins.
+NOTE d7 00:07 [bill] Paid bill: 35 coins.
+NOTE d7 00:07 [goal] Rent paid. The roof is yours for another week.
+MONEY d7 125
+NOTE d7 22:01 [warn] Jules has caught a cold.
+NOTE d8 00:13 [bill] Mobile plan: 5 coins.
+ASK d8 00:18 [Come along?] Rowan Bishop doesn't wait: "People are getting together at home. I'm counting you in." -> yes
+NOTE d8 04:00 [warn] A pumping station failed and the taps ran dry on the north side.
+NOTE d8 04:49 [career] Work at 6:00, Ironbridge Works. You set off around 5:04.
+NOTE d8 08:56 [story] "The library needs a writer," Bo says. "Just so you know."
+NOTE d8 09:53 [story] Rowan heard the  is after a police officer.
+NOTE d8 10:00 [relationship] Jules met Sable Rhodes at Ironbridge Works.
+NOTE d8 11:14 [relationship] Bo Tanner now sees Jules as: Friend
+NOTE d8 11:14 [relationship] Jules now sees Bo Tanner as: Friend
+NOTE d8 11:14 [relationship] Jules now sees Bo Tanner as: Friend
+NOTE d8 12:19 [relationship] Rowan Bishop now sees Jules as: Friend
+NOTE d8 12:19 [relationship] Jules now sees Rowan Bishop as: Friend
+NOTE d8 12:20 [relationship] Jules met Mei Elliot at Ironbridge Works.
+NOTE d8 13:00 [relationship] Jules now sees Bettina Garrick as: Friend
+NOTE d8 13:00 [relationship] Bettina Garrick now sees Jules as: Friend
+NOTE d8 13:00 [relationship] Jules met Eliot Murray at Ironbridge Works.
+NOTE d8 14:00 [career] Jules earned 128 coins at work.
+MONEY d8 244
+NOTE d8 23:00 [warn] Everyone's air conditioning or heating overloaded the power grid on the north side.
+NOTE d9 16:32 [relationship] Prudence is hosting a friends gathering.
+NOTE d9 18:19 [relationship] The friends gathering wraps up.
+MONEY d9 235
+NOTE d9 23:01 [warn] Jules slipped and bruised himself.
+ASK d10 12:00 [Come along?] Valda Merriweather asks politely whether you can come. There is a get-together at home. -> yes
+NOTE d10 15:01 [relationship] Jules now sees Bettina Garrick as: Friend
+NOTE d10 15:01 [visit] Jules had a great time at the party.
+NOTE d10 18:29 [relationship] Rufus Turner now sees Bo Tanner as: Friend
+NOTE d10 18:29 [relationship] Bo Tanner now sees Rufus Turner as: Friend
+MONEY d10 226
+NOTE d11 00:13 [bill] Paid bill: 5 coins.
+NOTE d11 00:13 [bill] Household bills: 49 coins (electricity 29, home internet 20), due on day 14.
+NOTE d11 00:13 [bill] Rent due for Starter Studio: 70 coins.
+NOTE d11 11:55 [visit] Rowan Bishop arrived for a visit.
+NOTE d11 15:35 [visit] The visit is over.
+MONEY d11 212
+ASK d12 00:18 [Come along?] "You're coming," Bo Tanner announces. "There is food and music at home." -> yes
+NOTE d12 08:15 [story] Bettina says the school is looking for a teacher.
+NOTE d12 11:43 [story] "The city hall needs a politician," Rowan says. "Just so you know."
+NOTE d12 12:56 [relationship] Rowan Bishop now sees Bettina Garrick as: Friend
+NOTE d12 12:56 [relationship] Bettina Garrick now sees Rowan Bishop as: Friend
+NOTE d12 14:00 [career] Jules earned 127 coins at work.
+NOTE d12 14:02 [relationship] Perrin Rowan now sees Bo Tanner as: Friend
+NOTE d12 14:58 [warn] Jules is overheating. Find shade and some water.
+MONEY d12 330
+NOTE d12 23:00 [warn] A storm brought power lines down on the north side.
+ASK d13 00:00 [A neighbour asks a favour] Aster Ploughman, a neighbour, asked Jules for a small favour. -> 
+NOTE d13 10:36 [visit] Bettina Garrick arrived for a visit.
+NOTE d13 13:38 [visit] The visit is over.
+NOTE d13 17:52 [relationship] Rufus Turner now sees Nash Swift as: Friend
+NOTE d13 18:17 [relationship] Nash Swift now sees Rufus Turner as: Friend
+MONEY d13 321
+NOTE d14 00:13 [bill] Paid bill: 49 coins.
+NOTE d14 00:13 [bill] Paid bill: 70 coins.
+NOTE d14 00:13 [visit] Mei Elliot dropped by to say thanks for the kindness.
+NOTE d14 10:00 [visit] Mei Elliot arrived for a visit.
+NOTE d14 12:08 [visit] The visit is over.
+NOTE d14 17:01 [relationship] Bo Tanner now sees Perrin Rowan as: Friend
+MONEY d14 193
+NOTE d15 00:13 [bill] Mobile plan: 5 coins.
+ASK d15 00:18 [An invitation] "You're coming," Rowan Bishop announces. "There is food and music at home." -> yes
+NOTE d15 02:01 [warn] Lightning struck: the computer is broken!
+NOTE d15 06:00 [relationship] Jules met Alva Mercer at Ironbridge Works.
+NOTE d15 06:20 [relationship] Jules met Aster Ploughman at Ironbridge Works.
+NOTE d15 09:42 [relationship] Bo Tanner now sees Mei Elliot as: Friend
+NOTE d15 09:42 [relationship] Mei Elliot now sees Bo Tanner as: Friend
+NOTE d15 10:01 [relationship] Jules now sees Bettina Garrick as: Best Friend
+NOTE d15 10:01 [relationship] Bettina Garrick now sees Jules as: Best Friend
+END job=construction_worker start_day=5 coins=193

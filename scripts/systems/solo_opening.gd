@@ -4,6 +4,8 @@ extends RefCounted
 ##   the landlord's note on the first morning (the real first rent and its day), the neighbour who knocks to say hello (a StoryVisits visit),
 ##   a Help wanted card at the business nearest home (a real opening there), and one moment from the background picked at creation: a loan's
 ##   first payment, a probation check-in in the calendar, the Kiln Quarter contact, or a job lead someone passes on.
+## Task 61c: in week 2 each background's moment has a second beat that depends on what the player did (follow); the neighbour comes back with a
+## reason (a word about the landlord, an invitation); and the storyteller tilts one real early problem (a burst pipe, a cold) for a few days.
 ##   SoloOpening.begin(hid)   on_hour(h)   on_minute() (the check-in only)   said: also holds SoloTeach's first-time lines
 
 static var start_day: int = 1
@@ -97,6 +99,21 @@ static func on_hour(h: int) -> void:
 	if d >= int(nb.get("day", 0)) and h >= int(nb.get("hour", 11)) and h < 19 and neighbour >= 0 and d <= 2 and once("neighbour"):
 		var sit: Dictionary = StoryVisits.schedule_visit([neighbour], fid, SysUtil.now() + 10, int(nb.get("minutes", 40)), "visit")
 		sit["line"] = _fill(str(nb.get("line", "")), {"who": _first(Story.name_of(neighbour))})
+	var pb: Dictionary = c.get("problem", {})
+	if d >= int(pb.get("day", 4)) and once("problem"):
+		var pick: Dictionary = (pb.get("incidents", []) as Array).pick_random() if not (pb.get("incidents", []) as Array).is_empty() else {}
+		if not pick.is_empty():
+			var key: String = ("home:%d" % SoloHome.hid()) if str(pick.get("subject", "")) == "home" else ("folk:%d" % fid)
+			StorytellerTilt.add(str(pick["id"]), key, str(pb.get("size", "opening")))          # only the odds of its own roll; nothing is announced
+	var again: Array = c.get("neighbour_again", [])
+	for i in again.size():
+		var na: Dictionary = again[i]
+		if neighbour >= 0 and d >= int(na.get("day", 3)) and h >= int(na.get("hour", 17)) and h < 20 and once("nb_again_%d" % i):
+			if str(na.get("kind", "")) == "invite":
+				StoryVisits.send_invite(neighbour, fid)
+			else:
+				var sv: Dictionary = StoryVisits.schedule_visit([neighbour], fid, SysUtil.now() + 10, int(na.get("minutes", 45)), "visit")
+				sv["line"] = _fill(str(na.get("line", "")), {"who": _first(Story.name_of(neighbour))})
 	var bg: String = str((Creation.picks.get(fid, {}) as Dictionary).get("background", ""))
 	var keys: Array = [bg] + ((Creation.picks.get(fid, {}) as Dictionary).get("flaws", []) as Array)
 	var moments: Dictionary = c.get("moments", {})
@@ -104,6 +121,9 @@ static func on_hour(h: int) -> void:
 		var m: Dictionary = moments.get(str(k), {})
 		if not m.is_empty() and d >= int(m.get("day", 1)) and h >= int(m.get("hour", 9)) and d <= 6 and once("bg_" + str(k)):
 			_moment(fid, m)
+		var fl: Dictionary = m.get("follow", {})
+		if not fl.is_empty() and said.has("bg_" + str(k)) and d >= int(fl.get("day", 8)) and h >= int(fl.get("hour", 10)) and d <= 13 and once("bgf_" + str(k)):
+			_follow(fid, fl)
 
 static func _landlord_note(ll: Dictionary) -> void:
 	var p: Dictionary = SoloHome.prop()
@@ -126,7 +146,10 @@ static func _moment(fid: int, m: Dictionary) -> void:
 		"probation":
 			var day: int = start_day + int(m.get("on_day", 3))
 			var hrs: Array = m.get("hours", [10, 16])
-			checkin = {"day": day, "hours": hrs, "lot": str(m.get("lot", "police")), "done": str(m.get("done", "")), "missed": str(m.get("missed", ""))}
+			checkin = {"day": day, "hours": hrs, "lot": str(m.get("lot", "police")), "done": str(m.get("done", "")), "missed": str(m.get("missed", "")),
+				"warning": str(m.get("warning", "")), "every": int(m.get("every_days", 7)), "misses": 0}
+			if int(JusticeState.probation.get(fid, -1)) < SysUtil.day():
+				JusticeState.probation[fid] = SysUtil.day() + int(m.get("probation_days", 60))          # the sentence's probation, now on file
 			CalendarBook.add(fid, day, float(hrs[0]), str(checkin["lot"]), "Probation check-in, %d:00-%d:00" % [int(hrs[0]), int(hrs[1])], "probation")
 			SysUtil.notify(_fill(str(m["line"]), {"when": "%s, %d:00-%d:00" % [Seasons.weekday_long(day), int(hrs[0]), int(hrs[1])]}), "story")
 		"contact":
@@ -146,6 +169,26 @@ static func _moment(fid: int, m: Dictionary) -> void:
 			var vt: String = str(Careers.career_def(career).get("workplace", ""))
 			var place: String = str((JobLeads.cfg().get("place_words", {}) as Dictionary).get(vt, Venues.label(vt).to_lower()))
 			SysUtil.notify(_fill(str(m["line"]), {"who": _first(Story.name_of(who)) if who >= 0 else "Someone", "place": place}), "story")
+
+## The second beat of a background's week: only when what the player did (or did not do) calls for it.
+static func _follow(fid: int, fl: Dictionary) -> void:
+	match str(fl.get("kind", "")):
+		"loan_due":          # the loan's first payment went out (a missed one has the bank's own line)
+			for l in BankAccounts.loans:
+				if int(l["hid"]) == SoloHome.hid() and str(l["kind"]) == str(fl.get("lender", "")) and int(l.get("missed", 0)) == 0 and int(l["next_due"]) > SysUtil.day() - 1:
+					SysUtil.notify(_fill(str(fl["line"]), {"pay": int(round(float(l["payment"])))}), "bill")
+					return
+		"lender_again":
+			for l in BankAccounts.loans:
+				if int(l["hid"]) == SoloHome.hid() and str(l["kind"]) == str(fl.get("lender", "")):
+					SysUtil.notify(_fill(str(fl["line"]), {"pay": int(round(float(l["payment"]))), "due": Seasons.weekday_long(int(l["next_due"]))}), "warn")
+					return
+		"contact_visit":          # the contact was never looked up: they turn up at the door
+			var cid: int = int((Creation.picks.get(fid, {}) as Dictionary).get("contact_id", -1))
+			if cid < 0 or RelationshipService.value(fid, cid, "friendship") >= float(fl.get("met_above", 22)):
+				return
+			var sv: Dictionary = StoryVisits.schedule_visit([cid], fid, SysUtil.now() + 15, int(fl.get("minutes", 60)), "visit")
+			sv["line"] = _fill(str(fl["line"]), {"who": _first(Story.name_of(cid))})
 
 ## An adult townie (the creation contact, else the neighbour, else anyone): who passes a lead on.
 static func _someone(fid: int) -> int:
@@ -172,9 +215,25 @@ static func on_minute() -> void:
 		checkin = {}
 		CalendarBook.appts = CalendarBook.appts.filter(func(a): return str(a["kind"]) != "probation")
 	elif SysUtil.day() > day or (SysUtil.day() == day and h >= float(hrs[1])):
-		SysUtil.notify(str(checkin["missed"]), "warn")
-		checkin = {}
 		CalendarBook.appts = CalendarBook.appts.filter(func(a): return str(a["kind"]) != "probation")
+		checkin["misses"] = int(checkin.get("misses", 0)) + 1
+		if int(checkin["misses"]) >= 2 and f != null:
+			SysUtil.notify(str(checkin["missed"]), "warn")
+			checkin = {}
+			_violation(int(f.id))
+			return
+		var next: int = SysUtil.day() + int(checkin.get("every", 7))          # the first miss: a warning and a new date
+		checkin["day"] = next
+		CalendarBook.add(Pawn.of(), next, float(hrs[0]), str(checkin["lot"]), "Probation check-in, %d:00-%d:00" % [int(hrs[0]), int(hrs[1])], "probation")
+		SysUtil.notify(_fill(str(checkin.get("warning", checkin["missed"])), {"when": "%s, %d:00-%d:00" % [Seasons.weekday_long(next), int(hrs[0]), int(hrs[1])]}), "warn")
+
+## The second missed check-in: the probation office passes it to the police, a probation violation case against the pawn (arrest, charge, trial).
+static func _violation(pid: int) -> void:
+	var c: Dictionary = CaseStore.create("probation_violation", pid, -1, CrimePerson.home_key(pid), {"witnessed": true, "trace": 1.0, "public": false})
+	c["charge_hint"] = "probation_violation"
+	c["state"] = "reported"
+	c["disc_day"] = SysUtil.day()
+	JusticeProcess.arrest(c, pid)
 
 static func busy() -> bool:
 	return not checkin.is_empty()

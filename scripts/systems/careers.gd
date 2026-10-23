@@ -226,6 +226,8 @@ static func pending_offer(folk_id: int) -> Dictionary:
 static func make_offer(f, cid: String = "", level: int = 0) -> Dictionary:
 	if f == null or jobs.has(int(f.id)) or retired.has(int(f.id)):
 		return {}
+	if SoloHome.active and Pawn.is_pawn(f):
+		return {}          # task 61: the pawn's jobs come only as answers to its own applications (JobApps), in the daytime
 	if why_not_work(f) != "":
 		if str(f.age_stage) != "teen" or why_not_work(f, "x") == "not one of the household":
 			return {}
@@ -278,6 +280,12 @@ static func on_job_search(folk_id: int) -> void:
 	if f == null or jobs.has(folk_id) or (why_not_work(f) != "" and str(f.age_stage) != "teen"):
 		return
 	seeking[folk_id] = SysUtil.day()
+	if SoloHome.active and Pawn.is_pawn(f):          # task 61: the pawn's search sends an application to the best job it can take
+		for r in EduJobs.board_for(f):
+			if bool(r["qualified"]) and JobApps.pending(folk_id).filter(func(a): return str(a["cid"]) == str(r["career"])).is_empty():
+				JobApps.send(folk_id, str(r["career"]))
+				return
+		return
 	if not offers.has(folk_id):
 		make_offer(f)
 	if not confirm_offers:

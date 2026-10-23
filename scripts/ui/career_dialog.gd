@@ -10,6 +10,21 @@ func _ready() -> void:
 static func hours_text(h: float) -> String:
 	return "%02d:%02d" % [int(h) % 24, int(round((h - floorf(h)) * 60.0))]
 
+const SKILL_WORDS := {"charisma": "handle customers better", "cooking": "cook with more care", "logic": "think problems through", "handiness": "fix things properly",
+	"fitness": "keep up on your feet", "writing": "write more clearly", "painting": "paint with a surer hand", "gardening": "look after the plants better",
+	"mechanics": "know engines better", "first_aid": "stay calm with patients", "driving": "drive more surely", "perception": "notice more"}
+
+## The next promotion's missing pieces as the manager would put it: no skill names or numbers.
+static func manager_wants(miss: Array) -> String:
+	var bits: Array = []
+	for r in miss:
+		var m := RegEx.create_from_string("^([a-z_]+) (\\d+)$").search(str(r))
+		if m != null:
+			bits.append(str(SKILL_WORDS.get(m.get_string(1), "get better at " + m.get_string(1).replace("_", " "))))
+	if bits.is_empty():
+		return "Your manager wants more time from you before a step up."
+	return "Your manager wants to see you %s." % " and ".join(bits.slice(0, 2))
+
 ## "cooking 2" -> "Cooking skill level 2"; "trait: creative or neat" -> "Trait: Creative or Neat".
 static func nice_requirement(r: String) -> String:
 	var rx := RegEx.create_from_string("^([a-z_]+) (\\d+)$")
@@ -116,9 +131,9 @@ func _job(info: Dictionary) -> void:
 		line(str(info["next_title"]), 15)
 		var miss: Array = info["next_missing"]
 		if miss.is_empty():
-			line("Requirements met. Keep performance up to 100.", 12, UITheme.ACCENT)
+			line("Keep turning up and doing the work well.", 12, UITheme.MUTED)
 		else:
-			line("Still needed: " + ", ".join(miss.map(func(x): return nice_requirement(str(x)))), 12, UITheme.MUTED)
+			line(manager_wants(miss), 12, UITheme.MUTED)          # task 61b: a promotion is performance and time; skills help, said in words
 	_skip_button()
 
 ## Task 61B: the work days, the next shift (day and time), where it is, and a Go there button.
@@ -128,7 +143,9 @@ func _when_where() -> void:
 		return
 	var cid: String = str(j["career"])
 	var sv: Dictionary = Careers.shift_def(cid, str(j.get("shift", "day")))
-	line("Work days: %s" % LifeHubJobs._days_text(sv.get("days", Careers.career_def(cid).get("days", [])) as Array), 14)
+	var pt: Array = CareerShifts.part_time_days(folk_id)
+	line("Work days: %s%s" % [LifeHubJobs._days_text(pt if not pt.is_empty() else sv.get("days", Careers.career_def(cid).get("days", [])) as Array),
+		"  (part-time until a promotion)" if not pt.is_empty() else ""], 14)
 	var ns: Dictionary = CalendarBook.next_shift(folk_id)
 	if ns.is_empty():
 		return

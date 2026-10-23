@@ -162,7 +162,7 @@ static func on_day(day: int) -> void:
 		Economy.bills.append({"id": Economy._seq, "hid": hid, "amount": amount, "base": amount, "issued": day, "due": day + int(b.get("due_after_days", 3)),
 			"paid": false, "late": false, "fee": 0, "reason": "phone"})
 		Economy._seq += 1
-		SysUtil.notify("Phone bill: %d coins." % amount, "bill")
+		SysUtil.notify("Mobile plan: %d coins." % amount, "bill")
 
 static func to_dict() -> Dictionary:
 	return {"own": own.duplicate(true)}
