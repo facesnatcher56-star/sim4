@@ -56,6 +56,8 @@ static func person_entries(f, target) -> Array:
 static func ask(f, target) -> void:
 	var fid: int = int(f.id)
 	var who: String = str(target.name).get_slice(" (", 0)
+	if JobApps.ask_in_person(f, Neighborhood.lot_of(target)):          # task 61: the application they have is answered here and now
+		return
 	var open: Array = hiring_at(Neighborhood.lot_of(target))
 	if open.is_empty():
 		SysUtil.notify(_line("not_hiring", {"who": who}), "story")
@@ -71,7 +73,7 @@ static func ask(f, target) -> void:
 			_apply(fid, cid, who), "later")
 
 static func _apply(fid: int, cid: String, who: String) -> void:
-	var r: Dictionary = EduJobs.apply(fid, cid)
+	var r: Dictionary = JobApps.send(fid, cid, true, who)
 	if not bool(r.get("ok", false)):
 		SysUtil.notify(_line("turned_down", {"who": who}) if str(r.get("reason", "")).begins_with("Not yet") else str(r.get("reason", "")), "story")
 
@@ -98,6 +100,8 @@ static func on_social_done(a: int, b: int, iid: String) -> void:
 	add(pawn, cid)
 	var vt: String = str(Careers.career_def(cid).get("workplace", ""))
 	var place: String = str((cfg().get("place_words", {}) as Dictionary).get(vt, Venues.label(vt).to_lower()))
+	if place == "":
+		place = Neighborhood.label_of(Workplace.lot_for(cid)) if Workplace.lot_for(cid) != "" else vt.replace("_", " ")
 	SysUtil.notify(_line("mention_own" if cid == own else "mention", {"who": SysUtil.folk_name(other).get_slice(" ", 0), "job": _job(cid), "place": place}), "story")
 
 static func to_dict() -> Dictionary:

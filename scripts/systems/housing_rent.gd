@@ -80,6 +80,9 @@ static func _charge(p: Dictionary, day: int) -> void:
 	if rent <= 0:
 		return
 	if str(p["tenant_kind"]) == "player":
+		if p.has("first_rent_share"):          # task 61: the first week was partly paid in advance
+			rent = int(round(float(rent) * float(p["first_rent_share"])))
+			p.erase("first_rent_share")
 		_bill(p, rent, day)
 		return
 	var t: Dictionary = Story.townies.get(int(p["tenant"]), {})

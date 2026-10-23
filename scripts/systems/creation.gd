@@ -227,7 +227,7 @@ static func apply(f, spec: Dictionary) -> void:
 			var rec: Dictionary = ed["record"]
 			var recs: Array = JusticeState.records.get(fid, [])
 			for ch in rec.get("charges", []):
-				recs.append({"day": SysUtil.day() - 365 * int(rec.get("years_ago", 0)), "charge": str(ch), "case": -1, "result": "convicted"})
+				recs.append({"day": SysUtil.day() - 365 * int(rec.get("years_ago", 0)), "charge": str(ch), "case": -1, "result": "guilty"})          # a conviction that counts (job bans, the hiring malus)
 			JusticeState.records[fid] = recs
 		if ed.has("contact"):
 			var cands: Array = Story.alive_townies().filter(func(t): return Story.stage_of(t) in ["adult", "elder"])
@@ -235,3 +235,4 @@ static func apply(f, spec: Dictionary) -> void:
 				var t: Dictionary = cands[absi(hash("%d|contact" % fid)) % cands.size()]
 				RelationshipService.add_both(fid, int(t["id"]), "friendship", 15.0)
 				RelationshipService.add_history(fid, int(t["id"]), "met", 0.3, int(t["id"]))
+				picks[fid]["contact_id"] = int(t["id"])          # task 61: they get in touch in the first week

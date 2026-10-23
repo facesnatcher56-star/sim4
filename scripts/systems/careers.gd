@@ -182,7 +182,7 @@ static func why_not_work(f, cid: String = "", level: int = 1) -> String:
 		return ""
 	return "too young for that job"
 
-static func hire(f, cid: String, level: int = 1) -> bool:
+static func hire(f, cid: String, level: int = 1, quiet: bool = false) -> bool:
 	if f == null or career_def(cid).is_empty() or level_def(cid, level).is_empty():
 		return false
 	if why_not_work(f, cid, level) != "":
@@ -198,7 +198,8 @@ static func hire(f, cid: String, level: int = 1) -> bool:
 	changed_day[int(f.id)] = SysUtil.day()
 	apply_schedule(f)
 	SysUtil.game_event("hired", {"folk_id": f.id, "career": cid, "level": level})
-	SysUtil.notify("%s is now a %s (%s)!" % [f.name, str(career_def(cid).get("label", cid)), title_of(int(f.id))], "career")
+	if not quiet:
+		SysUtil.notify("%s is now a %s (%s)!" % [f.name, str(career_def(cid).get("label", cid)), title_of(int(f.id))], "career")
 	return true
 
 static func quit_job(f, why: String = "quit") -> void:
@@ -320,6 +321,8 @@ static func on_day(day: int) -> void:
 			CareerSpread.maybe_switch(f)                  # a young adult may change careers (friction: back to level 1)
 			continue
 		# offers
+		if SoloHome.active and Pawn.is_pawn_id(fid):
+			continue                          # task 61: the pawn finds work by applying (JobApps), not by offers out of nowhere
 		if not jobs.has(fid) and not offers.has(fid) and not homemakers.has(fid) and JobSeeking.cooled_down(f) and stage == min_stage and Aging.stage_index(stage) >= Aging.stage_index(min_stage):
 			if SysUtil.chance(float(s.get("offer_chance_per_day", 0.3)) * StoryPacing.mult("job", int(f.household_id)) * clampf(1.0 + 0.2 * Creation.hiring(fid, "all"), 0.2, 2.0)):          # task 55: a record or a background
 				make_offer(f)

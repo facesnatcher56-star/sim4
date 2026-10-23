@@ -1,0 +1,71 @@
+{
+ "_doc": "Task 61B: applying for a job takes time (read by JobApps). Apply sends an application; the answer comes answer_days later between answer_hours, by phone (a working phone) or by letter at letter_hour the next morning. Some ask for an interview at the workplace (interview.chance, always from interview.from_level, never for small_jobs asked in person: those get a trial shift on the spot). The interview and the answer without one are one SkillCheck act 'interview' (charisma) plus the job's own skill, how the person looks and smells, their mood, their record and the others who applied (weights). A no is one plain line. An offer starts on the job's next work day.",
+ "answer_days": [
+  1,
+  2
+ ],
+ "answer_hours": [
+  10,
+  17
+ ],
+ "letter_hour": 9,
+ "interview": {
+  "chance": 0.5,
+  "from_level": 2,
+  "days_ahead": 1,
+  "hours": [
+   10,
+   15
+  ],
+  "late_min": 45,
+  "minutes": 30
+ },
+ "small_jobs": [
+  "barista",
+  "gardener",
+  "handyperson",
+  "warehouse_worker",
+  "factory_worker"
+ ],
+ "applicants": [
+  0,
+  4
+ ],
+ "weights": {
+  "no_interview_base": 0.35,
+  "job_skill": 0.04,
+  "hygiene": 0.12,
+  "mood": 0.08,
+  "record": -0.22,
+  "hiring_bonus": 0.05,
+  "per_applicant": -0.05
+ },
+ "lines": {
+  "sent": [
+   "Application sent to {place}.",
+   "You send your details to {place}."
+  ],
+  "sent_in_person": [
+   "{who} takes your details. \"We'll let you know.\""
+  ],
+  "trial": [
+   "{who} looks you over. \"Come in for a trial shift: {when}.\""
+  ],
+  "no": [
+   "They went with someone else.",
+   "Not this time.",
+   "The job has gone."
+  ],
+  "interview": [
+   "They'd like to meet you: {when}."
+  ],
+  "offer": [
+   "The job is yours. You start {when}."
+  ],
+  "missed": [
+   "You missed the interview at {place}."
+  ],
+  "letter": "A letter from ",
+  "phone": "A message from "
+ }
+}

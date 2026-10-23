@@ -1,0 +1,46 @@
+NOTE d1 09:00 [bill] A note under the door from Viggo Sterling, the landlord: "Rent's due Sunday. 35 coins."
+NOTE d1 11:10 [relationship] Blythe met Viggo Sterling.
+NOTE d1 11:10 [visit] Viggo from next door knocks to say hello.
+NOTE d1 11:36 [career] You send your details to Moss & Mug Cafe.
+APPLY cook -> { "ok": true, "reason": "" }
+NOTE d1 11:58 [visit] The visit is over.
+NOTE d1 21:00 [story] No bed yet. The floor it is.
+NOTE d1 23:00 [story] Your stomach growls. 200 coins and nothing in the cupboard.
+NOTE d2 00:00 [birthday] It's Blythe's birthday today!
+NOTE d2 02:00 [warn] A cable fault knocked out phones and internet on the north side.
+NOTE d2 12:14 [story] A message from Moss & Mug Cafe: They went with someone else.
+NOTE d2 14:15 [relationship] Blythe met Milo Bellweather.
+NOTE d2 14:15 [visit] Milo Bellweather arrived for a visit.
+NOTE d2 17:23 [visit] The visit is over.
+NOTE d3 14:52 [relationship] Blythe met Darcy Pike.
+NOTE d3 14:52 [visit] Darcy Pike arrived for a visit.
+NOTE d3 15:00 [story] Viggo from the café kitchen says they're a dishwasher short.
+NOTE d3 18:21 [visit] The visit is over.
+NOTE d4 00:13 [bill] Household bills: 49 coins (electricity 29, phone and internet 20), due on day 7.
+NOTE d4 00:13 [bill] Rent due for Starter Studio: 35 coins.
+NOTE d4 01:00 [story] The first bill. It pays itself on the day it's due, if the coins are there.
+NOTE d4 12:47 [visit] Vera Quigley arrived for a visit.
+NOTE d4 16:50 [visit] The visit is over.
+NOTE d4 18:00 [warn] A cable fault knocked out phones and internet on the north side.
+NOTE d5 17:33 [visit] Viggo Sterling arrived for a visit.
+NOTE d5 20:07 [visit] The visit is over.
+NOTE d6 00:13 [visit] Viggo Sterling dropped by to say thanks for the kindness.
+NOTE d6 10:00 [visit] Viggo Sterling arrived for a visit.
+NOTE d6 11:12 [relationship] Blythe met Kerensa Ember.
+NOTE d6 11:12 [visit] Kerensa Ember arrived for a visit.
+NOTE d6 12:08 [visit] The visit is over.
+NOTE d6 15:19 [visit] The visit is over.
+NOTE d7 00:07 [bill] Paid bill: 49 coins.
+NOTE d7 00:07 [bill] Paid bill: 35 coins.
+NOTE d7 00:07 [goal] Rent paid. The roof is yours for another week.
+NOTE d7 10:18 [visit] Darcy Pike arrived for a visit.
+NOTE d7 10:39 [relationship] Darcy Pike is hosting a friends gathering.
+NOTE d7 12:01 [goal] Blythe fulfilled a whim: Make a friend (+60 satisfaction)
+NOTE d7 12:01 [goal] Somebody in this town is glad to see you.
+NOTE d7 12:01 [relationship] Blythe now sees Vera Quigley as: Friend
+NOTE d7 12:01 [visit] Blythe had a great time at the party.
+NOTE d7 12:25 [relationship] The friends gathering wraps up.
+NOTE d7 13:24 [visit] The visit is over.
+NOTE d8 00:13 [bill] Phone bill: 5 coins.
+NOTE d8 07:00 [bad] Something was stolen at your home. The police have been told.
+END job= start_day=- coins=65

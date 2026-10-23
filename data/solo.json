@@ -15,7 +15,7 @@
   "start": {
     "coins": {"relaxed": 350, "normal": 200, "hard": 100},
     "rent": {"relaxed": 55, "normal": 70, "hard": 85},
-    "first_week_prepaid": {"relaxed": true, "normal": true, "hard": false},
+    "first_week_prepaid": {"relaxed": 1.0, "normal": 0.5, "hard": 0.0},
     "sofa_bed": {"relaxed": true, "normal": false, "hard": false},
     "evict_after_missed": {"relaxed": 3, "normal": 2, "hard": 1},
     "wage_mult": {"relaxed": 1.1, "normal": 1.0, "hard": 0.9},
@@ -26,6 +26,31 @@
     "notice_days": 3,
     "landlord_pays": {"water": 1.0, "rates": 1.0},
     "autopay": true
+  },
+  "opening": {
+    "_doc": "Task 61A, read by SoloOpening and SoloTeach. Each moment is said once, from a real system: the landlord's note (the real first rent), the neighbour's visit (StoryVisits), a Help wanted card near home (an opening at the nearest business that has staff), and one first-week moment per background (day = days after the start; kinds: loan = the real loan's payment and due day, probation = a check-in in the calendar, contact = the creation contact, lead = a real job lead). teach = the first-time lines.",
+    "landlord": {"day": 0, "hour": 9, "line": "A note under the door from {who}, the landlord: \"Rent's due {due}. {amount} coins.\"",
+      "line_paid": "A note under the door from {who}, the landlord: \"Rent's paid till {due}. {amount} coins a week after that.\""},
+    "neighbour": {"day": 0, "hour": 11, "minutes": 40, "line": "{who} from next door knocks to say hello."},
+    "moments": {
+      "college_dropout": {"day": 1, "hour": 10, "kind": "loan", "lender": "student_loan", "line": "A letter from the student loan office: {pay} coins a week, the first on {due}."},
+      "in_debt": {"day": 2, "hour": 11, "kind": "loan", "lender": "loan_shop", "line": "The loan shop rings: {pay} coins a week, the first on {due}. \"Don't make us come round.\""},
+      "ex_con": {"day": 1, "hour": 9, "kind": "probation", "on_day": 3, "hours": [10, 16], "lot": "police",
+        "line": "A letter from the probation office: check in at the police station on {when}.",
+        "done": "You check in at the front desk. The officer stamps your card.", "missed": "A letter from the probation office: you missed your check-in."},
+      "street_kid": {"day": 1, "hour": 19, "kind": "contact", "line": "{who} texts: \"Heard you got a place. Come find me in the Kiln Quarter.\"",
+        "line_no_phone": "{who} catches you in the street: \"Heard you got a place. Come find me in the Kiln Quarter.\""},
+      "retail_worker": {"day": 2, "hour": 13, "kind": "lead", "career": "barista", "line": "{who}, who used to work the till with you, says the {place} is after a cashier."},
+      "trade_apprentice": {"day": 2, "hour": 10, "kind": "lead", "career": "handyperson", "who": "neighbour", "line": "{who} from next door has a gate that sticks, and says the market is after an odd-jobber."},
+      "delivery_driver": {"day": 1, "hour": 12, "kind": "lead", "career": "warehouse_worker", "line": "{who} says the depot at the works yard is taking on pickers and packers this week."},
+      "kitchen_hand": {"day": 2, "hour": 15, "kind": "lead", "career": "cook", "line": "{who} from the café kitchen says they're a dishwasher short."},
+      "care_worker": {"day": 2, "hour": 16, "kind": "lead", "career": "teacher", "line": "{who} says the school needs teaching aides, and that care work counts."}
+    },
+    "teach": {
+      "hunger": {"below": -10, "line": "Your stomach growls. {coins} coins and nothing in the cupboard.", "line_food": "Your stomach growls."},
+      "no_bed": {"hour": 21, "line": "No bed yet. The floor it is."},
+      "first_bill": {"line": "The first bill. It pays itself on the day it's due, if the coins are there."}
+    }
   },
   "food": {
     "ingredient_cost": 3,

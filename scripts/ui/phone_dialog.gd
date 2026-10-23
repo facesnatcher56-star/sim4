@@ -10,6 +10,7 @@ const APPS := [
 	{"id": "messages", "label": "Messages", "glyph": "bubble", "color": "#2fbf71"},
 	{"id": "contacts", "label": "Contacts", "glyph": "person", "color": "#3b82f6"},
 	{"id": "jobs", "label": "Jobs", "glyph": "case", "color": "#f59e0b"},
+	{"id": "calendar", "label": "Calendar", "glyph": "calendar", "color": "#6b8af5"},
 	{"id": "bank", "label": "Bank", "glyph": "coin", "color": "#c99a12"},
 	{"id": "news", "label": "News", "glyph": "news", "color": "#ef4444"},
 	{"id": "social", "label": "Social", "glyph": "heart", "color": "#ec4899"},
@@ -203,7 +204,7 @@ func _icon(a: Dictionary, fid: int, labelled: bool) -> PhoneIcon:
 			var n: int = PhoneState.inbox_of(fid).size()
 			badge = str(n) if n > 0 else ""
 		"jobs":
-			badge = "1" if not Careers.pending_offer(fid).is_empty() else ""
+			badge = "1" if not Careers.pending_offer(fid).is_empty() else ("!" if not SoloOpening.said.has("t_jobs_app") and not Careers.has_job(fid) else "")          # task 61: lit until first opened
 	var ic := PhoneIcon.new(str(a["glyph"]), str(a["label"]), Color(str(a["color"])), badge)
 	ic.show_label = labelled
 	ic.custom_minimum_size = Vector2(80, 92 if labelled else 74)

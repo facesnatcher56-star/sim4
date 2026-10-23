@@ -47,8 +47,23 @@ func _jobless(info: Dictionary) -> void:
 	if (info.get("offer", {}) as Dictionary).is_empty():
 		line("No job yet.", 16)
 		line("Use a computer's \"Look for Jobs\", or the Phone's Jobs app, to find work. A job offer can be accepted or declined here, in the Jobs app or from the pop-up.", 13, UITheme.MUTED)
+		_applications()
 		return
 	offer_card(self, folk_id)
+
+## Task 61B: the applications still waiting for an answer, and an interview when there is one.
+func _applications() -> void:
+	var waiting: Array = JobApps.pending(folk_id)
+	if waiting.is_empty():
+		return
+	heading("Applications")
+	for a in waiting:
+		var p: String = JobApps.place(str(a["cid"]))
+		if str(a["state"]) == "interview":
+			var m: int = int(a["iv_min"])
+			line("%s: interview %s" % [p, JobApps.when(m / 1440 + 1, float(m % 1440) / 60.0)], 14, UITheme.ACCENT)
+		else:
+			line("%s: waiting to hear back" % p, 14, UITheme.MUTED)
 
 ## Offer summary + Accept / Decline buttons (also reused by the pop-up toast).
 static func offer_card(dlg: UIDialog, fid: int) -> void:
@@ -79,6 +94,7 @@ func _job(info: Dictionary) -> void:
 	if (info["shifts"] as Array).size() > 1:
 		shift_txt += "  (%s shift)" % str(info["shift"])
 	line(shift_txt, 14)
+	_when_where()
 	if bool(info["away"]):
 		line("Currently at work.", 13, UITheme.ACCENT)
 	heading("Performance")
@@ -104,6 +120,30 @@ func _job(info: Dictionary) -> void:
 		else:
 			line("Still needed: " + ", ".join(miss.map(func(x): return nice_requirement(str(x)))), 12, UITheme.MUTED)
 	_skip_button()
+
+## Task 61B: the work days, the next shift (day and time), where it is, and a Go there button.
+func _when_where() -> void:
+	var j: Dictionary = Careers.jobs.get(folk_id, {})
+	if j.is_empty():
+		return
+	var cid: String = str(j["career"])
+	var sv: Dictionary = Careers.shift_def(cid, str(j.get("shift", "day")))
+	line("Work days: %s" % LifeHubJobs._days_text(sv.get("days", Careers.career_def(cid).get("days", [])) as Array), 14)
+	var ns: Dictionary = CalendarBook.next_shift(folk_id)
+	if ns.is_empty():
+		return
+	var d: int = int(ns["day"])
+	var day_txt: String = "today" if d == SysUtil.day() else ("tomorrow" if d == SysUtil.day() + 1 else Seasons.weekday_long(d))
+	line("Next shift: %s, %s%s" % [day_txt, hours_text(float(ns["hour"])), (" at " + str(ns["place"])) if str(ns["place"]) != "" else ""], 14, UITheme.ACCENT)
+	var lot: String = str(ns["lot"])
+	if lot != "" and NeighborhoodLots.lot_at(folk_obj().tile) != lot:
+		var go := Button.new()
+		go.text = "Go there"
+		go.tooltip_text = "Walk to %s now." % str(ns["place"])
+		go.pressed.connect(func():
+			Commands.run({"folk_id": folk_id, "action": "travel", "args": {"folk_ids": [folk_id], "lot_id": lot}})
+			hide_dialog())
+		body.add_child(go)
 
 func _skip_button() -> void:
 	var penalty := int(Careers.settings().get("skip_penalty", 15))

@@ -326,7 +326,7 @@ static func _pay_single(bl: Dictionary) -> bool:
 	if not still_late:
 		missed[hid] = 0
 	SysUtil.notify("Paid bill: %d coins." % amount, "bill")
-	SysUtil.game_event("bill_paid", {"household_id": hid, "amount": amount})
+	SysUtil.game_event("bill_paid", {"household_id": hid, "amount": amount, "reasons": [str(bl.get("reason", "bills"))]})
 	BillPaying.refresh()
 	return true
 
@@ -337,11 +337,13 @@ static func pay_bill(hid: int) -> int:
 		return 0
 	if not spend(hid, total, "bills"):
 		return 0
+	var reasons: Array = []
 	for bl in outstanding(hid):
 		bl["paid"] = true
+		reasons.append(str(bl.get("reason", "bills")))
 	missed[hid] = 0
 	SysUtil.notify("Paid bills: %d coins." % total, "bill")
-	SysUtil.game_event("bill_paid", {"household_id": hid, "amount": total})
+	SysUtil.game_event("bill_paid", {"household_id": hid, "amount": total, "reasons": reasons})
 	BillPaying.refresh()
 	return total
 

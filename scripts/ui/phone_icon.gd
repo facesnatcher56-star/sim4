@@ -94,6 +94,10 @@ func _glyph(o: Vector2) -> void:
 			draw_circle(o + Vector2(0, -6), 12.0, w)
 			draw_colored_polygon(PackedVector2Array([o + Vector2(-10, 1), o + Vector2(10, 1), o + Vector2(0, 19)]), w)
 			draw_circle(o + Vector2(0, -6), 5.0, tint.darkened(0.25))
+		"calendar":
+			draw_style_box(_fill(w, 5), Rect2(o + Vector2(-17, -15), Vector2(34, 33)))
+			draw_rect(Rect2(o + Vector2(-17, -15), Vector2(34, 9)), tint.darkened(0.3))
+			draw_string(ThemeDB.fallback_font, o + Vector2(-12, 14), str(SysUtil.day() % 100), HORIZONTAL_ALIGNMENT_CENTER, 24, 18, tint.darkened(0.35))
 		"cart":
 			draw_style_box(_fill(w, 4), Rect2(o + Vector2(-16, -6), Vector2(32, 18)))
 			draw_arc(o + Vector2(-8, 18), 3.0, 0, TAU, 8, w, 3.0)

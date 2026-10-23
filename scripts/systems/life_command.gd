@@ -48,7 +48,7 @@ static func run(_player_id: int, folk_id: int, action: String, args: Dictionary 
 			var nojob: String = PhoneJobs.why_not(folk_id, str(args.get("career", "")))
 			if nojob != "":
 				return {"ok": false, "reason": nojob}
-			return EduJobs.apply(folk_id, str(args.get("career", "")))
+			return JobApps.send(folk_id, str(args.get("career", "")))
 		"phone_buy":
 			return PhoneOwn.buy(folk_id, str(args.get("kind", "old")))
 		"phone_sell":

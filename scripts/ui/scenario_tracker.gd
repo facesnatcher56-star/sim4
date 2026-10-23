@@ -85,6 +85,9 @@ func refresh() -> void:
 		l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		l.custom_minimum_size = Vector2(WIDTH - 60, 0)
+		if not done:
+			l.tooltip_text = str(gt["hint"])          # the other goals' hints only on hover
+			l.mouse_filter = Control.MOUSE_FILTER_PASS
 		row.add_child(l)
 		if not done and not shown_hint:
 			shown_hint = true
@@ -106,7 +109,7 @@ func _next_card(goals: Array) -> void:
 		mark.on = true
 		row.add_child(mark)
 		row.add_child(UIU.make_label(str(g["label"]), 13, UITheme.MUTED))
-	var msg := UIU.make_label("All done, well played! Every Folk has a life aspiration: a long-term dream with milestones and rewards. Pick one in Goals, or just keep living.", 13)
+	var msg := UIU.make_label("On your feet. Every Folk has a life aspiration, a long-term dream; pick one in Goals, or just keep living.", 13)
 	msg.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	msg.custom_minimum_size = Vector2(WIDTH - 20, 0)
 	box.add_child(msg)

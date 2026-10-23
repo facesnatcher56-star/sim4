@@ -22,9 +22,15 @@ static func begin(hid: int) -> void:
 	p["label"] = str(fp.get("label", "Starter Studio"))
 	p["condition"] = 80.0
 	let_to_pawn(p, hid, SoloCfg.rent(), SoloCfg.rent())
-	var prepaid: bool = bool(SoloCfg.by_diff("start", "first_week_prepaid"))
-	HousingRent.next_cycle = SysUtil.day() + (7 if prepaid else 3)      # Hard: the first rent is due on day 7, issued on day 4
+	var pre: float = clampf(float(SoloCfg.by_diff("start", "first_week_prepaid")), 0.0, 1.0)          # the share of the first week paid in advance
+	HousingRent.next_cycle = SysUtil.day() + (7 if pre >= 1.0 else 3)      # not all prepaid: the first rent is due on day 7 (Sunday), issued on day 4
+	if pre > 0.0 and pre < 1.0:
+		p["first_rent_share"] = 1.0 - pre                                   # Normal: half the first week is paid, the other half is due on Sunday
 	SoloMove.mark_fixtures(Neighborhood.HOME)
+
+## The next rent bill of a let property in coins (the first one may be only the unpaid share of the first week).
+static func next_rent(p: Dictionary) -> int:
+	return int(round(float(p.get("rent", 0)) * float(p.get("first_rent_share", 1.0))))
 
 ## Make `p` a let property with the pawn's household as tenant (a landlord townie owns it). A townie who lived there is no longer its tenant.
 static func let_to_pawn(p: Dictionary, hid: int, rent: int, deposit: int) -> void:
