@@ -162,7 +162,12 @@ func _raw_clip(f) -> String:
 		if running:
 			var post: Dictionary = m.get("posture", {})
 			return str(post.get(key, "Use_Stand"))
-	# 4. idle by posture / mood
+	# 4. a weapon held out: held low, or raised at someone (task 57b)
+	if _target_pose != "sit" and _target_pose != "lie":
+		var wc := WeaponShop.clip_of(folk_id)
+		if wc != "":
+			return wc
+	# 5. idle by posture / mood
 	var idle: Dictionary = m.get("idle", {})
 	if _target_pose == "sit":
 		return str(idle.get("sit", "Sit_Idle"))

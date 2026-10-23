@@ -14,9 +14,39 @@ const PERMIT_LOT := {"police_station": "police", "city_hall": "city_hall"}
 const SCREEN_TYPES := ["courthouse", "city_hall", "bank"]
 
 static var _last_lot: Dictionary = {}          # pid -> the lot they were last on (a search happens on the way in)
+static var _posed: Dictionary = {}             # task 57b: pid -> game minute until which the threat / aim pose holds
 
 static func reset() -> void:
 	_last_lot = {}
+	_posed = {}
+
+# ------------------------------------------------------------------ the body (task 57b)
+## WeaponActs: a threat, a demand or an attack with the weapon holds the threat / aim pose for a little while.
+static func posed(pid: int, _aid: String) -> void:
+	_posed[pid] = SysUtil.now() + 3
+
+## The grip of the weapon a person holds out: "" none, else one | knuckles | pistol | long (weapons.json hold).
+static func grip_of(pid: int) -> String:
+	for e in Inventory.items(pid):
+		if bool(e.get("shown", false)):
+			var hd: Dictionary = (cfg().get("hold", {}) as Dictionary).get(str(e["id"]), {})
+			if not hd.is_empty():
+				return str(hd.get("grip", "one"))
+	return ""
+
+## The clip of a standing person with a weapon out (FolkView), "" for none.
+static func clip_of(pid: int) -> String:
+	var g: String = grip_of(pid)
+	if g == "":
+		return ""
+	var using: bool = SysUtil.now() <= int(_posed.get(pid, -1))
+	match g:
+		"pistol":
+			return "Threaten_Pistol" if using else "Hold_Pistol"
+		"long":
+			return "Aim_Long" if using else "Hold_Long"
+	return "Threaten_1H" if using else "Hold_1H"
+
 
 static func cfg() -> Dictionary:
 	return SysUtil.table("weapons")
