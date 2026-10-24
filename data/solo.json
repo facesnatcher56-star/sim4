@@ -35,12 +35,6 @@
     "_doc": "Task 61A, read by SoloOpening and SoloTeach. Each moment is said once, from a real system: the landlord's note (the real first rent), the neighbour's visit (StoryVisits), a Help wanted card near home (an opening at the nearest business that has staff), and one first-week moment per background (day = days after the start; kinds: loan = the real loan's payment and due day, probation = a check-in in the calendar, contact = the creation contact, lead = a real job lead). teach = the first-time lines.",
     "landlord": {"day": 0, "hour": 9, "line": "A note under the door from {who}, the landlord: \"Rent's due {due}. {amount} coins.\"",
       "line_paid": "A note under the door from {who}, the landlord: \"Rent's paid till {due}. {amount} coins a week after that.\""},
-    "neighbour": {"day": 0, "hour": 11, "minutes": 40, "line": "{who} from next door knocks to say hello."},
-    "neighbour_again": [
-      {"day": 3, "hour": 17, "minutes": 45, "line": "{who} from next door drops by again. \"A word about the landlord: pay on the day. The locks get changed fast round here.\""},
-      {"day": 9, "hour": 12, "kind": "invite"}
-    ],
-    "problem": {"day": 4, "size": "opening", "incidents": [{"id": "burst_pipe", "subject": "home"}, {"id": "catch_cold", "subject": "folk"}]},
     "moments": {
       "college_dropout": {"day": 1, "hour": 10, "kind": "loan", "lender": "student_loan", "line": "A letter from the student loan office: {pay} coins a week, the first on {due}.",
         "follow": {"day": 8, "hour": 11, "kind": "loan_due", "lender": "student_loan", "line": "The first student loan payment went out: {pay} coins."}},

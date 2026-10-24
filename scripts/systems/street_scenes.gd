@@ -3,19 +3,16 @@ extends RefCounted
 ## Task 65: while the pawn is out, real things between real townies happen where it can see them (data/street_scenes.json). Never invented:
 ## each scene comes from a real state (a TownDrama thread: a feud, tension, a family rift, an affair, a debt, an addiction, a failing business;
 ## or somebody on the lot right now, who collapses). The people walk in from the gate (Crowd) and act it out; the player steps in, watches or
-## walks away, and that feeds the normal systems (friendship, grudges, tension, history, a hospital stay). About one scene an hour out,
-## sooner in a rough district and at night.   StreetScenes.on_minute()   StreetScenes.reset()
+## walks away, and that feeds the normal systems (friendship, grudges, tension, history, a hospital stay). Task 66: no timer of its own; the town's
+## events (TownLife) play here when the pawn is on their lot, and the involvement director (Involve) may pick one.
+##   StreetScenes.play(f, lot) / party(f) -> landed   cause(kind, f, lot)   stage(f, lot, s)   StreetScenes.on_minute() (the cue)   reset()
 
 const TITLE := "Out here"
 
-static var next_min: int = -1           # the earliest minute of the next scene on this outing
-static var _last_check: int = -1
 static var _used: Dictionary = {}       # "kind|a|b" -> day: one scene per thread a day
 static var pending: Dictionary = {}     # a scene on its way: {f, s, v, opts, text, since} until its people are in view of the pawn
 
 static func reset() -> void:
-	next_min = -1
-	_last_check = -1
 	_used = {}
 	pending = {}
 
@@ -34,54 +31,25 @@ static func _first(tid: int) -> String:
 
 # ------------------------------------------------------------------ the clock
 static func on_minute() -> void:
-	var now: int = SysUtil.now()
 	if not pending.is_empty():
-		_cue(now)
-		return
-	if now - _last_check < int(cfg().get("check_min", 10)):
-		return
-	_last_check = now
-	var f = SysUtil.folk(Pawn.of()) if SoloHome.active and Pawn.of() >= 0 else null
-	var lot: String = Neighborhood.lot_of(f) if f != null else ""
-	if f != null and lot == Neighborhood.HOME and not SysUtil.is_away(f) and not CrimePlace.is_asleep(f):
-		next_min = -1
-		_party_next_door(f)          # at home in the evening: the neighbours may have people round
-		return
-	if f == null or lot == "" or lot == Neighborhood.HOME or SysUtil.is_away(f) or CrimePlace.is_asleep(f):
-		next_min = -1          # away: the next outing starts its own clock
-		return
-	if next_min < 0:
-		next_min = now + _gap(lot)
-		return
-	if now < next_min:
-		return
-	if _play(f, lot):
-		next_min = now + _gap(lot)
-	else:
-		next_min = now + 15          # nothing real to show here right now: look again soon
+		_cue(SysUtil.now())
 
-static func _gap(lot: String) -> int:
-	var g: Array = cfg().get("gap_min", [45, 75])
-	var m: float = float(SysUtil.rng.randi_range(int(g[0]), int(g[1])))
-	if SoloDistricts.rough_at(lot) > 0.5:
-		m *= float(cfg().get("rough_mult", 0.6))
-	if SysUtil.hour_f() >= 20.0 or SysUtil.hour_f() < 5.0:
-		m *= float(cfg().get("night_mult", 0.75))
-	return int(m)
+static func busy() -> bool:
+	return not pending.is_empty()
 
-## Pick a kind by weight among those that have a real cause here and now, and play it.
-static func _play(f, lot: String) -> bool:
+## Pick a kind by weight among those that have a real cause here and now, and play it in front of the pawn.
+static func play(f, lot: String) -> bool:
 	var cands: Array = []
 	var ws: Array = []
 	for kind in (cfg().get("weights", {}) as Dictionary):
-		var s: Dictionary = _cause(str(kind), f, lot)
+		var s: Dictionary = cause(str(kind), f, lot)
 		if not s.is_empty():
 			cands.append(s)
 			ws.append(float(cfg()["weights"][kind]))
 	var pick = SysUtil.pick_weighted(cands, ws)
 	if pick == null:
 		return false
-	_stage(f, lot, pick)
+	stage(f, lot, pick)
 	return true
 
 ## A uniformed officer from the station walks in from the lot's gate (a real Folk on the map, like the station's own staff) and leaves again with the
@@ -107,19 +75,17 @@ static func _officer_walks_in(lot: String, near: Vector2i):
 	return cop
 
 ## At home in the evening: the neighbour (a real townie next door) has real friends round at their house, and the music carries. Once a day at most.
-static func _party_next_door(f) -> void:
+static func party(f) -> bool:
 	var h: float = SysUtil.hour_f()
 	var nb: int = SoloOpening.neighbour
-	if h < 19.0 or h >= 23.0 or nb < 0 or not _free(nb) or int(_used.get("party", -1)) == SysUtil.day():
-		return
-	if SysUtil.rng.randf() >= float(cfg().get("party_chance", 0.15)):
-		return
+	if h < 19.0 or h >= 23.0 or nb < 0 or not _free(nb) or int(_used.get("party", -1)) == SysUtil.day() or Neighborhood.lot_of(f) != Neighborhood.HOME:
+		return false
 	var lot: String = Neighborhood.home_of_townie(nb)
 	if lot == "" or lot == Neighborhood.HOME:
-		return
+		return false
 	var friends: Array = Story.free_townies().filter(func(t): return int(t["id"]) != nb and _free(int(t["id"])) and RelationshipService.value(nb, int(t["id"]), "friendship") >= 20.0)
 	if friends.size() < 2:
-		return
+		return false
 	_used["party"] = SysUtil.day()
 	var people: Array = [nb]
 	for t2 in friends.slice(0, 3):
@@ -131,6 +97,7 @@ static func _party_next_door(f) -> void:
 	JusticePlayer.ask(int(f.id), TITLE, _line("party", v),
 		[{"id": "go", "label": "Go round"}, {"id": "wall", "label": "Bang on the wall"}, {"id": "walk", "label": "Put up with it"}],
 		func(ch): _party_answer(f, nb, lot, v, str(ch)), "walk")
+	return true
 
 static func _party_answer(f, nb: int, lot: String, v: Dictionary, ch: String) -> void:
 	match ch:
@@ -144,6 +111,23 @@ static func _party_answer(f, nb: int, lot: String, v: Dictionary, ch: String) ->
 			SysUtil.notify(_line("party_bear", v), "story")
 
 ## A free townie (alive, not held, not in hospital) who is not on the map somewhere else.
+## The key a scene is remembered under (the same one cause() checks with _recent), whether it played in front of the pawn or off-screen.
+static func key_of(s: Dictionary) -> String:
+	match str(s["kind"]):
+		"upset", "alarm":
+			return "%s|%d" % [str(s["kind"]), int(s["a"])]
+		"gathering":
+			return "gathering|%d|-1" % int(s["a"])
+		"arrest":
+			return "arrest|%d" % int(s.get("case", -1))
+		"collapse":
+			return "collapse|%d|-1" % int(s["a"])
+	return "%s|%d|%d" % [str(s["kind"]), int(s["a"]), int(s.get("b", -1))]
+
+## A thread or pair already shown lately (task 66: not the same two people rowing every day).
+static func _recent(key: String) -> bool:
+	return SysUtil.day() - int(_used.get(key, -99)) < int(cfg().get("again_days", 3))
+
 static func _free(tid: int) -> bool:
 	if tid < 0 or not Story.townies.has(tid):
 		return false
@@ -153,39 +137,38 @@ static func _free(tid: int) -> bool:
 	var on = SysUtil.folk(tid)
 	return on == null or on.has_meta("crowd")
 
-static func _cause(kind: String, f, lot: String) -> Dictionary:
-	var day: int = SysUtil.day()
+static func cause(kind: String, f, lot: String) -> Dictionary:
 	match kind:
 		"row":
 			for th in TownDrama.threads:
-				if str(th["kind"]) in ["feud", "tension", "family"] and _free(int(th["a"])) and _free(int(th["b"])) and int(_used.get("row|%d|%d" % [th["a"], th["b"]], -1)) != day:
+				if str(th["kind"]) in ["feud", "tension", "family"] and _free(int(th["a"])) and _free(int(th["b"])) and not _recent("row|%d|%d" % [th["a"], th["b"]]):
 					return {"kind": "row", "a": int(th["a"]), "b": int(th["b"])}
 			var here: Array = Crowd.crowd_folk(lot)          # or two people on this lot right now who really can't stand each other
 			for i in here.size():
 				for j in range(i + 1, here.size()):
 					var x: int = int(here[i].get_meta("townie_id", -1))
 					var y: int = int(here[j].get_meta("townie_id", -1))
-					if x >= 0 and y >= 0 and (RelationshipService.value(x, y, "friendship") <= -15.0 or RelationshipService.value(x, y, "tension") >= 30.0) and int(_used.get("row|%d|%d" % [x, y], -1)) != day:
+					if x >= 0 and y >= 0 and (RelationshipService.value(x, y, "friendship") <= -15.0 or RelationshipService.value(x, y, "tension") >= 30.0) and not _recent("row|%d|%d" % [x, y]):
 						return {"kind": "row", "a": x, "b": y}
 		"affair":
 			for af in RelationshipService.affairs:
 				var a: int = int(af.get("cheater", -1))
 				var b: int = int(af.get("other", -1))
 				var c: int = int(af.get("victim", -1))
-				if _free(a) and _free(b) and _free(c) and int(_used.get("affair|%d|%d" % [a, b], -1)) != day:
+				if _free(a) and _free(b) and _free(c) and not _recent("affair|%d|%d" % [a, b]):
 					return {"kind": "affair", "a": a, "b": b, "c": c}
 		"debt":
 			for th2 in TownDrama.threads:
-				if str(th2["kind"]) == "debt" and _free(int(th2["a"])) and _free(int(th2["b"])) and (SysUtil.hour_f() >= 19.0 or SoloDistricts.rough_at(lot) > 0.4) and int(_used.get("debt|%d|%d" % [th2["a"], th2["b"]], -1)) != day:
+				if str(th2["kind"]) == "debt" and _free(int(th2["a"])) and _free(int(th2["b"])) and (SysUtil.hour_f() >= 19.0 or SoloDistricts.rough_at(lot) > 0.4) and not _recent("debt|%d|%d" % [th2["a"], th2["b"]]):
 					return {"kind": "debt", "a": int(th2["a"]), "b": int(th2["b"])}
 		"upset":
 			for th3 in TownDrama.threads:
-				if str(th3["kind"]) in ["family", "addiction", "business"] and _free(int(th3["a"])) and int(_used.get("upset|%d" % int(th3["a"]), -1)) != day:
+				if str(th3["kind"]) in ["family", "addiction", "business"] and _free(int(th3["a"])) and not _recent("upset|%d" % int(th3["a"])):
 					return {"kind": "upset", "a": int(th3["a"]), "b": -1}
 		"arrest":
 			for c in CaseStore.open_cases():          # the police are about to pick someone up: their top suspect, well into the case
 				var sus: Array = c.get("suspect_ids", [])
-				if str(c["state"]) != "open" or sus.is_empty() or not _free(int(sus[0])) or int(_used.get("arrest|%d" % int(c["id"]), -1)) == day:
+				if str(c["state"]) != "open" or sus.is_empty() or not _free(int(sus[0])) or _recent("arrest|%d" % int(c["id"])):
 					continue
 				if float(c.get("progress", 0.0)) >= float(cfg().get("arrest_progress", 0.5)):
 					return {"kind": "arrest", "a": int(sus[0]), "b": -1, "case": int(c["id"])}
@@ -193,22 +176,22 @@ static func _cause(kind: String, f, lot: String) -> Dictionary:
 			if VehicleBays.of(lot).is_empty() or (SysUtil.hour_f() >= 6.0 and SysUtil.hour_f() < 19.0 and SoloDistricts.rough_at(lot) <= 0.4):
 				return {}          # parked cars here, and dark or a rough block
 			for th4 in TownDrama.threads:
-				if str(th4["kind"]) == "crew" and _free(int(th4["a"])) and int(_used.get("alarm|%d" % int(th4["a"]), -1)) != day:
+				if str(th4["kind"]) == "crew" and _free(int(th4["a"])) and not _recent("alarm|%d" % int(th4["a"])):
 					return {"kind": "alarm", "a": int(th4["a"]), "b": -1}
 			for t5 in Story.free_townies():          # or anyone with a record for it
 				var tid5: int = int(t5["id"])
-				if not JusticeRecords.convictions(tid5).is_empty() and _free(tid5) and int(_used.get("alarm|%d" % tid5, -1)) != day:
+				if not JusticeRecords.convictions(tid5).is_empty() and _free(tid5) and not _recent("alarm|%d" % tid5):
 					return {"kind": "alarm", "a": tid5, "b": -1}
 		"collapse":
 			for p in Crowd.crowd_folk(lot):
-				if not p.has_meta("leaving") and (p.tile - f.tile).length() < 14.0 and Story.stage_of(Story.townies.get(int(p.get_meta("townie_id", -1)), {})) == "elder":
+				if not p.has_meta("leaving") and (p.tile - f.tile).length() < 14.0 and Story.stage_of(Story.townies.get(int(p.get_meta("townie_id", -1)), {})) == "elder" and not _recent("collapse|%d|-1" % int(p.get_meta("townie_id", -1))):
 					return {"kind": "collapse", "a": int(p.get_meta("townie_id", -1)), "b": -1}
 	return {}
 
 # ------------------------------------------------------------------ on stage
-static func _stage(f, lot: String, s: Dictionary) -> void:
+static func stage(f, lot: String, s: Dictionary) -> void:
 	var kind: String = str(s["kind"])
-	_used["%s|%d|%d" % [kind, int(s["a"]), int(s["b"])] if kind != "upset" else "upset|%d" % int(s["a"])] = SysUtil.day()
+	_used[key_of(s)] = SysUtil.day()
 	var people: Array = []
 	for key in ["a", "b", "c"]:
 		if int(s.get(key, -1)) >= 0:
@@ -322,12 +305,14 @@ static func _choose(f, s: Dictionary, v: Dictionary, ch: String) -> void:
 			if SysUtil.rng.randf() < 0.75:
 				SysUtil.notify(_line("comfort", v), "relationship")
 				_friend(pid, a, "comforted")
+				RelationshipService.add_history(pid, a, "stepped_in", 0.5, pid)
 			else:
 				SysUtil.notify(_line("comfort_no", v), "story")
 				_friend(pid, a, "brushed_off")
 		"ambulance":
 			SysUtil.notify(_line("ambulance", v), "story")
 			_friend(pid, a, "ambulance")
+			RelationshipService.add_history(pid, a, "stepped_in", 0.6, pid)
 			var p = SysUtil.folk(a)
 			if p != null and p.has_meta("crowd"):
 				Crowd.dismiss(p)
@@ -335,6 +320,7 @@ static func _choose(f, s: Dictionary, v: Dictionary, ch: String) -> void:
 		"help":
 			SysUtil.notify(_line("helped_up", v), "story")
 			_friend(pid, a, "helped")
+			RelationshipService.add_history(pid, a, "stepped_in", 0.5, pid)
 		"vouch":
 			SysUtil.notify(_line("vouch", v), "story")
 			_friend(pid, a, "helped")

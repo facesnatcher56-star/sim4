@@ -1,12 +1,5 @@
 {
- "_doc": "Task 65 (scripts/systems/street_scenes.gd): while the pawn is out, real things between real townies play out where it can see them. Every scene comes from a real state: a town drama thread (feud, tension, family rift, affair, debt, addiction or a failing business), or a person on the lot right now (someone collapses). The townies walk in from the lot's gate (Crowd) and act it out; the player can step in, watch or walk away, and each feeds the normal systems (friendship, grudges, tension, history). gap_min = minutes between scenes for one outing (times rough_mult in a rough district and night_mult after 20:00); check_min = how often it looks. Lines use {a} {b} {c} {place}. Task 65b: arrest (an open case's top suspect, well into the case, picked up by a real police officer townie: the real JusticeProcess.arrest), alarm (someone from a crew thread at a parked car, after dark or on a rough block), and at home in the evening the neighbour's party (their real friends at their house; party_chance per look, once a day).",
- "check_min": 10,
- "gap_min": [
-  45,
-  75
- ],
- "rough_mult": 0.6,
- "night_mult": 0.75,
+ "_doc": "Task 65/66 (scripts/systems/street_scenes.gd): the scene library. Every scene comes from a real state: a town drama thread (feud, tension, family rift, affair, debt, addiction or a failing business), two people on a lot who can't stand each other, an elder on the lot, an open case's top suspect (the arrest: a uniformed officer walks in, the real JusticeProcess.arrest), someone with a record or a crew thread at a parked car (the alarm, after dark or on a rough block), the neighbour's real friends round (the party next door, in the evening at home). TownLife plays them where the pawn is (else resolves them off-screen) and the involvement director may pick one. weights = how likely each kind is among those with a cause; stay_min = how long the people stay on the lot; arrest_progress = how far a case must be; party_min = how long the party lasts. Lines use {a} {b} {c} {place}.",
  "stay_min": 40,
  "weights": {
   "row": 4,
@@ -113,6 +106,6 @@
   ]
  },
  "arrest_progress": 0.5,
- "party_chance": 0.15,
- "party_min": 150
+ "party_min": 150,
+ "again_days": 3
 }

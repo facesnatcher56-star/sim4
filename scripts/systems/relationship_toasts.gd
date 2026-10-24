@@ -9,7 +9,7 @@ static func announce(x: int, y: int, bit: String) -> void:
 	if DeadPools.any_dead([x, y]):
 		return
 	var text: String = "%s now sees %s as: %s" % [SysUtil.folk_name(x), SysUtil.folk_name(y), RelationshipBits.bit_label(bit)]
-	if _household_involved(x, y) or _known_well(x, y):
+	if _household_involved(x, y) or (_known_well(x, y) and not SoloHome.active):          # task 66: in solo play the townies' own changes reach the player through people
 		SysUtil.notify(text, "relationship")
 	elif bit in QUIET_BITS:
 		ChronicleHook.note("relationship", text, [x, y], "", 1, false)

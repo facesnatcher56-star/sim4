@@ -10,10 +10,12 @@ extends RefCounted
 static var ask_fn: Callable = Callable()       # set by the UI: (folk_id, title, text, options, on_choice, default_id)
 static var auto: String = ""                   # tests: force this choice id when it is among the options
 static var log: Array = []                     # last prompts [{pid, title, text, options, choice}] (tests and the case board)
+static var open: int = 0                       # task 66: prompts on screen or waiting for the player (Involve never pulls while one is open)
 
 static func reset() -> void:
 	auto = ""
 	log.clear()
+	open = 0
 
 static func ask(pid: int, title: String, text: String, options: Array, on_choice: Callable, default_id: String) -> void:
 	var entry: Dictionary = {"pid": pid, "title": title, "text": text, "options": options.map(func(o): return str(o["id"])), "choice": ""}
@@ -29,7 +31,9 @@ static func ask(pid: int, title: String, text: String, options: Array, on_choice
 		on_choice.call(auto)
 		return
 	if ask_fn.is_valid():
+		open += 1
 		var wrapped: Callable = func(choice):
+			JusticePlayer.open = maxi(JusticePlayer.open - 1, 0)
 			entry["choice"] = str(choice)
 			for o in options:
 				if str(o["id"]) == str(choice):

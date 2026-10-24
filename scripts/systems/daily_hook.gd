@@ -1,17 +1,13 @@
 class_name DailyHook
 extends RefCounted
-## Task 65: one thing worth caring about each day (data/daily_hook.json). Once a day, at a random daytime hour, the storyteller tilts toward ONE
-## personal hook reaching the pawn through a real system: someone it knows asks for a loan (a real relationship; repaid or not, later), a home
-## problem (a StorytellerTilt on a real incident's own roll), or a wallet a real customer left behind. One plain line and a choice; never a list.
-##   DailyHook.on_hour(h)   DailyHook.on_day(day)   DailyHook.reset() / to_dict() / from_dict()
+## Task 65/66: personal hooks reaching the pawn through real systems (data/daily_hook.json), picked by the involvement director (Involve), never
+## on a clock: someone it knows asks for a loan (a real relationship; repaid or not, later), a home problem (a StorytellerTilt on a real incident's
+## own roll), or a wallet a real customer left behind. One plain line and a choice; never a list.
+##   DailyHook.favour(f, tid, key) / wallet(f) / problem(f) -> landed   DailyHook.on_day(day) (loans paid back)   reset() / to_dict() / from_dict()
 
-static var hour_today: int = -1
-static var done_day: int = -1
 static var loans: Array = []           # [{tid, coins, due}] money lent, to be paid back (or not)
 
 static func reset() -> void:
-	hour_today = -1
-	done_day = -1
 	loans = []
 
 static func cfg() -> Dictionary:
@@ -25,8 +21,6 @@ static func _friend(pid: int, tid: int, key: String) -> void:
 	RelationshipService.add_both(pid, tid, "friendship", float((cfg().get("friendship", {}) as Dictionary).get(key, 0.0)))
 
 static func on_day(day: int) -> void:
-	var hs: Array = cfg().get("hours", [10, 18])
-	hour_today = SysUtil.rng.randi_range(int(hs[0]), int(hs[1]))
 	var keep: Array = []
 	for l in loans:
 		if day < int(l["due"]):
@@ -43,38 +37,26 @@ static func on_day(day: int) -> void:
 			_friend(pid, int(l["tid"]), "stiffed")
 	loans = keep
 
-static func on_hour(h: int) -> void:
-	if not SoloHome.active or done_day == SysUtil.day() or h != hour_today:
-		return
-	var f = SysUtil.folk(Pawn.of()) if Pawn.of() >= 0 else null
-	if f == null or SysUtil.is_away(f) or CrimePlace.is_asleep(f):
-		return
-	var kinds: Array = ["favour", "problem", "wallet"]
-	kinds.shuffle()
-	for k in kinds:
-		var fired: bool = _favour(f) if k == "favour" else (_problem(f) if k == "problem" else _wallet(f))
-		if fired:
-			done_day = SysUtil.day()
-			SysUtil.game_event("daily_hook", {"kind": k})
-			return
-
 # ------------------------------------------------------------------ the hooks
-## Someone the pawn knows is short and asks (a phone call, or in person when they are standing there).
-static func _favour(f) -> bool:
-	var best: int = -1
+## Someone the pawn knows is short and asks (a phone call, or in person when they are standing there). `tid` >= 0: that person (a ripple: the
+## friend the debt collector leaned on, the one whose affair came out), with its own line `key`.
+static func favour(f, tid: int = -1, key: String = "favour") -> bool:
+	var best: int = tid
 	var best_v: float = float(cfg().get("favour_min", 10.0))
-	for t in Story.free_townies():
+	for t in (Story.free_townies() if tid < 0 else []):
 		var v: float = RelationshipService.value(int(f.id), int(t["id"]), "friendship")
-		if v >= best_v and Story.stage_of(t) in ["adult", "elder"] and not loans.any(func(l): return int(l["tid"]) == int(t["id"])):
+		if v >= best_v and Story.stage_of(t) in ["adult", "elder"] and Involve.fresh(int(t["id"])) and not loans.any(func(l): return int(l["tid"]) == int(t["id"])):
 			best_v = v
 			best = int(t["id"])
+	if loans.any(func(l): return int(l["tid"]) == best):
+		return false
 	if best < 0 or (PhoneOwn.block(int(f.id)) != "" and SysUtil.folk(best) == null):
 		return false
 	var amounts: Array = cfg().get("favour_amounts", [10, 20, 30])
 	var c: int = int(amounts[SysUtil.rng.randi_range(0, amounts.size() - 1)])
 	var n: String = Story.name_of(best).get_slice(" ", 0)
 	var opts: Array = [{"id": "lend", "label": "Lend %d coins" % c}, {"id": "no", "label": "Can't right now"}]
-	JusticePlayer.ask(int(f.id), "A favour", _line("favour", n, c), opts, func(ch): _favour_answer(f, best, c, str(ch)), "no")
+	JusticePlayer.ask(int(f.id), "A favour", _line(key, n, c), opts, func(ch): _favour_answer(f, best, c, str(ch)), "no")
 	return true
 
 static func _favour_answer(f, tid: int, c: int, ch: String) -> void:
@@ -89,7 +71,7 @@ static func _favour_answer(f, tid: int, c: int, ch: String) -> void:
 		_friend(int(f.id), tid, "refused")
 
 ## A home problem: only raises the odds of a real incident's own roll on the pawn's home (it may still not happen). Nothing is announced.
-static func _problem(f) -> bool:
+static func problem(f) -> bool:
 	var ids: Array = cfg().get("problem_incidents", [])
 	if ids.is_empty():
 		return false
@@ -97,13 +79,13 @@ static func _problem(f) -> bool:
 	return true
 
 ## A real customer on the same lot leaves their wallet behind.
-static func _wallet(f) -> bool:
+static func wallet(f) -> bool:
 	var lot: String = Neighborhood.lot_of(f)
 	if lot == "" or lot == Neighborhood.HOME:
 		return false
 	var owner = null
 	for p in Crowd.crowd_folk(lot):
-		if (p.tile - f.tile).length() < 12.0 and p.has_meta("townie_id"):
+		if (p.tile - f.tile).length() < 12.0 and p.has_meta("townie_id") and Involve.fresh(int(p.get_meta("townie_id"))):
 			owner = p
 			break
 	if owner == null:
@@ -133,10 +115,8 @@ static func _wallet_answer(f, tid: int, n: String, c: int, _lot: String, ch: Str
 			SysUtil.notify(_line("left", n), "story")
 
 static func to_dict() -> Dictionary:
-	return {"hour": hour_today, "done": done_day, "loans": loans.duplicate(true)}
+	return {"loans": loans.duplicate(true)}
 
 static func from_dict(d: Dictionary) -> void:
 	reset()
-	hour_today = int(d.get("hour", -1))
-	done_day = int(d.get("done", -1))
 	loans = (d.get("loans", []) as Array).duplicate(true)
