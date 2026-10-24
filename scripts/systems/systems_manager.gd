@@ -98,6 +98,7 @@ static func reset_all() -> void:
 	CarActs.reset()
 	WalkThen.reset()
 	ShopActs.reset()
+	StreetScenes.reset()
 	TillActs.reset()
 	StaffPosts.reset()
 	RestrictedPlaces.reset()

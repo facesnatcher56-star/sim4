@@ -37,6 +37,7 @@ static func reset() -> void:
 	SoloMove.reset()
 	SoloPressure.reset()
 	SoloGrey.reset()
+	DailyHook.reset()
 	SoloCrews.reset()
 	SoloDistricts.reset()
 
@@ -85,7 +86,7 @@ static func to_dict() -> Dictionary:
 		return {}
 	return {"rung": rung, "homeless": homeless, "since": since_day, "notice": notice_day, "leaving": leaving_day, "council": council_day, "deposit": deposit,
 		"stored": stored.duplicate(true), "sweek": shelter_week, "snights": shelter_nights, "rough": rough_nights, "phys": phys.duplicate(),
-		"pressure": SoloPressure.to_dict(), "grey": SoloGrey.to_dict(), "districts": SoloDistricts.rough.duplicate(), "driveby": [SoloCrews.due_abs, SoloCrews.district_id]}
+		"pressure": SoloPressure.to_dict(), "grey": SoloGrey.to_dict(), "hook": DailyHook.to_dict(), "districts": SoloDistricts.rough.duplicate(), "driveby": [SoloCrews.due_abs, SoloCrews.district_id]}
 
 static func from_dict(d: Dictionary) -> void:
 	reset()
@@ -106,6 +107,7 @@ static func from_dict(d: Dictionary) -> void:
 	phys = (d.get("phys", {}) as Dictionary).duplicate()
 	SoloPressure.from_dict(d.get("pressure", {}))
 	SoloGrey.from_dict(d.get("grey", {}))
+	DailyHook.from_dict(d.get("hook", {}))
 	SoloDistricts.rough = (d.get("districts", {}) as Dictionary).duplicate()
 	var db: Array = d.get("driveby", [-1, ""])
 	SoloCrews.due_abs = int(db[0])

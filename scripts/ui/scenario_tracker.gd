@@ -44,7 +44,7 @@ func refresh() -> void:
 	for c in box.get_children():
 		box.remove_child(c)
 		c.queue_free()
-	visible = Scenario.active() and Scenario.has_goals() and not dismissed and (not Scenario.finished or celebrating)
+	visible = Scenario.active() and Scenario.has_goals() and not dismissed and (not Scenario.finished or celebrating) and not SoloHome.active          # task 65: no to-do list in solo play (the goals still count, quietly)
 	if not visible:
 		return
 	var goals: Array = Scenario.goals()

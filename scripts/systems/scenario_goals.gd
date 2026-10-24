@@ -115,5 +115,6 @@ static func complete(goal_id: String) -> void:
 	SysUtil.game_event("scenario_goal_done", {"goal": goal_id})
 	if Scenario.done_count() >= Scenario.goals().size():
 		Scenario.finished = true
-		SysUtil.notify("Out of the bare room and on your feet. What you want next is up to you (Goals).", "goal")
+		if not SoloHome.active:          # task 65: solo play shows no goal list, so no pointer to one
+			SysUtil.notify("Out of the bare room and on your feet. What you want next is up to you (Goals).", "goal")
 		SysUtil.game_event("scenario_finished", {"scenario": Scenario.active_id})

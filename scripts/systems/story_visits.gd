@@ -160,6 +160,7 @@ static func on_minute() -> void:
 					respond_invite(int(inv["id"]), true)         # (at night the invite waits for the next day instead of sending them out)
 			elif now >= int(inv["expires_min"]):
 				inv["state"] = "expired"
+	VisitDoor.on_minute()
 	while Story.situations.size() > 0 and str(Story.situations[0]["state"]) == "done":
 		Story.situations.pop_front()
 	if Story.invites.size() > 30:
@@ -175,6 +176,7 @@ static func _arrive(sit: Dictionary) -> void:
 		return
 	sit["host_ids"] = hosts_alive
 	var tile: Vector2i = entrance(int(hosts_alive[0]))
+	var door: bool = VisitDoor.applies(sit)          # task 65: at the player's home they come to the front door and knock
 	var count: int = 0
 	for gid in sit["guest_ids"]:
 		var t: Dictionary = Story.townies.get(int(gid), {})
@@ -202,20 +204,23 @@ static func _arrive(sit: Dictionary) -> void:
 		(sit["roles"] as Dictionary)[str(gid)] = "guest"
 		(sit["spawned"] as Array).append(int(gid))
 		t["last_visit_day"] = SysUtil.day()
-		for hid2 in hosts_alive:
+		for hid2 in (hosts_alive if not door else []):          # at the player's door they meet only once the door is opened (VisitDoor.meet)
 			if not RelationshipService.knows(int(hid2), int(gid)):
 				RelationshipService.add_both(int(hid2), int(gid), "friendship", float(Story.cfg().get("visits", {}).get("acquaintance_friendship", 6)))
 				RelationshipService.add_history(int(hid2), int(gid), "visit", 0.3, int(gid))
 				SysUtil.notify("%s met %s." % [SysUtil.folk_name(int(hid2)), t["name"]], "relationship")
 		count += 1
-		# greet the host
-		var greet := Interaction.create("chat", f, int(hosts_alive[0]), false)
+		# greet the host (at the player's home: only once let in, VisitDoor)
+		var greet := Interaction.create("chat", f, int(hosts_alive[0]), false) if not door else null
 		if greet != null:
 			f.enqueue(greet)
 	for hid3 in hosts_alive:
 		(sit["roles"] as Dictionary)[str(hid3)] = "host"
 	if count == 0:
 		sit["state"] = "done"
+		return
+	if door:
+		VisitDoor.to_door(sit)
 		return
 	sit["state"] = "arrive"
 	SysUtil.notify(str(sit["line"]) if sit.has("line") else "%s arrived for a %s." % [", ".join(_names(sit["spawned"])), str(sit["kind"])], "visit")

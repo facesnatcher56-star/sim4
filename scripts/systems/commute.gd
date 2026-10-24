@@ -239,6 +239,8 @@ static func _start_home(f, t: Dictionary) -> void:
 	if NeighborhoodLots.lot_at(f.tile) == hl or home.x < 0:
 		_home(f, t)
 	else:
+		if Pawn.is_pawn(f):
+			SysUtil.notify("%s is done for the day and sets off home." % str(f.name).get_slice(" ", 0), "travel")          # playtest 65: the walk home is announced like the walk to work
 		_walk(f, home)
 
 static func _step_home(f, t: Dictionary, now: int) -> void:

@@ -144,7 +144,7 @@ static func self_entries(folk) -> Array:
 		if d.has("_solo") and (d.get("tests", []) as Array).has({"is_pawn": false}):
 			continue          # not for the pawn at all (the welcome basket)
 		ids.append(id)
-	return build_entries(folk, ids, table, make_checker(folk, null)) + Habits.self_entries(folk) + PocketActs.self_entries(folk)          # task 55: the smoker's cigarette; 63: On you, draw a weapon
+	return build_entries(folk, ids, table, make_checker(folk, null)) + Habits.self_entries(folk) + PocketActs.self_entries(folk) + VisibleWork.self_entries(folk)          # task 55: the smoker's cigarette; 63: On you, draw a weapon
 
 ## target_kind: "object" | "folk"
 static func entries_for(folk, target_kind: String, target_id: int) -> Array:
@@ -170,7 +170,7 @@ static func entries_for(folk, target_kind: String, target_id: int) -> Array:
 			var d: Dictionary = table[id]
 			if d.get("target", "") == "folk":
 				ids.append(id)
-	var acts: Array = PersonActs.entries(folk, target) + Licences.person_entries(folk, target) + JobLeads.person_entries(folk, target) + WeaponShop.permit_entries(folk, target) + WeaponActs.entries(folk, target)
+	var acts: Array = PersonActs.entries(folk, target) + Licences.person_entries(folk, target) + JobLeads.person_entries(folk, target) + VisitDoor.person_entries(folk, target) + WeaponShop.permit_entries(folk, target) + WeaponActs.entries(folk, target)
 	var have: Dictionary = {}
 	for e in acts:
 		have[str(e["label"]).to_lower()] = true

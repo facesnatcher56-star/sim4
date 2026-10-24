@@ -56,6 +56,7 @@ static func systems_rows(sm: Object) -> Array:
 		["PersonActs", "PersonActs", 1, 319, N, "", PersonActs.on_minute, Callable(PersonActs, "busy"), "task 53: only while the pawn follows someone"],
 		["hour/Habits.on_hour", "Habits", 60, 321, N, "hour", Habits.on_hour, null, "task 55: smokers only (a handful)"],
 		["Fears", "Fears", 1, 320, N, "", Fears.on_minute, Callable(Fears, "busy"), "task 55: only people with a fear flaw, every 5 minutes"],
+		["StreetScenes", "StreetScenes", 5, 323, N, "", StreetScenes.on_minute, null, "task 65: the pawn only, while out; looks every 10 minutes, a scene about once an hour"],
 		["CityAmbulance", "CityServices", 1, 317, N, "", CityAmbulance.on_minute, Callable(CityAmbulance, "busy"), "ambulances on their way (residents on the real map); idle = one emptiness test"],
 		["NeighborhoodService.after", "NeighborhoodService", 1, 320, N, "", NeighborhoodService.after_minute, null, "Crowd.update loops only the lots near an anchor (Tiers.lot_distances, cached); crowd checks per lot every 10 min; NEAR / TOWN crowd on their turn, they leave / arrive without walks; far lots dropped"],
 		["WeatherFolk", "WeatherFolk", 1, 330, N, "", WeatherFolk.on_minute, null, "ACTIVE every minute, NEAR / TOWN folk on their turn with the exposure scaled to the period"],
@@ -78,6 +79,7 @@ static func systems_rows(sm: Object) -> Array:
 		["hour/SoloOpening.on_hour", "SoloOpening", 60, 315, N, "hour", SoloOpening.on_hour, null, "task 61: the first week's moments (a few comparisons an hour)"],
 		["hour/SoloPressure.on_hour", "SoloPressure", 60, 316, N, "hour", SoloPressure.on_hour, null, "task 61c: a crew offer the evening it is ready (one comparison an hour)"],
 		["hour/SoloGrey.on_hour", "SoloGrey", 60, 316, N, "hour", SoloGrey.on_hour, null, "task 61c: an offer of grey money the day it is ready (one comparison an hour)"],
+		["hour/DailyHook.on_hour", "DailyHook", 60, 317, N, "hour", DailyHook.on_hour, null, "task 65: one personal hook a day for the pawn (one comparison an hour)"],
 		["hour/SoloTeach.on_hour", "SoloTeach", 60, 317, N, "hour", SoloTeach.on_hour, null, "task 61: first-time lines (the pawn only)"],
 		["hour/SoloCrews.on_hour", "SoloCrews", 60, 314, N, "hour", SoloCrews.on_hour, null, "one-character play: the planned drive-by of a rough district (one comparison an hour)"],
 		["hour/CarActs.on_hour", "CarActs", 60, 316, N, "", CarActs.on_hour, null, "task 53: stolen cars found missing (a handful of pending reports)"],
@@ -85,6 +87,7 @@ static func systems_rows(sm: Object) -> Array:
 		# --- day layer (was SystemsManager._on_day)
 		["day/ensure_registered", "SystemsManager", 1440, 200, N, "", ens, null, "residents only"],
 		["day/Holidays.on_day", "Holidays", 1440, 210, N, "day", Holidays.on_day, null, "world-level"],
+		["day/DailyHook.on_day", "DailyHook", 1440, 212, N, "day", DailyHook.on_day, null, "task 65: today's hook hour, money lent paid back (a handful of records)"],
 		["day/Aging.on_day", "Aging", 1440, 220, N, "day", Aging.on_day, null, "residents + townies: O(people) cheap comparisons"],
 		["day/Succession.on_day", "Succession", 1440, 235, N, "day", Succession.on_day, null, "players whose household has nobody left (normally none)"],
 		["day/Family.on_day", "Family", 1440, 230, N, "day", Family.on_day, null, "residents + townie family records (small)"],

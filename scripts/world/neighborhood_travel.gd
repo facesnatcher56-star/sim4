@@ -31,7 +31,8 @@ static func can_travel(folk_ids: Array, lot_id: String, opts: Dictionary = {}) -
 		return {"ok": false, "reason": "Unknown place."}
 	var ids: Array = movable(folk_ids)
 	if ids.is_empty():
-		return {"ok": false, "reason": "Nobody free to go (at work, school or a party)."}
+		var shift: String = VisibleWork.shift_text(folk_ids)
+		return {"ok": false, "reason": shift if shift != "" else "Nobody free to go (at work, school or a party)."}
 	var gate: String = SoloHome.travel_refusal(ids, lot_id)          # one-character play: locked out of the old home, the shelter is for people with no home
 	if gate != "":
 		return {"ok": false, "reason": gate}

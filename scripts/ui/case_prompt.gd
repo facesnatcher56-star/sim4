@@ -9,7 +9,7 @@ var _current: Dictionary = {}
 
 ## Task 63: a scene happening right now (the cashier at the door, a hand in the till) is not a decision that can wait for the morning:
 ## it is asked at once, at any hour, ahead of anything queued.
-const LIVE := ["At the door", "At the till", "At the car", "Staff only", "Robbery!"]
+const LIVE := ["At the door", "At the till", "At the car", "Staff only", "Robbery!", "At your door", "Your guest", "Out here"]
 
 static func is_live(title: String) -> bool:
 	return title in LIVE or title.begins_with("Caught in")
@@ -70,7 +70,14 @@ func _pick(choice: String) -> void:
 	visible = false
 	if cb.is_valid():
 		cb.call(choice)
-	_next()
+	if not visible:          # the answer may have asked a follow-up question, already on screen: don't hide it again
+		_next()
+
+## Task 65: a scene happening right now is asked from the top of the screen, so the people it is about stay in view in the middle.
+func _place_centre() -> void:
+	super._place_centre()
+	if not _current.is_empty() and is_live(str(_current.get("title", ""))):
+		position.y = 84.0
 
 ## Esc / Close = the default answer, so nothing waits forever.
 func hide_dialog() -> void:

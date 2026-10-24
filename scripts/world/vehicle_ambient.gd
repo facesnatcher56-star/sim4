@@ -3,8 +3,8 @@ extends RefCounted
 ## Parked and passing cars of the vehicle layer: the cars that stand in the bays of the lots near a focus (how many follows TransportParking.ambient for the hour),
 ## the players' own cars at their lots, and a trickle of cars that leave one lot and park at another, driving the right lane and stopping at red lights.
 ## The population of a lot is a function of (lot, bay, day) so it is the same every time you look. Task 37: EVERY lot is populated once (a car never pops in as the camera
-## pans), cars arrive from the map edge through the street lattice and leave towards it, only off the picture; the driver of a car that has parked gets out and walks
-## away up the path, and somebody walks down to a parked car before it leaves (VehicleWalkers). Cause: a parked car is somebody's way to a place.
+## pans), cars arrive from the map edge through the street lattice and leave towards it, only off the picture. Task 65: filler cars stand only at public places
+## (shops, venues, car parks) and nobody display-only walks between them and a door; a car at a home is always a real person's (Transport.cars).
 
 var view: VehicleView
 var occ: Dictionary = {}              # lot id -> Array (bay index -> vehicle id, 0 = free)
@@ -72,7 +72,12 @@ func _occ(lot_id: String) -> Array:
 
 
 func _share(lot_id: String) -> float:
-	return TransportParking.ambient(lot_id, SysUtil.hour_f())
+	return TransportParking.ambient(lot_id, SysUtil.hour_f()) if public_lot(lot_id) else 0.0
+
+## Task 65: filler cars (nobody in them the sim knows) only stand at public places: shops, venues, car parks. Never at a home, the player's
+## or anyone's: a car at a home is a real person's car (Transport.cars, a real trip).
+static func public_lot(lot_id: String) -> bool:
+	return Venues.type_of_lot(lot_id) not in ["home", "townie_home", "shelter", ""]
 
 
 func _populate(lot_id: String) -> void:
@@ -136,9 +141,7 @@ func _finish_arrivals() -> void:
 			v.erase("dest_lot")
 			v["stay_until"] = view.sim.vt + view.rng.randf_range(20.0, 90.0)
 			v["dir"] = (v["path"] as VehiclePath).dir_at(float((v["path"] as VehiclePath).length))
-			var bay_a: Array = _bays(str(v["lot"]))
-			if int(v["bay"]) < bay_a.size():
-				view.walkers.add(VehiclePlaces.side_of(bay_a[int(v["bay"])]), door_of(str(v["lot"])), int(v["id"]) * 7)
+			# task 65: no display-only figure walks from a filler car into a building (it would vanish at the door)
 
 
 ## Where an arriving car waits on the lane (just before it turns in) while the place is busy.
@@ -160,7 +163,7 @@ func moving_count() -> int:
 
 
 ## Every sync: lots below their share of parked cars get an arrival from the map edge; parked cars past their stay leave town or move to another lot.
-## Whoever leaves is fetched by a walker first (VehicleWalkers), then the car pulls out.
+## The car pulls straight out (task 65: no display-only walker).
 func _depart() -> void:
 	var amb: Dictionary = view.cfg.get("ambient", {})
 	if moving_count() >= int(amb.get("max_moving", 10)):
@@ -180,7 +183,7 @@ func _depart() -> void:
 	var v2: Dictionary = cands[view.rng.randi() % cands.size()]
 	var dests: Array = []
 	for lot_id in _lots_done:
-		if str(lot_id) == str(v2["lot"]):
+		if str(lot_id) == str(v2["lot"]) or not public_lot(str(lot_id)):
 			continue
 		var o: Array = _occ(str(lot_id))
 		for k in o.size():
@@ -193,15 +196,14 @@ func _depart() -> void:
 	_begin_departure(v2, str(d[0]), int(d[1]))
 
 
-## The driver walks down from the lot to the parked car; the car goes when the walker has arrived.
+## The car pulls out. Task 65: no display-only figure comes out of a building to fetch it (filler cars stand only at public places).
 func _begin_departure(v: Dictionary, dest_lot: String, dest_bay: int) -> void:
-	var bay: Dictionary = _bays(str(v["lot"]))[int(v["bay"])]
 	v["leaving"] = true
 	v["plan_lot"] = dest_lot
 	if dest_lot != "":
 		_occ(dest_lot)[dest_bay] = int(v["id"])
 		v["plan_bay"] = dest_bay
-	view.walkers.add(door_of(str(v["lot"])), VehiclePlaces.side_of(bay), int(v["id"]) * 5, Callable(self, "_depart_now").bind(v))
+	_depart_now(v)
 
 
 func _depart_now(v: Dictionary) -> void:
@@ -226,6 +228,8 @@ func _arrive_somewhere() -> bool:
 	if lots.is_empty():
 		return false
 	var lot_id: String = str(lots[view.rng.randi() % lots.size()])
+	if not public_lot(lot_id):
+		return false
 	var bays: Array = _bays(lot_id)
 	var o: Array = _occ(lot_id)
 	var taken: int = 0
