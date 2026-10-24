@@ -40,11 +40,6 @@ func run() -> Array:
 	fails = []
 	_check(StartHome.default_id() == "empty", "the default home is the empty one")
 	_check(StartHome.ids() == ["empty", "furnished"], "two choices on the New Game screen")
-	# money seed by home size: inside 1500..2500 and growing with the size
-	var small := StartHome.bonus("small")
-	var medium := StartHome.bonus("medium")
-	var large := StartHome.bonus("large")
-	_check(small >= 1500 and large <= 2500 and small < medium and medium < large, "starter money by size %d/%d/%d" % [small, medium, large])
 	_check(StartHome.normalize("nonsense") == "empty", "an unknown choice falls back to the default")
 
 	# furnished option keeps the old start
@@ -68,7 +63,7 @@ func run() -> Array:
 	_check(strays == 0, "empty: no furniture left in the home (%d stray)" % strays)
 	_check(kept > 0, "empty: doors / windows / lights are still there")
 	_check(_count("door") > 0 and _count("window") > 0, "empty: doors and windows kept")
-	_check(Economy.balance(1) == Scenario.funds_for("solo", "normal") + StartHome.bonus("small"), "empty: funds plus the moving-in allowance (%d)" % Economy.balance(1))
+	_check(Economy.balance(1) == Scenario.funds_for("solo", "normal"), "empty: scenario funds only, no furnishing money (%d)" % Economy.balance(1))
 	_check(StartHome.is_bare(1), "empty: is_bare")
 	var tips: Array = StartHome.tips_for(Scenario.def("solo"))
 	_check(tips.size() >= 3 and "bed" in str(tips[1]).to_lower(), "empty: the first tips walk through buying")

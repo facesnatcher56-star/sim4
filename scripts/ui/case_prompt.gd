@@ -7,13 +7,24 @@ extends UIDialog
 var _queue: Array = []        # [{pid, title, text, options, cb, default}]
 var _current: Dictionary = {}
 
+## Task 63: a scene happening right now (the cashier at the door, a hand in the till) is not a decision that can wait for the morning:
+## it is asked at once, at any hour, ahead of anything queued.
+const LIVE := ["At the door", "At the till", "At the car", "Staff only", "Robbery!"]
+
+static func is_live(title: String) -> bool:
+	return title in LIVE or title.begins_with("Caught in")
+
 func _ready() -> void:
 	dialog_width = 440.0
 	super._ready()
 
 ## JusticePlayer.ask_fn signature.
 func ask(pid: int, title: String, text: String, options: Array, on_choice: Callable, default_id: String) -> void:
-	_queue.append({"pid": pid, "title": title, "text": text, "options": options, "cb": on_choice, "default": default_id})
+	var e: Dictionary = {"pid": pid, "title": title, "text": text, "options": options, "cb": on_choice, "default": default_id}
+	if is_live(title):
+		_queue.push_front(e)
+	else:
+		_queue.append(e)
 	if not visible:
 		_next()
 
@@ -30,7 +41,7 @@ func _process(_d: float) -> void:
 		_next()
 
 func _next() -> void:
-	if _queue.is_empty() or _asleep_or_night(int(_queue[0]["pid"])):
+	if _queue.is_empty() or (not is_live(str(_queue[0]["title"])) and _asleep_or_night(int(_queue[0]["pid"]))):
 		_current = {}
 		visible = false
 		return

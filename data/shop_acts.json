@@ -1,5 +1,5 @@
 {
- "_doc": "Task 53 shops (scripts/systems/shop_acts.gd). The pawn can take anything off a shelf (objects.<def>.goods) without paying, slip it into a pocket (SkillCheck shoplift, watched by staff and shoppers), or eat it in the aisle. Cafe and bar orders go on a tab (orders: the real interaction, served without paying first) and are paid at the counter like goods. Paying happens at the till (till_objects on a shop lot); with too little cash the cashier says how much is missing. Walking out with unpaid goods: a cashier on shift (cashier_roles) who is there notices by their own attention (watch, less when busy: busy_per_customer per shopper in the shop, perception helps) and asks; concealed goods are only seen if the pocketing was spotted or the concealment check fails. Not noticed: the goods are yours, and the theft may still be found (CrimePetty shoplifting). replaces: the old pay-at-the-shelf interactions the pawn no longer gets (NPCs keep them).",
+ "_doc": "Task 53 shops (scripts/systems/shop_acts.gd). The pawn can take anything off a shelf (objects.<def>.goods) without paying, slip it into a pocket (SkillCheck shoplift, watched by staff and shoppers), or eat it in the aisle. Task 63: a counter order (orders: the real interaction) is paid when ordered (short of coins: the cashier says how much). Only an order marked tab (a round at the bar) or any order on a tab_venues lot runs a tab, paid at the till like goods; an unnoticed walk-out on a tab is one line to the player, never a shoplifting case. Paying happens at the till (till_objects on a shop lot); with too little cash the cashier says how much is missing. Walking out with unpaid goods: a cashier on shift (cashier_roles) who is there notices by their own attention (watch, less when busy: busy_per_customer per shopper in the shop, perception helps) and asks; concealed goods are only seen if the pocketing was spotted or the concealment check fails. Not noticed: the goods are yours, and the theft may still be found (CrimePetty shoplifting). replaces: the old pay-at-the-shelf interactions the pawn no longer gets (NPCs keep them).",
  "objects": {
   "grocery_cooler": {
    "replaces": ["buy_groceries", "buy_fresh_snack"],
@@ -13,10 +13,11 @@
    "orders": [
     {"iid": "order_coffee", "what": "a coffee", "price": 4},
     {"iid": "order_meal", "what": "a meal", "price": 12},
-    {"iid": "order_round", "what": "a round", "price": 6}
+    {"iid": "order_round", "what": "a round", "price": 6, "tab": true}
    ]
   }
  },
+ "tab_venues": ["restaurant", "bar"],
  "till_objects": ["counter", "cafe_counter"],
  "till": {
   "_doc": "The till (scripts/systems/till_acts.gd): float + per_hour of opening (times a stable 0.5..1.5) while open; empty after closing or once taken today. staff_sees: chance the staff at the post sees you open it.",

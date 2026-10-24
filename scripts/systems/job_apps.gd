@@ -73,6 +73,9 @@ static func send(fid: int, cid: String, in_person: bool = false, who: String = "
 		SysUtil.notify(_line("sent", {"place": place(cid)}), "career")
 	return {"ok": true, "reason": ""}
 
+static func _hm(m: int) -> String:
+	return "%d:%02d" % [floori((m % 1440) / 60.0), m % 60]
+
 static func _abs(day: int, hour: float) -> int:
 	return (day - 1) * 1440 + int(round(hour * 60.0))
 
@@ -84,7 +87,7 @@ static func on_minute() -> void:
 			"sent":
 				if now >= int(a["answer_min"]):
 					_answer(a, false)
-			"interview":
+			"interview", "in_scene":
 				_interview_tick(a, now)
 	apps = apps.filter(func(a): return str(a["state"]) != "done")
 
@@ -116,30 +119,49 @@ static func _answer(a: Dictionary, in_person: bool) -> void:
 		return
 	_decide(a, false, pre)
 
-## The pawn sets off for the interview like a commute (lead time), is judged on arrival, and has missed it after late_min.
+## The pawn sets off for the interview like a commute (lead time), waits there until the stated time, then sits down with the staff for a short
+## scene (task 63) and hears the answer at the end of it; an hour before, the alarm wakes a sleeping pawn (or a nudge). Missed after late_min.
 static func _interview_tick(a: Dictionary, now: int) -> void:
 	var f = SysUtil.folk(int(a["fid"]))
 	if f == null:
 		a["state"] = "done"
 		return
+	var iv: Dictionary = cfg().get("interview", {})
 	var lot: String = str(a["lot"])
 	var t0: int = int(a["iv_min"])
-	var late: int = int((cfg().get("interview", {}) as Dictionary).get("late_min", 45))
-	var here: bool = lot != "" and NeighborhoodLots.lot_at(f.tile) == lot
-	if here and now >= t0 - 30:
-		CalendarBook.remove_ref("interview", int(a["id"]))
-		_decide(a, true, "")
+	if str(a["state"]) == "in_scene":
+		if now >= int(a["end_min"]):
+			_decide(a, true, "")
 		return
+	var late: int = int(iv.get("late_min", 45))
+	var here: bool = lot != "" and NeighborhoodLots.lot_at(f.tile) == lot
+	if here and now >= t0:
+		CalendarBook.remove_ref("interview", int(a["id"]))
+		_scene(f, a, now)
+		return
+	if here and not bool(a.get("early", false)):
+		a["early"] = true
+		SysUtil.notify("You're early. They'll see you at %s." % _hm(t0), "story")
 	if now > t0 + late:
 		CalendarBook.remove_ref("interview", int(a["id"]))
 		a["state"] = "done"
 		SysUtil.notify(_line("missed", {"place": place(str(a["cid"]))}), "warn")
 		return
+	if not bool(a.get("nudged", false)) and not here and now >= t0 - int(iv.get("nudge_min", 60)):
+		a["nudged"] = true
+		var t: String = _hm(t0)
+		if CrimePlace.is_asleep(f):
+			f.cancel_current("woken for the interview")
+			SysUtil.notify("Your alarm goes off: the interview at %s is at %s." % [place(str(a["cid"])), t], "career")
+		else:
+			SysUtil.notify("Interview at %s at %s. Time to get going." % [place(str(a["cid"])), t], "career")
 	if not bool(a.get("set_off", false)) and lot != "" and not SysUtil.is_away(f) and not Commute.active(int(f.id)):
 		var dest: Vector2i = NeighborhoodLots.entry_tile(lot)
 		var m: float = Workplace.trip_minutes(f, dest)
 		if m >= 0.0 and now >= t0 - int(m * Workplace.num("lead_mult", 1.15) + Workplace.num("buffer_min", 10.0)):
 			a["set_off"] = true
+			if CrimePlace.is_asleep(f):
+				f.cancel_current("woken for the interview")
 			var ir := Interaction.create_goto(f, dest, false)
 			if ir != null:
 				ir.def = ir.def.duplicate(true)
@@ -147,12 +169,31 @@ static func _interview_tick(a: Dictionary, now: int) -> void:
 				ir.params["interview"] = true
 				f.enqueue(ir)
 
+## The interview itself: the pawn sits with the staff member on shift (or the manager) for `minutes`; the answer comes when it ends.
+static func _scene(f, a: Dictionary, now: int) -> void:
+	var mins: int = int((cfg().get("interview", {}) as Dictionary).get("minutes", 18))
+	a["state"] = "in_scene"
+	a["end_min"] = now + mins
+	var staff: Array = Crowd.staff_folk(str(a["lot"]))
+	var who: String = str(staff[0].name).get_slice(" (", 0) if not staff.is_empty() else "The manager"
+	SysUtil.notify("%s sits down with you for the interview." % who, "career")
+	var ir: Interaction = Interaction.create("wait_here", f, -1, false)
+	if ir != null:
+		ir.def = ir.def.duplicate(true)
+		ir.def["label"] = "Interview"
+		ir.def["duration_min"] = mins
+		ir.def["posture"] = "sit"
+		ir.def["priority"] = "high"
+		ir.def["thought"] = "Trying to make a good impression."
+		f.clear_queue()
+		f.enqueue(ir)
+
 ## Yes or no. Interview: SkillCheck act "interview" (charisma) plus the rest; without one, a base share plus the rest.
 static func _decide(a: Dictionary, interviewed: bool, pre: String) -> void:
 	var fid: int = int(a["fid"])
 	var cid: String = str(a["cid"])
 	a["state"] = "done"
-	var p: float = chance(fid, cid, int(a["applicants"]), interviewed)
+	var p: float = chance(fid, cid, int(a["applicants"]), interviewed, int(a["level"]))
 	var barred: bool = str(a["lot"]) != "" and str((Creation.picks.get(fid, {}) as Dictionary).get("barred_lot", "")) == str(a["lot"])          # task 62: the old manager's word
 	if JusticeRecords.bans(fid, cid) or barred or SysUtil.rng.randf() >= p:
 		if interviewed:
@@ -180,7 +221,7 @@ static func _walk_home(fid: int) -> void:
 		f.enqueue(ir)
 
 ## The share of a yes (never shown).
-static func chance(fid: int, cid: String, applicants: int, interviewed: bool) -> float:
+static func chance(fid: int, cid: String, applicants: int, interviewed: bool, level: int = 1) -> float:
 	var w: Dictionary = cfg().get("weights", {})
 	var f = SysUtil.folk(fid)
 	var b: float = float(w.get("job_skill", 0.04)) * float(Careers.skill_for(f, cid)) if f != null else 0.0
@@ -192,6 +233,8 @@ static func chance(fid: int, cid: String, applicants: int, interviewed: bool) ->
 	b += float(w.get("hiring_bonus", 0.05)) * Creation.hiring(fid, Creation.job_kind(cid))
 	b += float(w.get("per_applicant", -0.05)) * float(applicants)
 	if interviewed:
+		if level <= 1:
+			b += float(w.get("entry_ease", 0.0))          # task 63: an entry-level job with an average applicant is about an even chance
 		return SkillCheck.chance(fid, "interview", {"bonus": b})
 	return clampf(0.5 + float(w.get("no_interview_base", 0.35)) + b, 0.05, 0.95)
 
