@@ -7,35 +7,27 @@
 - Your Folk only does what you tell them. Click a thing for its menu, right-click the ground to walk there. **Myself** (next to the face) lists what you can do with nothing around.
 - Keys: Space pauses, 1 / 2 / 3 set the speed, W A S D move the camera, Q / E rotate, the wheel zooms, Tab cuts walls, B is build and buy, M is the map, F1 is help.
 
-## What's new since you last played
-- **Freedom to try things:** take goods off a shelf, pocket them, walk out, open a till. The people who are really there decide what happens.
-- **Skills behind actions:** fixing, lying, sneaking, fighting and talking roll against your skills. No odds are shown.
-- **Doors, cars and shops:** locks, cars, and a Shops tab with real stock and delivery.
-- **The bank:** accounts, loans, the lottery.
-- **Weapons and permits:** the sporting goods counter, permits at the police desk, and drawing a weapon from Myself.
-- **Backgrounds and creation points:** Street kid, Fresh out, College dropout and more, each with its own first week.
-- **A new start:** a bare studio and 200 coins, the landlord's note, the neighbour, and the Getting Started goals (a paid meal, a real bed, a wage, the rent, a friend, moving up).
-- **Jobs the real way:** apply on the phone or ask at the counter, wait for the answer, and turn up for the interview at the stated time.
-- **The calendar** on the phone: interviews, check-ins, reminders.
-- **Town drama:** feuds, secrets and cases going on around you.
-- **New art and models:** the grounded look, and new buildings, people and furniture.
-- **HUD polish:** a marker where you send your Folk, and orders that start at once.
+## What's different now
+- **No fixed events and no to-do list.** Apart from the landlord's note about the rent, nothing happens on a set day. There is no checklist on screen.
+- **The town runs on its own,** all day and night: rows, thefts, break-ins, an affair found out, a debt collected, someone collapsing, an arrest, a car alarm, a party next door. They are real people with real reasons, and what happens to them sticks.
+- **If you are there, you see it,** and you can step in, watch or walk away. If you are not, you only hear about it from people: someone mentions it when you talk, a visitor brings the news, a friend who was caught up in it calls you.
+- **Things find you.** While you are awake with nothing going on, it will not stay quiet for long: a knock at the door, a friend asking for help or money, someone you crossed coming to have it out, a crew with a job, a wallet left on a seat, the police asking what you saw. The more you get tangled up with people, the more of it is about them.
+- **Visitors knock.** Nobody walks into your home. Answer, look through the window, or ignore it; once the door is open, let them in, talk on the step, or send them away. Guests ask before using your bathroom, and you can tell them it's getting late.
+- **Close always means no, or later.** Closing a question never lets someone move in or takes a job for you.
+- **Saying yes counts.** A crew job is at a time and a place; a meet-up means turning up. If you don't, people remember.
 
 ## Things worth trying
 - Get through the first week on 200 coins: find work, eat, and pay the rent on Sunday.
-- Ask at the cafe if they're hiring, then go to the interview on time.
-- Order at the cafe counter (you pay as you order). Order a round at the bar in the evening, then walk out without paying.
-- Take something off a market shelf and walk out. See who notices.
-- Sleep a night on the floor, then buy a bed (B) and feel the difference.
-- Make a friend at the park or the gym and accept an invitation.
-- Start again with a different background.
+- Go out and stay out: the cafe, the park, the market in the evening. See what goes on around you.
+- Step in when two people are at each other's throats. Then see who comes back to you later, and why.
+- Lend a friend money, or don't. Take the crew's job, or skip it.
+- Talk to people. They know things.
 
 ## Known issues
 - The camera stays put when your Folk walks off-screen. Click their face (bottom-left, next to Myself) and the camera goes to them and follows.
 - Small hitches (under a second) now and then, mostly just after arriving somewhere.
-- Some leftover automated checks fail only in tests, never in play: two street-fence routing checks. The reviewer has the list.
+- The town's events and what reaches you were tuned with scripted two-day runs, not by a person. If it ever feels too busy, too quiet, or the same face keeps turning up, please say so.
 - Co-op hasn't been tried between two real PCs yet.
-- Long lives (weeks, generations) were only played by scripts. Odd story moments are possible; please tell us.
 
 ## How to report
 Write a note to the reviewer on the board (`coord/messages/`), or just tell Claude. Say what you did, what you expected, what happened, and the day and time on the in-game clock. A screenshot (Windows + Shift + S) helps a lot.
