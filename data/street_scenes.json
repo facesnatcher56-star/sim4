@@ -1,28 +1,111 @@
 {
- "_doc": "Task 65 (scripts/systems/street_scenes.gd): while the pawn is out, real things between real townies play out where it can see them. Every scene comes from a real state: a town drama thread (feud, tension, family rift, affair, debt, addiction or a failing business), or a person on the lot right now (someone collapses). The townies walk in from the lot's gate (Crowd) and act it out; the player can step in, watch or walk away, and each feeds the normal systems (friendship, grudges, tension, history). gap_min = minutes between scenes for one outing (times rough_mult in a rough district and night_mult after 20:00); check_min = how often it looks. Lines use {a} {b} {c} {place}.",
- "check_min": 10,
- "gap_min": [45, 75],
- "rough_mult": 0.6,
- "night_mult": 0.75,
+ "_doc": "Task 65/66 (scripts/systems/street_scenes.gd): the scene library. Every scene comes from a real state: a town drama thread (feud, tension, family rift, affair, debt, addiction or a failing business), two people on a lot who can't stand each other, an elder on the lot, an open case's top suspect (the arrest: a uniformed officer walks in, the real JusticeProcess.arrest), someone with a record or a crew thread at a parked car (the alarm, after dark or on a rough block), the neighbour's real friends round (the party next door, in the evening at home). TownLife plays them where the pawn is (else resolves them off-screen) and the involvement director may pick one. weights = how likely each kind is among those with a cause; stay_min = how long the people stay on the lot; arrest_progress = how far a case must be; party_min = how long the party lasts. Lines use {a} {b} {c} {place}.",
  "stay_min": 40,
- "weights": {"row": 4, "affair": 1.5, "debt": 2, "upset": 2.5, "collapse": 1},
- "friendship": {"helped": 6.0, "dragged_in": -5.0, "comforted": 8.0, "ambulance": 10.0, "brushed_off": -2.0},
+ "weights": {
+  "row": 4,
+  "affair": 1.5,
+  "debt": 2,
+  "upset": 2.5,
+  "collapse": 1,
+  "arrest": 2.5,
+  "alarm": 1.5
+ },
+ "friendship": {
+  "helped": 6.0,
+  "dragged_in": -5.0,
+  "comforted": 8.0,
+  "ambulance": 10.0,
+  "brushed_off": -2.0
+ },
  "lines": {
-  "row": ["{a} and {b} are shouting at each other outside {place}.", "{a} jabs a finger at {b}. Voices are raised; people are looking.", "{a} and {b} are squaring up to each other, outside {place}."],
-  "row_fight": ["{a} shoves {b}. It's turning into a fight outside {place}."],
-  "affair": ["{c} has found {a} and {b} together. \"How long has this been going on?\""],
-  "debt": ["{b} has {a} backed against the wall. \"You know what you owe.\""],
-  "upset": ["{a} is sitting on their own, crying quietly.", "{a} is staring at nothing, eyes red."],
-  "collapse": ["{a} sways, then folds to the ground.", "{a} grabs their chest and goes down."],
-  "calm_ok": ["You get between them. \"Come on, not here.\" They back off, still glaring, but it's over.", "A few words and they cool down. {a} even nods at you."],
-  "calm_fail": ["\"Stay out of it!\" {a} rounds on you instead.", "Nobody listens. {a} turns on you: \"Who asked you?\""],
-  "watched": ["You watch it play out. People will be talking about this.", "You stay and watch. You won't forget who said what."],
-  "walked": ["You keep walking.", "Not your business. You move on."],
-  "comfort": ["You sit with {a} for a while. They manage a smile. \"Thanks. Really.\""],
-  "comfort_no": ["{a} wipes their eyes. \"I'm fine. Leave it.\""],
-  "debt_ok": ["\"Leave them alone.\" {b} looks you over, spits, and walks off. For now."],
-  "debt_fail": ["{b} turns to you. \"You want some too?\" You back off."],
-  "ambulance": ["You call it in and stay with {a} until the ambulance comes."],
-  "helped_up": ["You help {a} sit up. They're shaken, but talking."]
- }
+  "row": [
+   "{a} and {b} are shouting at each other outside {place}.",
+   "{a} jabs a finger at {b}. Voices are raised; people are looking.",
+   "{a} and {b} are squaring up to each other, outside {place}."
+  ],
+  "row_fight": [
+   "{a} shoves {b}. It's turning into a fight outside {place}."
+  ],
+  "affair": [
+   "{c} has found {a} and {b} together. \"How long has this been going on?\""
+  ],
+  "debt": [
+   "{b} has {a} backed against the wall. \"You know what you owe.\""
+  ],
+  "upset": [
+   "{a} is sitting on their own, crying quietly.",
+   "{a} is staring at nothing, eyes red."
+  ],
+  "collapse": [
+   "{a} sways, then folds to the ground.",
+   "{a} grabs their chest and goes down."
+  ],
+  "calm_ok": [
+   "You get between them. \"Come on, not here.\" They back off, still glaring, but it's over.",
+   "A few words and they cool down. {a} even nods at you."
+  ],
+  "calm_fail": [
+   "\"Stay out of it!\" {a} rounds on you instead.",
+   "Nobody listens. {a} turns on you: \"Who asked you?\""
+  ],
+  "watched": [
+   "You watch it play out. People will be talking about this.",
+   "You stay and watch. You won't forget who said what."
+  ],
+  "walked": [
+   "You keep walking.",
+   "Not your business. You move on."
+  ],
+  "comfort": [
+   "You sit with {a} for a while. They manage a smile. \"Thanks. Really.\""
+  ],
+  "comfort_no": [
+   "{a} wipes their eyes. \"I'm fine. Leave it.\""
+  ],
+  "debt_ok": [
+   "\"Leave them alone.\" {b} looks you over, spits, and walks off. For now."
+  ],
+  "debt_fail": [
+   "{b} turns to you. \"You want some too?\" You back off."
+  ],
+  "ambulance": [
+   "You call it in and stay with {a} until the ambulance comes."
+  ],
+  "helped_up": [
+   "You help {a} sit up. They're shaken, but talking."
+  ],
+  "arrest": [
+   "{b}, a police officer, stops {a}. \"You need to come with me.\" {a} protests, loudly.",
+   "A police officer, {b}, takes {a} by the arm. \"Down to the station. Now.\""
+  ],
+  "vouch": [
+   "\"You've got the wrong person!\" The officer notes your name. {a} looks back at you, grateful."
+  ],
+  "alarm": [
+   "A car alarm goes off. {a} is bent over a parked car's door.",
+   "A car alarm starts wailing. {a} jumps back from a parked car, looking around."
+  ],
+  "alarm_ok": [
+   "\"Oi! Get away from that!\" {a} legs it."
+  ],
+  "alarm_fail": [
+   "{a} squares up to you. \"Mind your own.\" You back off."
+  ],
+  "alarm_police": [
+   "You call it in. {a} sees you on the phone and walks off fast."
+  ],
+  "party": [
+   "Music is thumping through the wall: {a} has people round next door.",
+   "Laughter and loud music from {place} next door. {a}'s got friends over."
+  ],
+  "party_wall": [
+   "You bang on the wall. The music drops, then creeps back up."
+  ],
+  "party_bear": [
+   "You put up with it. It quietens down eventually."
+  ]
+ },
+ "arrest_progress": 0.5,
+ "party_min": 150,
+ "again_days": 3
 }

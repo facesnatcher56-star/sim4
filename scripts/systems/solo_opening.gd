@@ -94,36 +94,36 @@ static func on_hour(h: int) -> void:
 	var c: Dictionary = cfg()
 	var ll: Dictionary = c.get("landlord", {})
 	if d >= int(ll.get("day", 0)) and h >= int(ll.get("hour", 9)) and d <= 1 and once("landlord"):
-		_landlord_note(ll)
-	var nb: Dictionary = c.get("neighbour", {})
-	if d >= int(nb.get("day", 0)) and h >= int(nb.get("hour", 11)) and h < 19 and neighbour >= 0 and d <= 2 and once("neighbour"):
-		var sit: Dictionary = StoryVisits.schedule_visit([neighbour], fid, SysUtil.now() + 10, int(nb.get("minutes", 40)), "visit")
-		sit["line"] = _fill(str(nb.get("line", "")), {"who": _first(Story.name_of(neighbour))})
-	var pb: Dictionary = c.get("problem", {})
-	if d >= int(pb.get("day", 4)) and once("problem"):
-		var pick: Dictionary = (pb.get("incidents", []) as Array).pick_random() if not (pb.get("incidents", []) as Array).is_empty() else {}
-		if not pick.is_empty():
-			var key: String = ("home:%d" % SoloHome.hid()) if str(pick.get("subject", "")) == "home" else ("folk:%d" % fid)
-			StorytellerTilt.add(str(pick["id"]), key, str(pb.get("size", "opening")))          # only the odds of its own roll; nothing is announced
-	var again: Array = c.get("neighbour_again", [])
-	for i in again.size():
-		var na: Dictionary = again[i]
-		if neighbour >= 0 and d >= int(na.get("day", 3)) and h >= int(na.get("hour", 17)) and h < 20 and once("nb_again_%d" % i):
-			if str(na.get("kind", "")) == "invite":
-				StoryVisits.send_invite(neighbour, fid)
-			else:
-				var sv: Dictionary = StoryVisits.schedule_visit([neighbour], fid, SysUtil.now() + 10, int(na.get("minutes", 45)), "visit")
-				sv["line"] = _fill(str(na.get("line", "")), {"who": _first(Story.name_of(neighbour))})
-	var bg: String = str((Creation.picks.get(fid, {}) as Dictionary).get("background", ""))
-	var keys: Array = [bg] + ((Creation.picks.get(fid, {}) as Dictionary).get("flaws", []) as Array)
-	var moments: Dictionary = c.get("moments", {})
+		_landlord_note(ll)          # rent is real and due: the one fixed moment left (task 66)
+
+## Task 66: the background's moments are no longer on fixed days. They are situations the involvement director (Involve) may pick, weighted
+## to early in the game: the first one once a day has passed, its follow-up some days after the first was said. [] = none waiting.
+static func beats(fid: int) -> Array:
+	var out: Array = []
+	var d: int = SysUtil.day() - start_day
+	var moments: Dictionary = cfg().get("moments", {})
+	var keys: Array = [str((Creation.picks.get(fid, {}) as Dictionary).get("background", ""))] + ((Creation.picks.get(fid, {}) as Dictionary).get("flaws", []) as Array)
 	for k in keys:
 		var m: Dictionary = moments.get(str(k), {})
-		if not m.is_empty() and d >= int(m.get("day", 1)) and h >= int(m.get("hour", 9)) and d <= 6 and once("bg_" + str(k)):
-			_moment(fid, m)
-		var fl: Dictionary = m.get("follow", {})
-		if not fl.is_empty() and said.has("bg_" + str(k)) and d >= int(fl.get("day", 8)) and h >= int(fl.get("hour", 10)) and d <= 13 and once("bgf_" + str(k)):
-			_follow(fid, fl)
+		if m.is_empty():
+			continue
+		if not said.has("bg_" + str(k)):
+			if d >= mini(int(m.get("day", 1)), 1):
+				out.append("bg_" + str(k))
+		elif not (m.get("follow", {}) as Dictionary).is_empty() and not said.has("bgf_" + str(k)) and SysUtil.day() - int(said["bg_" + str(k)]) >= 3:
+			out.append("bgf_" + str(k))
+	return out
+
+static func fire_beat(fid: int, beat: String) -> bool:
+	var k: String = beat.trim_prefix("bgf_") if beat.begins_with("bgf_") else beat.trim_prefix("bg_")
+	var m: Dictionary = (cfg().get("moments", {}) as Dictionary).get(k, {})
+	if m.is_empty() or not once(beat):
+		return false
+	if beat.begins_with("bgf_"):
+		_follow(fid, m.get("follow", {}))
+	else:
+		_moment(fid, m)
+	return true
 
 static func _landlord_note(ll: Dictionary) -> void:
 	var p: Dictionary = SoloHome.prop()

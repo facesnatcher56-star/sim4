@@ -1,24 +1,68 @@
 {
- "_doc": "Task 65 (scripts/systems/daily_hook.gd): each day the storyteller tilts toward ONE personal thing reaching the pawn through a real system, at a random daytime hour (hours). Kinds are tried in a shuffled order and the first with a real cause fires: favour (someone the pawn knows, friendship >= favour_min, asks to borrow money by phone), problem (StorytellerTilt on a real home incident: the odds of its own roll only), wallet (a real customer on the same lot leaves a wallet behind). Never a list or objective: one plain line and a choice.",
- "hours": [10, 18],
+ "_doc": "Task 65/66 (scripts/systems/daily_hook.gd): personal hooks the involvement director (data/director.json) may pick, never on a clock: favour (someone the pawn knows, friendship >= favour_min, asks to borrow money; a ripple names the friend and uses its own line), problem (StorytellerTilt on a real home incident: the odds of its own roll only), wallet (a real customer on the same lot leaves a wallet behind). One plain line and a choice.",
  "favour_min": 10.0,
- "favour_amounts": [10, 20, 30],
- "repay_days": [3, 7],
+ "favour_amounts": [
+  10,
+  20,
+  30
+ ],
+ "repay_days": [
+  3,
+  7
+ ],
  "repay_chance": 0.7,
- "problem_incidents": ["appliance_breakdown", "toilet_overflow", "roach_infestation"],
- "wallet_coins": [15, 60],
+ "problem_incidents": [
+  "appliance_breakdown",
+  "toilet_overflow",
+  "roach_infestation"
+ ],
+ "wallet_coins": [
+  15,
+  60
+ ],
  "wallet_caught": 0.15,
- "friendship": {"lent": 8.0, "refused": -2.0, "repaid": 3.0, "stiffed": -10.0, "returned": 10.0, "kept_seen": -15.0},
+ "friendship": {
+  "lent": 8.0,
+  "refused": -2.0,
+  "repaid": 3.0,
+  "stiffed": -10.0,
+  "returned": 10.0,
+  "kept_seen": -15.0
+ },
  "lines": {
-  "favour": ["{n} calls. \"Bit awkward... could you lend me {c} coins till next week?\"", "{n} catches you: \"I'm short {c} for the rent. Any chance?\""],
-  "lent": ["You hand over {c} coins. {n} looks relieved. \"I won't forget this.\""],
-  "refused": ["\"No, that's fair. Don't worry about it.\" {n} sounds disappointed."],
-  "repaid": ["{n} pays you back the {c} coins, with thanks."],
-  "stiffed": ["It's been a while. {n} still hasn't paid back the {c} coins, and doesn't mention it."],
-  "wallet": ["A wallet is lying on the seat where {n} was sitting."],
-  "returned": ["You catch {n} at the door. \"My wallet! Thank you!\""],
-  "kept": ["You pocket it. {c} coins inside."],
-  "kept_seen": ["{n} comes back for it, and sees it in your hand. \"That's mine.\""],
-  "left": ["You leave it where it is."]
+  "favour": [
+   "{n} calls. \"Bit awkward... could you lend me {c} coins till next week?\"",
+   "{n} catches you: \"I'm short {c} for the rent. Any chance?\""
+  ],
+  "lent": [
+   "You hand over {c} coins. {n} looks relieved. \"I won't forget this.\""
+  ],
+  "refused": [
+   "\"No, that's fair. Don't worry about it.\" {n} sounds disappointed."
+  ],
+  "repaid": [
+   "{n} pays you back the {c} coins, with thanks."
+  ],
+  "stiffed": [
+   "It's been a while. {n} still hasn't paid back the {c} coins, and doesn't mention it."
+  ],
+  "wallet": [
+   "A wallet is lying on the seat where {n} was sitting."
+  ],
+  "returned": [
+   "You catch {n} at the door. \"My wallet! Thank you!\""
+  ],
+  "kept": [
+   "You pocket it. {c} coins inside."
+  ],
+  "kept_seen": [
+   "{n} comes back for it, and sees it in your hand. \"That's mine.\""
+  ],
+  "left": [
+   "You leave it where it is."
+  ],
+  "favour_ripple": [
+   "{n} calls, upset. \"I'm in a hole. Could you spare {c} coins? Just till things settle.\""
+  ]
  }
 }

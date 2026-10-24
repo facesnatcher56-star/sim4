@@ -111,7 +111,7 @@ func _process(_d: float) -> bool:
 				return false
 			_speed(1)
 			_hud.lot_view.focus_on("folk", int(pawn().id))
-			var played: bool = StreetScenes._play(pawn(), "park")
+			var played: bool = StreetScenes.play(pawn(), "park")
 			print("CHECK street scene played at the park: %s; threads %s" % [str(played), str(TownDrama.threads.map(func(t): return "%s:%s/%s" % [t["kind"], str(StreetScenes._free(int(t["a"]))), str(StreetScenes._free(int(t["b"])))]))])
 			if not played and _frames < 14000:
 				_wait(300)
@@ -130,6 +130,22 @@ func _process(_d: float) -> bool:
 			_wait(60)
 		11:
 			_shot("07_after_scene")
+			var s2: Dictionary = StreetScenes.cause("arrest", pawn(), "park")
+			print("CHECK arrest cause at the park: %s (open cases %d)" % [str(s2), CaseStore.open_cases().size()])
+			if not s2.is_empty():
+				StreetScenes.stage(pawn(), "park", s2)
+			_wait(30)
+		12:
+			if not StreetScenes.pending.is_empty() or (not _hud.case_prompt.visible and _frames < 20000 and not StreetScenes._used.keys().any(func(k): return str(k).begins_with("arrest"))):
+				if _frames < 20000:
+					_wait(20)
+					_step -= 1
+					return false
+			if _hud.case_prompt.visible:
+				_shot("08_arrest")
+				_hud.case_prompt._pick("watch")
+			_wait(30)
+		13:
 			quit()
 			return true
 	return false

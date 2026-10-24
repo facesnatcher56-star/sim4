@@ -337,6 +337,7 @@ func _on_game_event(ev_name: String, payload: Dictionary) -> void:
 				SysUtil.notify("%s" % {"accepted": "They said yes!", "declined": "They said no...", "too_soon": "'It's too soon,' they said.", "no_bond": "They barely know each other.", "already_engaged": "They are already engaged.", "already_married": "They are already married."}.get(out, out), "relationship")
 		"social_done":
 			StoryVisits.on_social_done(int(payload.get("folk_id", -1)), int(payload.get("target_id", -1)), str(payload.get("interaction", "")))
+			TownLife.on_social(int(payload.get("folk_id", -1)), int(payload.get("target_id", -1)))          # task 66: news travels through people
 			JobLeads.on_social_done(int(payload.get("folk_id", -1)), int(payload.get("target_id", -1)), str(payload.get("interaction", "")))          # 51: word of mouth
 	# feed goals for the acting folk (and the other party, for relationship events)
 	var f2 = SysUtil.folk(int(payload.get("folk_id", -1)))
