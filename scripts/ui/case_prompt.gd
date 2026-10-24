@@ -9,7 +9,7 @@ var _current: Dictionary = {}
 
 ## Task 63: a scene happening right now (the cashier at the door, a hand in the till) is not a decision that can wait for the morning:
 ## it is asked at once, at any hour, ahead of anything queued.
-const LIVE := ["At the door", "At the till", "At the car", "Staff only", "Robbery!"]
+const LIVE := ["At the door", "At the till", "At the car", "Staff only", "Robbery!", "At your door", "Your guest", "Out here"]
 
 static func is_live(title: String) -> bool:
 	return title in LIVE or title.begins_with("Caught in")

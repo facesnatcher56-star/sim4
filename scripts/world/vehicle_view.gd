@@ -21,7 +21,6 @@ var buses: VehicleBuses = null
 var calls: VehicleCalls = null
 var signals: VehicleSignals = null
 var filler: VehicleFiller = null
-var walkers: VehicleWalkers = null
 var props: ParkingProps = null                 # carports (display only, made when the layer draws)
 var lot_view: Node3D = null
 var draw: bool = true                       # false: no meshes (tests)
@@ -58,7 +57,6 @@ func _init() -> void:
 	calls = VehicleCalls.new(self)
 	signals = VehicleSignals.new(self)
 	filler = VehicleFiller.new(self)
-	walkers = VehicleWalkers.new(self)
 	sim.dark_fn = Callable(self, "_dark")
 	sim.retire_fn = Callable(self, "retire_ok")
 
@@ -99,7 +97,6 @@ func reset() -> void:
 	nodes.clear()
 	signals.clear()
 	filler.reset()
-	walkers.clear()
 	seeding = true
 	_seed_syncs = 0
 
@@ -114,7 +111,6 @@ func advance(delta: float, speed: int) -> void:
 	active = speed <= int(cfg.get("max_speed", 3))
 	if not active:
 		if was_active:
-			walkers.clear()
 			trips.release_all()
 			sim.vehicles.clear()
 			ambient.reset()
@@ -135,7 +131,6 @@ func advance(delta: float, speed: int) -> void:
 	sim.hour = SysUtil.hour_f()
 	for _i in steps:
 		sim.step(dt / float(steps))
-	walkers.tick(dt)
 	trips.tick(dt)
 	calls.tick(dt)
 	buses.tick(dt)

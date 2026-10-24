@@ -158,14 +158,6 @@ func _process(_d: float) -> bool:
 		JusticePlayer.hold(SysUtil.folk(Pawn.of()), 360.0, "custody", "In custody")
 		root.get_node("Events").selection_changed.emit("folk", Pawn.of())
 		root.get_node("Clock").set_speed(2)
-	if _frames == 60 and _scn == "walker":
-		var pf = _main.hud._resolve(_main.hud.selected_folk_id)
-		var vv = _main.find_child("VehicleView", true, false)
-		var at: Vector3 = root.get_node("World").tile_to_pos(pf.tile)
-		if vv != null:
-			for k in 3:
-				vv.walkers.add(Vector2(at.x - 2 + k, at.z + 3), Vector2(at.x + 6 + k, at.z + 3), 11 + k * 97)
-		print("WALKER view=%s count=%d" % [str(vv != null), vv.walkers.count() if vv != null else -1])
 	if _frames == 60 and _scn in ["jobs", "phone", "nophone", "messages"]:
 		var hud5 = _main.hud
 		var pid5: int = hud5.selected_folk_id
