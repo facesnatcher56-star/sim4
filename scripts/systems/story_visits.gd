@@ -50,12 +50,12 @@ static func _visits_and_invites(day: int) -> void:
 					inviters.append(t2)
 			var who = SysUtil.pick(inviters)
 			if who != null and not _has_open_invite(int(r2.id)):
-				send_invite(int(who["id"]), int(r2.id))
+				send_invite_later(int(who["id"]), int(r2.id))
 				break
 
 static func _has_open_invite(folk_id: int) -> bool:
 	for inv in Story.invites:
-		if int(inv["folk_id"]) == folk_id and str(inv["state"]) == "open":
+		if int(inv["folk_id"]) == folk_id and str(inv["state"]) in ["open", "later"]:
 			return true
 	return false
 
@@ -125,6 +125,9 @@ static func start_party(host_id: int, townie_ids: Array, duration: int = 240) ->
 static func on_minute() -> void:
 	var now: int = SysUtil.now()
 	prune_held_guests()
+	for inv in Story.invites:
+		if str(inv["state"]) == "later" and now >= int(inv.get("send_min", 0)):
+			_deliver(inv)
 	for sit in Story.situations:
 		match str(sit["state"]):
 			"scheduled":
@@ -306,15 +309,29 @@ static func is_visitor(folk_id: int) -> bool:
 
 # ------------------------------------------------------------------ party invites
 static func send_invite(townie_id: int, folk_id: int) -> Dictionary:
-	var ic: Dictionary = Story.cfg().get("invites", {})
-	var inv: Dictionary = {"id": Story._seq, "townie_id": townie_id, "folk_id": folk_id, "state": "open", "created_min": SysUtil.now(),
-		"expires_min": SysUtil.now() + int(float(ic.get("expire_hours", 24)) * 60.0)}
+	var inv: Dictionary = {"id": Story._seq, "townie_id": townie_id, "folk_id": folk_id, "state": "later", "created_min": SysUtil.now(), "expires_min": SysUtil.now()}
 	Story._seq += 1
 	Story.invites.append(inv)
+	_deliver(inv)
+	return inv
+
+## Task 63: the daily roll runs at midnight; its invitation is held and sent between 10:00 and 16:00 that day, so "this evening" reads right.
+static func send_invite_later(townie_id: int, folk_id: int) -> void:
+	var inv: Dictionary = {"id": Story._seq, "townie_id": townie_id, "folk_id": folk_id, "state": "later", "created_min": SysUtil.now(), "expires_min": SysUtil.now(),
+		"send_min": (SysUtil.day() - 1) * 1440 + SysUtil.rng.randi_range(10 * 60, 16 * 60)}
+	Story._seq += 1
+	Story.invites.append(inv)
+
+static func _deliver(inv: Dictionary) -> void:
+	var ic: Dictionary = Story.cfg().get("invites", {})
+	var townie_id: int = int(inv["townie_id"])
+	var folk_id: int = int(inv["folk_id"])
+	inv["state"] = "open"
+	inv["created_min"] = SysUtil.now()
+	inv["expires_min"] = SysUtil.now() + int(float(ic.get("expire_hours", 24)) * 60.0)
 	if not PlayerRequests.party(townie_id, folk_id, int(inv["id"])):
 		SysUtil.notify("%s invites %s to a party!" % [Story.name_of(townie_id), SysUtil.folk_name(folk_id)], "invite")
 	SysUtil.game_event("party_invite", {"folk_id": folk_id, "townie_id": townie_id, "invite_id": inv["id"]})
-	return inv
 
 static func open_invites(folk_id: int = -1) -> Array:
 	var out: Array = []

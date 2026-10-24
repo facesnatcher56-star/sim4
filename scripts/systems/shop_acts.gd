@@ -8,12 +8,14 @@ static var carried: Dictionary = {}          # fid -> [{lot, id, what, price, ki
 static var flagged: Dictionary = {}          # fid -> true: somebody saw them pocket something
 static var asking: Dictionary = {}           # fid -> lot: the cashier asked, waiting for the answer
 static var was_in: Dictionary = {}           # "fid|lot" -> true: has been inside that shop holding its goods (walking out = going from in to out)
+static var resume: Dictionary = {}           # fid -> [Interaction]: the player's orders the door scene interrupted (task 63: given back after the answer)
 
 static func reset() -> void:
 	carried = {}
 	flagged = {}
 	asking = {}
 	was_in = {}
+	resume = {}
 
 static func busy() -> bool:
 	return not carried.is_empty()
@@ -104,11 +106,27 @@ static func eat_here(f, lot: String, good: Dictionary) -> void:
 	if not Notice.who(int(f.id), f.tile, {"visibility": 0.6}).is_empty():
 		flagged[int(f.id)] = true
 
-## A cafe or bar order: the real interaction, served now, owed on the tab (no coins test, no coins taken at the counter).
+## Task 63: a counter cafe takes the money when you order; only a sit-down restaurant or a bar (a round in the evening) runs a tab.
+static func on_tab(lot: String, od: Dictionary) -> bool:
+	return bool(od.get("tab", false)) or (cfg().get("tab_venues", []) as Array).has(Venues.type_of_lot(lot))
+
+## A cafe or bar order: the real interaction, served now (no coins test, no coins taken on finish). Paid at the till first, or owed on the tab.
 static func order(f, lot: String, obj, od: Dictionary) -> void:
 	var ir: Interaction = _order_ir(f, obj, od)
 	if ir == null:
-		return          # nothing is served, so nothing goes on the tab
+		return          # nothing is served, so nothing is paid or owed
+	if not on_tab(lot, od):
+		var c = _cashier(lot)
+		var nm: String = _nm(c) if c != null else "the cashier"
+		var price: int = int(od["price"])
+		var have: int = Economy.balance(int(f.household_id))
+		if have < price:
+			SysUtil.notify(_cap(_line("short", {"n": nm, "t": price, "s": price - have})), "warn")
+			return
+		Economy.spend(int(f.household_id), price, "shop: %s" % Neighborhood.label_of(lot))
+		SysUtil.notify(_cap(_line("paid", {"n": nm, "t": price})), "story")
+		f.enqueue(ir)
+		return
 	f.enqueue(ir)
 	var list: Array = carried.get(int(f.id), [])
 	list.append({"lot": lot, "id": str(od["iid"]), "what": str(od["what"]), "price": int(od["price"]), "kind": "eaten", "hidden": false, "tab": true})          # staff served it: they know
@@ -120,7 +138,7 @@ static func _order_ir(f, obj, od: Dictionary) -> Interaction:
 	if ir == null:
 		return null
 	ir.def = ir.def.duplicate(true)
-	ir.def["tests"] = (ir.def.get("tests", []) as Array).filter(func(t): return not (t is Dictionary and (t as Dictionary).has("coins_at_least")))
+	ir.def["tests"] = (ir.def.get("tests", []) as Array).filter(func(t): return not (t is Dictionary and ((t as Dictionary).has("coins_at_least") or (t as Dictionary).has("stat_below"))))          # task 63: paid for, a coffee can be had at any energy; the need is what it does, not a gate
 	ir.def["on_finish"] = (ir.def.get("on_finish", []) as Array).filter(func(e): return not (e is Dictionary and (e as Dictionary).has("coins_add")))
 	return ir if ir.can_run(f, obj, false) else null
 
@@ -136,25 +154,30 @@ static func _cashier(lot: String):
 static func _nm(p) -> String:
 	return str(p.name).get_slice(" (", 0)
 
+## Lines say "the cashier" mid-sentence when nobody is named; a line that starts with it gets a capital.
+static func _cap(t: String) -> String:
+	return t.left(1).to_upper() + t.substr(1)
+
 static func pay(f, lot: String) -> void:
 	var fid: int = int(f.id)
 	var items: Array = unpaid(fid, lot)
 	var c = _cashier(lot)
-	var nm: String = _nm(c) if c != null else "The cashier"
+	var nm: String = _nm(c) if c != null else "the cashier"
 	if items.is_empty():
-		SysUtil.notify(_line("nothing_to_pay", {"n": nm}), "story")
+		SysUtil.notify(_cap(_line("nothing_to_pay", {"n": nm})), "story")
 		return
 	var total: int = _total(items)
 	var have: int = Economy.balance(int(f.household_id))
 	if have < total:
-		JusticePlayer.ask(fid, "At the till", _line("short", {"n": nm, "t": total, "s": total - have}),
+		JusticePlayer.ask(fid, "At the till", _cap(_line("short", {"n": nm, "t": total, "s": total - have})),
 			[{"id": "back", "label": "Put something back"}, {"id": "all", "label": "Leave it all"}, {"id": "walk", "label": "Walk out with it"}],
 			func(ch): _short(f, lot, str(ch)), "back")
 		return
 	Economy.spend(int(f.household_id), total, "shop: %s" % Neighborhood.label_of(lot))
-	SysUtil.notify(_line("paid", {"n": nm, "t": total}), "story")
+	SysUtil.notify(_cap(_line("paid", {"n": nm, "t": total})), "story")
 	_own(f, items)
 	_drop(fid, lot)
+	_resume(f)
 
 static func _short(f, lot: String, ch: String) -> void:
 	var fid: int = int(f.id)
@@ -170,11 +193,15 @@ static func _short(f, lot: String, ch: String) -> void:
 			SysUtil.notify(_line("put_back"), "story")
 			if not unpaid(fid, lot).is_empty():
 				pay(f, lot)
+			else:
+				_resume(f)
 		"all":
 			var keep2: Array = (carried.get(fid, []) as Array).filter(func(it): return str(it["lot"]) != lot or str(it["kind"]) == "eaten")
 			carried[fid] = keep2
 			SysUtil.notify(_line("put_back"), "story")
+			_resume(f)
 		_:
+			resume.erase(fid)
 			flagged[fid] = true          # walking off from the till with it: the cashier is looking right at you
 
 static func _own(f, items: Array) -> void:
@@ -225,23 +252,29 @@ static func _exit(f, lot: String) -> void:
 		var busy: float = float(cfg().get("busy_per_customer", 0.06)) * float(Crowd.count(lot))
 		var p: float = float(cfg().get("watch", 0.85)) * clampf(1.0 - busy, 0.2, 1.0) * (0.7 + SkillCheck.level(int(c.id), "perception") * 0.05)
 		seen = visible and (bool(flagged.get(fid, false)) or SysUtil.rng.randf() < p)
+	var tab_only: bool = items.all(func(it): return bool(it.get("tab", false)))
 	if not seen:
-		_steal(f, lot, false)
+		if tab_only:          # task 63: an unnoticed walk-out on a tab is the character's own knowledge, never a shoplifting case
+			SysUtil.notify("You walked out without paying the %d coins." % _total(items), "warn")
+			_drop(fid, lot)
+		else:
+			_steal(f, lot, false)
 		return
 	var nm: String = _nm(c)
-	var tab_only: bool = items.all(func(it): return bool(it.get("tab", false)) or str(it["kind"]) == "eaten")
-	var line: String = Sexes.fill(_line("ask_tab" if tab_only else "ask", {"n": nm}), int(c.id))
+	var no_back: bool = items.all(func(it): return bool(it.get("tab", false)) or str(it["kind"]) == "eaten")          # nothing left to put back
+	var line: String = Sexes.fill(_line("ask_tab" if no_back else "ask", {"n": nm}), int(c.id))
 	SysUtil.notify(line, "bad")
+	_keep_orders(f)
 	f.cancel_current("stopped at the door")
 	f.clear_queue()
 	asking[fid] = lot          # still held until the answer
 	JusticePlayer.ask(fid, "At the door", line,
-		([{"id": "pay", "label": "Pay"}] + ([] if tab_only else [{"id": "back", "label": "Put it back"}]) + [{"id": "lie", "label": "Say you already paid"}, {"id": "walk", "label": "Keep walking"}, {"id": "run", "label": "Run"}]),
+		([{"id": "pay", "label": "Pay"}] + ([] if no_back else [{"id": "back", "label": "Put it back"}]) + [{"id": "lie", "label": "Say you already paid"}, {"id": "walk", "label": "Keep walking"}, {"id": "run", "label": "Run"}]),
 		func(ch): _answer(f, lot, c, str(ch)), "pay")
 
 static func _answer(f, lot: String, c, ch: String) -> void:
 	var fid: int = int(f.id)
-	var nm: String = _nm(c) if c != null else "The cashier"
+	var nm: String = _nm(c) if c != null else "the cashier"
 	asking.erase(fid)
 	match ch:
 		"pay":
@@ -249,21 +282,49 @@ static func _answer(f, lot: String, c, ch: String) -> void:
 		"back":
 			_drop(fid, lot)
 			SysUtil.notify(_line("put_back"), "story")
+			_resume(f)
 		"lie":
 			var r: Dictionary = SkillCheck.attempt(fid, "lie", {"opponent": int(c.id)} if c != null else {})
 			if bool(r["ok"]):
-				SysUtil.notify(_line("lie_ok", {"n": nm}), "story")
+				SysUtil.notify(_cap(_line("lie_ok", {"n": nm})), "story")
 				_steal(f, lot, false)
+				_resume(f)
 			else:
-				SysUtil.notify(_line("lie_fail", {"n": nm}), "bad")
+				SysUtil.notify(_cap(_line("lie_fail", {"n": nm})), "bad")
 				_steal(f, lot, true)
+				resume.erase(fid)
 		_:
-			SysUtil.notify(_line("shout", {"n": nm}), "bad")
+			resume.erase(fid)
+			SysUtil.notify(_cap(_line("shout", {"n": nm})), "bad")
 			_steal(f, lot, true, ch == "run")
 			if ch == "run":
 				var away: Interaction = Interaction.create_goto(f, NeighborhoodLots.street_tile(lot) + Vector2i(0, 8), true, 0)
 				if away != null:
 					f.enqueue(away)
+
+## Task 63: the walk (or whatever else the player ordered) the cashier interrupted, kept so it carries on after the answer.
+static func _keep_orders(f) -> void:
+	var keep: Array = []
+	var cur: Interaction = f.current
+	if cur != null and cur.player:
+		var again: Interaction = Interaction.create(cur.def_id, f, cur.target_id, true)
+		if again != null:
+			again.def = cur.def
+			again.params = cur.params.duplicate()
+			again.goto_tile = cur.goto_tile
+			again.goto_level = cur.goto_level
+			keep.append(again)
+	for q in f.queue:
+		if (q as Interaction).player:
+			keep.append(q)
+	if not keep.is_empty():
+		resume[int(f.id)] = keep
+
+static func _resume(f) -> void:
+	for ir in resume.get(int(f.id), []):
+		(ir as Interaction).state = "queued"
+		f.enqueue(ir)
+	resume.erase(int(f.id))
 
 ## The shop's real security (CrimeSecurity business profile): camera footage of the exit, and a guard on post who is awake.
 static func security(lot: String) -> Dictionary:

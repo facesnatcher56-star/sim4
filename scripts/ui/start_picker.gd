@@ -118,7 +118,7 @@ func _build_home_state(root: VBoxContainer) -> void:
 	var hr := HBoxContainer.new()
 	root.add_child(hr)
 	var hl := UIU.make_label("Home", 15)
-	hl.tooltip_text = "Start with bare walls and extra coins to furnish it yourself, or move into a furnished home. In co-op the host's choice applies."
+	hl.tooltip_text = "Start with bare walls and furnish it yourself as you earn, or move into a furnished home. In co-op the host's choice applies."
 	hr.add_child(hl)
 	var grp := ButtonGroup.new()
 	for hid in StartHome.ids():
@@ -262,8 +262,7 @@ func _refresh() -> void:
 	var names: Array = []
 	for fd in household.get("folk", []):
 		names.append(str(fd["name"]))
-	var extra: String = ("  +  %s to furnish" % ScenarioCard.coins_text(StartHome.bonus(start_id))) if home_state == "empty" else ""
-	summary.text = "" if custom else "%s  -  %s" % [", ".join(names), ScenarioCard.coins_text(funds())] + extra
+	summary.text = "" if custom else "%s  -  %s" % [", ".join(names), ScenarioCard.coins_text(funds())] + ("  (bare studio)" if home_state == "empty" else "")
 
 func _open_creator(with_home: bool) -> void:
 	var custom: bool = bool(Scenario.def(selected_id).get("custom", false))

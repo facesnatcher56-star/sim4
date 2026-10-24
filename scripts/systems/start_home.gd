@@ -3,7 +3,6 @@ extends RefCounted
 ## New-game home state (task 32d, data/start_home.json): 'empty' (default) or 'furnished'.
 ##   StartHome.default_id() / ids() / option(id)    the choices shown on the New Game screen
 ##   StartHome.apply(w, id, start_id) -> int         after the lot is built: strips the home of furniture when `id` == empty (returns objects removed)
-##   StartHome.bonus(start_id)                       starter coins on top of the scenario's funds, by home size
 ##   StartHome.next_basic(hid) -> Dictionary         the first basic the household still lacks {id, text} or {} when all are bought
 ##   StartHome.is_bare(hid)                          the household owns no bed at all (the 'empty start' state)
 ## Pure function of the choice and the world; the host's choice is part of the saved world, so co-op clients see the same home.
@@ -28,10 +27,6 @@ static func option(id: String) -> Dictionary:
 
 static func normalize(id: String) -> String:
 	return id if id in ids() else default_id()
-
-static func bonus(start_id: String) -> int:
-	var c: Dictionary = cfg()
-	return int((c.get("bonus_by_size", {}) as Dictionary).get(start_id, c.get("bonus_default", 2000)))
 
 static func _keeps(def_id: String) -> bool:
 	var c: Dictionary = cfg()

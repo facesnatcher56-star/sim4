@@ -14,7 +14,7 @@
       {"prop": "book", "tags": ["read"], "clips": ["Read", "Sit_Read"]},
       {"prop": "gamepad", "ids": ["play_computer", "play_video_games", "play_console"], "tags": ["game"], "clips": ["Type", "Sit_Type", "Sit_Watch", "Sit_Idle", "Idle"]},
       {"prop": "phone", "tags": ["phone", "call", "text"], "clips": ["Phone_Call", "Phone_Text", "Sit_Phone_Call", "Sit_Phone_Text"]},
-      {"prop": "phone", "ids": ["call_police", "call_firefighters", "order_groceries", "call_exterminator", "call_gas_company", "call_handyperson", "call_plumber", "call_repairers"], "clips": ["Phone_Call", "Phone_Text", "Sit_Phone_Call", "Sit_Phone_Text"]},
+      {"prop": "phone", "ids": ["phone_scroll", "phone_music", "call_police", "call_firefighters", "order_groceries", "call_exterminator", "call_gas_company", "call_handyperson", "call_plumber", "call_repairers"], "clips": ["Phone_Call", "Phone_Text", "Sit_Phone_Call", "Sit_Phone_Text"]},
       {"prop": "brush", "ids": ["paint_canvas", "paint_masterpiece"], "clips": ["Paint"]},
       {"prop": "mic", "ids": ["karaoke", "perform_on_stage", "serenade"], "clips": ["Sing"]},
       {"prop": "guitar", "ids": ["play_guitar", "practice_guitar"], "clips": ["Strum"]},

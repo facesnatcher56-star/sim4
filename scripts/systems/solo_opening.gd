@@ -238,6 +238,9 @@ static func on_minute() -> void:
 	var day: int = int(checkin["day"])
 	var hrs: Array = checkin["hours"]
 	var h: float = SysUtil.hour_f()
+	if f != null and SysUtil.day() == day and h >= 8.0 and h < float(hrs[1]) and int(checkin.get("nudged", -1)) != day and str(checkin.get("kind", "")) != "old_boss":
+		checkin["nudged"] = day          # task 63: a morning reminder on the day
+		SysUtil.notify("Probation check-in today at the %s, %d:00-%d:00." % [Neighborhood.label_of(str(checkin["lot"])), int(hrs[0]), int(hrs[1])], "story")
 	if f != null and SysUtil.day() == day and h >= float(hrs[0]) and h < float(hrs[1]) and NeighborhoodLots.lot_at(f.tile) == str(checkin["lot"]):
 		CalendarBook.appts = CalendarBook.appts.filter(func(a): return str(a["kind"]) != "probation")
 		if str(checkin.get("kind", "")) == "old_boss":
@@ -267,7 +270,7 @@ static func on_minute() -> void:
 		var next: int = SysUtil.day() + int(checkin.get("every", 7))          # the first miss: a warning and a new date
 		checkin["day"] = next
 		CalendarBook.add(Pawn.of(), next, float(hrs[0]), str(checkin["lot"]), "Probation check-in, %d:00-%d:00" % [int(hrs[0]), int(hrs[1])], "probation")
-		SysUtil.notify(_fill(str(checkin.get("warning", checkin["missed"])), {"when": "%s, %d:00-%d:00" % [Seasons.weekday_long(next), int(hrs[0]), int(hrs[1])]}), "warn")
+		SysUtil.notify(_fill(str(checkin.get("warning", checkin["missed"])), {"when": "next %s, %d:00-%d:00" % [Seasons.weekday_long(next), int(hrs[0]), int(hrs[1])]}), "warn")          # task 63: not "Thursday" again on a Thursday
 
 ## The second missed check-in: the probation office passes it to the police, a probation violation case against the pawn (arrest, charge, trial).
 static func _violation(pid: int) -> void:

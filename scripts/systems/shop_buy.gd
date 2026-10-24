@@ -62,6 +62,7 @@ static func buy(hid: int, folk_id: int, sid: String, iid: String, qty: int = 1, 
 		SysUtil.notify("Ordered %s. It will be delivered tomorrow." % label, "info")
 	else:
 		receive(hid, sid, iid, qty, folk_id)
+		SysUtil.notify("Bought: %s." % (label.to_lower() if qty == 1 else "%d x %s" % [qty, label.to_lower()]), "info")          # task 63: a line for every purchase
 	SysUtil.game_event("shop_bought", {"household_id": hid, "shop": sid, "item": iid, "qty": qty, "paid": total, "online": online})
 	return {"ok": true, "reason": "", "paid": total}
 

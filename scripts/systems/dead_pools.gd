@@ -29,7 +29,7 @@ static func purge(id: int) -> void:
 		RelationshipService.gossip_items[holder] = kept
 	RelationshipService.affairs = RelationshipService.affairs.filter(func(a): return int(a.get("cheater", -1)) != id and int(a.get("other", -1)) != id and int(a.get("victim", -1)) != id)
 	for inv in Story.invites:
-		if str(inv["state"]) == "open" and (int(inv["townie_id"]) == id or int(inv["folk_id"]) == id):
+		if str(inv["state"]) in ["open", "later"] and (int(inv["townie_id"]) == id or int(inv["folk_id"]) == id):
 			inv["state"] = "expired"
 	for sit in Story.situations:
 		(sit["guest_ids"] as Array).erase(id)

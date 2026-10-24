@@ -117,7 +117,8 @@ static func on_returned(f, _rec: Dictionary) -> void:
 	f.remove_buff("sick")
 	Health.on_discharged(f)
 	var paid: int = charge(int(p.get("hid", f.household_id)), int(p["bill"]), str(f.name))
-	SysUtil.notify("%s is home from hospital. The bill was %d coins." % [f.name, paid] if paid > 0 else "%s is home from hospital." % f.name, "info")
+	if SysUtil.is_resident(f) or SysUtil.residents().any(func(r): return IncidentSubject.knows_well(int(r.id), int(f.id))):          # task 63: not for strangers
+		SysUtil.notify("%s is home from hospital. The bill was %d coins." % [f.name, paid] if paid > 0 else "%s is home from hospital." % f.name, "info")
 	SysUtil.game_event("discharged", {"folk_id": int(f.id), "bill": paid})
 
 ## Pay `amount` (minus insurance) now, or leave an ordinary bill when the household cannot afford it. Returns the net amount.
@@ -127,12 +128,30 @@ static func charge(hid: int, amount: int, who: String = "") -> int:
 		return net
 	if Economy.spend(hid, net, "hospital bill"):
 		return net
+	if SoloHome.active:
+		_plan(hid, net, who)
+		return net
 	var bill: Dictionary = {"id": Economy._seq, "hid": hid, "amount": net, "base": net, "issued": SysUtil.day(), "due": SysUtil.day() + 3,
 		"paid": false, "late": false, "fee": 0, "reason": "hospital"}
 	Economy._seq += 1
 	Economy.bills.append(bill)
 	SysUtil.notify("The hospital bill for %s (%d coins) is waiting to be paid." % [who, net], "bill")
 	return net
+
+## Task 63: a solo pawn who cannot pay gets a payment plan, one ordinary bill a week (data/solo.json "hospital_plan_weeks"), not one lump with late fees.
+static func _plan(hid: int, net: int, who: String) -> void:
+	var weeks: int = maxi(int(SoloCfg.cfg().get("hospital_plan_weeks", 4)), 1)
+	var part: int = ceili(float(net) / float(weeks))
+	var left: int = net
+	for i in weeks:
+		var amt: int = mini(part, left)
+		if amt <= 0:
+			break
+		left -= amt
+		Economy.bills.append({"id": Economy._seq, "hid": hid, "amount": amt, "base": amt, "issued": SysUtil.day(), "due": SysUtil.day() + 3 + 7 * i,
+			"paid": false, "late": false, "fee": 0, "reason": "hospital"})
+		Economy._seq += 1
+	SysUtil.notify("The hospital put %s's bill (%d coins) on a payment plan: %d coins a week for %d weeks." % [who, net, part, weeks], "bill")
 
 # ------------------------------------------------------------------ far townies
 static func on_hour() -> void:

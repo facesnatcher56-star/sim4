@@ -29,13 +29,13 @@
    "pipes_checked": {"label": "Pipes Checked", "mood": {}, "duration_min": 7200, "hidden": true, "thought": "The pipes are in good shape."}
   },
   "interactions": {
-   "fix_leak": {"label": "Stop the Leak", "kind": "super", "target": "object", "objects": ["sink", "toilet", "bathtub", "shower", "washing_machine"], "tags": ["chore", "repair", "skill"],
+   "fix_leak": {"label": "Fix the Leak", "kind": "super", "target": "object", "objects": ["sink", "toilet", "bathtub", "shower", "washing_machine"], "tags": ["chore", "repair", "skill"],
     "duration_min": 25, "posture": "stand", "tests": [{"age_stage_is": ["adult", "elder"]}, {"has_buff": "plumbing_trouble"}], "per_min": {"energy": -0.1, "hygiene": -0.2}, "skill_xp_per_min": {"handiness": 1.0},
     "works_when_broken": true, "on_finish": [{"fire_event": "fix_leak"}], "autonomous": true, "priority": "urgent", "advertises": {"tidy": 4.0}, "thought": "Shut the water off and fix the pipe."},
    "check_pipes": {"label": "Check the Pipes", "kind": "super", "target": "object", "objects": ["sink", "bathtub", "shower"], "tags": ["chore", "repair", "safety"],
     "duration_min": 10, "posture": "stand", "tests": [{"age_stage_is": ["teen", "adult", "elder"]}, {"lacks_buff": "pipes_checked"}], "per_min": {}, "skill_xp_per_min": {"handiness": 0.5},
     "on_finish": [{"add_buff": "pipes_checked"}, {"fire_event": "check_pipes"}], "autonomous": false, "priority": "normal", "advertises": {}, "thought": "Better check these pipes.", "cooldown_min": 2880},
-   "call_plumber": {"label": "Call a Plumber", "kind": "super", "target": "object", "objects": ["mailbox"], "tags": ["repair", "chore"],
+   "call_plumber": {"label": "Call a Plumber", "kind": "super", "target": "object", "objects": ["mailbox", "sink", "toilet", "bathtub", "shower", "washing_machine"], "works_when_broken": true, "tags": ["repair", "chore"],
     "duration_min": 5, "posture": "stand", "tests": [{"age_stage_is": ["teen", "adult", "elder"]}, {"has_buff": "plumbing_trouble"}], "per_min": {}, "on_finish": [{"fire_event": "call_plumber"}],
     "autonomous": false, "priority": "normal", "advertises": {}, "thought": "We need a plumber."},
    "call_handyperson": {"label": "Call a Handyperson", "kind": "super", "target": "object", "objects": ["mailbox"], "tags": ["repair", "chore"],
@@ -50,7 +50,7 @@
   },
   "object_interactions": {
    "mailbox": ["call_plumber", "call_handyperson", "call_exterminator"],
-   "sink": ["fix_leak", "check_pipes"], "toilet": ["fix_leak"], "bathtub": ["fix_leak", "check_pipes"], "shower": ["fix_leak", "check_pipes"], "washing_machine": ["fix_leak"],
+   "sink": ["fix_leak", "call_plumber", "check_pipes"], "toilet": ["fix_leak", "call_plumber"], "bathtub": ["fix_leak", "call_plumber", "check_pipes"], "shower": ["fix_leak", "call_plumber", "check_pipes"], "washing_machine": ["fix_leak", "call_plumber"],
    "trash_bin": ["set_roach_traps"]
   }
  },

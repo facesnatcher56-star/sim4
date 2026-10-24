@@ -1,15 +1,13 @@
 {
   "version": 1,
-  "notes": "New-game home state (task 32d). 'empty' strips the home lot of furniture and appliances (walls, doors, windows, floors, ceiling lights, the mailbox and the yard's pond/garden stay) and adds starter money by home size. Free Play and every scenario can use either. 'furnished' is the old start.",
+  "notes": "New-game home state (task 32d). 'empty' strips the home lot of furniture and appliances (walls, doors, windows, floors, ceiling lights, the mailbox and the yard's pond/garden stay) and adds no money: you start with what the scenario gives (task 63). Free Play and every scenario can use either. 'furnished' is the old start.",
   "default": "empty",
   "options": [
-    {"id": "empty", "label": "Empty home (furnish it yourself)", "desc": "Bare walls and floors plus extra coins for a bed, toilet, shower, fridge, stove and seats. Press B to buy."},
+    {"id": "empty", "label": "Empty home (furnish it yourself)", "desc": "Bare walls and floors, and only the coins in your pocket. Buy a bed, fridge, stove and seats as you earn: press B."},
     {"id": "furnished", "label": "Furnished home", "desc": "Move into a home that already has its furniture."}
   ],
   "keep_tags": ["structure", "door", "window", "ceiling"],
   "keep_defs": ["mailbox", "fishing_spot", "garden_plot", "fire_extinguisher", "toilet", "shower", "sink"],
-  "bonus_by_size": {"small": 1500, "medium": 2000, "classic": 2200, "large": 2500},
-  "bonus_default": 2000,
   "basics": [
     {"id": "bed", "buy": "sofa_bed", "room": "largest", "defs": ["bed", "single_bed", "sofa_bed", "bunk_bed"], "per_folk": true, "text": "Buy a bed so your Folk can sleep properly: press B, open Bedroom, pick a bed and click a spot in the bedroom."},
     {"id": "toilet", "buy": "toilet", "room": "smallest", "defs": ["toilet"], "text": "Next, a toilet: press B, open Bathroom and place a Toilet in the bathroom."},

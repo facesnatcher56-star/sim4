@@ -1,5 +1,5 @@
 {
- "_doc": "Task 61B: applying for a job takes time (read by JobApps). Apply sends an application; the answer comes answer_days later between answer_hours, by phone (a working phone) or by letter at letter_hour the next morning. Some ask for an interview at the workplace (interview.chance, always from interview.from_level, never for small_jobs asked in person: those get a trial shift on the spot). The interview and the answer without one are one SkillCheck act 'interview' (charisma) plus the job's own skill, how the person looks and smells, their mood, their record and the others who applied (weights). A no is one plain line. An offer starts on the job's next work day.",
+ "_doc": "Task 61B: applying for a job takes time (read by JobApps). Apply sends an application; the answer comes answer_days later between answer_hours, by phone (a working phone) or by letter at letter_hour the next morning. Some ask for an interview at the workplace (interview.chance, always from interview.from_level, never for small_jobs asked in person: those get a trial shift on the spot). The interview and the answer without one are one SkillCheck act 'interview' (charisma) plus the job's own skill, how the person looks and smells, their mood, their record and the others who applied (weights). A no is one plain line. An offer starts on the job's next work day. Task 63: the pawn waits at the place until the stated time, then sits with the staff for interview.minutes and hears the answer at the end; nudge_min before, a sleeping pawn's alarm goes off (else a nudge). weights.entry_ease lifts an entry-level (level 1) interview so an average applicant is about an even chance.",
  "answer_days": [
   1,
   2
@@ -18,7 +18,8 @@
    15
   ],
   "late_min": 45,
-  "minutes": 30
+  "minutes": 18,
+  "nudge_min": 60
  },
  "small_jobs": [
   "barista",
@@ -34,11 +35,12 @@
  "weights": {
   "no_interview_base": 0.35,
   "job_skill": 0.04,
-  "hygiene": 0.12,
-  "mood": 0.08,
+  "hygiene": 0.2,
+  "mood": 0.12,
   "record": -0.22,
   "hiring_bonus": 0.05,
-  "per_applicant": -0.05
+  "per_applicant": -0.03,
+  "entry_ease": 0.38
  },
  "lines": {
   "sent": [

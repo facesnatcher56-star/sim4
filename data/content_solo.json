@@ -1,6 +1,8 @@
 {
   "_doc": "One-character play content (merged by SoloContent): the bottom of the ladder. Self actions for the pawn only, ordered from the Myself menu. Numbers that may be tuned live in data/solo.json.",
   "interactions": {
+    "phone_scroll": {"label": "Scroll on Your Phone", "kind": "super", "target": "self", "tags": ["fun", "phone"], "duration_min": 30, "posture": "stand", "tests": [{"has_phone": true}, {"stat_below": ["fun", 90]}], "per_min": {"fun": 0.4, "social": 0.04}, "on_finish": [], "autonomous": true, "player_menu": true, "priority": "normal", "advertises": {"fun": 2.0}, "thought": "Just one more video.", "_doc": "Task 63: free things to do in a bare studio."},
+    "phone_music": {"label": "Listen to Music on Your Phone", "kind": "super", "target": "self", "tags": ["fun", "music", "phone"], "duration_min": 30, "posture": "stand", "tests": [{"has_phone": true}, {"stat_below": ["fun", 90]}], "per_min": {"fun": 0.3, "comfort": 0.05}, "on_finish": [], "autonomous": true, "player_menu": true, "priority": "normal", "advertises": {"fun": 1.6}, "thought": "This one's a good song."},
     "wait_here": {"label": "Wait Around", "kind": "super", "target": "self", "tags": ["rest"], "duration_min": 10, "posture": "stand", "tests": [], "per_min": {}, "on_finish": [], "autonomous": false, "player_menu": true, "priority": "normal", "thought": "Just waiting."},
   "sleep_rough": {
       "label": "Sleep Rough",

@@ -118,6 +118,9 @@ static func check_one(c: Variant, ctx: Dictionary) -> bool:
 			"shelter_night":                   # a shelter night is still free this week
 				if SoloShelter.nights_left() <= 0:
 					return false
+			"has_phone":                       # task 63: a phone in the pocket that works (not broken, lost or stolen; a cut-off line still plays music)
+				if folk == null or (not PhoneOwn.tracked(int(folk.id)) or PhoneOwn.status(int(folk.id)) == "ok") != bool(v):
+					return false
 			"is_pawn":                         # one-character play: the player's character (true) or an ordinary NPC (false)
 				if folk == null or Pawn.is_pawn(folk) != bool(v):
 					return false

@@ -21,14 +21,26 @@ static func totals(folk) -> Dictionary:
 
 static func compute(folk) -> Dictionary:
 	var t := totals(folk)
+	var lift: float = need_lift(folk)
 	var best := ""
 	var best_v := 0.0
 	for m in MOODS:   # fixed order breaks ties deterministically
-		var v: float = float(t.get(m, 0.0))
+		var v: float = float(t.get(m, 0.0)) * (lift if POSITIVE.has(m) else 1.0)
 		if v > best_v:
 			best_v = v
 			best = m
 	return {"mood": "neutral" if best == "" else best, "intensity": intensity_for(best_v)}
+
+## Task 63: mood follows the needs. Every need far below zero (under -50) takes a third off the pleasant moods, so a good day out does not
+## read "Happy" at -100 fun; the unpleasant moods are unchanged.
+static func need_lift(folk) -> float:
+	var low: int = 0
+	if not ("needs" in folk):
+		return 1.0
+	for nid in folk.needs:
+		if (folk.needs[nid] as Stat).value < -50.0:
+			low += 1
+	return maxf(1.0 - 0.34 * float(low), 0.2)
 
 static func intensity_for(total: float) -> int:
 	if total >= 6.0:

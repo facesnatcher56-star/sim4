@@ -50,6 +50,8 @@ static func describe_tests(def: Dictionary, folk = null, target = null) -> Strin
 	if folk != null:
 		ctx = {"folk": folk, "object": target if not (target is Folk) else null, "target": target if target is Folk else null}
 		if target != null and not (target is Folk) and bool(WorldIface.state_get(target, "broken", false)) and not bool(def.get("works_when_broken", false)):
+			if folk != null and int(ChaosState.leak_of(int(folk.household_id)).get("obj", -1)) == int(UIU.prop(target, "id", -2)):
+				return "It's leaking. It needs fixing first"          # task 63: Fix the Leak or Call a Plumber, on this same menu
 			return "Broken. Repair it first"
 		var only: Array = def.get("objects", [])
 		if target != null and not (target is Folk) and not only.is_empty() and not only.has(str(UIU.prop(target, "def_id", ""))):
@@ -75,6 +77,8 @@ static func describe_tests(def: Dictionary, folk = null, target = null) -> Strin
 				"has_licence": parts.append("needs a driving licence (the test is at City Hall)")
 				"election_open": parts.append("No election on right now")
 				"has_guests": parts.append("You don't know anyone to invite yet")
+				"at_home_lot": parts.append("Only at your own home")
+				"has_phone": parts.append("Your phone isn't working")
 				"not": parts.append("Not at your own home" if (v is Dictionary and (v as Dictionary).has("at_home_lot")) else "not possible right now")
 				"circadian": parts.append("Not time to sleep yet")
 				"no_free_bed": parts.append("You have a bed to use")
@@ -140,7 +144,7 @@ static func self_entries(folk) -> Array:
 		if d.has("_solo") and (d.get("tests", []) as Array).has({"is_pawn": false}):
 			continue          # not for the pawn at all (the welcome basket)
 		ids.append(id)
-	return build_entries(folk, ids, table, make_checker(folk, null)) + Habits.self_entries(folk)          # task 55: the smoker's cigarette
+	return build_entries(folk, ids, table, make_checker(folk, null)) + Habits.self_entries(folk) + PocketActs.self_entries(folk)          # task 55: the smoker's cigarette; 63: On you, draw a weapon
 
 ## target_kind: "object" | "folk"
 static func entries_for(folk, target_kind: String, target_id: int) -> Array:
