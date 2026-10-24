@@ -72,7 +72,8 @@
    "You call it in and stay with {a} until the ambulance comes."
   ],
   "helped_up": [
-   "You help {a} sit up. They're shaken, but talking."
+   "You help {a} sit up. They're shaken. Someone walks them home to rest.",
+   "You stay with {a} until they can stand. They go home, grey in the face."
   ],
   "arrest": [
    "{b}, a police officer, stops {a}. \"You need to come with me.\" {a} protests, loudly.",
@@ -103,9 +104,13 @@
   ],
   "party_bear": [
    "You put up with it. It quietens down eventually."
+  ],
+  "someone_called": [
+   "Behind you, someone is already on the phone for an ambulance."
   ]
  },
  "arrest_progress": 0.5,
  "party_min": 150,
- "again_days": 3
+ "again_days": 3,
+ "rest_days": 2
 }

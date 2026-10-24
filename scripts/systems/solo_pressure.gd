@@ -2,7 +2,8 @@ class_name SoloPressure
 extends RefCounted
 ## The pressure cycle (R14.5): a pawn who is broke, jobless or behind on a bill and lives in a rough district gets a CREW OFFER, never a command.
 ## First offer within `first_offer_days` of the trouble starting (Easy 5, Normal 3, Hard 2), then one every `repeat_days` while it lasts: a lookout
-## (2 h, 40 coins), a run (1 h, 55) or a corner shift (4 h, 90) against legal work that pays 10 to 20 an hour but starts slowly or far away.
+## (2 h, 40 coins), a run (1 h, 55) or a corner shift (4 h, 90). Task 66c: a yes is ONE job, that night at that spot (job); it happens only if the
+## pawn turns up, and skipping it is remembered. After join_after jobs the crew asks the pawn in.
 ## Accepting costs HEAT (police attention), DUES (3 a day once in), a RECORD if caught (blocks hiring until it is expunged after clean living) and
 ## the crew's rivals. Refusing keeps you clean and poorer; the third refusal brings a scare, never a death. Leaving costs a payoff.
 ## Every offer waits for the player's answer (JusticePlayer.ask: Esc = no). Numbers: data/solo.json "pressure".
@@ -17,6 +18,8 @@ static var last_offer: int = -99
 static var clean_days: int = 0            # days without a crew job (the record is expunged after expunge days of clean living)
 static var waiting: bool = false          # an offer is on the screen
 static var due: Dictionary = {}           # task 61c: {day, district} an offer is ready; it is made in the evening on the block (on_hour)
+static var job: Dictionary = {}           # task 66c: the job said yes to {offer, at, lot, crew}: it happens only if the pawn is there at that hour
+static var jobs_done: int = 0             # task 66c: after join_after jobs the crew asks the pawn in (a first yes is one job, not membership)
 
 static func reset() -> void:
 	member = false
@@ -28,12 +31,15 @@ static func reset() -> void:
 	last_offer = -99
 	clean_days = 0
 	waiting = false
+	job = {}
+	jobs_done = 0
 
 static func cfg() -> Dictionary:
 	return SoloCfg.sect("pressure")
 
 static func to_dict() -> Dictionary:
-	return {"member": member, "crew": crew_name, "heat": heat, "standing": standing, "refusals": refusals, "since": trouble_since, "last": last_offer, "clean": clean_days}
+	return {"member": member, "crew": crew_name, "heat": heat, "standing": standing, "refusals": refusals, "since": trouble_since, "last": last_offer, "clean": clean_days,
+		"job": job.duplicate(), "jobs_done": jobs_done}
 
 static func from_dict(d: Dictionary) -> void:
 	reset()
@@ -45,6 +51,8 @@ static func from_dict(d: Dictionary) -> void:
 	trouble_since = int(d.get("since", -1))
 	last_offer = int(d.get("last", -99))
 	clean_days = int(d.get("clean", 0))
+	job = (d.get("job", {}) as Dictionary).duplicate()
+	jobs_done = int(d.get("jobs_done", 0))
 
 # ------------------------------------------------------------------ the trouble
 static func in_trouble(f) -> bool:
@@ -100,6 +108,8 @@ static func on_day(day: int) -> void:
 
 ## The evening of a day an offer is ready (17:00 to 21:00), while the pawn is about.
 static func on_hour(h: int) -> void:
+	if not job.is_empty():
+		_job_hour()
 	if due.is_empty() or h < 17 or h > 21 or waiting:
 		return
 	if int(due["day"]) != SysUtil.day():
@@ -149,8 +159,8 @@ static func _offer(f, did: String, day: int) -> void:
 	last_offer = day
 	waiting = true
 	var crew: String = _crew_name(did)
-	var legal: String = "Legal work pays 10 to 20 an hour but it starts slowly or far away."
-	var txt: String = "A man from %s catches you on the block. \"%s: %d minutes, %d coins, tonight.\" He does not ask twice a day, but he asks again. %s" % [crew, str(o["label"]), int(o["minutes"]), int(o["pay"]), legal]
+	var at_h: int = maxi(int(cfg().get("job_hour", 21)), floori(SysUtil.hour_f()) + 1)
+	var txt: String = "A man from %s catches you on the block. \"%s. Tonight, %d:00, right here. %d minutes, %d coins.\"" % [crew, str(o["label"]), at_h, int(o["minutes"]), int(o["pay"])]          # task 66c: what he wants and what he pays, nothing else
 	JusticePlayer.ask(int(f.id), "An offer on the block", txt, [{"id": "yes", "label": "Take it (%d coins)" % int(o["pay"])}, {"id": "no", "label": "Not interested"}],
 		_answer.bind(int(f.id), str(o["id"]), crew), "no")
 	if not JusticePlayer.ask_fn.is_valid():
@@ -189,13 +199,45 @@ static func _answer(choice, pid: int, offer_id: String, crew: String) -> void:
 			o = x
 	if o.is_empty():
 		return
-	var joined: bool = not member
-	member = true
-	crew_name = crew
 	refusals = 0
+	var at_h: int = maxi(int(cfg().get("job_hour", 21)), floori(SysUtil.hour_f()) + 1)
+	var lot: String = Neighborhood.lot_of(f)
+	job = {"offer": offer_id, "at": (SysUtil.day() - 1) * 1440 + at_h * 60, "lot": lot, "crew": crew}          # one job, here, tonight: not membership
+	CalendarBook.add(pid, SysUtil.day(), float(at_h), lot, "%s, %d:00" % [str(o["label"]), at_h], "crew")
+	SysUtil.notify("\"%d:00. Don't be late.\" He's gone." % at_h, "story")
+
+## The hour of the job: there and free, it happens (pay, heat, the chance of the police); not there, it was skipped, and the crew remembers.
+static func _job_hour() -> void:
+	var now: int = SysUtil.now()
+	if now < int(job["at"]):
+		return
+	var f = SysUtil.folk(Pawn.of())
+	var o: Dictionary = {}
+	for x in cfg().get("offers", []):
+		if str(x["id"]) == str(job["offer"]):
+			o = x
+	var crew: String = str(job["crew"])
+	var lot: String = str(job["lot"])
+	CalendarBook.appts = CalendarBook.appts.filter(func(a): return str(a["kind"]) != "crew")
+	job = {}
+	if f == null or o.is_empty():
+		return
+	if Neighborhood.lot_of(f) != lot or SysUtil.is_away(f) or CrimePlace.is_asleep(f):
+		standing -= 2.0
+		refusals += 1
+		f.add_buff("eviction_scare")
+		SysUtil.notify("They waited at %s. You never came. Word gets round the block." % Neighborhood.label_of(lot), "warn")
+		return
+	jobs_done += 1
 	_do_job(f, o)
-	if joined:
-		SysUtil.notify("You are in with %s. Dues are %d coins a day." % [crew, int(cfg().get("dues_per_day", 3))], "warn")
+	if not member and jobs_done >= int(cfg().get("join_after", 3)):
+		JusticePlayer.ask(int(f.id), "An offer on the block", "\"You've done all right by us. Want in properly? %d a day, and the work comes to you.\"" % int(cfg().get("dues_per_day", 3)),
+			[{"id": "yes", "label": "Join %s" % crew}, {"id": "no", "label": "Keep it at odd jobs"}],
+			func(ch):
+				if str(ch) == "yes":
+					SoloPressure.member = true
+					SoloPressure.crew_name = crew
+					SysUtil.notify("You are in with %s. Dues are %d coins a day." % [crew, int(cfg().get("dues_per_day", 3))], "warn"), "no")
 
 ## Run one job at once (pay, heat, a chance of the police) and send the pawn out for its length.
 static func _do_job(f, o: Dictionary) -> void:

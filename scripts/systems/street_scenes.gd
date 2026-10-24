@@ -9,6 +9,7 @@ extends RefCounted
 
 const TITLE := "Out here"
 
+static var last_people: Array = []     # the townies of the last scene staged (Involve counts them as in a pull)
 static var _used: Dictionary = {}       # "kind|a|b" -> day: one scene per thread a day
 static var pending: Dictionary = {}     # a scene on its way: {f, s, v, opts, text, since} until its people are in view of the pawn
 
@@ -110,6 +111,14 @@ static func _party_answer(f, nb: int, lot: String, v: Dictionary, ch: String) ->
 		_:
 			SysUtil.notify(_line("party_bear", v), "story")
 
+## A townie who has gone home to rest: they leave the lot (walking out of the gate) and are out of town life for `days`.
+static func _laid_up(tid: int, days: int) -> void:
+	var p = SysUtil.folk(tid)
+	if p != null and p.has_meta("crowd"):
+		Crowd.start_leaving(p)
+	if Story.townies.has(tid):
+		Story.townies[tid]["missing_until"] = SysUtil.day() + days
+
 ## A free townie (alive, not held, not in hospital) who is not on the map somewhere else.
 ## The key a scene is remembered under (the same one cause() checks with _recent), whether it played in front of the pawn or off-screen.
 static func key_of(s: Dictionary) -> String:
@@ -134,8 +143,10 @@ static func _free(tid: int) -> bool:
 	if tid < 0 or not Story.townies.has(tid):
 		return false
 	var t: Dictionary = Story.townies[tid]
-	if not bool(t["alive"]) or JusticeState.inmates.has(tid) or Hospital.is_in(tid) or Story.stage_of(t) not in ["adult", "elder", "teen"]:
+	if not bool(t["alive"]) or JusticeState.inmates.has(tid) or Hospital.is_in(tid) or Story.stage_of(t) not in ["adult", "elder", "teen"] or int(t.get("missing_until", 0)) > SysUtil.day():          # (resting at home after a collapse too)
 		return false
+	if not Involve.fresh(tid) or not TownLife.rested(tid):
+		return false          # task 66c: just in a pull, or just in something in town: someone else this time
 	var on = SysUtil.folk(tid)
 	return on == null or on.has_meta("crowd")
 
@@ -150,7 +161,7 @@ static func cause(kind: String, f, lot: String) -> Dictionary:
 				for j in range(i + 1, here.size()):
 					var x: int = int(here[i].get_meta("townie_id", -1))
 					var y: int = int(here[j].get_meta("townie_id", -1))
-					if x >= 0 and y >= 0 and (RelationshipService.value(x, y, "friendship") <= -15.0 or RelationshipService.value(x, y, "tension") >= 30.0) and not _recent("row|%d|%d" % [x, y]):
+					if x >= 0 and y >= 0 and _free(x) and _free(y) and (RelationshipService.value(x, y, "friendship") <= -15.0 or RelationshipService.value(x, y, "tension") >= 30.0) and not _recent("row|%d|%d" % [x, y]):
 						return {"kind": "row", "a": x, "b": y}
 		"affair":
 			for af in RelationshipService.affairs:
@@ -192,6 +203,7 @@ static func cause(kind: String, f, lot: String) -> Dictionary:
 
 # ------------------------------------------------------------------ on stage
 static func stage(f, lot: String, s: Dictionary) -> void:
+	last_people = [int(s["a"]), int(s.get("b", -1)), int(s.get("c", -1))].filter(func(x): return x >= 0)
 	var kind: String = str(s["kind"])
 	_used[key_of(s)] = SysUtil.day()
 	var people: Array = []
@@ -323,6 +335,7 @@ static func _choose(f, s: Dictionary, v: Dictionary, ch: String) -> void:
 			SysUtil.notify(_line("helped_up", v), "story")
 			_friend(pid, a, "helped")
 			RelationshipService.add_history(pid, a, "stepped_in", 0.5, pid)
+			_laid_up(a, int(cfg().get("rest_days", 2)))          # they go home to rest: out of things for a while
 		"vouch":
 			SysUtil.notify(_line("vouch", v), "story")
 			_friend(pid, a, "helped")
@@ -340,3 +353,9 @@ static func _choose(f, s: Dictionary, v: Dictionary, ch: String) -> void:
 			CrimePetty.commit("vandalism", a, "venue:" + Neighborhood.lot_of(f), {"seen": true, "trace": 0.5})          # a witness on the phone: a real case
 		_:
 			SysUtil.notify(_line("walked", v), "story")
+			if str(s["kind"]) == "collapse":          # somebody else calls it in
+				SysUtil.notify(_line("someone_called", v), "story")
+				var p2 = SysUtil.folk(a)
+				if p2 != null and p2.has_meta("crowd"):
+					Crowd.dismiss(p2)
+				Hospital.admit(a, 2, "collapsed in the street")
