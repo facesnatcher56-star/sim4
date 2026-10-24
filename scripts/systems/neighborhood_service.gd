@@ -182,7 +182,9 @@ static func _meetups() -> void:
 					SysUtil.notify("%s arrived at %s to hang out with %s." % [npc.name, Neighborhood.label_of(lot_id), SysUtil.folk_name(int(m["folk_id"]))], "visit")
 				elif now > int(m["arrive_min"]) + 60:
 					m["state"] = "done"
-					RelationshipService.add_both(int(m["folk_id"]), int(m["townie_id"]), "friendship", -3.0)
+					RelationshipService.add_both(int(m["folk_id"]), int(m["townie_id"]), "friendship", -5.0 if Pawn.is_pawn_id(int(m["folk_id"])) else -3.0)
+					if Pawn.is_pawn_id(int(m["folk_id"])):
+						Involve.stood[int(m["townie_id"])] = true          # task 66b: they bring it up next time
 					SysUtil.notify("%s waited and gave up - nobody came." % Story.name_of(int(m["townie_id"])), "warn")
 			"here":
 				if now >= int(m["end_min"]):

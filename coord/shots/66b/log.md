@@ -1,0 +1,106 @@
+# Task 66b: two game days, solo start on Normal (seed 7171)
+
+Played like a person would: out to the cafe at 9, the park at 12, the market at 15, home at 18, asleep 23:00-07:00; every prompt answered like a decent person.
+
+- Pulls (the director): 14, with stakes: 7
+- Town events off-screen (TownLife, heard of only through people): 10; told as gossip: 4
+- Prompts: 17
+- Longest awake stretch with nothing open: 130 min (ending d1 22:50); the director's own count: 120 min
+- Toasts: 48 over two days ({ "bill": 1, "travel": 16, "relationship": 14, "story": 3, "bad": 1, "warn": 4, "weather": 3, "invite": 2, "visit": 2, "goal": 1, "holiday": 1 })
+
+## Everything, in order
+
+- d1 09:00  toast (bill): A note under the door from Briar Palmer, the landlord: "Rent's due Sunday. 35 coins."
+- d1 09:00  toast (travel): Tristan heads to Moss & Mug Cafe (17 min on foot).
+- d1 09:17  toast (travel): Tristan arrived at Moss & Mug Cafe.
+- d1 09:20  toast (relationship): Tristan met Dov Hobb at Moss & Mug Cafe.
+- d1 09:40  toast (relationship): Tristan met Quentin Rook at Moss & Mug Cafe.
+- d1 10:00  toast (story): A letter from the probation office: check in at the police station on Thursday, 10:00-16:00.
+- **d1 10:00  PULL (stakes): background: bg_ex_con** ()
+- **d1 11:00  PULL (stakes): scene** ()
+- d1 11:15  scene in front of the player: row
+- d1 11:15  asked "Out here": Fletcher and Quentin are shouting at each other outside Moss & Mug Cafe. -> step
+- d1 11:15  toast (bad): Nobody listens. Fletcher turns on you: "Who asked you?"
+- d1 12:00  asked "Left behind": A wallet is lying on the seat where Emeric was sitting. -> return
+- d1 12:00  toast (relationship): You catch Emeric at the door. "My wallet! Thank you!"
+- **d1 12:00  PULL (stakes): wallet** ()
+- d1 12:00  toast (travel): Tristan heads to Willow Green Park (27 min on foot).
+- d1 12:27  toast (travel): Tristan arrived at Willow Green Park.
+- d1 13:20  toast (relationship): Tristan met Gilda Thorn at Willow Green Park.
+- d1 14:00  toast (relationship): Tristan met Beatrix Mallory at Willow Green Park.
+- **d1 14:00  PULL (stakes): scene** ()
+- d1 14:01  scene in front of the player: collapse
+- d1 14:01  asked "Out here": Dov grabs their chest and goes down. -> help
+- d1 14:01  toast (story): You help Dov sit up. They're shaken, but talking.
+- d1 15:00  toast (relationship): Tristan met Mags Wolfe at Willow Green Park.
+- d1 15:00  asked "An offer on the block": A man from the Harbour Crew catches you on the block. "Be a lookout: 120 minutes, 40 coins, tonight." He does not ask twice a day, but he asks again. Legal work pays 10 to 20 an hour but it starts slowly or far away. -> yes
+- d1 15:00  toast (warn): You are in with the Harbour Crew. Dues are 3 coins a day.
+- **d1 15:00  PULL (stakes): temptation: a crew offer** ()
+- d1 15:00  toast (travel): Tristan heads to Greenbarrow Market (15 min on foot).
+- d1 15:14  toast (travel): Tristan arrived at Greenbarrow Market.
+- d1 16:00  toast (weather): It has started to rain.
+- d1 17:00  asked "A favour": Dov catches you: "I'm short 20 for the rent. Any chance?" -> lend
+- d1 17:00  toast (relationship): You hand over 20 coins. Dov looks relieved. "I won't forget this."
+- **d1 17:00  PULL (stakes): favour** ()
+- d1 18:00  asked "Your phone": Your phone buzzes: Dov. "I'm heading to Ironleaf Gym. Come?" -> yes
+- d1 18:00  toast (invite): Dov Hobb will meet Tristan at Ironleaf Gym around 18:45.
+- **d1 18:00  PULL: call** (Dov Hobb)
+- d1 18:00  toast (travel): Tristan heads home (15 min on foot).
+- d1 18:14  toast (travel): Tristan arrived at Home.
+- **d1 19:00  PULL: visit** (Emeric Vance)
+- d1 19:25  asked "At your door": The doorbell rings. -> answer
+- d1 19:25  asked "At your door": Tristan opens the door. Emeric: "Did you hear? Gilda and Briar had a proper shouting match at St. Mary's Hospital." -> in
+- d1 19:46  toast (warn): Dov Hobb waited and gave up - nobody came.
+- d1 19:48  asked "Your guest": Emeric hovers by the bathroom. "Mind if I use your bathroom?" -> yes
+- d1 20:44  toast (visit): The visit is over.
+- d1 21:00  toast (story): No bed yet. The floor it is.
+- d2 00:00  toast (weather): Tomorrow: a chance of a tornado or hail. Check the shutters and know where to take cover.
+- d2 00:01  toast (weather): A cold snap has arrived. Bundle up!
+- d2 09:00  toast (travel): Tristan heads to Moss & Mug Cafe (17 min on foot).
+- d2 09:18  toast (travel): Tristan arrived at Moss & Mug Cafe.
+- d2 09:20  toast (relationship): Tristan met Hale Fox at Moss & Mug Cafe.
+- d2 10:00  asked "Your phone": Hale rings. "Fancy meeting at Willow Green Park in a bit?" -> yes
+- d2 10:00  toast (invite): Hale Fox will meet Tristan at Willow Green Park around 10:45.
+- **d2 10:00  PULL: call** (Hale Fox)
+- d2 11:46  toast (warn): Hale Fox waited and gave up - nobody came.
+- d2 12:00  asked "Out here": Briar leans over from the next seat, unable to keep it in. "Did you hear? Quentin and Fletcher had a proper shouting match at Cedar Court 4." -> talk
+- **d2 12:00  PULL: approach** (Briar Palmer)
+- d2 12:00  toast (travel): Tristan heads to Willow Green Park (27 min on foot).
+- d2 12:29  toast (travel): Tristan arrived at Willow Green Park.
+- d2 13:00  toast (relationship): Tristan met Stanislav Langley at Willow Green Park.
+- d2 13:20  toast (goal): Somebody in this town is glad to see you.
+- d2 13:20  toast (relationship): Tristan now sees Dov Hobb as: Friend
+- d2 13:20  toast (relationship): Dov Hobb now sees Tristan as: Friend
+- d2 13:20  toast (relationship): Tristan met Bernadette Hartwell at Willow Green Park.
+- d2 14:00  asked "A thank-you": Dov finds you. "I never thanked you properly. Let me buy you a coffee?" -> yes
+- d2 14:00  toast (relationship): Coffee with Dov. You talk for a while; it's easy.
+- **d2 14:00  PULL: thanks** (Dov Hobb)
+- d2 15:00  asked "Out here": Stanislav wanders over, keen to tell someone. "I had a few people round last night. Dov came." -> talk
+- **d2 15:00  PULL: approach** (Stanislav Langley)
+- d2 15:00  toast (travel): Tristan heads to Greenbarrow Market (15 min on foot).
+- d2 15:15  toast (travel): Tristan arrived at Greenbarrow Market.
+- d2 15:18  toast (warn): Tristan didn't make it to the bathroom.
+- d2 17:00  asked "A favour": Emeric calls. "Bit awkward... could you lend me 10 coins till next week?" -> lend
+- d2 17:00  toast (relationship): You hand over 10 coins. Emeric looks relieved. "I won't forget this."
+- **d2 17:00  PULL (stakes): favour** ()
+- d2 18:00  toast (travel): Tristan heads home (15 min on foot).
+- d2 18:14  toast (travel): Tristan arrived at Home.
+- **d2 19:00  PULL: visit** (Gilda Thorn)
+- d2 19:25  asked "At your door": Three knocks at the door. -> answer
+- d2 19:25  asked "At your door": Tristan opens the door. Gilda: "Someone was messing with the cars at Elm Court Apartments. They're saying it was Dov." -> in
+- d2 19:42  asked "Your guest": Gilda shifts from foot to foot. "Where's your bathroom?" -> yes
+- d2 21:22  toast (visit): The visit is over.
+- d3 00:00  toast (holiday): Tomorrow: Bloom Festival.
+
+## The town's own events (off-screen)
+
+- day 1: row, Kai Yates / Stanislav Langley at Hollow Oak Library
+- day 1: row, Briar Palmer / Gilda Thorn at Cedar Court 4
+- day 1: theft, Dov Hobb / Mags Wolfe at Fernwood Courthouse
+- day 1: alarm, Dov Hobb at Elm Court Apartments (told)
+- day 1: row, Quentin Rook / Fletcher Archer at Cedar Court 4 (told)
+- day 1: row, Gilda Thorn / Briar Palmer at St. Mary's Hospital (told)
+- day 1: gathering, Emeric Vance / Quentin Rook at Hillcrest Manor
+- day 2: gathering, Dov Hobb / Stanislav Langley at Hillcrest Manor (told)
+- day 2: gathering, Mags Wolfe / Fletcher Archer at Cedar Court 4
+- day 3: gathering, Stanislav Langley / Mags Wolfe at Cedar Court 4

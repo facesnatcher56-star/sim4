@@ -4,9 +4,9 @@ extends SceneTree
 ## own events, the toasts per kind, and the longest awake stretch with nothing open.
 ##   <godot> --headless --path . --script res://tools/alive66_log.gd
 const Kit := preload("res://tests/start_kit.gd")
-const OUT := "res://coord/shots/66/log.md"
+const OUT := "res://coord/shots/66b/log.md"
 const PLAN := {9: "cafe", 12: "park", 15: "market", 18: "home"}
-const LIKE := ["answer", "in", "lend", "go", "comfort", "step", "watch", "yes", "tell", "take", "return", "sorry", "help", "ambulance", "talk"]
+const LIKE := ["answer", "in", "lend", "yes", "go", "comfort", "step", "watch", "yes", "tell", "take", "return", "sorry", "help", "ambulance", "talk"]
 var _done := false
 var lines: Array = []
 var toasts: Dictionary = {}
@@ -19,13 +19,15 @@ func _process(_d: float) -> bool:
 	TestFixture.isolate_user_files()
 	var folk: Array = Kit.new_game("solo", "normal", {}, -1, {"world_seed": 7171, "home_state": "empty"})
 	var f: Folk = folk[0]
-	var t0: int = SysUtil.now()
+	var spec: Dictionary = (Creation.picks.get(int(f.id), Creation.empty_spec()) as Dictionary)
+	spec["background"] = "ex_con"          # a real background, so its first-week moment can land (the default "nobody" has none)
+	Creation.picks[int(f.id)] = spec
 	SimEnv.events().notification.connect(func(text, kind):
 		toasts[kind] = int(toasts.get(kind, 0)) + 1
 		lines.append("- %s  toast (%s): %s" % [_t(), kind, text]))
 	SimEnv.events().game_event.connect(func(n, p):
 		if n == "involve_pull":
-			lines.append("- **%s  PULL: %s** (%s)" % [_t(), str(p.get("what", "")), ", ".join(Involve.log[-1]["people"]) if not Involve.log.is_empty() else ""])
+			lines.append("- **%s  PULL%s: %s** (%s)" % [_t(), " (stakes)" if bool(p.get("stakes", false)) else "", str(p.get("what", "")), ", ".join(Involve.log[-1]["people"]) if not Involve.log.is_empty() else ""])
 		elif n == "street_scene":
 			lines.append("- %s  scene in front of the player: %s" % [_t(), str(p.get("kind", ""))]))
 	JusticePlayer.ask_fn = func(pid, title, text, options, cb, def):
@@ -63,9 +65,9 @@ func _process(_d: float) -> bool:
 					longest_at = "ending %s" % _t()
 			else:
 				idle_now = -1
-	var out: Array = ["# Task 66: two game days, solo start on Normal (seed 7171)", "",
+	var out: Array = ["# Task 66b: two game days, solo start on Normal (seed 7171)", "",
 		"Played like a person would: out to the cafe at 9, the park at 12, the market at 15, home at 18, asleep 23:00-07:00; every prompt answered like a decent person.", "",
-		"- Pulls (the director): %d" % Involve.log.size(),
+		"- Pulls (the director): %d, with stakes: %d" % [Involve.log.size(), Involve.log.filter(func(e): return bool(e.get("stakes", false))).size()],
 		"- Town events off-screen (TownLife, heard of only through people): %d; told as gossip: %d" % [TownLife.recent.size(), TownLife.recent.filter(func(e): return bool(e["told"])).size()],
 		"- Prompts: %d" % prompts.size(),
 		"- Longest awake stretch with nothing open: %d min (%s); the director's own count: %d min" % [longest, longest_at, Involve.longest_idle],
@@ -76,7 +78,7 @@ func _process(_d: float) -> bool:
 	for e in TownLife.recent:
 		off.append("- day %d: %s, %s%s at %s%s" % [int(e["day"]), str(e["kind"]), Story.name_of(int(e["a"])), (" / " + Story.name_of(int(e["b"]))) if int(e["b"]) >= 0 else "", Neighborhood.label_of(str(e["lot"])), " (told)" if bool(e["told"]) else ""])
 	out.append_array(off)
-	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://coord/shots/66"))
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://coord/shots/66b"))
 	var fa := FileAccess.open(OUT, FileAccess.WRITE)
 	fa.store_string("\n".join(out) + "\n")
 	fa.close()

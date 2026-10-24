@@ -100,7 +100,6 @@ static func on_hour(h: int) -> void:
 ## to early in the game: the first one once a day has passed, its follow-up some days after the first was said. [] = none waiting.
 static func beats(fid: int) -> Array:
 	var out: Array = []
-	var d: int = SysUtil.day() - start_day
 	var moments: Dictionary = cfg().get("moments", {})
 	var keys: Array = [str((Creation.picks.get(fid, {}) as Dictionary).get("background", ""))] + ((Creation.picks.get(fid, {}) as Dictionary).get("flaws", []) as Array)
 	for k in keys:
@@ -108,8 +107,7 @@ static func beats(fid: int) -> Array:
 		if m.is_empty():
 			continue
 		if not said.has("bg_" + str(k)):
-			if d >= mini(int(m.get("day", 1)), 1):
-				out.append("bg_" + str(k))
+			out.append("bg_" + str(k))          # the first moment may come from the first day
 		elif not (m.get("follow", {}) as Dictionary).is_empty() and not said.has("bgf_" + str(k)) and SysUtil.day() - int(said["bg_" + str(k)]) >= 3:
 			out.append("bgf_" + str(k))
 	return out

@@ -16,6 +16,8 @@ static var _thanked: Dictionary = {}       # townie id -> true
 static var _asked: Dictionary = {}         # "questions|tid" -> true
 static var _kind_at: Dictionary = {}       # kind -> minute it last landed (cooldown_h per kind)
 static var _person_at: Dictionary = {}     # townie id -> minute they were last in a pull (person_gap_h)
+static var _visited: Dictionary = {}       # townie id -> minute of their last visit (visit_gap_h)
+static var stood: Dictionary = {}          # townie id -> true: the pawn said yes to meeting them and never came (they bring it up)
 
 static func reset() -> void:
 	pressure = 0.0
@@ -27,6 +29,8 @@ static func reset() -> void:
 	_asked = {}
 	_kind_at = {}
 	_person_at = {}
+	_visited = {}
+	stood = {}
 
 static func cfg() -> Dictionary:
 	return SysUtil.table("director")
@@ -43,16 +47,16 @@ static func fresh(tid: int) -> bool:
 	return SysUtil.now() - int(_person_at.get(tid, -100000)) >= int(float(cfg().get("person_gap_h", 20)) * 60.0)
 
 ## Something reached the player (a pull, or a town event that happened in front of them): the pressure resets.
-static func landed(what: String, people: Array = []) -> void:
+static func landed(what: String, people: Array = [], stakes: bool = false) -> void:
 	pressure = 0.0
 	last_pull = SysUtil.now()
 	for p in people:
 		if int(p) >= 0:
 			_person_at[int(p)] = SysUtil.now()
-	log.append({"min": SysUtil.now(), "what": what, "people": people.filter(func(p): return int(p) >= 0).map(func(p): return Story.name_of(int(p)))})
+	log.append({"min": SysUtil.now(), "what": what, "stakes": stakes, "people": people.filter(func(p): return int(p) >= 0).map(func(p): return Story.name_of(int(p)))})
 	while log.size() > 200:
 		log.pop_front()
-	SysUtil.game_event("involve_pull", {"what": what})
+	SysUtil.game_event("involve_pull", {"what": what, "stakes": stakes})
 
 # ------------------------------------------------------------------ what is open
 static func open_count(f) -> int:
@@ -97,6 +101,9 @@ static func on_hour(_h: int) -> void:
 	longest_idle = maxi(longest_idle, now - idle_since)
 	if JusticePlayer.open > 0 or open >= int(cfg().get("max_open", 2)):
 		return
+	var hours: Array = cfg().get("pull_hours", [8, 22])
+	if SysUtil.hour_f() < float(hours[0]) or SysUtil.hour_f() >= float(hours[1]):
+		return          # late at night nobody comes knocking with thanks or small talk; the town's own events still happen
 	pressure = minf(pressure + float(cfg().get("pressure_step", 0.4)), 1.0)
 	if SysUtil.rng.randf() >= pressure:
 		return
@@ -108,6 +115,12 @@ static func on_hour(_h: int) -> void:
 static func _pull(f) -> bool:
 	var pool: Dictionary = cfg().get("pool", {})
 	var early: bool = SysUtil.day() - SoloOpening.start_day < int(cfg().get("early_days", 7))
+	if early and not SoloOpening.said.keys().any(func(k): return str(k).begins_with("bg_")):          # the background's first moment lands early: the most personal hook
+		var rb: Dictionary = _try("background", f)
+		if not rb.is_empty():
+			_kind_at["background"] = SysUtil.now()
+			landed("background: " + str(rb.get("what", "")), [], true)
+			return true
 	var kinds: Array = []
 	var ws: Array = []
 	for k in pool:
@@ -115,7 +128,7 @@ static func _pull(f) -> bool:
 		if SysUtil.now() - int(_kind_at.get(str(k), -100000)) < int(float(e.get("cooldown_h", 0)) * 60.0):
 			continue
 		kinds.append(str(k))
-		ws.append(float(e.get("weight", 1.0)) * (float(e.get("early", 1.0)) if early else 1.0) * float(e.get("connect", 1.0)))
+		ws.append(float(e.get("weight", 1.0)) * (float(e.get("early", 1.0)) if early else 1.0) * float(e.get("connect", 1.0)) * float(cfg().get("stakes_mult" if bool(e.get("stakes", false)) else "pleasant_mult", 1.0)))
 	while not kinds.is_empty():
 		var k2 = SysUtil.pick_weighted(kinds, ws)
 		var i: int = kinds.find(k2)
@@ -125,7 +138,7 @@ static func _pull(f) -> bool:
 		if not r.is_empty():
 			_kind_at[str(k2)] = SysUtil.now()
 			if bool(r.get("lands", true)):
-				landed(str(k2) + (": " + str(r["what"]) if r.has("what") else ""), r.get("people", []))
+				landed(str(k2) + (": " + str(r["what"]) if r.has("what") else ""), r.get("people", []), bool((pool[k2] as Dictionary).get("stakes", false)))
 				return true
 	return false
 
@@ -144,7 +157,9 @@ static func _try(kind: String, f) -> Dictionary:
 				tid = SoloOpening.neighbour
 			if tid < 0:
 				return {}
-			StoryVisits.schedule_visit([tid], pid, SysUtil.now() + 15, SysUtil.rng.randi_range(60, 120), "visit")
+			_visited[tid] = SysUtil.now()
+			var sv: Dictionary = StoryVisits.schedule_visit([tid], pid, SysUtil.now() + 15, SysUtil.rng.randi_range(60, 120), "visit")
+			sv["line"] = _why_visit(tid)
 			return {"people": [tid]}
 		"favour":
 			return {"people": []} if DailyHook.favour(f) else {}
@@ -152,9 +167,14 @@ static func _try(kind: String, f) -> Dictionary:
 			return _call(f)
 		"ripple":
 			var rp: Dictionary = TownLife.ripple(pid)
-			if rp.is_empty() or not DailyHook.favour(f, int(rp["tid"]), "favour_ripple"):
+			if rp.is_empty() or not _ripple(f, rp):
 				return {}
 			return {"what": str(rp["kind"]), "people": [int(rp["tid"])]}
+		"temptation":
+			if not SoloPressure.in_trouble(f) or SoloPressure.waiting or home:
+				return {}
+			SoloPressure._offer(f, SoloPressure.district_of_pawn(f), SysUtil.day())
+			return {"what": "a crew offer"}
 		"wallet":
 			return {"people": []} if not home and DailyHook.wallet(f) else {}
 		"scene":
@@ -195,6 +215,8 @@ static func _known(pid: int, at_least: float, come: bool = false) -> int:
 
 static func _can_come(tid: int) -> bool:
 	if tid < 0 or not Story.townies.has(tid) or not StreetScenes._free(tid) or not fresh(tid) or int(Story.townies[tid].get("last_visit_day", -99)) == SysUtil.day():
+		return false
+	if SysUtil.now() - int(_visited.get(tid, -100000)) < int(float(cfg().get("visit_gap_h", 48)) * 60.0):
 		return false
 	var on = SysUtil.folk(tid)
 	return on == null or on.has_meta("crowd")          # at home, or out at a venue (they leave it to come over: StoryVisits)
@@ -272,6 +294,46 @@ static func _grudge(f, home: bool) -> Dictionary:
 				SysUtil.notify(_line("grudge_stand", v), "bad"), "walk")
 	return {"what": "out", "people": [who]}
 
+## A friend of the pawn's was just in something: what they ask depends on what it was (to speak up for them, money, somewhere to stay,
+## to talk to the other one). Each is a real choice with a cost.
+static func _ripple(f, rp: Dictionary) -> bool:
+	var pid: int = int(f.id)
+	var tid: int = int(rp["tid"])
+	var kind: String = str(rp["kind"])
+	if kind == "debt":
+		return DailyHook.favour(f, tid, "favour_ripple")
+	if PhoneOwn.block(pid) != "" and SysUtil.folk(tid) == null:
+		return false
+	var v: Dictionary = {"n": Story.name_of(tid).get_slice(" ", 0)}
+	var key: String = {"arrest": "ripple_arrest", "affair": "ripple_affair"}.get(kind, "ripple_row")
+	var opts: Array = (cfg().get("ripple_options", {}) as Dictionary).get(key, [{"id": "yes", "label": "Yes"}, {"id": "no", "label": "No"}])
+	JusticePlayer.ask(pid, "A friend in trouble", _line(key, v), opts,
+		func(ch):
+			if str(ch) == "no":
+				RelationshipService.add_both(pid, tid, "friendship", -6.0)
+				SysUtil.notify(_line("ripple_no", v), "story")
+				return
+			RelationshipService.add_both(pid, tid, "friendship", 10.0)
+			RelationshipService.add_history(pid, tid, "stepped_in", 0.6, pid)
+			if kind == "affair":
+				var sv: Dictionary = StoryVisits.schedule_visit([tid], pid, SysUtil.now() + 30, 600, "visit")          # they come and stay the evening
+				sv["line"] = _line("ripple_affair_door", v)
+			elif kind == "arrest":
+				for c in CaseStore.open_cases() + CaseStore.in_state(["arrested", "charged"]):
+					if int(c.get("accused", -1)) == tid or int(c.get("culprit", -1)) == tid:
+						CaseStore.note(c, "%s gave a character statement for %s." % [str(f.name), Story.name_of(tid)], "", 1, false)
+						break
+			SysUtil.notify(_line(key + "_yes", v), "relationship"), "no")
+	return true
+
+static func _why_visit(tid: int) -> String:
+	var v: Dictionary = {"n": Story.name_of(tid).get_slice(" ", 0)}
+	var news: int = TownLife.news_for(Pawn.of(), tid)
+	if news >= 0:
+		v["news"] = TownLife.tell(news, tid)
+		return _line("why_news", v)
+	return _line("why_visit", v)
+
 ## Someone on the same lot right now comes over: a friend says hello, an acquaintance asks how it's going, a stranger strikes up a conversation.
 ## The most ordinary pull there is, and always real: the person is standing there.
 static func _approach(f) -> Dictionary:
@@ -281,20 +343,25 @@ static func _approach(f) -> Dictionary:
 	var pid: int = int(f.id)
 	var best = null
 	var best_d: float = 18.0
+	var news: int = -1
 	for p in Crowd.crowd_folk(lot):
 		var tid: int = int(p.get_meta("townie_id", -1))
 		if tid < 0 or p.has_meta("leaving") or not fresh(tid) or Story.stage_of(Story.townies.get(tid, {})) not in ["adult", "elder", "teen"]:
+			continue
+		var n_idx: int = TownLife.news_for(pid, tid)          # task 66b: they only come over with something to tell
+		if n_idx < 0:
 			continue
 		var d: float = (p.tile - f.tile).length()
 		if d < best_d:
 			best_d = d
 			best = p
+			news = n_idx
 	if best == null:
 		return {}
 	var tid2: int = int(best.get_meta("townie_id"))
 	var fr: float = RelationshipService.value(tid2, pid, "friendship")
 	var key: String = "approach_friend" if fr >= 20.0 else ("approach_known" if RelationshipService.knows(pid, tid2) else "approach_stranger")
-	var v: Dictionary = {"n": str(best.name).get_slice(" ", 0)}
+	var v: Dictionary = {"n": str(best.name).get_slice(" ", 0), "news": TownLife.tell(news, tid2)}
 	best.clear_queue()
 	var go := Interaction.create_goto(best, Crowd.free_near(f.tile + Vector2i(1, 1)), false)
 	if go != null:
