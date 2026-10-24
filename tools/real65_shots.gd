@@ -130,6 +130,22 @@ func _process(_d: float) -> bool:
 			_wait(60)
 		11:
 			_shot("07_after_scene")
+			var s2: Dictionary = StreetScenes._cause("arrest", pawn(), "park")
+			print("CHECK arrest cause at the park: %s (open cases %d)" % [str(s2), CaseStore.open_cases().size()])
+			if not s2.is_empty():
+				StreetScenes._stage(pawn(), "park", s2)
+			_wait(30)
+		12:
+			if not StreetScenes.pending.is_empty() or (not _hud.case_prompt.visible and _frames < 20000 and not StreetScenes._used.keys().any(func(k): return str(k).begins_with("arrest"))):
+				if _frames < 20000:
+					_wait(20)
+					_step -= 1
+					return false
+			if _hud.case_prompt.visible:
+				_shot("08_arrest")
+				_hud.case_prompt._pick("watch")
+			_wait(30)
+		13:
 			quit()
 			return true
 	return false
