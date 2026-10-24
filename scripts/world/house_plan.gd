@@ -46,6 +46,12 @@ static func defs() -> Dictionary:
 					d[ok] = e["override"][ok]
 				if not d.is_empty():
 					_defs[k] = d
+	var city: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://data/incidents/12_city.json"))          # task 63: the public toilet in the cafe, gym and park
+	if city is Dictionary:
+		var cobjs: Dictionary = (city.get("content", {}) as Dictionary).get("objects", {})
+		for k2 in cobjs:
+			if (cobjs[k2] as Dictionary).has("def") and not _defs.has(k2):
+				_defs[k2] = (cobjs[k2]["def"] as Dictionary).duplicate(true)
 	return _defs
 
 

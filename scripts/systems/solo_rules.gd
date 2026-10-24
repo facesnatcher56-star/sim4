@@ -20,6 +20,12 @@ static func landlord_pays(hid: int, parts: Dictionary) -> void:
 	for k in shares:
 		if parts.has(k):
 			parts[k] = float(parts[k]) * (1.0 - float(shares[k]))
+	# task 63: no home internet without a device that needs it (the mobile plan is the phone), and a studio's electricity sized to the studio
+	var defs: Dictionary = UtilityHomes.defs_of(hid)
+	if not (SoloCfg.sect("start").get("internet_devices", []) as Array).any(func(d): return not (defs.get(d, []) as Array).is_empty()):
+		parts["internet"] = 0.0
+	if SoloHome.rung == "starter" and parts.has("power"):
+		parts["power"] = minf(float(parts["power"]), float(SoloCfg.by_diff("start", "studio_power_cap")))
 
 ## Named consequences fired from interaction data ({"solo_hook": name}).
 static func hook(name: String, folk) -> void:

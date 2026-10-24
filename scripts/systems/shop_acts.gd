@@ -138,7 +138,7 @@ static func _order_ir(f, obj, od: Dictionary) -> Interaction:
 	if ir == null:
 		return null
 	ir.def = ir.def.duplicate(true)
-	ir.def["tests"] = (ir.def.get("tests", []) as Array).filter(func(t): return not (t is Dictionary and (t as Dictionary).has("coins_at_least")))
+	ir.def["tests"] = (ir.def.get("tests", []) as Array).filter(func(t): return not (t is Dictionary and ((t as Dictionary).has("coins_at_least") or (t as Dictionary).has("stat_below"))))          # task 63: paid for, a coffee can be had at any energy; the need is what it does, not a gate
 	ir.def["on_finish"] = (ir.def.get("on_finish", []) as Array).filter(func(e): return not (e is Dictionary and (e as Dictionary).has("coins_add")))
 	return ir if ir.can_run(f, obj, false) else null
 

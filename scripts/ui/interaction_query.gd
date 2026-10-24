@@ -78,6 +78,7 @@ static func describe_tests(def: Dictionary, folk = null, target = null) -> Strin
 				"election_open": parts.append("No election on right now")
 				"has_guests": parts.append("You don't know anyone to invite yet")
 				"at_home_lot": parts.append("Only at your own home")
+				"has_phone": parts.append("Your phone isn't working")
 				"not": parts.append("Not at your own home" if (v is Dictionary and (v as Dictionary).has("at_home_lot")) else "not possible right now")
 				"circadian": parts.append("Not time to sleep yet")
 				"no_free_bed": parts.append("You have a bed to use")

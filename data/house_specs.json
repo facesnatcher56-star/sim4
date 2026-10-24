@@ -587,6 +587,11 @@
    "win": 1.0,
    "items": [
     {
+     "d": "public_toilet",
+     "at": "corner",
+     "req": 1
+    },
+    {
      "rep": [
       4,
       7
@@ -890,6 +895,11 @@
    "hab": false,
    "win": 1.0,
    "items": [
+    {
+     "d": "public_toilet",
+     "at": ["corner", "wall", "free"],
+     "req": 1
+    },
     {
      "d": "rug",
      "at": "grid",
@@ -1564,6 +1574,11 @@
    "hab": false,
    "win": 1.0,
    "items": [
+    {
+     "d": "public_toilet",
+     "at": ["path", "free"],
+     "req": 1
+    },
     {
      "rep": [
       2,
