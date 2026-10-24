@@ -12,6 +12,8 @@
     "job_centre": {"lot": "city_hall", "hours": [9, 17]},
     "paper": {"price": 2, "ads": 3}
   },
+  "hospital_plan_weeks": 4,
+  "early_luck": {"days": 7, "min_severity": 2, "_doc": "Task 63 (EarlyLuck): after one real problem on the player in the first days, no other bad incident until the week is over."},
   "start": {
     "coins": {"relaxed": 350, "normal": 200, "hard": 100},
     "rent": {"relaxed": 55, "normal": 70, "hard": 85},

@@ -2,17 +2,17 @@
   "_doc": "Task 48: the questions the game puts to the player's character (PlayerPrompt). Each type has titles, and lines per VOICE (warm, formal, shy, bold: chosen from how well the two know each other and their traits, never stated). {name} the asker, {their}/{name}/{them} pronouns of the asker, {place}, {amount}, {why} a real reason. Options have several label variants and a hint that says what the answer DOES (never a prediction). No relationship words in any text. The same line is not used twice in a row for the same pair, and not again until most others were used.",
   "types": {
     "party_invite": {
-      "titles": ["A party tonight", "An invitation", "Come along?", "Something on this evening"],
+      "titles": ["A party this evening", "An invitation", "Come along?", "Something on this evening"],
       "why": ["People are getting together at {place}.", "A few friends are meeting up.", "There is food and music at {place}.", "There is a get-together at {place}."],
       "lines": {
-        "warm": ["{name} caught you with a big grin: \"We're doing something tonight. {why} Say you'll come.\"", "\"Don't say no,\" {name} says. \"{why} It would not be the same without you.\"", "{name} has saved you a seat. {why} Coming?", "\"I was hoping you'd be free,\" {name} says. \"{why}\""],
+        "warm": ["{name} caught you with a big grin: \"We're doing something this evening. {why} Say you'll come.\"", "\"Don't say no,\" {name} says. \"{why} It would not be the same without you.\"", "{name} has saved you a seat. {why} Coming?", "\"I was hoping you'd be free,\" {name} says. \"{why}\""],
         "formal": ["{name} has sent a note: \"{why} You would be very welcome.\"", "\"I would like to invite you,\" {name} writes. \"{why}\"", "An invitation from {name}. {why} Will you attend?", "{name} asks politely whether you can come. {why}"],
         "shy": ["{name} hesitates. \"Um. {why} You don't have to...\"", "\"I wasn't sure whether to ask,\" {name} mumbles. \"{why}\"", "{name} shuffles a little. \"{why} Only if you want to.\"", "A small, nervous message from {name}: \"{why} Maybe?\""],
-        "bold": ["\"You're coming,\" {name} announces. \"{why}\"", "{name} doesn't wait: \"{why} I'm counting you in.\"", "\"Tonight. {why} Be there,\" says {name}.", "{name} grins: \"{why} Say yes before I make you.\""]
+        "bold": ["\"You're coming,\" {name} announces. \"{why}\"", "{name} doesn't wait: \"{why} I'm counting you in.\"", "\"This evening. {why} Be there,\" says {name}.", "{name} grins: \"{why} Say yes before I make you.\""]
       },
       "options": [
         {"id": "yes", "labels": ["Go", "I'll be there", "Count me in", "Yes, I'll come"], "hints": ["you spend the evening there", "you are away at the party for a few hours"]},
-        {"id": "no", "labels": ["Not tonight", "Another time", "I can't make it", "Say no"], "hints": ["you stay where you are; {name} will not mind much", "you skip it; it is a small thing"]}
+        {"id": "no", "labels": ["Not this time", "Another time", "I can't make it", "Say no"], "hints": ["you stay where you are; {name} will not mind much", "you skip it; it is a small thing"]}
       ]
     },
     "romance_sweetheart": {

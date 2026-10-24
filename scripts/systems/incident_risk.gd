@@ -69,6 +69,7 @@ static func effective_rate(def: Dictionary, subj, surprise: bool = true, conditi
 	r *= HealthRisk.mult(def, subj)                 # task 14: fitness, diet, flu shot and conditions
 	r *= VacationHome.rate_mult(def, subj)          # task 22: an empty house is a better target (incidents tagged "burglary_odds")
 	r *= SoloDistricts.rate_mult(def, subj)         # task 40: a rough district has many times the town's crime
+	r *= EarlyLuck.rate_mult(def, subj)             # task 63: one real problem at most in a solo start's first week
 	if surprise and bool(def.get("surprise", true)):
 		r *= Incidents.surprise_mult()
 	return r

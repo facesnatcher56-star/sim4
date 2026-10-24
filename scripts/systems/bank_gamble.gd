@@ -14,6 +14,10 @@ static var next_draw: int = 0
 static var last_draw: Dictionary = {}   # {day, jackpot_won, winner}
 static var rng: RandomNumberGenerator = RandomNumberGenerator.new()
 
+## The day of the next draw, also before the first day has rolled it (task 63: never "day 0").
+static func draw_day() -> int:
+	return next_draw if next_draw > 0 else SysUtil.day() + int(cfg().get("draw_days", 7))
+
 static func reset() -> void:
 	tickets.clear()
 	addiction.clear()

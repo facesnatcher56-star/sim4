@@ -2,7 +2,7 @@ class_name PieEntries
 extends RefCounted
 ## Keeps the interaction menu digestible: hides things this Folk can never do to this target, rewords "why not"
 ## reasons for players (no internal ids), and floats recently used actions to the top.
-const NEVER_PATTERNS := ["already together", "divorce instead", "only for exes", "only after being cheated", "not for ", "needs trait", "already attached", "is away", "Too young", "Only adults", "Nothing to do here", "No election on", "Not at your own home", "You have no car", "No car of yours"]          # hidden: the thing is not there at all
+const NEVER_PATTERNS := ["already together", "divorce instead", "only for exes", "only after being cheated", "not for ", "needs trait", "already attached", "is away", "Too young", "Only adults", "Nothing to do here", "No election on", "Not at your own home", "Only at your own home", "You have no car", "No car of yours"]          # hidden: the thing is not there at all
 const NOT_NEEDED := {"hunger": "Not hungry enough", "energy": "Not tired enough", "bladder": "Doesn't need the toilet", "hygiene": "Already clean",
 	"social": "Doesn't need company", "fun": "Not bored", "comfort": "Already comfortable"}
 const TOO_LOW := {"hunger": "Too hungry", "energy": "Too tired", "bladder": "Too desperate", "hygiene": "Too grimy", "social": "Too lonely", "fun": "Too bored", "comfort": "Too uncomfortable"}

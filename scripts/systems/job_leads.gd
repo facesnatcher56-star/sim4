@@ -32,6 +32,8 @@ static func hiring_at(lot: String) -> Array:
 	var vt: String = Venues.type_of_lot(lot)
 	if lot == "" or vt in ["home", ""]:
 		return []
+	if (LotLoader.template(Neighborhood.template_of(lot)).get("staff", []) as Array).is_empty() and StaffPosts.defs(lot).is_empty():
+		return []          # task 63: no sign where nobody works to be asked (the park's gardener job stays on the phone's board)
 	EduJobs.refresh(SysUtil.day())
 	return Careers.career_ids().filter(func(c): return str(Careers.career_def(str(c)).get("workplace", "")) == vt and EduJobs.openings(str(c)) > 0)
 

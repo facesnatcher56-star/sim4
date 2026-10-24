@@ -69,8 +69,8 @@ static func pipe(hid: int, kind: String) -> Dictionary:
 	ChaosClock.sync_markers(hid)
 	var name: String = label_of(o)
 	if kind == "overflow":
-		return {"text": "The %s is overflowing and water is creeping across the floor. Fix it yourself (the handiness skill helps) or call a plumber at the mailbox for about %d coins." % [name, int(c.get("plumber_fee", 55))], "kind": "warn"}
-	return {"text": "A pipe burst under the %s and water is pouring out. The damage grows by the hour and damp turns to mould. Fix it yourself (the handiness skill helps) or call a plumber at the mailbox for about %d coins." % [name, int(c.get("plumber_fee", 90))], "kind": "bad"}
+		return {"text": "The %s is overflowing and water is creeping across the floor. Fix it yourself (the handiness skill helps) or call a plumber from it for about %d coins." % [name, int(c.get("plumber_fee", 55))], "kind": "warn"}
+	return {"text": "A pipe burst under the %s and water is pouring out. The damage grows by the hour and damp turns to mould. Fix it yourself (the handiness skill helps) or call a plumber from it for about %d coins." % [name, int(c.get("plumber_fee", 90))], "kind": "bad"}
 
 ## Puddles on the floor around the fixture (the same mess the slip checks and the floor tint read).
 static func spill(tile: Vector2i, c: Dictionary) -> void:

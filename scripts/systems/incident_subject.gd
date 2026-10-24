@@ -193,15 +193,21 @@ func head():
 func known_by_household() -> bool:
 	if household_id > 0 or lot_key.begins_with("home:"):
 		return true
-	var ids: Array = [id] if kind == "townie" else []
+	var ids: Array = [id] if kind in ["townie", "folk"] else []
 	if kind == "lot":
 		for m in members():
 			ids.append(m.id)
 	for r in SysUtil.residents():
 		for i in ids:
-			if RelationshipService.knows(int(r.id), int(i)):
+			if knows_well(int(r.id), int(i)):
 				return true
 	return false
+
+## Task 63: in solo play only people the player knows well (a friend or closer) make the news of their colds and hospital stays.
+static func knows_well(a: int, b: int) -> bool:
+	if not SoloHome.active:
+		return RelationshipService.knows(a, b)
+	return RelationshipService.value(a, b, "friendship") >= 30.0 or RelationshipService.value(a, b, "romance") >= 30.0
 
 ## Is this townie standing on the map as a (visitor) Folk? Then the FULL version handles them.
 static func on_map(townie_id: int) -> bool:
