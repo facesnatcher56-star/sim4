@@ -164,6 +164,8 @@
     "heat_decay_per_day": 1,
     "drift_days": 28,
     "dues_per_day": 3,
+    "job_hour": 21,
+    "join_after": 3,
     "leave_payoff": 150,
     "record_expunge_days": 56
   }

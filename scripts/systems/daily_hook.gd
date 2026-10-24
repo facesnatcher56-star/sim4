@@ -6,6 +6,7 @@ extends RefCounted
 ##   DailyHook.favour(f, tid, key) / wallet(f) / problem(f) -> landed   DailyHook.on_day(day) (loans paid back)   reset() / to_dict() / from_dict()
 
 static var loans: Array = []           # [{tid, coins, due}] money lent, to be paid back (or not)
+static var last_tid: int = -1          # the person in the last hook (Involve: the person gap)
 
 static func reset() -> void:
 	loans = []
@@ -55,6 +56,7 @@ static func favour(f, tid: int = -1, key: String = "favour") -> bool:
 	var amounts: Array = cfg().get("favour_amounts", [10, 20, 30])
 	var c: int = int(amounts[SysUtil.rng.randi_range(0, amounts.size() - 1)])
 	var n: String = Story.name_of(best).get_slice(" ", 0)
+	last_tid = best
 	var opts: Array = [{"id": "lend", "label": "Lend %d coins" % c}, {"id": "no", "label": "Can't right now"}]
 	JusticePlayer.ask(int(f.id), "A favour", _line(key, n, c), opts, func(ch): _favour_answer(f, best, c, str(ch)), "no")
 	return true
@@ -91,6 +93,7 @@ static func wallet(f) -> bool:
 	if owner == null:
 		return false
 	var tid: int = int(owner.get_meta("townie_id"))
+	last_tid = tid
 	var wc: Array = cfg().get("wallet_coins", [15, 60])
 	var c: int = SysUtil.rng.randi_range(int(wc[0]), int(wc[1]))
 	var n: String = str(owner.name).get_slice(" ", 0)

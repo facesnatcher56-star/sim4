@@ -12,10 +12,12 @@ const STAGED := ["row", "affair", "debt", "upset", "collapse", "arrest", "alarm"
 
 static var recent: Array = []          # [{kind, a, b, c, lot, day, told}] what happened, newest last
 static var _rippled: Dictionary = {}   # index -> true: already reached the player as a ripple
+static var _in_at: Dictionary = {}     # townie id -> minute they were last in a town event (rest_h: spread it across the town)
 
 static func reset() -> void:
 	recent = []
 	_rippled = {}
+	_in_at = {}
 
 static func cfg() -> Dictionary:
 	return (SysUtil.table("director").get("town", {}) as Dictionary)
@@ -55,14 +57,20 @@ static func _one() -> void:
 	var lot2: String = str(pick["lot"])
 	if str(pick["kind"]) in STAGED and Neighborhood.lot_of(f) == lot2 and not SysUtil.is_away(f) and not CrimePlace.is_asleep(f) and StreetScenes.pending.is_empty() and JusticePlayer.open == 0:
 		StreetScenes.stage(f, lot2, pick)          # right here: the player sees it happen
+		for who2 in StreetScenes.last_people:
+			_in_at[int(who2)] = SysUtil.now()
 		Involve.landed("scene: %s" % str(pick["kind"]), [int(pick["a"]), int(pick.get("b", -1))])
 		return
 	_offscreen(pick, lot2)
 
+## Not in a town event for rest_h hours (the same few names should not run through everything).
+static func rested(tid: int) -> bool:
+	return SysUtil.now() - int(_in_at.get(tid, -100000)) >= int(float(cfg().get("rest_h", 12)) * 60.0)
+
 ## Everyday causes the town has without any thread: two townies who already dislike each other run into each other (a row), or someone
 ## with friends has them round (a get-together at their home). Sampled, so it stays cheap. {} when none turned up this time.
 static func _everyday(lots: Array) -> Dictionary:
-	var pool: Array = Story.free_townies().filter(func(t): return Story.stage_of(t) in ["adult", "elder"] and StreetScenes._free(int(t["id"])))
+	var pool: Array = Story.free_townies().filter(func(t): return Story.stage_of(t) in ["adult", "elder"] and StreetScenes._free(int(t["id"])))          # (_free: rested and not just in a pull)
 	if pool.size() < 3 or lots.is_empty():
 		return {}
 	var friendly: Dictionary = {}          # a get-together only when nothing rougher turned up this time (66b: they were most of the town's events)
@@ -123,6 +131,9 @@ static func _offscreen(s: Dictionary, lot: String) -> void:
 		"drunk":
 			CrimePetty.commit("disturbance", a, "venue:" + lot, {"seen": true})
 	recent.append({"kind": kind, "a": a, "b": b, "c": int(s.get("c", -1)), "lot": lot, "day": SysUtil.day(), "told": false})
+	for who in [a, b, int(s.get("c", -1))]:
+		if who >= 0:
+			_in_at[who] = SysUtil.now()
 	while recent.size() > int(cfg().get("keep", 24)):
 		recent.pop_front()
 		_rippled.clear()

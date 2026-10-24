@@ -75,6 +75,8 @@ static func open_count(f) -> int:
 			n += 1
 	if not SoloOpening.checkin.is_empty() and int(SoloOpening.checkin.get("day", -1)) == SysUtil.day():
 		n += 1
+	if not SoloPressure.job.is_empty() and int(SoloPressure.job["at"]) - now < soon:
+		n += 1
 	for b in Economy.outstanding(int(f.household_id)):
 		if bool(b.get("late", false)):
 			n += 1
@@ -162,7 +164,7 @@ static func _try(kind: String, f) -> Dictionary:
 			sv["line"] = _why_visit(tid)
 			return {"people": [tid]}
 		"favour":
-			return {"people": []} if DailyHook.favour(f) else {}
+			return {"people": [DailyHook.last_tid]} if DailyHook.favour(f) else {}
 		"call":
 			return _call(f)
 		"ripple":
@@ -176,9 +178,9 @@ static func _try(kind: String, f) -> Dictionary:
 			SoloPressure._offer(f, SoloPressure.district_of_pawn(f), SysUtil.day())
 			return {"what": "a crew offer"}
 		"wallet":
-			return {"people": []} if not home and DailyHook.wallet(f) else {}
+			return {"people": [DailyHook.last_tid]} if not home and DailyHook.wallet(f) else {}
 		"scene":
-			return {"people": []} if not home and lot != "" and StreetScenes.play(f, lot) else {}
+			return {"people": StreetScenes.last_people.duplicate()} if not home and lot != "" and StreetScenes.play(f, lot) else {}
 		"party":
 			return {"people": [SoloOpening.neighbour]} if StreetScenes.party(f) else {}
 		"background":
