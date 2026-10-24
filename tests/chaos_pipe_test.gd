@@ -101,19 +101,14 @@ func _plumber(f: Array) -> void:
 	K.teardown()
 
 func _warning(f: Array) -> void:
+	# owner rule (data/incidents.json config.warnings = false): nothing warns the player of what is coming
 	var h: Dictionary = C.setup()
-	var ada: Folk = h["ada"]
 	var r: Dictionary = IncidentFlow.start("burst_pipe", IncidentSubject.of_household(1))
-	K.expect(f, str(r.get("mode", "")) == "warned" and Incidents.active().size() == 1, "the pipes knock first")
-	K.expect(f, K.has_note("knocking") and ChaosState.leak_of(1).is_empty(), "warning toast, no water yet")
-	C.minutes(61)
-	K.expect(f, not ChaosState.leak_of(1).is_empty(), "left alone, the pipe bursts an hour later")
+	K.expect(f, str(r.get("mode", "")) != "warned" and not K.has_note("knocking"), "no knocking first: no warnings")
+	K.expect(f, not ChaosState.leak_of(1).is_empty(), "the pipe bursts at once")
 	K.teardown()
 	var h2: Dictionary = C.setup()
-	IncidentFlow.start("burst_pipe", IncidentSubject.of_household(1))
 	h2["ada"].add_buff("pipes_checked")
-	C.minutes(61)
-	K.expect(f, ChaosState.leak_of(1).is_empty() and K.has_note("pipes held"), "checking the pipes in time averts it")
 	K.expect(f, Incidents.effective_rate("burst_pipe", IncidentSubject.of_household(1)) < 0.18 * 0.2, "checked pipes cut the rate")
 	K.teardown()
 

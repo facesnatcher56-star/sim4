@@ -49,9 +49,7 @@ func run() -> Array:
 	_check(ss.size() == 4 and float(ss[3]) < float(ss[1]), "grounded winter is greyer than summer")
 	_check(LightMood.season_value(ss, 3.5) < LightMood.season_value(ss, 1.5), "season_value: winter < summer")
 	_check(absf(LightMood.season_value(ss, 3.99) - LightMood.season_value(ss, 4.01)) < 0.02, "seasonal grey changes smoothly over the year turn")
-	Looks.set_look("reference")
-	_check(is_equal_approx(LightMood.season_value(Looks.earr("season_sat"), 3.5), 1.0), "reference has no seasonal grey")
-	_check(Looks.ec("dawn").is_equal_approx(Looks.ec("twilight")), "reference dawn = today's twilight")
+	# (the old "reference" look is gone: data/looks.json has only "grounded")
 	# --- wet streets and puddles
 	var w0: Dictionary = LightMood.wet_mood(0.0, 0.5)
 	var w1: Dictionary = LightMood.wet_mood(1.0, 0.5)

@@ -283,7 +283,7 @@ func _journal(f: Array) -> void:
 	S.set_time(2, 6)
 	var lines: Array = Emotions.on_day(2)
 	S.expect(f, lines.size() == 2 and str(lines[0]).find("content") >= 0, "daily journal summary: %s" % str(lines))
-	S.expect(f, S.K.has_note("Mood journal"), "journal toast")
+	S.expect(f, not S.K.has_note("Mood journal") and not Emotions.last_journal.is_empty(), "quiet depth: the journal is kept, not toasted")
 	S.expect(f, S.K.count_events("mood_journal") == 1, "journal event")
 	S.expect(f, int(Emotions.journal_for(a.id)["samples"]) == 0, "journal resets each day")
 	S.teardown()

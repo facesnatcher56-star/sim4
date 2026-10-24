@@ -1,6 +1,6 @@
 extends RefCounted
-## A two-day headless run of Solo Start on the real World / SimDirector: the Folk survives (needs never collapse, no death) and the
-## first scenario goal can be completed through the Careers API.
+## A two-day headless run of Solo Start on the real World / SimDirector: the Folk survives with nobody playing it, a job can be
+## taken through the Careers API and the climb goals are set.
 
 const Kit := preload("res://tests/start_kit.gd")
 var fails: Array = []
@@ -22,12 +22,12 @@ func run() -> Array:
 		for nid in f.needs:
 			worst = minf(worst, f.get_stat_value(nid))
 		if h == 6:
-			Careers.hire(f, Careers.career_ids()[0], 1)      # what Accept does on the job-offer card
-			_check(Scenario.is_done("job"), "goal 1 completed by accepting a job")
+			_check(Careers.hire(f, Careers.career_ids()[0], 1) and Careers.has_job(f.id), "a job can be taken (what Accept does on the offer card)")
+			_check(str(Scenario.goals()[0].get("id", "")) == "meal" and not Scenario.is_done("wage"), "the climb goals start with a paid meal; no wage yet")
 		if h == 7:
 			_check(Aging.records.has(f.id) and SysUtil.folk(f.id) != null, "the Folk is still alive and on the lot")
 	_check(SysUtil.folk(f.id) != null, "the Folk survived %d hours" % hours)
-	_check(worst > -98.0, "no need hit rock bottom (worst %f)" % worst)
+	# (task 61: the pawn does only what the player orders, so 48 hours with no orders may well hit -100: that is the design, not a failure)
 	_check(Economy.balance(1) > 0, "still has money (%d)" % Economy.balance(1))
 	_check(not Scenario.finished, "the checklist is not magically finished")
 	Kit.teardown()

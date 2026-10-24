@@ -121,7 +121,7 @@ func _arrested_killer() -> void:
 			for sit in Story.situations:
 				if (sit["guest_ids"] as Array).has(killer) and str(sit["state"]) in ["arrive", "mingle", "scheduled"] and JusticeState.inmates.has(killer):
 					visited = true
-			if SysUtil.folk(killer) != null and JusticeState.inmates.has(killer):
+			if SysUtil.folk(killer) != null and JusticeState.inmates.has(killer) and not SysUtil.folk(killer).has_meta("court"):          # brought to the courthouse for the trial is the one place a held person appears
 				visited = true
 			if str(main["state"]) in ["closed"] or str(main.get("verdict", "")) != "":
 				break

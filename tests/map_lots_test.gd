@@ -7,7 +7,6 @@ const Kit = preload("res://tests/hood_kit.gd")
 const SKit = preload("res://tests/start_kit.gd")
 const SEEDS := [11, 2222, 33333, 444444, 5555555]
 const SCENARIOS := ["solo", "couple", "family", "roommates", "sandbox"]
-const HOME_POOL := {"solo": "small", "couple": "medium", "family": "medium", "roommates": "large", "sandbox": "classic"}
 
 var fails: Array = []
 
@@ -29,7 +28,7 @@ func run() -> Array:
 	Kit.teardown()
 	return fails
 
-## All 19 lots pairwise distinct layouts; home from the scenario's pool; seed saved.
+## All the lots pairwise distinct layouts; home from the scenario's pool; seed saved.
 func _distinct(sc: String, wseed: int) -> void:
 	var seen: Dictionary = {}
 	var rg: WorldRegions = Kit.world().regions
@@ -39,7 +38,8 @@ func _distinct(sc: String, wseed: int) -> void:
 		_check(not seen.has(sig), "%s/%d: %s and %s share a layout (%s)" % [sc, wseed, str(l["id"]), str(seen.get(sig, "")), tid])
 		seen[sig] = str(l["id"])
 	var home: String = Neighborhood.home_template
-	_check(home.begins_with(str(HOME_POOL[sc]) + "_") or (sc == "sandbox" and home == "classic"), "%s: home %s is not from the %s pool" % [sc, home, HOME_POOL[sc]])
+	var pool: Array = LotPicker.home_pool(str(Scenario.def(sc).get("start_id", "classic")))          # the New Game screen's own pool for this kind of start
+	_check(pool.has(home) or (sc == "sandbox" and home == "classic"), "%s: home %s is not from its pool %s" % [sc, home, str(pool)])
 	_check(rg.home()["template"] == home and Neighborhood.world_seed == wseed, "%s: home template / seed recorded" % sc)
 	for lid in ["townie_a", "townie_b", "townie_c"]:
 		var t: String = Neighborhood.template_of(lid)
@@ -77,7 +77,7 @@ func _whole_map(start: String) -> void:
 		var g: Dictionary = LotLoader.template(str(gid))
 		min_objects[gid] = {"small": 14, "medium": 30, "large": 50, "classic": 40}.get(str(g.get("size", "")), 10) if str(g.get("kind", "")) == "home" else int(min_objects.get(str(g.get("venue", "")), 10))
 	var lots: Array = Neighborhood.lots()
-	_check(lots.size() == 19, "%s: 19 lots (%d)" % [start, lots.size()])
+	_check(lots.size() == 21, "%s: 21 lots (%d)" % [start, lots.size()])          # 19 + the later apartments and shelter lots
 	var per_lot: Dictionary = {}
 	for o in W.all_objects():
 		var l: String = Neighborhood.lot_at(o.tile)
