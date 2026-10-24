@@ -118,6 +118,8 @@ static func key_of(s: Dictionary) -> String:
 			return "%s|%d" % [str(s["kind"]), int(s["a"])]
 		"gathering":
 			return "gathering|%d|-1" % int(s["a"])
+		"theft", "break_in", "drunk":
+			return "%s|%d" % ["theft" if str(s["kind"]) == "break_in" else str(s["kind"]), int(s["a"])]
 		"arrest":
 			return "arrest|%d" % int(s.get("case", -1))
 		"collapse":

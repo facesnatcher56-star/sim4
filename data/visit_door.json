@@ -5,26 +5,103 @@
  "give_up_min": 6,
  "doorstep_min": 20,
  "cooldown_min": 600,
- "bath_defs": ["toilet", "shower", "bathtub", "sink"],
- "private_iids": ["brush_teeth", "take_shower", "take_bath", "nap", "sleep_bed", "sleep_sofa", "grab_snack", "cook_meal", "change_clothes"],
- "private_defs": ["fridge", "stove", "bed", "single_bed", "sofa_bed", "bunk_bed", "crib", "wardrobe", "computer"],
+ "bath_defs": [
+  "toilet",
+  "shower",
+  "bathtub",
+  "sink"
+ ],
+ "private_iids": [
+  "brush_teeth",
+  "take_shower",
+  "take_bath",
+  "nap",
+  "sleep_bed",
+  "sleep_sofa",
+  "grab_snack",
+  "cook_meal",
+  "change_clothes"
+ ],
+ "private_defs": [
+  "fridge",
+  "stove",
+  "bed",
+  "single_bed",
+  "sofa_bed",
+  "bunk_bed",
+  "crib",
+  "wardrobe",
+  "computer"
+ ],
  "stay_refuse": 0.12,
  "stay_refuse_hothead": 0.35,
- "friendship": {"snub": -2.0, "sent_away": -4.0, "argued": -10.0, "police": -20.0},
+ "friendship": {
+  "snub": -2.0,
+  "sent_away": -4.0,
+  "argued": -10.0,
+  "police": -20.0
+ },
  "lines": {
-  "knock": ["Somebody knocks at the front door.", "Three knocks at the door.", "The doorbell rings."],
-  "knock_again": ["They knock again, louder.", "Another knock. Whoever it is isn't going away yet."],
-  "look": ["Through the window: {n}, waiting on the step.", "You peek through the window. It's {n}."],
-  "why_visit": ["\"Hi! I was passing and thought I'd say hello.\"", "\"Got a minute? I was in the area.\"", "\"Hello! Not a bad time, is it?\""],
-  "why_party": ["\"We heard there's a party!\"", "\"Party's here, right?\""],
-  "sent_away": ["{n} shrugs. \"Another time, then.\"", "\"Oh. Right.\" {n} turns and goes."],
-  "gave_up": ["The knocking stops. Whoever it was has gone.", "Footsteps go back down the path."],
-  "came_by": ["{n}: \"Came by your place earlier. Guess you were out.\"", "{n}: \"Knocked earlier, nobody home. Another time!\""],
-  "bath_ask": ["{n} hovers by the bathroom. \"Mind if I use your bathroom?\""],
-  "bath_no": ["{n} nods. \"No problem.\" They look a little uncomfortable."],
-  "leave_ok": ["\"Is that the time? I'll get going.\" {n} heads for the door.", "\"Right, I'll let you get some rest.\" {n} gets up to go."],
-  "leave_refuse": ["{n} doesn't move. \"I've only just sat down.\"", "\"Kicking me out? Charming.\" {n} stays put."],
-  "insist": ["Words are said. {n} storms out and slams the door.", "It turns into a row. {n} leaves angry."],
-  "police": ["You pick up the phone. {n} goes, muttering, before anyone comes."]
+  "knock": [
+   "Somebody knocks at the front door.",
+   "Three knocks at the door.",
+   "The doorbell rings."
+  ],
+  "knock_again": [
+   "They knock again, louder.",
+   "Another knock. Whoever it is isn't going away yet."
+  ],
+  "look": [
+   "Through the window: {n}, waiting on the step.",
+   "You peek through the window. It's {n}."
+  ],
+  "why_visit": [
+   "\"Hi! I was passing and thought I'd say hello.\"",
+   "\"Got a minute? I was in the area.\"",
+   "\"Hello! Not a bad time, is it?\"",
+   "\"I baked too much. Thought you might want some.\"",
+   "\"I couldn't face my own four walls tonight. Mind some company?\"",
+   "\"I've had the worst day. Got time for a cup of something?\"",
+   "\"I owed you a visit. Here I am.\""
+  ],
+  "why_party": [
+   "\"We heard there's a party!\"",
+   "\"Party's here, right?\""
+  ],
+  "sent_away": [
+   "{n} shrugs. \"Another time, then.\"",
+   "\"Oh. Right.\" {n} turns and goes."
+  ],
+  "gave_up": [
+   "The knocking stops. Whoever it was has gone.",
+   "Footsteps go back down the path."
+  ],
+  "came_by": [
+   "{n}: \"Came by your place earlier. Guess you were out.\"",
+   "{n}: \"Knocked earlier, nobody home. Another time!\""
+  ],
+  "bath_ask": [
+   "{n} hovers by the bathroom. \"Mind if I use your bathroom?\"",
+   "\"Sorry, could I use your loo?\" {n} asks.",
+   "{n} shifts from foot to foot. \"Where's your bathroom?\""
+  ],
+  "bath_no": [
+   "{n} nods. \"No problem.\" They look a little uncomfortable."
+  ],
+  "leave_ok": [
+   "\"Is that the time? I'll get going.\" {n} heads for the door.",
+   "\"Right, I'll let you get some rest.\" {n} gets up to go."
+  ],
+  "leave_refuse": [
+   "{n} doesn't move. \"I've only just sat down.\"",
+   "\"Kicking me out? Charming.\" {n} stays put."
+  ],
+  "insist": [
+   "Words are said. {n} storms out and slams the door.",
+   "It turns into a row. {n} leaves angry."
+  ],
+  "police": [
+   "You pick up the phone. {n} goes, muttering, before anyone comes."
+  ]
  }
 }

@@ -7,7 +7,8 @@ extends RefCounted
 ## when they talk to someone who knows the people involved, and as a ripple when a friend of theirs was in it (Involve picks those up).
 ##   TownLife.on_hour(h)   TownLife.on_social(pawn_id, other_id)   TownLife.ripple(pid) -> {tid, kind} or {}   recent   reset()
 
-const PUBLIC := ["row", "arrest", "alarm", "collapse"]          # things people saw in the street; the rest (an affair, a debt, someone upset) only friends know
+const PUBLIC := ["row", "arrest", "alarm", "collapse", "drunk", "break_in"]
+const STAGED := ["row", "affair", "debt", "upset", "collapse", "arrest", "alarm"]          # the kinds StreetScenes can play in front of the pawn          # things people saw in the street; the rest (an affair, a debt, someone upset) only friends know
 
 static var recent: Array = []          # [{kind, a, b, c, lot, day, told}] what happened, newest last
 static var _rippled: Dictionary = {}   # index -> true: already reached the player as a ripple
@@ -52,7 +53,7 @@ static func _one() -> void:
 	if pick == null:
 		return
 	var lot2: String = str(pick["lot"])
-	if str(pick["kind"]) != "gathering" and Neighborhood.lot_of(f) == lot2 and not SysUtil.is_away(f) and not CrimePlace.is_asleep(f) and StreetScenes.pending.is_empty() and JusticePlayer.open == 0:
+	if str(pick["kind"]) in STAGED and Neighborhood.lot_of(f) == lot2 and not SysUtil.is_away(f) and not CrimePlace.is_asleep(f) and StreetScenes.pending.is_empty() and JusticePlayer.open == 0:
 		StreetScenes.stage(f, lot2, pick)          # right here: the player sees it happen
 		Involve.landed("scene: %s" % str(pick["kind"]), [int(pick["a"]), int(pick.get("b", -1))])
 		return
@@ -64,6 +65,7 @@ static func _everyday(lots: Array) -> Dictionary:
 	var pool: Array = Story.free_townies().filter(func(t): return Story.stage_of(t) in ["adult", "elder"] and StreetScenes._free(int(t["id"])))
 	if pool.size() < 3 or lots.is_empty():
 		return {}
+	var friendly: Dictionary = {}          # a get-together only when nothing rougher turned up this time (66b: they were most of the town's events)
 	for _i in int(cfg().get("everyday_tries", 12)):
 		var a: int = int(pool[SysUtil.rng.randi_range(0, pool.size() - 1)]["id"])
 		var b: int = int(pool[SysUtil.rng.randi_range(0, pool.size() - 1)]["id"])
@@ -72,9 +74,17 @@ static func _everyday(lots: Array) -> Dictionary:
 		var fr: float = RelationshipService.value(a, b, "friendship")
 		if (fr <= -10.0 or RelationshipService.value(a, b, "tension") >= 20.0) and not StreetScenes._recent("row|%d|%d" % [a, b]):
 			return {"kind": "row", "a": a, "b": b, "lot": str(lots[0])}
-		if fr >= 20.0 and not StreetScenes._recent("gathering|%d|-1" % a) and Neighborhood.home_of_townie(a) != "":
-			return {"kind": "gathering", "a": a, "b": b, "lot": Neighborhood.home_of_townie(a)}
-	return {}
+		var crook: bool = not JusticeRecords.convictions(a).is_empty() or TownDrama.threads.any(func(t): return str(t["kind"]) in ["crew", "addiction", "debt"] and int(t["a"]) == a)
+		if crook and not StreetScenes._recent("theft|%d" % a):          # someone with a record, a crew, a habit or a debt: they take what isn't theirs
+			var home_b: String = Neighborhood.home_of_townie(b)
+			if home_b != "" and SysUtil.rng.randf() < 0.4:
+				return {"kind": "break_in", "a": a, "b": b, "lot": home_b}
+			return {"kind": "theft", "a": a, "b": b, "lot": str(lots[0])}
+		if TownDrama.threads.any(func(t): return str(t["kind"]) == "addiction" and int(t["a"]) == a) and SysUtil.hour_f() >= 18.0 and not StreetScenes._recent("drunk|%d" % a):
+			return {"kind": "drunk", "a": a, "b": -1, "lot": str(lots[0])}
+		if friendly.is_empty() and fr >= 20.0 and not StreetScenes._recent("gathering|%d|-1" % a) and Neighborhood.home_of_townie(a) != "":
+			friendly = {"kind": "gathering", "a": a, "b": b, "lot": Neighborhood.home_of_townie(a)}
+	return friendly if SysUtil.rng.randf() < float(cfg().get("gathering_share", 0.2)) else {}
 
 ## It happens for real where the pawn is not: the same consequences the townies would get in a scene nobody stepped into.
 static func _offscreen(s: Dictionary, lot: String) -> void:
@@ -105,29 +115,57 @@ static func _offscreen(s: Dictionary, lot: String) -> void:
 			CrimePetty.commit("vandalism", a, "venue:" + lot, {"seen": false, "trace": 0.3})
 		"gathering":
 			RelationshipService.add_both(a, b, "friendship", 5.0)
+		"theft", "break_in":          # a real case: the police may work it, and an arrest may follow (another scene, another ripple)
+			var c2: Dictionary = CaseStore.create("theft" if kind == "theft" else "burglary", a, b, "venue:" + lot, {"witnessed": SysUtil.rng.randf() < 0.4, "trace": 0.4})
+			c2["state"] = "open"
+			c2["disc_day"] = SysUtil.day()
+			RelationshipService.add_value(b, a, "tension", 10.0)
+		"drunk":
+			CrimePetty.commit("disturbance", a, "venue:" + lot, {"seen": true})
 	recent.append({"kind": kind, "a": a, "b": b, "c": int(s.get("c", -1)), "lot": lot, "day": SysUtil.day(), "told": false})
 	while recent.size() > int(cfg().get("keep", 24)):
 		recent.pop_front()
 		_rippled.clear()
 
 # ------------------------------------------------------------------ through people
-## The pawn has just talked to `other`: if they know someone something happened to, they say so (one item per chat).
+## The pawn has just talked to `other`: if they were stood up by the pawn they say so, else if they know someone something happened to,
+## they tell it (one item per chat).
 static func on_social(pid: int, other: int) -> void:
 	if not Pawn.is_pawn_id(pid) or other < 0:
 		return
+	if Involve.stood.has(other):
+		Involve.stood.erase(other)
+		SysUtil.notify("%s: \"%s\"" % [Story.name_of(other).get_slice(" ", 0), str(cfg().get("stood_line", "You stood me up the other day. I waited an hour."))], "story")
+		return
+	var i: int = news_for(pid, other)
+	if i >= 0:
+		SysUtil.notify("%s: \"%s\"" % [Story.name_of(other).get_slice(" ", 0), tell(i, other)], "story")
+
+## The newest untold thing `other` would know and tell the pawn: they were in it, they are close to someone who was, or it was public
+## (a scene in the street) and the pawn knows someone in it. -1 when they have nothing.
+static func news_for(pid: int, other: int) -> int:
 	for i in range(recent.size() - 1, -1, -1):
 		var e: Dictionary = recent[i]
 		if bool(e["told"]) or SysUtil.day() - int(e["day"]) > 4:
 			continue
-		var near: bool = other in [int(e["a"]), int(e["b"]), int(e["c"])] or (str(e["kind"]) in PUBLIC and SysUtil.rng.randf() < 0.5)          # a public scene: anyone in town may have heard
+		var near: bool = other in [int(e["a"]), int(e["b"]), int(e["c"])]
+		if str(e["kind"]) == "gathering" and not near:
+			continue          # a get-together is only news from someone who was there
 		for who in [int(e["a"]), int(e["b"])]:
 			if who >= 0 and RelationshipService.value(other, who, "friendship") >= 10.0:
 				near = true
-		if not near:
-			continue
-		e["told"] = true
-		SysUtil.notify("%s: \"%s\"" % [Story.name_of(other).get_slice(" ", 0), _gossip(e, other)], "story")
-		return
+			if who >= 0 and str(e["kind"]) in PUBLIC and RelationshipService.knows(pid, who):
+				near = true
+		if near:
+			return i
+	return -1
+
+## Say item `i` as `teller` would, and mark it told.
+static func tell(i: int, teller: int) -> String:
+	if i < 0 or i >= recent.size():
+		return ""
+	recent[i]["told"] = true
+	return _gossip(recent[i], teller)
 
 static func _gossip(e: Dictionary, teller: int) -> String:
 	var lines: Dictionary = cfg().get("gossip", {})
