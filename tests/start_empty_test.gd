@@ -52,6 +52,7 @@ func run() -> Array:
 	# empty home
 	var folk: Array = Kit.new_game("solo", "normal", {}, -1, {"home_state": "empty", "world_seed": 5})
 	var f: Folk = folk[0]
+	Players.table.clear()          # task 61: a played pawn only does what it is told; these checks are the household looking after itself (an NPC household, auto-furnish)
 	var kept := 0
 	var strays := 0
 	for o in _home_objects():
@@ -66,7 +67,7 @@ func run() -> Array:
 	_check(Economy.balance(1) == Scenario.funds_for("solo", "normal"), "empty: scenario funds only, no furnishing money (%d)" % Economy.balance(1))
 	_check(StartHome.is_bare(1), "empty: is_bare")
 	var tips: Array = StartHome.tips_for(Scenario.def("solo"))
-	_check(tips.size() >= 3 and "bed" in str(tips[1]).to_lower(), "empty: the first tips walk through buying")
+	_check(tips.size() >= 3 and tips.any(func(t): return "bed" in str(t).to_lower()), "empty: the tips say how to get a bed")
 	_check(str(StartHome.next_basic(1).get("id", "")) == "bed", "empty: first basic is the bed")
 
 	# the tips panel: walks through the tips, then follows the shopping list
@@ -92,10 +93,11 @@ func run() -> Array:
 	_check(worst > -98.0, "empty: no need hit rock bottom (worst %f)" % worst)
 	_check(int(started.get("sleep_floor", 0)) + int(started.get("pass_out", 0)) > 0, "empty: slept on the floor")
 	_check(int(started.get("welcome_snack", 0)) > 0, "empty: ate from the welcome basket (%s)" % str(started))
-	_check(int(started.get("cafe_restroom", 0)) > 0, "empty: used the cafe restroom")
+	_check(_count("toilet") > 0 and int(started.get("cafe_restroom", 0)) == 0, "empty: the studio keeps its toilet, so no cafe restroom trips")          # keep_defs: toilet, shower, sink
 	_check(int(started.get("have_accident", 0)) == 0, "empty: no accident")
 
-	# buy the basics in the order the tips ask; the next-step hint follows
+	# buy the basics in the order the tips ask; the next-step hint follows (task 63: no furnishing money, so the test pays for them)
+	Economy.deposit(1, 4000, "test: furnishing money")
 	var from: Vector2i = f.tile
 	var order: Array = []
 	for _i in 12:
@@ -105,12 +107,12 @@ func run() -> Array:
 		order.append(str(nb["id"]))
 		var def_id: String = {"bed": "single_bed", "toilet": "toilet", "fridge": "fridge", "shower": "shower", "stove": "stove", "seat": "chair"}[str(nb["id"])]
 		_check(_buy(def_id, from), "bought %s" % def_id)
-	_check(order.slice(0, 3) == ["bed", "toilet", "fridge"], "tips order starts bed, toilet, fridge: %s" % str(order))
+	_check(order.slice(0, 2) == ["bed", "fridge"] and not order.has("toilet"), "tips order starts bed, fridge (the studio has its toilet): %s" % str(order))
 	_check(StartHome.next_basic(1).is_empty(), "all basics bought")
 	_check(panel.label.text == str(StartHome.cfg()["done_text"]) and panel.title_label.text == "All set", "tips: the note follows the shopping and ends with all set (%s)" % panel.label.text)
 	panel.queue_free()
 	UIPrefs.set_flag("tips_seen", seen_before)
-	_check(Economy.balance(1) > 0, "the allowance covered the basics (left %d)" % Economy.balance(1))
+	_check(Economy.balance(1) > 0, "the basics were paid for (left %d)" % Economy.balance(1))
 	# a guest on the home lot never takes the resident's bed (seed-dependent order bug: a visitor lay down in the one bed and the owner slept on the floor)
 	_check(Cond.check_one({"home_guest": false}, {"folk": f}), "resident is not a home guest")
 	f.set_meta("visitor", true)

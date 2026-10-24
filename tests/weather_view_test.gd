@@ -33,7 +33,7 @@ func run() -> Array:
 	wv._apply(100.0, true)
 	W.expect(f, lot._sun.light_energy < noon_energy * 0.2, "the sun is down at 1am (%f vs %f)" % [lot._sun.light_energy, noon_energy])
 	W.expect(f, lot._env.background_color.get_luminance() < noon_bg.get_luminance() * 0.5, "the sky is dark at night")
-	W.expect(f, lot._env.ambient_light_energy > 0.4, "ambient stays readable at night (%f)" % lot._env.ambient_light_energy)
+	W.expect(f, lot._env.ambient_light_energy > 0.25, "ambient stays readable at night (%f; the grounded look's night is 0.3)" % lot._env.ambient_light_energy)
 	for v in [lot._sun.light_energy, lot._env.ambient_light_energy, lot._env.background_color.r]:
 		W.expect(f, not is_nan(v) and not is_inf(v), "no NaN in the rig")
 	# sun moves across the sky
@@ -57,7 +57,7 @@ func run() -> Array:
 	W.expect(f, float(wv.p["snow"]) > 0.4 and float(wv.p["snowcover"]) > 0.7, "snow parameters")
 	Weather.force("sunny", 0.0)
 	wv._apply(100.0, true)
-	W.expect(f, not lot._env.fog_enabled, "clear weather disables fog")
+	W.expect(f, not lot._env.fog_enabled or lot._env.fog_density <= Looks.ef("fog_floor", 0.0) * 1.05 + 0.001, "clear weather: no weather fog, only the look's light haze (%f)" % lot._env.fog_density)
 	# smooth transitions: one second of frames does not jump all the way
 	Weather.force("thunderstorm")
 	wv._apply(100.0, true)

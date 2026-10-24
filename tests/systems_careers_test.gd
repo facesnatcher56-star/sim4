@@ -216,7 +216,7 @@ func _school(f: Array) -> void:
 func _retirement(f: Array) -> void:
 	var w := K.setup()
 	var a := K.make_folk(w, "Old", [], 1, Vector2i(12, 12), "elder")
-	Aging.set_age_days(a, 182.0)
+	Aging.set_age_days(a, float(Aging.stage_def("elder")["from_day"]) + 2.0)          # an elder by the current life stages (they got longer)
 	Careers.hire(a, "painter", 3)
 	WorldIface.coins[1] = 0
 	Careers.on_day(5)

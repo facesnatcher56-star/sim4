@@ -151,6 +151,10 @@ static func satisfy_requires(f: Folk, other: Folk, req: Array) -> void:
 				RelationshipKnowledge.reveal(f.id, other.id, "career")
 			"knows_aspiration":
 				RelationshipKnowledge.reveal(f.id, other.id, "aspiration")
+			"knows_interest":
+				var k: Dictionary = RelationshipKnowledge._know(f.id, other.id)
+				if (k.get("interests", []) as Array).is_empty():
+					k["interests"] = ["music"]          # known to share a topic (the reveal needs a skilled interest the stub folk may not have)
 			"knows_trait":
 				if other.traits.is_empty():
 					other.traits.append("friendly")

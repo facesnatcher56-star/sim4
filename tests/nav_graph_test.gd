@@ -30,7 +30,7 @@ func _ports(W) -> Dictionary:
 
 func _connectivity(W) -> void:
 	var ports: Dictionary = _ports(W)
-	_check(ports.size() == 19, "every lot has a street gate on the sidewalk (%d)" % ports.size())
+	_check(ports.size() == 21, "every lot has a street gate on the sidewalk (%d)" % ports.size())          # 19 + apartments and shelter
 	var ids: Array = ports.keys()
 	var bad := 0
 	for a in ids:

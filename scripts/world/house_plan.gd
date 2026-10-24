@@ -35,23 +35,30 @@ static func defs() -> Dictionary:
 	var base: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://data/objects.json"))
 	if base is Dictionary:
 		_defs = (base as Dictionary).duplicate(true)
-	for path in ["res://data/venues.json", "res://data/building_rules.json", "res://data/careers_works.json"]:        # cloned objects of the venues and of the multi-floor buildings
-		var ven: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
-		if ven is Dictionary:
-			var objs: Dictionary = (ven.get("content", {}) as Dictionary).get("objects", {})
-			for k in objs:
-				var e: Dictionary = objs[k]
-				var d: Dictionary = (_defs.get(str(e.get("clone", "")), {}) as Dictionary).duplicate(true)
-				for ok in (e.get("override", {}) as Dictionary):
-					d[ok] = e["override"][ok]
-				if not d.is_empty():
-					_defs[k] = d
-	var city: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://data/incidents/12_city.json"))          # task 63: the public toilet in the cafe, gym and park
-	if city is Dictionary:
-		var cobjs: Dictionary = (city.get("content", {}) as Dictionary).get("objects", {})
-		for k2 in cobjs:
-			if (cobjs[k2] as Dictionary).has("def") and not _defs.has(k2):
-				_defs[k2] = (cobjs[k2]["def"] as Dictionary).duplicate(true)
+	# objects added by content files: full defs ("def", e.g. the public toilet, safes) first, then clones of a base object ("clone" + "override")
+	var paths: Array = ["res://data/venues.json", "res://data/building_rules.json", "res://data/careers_works.json", "res://data/content_solo.json"]
+	for fn in DirAccess.get_files_at("res://data/incidents"):
+		if fn.ends_with(".json"):
+			paths.append("res://data/incidents/" + fn)
+	var clones: Dictionary = {}
+	for path in paths:
+		var src: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+		if not (src is Dictionary):
+			continue
+		var objs: Dictionary = (src.get("content", {}) as Dictionary).get("objects", src.get("objects", {}))
+		for k in objs:
+			var e: Dictionary = objs[k]
+			if e.has("def") and not _defs.has(k):
+				_defs[k] = (e["def"] as Dictionary).duplicate(true)
+			elif e.has("clone"):
+				clones[k] = e
+	for k2 in clones:
+		var c: Dictionary = clones[k2]
+		var d: Dictionary = (_defs.get(str(c["clone"]), {}) as Dictionary).duplicate(true)
+		for ok in (c.get("override", {}) as Dictionary):
+			d[ok] = c["override"][ok]
+		if not d.is_empty():
+			_defs[k2] = d
 	return _defs
 
 

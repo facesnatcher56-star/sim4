@@ -59,6 +59,10 @@ static func _count(hid: int, defs: Array) -> int:
 	for o in Economy.objects_of(hid):
 		if str(o.def_id) in defs:
 			n += 1
+	if n == 0 and hid == Economy.primary_household() and defs.any(func(d): return d in (cfg().get("keep_defs", []) as Array)):
+		for o2 in SysUtil.all_world_objects():          # task 64: the landlord's fixtures (toilet, shower) stay in the studio and count, though the tenant does not own them
+			if str(o2.def_id) in defs and NeighborhoodLots.lot_at(o2.tile) == Neighborhood.HOME:
+				n += 1
 	return n
 
 static func _residents(hid: int) -> int:
