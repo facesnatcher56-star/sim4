@@ -50,10 +50,13 @@ static func update(fv, inter: Variant, clip: String) -> void:
 	if fv._rig == null or fv._is_placeholder:
 		return
 	var wm: String = _shown_weapon(int(fv.folk_id))          # task 57: a drawn weapon is in the right hand
+	if wm != "" and clip == "Aim_Long":
+		wm += ":use"                                        # a long gun at the shoulder lies differently between the fists
 	var sig: int = (inter.get_instance_id() if inter != null else 0) * 31 + hash(clip) + hash(wm)
 	if sig == fv._prop_sig:
 		return
 	fv._prop_sig = sig
+	_fists(fv, wm, clip)
 	var want: Array = []
 	if inter != null and not fv._moving and fv._waypoints.is_empty():
 		var tags: Array = inter.def.get("tags", []) if inter.def is Dictionary else []
@@ -87,8 +90,25 @@ static func _shown_weapon(fid: int) -> String:
 	return ""
 
 
+## Task 57b: the fists close round the grip (body shape keys grip_R, and grip_L when both hands hold it).
+static func _fists(fv, wm: String, clip: String) -> void:
+	var body: MeshInstance3D = null
+	if fv._rig != null:
+		body = fv._rig.find_child("body", true, false) as MeshInstance3D
+	if body == null or body.mesh == null:
+		return
+	var r: float = 1.0 if wm != "" else 0.0
+	var l: float = 1.0 if wm != "" and (clip in ["Hold_Long", "Aim_Long", "Threaten_Pistol"]) else 0.0
+	for pair in [["grip_R", r], ["grip_L", l]]:
+		var i: int = body.find_blend_shape_by_name(StringName(pair[0]))
+		if i >= 0:
+			body.set_blend_shape_value(i, float(pair[1]))
+
+
 ## A weapon's own model on hand_R, placed by weapons.json "hold" (measured in Blender on the same rig).
 static func _build_weapon(fv, wid: String) -> Node3D:
+	var use: bool = wid.ends_with(":use")
+	wid = wid.trim_suffix(":use")
 	var sk := _find_skeleton(fv._rig)
 	var d: Dictionary = WeaponPermits.def_weapon(wid)
 	var path: String = "res://assets/models/%s.glb" % str(d.get("model", wid))
@@ -100,8 +120,8 @@ static func _build_weapon(fv, wid: String) -> Node3D:
 	sk.add_child(att)
 	var model: Node3D = (load(path) as PackedScene).instantiate()
 	var h: Dictionary = (SysUtil.table("weapons").get("hold", {}) as Dictionary).get(wid, {})
-	var o: Array = h.get("pos", [0, 0.07, 0])
-	var r: Array = h.get("rot", [90, 0, 0])
+	var o: Array = h.get("pos_use" if use else "pos", h.get("pos", [0, 0.07, 0]))
+	var r: Array = h.get("rot_use" if use else "rot", h.get("rot", [90, 0, 0]))
 	model.position = Vector3(float(o[0]), float(o[1]), float(o[2]))
 	model.rotation_degrees = Vector3(float(r[0]), float(r[1]), float(r[2]))
 	att.add_child(model)

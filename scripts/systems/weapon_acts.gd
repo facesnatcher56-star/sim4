@@ -186,6 +186,7 @@ static func do_act(f, target, aid: String) -> void:
 		return
 	var tn: String = str(target.name).get_slice(" (", 0)
 	var act: String = str(CARRY_ACT.get(aid, "fight"))
+	WeaponShop.posed(fid, aid)          # task 57b: the body shows it (Threaten / Aim)
 	var r: Dictionary = _attempt(fid, tid, act, st)
 	var ok: bool = bool(r["ok"])
 	var catastrophic: bool = str(r["grade"]) == "catastrophic"

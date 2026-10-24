@@ -291,7 +291,8 @@ def _tube_path(M, pts, radii, mat, wd, seg=6, flat=1.0):
     M.loft(rows, mat, wd, closed=True, caps=False)
 
 
-def hand(M, side, wd=1.0, mat="skin"):
+def hand(M, side, wd=1.0, mat="skin", curl=0.0):
+    """curl 0 = relaxed open hand, 1 = a fist closed round a grip (the grip_L / grip_R shape keys; same topology either way)."""
     sx = -1 if side == "L" else 1
     hb = "hand_" + side
     wh = W(hb)
@@ -309,10 +310,12 @@ def hand(M, side, wd=1.0, mat="skin"):
         a = V((sx * 0.240, y, 0.726))
         b = V((sx * 0.239, y * 1.02, 0.726 - ln * 0.55))
         c = V((sx * 0.228, y * 1.04, 0.726 - ln))
-        _tube_path(M, (a, b, c), [r, r * 0.98, r * 0.92, r * 0.82], mat, wh, seg=6, flat=0.9)
+        bc = V((sx * 0.228, y, 0.700))                  # curled: down over the knuckle, then back up into the palm
+        cc = V((sx * 0.214, y * 0.95, 0.722))
+        _tube_path(M, (a, b.lerp(bc, curl), c.lerp(cc, curl)), [r, r * 0.98, r * 0.92, r * 0.82], mat, wh, seg=6, flat=0.9)
     a = V((sx * 0.231, 0.022, 0.786))
-    b = V((sx * 0.225, 0.041, 0.766))
-    c = V((sx * 0.222, 0.047, 0.742))
+    b = V((sx * 0.225, 0.041, 0.766)).lerp(V((sx * 0.219, 0.036, 0.752)), curl)          # the thumb closes over the fingers
+    c = V((sx * 0.222, 0.047, 0.742)).lerp(V((sx * 0.214, 0.022, 0.735)), curl)
     _tube_path(M, (a, b, c), [0.0115, 0.0105, 0.0095, 0.0080], mat, wh, seg=6)
 
 
@@ -498,12 +501,12 @@ def shoes(M, kind, wd):
 
 
 # ------------------------------------------------------------------ base body (neck, arms, hands) - skull is added by folk_head
-def base_body(M, wd):
+def base_body(M, wd, curl_l=0.0, curl_r=0.0):
     M.tube(V((0, 0.004, 1.35)), V((0, 0.008, 1.50)), [(0, 0.060, 0.056), (0.5, 0.053, 0.051), (1, 0.050, 0.048)], "skin",
            lambda p: {"neck": 1.0} if p.z > 1.42 else {"neck": 0.5, "chest": 0.5}, seg=12)
     for side in "LR":
         limb(M, arm_chain(side), ARM, arm_w, side, 0.0, 0.546, "skin", seg=12, rk=wd, pole1=True)
-        hand(M, side, wd)
+        hand(M, side, wd, curl=curl_l if side == "L" else curl_r)
 
 
 def build_clothes(arm, bones, S, wd):
