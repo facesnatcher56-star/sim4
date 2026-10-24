@@ -11,11 +11,13 @@ const TITLE := "Out here"
 static var next_min: int = -1           # the earliest minute of the next scene on this outing
 static var _last_check: int = -1
 static var _used: Dictionary = {}       # "kind|a|b" -> day: one scene per thread a day
+static var pending: Dictionary = {}     # a scene on its way: {f, s, v, opts, text, since} until its people are in view of the pawn
 
 static func reset() -> void:
 	next_min = -1
 	_last_check = -1
 	_used = {}
+	pending = {}
 
 static func cfg() -> Dictionary:
 	return SysUtil.table("street_scenes")
@@ -33,6 +35,9 @@ static func _first(tid: int) -> String:
 # ------------------------------------------------------------------ the clock
 static func on_minute() -> void:
 	var now: int = SysUtil.now()
+	if not pending.is_empty():
+		_cue(now)
+		return
 	if now - _last_check < int(cfg().get("check_min", 10)):
 		return
 	_last_check = now
@@ -92,6 +97,13 @@ static func _cause(kind: String, f, lot: String) -> Dictionary:
 			for th in TownDrama.threads:
 				if str(th["kind"]) in ["feud", "tension", "family"] and _free(int(th["a"])) and _free(int(th["b"])) and int(_used.get("row|%d|%d" % [th["a"], th["b"]], -1)) != day:
 					return {"kind": "row", "a": int(th["a"]), "b": int(th["b"])}
+			var here: Array = Crowd.crowd_folk(lot)          # or two people on this lot right now who really can't stand each other
+			for i in here.size():
+				for j in range(i + 1, here.size()):
+					var x: int = int(here[i].get_meta("townie_id", -1))
+					var y: int = int(here[j].get_meta("townie_id", -1))
+					if x >= 0 and y >= 0 and (RelationshipService.value(x, y, "friendship") <= -15.0 or RelationshipService.value(x, y, "tension") >= 30.0) and int(_used.get("row|%d|%d" % [x, y], -1)) != day:
+						return {"kind": "row", "a": x, "b": y}
 		"affair":
 			for af in RelationshipService.affairs:
 				var a: int = int(af.get("cheater", -1))
@@ -145,9 +157,23 @@ static func _stage(f, lot: String, s: Dictionary) -> void:
 				p0.clear_queue()
 			text = _line("collapse", v)
 			opts = [{"id": "ambulance", "label": "Call an ambulance"}, {"id": "help", "label": "Help them up"}, {"id": "walk", "label": "Walk on"}]
-	SysUtil.notify(text, "story")
-	SysUtil.game_event("street_scene", {"kind": kind, "a": int(s["a"]), "b": int(s.get("b", -1)), "lot": lot})
-	JusticePlayer.ask(int(f.id), TITLE, text, opts, func(ch): _choose(f, s, v, str(ch)), "walk")
+	pending = {"f": f, "s": s, "v": v, "opts": opts, "text": text, "since": SysUtil.now(), "lot": lot}          # the line comes when they are in view (_cue)
+
+## The scene's people have walked over (within a few tiles of the pawn), or a quarter of an hour has passed: now the player sees it happen.
+static func _cue(now: int) -> void:
+	var p: Dictionary = pending
+	var f = p["f"]
+	var s: Dictionary = p["s"]
+	var a = SysUtil.folk(int(s["a"]))
+	var near: bool = a != null and f != null and (a.tile - f.tile).length() <= 5.0
+	if not near and now < int(p["since"]) + 15:
+		return
+	pending = {}
+	if f == null or Neighborhood.lot_of(f) != str(p["lot"]):
+		return          # the pawn has gone: the scene plays out without them
+	SysUtil.notify(str(p["text"]), "story")
+	SysUtil.game_event("street_scene", {"kind": str(s["kind"]), "a": int(s["a"]), "b": int(s.get("b", -1)), "lot": str(p["lot"])})
+	JusticePlayer.ask(int(f.id), TITLE, str(p["text"]), p["opts"], func(ch): _choose(f, s, p["v"], str(ch)), "walk")
 
 ## The townie on the map at the pawn's lot: already there as a customer, or walking in from the gate now (never popping up beside the pawn).
 static func _bring(tid: int, lot: String, near: Vector2i):

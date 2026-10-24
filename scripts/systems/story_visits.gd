@@ -204,7 +204,7 @@ static func _arrive(sit: Dictionary) -> void:
 		(sit["roles"] as Dictionary)[str(gid)] = "guest"
 		(sit["spawned"] as Array).append(int(gid))
 		t["last_visit_day"] = SysUtil.day()
-		for hid2 in hosts_alive:
+		for hid2 in (hosts_alive if not door else []):          # at the player's door they meet only once the door is opened (VisitDoor.meet)
 			if not RelationshipService.knows(int(hid2), int(gid)):
 				RelationshipService.add_both(int(hid2), int(gid), "friendship", float(Story.cfg().get("visits", {}).get("acquaintance_friendship", 6)))
 				RelationshipService.add_history(int(hid2), int(gid), "visit", 0.3, int(gid))

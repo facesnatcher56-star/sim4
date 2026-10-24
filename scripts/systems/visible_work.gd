@@ -31,6 +31,36 @@ static func post_tile(f, lot_id: String, career_id: String) -> Vector2i:
 	var sp: Vector2i = Workplace.staff_tile(lot_id)
 	return sp if sp.x >= 0 else NeighborhoodLots.entry_tile(lot_id)
 
+## Playtest 65: in one-character play, "at work until 13:00. Myself > Leave work early to go now." ("" when nobody of these is on a shift).
+static func shift_text(folk_ids: Array) -> String:
+	for id in folk_ids:
+		var f = SysUtil.folk(int(id))
+		var rec: Dictionary = Away.active.get(int(id), {})
+		if f != null and Pawn.is_pawn(f) and str(rec.get("reason", "")) == "work":
+			var end: int = int(rec["until_min"])
+			return "%s is at work until %d:%02d.%s" % [str(f.name).get_slice(" ", 0), floori((end % 1440) / 60.0), end % 60, " Myself > Leave work early to go now." if Away.is_visible(int(id)) else ""]
+	return ""
+
+## The Myself menu during a visible shift: leave early (half pay and a performance hit, like any early leaving).
+static func self_entries(f) -> Array:
+	if f == null or not Pawn.is_pawn(f) or not Away.is_visible(int(f.id)) or str(Away.active.get(int(f.id), {}).get("reason", "")) != "work":
+		return []
+	return [{"id": "leave_work", "label": "Leave work early", "category": "Myself", "enabled": true, "reason": "", "action": func(): Commute.finish_visible(f, false)}]
+
+const BREAK_TAGS := ["food", "drink", "coffee", "meal", "snack", "toilet"]
+
+## Every order the player gave is a short break here at work: eating, a drink or the toilet, on the work lot itself.
+static func _on_break(f, lot: String) -> bool:
+	var irs: Array = f.queue.filter(func(q): return (q as Interaction).player)
+	if f.current != null and f.current.player:
+		irs.append(f.current)
+	for ir in irs:
+		var tags: Array = (ir as Interaction).def.get("tags", [])
+		var o = (ir as Interaction).obj
+		if not tags.any(func(tg): return str(tg) in BREAK_TAGS) or (o != null and NeighborhoodLots.lot_at(o.tile) != lot) or (o == null and Neighborhood.lot_of(f) != lot):
+			return false
+	return not irs.is_empty()
+
 static func step(f, t: Dictionary, now: int) -> void:
 	var fid: int = int(f.id)
 	var rec: Dictionary = Away.active.get(fid, {})
@@ -38,6 +68,9 @@ static func step(f, t: Dictionary, now: int) -> void:
 		return
 	if now >= int(rec["until_min"]):
 		Commute.finish_visible(f, true)
+		return
+	if CareerShifts.player_busy(f) and _on_break(f, str(t["lot"])):
+		f.idle_until_min = now + 5          # playtest 65: a meal, a drink or the toilet at work is a break, not walking out
 		return
 	if CareerShifts.player_busy(f) or CareerShifts.is_critical(f):
 		Commute.finish_visible(f, false)

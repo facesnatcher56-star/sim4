@@ -30,7 +30,7 @@
       "options": [
         {"id": "hello", "label": "Say hello", "fx": [{"friend": 8}, {"buff": "cheered_up"}], "text": "{name} and {other} chatted for a while."},
         {"id": "distance", "label": "Keep your distance", "fx": [], "text": "{name} pointed the way and moved on."}],
-      "default": "hello", "auto": "hello", "lot_text": "A stranger, {other}, moved in near {name}."},
+      "default": "distance", "auto": "hello", "auto": "hello", "lot_text": "A stranger, {other}, moved in near {name}."},
     "secret_out": {"title": "A secret comes out", "size": "medium", "tone": "bad", "cat": "social", "scope": "home", "weight": 0, "tags": ["social", "scandal"], "when": {"adult": true, "removed": "a leak with no real secret: needs the real secret and gossip system to roll it"},
       "arrive": "gossip", "text": "Word has got around about something {name} hoped to keep quiet. {other} is the one telling it.",
       "signs": ["People go quiet when {name} walks into a room."],
@@ -45,7 +45,7 @@
         {"id": "read_out", "label": "Read it out to the household", "fx": [{"buff": "anxious_jitters"}, {"friend": 3}], "text": "The household read it together. Nobody could say who wrote it."},
         {"id": "police", "label": "Show it to the police", "fx": [{"rep": 1}, {"buff": "reassured"}], "text": "The police took a note and said there was nothing to worry about."},
         {"id": "burn", "label": "Burn it", "fx": [{"buff": "uneasy_memory"}], "text": "{name} burned the letter and tried to forget it."}],
-      "default": "read_out", "auto": "burn"},
+      "default": "burn", "auto": "read_out", "auto": "burn"},
     "old_flame": {"title": "An old flame returns", "size": "medium", "tone": "mixed", "cat": "social", "scope": "home", "weight": 0, "tags": ["social"], "when": {"adult": true}, "mature": true,
       "arrive": "flame", "text": "{other}, an old flame, has turned up in town and left a note for {name}.",
       "signs": ["Someone from the past was asking about {name} at the café."],
@@ -68,13 +68,13 @@
       "default": "accept", "auto": "accept", "lot_text": "{name} received an unexpected inheritance."},
     "pet_on_doorstep": {"title": "A pet at the door", "size": "small", "tone": "good", "cat": "home", "scope": "home", "weight": 0, "when": {"pets": true, "removed": "creates a pet from nothing"},
       "text": "A friendly stray turned up on the doorstep.", "lot_text": "A friendly stray turned up on {name}'s doorstep.", "options": [{"id": "keep", "label": "Take them in", "fx": [{"pet": true}, {"buff": "cheered_up"}], "text": "{name} took {pet} in. They have a new friend."}, {"id": "shelter", "label": "Take them to the shelter", "fx": [{"rep": 1}], "text": "The shelter will find them a home."}],
-      "default": "keep", "auto": "keep"},
+      "default": "shelter", "auto": "keep", "auto": "keep"},
     "headhunter": {"title": "A job headhunter", "size": "medium", "tone": "good", "cat": "work", "scope": "home", "weight": 0, "wealth": {"poor": 1.8}, "tags": ["work"], "when": {"adult": true, "job": true, "removed": "a job offer from nowhere: the job board and the career system make real offers"},
       "arrive": "headhunter", "text": "{other}, a recruiter, rang {name} with an offer that sounds too good to ignore.",
       "options": [
         {"id": "listen", "label": "Hear them out", "fx": [{"job_offer": true}], "text": "{other} sent the details over."},
         {"id": "loyal", "label": "Stay loyal to the boss", "fx": [{"coins": 25}, {"rep": 1}], "text": "{name}'s boss heard about it and gave them a small thank-you."}],
-      "default": "listen", "auto": "listen", "lot_text": "{name} was approached by a recruiter."},
+      "default": "loyal", "auto": "listen", "auto": "listen", "lot_text": "{name} was approached by a recruiter."},
     "contest": {"title": "A local contest", "size": "small", "tone": "good", "cat": "money", "scope": "home", "weight": 0, "tags": ["social"],
       "text": "There is a local contest this week, with a small prize for the winner.",
       "options": [
@@ -92,7 +92,7 @@
       "options": [
         {"id": "help", "label": "Help out", "fx": [{"friend": 10}, {"rep": 1}], "text": "{name} lent a hand. {other} will remember it."},
         {"id": "busy", "label": "Say you are busy", "fx": [{"friend": -4}], "text": "{name} said it was a bad time."}],
-      "default": "help", "auto": "help", "lot_text": "{name} did a neighbour a favour."},
+      "default": "busy", "auto": "help", "auto": "help", "lot_text": "{name} did a neighbour a favour."},
     "work_power_struggle": {"title": "A power struggle at work", "size": "medium", "tone": "mixed", "cat": "work", "scope": "home", "weight": 0, "tags": ["work"], "when": {"adult": true, "job": true, "removed": "no real managers: pay or stress with no actor"},
       "text": "Two managers are fighting over who runs the department, and both want {name} on their side.",
       "signs": ["There are whispers and closed doors at work."],
@@ -105,7 +105,7 @@
       "options": [
         {"id": "accountant", "label": "Hire an accountant (150 coins)", "fx": [{"coins": -150}], "text": "The accountant sorted it out quickly."},
         {"id": "diy", "label": "Handle it yourself", "fx": [{"roll": 0.5, "then": [], "else": [{"coins": -300}, {"buff": "money_worries"}]}], "text": "It took a week of paperwork."}],
-      "default": "accountant", "auto": "diy"},
+      "default": "diy", "auto": "accountant", "auto": "diy"},
     "gold_digger": {"title": "A charming newcomer", "size": "medium", "tone": "mixed", "cat": "money", "scope": "home", "weight": 0, "wealth": {"rich": 4.0, "poor": 0.0}, "when": {"adult": true, "tier": "rich", "removed": "creates a townie from nothing"},
       "arrive": "stranger", "text": "{other}, a charming newcomer, keeps finding reasons to ask {name} about money.",
       "options": [
@@ -117,7 +117,7 @@
       "options": [
         {"id": "yes", "label": "Let them stay", "fx": [{"friend": 12}, {"visit_days": 2}, {"rep": 1}], "text": "{other} moved in on the sofa for a couple of days."},
         {"id": "no", "label": "Say no", "fx": [{"friend": -8}], "text": "{name} could not make room."}],
-      "default": "yes", "auto": "yes"},
+      "default": "no", "auto": "yes", "auto": "yes"},
     "mayor_scandal": {"title": "A scandal at the town hall", "size": "medium", "tone": "bad", "cat": "town", "scope": "town", "weight": 0, "tags": ["scandal"],
       "text": "The mayor is in the papers for the wrong reasons. People are asking what the council knew.", "signs": ["The mayor's aide looks nervous in every photo."],
       "fx": [{"mood_city": -0.12}], "news": "A scandal at the town hall: the mayor is under pressure.", "sev": 2},

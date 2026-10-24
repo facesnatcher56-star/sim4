@@ -70,7 +70,14 @@ func _pick(choice: String) -> void:
 	visible = false
 	if cb.is_valid():
 		cb.call(choice)
-	_next()
+	if not visible:          # the answer may have asked a follow-up question, already on screen: don't hide it again
+		_next()
+
+## Task 65: a scene happening right now is asked from the top of the screen, so the people it is about stay in view in the middle.
+func _place_centre() -> void:
+	super._place_centre()
+	if not _current.is_empty() and is_live(str(_current.get("title", ""))):
+		position.y = 84.0
 
 ## Esc / Close = the default answer, so nothing waits forever.
 func hide_dialog() -> void:

@@ -6,6 +6,7 @@
  "doorstep_min": 20,
  "cooldown_min": 600,
  "bath_defs": ["toilet", "shower", "bathtub", "sink"],
+ "private_iids": ["brush_teeth", "take_shower", "take_bath", "nap", "sleep_bed", "sleep_sofa", "grab_snack", "cook_meal", "change_clothes"],
  "private_defs": ["fridge", "stove", "bed", "single_bed", "sofa_bed", "bunk_bed", "crib", "wardrobe", "computer"],
  "stay_refuse": 0.12,
  "stay_refuse_hothead": 0.35,

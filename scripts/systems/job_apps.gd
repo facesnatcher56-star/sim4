@@ -205,9 +205,22 @@ static func _decide(a: Dictionary, interviewed: bool, pre: String) -> void:
 		SkillCheck.train(fid, "charisma", 6.0, true)
 	if interviewed:
 		_walk_home(fid)
-	var sd: Dictionary = _offer(fid, cid, int(a["level"]))
+	var head: String = pre if pre != "" else place(cid) + ": "
+	if Careers.has_job(fid) and Pawn.is_pawn_id(fid):          # playtest 65: never swap the job without asking
+		var old: String = Careers.title_of(fid)
+		var lv: int = int(a["level"])
+		JusticePlayer.ask(fid, "A job offer", "%sThe job is yours if you want it. Take it, and leave your job as %s?" % [head, old],
+			[{"id": "take", "label": "Take it"}, {"id": "stay", "label": "Stay as %s" % old}], func(ch): _take(fid, cid, lv, head, str(ch)), "stay")
+		return
+	_take(fid, cid, int(a["level"]), head, "take")
+
+static func _take(fid: int, cid: String, level: int, head: String, ch: String) -> void:
+	if ch != "take":
+		SysUtil.notify(head + "You turn it down and stay where you are.", "career")
+		return
+	var sd: Dictionary = _offer(fid, cid, level)
 	if not sd.is_empty():
-		SysUtil.notify((pre if pre != "" else place(cid) + ": ") + _line("offer", {"when": "%s, at %s" % [when(int(sd["day"]), float(sd["hour"])), place(cid)]}), "career")
+		SysUtil.notify(head + _line("offer", {"when": "%s, at %s" % [when(int(sd["day"]), float(sd["hour"])), place(cid)]}), "career")
 
 ## After an interview the pawn walks home again, like after a shift (nobody waits around in the building until it closes).
 static func _walk_home(fid: int) -> void:
@@ -219,6 +232,7 @@ static func _walk_home(fid: int) -> void:
 		ir.def = ir.def.duplicate(true)
 		ir.def["priority"] = "high"
 		f.enqueue(ir)
+		SysUtil.notify("%s heads home." % str(f.name).get_slice(" ", 0), "travel")          # playtest 65: never leave without saying why
 
 ## The share of a yes (never shown).
 static func chance(fid: int, cid: String, applicants: int, interviewed: bool, level: int = 1) -> float:

@@ -101,7 +101,7 @@ static func _knock(sit: Dictionary, now: int) -> void:
 	if WorldIface.world() != null and not WorldIface.world().objects_of_def("window").is_empty():
 		opts.append({"id": "look", "label": "Look through the window"})
 	opts.append({"id": "ignore", "label": "Ignore it"})
-	JusticePlayer.ask(int(host.id), TITLE, _line("knock"), opts, func(ch): _answer(sit, str(ch)), "answer")
+	JusticePlayer.ask(int(host.id), TITLE, _line("knock"), opts, func(ch): _answer(sit, str(ch)), "ignore")          # Close = not answering (never a yes)
 
 static func _answer(sit: Dictionary, ch: String) -> void:
 	if str(sit["state"]) != "door":
@@ -111,7 +111,7 @@ static func _answer(sit: Dictionary, ch: String) -> void:
 	match ch:
 		"look":
 			JusticePlayer.ask(int(host.id), TITLE, _line("look", ", ".join(StoryVisits._names(sit["spawned"]))),
-				[{"id": "answer", "label": "Answer the door"}, {"id": "ignore", "label": "Ignore it"}], func(c2): _answer(sit, str(c2)), "answer")
+				[{"id": "answer", "label": "Answer the door"}, {"id": "ignore", "label": "Ignore it"}], func(c2): _answer(sit, str(c2)), "ignore")
 		"ignore":
 			var d: Dictionary = sit["door"]
 			d["phase"] = "knocked"
@@ -121,13 +121,14 @@ static func _answer(sit: Dictionary, ch: String) -> void:
 			var why: String = str(sit["line"]) if sit.has("line") else _line("why_party" if str(sit["kind"]) == "party" else "why_visit")
 			JusticePlayer.ask(int(host.id), TITLE, "%s opens the door. %s: %s" % [str(host.name).get_slice(" ", 0), n, why],
 				[{"id": "in", "label": "Let them in"}, {"id": "step", "label": "Talk on the doorstep"}, {"id": "away", "label": "Send them away"}],
-				func(c3): _opened(sit, str(c3)), "in")
+				func(c3): _opened(sit, str(c3)), "step")          # Close = a word on the doorstep, nobody let in
 
 static func _opened(sit: Dictionary, ch: String) -> void:
 	var host = _host(sit)
 	if host == null:
 		sit["state"] = "done"
 		return
+	_meet(sit, host)
 	match ch:
 		"away":
 			_friend(sit, "sent_away")
@@ -154,6 +155,14 @@ static func _opened(sit: Dictionary, ch: String) -> void:
 				if greet != null:
 					g.enqueue(greet)
 			SysUtil.game_event("visit_started", {"folk_id": int(host.id), "situation": sit["id"], "guests": (sit["spawned"] as Array).duplicate()})
+
+## The door is open: a stranger on the step is now someone the pawn has met.
+static func _meet(sit: Dictionary, host) -> void:
+	for gid in sit["spawned"]:
+		if not RelationshipService.knows(int(host.id), int(gid)):
+			RelationshipService.add_both(int(host.id), int(gid), "friendship", float(Story.cfg().get("visits", {}).get("acquaintance_friendship", 6)))
+			RelationshipService.add_history(int(host.id), int(gid), "visit", 0.3, int(gid))
+			SysUtil.notify("%s met %s." % [str(host.name), Story.name_of(int(gid))], "relationship")
 
 ## Nobody let them in: they give up and walk off; a snub is felt, and a friend may text later.
 static func _give_up(sit: Dictionary) -> void:
@@ -187,7 +196,7 @@ static func _manners(sit: Dictionary, now: int) -> void:
 		if cur == null or cur.obj == null or NeighborhoodLots.lot_at(cur.obj.tile) != Neighborhood.HOME:
 			continue
 		var def_id: String = str(cur.obj.def_id)
-		if (c.get("private_defs", []) as Array).has(def_id):
+		if (c.get("private_defs", []) as Array).has(def_id) or (c.get("private_iids", []) as Array).has(str(cur.def_id)):
 			g.cooldowns[cur.def_id] = now + int(c.get("cooldown_min", 600))
 			cur.cancel("a guest")
 		elif (c.get("bath_defs", []) as Array).has(def_id) and not bool(g.get_meta("bath_ok", false)):
